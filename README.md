@@ -1,7 +1,7 @@
 # Use PyRoad and go much further...
 PyRoad is a Python library to simplify queries and visualization of trajectories and other spatial-temporal data.
 
-We will also release wrappers to some useful Java libraries in this field.
+We will also release wrappers to some useful Java libraries frequently used in the mobility domain.
 
 ## Useful list of related libraries and links
 - [Handling GPS Data with Python](https://github.com/FlorianWilhelm/gps_data_with_python/tree/master/notebooks)
