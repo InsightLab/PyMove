@@ -7,3 +7,4 @@ Python library to simplify queries and visualization of trajectories and other s
 - [Ramer-Douglas-Peucker algorithm](https://github.com/fhirschmann/rdp)
 - [Knee point detection in Python](https://github.com/arvkevi/kneed)
 - [TrajSuite Java Library](https://github.com/lukehb/TrajSuite)
+- [GraphHopper Map-Matching Java Library](https://github.com/graphhopper/map-matching)
