@@ -1,5 +1,5 @@
 # Use PyRoad and go much further...
-Python library to simplify queries and visualization of trajectories and other spatial-temporal data.
+PyRoad is a Python library to simplify queries and visualization of trajectories and other spatial-temporal data.
 
 We will also release wrappers to some useful Java libraries in this field.
 
