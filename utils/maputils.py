@@ -3,7 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import colorsys
 import numpy as np
-import folium
+#import folium
 
 # http://www.color-hex.com/color/
 

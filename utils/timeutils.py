@@ -1,7 +1,7 @@
 from __future__ import division
 import datetime
 import time
-from pandas._libs.tslibs.timestamps import Timestamp
+#from pandas._libs.tslibs.timestamps import Timestamp
 
 def timestamp_to_millis(timestamp):
     """
@@ -29,11 +29,11 @@ def time_str(date1):
     return date1.strftime('%H:%M:%S')
 
 
-def dtime(dt_str):
+def str_to_dtime(dt_str):
     if len(dt_str) == 10:
-        return datetime.datetime.strptime(dt_str, '%Y-%m-%d')
+        return datetime.datatime.strptime(dt_str, '%Y-%m-%d')
     else:
-        return datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+        return datetime.datatime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
 
 def dtime_str(dt1):
