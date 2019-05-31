@@ -1,6 +1,7 @@
 from time import time
 
 import numpy as np
+import pandas as pd
 from scipy.interpolate import interp1d
 
 from utils import timeutils
@@ -8,32 +9,66 @@ from utils import numpyutils as npu
 from utils import pandasutils as pdu
 from utils import progressutils as pru
 
+def format_labels(df_, current_id, current_latitude, current_longitude, current_data,  inplace=False):
+    """ 
+    Format the labels for the PyRoad lib pattern
+    """ 
+    if inplace:
+        return df_.rename(columns= {current_id: "id", current_latitude: "lat", current_longitude: "long", current_data: "date"}, inplace=True)
+    else:
+        return df_.rename(columns= {current_id: "id", current_latitude: "lat", current_longitude: "long", current_data: "date"}, inplace=False) 
+
+def format_data(df_, id='id', setIndex=False):
+    """ 
+    Format the data to an appropriate format
+    """
+    try:
+        if setIndex:
+            df_.set_index(id, inplace=True)
+        
+        df_['lat'] = df_['lat'].astype('float64')
+        df_['long'] = df_['long'].astype('float64')
+        df_['date'] = pd.to_datetime(df_['date'])
+    except Exception as e:
+        print('Error: format data function')
+        raise e
 
 
-def filter_bbox(df, lat_down, lon_left, lat_up, lon_right, filter_out=False, inplace=False):
+def filter_bbox(df_, lat_down, lon_left, lat_up, lon_right, filter_out=False, inplace=False):
     """
     Filter bounding box.
     Example: 
     filter_bbox(df_, -3.90, -38.67, -3.68, -38.38) -> Fortaleza
     """
-    filter_ = (df['lat'] >= lat_down) & (df['lat'] <= lat_up) & (df['lon'] >= lon_left) & (df['lon'] <= lon_right)
+    filter_ = (df_['lat'] >= lat_down) & (df_['lat'] <= lat_up) & (df_['long'] >= lon_left) & (df_['g'] <= lon_right)
     
     if filter_out:
         filter_ = ~filter_
 
     if inplace:
-        df.drop( index=df[ ~filter_ ].index, inplace=True )
-        return df
+        df_.drop( index=df_[ ~filter_ ].index, inplace=True )
+        return df_
     else:
-        return df.loc[ filter_ ]
+        return df_.loc[ filter_ ]
 
 
-def remove_duplicates(df, subset=None, inplace=False):
-    return df.drop_duplicates(subset, inplace)
+def remove_duplicates(df_, subset=None, inplace=False):
+    """
+    Return DataFrame with duplicate rows removed, 
+    optionally only considering certain columns.
+    """
+    return df_.drop_duplicates(subset, inplace)
 
 
-def bbox(df):
-    return (df['lat'].min(), df['lon'].min(), df['lat'].max(), df['lon'].max())
+def bbox(df_):
+    """
+    A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
+    Latitude is a decimal number between -90.0 and 90.0. Longitude is a decimal number between -180.0 and 180.0.
+    They usually follow the standard format of: 
+    bbox = left,bottom,right,top 
+    bbox = min Longitude , min Latitude , max Longitude , max Latitude 
+    """
+    return (df_['lat'].min(), df_['long'].min(), df_['lat'].max(), df_['long'].max())
 
 
 def lon2XSpherical(lon):
@@ -74,43 +109,45 @@ def y2LatSpherical(y):
 
 
 def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
+    
     """
     Vectorized haversine function.
     https://stackoverflow.com/questions/43577086/pandas-calculate-haversine-distance-within-each-group-of-rows
     Calculate the great circle distance between two points
     on the earth (specified in decimal degrees or in radians).
-    All (lat, lon) coordinates must have numeric dtypes and be of equal length.
+    All (lat, long) coordinates must have numeric dtypes and be of equal length.
     Result in meters.
     """
     if to_radians:
         lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
-
-    a = np.sin((lat2-lat1)/2.0)**2 + \
-        np.cos(lat1) * np.cos(lat2) * np.sin((lon2-lon1)/2.0)**2
-
+        a = np.sin((lat2-lat1)/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2-lon1)/2.0)**2
     return earth_radius * 2 * np.arcsin(np.sqrt(a)) * 1000  # result in meters (* 1000)
+        
+    
 
-
-def create_update_distance_features(df_, index_name='id'):
+def create_update_distance_features(df_, index_name='id', label_lat='lat', label_long='long'):
     """
     for better performance the trajectory id must be the index.
     """
-    print('create_update_distance_features')
+    print('create_update_distance_features in meters')
     try:
-        if df_.index.name is None:
-            df_.set_index(index_name, inplace=True)
-        
-        if 'dist_curr_to_next' not in df_:
-            df_['dist_curr_to_next'] = -1.0
+        df_aux = df_
+        if df_aux.index.name is None:
+            df_aux.set_index(index_name, inplace=True)
+            """df_aux[label_lat] = df_aux[label_lat].astype('float64')
+            df_aux[label_long] = df_aux[label_long].astype('float64')
+        """
+        if 'dist_curr_to_next' not in df_aux:
+            df_aux['dist_curr_to_next'] = -1.0
         if 'dist_prev_to_curr' not in df_:
-            df_['dist_prev_to_curr'] = -1.0
+            df_aux['dist_prev_to_curr'] = -1.0
         if 'dist_prev_to_next' not in df_:
-            df_['dist_prev_to_next'] = -1.0
+            df_aux['dist_prev_to_next'] = -1.0
 
-        ids = df_.index.unique()
-        size = df_.shape[0]
+        ids = df_aux.index.unique()
+        size = df_aux.shape[0]
         count = 0
-        curr_perc_int = -1;
+        curr_perc_int = -1
         start_time = time()
         deltatime_str = ''
         for id_ in ids:
@@ -119,77 +156,117 @@ def create_update_distance_features(df_, index_name='id'):
             #else:    
             #    filter_ = df_[label_id] == id_
                 
-            curr_lat = df_.at[id_, 'lat']
-            curr_lon = df_.at[id_, 'lon']
-            prev_lat = numpyutils.shift(curr_lat, 1)
-            prev_lon = numpyutils.shift(curr_lon, 1)
-            next_lat = numpyutils.shift(curr_lat, -1)
-            next_lon = numpyutils.shift(curr_lon, -1)
+            curr_lat = df_aux.at[id_, label_lat]
+            curr_lon = df_aux.at[id_, label_long]
+
+            prev_lat = npu.shift(curr_lat, 1)
+            prev_lon = npu.shift(curr_lon, 1)
+            
+            next_lat = npu.shift(curr_lat, -1)
+            next_lon = npu.shift(curr_lon, -1)
             # using pandas shift in a large dataset: 7min 21s
             # using numpy shift above: 33.6 s
             
             # compute distance to next point
             #df_.loc[id_, 'dist_curr_to_next'] = 
-            df_.at[id_, 'dist_curr_to_next'] = haversine(curr_lat, curr_lon, next_lat, next_lon)
+            df_aux.at[id_, 'dist_curr_to_next'] = haversine(curr_lat, curr_lon, next_lat, next_lon)
 
             # compute distance from previous to current point
             #df_.loc[id_, 'dist_prev_to_curr'] = 
-            df_.at[id_, 'dist_prev_to_curr'] = numpyutils.shift(df_.at[id_, 'dist_curr_to_next'], 1)
+            df_aux.at[id_, 'dist_prev_to_curr'] = npu.shift(df_.at[id_, 'dist_curr_to_next'], 1)
 
             # use distance from previous to next
             #df_.loc[id_, 'dist_prev_to_next'] = 
-            df_.at[id_, 'dist_prev_to_next'] = haversine(prev_lat, prev_lon, next_lat, next_lon)
+            df_aux.at[id_, 'dist_prev_to_next'] = haversine(prev_lat, prev_lon, next_lat, next_lon)
             
             count += curr_lat.shape[0]
             curr_perc_int, est_time_str = pru.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
-
-        return deltatime_str
-
+        print(deltatime_str)
+        return df_aux
     except Exception as e:
         print('{}: {}'.format(index_name, id_))
         raise e
-
-        
-def create_update_space_time_features(df_, index_name='id'):
+        return df_
+"""
+def create_update_time_delta_features(df_, label_date='date'):
     try:
-        if 'dist_curr_to_next' not in df_:
-            create_update_distance_features(df_, index_name)
+        df_aux = df_
+        if 'time_curr_to_next' not in df_aux:
+            df_aux['time_curr_to_next'] = 0.0
+            df_aux['time_prev_to_curr'] = 0.0
+            df_aux['time_prev_to_next'] = 0.0
+        
+        ids = df_aux.index.unique()
+        size = df_aux.shape[0]
+        count = 0
+        curr_perc_int = -1
+        start_time = time()
+        deltatime_str = ''
 
-        if df_.index.name is None:
-            df_.set_index(index_name, inplace=True)
+        for id_ in ids:            
+            curr_date = df_aux.at[id_, label_date]
+            prev_date = npu.shift(curr_date, 1, fill_value=None)
+            next_date = npu.shift(curr_date, -1, fill_value=None)
+            
+            df_aux.at[id_, 'time_curr_to_next'] = 
+            df_aux.at[id_, 'time_prev_to_curr'] = npu.shift(df_.at[id_, 'dist_curr_to_next'], 1)
+            df_aux.at[id_, 'time_prev_to_next'] = haversine(prev_lat, prev_lon, next_lat, next_lon)               
+
+
+            count += curr_lat.shape[0]
+            curr_perc_int, est_time_str = pru.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+        
+
+    except Exception as e:
+        print('{}: {} - size: {}'.format(index_name, id_, size_id))
+        raise e
+        return df_
+"""
+def create_update_space_time_features(df_, index_name='id', label_date='date'):
+    try:
+        df_aux = df_
+        if 'dist_curr_to_next' not in df_aux:
+            create_update_distance_features(df_aux, index_name)
+
+        if df_aux.index.name is None:
+            df_aux.set_index(index_name, inplace=True)
 
         print('create_update_space_time_features')
-        if 'time_delta' not in df_:
-            df_['time_delta'] = -1.0
-        if 'speed' not in df_:
-            df_['speed'] = -1.0
+        if 'time_delta' not in df_aux:
+            df_aux['time_delta'] = -1.0
+        if 'speed' not in df_aux:
+            df_aux['speed'] = -1.0
 
-        ids = df_.index.unique()
+        ids = df_aux.index.unique()
 
-        size = df_.shape[0]
+        size = df_aux.shape[0]
         count = 0
-        curr_perc_int = -1;
+        curr_perc_int = -1
         start_time = time()
         for id_ in ids:
-            time_ = df_.at[id_, 'time'].astype(np.float64)
+            time_ = df_aux.at[id_, label_date].astype(np.float64)
             if type(time_) == np.float64:
                 size_id = 1
                 raise Exception("Trajectory must have at least 2 gps points.")
             else:
                 size_id = time_.shape[0] 
             
-            time_delta_ = numpyutils.shift(time_, -1) - time_
 
-            #time_delta_ = df_.loc[filter_, 'time'].shift(-1).values - time_millis_
-            df_.at[id_, 'time_delta'] = time_delta_
-            df_.at[id_, 'speed'] = df_.at[id_, 'dist_curr_to_next'] / (time_delta_ / 1000)  # unit: m/s
+            time_delta_ = npu.shift(time_, -1) - time_
+
+            """if time_delta is in nanosecond, then multiplies by 10-⁹ to tranform in seconds """
+            df_aux.at[id_, 'time_delta'] = time_delta_*(10**-9)
+            df_aux.at[id_, 'speed'] = df_aux.at[id_, 'dist_curr_to_next'] / (time_delta_ / 1000)  # unit: m/s
 
             count += size_id
             curr_perc_int, est_time_str = pru.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
-                
+
+        return df_aux       
     except Exception as e:
         print('{}: {} - size: {}'.format(index_name, id_, size_id))
         raise e
+        return df_
+
 
         
 def add_curr_to_next_dist_time_speed_features(df_, index_name='tid'):
@@ -211,7 +288,7 @@ def add_curr_to_next_dist_time_speed_features(df_, index_name='tid'):
         ids = df_.index.unique()
         size = df_.shape[0]
         count = 0
-        curr_perc_int = -1;
+        curr_perc_int = -1
         start_time = time()
         deltatime_str = ''
         for id_ in ids:
