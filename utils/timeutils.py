@@ -1,7 +1,7 @@
 from __future__ import division
 import datetime
 import time
-#from pandas._libs.tslibs.timestamps import Timestamp
+from pandas._libs.tslibs.timestamps import Timestamp
 
 def timestamp_to_millis(timestamp):
     """
