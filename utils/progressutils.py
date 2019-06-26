@@ -1,6 +1,6 @@
 from time import time
 from utils import timeutils
-
+#import timeutils
 
 def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
     """

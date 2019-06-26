@@ -3,7 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import colorsys
 import numpy as np
-#import folium
+import folium
 
 # http://www.color-hex.com/color/
 
@@ -24,7 +24,7 @@ def cmap_hex_color(cmap, i):
     return matplotlib.colors.rgb2hex(cmap(i))
 
 
-def save_map(df, file, tiles='OpenStreetMap', label_id='id', label_lat='lat', label_lon='lon', cmap='tab20'):
+def save_map(df, file, tiles='OpenStreetMap', label_id='id', label_lat='lat', label_lon='long', cmap='tab20'):
     m = folium.Map(tiles=tiles)
     m.fit_bounds([ [df[label_lat].min(), df[label_lon].min()], [df[label_lat].max(), df[label_lon].max()] ])
     ids = df[label_id].unique()
