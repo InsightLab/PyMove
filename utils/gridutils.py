@@ -6,6 +6,7 @@ from geojson import Feature, FeatureCollection
 from shapely.geometry import Polygon
 import pickle
 
+
 # Transform latitude degree in meters
 # Latitude in Fortaleza: -3.8162973555
 def lat_meters(Lat):
@@ -54,11 +55,11 @@ def create_virtual_grid(cell_size, bbox):
     print('\nA virtual grid was created')
     return my_dict
 
-def create_grid_geometry(dic_grid):
+
+def create_all_polygons_on_grid(dic_grid):
     # Cria o vetor vazio de gometrias da grid
     try:
         grid_polygon = np.array([[None for i in range(dic_grid['grid_size_lon_x'])] for j in range(dic_grid['grid_size_lat_y'])])
-        
         lat_init = dic_grid['lat_min_y']    
         for i in tqdm(range(dic_grid['grid_size_lat_y'])):
             lon_init = dic_grid['lon_min_x']
@@ -71,19 +72,28 @@ def create_grid_geometry(dic_grid):
                                             ))
                 lon_init += dic_grid['cell_size_by_degree']
             lat_init += dic_grid['cell_size_by_degree']
-
         dic_grid['grid_polygon'] = grid_polygon
         print('\nGeometry was created to a virtual grid')
     except Exception as e:
         raise e
-   
 
-def point_to_grid(event_lat, event_lon, dic_grid):
-    y = math.floor((float(event_lat) - dic_grid['lat_min_y'])/ dic_grid['cell_size_by_degree'])
-    x = math.floor((float(event_lon) - dic_grid['lon_min_x'])/ dic_grid['cell_size_by_degree'])
-    return x, y
+def create_one_polygon_to_point_on_grid(dic_grid, index_lat_y, index_lon_x):
+    lat_init = dic_grid['lat_min_y'] + dic_grid['cell_size_by_degree'] * index_lat_y
+    lon_init = dic_grid['lon_min_x'] + dic_grid['cell_size_by_degree'] * index_lon_x
+    polygon = Polygon(((lat_init, lon_init),
+         (lat_init + dic_grid['cell_size_by_degree'], lon_init),
+         (lat_init + dic_grid['cell_size_by_degree'], lon_init + dic_grid['cell_size_by_degree']),
+         (lat_init, lon_init + dic_grid['cell_size_by_degree'])
+                                            ))
+    return polygon
 
-def save_grid(filename, dic_grid):
+def point_to_index_grid(event_lat, event_lon, dic_grid):
+    indexes_lat_y = np.floor((np.float64(event_lat) - dic_grid['lat_min_y'])/ dic_grid['cell_size_by_degree'])
+    indexes_lon_x = np.floor((np.float64(event_lon) - dic_grid['lon_min_x'])/ dic_grid['cell_size_by_degree'])
+    print('...[{},{}] indexes were created to lat and lon'.format(indexes_lat_y.size, indexes_lon_x.size))
+    return indexes_lat_y, indexes_lon_x
+
+def save_grid_pkl(filename, dic_grid):
     """ex: save_grid(grid_file, my_dict_grid)"""
     try:
         f = open(filename,"wb")
@@ -93,11 +103,10 @@ def save_grid(filename, dic_grid):
     except Exception as e:
         raise e
 
-
-def read_grid(filename):
+def read_grid_pkl(filename):
     """ex: read_grid(grid_file)"""
     try:
-        with open(filename+'.pkl', 'rb') as f:
+        with open(filename, 'rb') as f:
             dic_grid = pickle.load(f)
             f.close()
             return dic_grid

@@ -46,4 +46,60 @@ def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, fil
     values_feature[filter_] = values_feature_filter
     df.at[id_, feature_name] = values_feature
 
+def tranform_speed_from_mS_to_kmH(df_, label_speed, replace=True):
+    """
+    transformed speed 
+    """
+    df_[label_speed+'_kmH'] = df_[label_speed].transform(lambda row: row*3.6)
+    if replace:
+        del df_[label_speed] 
 
+
+def transform_speed_from_kmH_to_mS(df_, label_speed, replace=True):
+    df_[label_speed+'_ms'] = df_[label_speed].transform(lambda row: row/3.6)
+    if replace:
+        del df_[label_speed] 
+
+""" transform distances """
+def transform_dist_from_meters_to_kilometers(df_, label_distance, replace=True):
+    df_[label_distance+'_km'] = df_[label_distance].transform(lambda row: row/1000)
+    if replace:
+        del df_[label_distance] 
+
+def transform_dist_from_to_kilometers_to_meters(df_, label_distance, replace=True):
+    df_[label_distance+'_m'] = df_[label_distance].transform(lambda row: row*1000)
+    if replace:
+        del df_[label_distance] 
+
+
+""" transform time """
+def transform_time_from_seconds_to_minutes(df_, label_time, replace=True):
+    df_[label_time+'_m'] = df_[label_time].transform(lambda row: row/60.0)
+    if replace:
+        del df_[label_time]
+
+def transform_time_from_minute_to_seconds(df_, label_time, replace=True):
+    df_[label_time+'_s'] = df_[label_time].apply(lambda row: row*60.0)
+    if replace:
+        del df_[label_time]
+
+def transform_time_from_minute_to_hours(df_, label_time, replace=True):
+    df_[label_time+'_h'] = df_[label_time].apply(lambda row: row/60.0)
+    if replace:
+        del df_[label_time]
+
+def transform_time_from_hours_to_minute(df_, label_time, replace=True):
+    df_[label_time+'_m'] = df_[label_time].apply(lambda row: row*60.0)
+    if replace:
+        del df_[label_time]
+
+
+def transform_time_from_seconds_to_hours(df_, label_time, replace=True):
+    df_[label_time+'_h'] = df_[label_time].apply(lambda row: row/3600.0)
+    if replace:
+        del df_[label_time]
+
+def transform_time_from_hours_to_seconds(df_, label_time, replace=True):
+    df_[label_time+'_s'] = df_[label_time].apply(lambda row: row*3600.0)
+    if replace:
+        del df_[label_time]

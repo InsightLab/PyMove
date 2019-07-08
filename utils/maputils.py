@@ -68,19 +68,19 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap'):
     m.save(file) 
 
     
-def show_traj(df, label_id='id', label_lat='lat', label_lon='lon', figsize=(10,10), return_fig=False):
+def show_traj(df, label_tid='tid', label_lat='lat', label_lon='lon', figsize=(10,10), return_fig=False):
     fig = plt.figure(figsize=figsize)
-    ids = df[label_id].unique()
+    ids = df[label_tid].unique()
     for id_ in ids:
-        df_id = df[ df[label_id] == id_ ]
+        df_id = df[ df[label_tid] == id_ ]
         plt.plot(df_id[label_lon], df_id[label_lat])
     if return_fig:
         return fig
 
     
-def show_traj_id(df, tid, label_id='id', label_lat='lat', label_lon='lon', figsize=(10,10)):
+def show_traj_id(df, tid, label_tid='tid', label_lat='lat', label_lon='lon', figsize=(10,10)):
     fig = plt.figure(figsize=figsize)
-    df_ = df[ df[label_id] == tid ]
+    df_ = df[ df[label_tid] == tid ]
     plt.plot(df_.iloc[0][label_lon], df_.iloc[0][label_lat], 'yo', markersize=20)             # start point
     plt.plot(df_.iloc[-1][label_lon], df_.iloc[-1][label_lat], 'yX', markersize=20)           # end point
     
