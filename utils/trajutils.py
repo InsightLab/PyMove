@@ -10,6 +10,7 @@ from utils import numpyutils as npu
 from utils import pandasutils as pdu
 from utils import progressutils as pru
 from utils import trajutils
+from utils import gridutils
 """
 
 import timeutils
@@ -19,38 +20,51 @@ import progressutils as pru
 
 """
 """main labels """
+gl_label_tid = 'tid'
 gl_label_id = 'id'
 gl_label_lat = 'lat'
 gl_label_lon = 'lon'
-gl_label_date = 'date'
+gl_label_datetime = 'datetime'
 
-""" labels to distances"""
+
+"""date and time labels"""
+gl_label_day = 'day'
+gl_label_period = 'period'
+
+""" labels to distances features"""
 gl_label_dist_prev_next = 'dist_prev_to_next'
 gl_label_dist_to_prev = 'dist_to_prev'
 gl_label_dist_to_next = 'dist_to_next'
 
     
-""" labels to space and time"""
+""" labels to space and time features"""
 gl_label_time_to_prev = 'time_to_prev'
 gl_label_time_to_next = 'time_to_next'
 gl_label_speed_to_prev = 'speed_to_prev' 
 gl_label_speed_to_next = 'speed_to_next'
 
 """ labels to move and stop"""
-gl_situation = 'situation'
+gl_label_situation = 'situation'
 
-def format_labels(df_, current_id, current_lat, current_lon, current_date,  inplace=False):
+""" labels to grid"""
+gl_label_index_grid_lat = 'index_grid_lat'
+gl_label_index_grid_lon = 'index_grid_lon'
+
+def format_labels(df_, current_id, current_lat, current_lon, current_datetime,  inplace=False):
     """ 
-    Format the labels for the PyRoad lib pattern
+    Format the labels for the PyRoad lib pattern 
+        labels output = lat, lon and datatime
     """ 
     if inplace:
-        return df_.rename(columns= {current_id: gl_label_id, current_lat: gl_label_lat, current_lon: gl_label_lon, current_date: gl_label_date}, inplace=True)
+        return df_.rename(columns= {current_id: gl_label_id, current_lat: gl_label_lat, current_lon: gl_label_lon, current_datetime: gl_label_datetime}, inplace=True)
     else:
-        return df_.rename(columns= {current_id: gl_label_id, current_lat: gl_label_lat, current_lon: gl_label_lon, current_date: gl_label_date}, inplace=False) 
+        return df_.rename(columns= {current_id: gl_label_id, current_lat: gl_label_lat, current_lon: gl_label_lon, current_datetime: gl_label_datetime}, inplace=False) 
         
-def format_trajectories_data(df_, id=gl_label_id, label_date=gl_label_date, label_lat=gl_label_lat, label_lon=gl_label_lon, setIndex=False):
+def format_trajectories_data(df_, id=gl_label_id, label_id=gl_label_id, label_datetime=gl_label_datetime, label_lat=gl_label_lat, label_lon=gl_label_lon, setIndex=False):
     """ 
-    Format the data to an appropriate format
+    Format the data to an appropriate format 
+        lat and lon: (float)
+        datetime: pandas.datetime
     """
     try:
         if setIndex:
@@ -58,34 +72,22 @@ def format_trajectories_data(df_, id=gl_label_id, label_date=gl_label_date, labe
         
         df_[label_lat] = df_[label_lat].astype('float64')
         df_[label_lon] = df_[label_lon].astype('float64')
-        df_[label_date] = pd.to_datetime(df_[label_date])
+        df_[label_datetime] = pd.to_datetime(df_[label_datetime])
     except Exception as e:
         raise e
 
 def show_data_info(df):
+    """
+        show dataset information from dataframe, this is number of rows, datetime interval, and bounding box 
+    """
     try:
         print('\n======================= INFORMATION ABOUT DATASET =======================\n')
-        print('Number of Rows: {}\nNumber of Ids: {} '.format(df.shape[0], df['id'].nunique()))
-        print('Data between {} and {}'.format(df['date'].min(), df['date'].max()))
+        print('Number of Rows: {}\nNumber of Ids: {} '.format(df.shape[0], df[gl_label_id].nunique()))
+        print('Trajectories between {} and {}'.format(df[gl_label_datetime].min(), df[gl_label_datetime].max()))
         print('Bounding Box:', trajutils.get_bbox(df)) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
         print('\n=========================================================================\n')
     except Exception as e:
         raise e    
-
-def bbox_split(bbox, total_grids):
-    lat_min = bbox[0]
-    lon_min = bbox[1]
-    lat_max = bbox[2]
-    lon_max = bbox[3]
-    const_lat =  abs(abs(lat_max) - abs(lat_min))/total_grids
-    const_lon =  abs(abs(lon_max) - abs(lon_min))/total_grids
-    print('const_lat: {}\nconst_lon: {}'.format(const_lat, const_lon))
-
-    df = pd.DataFrame(columns=['lat_min', 'lon_min', 'lat_max', 'lon_max'])
-    for i in range(total_grids):
-        df = df.append({'lat_min':lat_min, 'lon_min': lon_min + (const_lon * i), 'lat_max': lat_max, 'lon_max':lon_min + (const_lon * (i + 1))}, ignore_index=True)
-    
-    return df
 
 def get_bbox(df_, label_lat = gl_label_lat, label_lon = gl_label_lon):
     """
@@ -100,28 +102,55 @@ def get_bbox(df_, label_lat = gl_label_lat, label_lon = gl_label_lon):
     except Exception as e:
         raise e
 
-def filter_by_date_id(df_, index=None, label_id=gl_label_id, label_date = gl_label_date, startDate=None, endDate=None):
-    if (startDate is not None and endDate is not None):
-        return df_[(df_[label_id] == index) & (df_[label_date] > startDate) & (df_[label_date] <= endDate)]
-    elif (startDate is None):
-        return df_[(df_[label_id] == index) & (df_[label_date] <= endDate)]
-    else:
-        return df_[(df_[label_id] == index) & (df_[label_date] > startDate)]  
+def bbox_split(bbox, number_grids):
+    """
+        split bound box in N grids of the same size
+    """
+    lat_min = bbox[0]
+    lon_min = bbox[1]
+    lat_max = bbox[2]
+    lon_max = bbox[3]
+    
+    const_lat =  abs(abs(lat_max) - abs(lat_min))/number_grids
+    const_lon =  abs(abs(lon_max) - abs(lon_min))/number_grids
+    print('const_lat: {}\nconst_lon: {}'.format(const_lat, const_lon))
 
-def filter_by_date(df_, label_date = gl_label_date, startDate=None, endDate=None):
-    if (startDate is not None and endDate is not None):
-        return df_[(df_[label_date] > startDate) & (df_[label_date] <= endDate)]
-    elif (startDate is None):
-        return df_[(df_[label_date] <= endDate)]
-    else:
-        return df_[(df_[label_date] > startDate)]  
+    df = pd.DataFrame(columns=['lat_min', 'lon_min', 'lat_max', 'lon_max'])
+    for i in range(number_grids):
+        df = df.append({'lat_min':lat_min, 'lon_min': lon_min + (const_lon * i), 'lat_max': lat_max, 'lon_max':lon_min + (const_lon * (i + 1))}, ignore_index=True)
+    
+    return df
 
-def filter_bbox(df_, lat_down, lon_left, lat_up, lon_right, filter_out=False, label_lat = gl_label_lat, label_lon = gl_label_lon, inplace=False):
+
+def filter_by_datetime_id(df_, id_=None, startDatetime=None, endDatetime=None,  label_id=gl_label_id, label_datetime = gl_label_datetime,):
+    """
+        filter dataset from id and datetime interval  
+    """
+    if (startDatetime is not None and endDatetime is not None):
+        return df_[(df_[label_id] == id_) & (df_[label_datetime] > startDatetime) & (df_[label_datetime] <= endDatetime)]
+    elif (startDatetime is None):
+        return df_[(df_[label_id] == id_) & (df_[label_datetime] <= endDatetime)]
+    else:
+        return df_[(df_[label_id] == id_) & (df_[label_datetime] > startDatetime)]  
+
+def filter_by_datetime(df_, label_datetime = gl_label_datetime, startDatetime=None, endDatetime=None):
+    if (startDatetime is not None and endDatetime is not None):
+        return df_[(df_[label_datetime] > startDatetime) & (df_[label_datetime] <= endDatetime)]
+    elif (startDatetime is None):
+        return df_[(df_[label_datetime] <= endDatetime)]
+    else:
+        return df_[(df_[label_datetime] > startDatetime)]  
+
+def filter_bbox(df_, bbox, filter_out=False, label_lat = gl_label_lat, label_lon = gl_label_lon, inplace=False):
     """
     Filter bounding box.
     Example: 
-    filter_bbox(df_, -3.90, -38.67, -3.68, -38.38) -> Fortaleza
+    filter_bbox(df_, [-3.90, -38.67, -3.68, -38.38]) -> Fortaleza
     """
+    lat_down =  bbox[0]
+    lon_left =  bbox[1]
+    lat_up = bbox[2]
+    lon_right = bbox[3]
     try:
         filter_ = (df_[label_lat] >= lat_down) & (df_[label_lat] <= lat_up) & (df_[label_lon] >= lon_left) & (df_[label_lon] <= lon_right)
         if filter_out:
@@ -135,9 +164,7 @@ def filter_bbox(df_, lat_down, lon_left, lat_up, lon_right, filter_out=False, la
     except Exception as e: 
             raise e
 
-""" ===================================================================================
-----------------------  FUCTIONS TO LAT AND LONG OPERATIONS ---------------------------
-======================================================================================= """ 
+""" ----------------------  FUCTIONS TO LAT AND LONG OPERATIONS --------------------------- """ 
 
 def lon2XSpherical(lon):
     """
@@ -179,25 +206,66 @@ def y2LatSpherical(y):
 def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
     
     """
-    Vectorized haversine function.
-    https://stackoverflow.com/questions/43577086/pandas-calculate-haversine-distance-within-each-group-of-rows
+    Vectorized haversine function: https://stackoverflow.com/questions/43577086/pandas-calculate-haversine-distance-within-each-group-of-rows
+    About distance between two points: https://janakiev.com/blog/gps-points-distance-python/
     Calculate the great circle distance between two points
     on the earth (specified in decimal degrees or in radians).
     All (lat, lon) coordinates must have numeric dtypes and be of equal length.
     Result in meters.
+    Use 3956 in earth radius for miles
     """
     if to_radians:
         lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
         a = np.sin((lat2-lat1)/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2-lon1)/2.0)**2
     return earth_radius * 2 * np.arcsin(np.sqrt(a)) * 1000  # result in meters (* 1000)
 
+""" ----------------------  FUCTIONS TO CREATE NEW FEATURES IN DATASET   ----------------------------- """
+def create_update_tid_based_on_id_datatime(df_, label_datetime=gl_label_datetime):
+    
+    df[trajutils.gl_label_tid] = df[trajutils.gl_label_id].astype(str) + df[trajutils.gl_label_datetime].dt.strftime("%Y%m%d")
 
-""" ===================================================================================
-----------------------  FUCTIONS TO CREATE NEW FEATURES IN DATASET   -----------------------------------
-======================================================================================= """ 
 
+def create_update_day_of_the_week_features(df_, label_datetime=gl_label_datetime):
+    """
+        Create or update a feature day of the week from datatime
+            Exampĺe: datetime = 2019-04-28 00:00:56  -> day = Sunday
+    """
+    print('\nCreating or updating day of the week feature...\n')
+    try:
+        df_[gl_label_day] = df_[label_datetime].dt.day_name()
+        print('...the day of the weeek feature was created...\n')
+    except Exception as e:
+        raise e
+
+def create_update_time_of_day_features(df_, label_datetime = gl_label_datetime):
+    """
+        Create a feature time of day or period from datatime
+            Examples: 
+                datetime1 = 2019-04-28 02:00:56 -> period = early morning
+                datetime2 = 2019-04-28 08:00:56 -> period = morning
+                datetime3 = 2019-04-28 14:00:56 -> period = afternoon
+                datetime4 = 2019-04-28 20:00:56 -> period = evening
+    """
+    print('\nCreating or updating period feature\n...early morning from 0H to 6H\n...morning from 6H to 12H\n...afternoon from 12H to 18H\n...evening from 18H to 24H')
+    try:
+        conditions =   [(df_[label_datetime].dt.hour >= 0) & (df_[label_datetime].dt.hour < 6), 
+                        (df_[label_datetime].dt.hour >= 6) & (df_[label_datetime].dt.hour < 12),
+                        (df_[label_datetime].dt.hour >= 12) & (df_[label_datetime].dt.hour < 18),  
+                        (df_[label_datetime].dt.hour >= 18) & (df_[label_datetime].dt.hour < 24)]
+        choices = ['early morning', 'morning', 'afternoon', 'evening']
+        df_[gl_label_period] = np.select(conditions, choices, 'undefined')      
+        print('\n...the time of day feature was created')
+    except Exception as e:
+        raise e
 
 def create_update_distance_features(df_, label_id=gl_label_id, label_lat=gl_label_lat, label_lon=gl_label_lon):
+    """
+        Create three distance in meters to an GPS point P (lat, lon)
+            Example:
+                P to P.next = 2 meters
+                P to P.previous = 1 meter
+                P.previous to P.next = 1 meters
+    """
     print('\nCreating or updating distance features in meters...\n')
     try:
         if df_.index.name is None:
@@ -210,7 +278,7 @@ def create_update_distance_features(df_, label_id=gl_label_id, label_lat=gl_labe
         if gl_label_dist_to_prev not in df_:
             df_[gl_label_dist_to_prev] = -1.0
         if gl_label_dist_prev_next not in df_:
-            df_[gl_label_dist_prev_next] = -1.0
+            df_[gl_label_dist_prev_next]= -1.0
 
         ids = df_.index.unique()
         size = df_.shape[0]
@@ -243,10 +311,10 @@ def create_update_distance_features(df_, label_id=gl_label_id, label_lat=gl_labe
             # compute distance from previous to current point
             #df_.loc[id_, 'dist_prev_to_curr'] = 
             df_.at[id_, gl_label_dist_to_prev] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
+            #npu.shift(df_.at[id_, gl_label_dist_to_next], 1)
 
             # use distance from previous to next
             #df_.loc[id_, 'dist_prev_to_next'] = 
-            #
             df_.at[id_, gl_label_dist_prev_next] = haversine(prev_lat, prev_lon, next_lat, next_lon)
             
             count += curr_lat.shape[0]
@@ -259,10 +327,19 @@ def create_update_distance_features(df_, label_id=gl_label_id, label_lat=gl_labe
         raise e
 
 
-def create_update_dist_time_speed_features(df_, label_id=gl_label_id, label_date=gl_label_date):
+def create_update_dist_time_speed_features(df_, label_id=gl_label_id, label_datetime=gl_label_datetime):
+    """
+    Firstly, create three distance to an GPS point P (lat, lon)
+    After, create two feature to time between two P: time to previous and time to next 
+    Lastly, create two feature to speed using time and distance features
+    Example:
+        dist_to_next =  248.33 meters, dist_to_prev 536.57 meters
+        time_next = 60 seconds, time_prev = 60.0 seconds
+        speed_next = 4.13 m/s, speed_prev = 8.94 m/s.
+    """
     try:
         print('\nCreating or updating space and time features in meters by seconds\n')
-       
+        
         """update or create distance features"""
         create_update_distance_features(df_, label_id)   
 
@@ -288,14 +365,14 @@ def create_update_dist_time_speed_features(df_, label_id=gl_label_id, label_date
         curr_perc_int = -1
         start_time = time()
         for id_ in ids:
-            time_ = df_.at[id_, label_date].astype(np.float64)
+            time_ = df_.at[id_, label_datetime].astype(np.float64)
             if type(time_) == np.float64:
                 size_id = 1
                 raise Exception("Trajectory must have at least 2 gps points.")
             else:
                 size_id = time_.shape[0] 
             
-            """time_to_prev = current_date - prev_date 
+            """time_to_prev = current_datetime - prev_datetime 
             the time_delta must be in nanosecond, then we multiplie by 10-⁹ to tranform in seconds """
             time_delta_prev = (time_ - npu.shift(time_, 1))*(10**-9)
             df_.at[id_, gl_label_time_to_prev] = time_delta_prev
@@ -308,6 +385,11 @@ def create_update_dist_time_speed_features(df_, label_id=gl_label_id, label_date
             df_.at[id_, gl_label_speed_to_prev] = df_.at[id_, gl_label_dist_to_prev] / (time_delta_prev)  # unit: m/s
             df_.at[id_, gl_label_speed_to_next] = df_.at[id_, gl_label_dist_to_next] / (time_delta_next)  # unit: m/s
 
+
+            #pdu.change_df_feature_values_using_filter(df_, id_, 'delta_time', filter_points, delta_times)
+            #pdu.change_df_feature_values_using_filter(df_, id_, 'delta_dist', filter_points, delta_dists)
+            #pdu.change_df_feature_values_using_filter(df_, id_, 'speed', filter_points, speeds)
+
             count += size_id
             curr_perc_int, est_time_str = pru.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
         print('...Reset index...\n')
@@ -316,62 +398,54 @@ def create_update_dist_time_speed_features(df_, label_id=gl_label_id, label_date
         print('{}: {} - size: {}'.format(label_id, id_, size_id))
         raise e
 
-def create_update_move_and_stop_feature(df_, label_id=gl_label_id, new_label=gl_situation, time_radius_to_stop=10, update_features=True):
+def create_update_move_and_stop_by_distance(df_, label_id=gl_label_id, radius_dist=1, update_features=True):
     if (update_features) is True:
-        """update or create distance features"""
+        """update or create distance, time and speed features"""
         create_update_dist_time_speed_features(df_, label_id)   
     try:
         print('\nCreating or updating features MOVE and STOPS...\n')
+        new_label = gl_label_situation +"_"+ str(radius_dist)
         if(new_label in df_):
             del df_[new_label]
-        conditions = (df_[gl_label_time_to_next] < time_radius_to_stop), (df_[gl_label_time_to_next] >= time_radius_to_stop)
+
+        conditions = (df_[gl_label_dist_to_prev] > radius_dist), (df_[gl_label_dist_to_prev] <= radius_dist)
         choices = ['move', 'stop']
-        df_[new_label] = np.select(conditions, choices, 'undefined')      
+        df_[new_label] = np.select(conditions, choices, np.nan)      
         print('\n....There are {} stops to this parameters\n'.format(df_[df_[new_label] == 'stop'].shape[0]))
     except Exception as e:
         raise e
 
 
-""" ===================================================================================
-----------------------  FUCTIONS TO DATA CLEANING   -----------------------------------
-======================================================================================= """ 
+def create_update_index_grid_feature(df_, dic_grid, label_lat=gl_label_lat, label_lon=gl_label_lon):
+    print('\nCreating or updating index of the grid feature..\n')
+    try:
+        if gl_label_index_grid_lat in df_:
+           del df_[gl_label_index_grid_lat]
+        if gl_label_index_grid_lon in df_:
+           del df_[gl_label_index_grid_lon]
+
+        lat_, lon_ = gridutils.point_to_index_grid(df_[label_lat], df_[label_lon], dic_grid)
+
+        df_[gl_label_index_grid_lat] = np.int64(lat_)
+        df_[gl_label_index_grid_lon] = np.int64(lon_)
+    except Exception as e:
+        raise e
 
 
-def remove_duplicates(df_, subset=None, inplace=False):
+
+"""----------------------  FUCTIONS TO DATA CLEANING   ----------------------------------- """ 
+
+
+def clean_duplicates(df_, subset=None, inplace=False):
     """
     Return DataFrame with duplicate rows removed, optionally only considering certain columns.
     """
     print('Remove rows duplicates by subset')
     return df_.drop_duplicates(subset, inplace)
-    
-""" This fuction is the union between clean_gps_nearby_points and clean_gps_jumps_by_distance fuctions 
-def clean_gps_nearby_points_and_jumps_by_distance(df_, label_id=gl_label_id, radius_area=10.0, jump_coefficient=3.0):
-    create_update_distance_features(df_, label_id)
-    
-    filter_nearby_points = (df_[gl_label_dist_to_prev] <= radius_area)
-    
-    filter_jumpy = (df_[gl_label_dist_to_next] > 1) & (df_[gl_label_dist_to_prev] > 1) & \
-       (jump_coefficient * df_[gl_label_dist_prev_next] < df_[gl_label_dist_to_next]) & \
-       (jump_coefficient * df_[gl_label_dist_prev_next] < df_[gl_label_dist_to_prev])  
 
-    idx_nearby = df_[filter_nearby_points].index
-    idx_jumps= df_[filter_jumpy].index
-
-    if idx_jumps.shape[0] > 0:
-        print('...Dropping {} rows of Jumps points\n'.format(idx_jumps.shape[0]))
-        shape_before = df_.shape[0]
-        df_.drop(index=idx_jumps, inplace=True)
-        print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0])) 
-        clean_gps_nearby_points_and_jumps_by_distance(df_, label_id, radius_area, jump_coefficient)
-    elif idx_nearby.shape[0] > 0:
-        print('...Dropping {} gps Nearby points\n'.format(idx_nearby.shape[0]))
-        shape_before = df_.shape[0]
-        df_.drop(index=idx_nearby, inplace=True)
-        print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
-        clean_gps_nearby_points_and_jumps_by_distance(df_, label_id, radius_area, jump_coefficient)
-    else:
-        print("...There is no gps points to drop\n")
-"""
+def clean_NaN_values(df_):
+    df_.dropna(how='any')
+    
 def clean_gps_nearby_points(df_, label_id=gl_label_id, radius_area=10.0, update_features=True):
     if(update_features):
        create_update_distance_features(df_, label_id)
@@ -438,6 +512,60 @@ def clean_gps_speed_max_radius(df_, label_id=gl_label_id, speed_max=50.0, update
         print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
         clean_gps_speed_max_radius(df_, label_id, speed_max)
 
+def clean_trajectories_with_few_points(df_, label_tid=gl_label_tid, min_points_per_trajectory=2, update_features=True):
+
+    print('\nClean trajectories with few points')
+        
+    if(update_features):
+        create_update_dist_time_speed_features(df_, label_tid)
+
+    if df_.index.name is not None:
+        print('\n...Reset index for filtering\n')
+        df_.reset_index(inplace=True)
+
+    df_count_tid = df_.groupby(by=label_tid).size()
+    
+    tids_with_few_points = df_count_tid[ df_count_tid < min_points_per_trajectory ].index
+    print('\n...ids_with_few_points: {}'.format(tids_with_few_points.shape[0]))
+    
+    shape_before_drop = df_.shape
+    idx = df_[ df_[label_tid].isin(tids_with_few_points) ].index
+    print('\n...tids before drop: {}'.format(df_[label_tid].unique().shape[0]))
+    df_.drop(index=idx, inplace=True)
+    print('\n...tids after drop: {}'.format(df_[label_tid].unique().shape[0]))
+    print('\n...shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape)) 
+
+def clean_short_and_few_points_trajectories(df_, label_tid=gl_label_tid, min_trajectory_distance=100, min_points_per_trajectory=2):
+    # remove_tids_with_few_points must be performed before updating features, because 
+    # those features only can be computed with at least 2 points per trajactories
+    print('\nRemove short trajectories...')
+    clean_trajectories_with_few_points(df_, label_tid, min_points_per_trajectory)
+    
+    print('\n...create or update distance, time and speed features...')
+    create_update_dist_time_speed_features(df_, label_tid)
+
+    if df_.index.name is not None:
+        print('reseting index')
+        df_.reset_index(inplace=True)
+        
+    print('\n...dropping unnecessary trajectories...')
+    df_agg_tid = df_.groupby(by=label_tid).agg({gl_label_dist_to_next:'sum'})
+    filter_ = (df_agg_tid[gl_label_dist_to_next] < min_trajectory_distance)    
+    tid_selection = df_agg_tid[ filter_ ].index
+    print('\n...short trajectories and trajectories with a minimum distance ({}): {}'.format(df_agg_tid.shape[0], 
+            min_trajectory_distance))
+    
+    shape_before_drop = df_.shape
+    idx = df_[ df_[label_tid].isin(tid_selection) ].index
+    if idx.shape[0] > 0:
+        tids_before_drop = df_[label_tid].unique().shape[0]
+        df_.drop(index=idx, inplace=True)
+        print('\n...tids - before drop: {} - after drop: {}'.format(tids_before_drop, df_[label_tid].unique().shape[0]))
+        print('\n...shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
+        clean_short_and_few_points_trajectories(df_)
+    else:
+        print('\...remove_short_trajs_and_trajs_with_few_points - nothing to change:', df_.shape)        
+
 
 """ ============================================================"""
 """ All of the above functions have been standardized and tested"""
@@ -495,26 +623,7 @@ def create_dist_time_speed_features(df_, index_name='tid'):
         raise e
 """
 
-def remove_trajectories_with_few_points(df_, label_id='id', min_points_per_trajectory=2):
-    print('remove_trajectories_with_few_points')
-    if df_.index.name is not None:
-        print('\nReset index for filtering\n')
-        df_.reset_index(inplace=True)
-
-    df_count_tid = df_.groupby(by=label_id).size()
-    
-    tids_with_few_points = df_count_tid[ df_count_tid < min_points_per_trajectory ].index
-    print('#ids_with_few_points: {}'.format(tids_with_few_points.shape[0]))
-    
-    shape_before_drop = df_.shape
-    idx = df_[ df_[label_id].isin(tids_with_few_points) ].index
-    print('#ids before drop: {}'.format(df_[label_id].unique().shape[0]))
-    df_.drop(index=idx, inplace=True)
-    print('#ids after drop: {}'.format(df_[label_id].unique().shape[0]))
-    print('shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape)) 
-
-
-
+       
 def split_trajectories_by_time(df_, index_name='id', max_time_between_adj_points=900, label_new_id='tid'):
     """
     index_name is the current id.
@@ -666,41 +775,6 @@ def split_trajectories(df_, index_name='id', max_dist_between_adj_points=1000, m
     else:
         print('no trajs with only one point - nothing to change:', df_.shape)
 
-def remove_short_trajs_and_trajs_with_few_points(df_, label_id='tid', min_trajectory_distance=100):
-    # remove_tids_with_few_points must be performed before updating features, because 
-    # those features only can be computed with at least 2 points per trajactories
-    print('remove_tids_with_few_points...')
-    remove_trajectories_with_few_points(df_, label_id)
-    
-    print('create_update_distance_features...')
-    create_update_distance_features(df_, label_id=label_id)
-    
-    print('create_update_space_time_features...')
-    """ create_update_space_time_features(df_, label_id)"""
-
-    if df_.index.name is not None:
-        print('reseting index')
-        df_.reset_index(inplace=True)
-        
-    print('dropping unnecessary trajectories...')
-    df_agg_tid = df_.groupby(by='tid').agg({'dist_curr_to_next':'sum'})
-    filter_ = (df_agg_tid['dist_curr_to_next'] < min_trajectory_distance)    
-    tid_selection = df_agg_tid[ filter_ ].index
-    print('#short trajectories and trajectories with a minimum distance ({}): {}'.format(df_agg_tid.shape[0], 
-            min_trajectory_distance))
-    
-    shape_before_drop = df_.shape
-    idx = df_[ df_['tid'].isin(tid_selection) ].index
-    if idx.shape[0] > 0:
-        tids_before_drop = df_['tid'].unique().shape[0]
-        df_.drop(index=idx, inplace=True)
-        print('#tids - before drop: {} - after drop: {}'.format(tids_before_drop, df_['tid'].unique().shape[0]))
-        print('shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-        remove_short_trajs_and_trajs_with_few_points(df_)
-    else:
-        print('remove_short_trajs_and_trajs_with_few_points - nothing to change:', df_.shape)        
-
-        
 def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points=5000, max_time_between_adj_points=900, max_speed=30):
     try:
         if df.index.name is not None:
@@ -962,4 +1036,3 @@ def interpolate_add_deltatime_speed_features(df, label_id='tid', max_time_betwee
         print('shape before dropping: {}'.format(df.shape))
         df.drop(index=idxs_drop, inplace=True )
         print('shape after dropping: {}'.format(df.shape))
-

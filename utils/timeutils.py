@@ -21,30 +21,34 @@ def millis_to_timestamp(milliseconds):
     return Timestamp(milliseconds, unit='ms')
 
 
-def date_str(date1):
+def date_to_str(date1):
     return date1.strftime('%Y-%m-%d')
 
 
-def time_str(date1):
+def time_to_str(date1):
     return date1.strftime('%H:%M:%S')
 
 
-def str_to_dtime(dt_str):
+def str_to_datatime(dt_str):
     if len(dt_str) == 10:
-        return datetime.datatime.strptime(dt_str, '%Y-%m-%d')
+        return datatime.datatime.strptime(dt_str, '%Y-%m-%d')
     else:
-        return datetime.datatime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+        return datatime.datatime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
 
-def dtime_str(dt1):
+def str_to_time(dt_str):
+    return datatime.datatime.strptime(dt_str, '%H:%M:%S')
+
+
+def datetime_to_str(dt1):
     return dt1.strftime('%Y-%m-%d %H:%M:%S')
 
 
 def now_str():
-    return dtime_str(datetime.datetime.now())
+    return datetime_to_str(datetime.datetime.now())
 
 
-def dtime_to_min(dt1):
+def datetime_to_min(dt1):
     """
     Converts a datetime to an int representation in minutes. 
     To do the reverse use: min_to_dtime.
@@ -56,7 +60,7 @@ def dtime_to_min(dt1):
     return int((dt1 - datetime.datetime.utcfromtimestamp(0)).total_seconds() / 60)
 
 
-def min_to_dtime(min1):
+def min_to_datatime(min1):
     """
     Converts an int representation in minutes to a datetime. 
     To do the reverse use: dtime_to_min.
@@ -83,7 +87,7 @@ def datetime_slot(dt1, time_window_duration=5):
     return datetime.datetime(dt1.year, dt1.month, dt1.day, dt1.hour, minute)
 
 
-def dtime_str_to_min_slot(dt_str, time_window_duration=5):
+def datatime_str_to_min_slot(dt_str, time_window_duration=5):
     """
     Converts a datetime string to an int minute time slot (approximated to the time slot).
     Same as datetime_str_to_min_slot, but another implementation.
@@ -92,7 +96,7 @@ def dtime_str_to_min_slot(dt_str, time_window_duration=5):
     """
     dt = dtime(dt_str)
     dt_slot = datetime_slot(dt, time_window_duration)
-    return dtime_to_min(dt_slot)
+    return datatime_to_min(dt_slot)
 
 
 def datetime_str_to_min_slot(dt_str, time_window_duration=5):

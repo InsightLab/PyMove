@@ -7,6 +7,7 @@ def shift(arr, num, fill_value=np.nan):
     """
     """ Return a new array with the same shape and type as a given array."""
     result = np.empty_like(arr)
+
     if num > 0:
         result[:num] = fill_value
         result[num:] = arr[:-num]
