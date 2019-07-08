@@ -222,7 +222,7 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 """ ----------------------  FUCTIONS TO CREATE NEW FEATURES IN DATASET   ----------------------------- """
 def create_update_tid_based_on_id_datatime(df_, label_datetime=gl_label_datetime):
     
-    df[trajutils.gl_label_tid] = df[trajutils.gl_label_id].astype(str) + df[trajutils.gl_label_datetime].dt.strftime("%Y%m%d")
+    df_[trajutils.gl_label_tid] = df_[trajutils.gl_label_id].astype(str) + df_[trajutils.gl_label_datetime].dt.strftime("%Y%m%d")
 
 
 def create_update_day_of_the_week_features(df_, label_datetime=gl_label_datetime):
