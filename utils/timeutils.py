@@ -25,8 +25,8 @@ def date_to_str(date1):
     return date1.strftime('%Y-%m-%d')
 
 
-def time_to_str(date1):
-    return date1.strftime('%H:%M:%S')
+def time_to_str(time1):
+    return time1.strftime('%H:%M:%S')
 
 
 def str_to_datatime(dt_str):
@@ -48,7 +48,7 @@ def now_str():
     return datetime_to_str(datetime.datetime.now())
 
 
-def datetime_to_min(dt1):
+def datetime_to_min(datetime):
     """
     Converts a datetime to an int representation in minutes. 
     To do the reverse use: min_to_dtime.
@@ -57,7 +57,7 @@ def datetime_to_min(dt1):
     # get an integer time slot from a datetime
     # e.g. in:datetime.datetime(2014, 1, 1, 20, 55) -> out:23143495
     # e.g. in:datetime.datetime(2014, 1, 1, 20, 56) -> out:23143496
-    return int((dt1 - datetime.datetime.utcfromtimestamp(0)).total_seconds() / 60)
+    return int((datetime - datetime.datetime.utcfromtimestamp(0)).total_seconds() / 60)
 
 
 def min_to_datatime(min1):
@@ -94,9 +94,9 @@ def datatime_str_to_min_slot(dt_str, time_window_duration=5):
     To do almost the reverse (consider time slot approximation) use: min_to_dtime.
     e.g. in:'2014-01-01 20:56:00' -> out:23143495
     """
-    dt = dtime(dt_str)
+    dt = datetime_to_str(dt_str)
     dt_slot = datetime_slot(dt, time_window_duration)
-    return datatime_to_min(dt_slot)
+    return dt_slot
 
 
 def datetime_str_to_min_slot(dt_str, time_window_duration=5):
@@ -111,9 +111,9 @@ def datetime_str_to_min_slot(dt_str, time_window_duration=5):
     return int(dt_min // time_window_duration * time_window_duration)
     
 
-def day_of_week(dt1):
+def date_to_day_of_week_int(date):
     # Monday == 0...Sunday == 6
-    return dt1.weekday()
+    return date.weekday()
 
 
 def elapsed_time_dt(start_time):
@@ -128,7 +128,7 @@ def working_day(dt, holidays):
     result = True
 
     if type(dt) == str:
-        dt = dtime(dt)
+        dt = date_to_str(dt)
 
     if type(dt) == datetime.datetime:
         dt = datetime.date(dt.year, dt.month, dt.day)
@@ -136,7 +136,7 @@ def working_day(dt, holidays):
     if dt in holidays:
         result = False
     else:
-        dow = day_of_week(dt)
+        dow = date_to_day_of_week_int(dt)
         # 5 == saturday, 6 == sunday
         if dow == 5 or dow == 6:
             result = False
