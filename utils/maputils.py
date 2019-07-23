@@ -1,9 +1,10 @@
-from matplotlib.colors import LinearSegmentedColormap
 import matplotlib
 import matplotlib.pyplot as plt
 import colorsys
 import numpy as np
 import folium
+from matplotlib.colors import LinearSegmentedColormap
+
 from utils import trajutils
 
 # http://www.color-hex.com/color/
@@ -101,7 +102,7 @@ def show_grid_polygons(df_, id_, label_id = trajutils.dic_labels['id'], label_po
     df_ = df_[ df_[label_id] == id_]
     
     xs_start, ys_start = df_.iloc[0][label_polygon].exterior.xy
-    xs_end, ys_end = df_.iloc[1][label_polygon].exterior.xy
+    #xs_end, ys_end = df_.iloc[1][label_polygon].exterior.xy
     
     plt.plot(ys_start,xs_start, 'bo', markersize=20)             # start point
     #plt.plot(ys_end, xs_end, 'rX', markersize=20)           # end point

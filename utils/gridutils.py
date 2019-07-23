@@ -1,14 +1,15 @@
 import math
-from tqdm import tqdm_notebook as tqdm
 import numpy as np
-from geojson import Polygon as jsonPolygon
 import matplotlib as plt
+import matplotlib.pyplot as plt
+
+from tqdm import tqdm_notebook as tqdm
 from geojson import Feature, FeatureCollection
 from shapely.geometry import Polygon
+from geojson import Polygon as jsonPolygon
 import pickle
-import matplotlib.pyplot as plt
-from utils import trajutils
 
+from utils import trajutils
 
 def lat_meters(Lat):
     """
