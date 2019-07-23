@@ -2,7 +2,7 @@ from xml.etree import ElementTree as ET
 import pandas as pd
 import numpy as np
 from time import time
-from utils import progressutils as pu
+from utils import utils as ut
 
 try:
     import overpy as ovp
@@ -93,7 +93,7 @@ def add_features_from_osm(df, osm_id_label, osm_xml_file, tag_labels, default_va
                         df_new.at[way_id, key] = ctag.get('v')
 
         size_processed += 1
-        curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=20)
+        curr_perc_int, _ = ut.progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=20)
     
     df_new.reset_index(inplace=True)
     return df_new

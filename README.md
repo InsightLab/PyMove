@@ -1,5 +1,5 @@
-# Use PyMove and go much further...
-PyMove is a Python library to simplify queries and visualization of trajectories and other spatial-temporal data.
+# Use PyRoad and go much further...
+PyRoad is a Python library to simplify queries and visualization of trajectories and other spatial-temporal data.
 
 We will also release wrappers to some useful Java libraries frequently used in the mobility domain.
 
