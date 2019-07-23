@@ -1,5 +1,5 @@
 # Use PyMove and go much further...
-Pymove is a Python library to processing and visualization of trajectories and other spatial-temporal data.
+PyMove is a Python library to processing and visualization of trajectories and other spatial-temporal data.
 
 We will also release wrappers to some useful Java libraries frequently used in the mobility domain.
 
