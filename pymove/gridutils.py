@@ -9,7 +9,7 @@ from shapely.geometry import Polygon
 from geojson import Polygon as jsonPolygon
 import pickle
 
-from utils import trajutils
+from pymove import trajutils
 
 def lat_meters(Lat):
     """

@@ -3,9 +3,7 @@ import pandas as pd
 import time
 from scipy.interpolate import interp1d
 
-
-from utils import utils as ut
-from utils import gridutils
+from pymove import utils as ut
 
 
 """main labels """
@@ -26,16 +24,22 @@ def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     dic_labels['lat'] = current_lat
     dic_labels['datetime'] = current_datetime
     return dic_labels
-      
+    
 def show_trajectories_info(df_, dic_labels=dic_labels):
     """
         show dataset information from dataframe, this is number of rows, datetime interval, and bounding box 
     """
     try:
         print('\n======================= INFORMATION ABOUT DATASET =======================\n')
-        print('Number of Rows: {}\nNumber of Ids: {} '.format(df_.shape[0], df_[dic_labels['id']].nunique()))
-        print('Trajectories between {} and {}'.format(df_[dic_labels['datetime']].min(), df_[dic_labels['datetime']].max()))
-        print('Bounding Box:', get_bbox(df_, dic_labels)) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
+        print('Number of Points: {}\n'.format(df_.shape[0]))
+        if dic_labels['id'] in df_:
+            print('Number of IDs objects: {}\n'.format(df_[dic_labels['id']].nunique()))
+        if dic_features_label['tid'] in df_:
+            print('Number of IDs trajectory: {}\n'.format(df_[dic_features_label['tid']].nunique()))
+        if dic_labels['datetime'] in df_:
+            print('Start Date:{}     End Date:{}\n'.format(df_[dic_labels['datetime']].min(), df_[dic_labels['datetime']].max()))
+        if dic_labels['lat'] and dic_labels['lon'] in df_:
+            print('Bounding Box:', get_bbox(df_, dic_labels)) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
         print('\n=========================================================================\n')
     except Exception as e:
         raise e    
@@ -127,6 +131,28 @@ def filter_by_id(df_, id_=None, label_id=dic_labels['id'], filter_out=False):
     """
     return filter_by_label(df_, id_, label_id, filter_out)
 
+def filter_jumps(df_, jump_coefficient=3.0, threshold = 1, filter_out=False):
+    
+    if df_.index.name is not None:
+        print('...Reset index for filtering\n')
+        df_.reset_index(inplace=True)
+    
+    if dic_features_label['dist_to_prev'] in df_ and dic_features_label['dist_to_next'] and dic_features_label['dist_prev_to_next'] in df_:
+        filter_ = (df_[dic_features_label['dist_to_next']] > threshold) & (df_[dic_features_label['dist_to_prev']] > threshold) & (df_[dic_features_label['dist_prev_to_next']] > threshold) & \
+        (jump_coefficient * df_[dic_features_label['dist_prev_to_next']] < df_[dic_features_label['dist_to_next']]) & \
+        (jump_coefficient * df_[dic_features_label['dist_prev_to_next']] < df_[dic_features_label['dist_to_prev']])  
+
+        if filter_out:
+            filter_ = ~filter_
+
+        print('...Filtring jumps \n')
+        return df_[filter_]
+    
+    else:
+        print('...Distances features were not created')
+        return df_
+
+
 """ ----------------------  FUCTIONS TO LAT AND LONG COORDINATES --------------------------- """ 
 
 def lon2XSpherical(lon):
@@ -186,13 +212,18 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 
 """ ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON DATATIME  ----------------------------- """
 
-def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels):
+def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels, sort=True):
     """
         Create or update trajectory id  
             Exampĺe: ID = M00001 and datetime = 2019-04-28 00:00:56  -> tid = M0000120190428
     """
     try:
         print('\nCreating or updating tid feature...\n')
+        if sort is True:
+            print('...Sorting by {} and {} to increase performance\n'.format(dic_labels['id'], dic_labels['datetime']))
+            df_.sort_values([dic_labels['id'], dic_labels['datetime']], inplace=True)
+
+
         df_[dic_features_label['tid']] = df_[dic_labels['id']].astype(str) + df_[dic_labels['datetime']].dt.date.astype(str)
         #strftime("%Y%m%d")  
         print('\n...tid feature was created...\n')      
@@ -243,15 +274,16 @@ def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_l
     """
     try:
         print('\nCreating or updating distance features in meters...\n')
+        start_time = time.time()
+
+        if sort is True:
+            print('...Sorting by {} and {} to increase performance\n'.format(label_id, dic_labels['datetime']))
+            df_.sort_values([label_id, dic_labels['datetime']], inplace=True)
 
         if df_.index.name is None:
             print('...Set {} as index to increase attribution performance\n'.format(label_id))
             df_.set_index(label_id, inplace=True)
         
-        if sort is True:
-            print('...Sorting by {} and {} to increase performance\n'.format(label_id, dic_labels['datetime']))
-            df_.sort_values([label_id, dic_labels['datetime']], inplace=True)
-
         """ create ou update columns"""
         df_[dic_features_label['dist_to_prev']] = label_dtype(-1.0)
         df_[dic_features_label['dist_to_next']] = label_dtype(-1.0)
@@ -272,25 +304,23 @@ def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_l
             
             if size_id <= 1:
                 print('...id:{}, must have at least 2 GPS points\n'.format(idx))
-                df_.at[idx, dic_features_label['dist_to_next']] = np.nan
+                #df_.at[idx, dic_features_label['dist_to_next']] = np.nan
                 df_.at[idx, dic_features_label['dist_to_prev']] = np.nan
-                df_.at[idx, dic_features_label['dist_prev_to_next']] = np.nan    
+                #df_.at[idx, dic_features_label['dist_prev_to_next']] = np.nan    
                 
             else:
                 prev_lat = ut.shift(curr_lat, 1)
                 prev_lon = ut.shift(curr_lon, 1)
+                # compute distance from previous to current point
+                df_.at[idx, dic_features_label['dist_to_prev']] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
                 
                 next_lat = ut.shift(curr_lat, -1)
                 next_lon = ut.shift(curr_lon, -1)
-                # using pandas shift in a large dataset: 7min 21s
-                # using numpy shift above: 33.6 s
-                
                 # compute distance to next point
                 df_.at[idx, dic_features_label['dist_to_next']] = haversine(curr_lat, curr_lon, next_lat, next_lon)
-
-                # compute distance from previous to current point
-                df_.at[idx, dic_features_label['dist_to_prev']] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
-                #ut.shift(df_.at[id_, gl_label_dist_to_next], 1)
+                
+                # using pandas shift in a large dataset: 7min 21s
+                # using numpy shift above: 33.6 s
 
                 # use distance from previous to next
                 df_.at[idx, dic_features_label['dist_prev_to_next']] = haversine(prev_lat, prev_lon, next_lat, next_lon)
@@ -299,6 +329,7 @@ def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_l
                 curr_perc_int, est_time_str = ut.progress_update(sum_size_id, df_size, start_time, curr_perc_int, step_perc=20)
         df_.reset_index(inplace=True)
         print('...Reset index\n')
+        print('..Total Time: {}'.format((time.time() - start_time)))
     except Exception as e:
         print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
         raise e
@@ -314,54 +345,77 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
         speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
     """
     try:
-        create_update_dist_features(df_, label_id=label_id, dic_labels=dic_labels, label_dtype = np.float64, sort=sort)
 
-        print('\nCreating or updating time and speed features in meters by seconds\n')  
+        print('\nCreating or updating distance, time and speed features in meters by seconds\n') 
+        start_time = time.time()
+
+        if sort is True:
+            print('...Sorting by {} and {} to increase performance\n'.format(label_id, dic_labels['datetime']))
+            df_.sort_values([label_id, dic_labels['datetime']], inplace=True)
+            #time_sort = time.time()
+ 
         if df_.index.name is None:
             print('...Set {} as index to a higher peformance\n'.format(label_id))
             df_.set_index(label_id, inplace=True)
+           # time_index = time.time()
 
         """create new feature to time"""
-        df_[dic_features_label['time_to_next']] = label_dtype(-1.0)
+        df_[dic_features_label['dist_to_prev']] = label_dtype(-1.0)
+
+        """create new feature to time"""
+        #df_[dic_features_label['time_to_next']] = label_dtype(-1.0)
         df_[dic_features_label['time_to_prev']] = label_dtype(-1.0)
 
         """create new feature to speed"""
-        df_[dic_features_label['speed_to_next']] = label_dtype(-1.0)
+        #df_[dic_features_label['speed_to_next']] = label_dtype(-1.0)
         df_[dic_features_label['speed_to_prev']] = label_dtype(-1.0)
-
 
         ids = df_.index.unique()
         df_size = df_.shape[0]
         curr_perc_int = -1
-        start_time = time.time()
         sum_size_id = 0
         size_id = 0
 
         for idx in ids:
-            """ if data is numpy array, then it is a datetime object with size <= 1"""
-            if type(df_.at[idx, dic_labels['datetime']]) is not np.ndarray:
-                size_id = 1
+            curr_lat = df_.at[idx, dic_labels['lat']]
+            curr_lon = df_.at[idx, dic_labels['lon']]
+
+            size_id = curr_lat.size
+            
+            if size_id <= 1:
                 print('...id:{}, must have at least 2 GPS points\n'.format(idx))
+                df_.at[idx, dic_features_label['dist_to_prev']] = np.nan 
                 df_.at[idx, dic_features_label['time_to_prev']] = np.nan
-                df_.at[idx, dic_features_label['time_to_next']] = np.nan
-                df_.at[idx, dic_features_label['speed_to_prev']] = np.nan  
-                df_.at[idx, dic_features_label['speed_to_next']] = np.nan      
+                df_.at[idx, dic_features_label['speed_to_prev']] = np.nan   
             else:
-                """time_to_prev = current_datetime - prev_datetime 
-                the time_delta must be in nanosecond, then we multiplie by 10-⁹ to tranform in seconds """
-                size_id = df_.at[idx, dic_labels['datetime']].size
+                prev_lat = ut.shift(curr_lat, 1)
+                prev_lon = ut.shift(curr_lon, 1)
+                # compute distance from previous to current point
+                df_.at[idx, dic_features_label['dist_to_prev']] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
+                
+                
+            #""" if data is numpy array, then it is a datetime object with size <= 1"""
+            #if type(df_.at[idx, dic_labels['datetime']]) is not np.ndarray:
+                #size_id = 1
+                #print('...id:{}, must have at least 2 GPS points\n'.format(idx))
+                #df_.at[idx, dic_features_label['time_to_prev']] = np.nan
+                #df_.at[idx, dic_features_label['speed_to_prev']] = np.nan   
+            #else:
+                #"""time_to_prev = current_datetime - prev_datetime 
+                #the time_delta must be in nanosecond, then we multiplie by 10-⁹ to tranform in seconds """
+                #size_id = df_.at[idx, dic_labels['datetime']].size
 
                 time_ = df_.at[idx, dic_labels['datetime']].astype(label_dtype)
                 time_prev = (time_ - ut.shift(time_, 1))*(10**-9)
                 df_.at[idx, dic_features_label['time_to_prev']] = time_prev
 
                 """ set time_to_next"""
-                time_next = (ut.shift(time_, -1) - time_)*(10**-9)
-                df_.at[idx, dic_features_label['time_to_next']] = time_next
+                #time_next = (ut.shift(time_, -1) - time_)*(10**-9)
+                #df_.at[idx, dic_features_label['time_to_next']] = time_next
                 
                 "set Speed features"
                 df_.at[idx, dic_features_label['speed_to_prev']] = df_.at[idx, dic_features_label['dist_to_prev']] / (time_prev)  # unit: m/s
-                df_.at[idx, dic_features_label['speed_to_next']] = df_.at[idx, dic_features_label['dist_to_next']] / (time_next)  # unit: m/s
+                #df_.at[idx, dic_features_label['speed_to_next']] = df_.at[idx, dic_features_label['dist_to_next']] / (time_next)  # unit: m/s
 
 
                 #ut.change_df_feature_values_using_filter(df_, id_, 'delta_time', filter_points, delta_times)
@@ -372,6 +426,7 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
                 curr_perc_int, est_time_str = ut.progress_update(sum_size_id , df_size, start_time, curr_perc_int, step_perc=20)
         print('...Reset index...\n')
         df_.reset_index(inplace=True)
+        print('..Total Time: {:.3f}'.format((time.time() - start_time)))
     except Exception as e:
         print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id ))
         raise e
@@ -407,17 +462,26 @@ def create_update_index_grid_feature(df_, dic_grid=None, dic_labels=dic_labels, 
 """----------------------  FUCTIONS TO DATA CLEANING   ----------------------------------- """ 
 
 
-def clean_duplicates(df_, subset=None, keep='first', inplace=False):
+def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, return_idx=True):
     """
     Return DataFrame with duplicate rows removed, optionally only considering certain columns.
     """
     print('\nRemove rows duplicates by subset')
-    tam_drop = df_[df_.duplicated(subset=subset )].shape[0] 
+    if sort is True:
+        print('...Sorting by {} and {} to increase performance\n'.format(dic_labels['id'], dic_labels['datetime']))
+        df_.sort_values([dic_labels['id'], dic_labels['datetime']], inplace=True)
+    
+    idx = df_.duplicated(subset=subset )
+    tam_drop = df_[idx].shape[0] 
+
     if tam_drop > 0:
         df_.drop_duplicates(subset, keep, inplace)
         print('...There are {} GPS points duplicated'.format(tam_drop))
     else:
         print('...There are no GPS points duplicated')
+
+    if return_idx:
+        return return_idx
 
 def clean_consecutive_duplicates(df, subset=None, keep='first', inplace=False):
     if keep == 'first':
@@ -440,7 +504,30 @@ def clean_NaN_values(df_, axis=0, how='any', thresh=None, subset=None, inplace=T
     #df.isna().sum()
     df_.dropna(axis=axis, how=how, thresh=thresh, subset=None, inplace=inplace)
     
-def clean_gps_nearby_points(df_, label_id=dic_labels['id'], dic_labels=dic_labels, radius_area=10.0, label_dtype=np.float64):
+        
+def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient=3.0, threshold = 1, dic_labels=dic_labels, label_dtype=np.float64, sum_drop=0):
+
+    create_update_dist_features(df_, label_id, dic_labels, label_dtype=label_dtype)
+
+    try:
+        print('\nCleaning gps jumps by distance to jump_coefficient {}...\n'.format(jump_coefficient))
+        df_jumps = filter_jumpy
+        rows_to_drop = idx.size
+
+        if rows_to_drop > 0:
+            print('...Dropping {} rows of gps points\n'.format(rows_to_drop))
+            shape_before = df_.shape[0]
+            df_.drop(index=df_jumps.index, inplace=True)
+            sum_drop = sum_drop + rows_to_drop
+            print('...Rows before: {}, Rows after:{}, Sum drop:{}\n'.format(shape_before, df_.shape[0], sum_drop))
+            clean_gps_jumps_by_distance(df_, label_id, jump_coefficient, threshold, dic_labels, label_dtype, sum_drop)  
+        else:
+            print('{} GPS points were dropped'.format(sum_drop))    
+
+    except Exception as e:
+       raise e
+
+def clean_gps_nearby_points_by_distances(df_, label_id=dic_labels['id'], dic_labels=dic_labels, radius_area=10.0, label_dtype=np.float64):
 
     create_update_dist_features(df_, label_id, dic_labels, label_dtype)
     try:
@@ -464,32 +551,29 @@ def clean_gps_nearby_points(df_, label_id=dic_labels['id'], dic_labels=dic_label
             print('...{} is not in the dataframe'.format(dic_features_label['dist_to_prev']))
     except Exception as e:
        raise e
-    
-def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient=3.0, threshold = 1, dic_labels=dic_labels, label_dtype=np.float64):
 
-    create_update_dist_features(df_, label_id, dic_labels, label_dtype=label_dtype)
+def clean_gps_nearby_points_by_speed(df_, label_id=dic_labels['id'], dic_labels=dic_labels, speed_radius=0.0, label_dtype=np.float64):
 
+    create_update_dist_time_speed_features(df_, label_id, dic_labels, label_dtype)
     try:
-        print('\nCleaning gps jumps by distance to jump_coefficient {}...\n'.format(jump_coefficient))
+        print('\nCleaning gps points using {} speed radius\n'.format(speed_radius))
         if df_.index.name is not None:
             print('...Reset index for filtering\n')
             df_.reset_index(inplace=True)
-        
-        if dic_features_label['dist_to_prev'] in df_ and dic_features_label['dist_to_next'] and dic_features_label['dist_prev_to_next'] in df_:
-            filter_jumpy = (df_[dic_features_label['dist_to_next']] > threshold) & (df_[dic_features_label['dist_to_prev']] > threshold) & \
-            (jump_coefficient * df_[dic_features_label['dist_prev_to_next']] < df_[dic_features_label['dist_to_next']]) & \
-            (jump_coefficient * df_[dic_features_label['dist_prev_to_next']] < df_[dic_features_label['dist_to_prev']])  
+    
+        if dic_features_label['speed_to_prev'] in df_:
+            filter_nearby_points = (df_[dic_features_label['speed_to_prev']] <= speed_radius)
 
-            idx = df_[filter_jumpy].index
-            
-            print('...There are {} gps points to drop \n'.format(idx.shape[0]))
-            if  idx.shape[0] > 0:
-                print('...Dropping {} rows of gps points\n'.format(idx.shape[0]))
+            idx = df_[filter_nearby_points].index
+            print('...There are {} gps points to drop\n'.format(idx.shape[0]))
+            if idx.shape[0] > 0:
+                print('...Dropping {} gps points\n'.format(idx.shape[0]))
                 shape_before = df_.shape[0]
                 df_.drop(index=idx, inplace=True)
                 print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
-                clean_gps_jumps_by_distance(df_, label_id, jump_coefficient, threshold, dic_labels, label_dtype)      
-
+                clean_gps_nearby_points_by_speed(df_, label_id, dic_labels, speed_radius, label_dtype)
+        else:
+            print('...{} is not in the dataframe'.format(dic_features_label['dist_to_prev']))
     except Exception as e:
        raise e
 

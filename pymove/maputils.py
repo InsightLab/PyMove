@@ -5,7 +5,7 @@ import numpy as np
 import folium
 from matplotlib.colors import LinearSegmentedColormap
 
-from utils import trajutils
+from pymove import trajutils
 
 # http://www.color-hex.com/color/
 
@@ -67,14 +67,20 @@ def invert_map(map_):
         inv_map[v].append(k)
     return inv_map
     
-def show_traj(df, label_tid=trajutils.dic_features_label['tid'], dic_labels=trajutils.dic_labels, figsize=(10,10), return_fig=False):
+"""
+https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
+"""
+
+def show_traj(df, label_tid=trajutils.dic_labels['id'], dic_labels=trajutils.dic_labels, figsize=(10,10), return_fig=True, markers= 'o',markersize=20):
     fig = plt.figure(figsize=figsize)
     ids = df[label_tid].unique()
+    
     for id_ in ids:
         df_id = df[ df[label_tid] == id_ ]
-        plt.plot(df_id[dic_labels['lon']], df_id[dic_labels['lat']], 'rX',markersize=20)
+        plt.plot(df_id[dic_labels['lon']], df_id[dic_labels['lat']], markers, markersize=markersize)
     if return_fig:
         return fig
+
 
 def show_traj_id(df, tid, label_tid=trajutils.dic_features_label['tid'], dic_labels=trajutils.dic_labels, figsize=(10,10)):
     fig = plt.figure(figsize=figsize)
