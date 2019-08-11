@@ -4,7 +4,7 @@ import time
 from scipy.interpolate import interp1d
 
 from pymove import utils as ut
-
+from pymove import gridutils
 
 """main labels """
 dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
@@ -39,7 +39,14 @@ def show_trajectories_info(df_, dic_labels=dic_labels):
         if dic_labels['datetime'] in df_:
             print('Start Date:{}     End Date:{}\n'.format(df_[dic_labels['datetime']].min(), df_[dic_labels['datetime']].max()))
         if dic_labels['lat'] and dic_labels['lon'] in df_:
-            print('Bounding Box:', get_bbox(df_, dic_labels)) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
+            print('Bounding Box:{}\n'.format(get_bbox(df_, dic_labels))) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
+        if dic_features_label['time_to_prev'] in df_:            
+            print('Gap time MAX:{}     Gap time MIN:{}\n'.format(round(df_[dic_features_label['time_to_prev']].max(),3), round(df_[dic_features_label['time_to_prev']].min(), 3)))
+        if dic_features_label['speed_to_prev'] in df_:            
+            print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[dic_features_label['speed_to_prev']].max(), 3), round(df_[dic_features_label['speed_to_prev']].min(), 3))) 
+        if dic_features_label['dist_to_prev'] in df_:            
+            print('Distance MAX:{}    Distance MIN:{}\n'.format(round(df_[dic_features_label['dist_to_prev']].max(),3), round(df_[dic_features_label['dist_to_prev']].min(), 3))) 
+            
         print('\n=========================================================================\n')
     except Exception as e:
         raise e    
@@ -212,10 +219,10 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 
 """ ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON DATATIME  ----------------------------- """
 
-def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels, sort=True):
+def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels, str_format="%Y%m%d%H", sort=True):
     """
         Create or update trajectory id  
-            Exampĺe: ID = M00001 and datetime = 2019-04-28 00:00:56  -> tid = M0000120190428
+            Exampĺe: ID = M00001 and datetime = 2019-04-28 00:00:56  -> tid = M000012019042800
     """
     try:
         print('\nCreating or updating tid feature...\n')
@@ -224,9 +231,24 @@ def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels, sort=True
             df_.sort_values([dic_labels['id'], dic_labels['datetime']], inplace=True)
 
 
-        df_[dic_features_label['tid']] = df_[dic_labels['id']].astype(str) + df_[dic_labels['datetime']].dt.date.astype(str)
-        #strftime("%Y%m%d")  
+        df_[dic_features_label['tid']] = df_[dic_labels['id']].astype(str) + df_[dic_labels['datetime']].strftime(str_format)  
+        #%.dt.date.astype(str)
+        
         print('\n...tid feature was created...\n')      
+    except Exception as e:
+        raise e
+
+def create_update_date_features(df_, dic_labels=dic_labels):
+    try:
+        if dic_labels['datetime'] in df_:
+            df_['date'] = df_[dic_labels['datetime']].dt.date
+    except Exception as e:
+        raise e
+    
+def create_update_hour_features(df_, dic_labels=dic_labels):    
+    try:
+        if dic_labels['datetime'] in df_:
+            df_['hour'] = df_[dic_labels['datetime']].dt.hour
     except Exception as e:
         raise e
 
@@ -459,8 +481,7 @@ def create_update_index_grid_feature(df_, dic_grid=None, dic_labels=dic_labels, 
         raise e
 
 
-"""----------------------  FUCTIONS TO DATA CLEANING   ----------------------------------- """ 
-
+    """----------------------  FUCTIONS TO DATA CLEANING   ----------------------------------- """ 
 
 def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, return_idx=True):
     """
@@ -503,16 +524,15 @@ def clean_consecutive_duplicates(df, subset=None, keep='first', inplace=False):
 def clean_NaN_values(df_, axis=0, how='any', thresh=None, subset=None, inplace=True):
     #df.isna().sum()
     df_.dropna(axis=axis, how=how, thresh=thresh, subset=None, inplace=inplace)
-    
-        
+         
 def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient=3.0, threshold = 1, dic_labels=dic_labels, label_dtype=np.float64, sum_drop=0):
 
     create_update_dist_features(df_, label_id, dic_labels, label_dtype=label_dtype)
 
     try:
         print('\nCleaning gps jumps by distance to jump_coefficient {}...\n'.format(jump_coefficient))
-        df_jumps = filter_jumpy
-        rows_to_drop = idx.size
+        df_jumps = filter_jumps(df_, jump_coefficient, threshold)
+        rows_to_drop = df_jumps.shape[0]
 
         if rows_to_drop > 0:
             print('...Dropping {} rows of gps points\n'.format(rows_to_drop))
@@ -546,7 +566,7 @@ def clean_gps_nearby_points_by_distances(df_, label_id=dic_labels['id'], dic_lab
                 shape_before = df_.shape[0]
                 df_.drop(index=idx, inplace=True)
                 print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
-                clean_gps_nearby_points(df_, label_id, dic_labels, radius_area, label_dtype)
+                clean_gps_nearby_points_by_distances(df_, label_id, dic_labels, radius_area, label_dtype)
         else:
             print('...{} is not in the dataframe'.format(dic_features_label['dist_to_prev']))
     except Exception as e:
