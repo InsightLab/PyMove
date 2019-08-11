@@ -71,6 +71,18 @@ def invert_map(map_):
 https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
 """
 
+def show_points_GPS(df_, dic_labels=trajutils.dic_labels, kind='scatter', figsize=(21,9), save_fig=False, name='show_gps_points.png'):
+    try:
+        if dic_labels['lat'] in df_ and dic_labels['lon'] in df_:
+            df_.drop_duplicates([dic_labels['lat'], dic_labels['lon']]).plot(kind=kind, x=dic_labels['lon'], y=dic_labels['lat'], figsize=figsize)
+            plt.plot(df_.iloc[0][dic_labels['lon']], df_.iloc[0][dic_labels['lat']], 'yo', markersize=10)             # start point
+            plt.plot(df_.iloc[-1][dic_labels['lon']], df_.iloc[-1][dic_labels['lat']], 'yX', markersize=10)           # end point
+            
+            if save_fig == True:
+                plt.savefig(name)   
+    except Exception as e:
+        raise e
+
 def show_traj(df, label_tid=trajutils.dic_labels['id'], dic_labels=trajutils.dic_labels, figsize=(10,10), return_fig=True, markers= 'o',markersize=20):
     fig = plt.figure(figsize=figsize)
     ids = df[label_tid].unique()
@@ -80,7 +92,6 @@ def show_traj(df, label_tid=trajutils.dic_labels['id'], dic_labels=trajutils.dic
         plt.plot(df_id[dic_labels['lon']], df_id[dic_labels['lat']], markers, markersize=markersize)
     if return_fig:
         return fig
-
 
 def show_traj_id(df, tid, label_tid=trajutils.dic_features_label['tid'], dic_labels=trajutils.dic_labels, figsize=(10,10)):
     fig = plt.figure(figsize=figsize)
