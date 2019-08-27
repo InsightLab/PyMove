@@ -1,17 +1,11 @@
 # TODO: Modelar como classe
 # TODO: Andreza
 import math
+import pandas as pd
 import numpy as np
-import matplotlib as plt
-import matplotlib.pyplot as plt
-
 from tqdm import tqdm_notebook as tqdm
-from geojson import Feature, FeatureCollection
 from shapely.geometry import Polygon
-from geojson import Polygon as jsonPolygon
 import pickle
-
-from pymove import trajutils
 
 def lat_meters(Lat):
     """
@@ -28,6 +22,44 @@ def lat_meters(Lat):
     return meters
 
 def create_virtual_grid(cell_size, bbox, meters_by_degree = lat_meters(-3.8162973555)):
+    """
+    Create a virtual grid based in dataset's bound box.
+
+    Parameters
+    ----------
+    cell_size : float
+            Size of grid's cell.
+
+    bbox : tuple
+            Representa uma bound box, uma tupla de 4 valores com os limites minímo e máximo da latitude e longitude.
+
+    meters_by_degree : float
+            Representa a metragem da latitude escolhida. por default a latitude setada é a de Fortaleza.
+
+    Returns
+    -------
+    virtual_grid : dict
+            Contains informations about virtual grid, how
+            - lon_min_x: longitude mínima.
+            - lat_min_y: latitude miníma. 
+            - grid_size_lat_y: tamanho da grid latitude. 
+            - grid_size_lon_x: tamanho da longitude da grid.
+            - cell_size_by_degree: tamanho da célula da Grid.
+
+    Examples
+    --------
+    >>> from pymove.transformations import lat_meters
+    >>> ...
+    >>> dic_grid = create_virtual_grid(15, bbox)
+
+
+    Notes
+    -----
+
+    References
+    ----------
+
+    """
     print('\nCreating a virtual grid without polygons')
     
     # Latitude in Fortaleza: -3.8162973555
@@ -54,17 +86,44 @@ def create_virtual_grid(cell_size, bbox, meters_by_degree = lat_meters(-3.816297
     print('...grid_size_lat_y:{}\ngrid_size_lon_x:{}'.format(grid_size_lat_y, grid_size_lon_x))
 
     # Return a dicionary virtual grid 
-    my_dict = dict()
+    virtual_grid = dict()
     
-    my_dict['lon_min_x'] = lon_min_x
-    my_dict['lat_min_y'] = lat_min_y
-    my_dict['grid_size_lat_y'] = grid_size_lat_y
-    my_dict['grid_size_lon_x'] = grid_size_lon_x
-    my_dict['cell_size_by_degree'] = cell_size_by_degree
+    virtual_grid['lon_min_x'] = lon_min_x
+    virtual_grid['lat_min_y'] = lat_min_y
+    virtual_grid['grid_size_lat_y'] = grid_size_lat_y
+    virtual_grid['grid_size_lon_x'] = grid_size_lon_x
+    virtual_grid['cell_size_by_degree'] = cell_size_by_degree
     print('\n..A virtual grid was created')
-    return my_dict
+    return virtual_grid
 
 def create_all_polygons_on_grid(dic_grid):
+    """
+    Create all polygons that are represented in a grid.
+
+    Parameters
+    ----------
+    dic_grid : dict
+              O que representa
+
+    Returns
+    -------
+    my_dict : tipo
+            O que faz
+
+    Examples
+    --------
+    >>> from....
+    >>> ....
+    >>> ....
+
+    Notes
+    -----
+
+    References
+    ----------
+
+    """
+    
     # Cria o vetor vazio de gometrias da grid
     try:
         print('\nCreating all polygons on virtual grid')
