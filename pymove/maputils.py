@@ -67,11 +67,27 @@ def invert_map(map_):
         inv_map[v].append(k)
     return inv_map
     
-"""
-https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
-"""
+""" https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html """
 
-def show_points_GPS(df_, dic_labels=trajutils.dic_labels, kind='scatter', figsize=(21,9), save_fig=False, name='show_gps_points.png'):
+def show_object_id_by_date(df_, create_features=True, figsize=(21,9), save_fig=True, name='shot_points_by_date.png', low_memory=True):
+    fig, ax = plt.subplots(2,2,figsize=figsize)
+    trajutils.create_update_date_features(df_)
+    df_.loc[:,['date', 'id']].groupby(['id', 'date']).count().reset_index().groupby('date').count().plot(subplots=True, kind = 'line', grid=True, ax=ax[1][0], rot=45, fontsize=12)
+    trajutils.create_update_hour_features(df_)
+    df_.loc[:,['hour', 'id']].groupby(['hour', 'id']).count().reset_index().groupby('hour').count().plot(subplots=True, kind = 'line', grid=True, ax=ax[1][1], fontsize=12)
+    del df_['date']    
+    del df_['hour']
+    trajutils.create_update_day_of_the_week_features(df_)
+    df_.loc[:,['period', 'id']].groupby(['period', 'id']).count().reset_index().groupby('period').count().plot(subplots=True, kind = 'bar', rot=0, ax=ax[0][0], fontsize=12)
+    del df_['period']
+    trajutils.create_update_time_of_day_features(df_)  
+    df_.loc[:,['day', 'id']].groupby(['day', 'id']).count().reset_index().groupby('day').count().plot(subplots=True,  kind = 'bar', ax=ax[0][1], rot=0, fontsize=12)
+    del df_['day']
+
+    if save_fig:
+        plt.savefig(fname=name, fig=fig)
+
+def show_lat_lon_GPS(df_, dic_labels=trajutils.dic_labels, kind='scatter', figsize=(21,9), save_fig=False, name='show_gps_points.png'):
     try:
         if dic_labels['lat'] in df_ and dic_labels['lon'] in df_:
             df_.drop_duplicates([dic_labels['lat'], dic_labels['lon']]).plot(kind=kind, x=dic_labels['lon'], y=dic_labels['lat'], figsize=figsize)
@@ -80,6 +96,23 @@ def show_points_GPS(df_, dic_labels=trajutils.dic_labels, kind='scatter', figsiz
             
             if save_fig == True:
                 plt.savefig(name)   
+    except Exception as e:
+        raise e
+
+def show_all_features(df_, figsize=(21,15), dtype=np.float64, save_fig=True, name='features.png'):
+    try:
+        col_float = df_.select_dtypes(include=[dtype]).columns
+        tam = col_float.size
+        if(tam > 0):
+            fig, ax = plt.subplots(tam,1, figsize=figsize)
+            ax_count = 0
+            for col in col_float:
+                ax[ax_count].set_title(col)
+                df_[col].plot(subplots=True, ax=ax[ax_count])
+                ax_count+=1
+            
+            if save_fig:
+                plt.savefig(fname=name, fig=fig)
     except Exception as e:
         raise e
 
