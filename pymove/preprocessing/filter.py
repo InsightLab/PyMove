@@ -24,7 +24,7 @@ def filter_bbox(df_, bbox, filter_out=False, dic_labels=dic_labels, inplace=Fals
        The input trajectory data
        
     bbox : tuple
-        Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude
+        Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude of the bounding box.
         
     filter_out : boolean, optional(false by default)
         If set to false the function will return the trajectories points within the bounding box, and the points outside otherwise
@@ -111,10 +111,10 @@ def filter_by_label(df_, value, label_name, filter_out=False):
         The input trajectory data
         
     value : The type of the feature values to be use to filter the trajectories
-        Specifies the value used to filter the trajectories points
+        Specify the value used to filter the trajectories points
         
     label_name : String
-        Specifies the label of the colum used in the filtering 
+        Specify the label of the colum used in the filtering 
         
     filter_out : boolean, optional(false by default) 
         If set to True, it will return trajectory points with feature value different from the value specified in the parameters
@@ -220,7 +220,7 @@ def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, r
         The input trajectory data
 
     subset : String or Array of Strings, optional(None by default)
-        Especifies Column label or sequence of labels, considered for identifying duplicates. By default all columns are used.
+        Specify  Column label or sequence of labels, considered for identifying duplicates. By default all columns are used.
     
     keep : String if the option are 'first' or 'last and boolean if False. Optional(first by default)
         if keep is set as first, all the duplicates except for the first occurrence will be droped. On the other hand if seted to last, all duplicates except for the last occurrence will be droped. If set to False, all duplicates are droped. 
@@ -265,7 +265,7 @@ def clean_consecutive_duplicates(df, subset=None, keep='first', inplace=False):
         The input trajectory data
 
     subset : Array of Strings, optional(None by default)
-        Especifies Column label or sequence of labels, considered for identifying duplicates. By default all columns are used.
+        Specify  Column label or sequence of labels, considered for identifying duplicates. By default all columns are used.
     
     keep : String. Optional(first by default)
         Determine wich duplicate will be removed.
