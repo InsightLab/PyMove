@@ -211,8 +211,26 @@ def filter_jumps(df_, jump_coefficient=3.0, threshold = 1, filter_out=False):
 """----------------------  FUCTIONS TO DATA CLEANING   ----------------------------------- """ 
 
 def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, return_idx=False):
-    """
-    Return DataFrame with duplicate rows removed, optionally only considering certain columns.
+    """Removes the duplicated rows of the Dataframe, optionally only certaind columns can be consider.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+
+    subset : String or Array of Strings, optional(None by default)
+        Especifies Column label or sequence of labels, considered for identifying duplicates. By default all columns are used.     
+        
+        
+        
+        column label or sequence of labels, optional
+
+    Only consider certain columns for identifying duplicates, by default use all of the columns
+
+        
+    
+    
+    
     """
     print('\nRemove rows duplicates by subset')
     if sort is True:
