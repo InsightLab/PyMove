@@ -8,6 +8,14 @@ from scipy.interpolate import interp1d
 from pymove import utils as ut
 from pymove import gridutils
 
+"""main labels """
+dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
+
+dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next', 
+                    'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
+                    'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
+                    'situation':'situation'}
+
 """ ----------------------  FUCTIONS TO LAT AND LONG COORDINATES --------------------------- """ 
 
 def lon2XSpherical(lon):

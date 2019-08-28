@@ -7,10 +7,41 @@ from scipy.interpolate import interp1d
 from pymove import utils as ut
 from pymove import gridutils
 
+"""main labels """
+dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
+
+dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next', 
+                    'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
+                    'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
+                    'situation':'situation'}
+
 def filter_bbox(df_, bbox, filter_out=False, dic_labels=dic_labels, inplace=False):
-    """
-    Filter bounding box.
-    Example: 
+    """Filters points of the trajectories according to especified bounding box.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+       The input trajectory data
+       
+    bbox : tuple
+        Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude
+        
+    filter_out : boolean, optional(false by default)
+        If set to false the function will return the trajectories points within the bounding box, and the points outside otherwise
+        
+    dic_labels : dict, optional(the classe's dic_labels by default)
+        Dictionary mapping the user's dataframe labels to the pattern of the PyRoad's lib 
+        
+    inplace : boolean, optional(false by default)
+        if set to true the original dataframe will be altered to contain the result of the filtering
+        
+    Returns
+    -------
+    df : dataframe
+        Returns the filtered trajectories points
+        
+    Example
+    -------
         filter_bbox(df_, [-3.90, -38.67, -3.68, -38.38]) -> Fortaleza
             lat_down =  bbox[0], lon_left =  bbox[1], lat_up = bbox[2], lon_right = bbox[3]
     """
@@ -28,6 +59,31 @@ def filter_bbox(df_, bbox, filter_out=False, dic_labels=dic_labels, inplace=Fals
             raise e
 
 def filter_by_datetime(df_, startDatetime=None, endDatetime=None, dic_labels=dic_labels, filter_out=False):
+    """Filters trajectories points according to especified time range
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+        
+    startDatetime : String
+        The start date and time (Datetime format) of the time range used in the filtering
+        
+    endDatetime : String
+        The end date and time (Datetime format) of the time range used in the filtering
+        
+    dic_labels : dict, optional(the classe's dic_labels by default)
+        Dictionary mapping the user dataframe labels to the pattern of the PyRoad's lib 
+        
+    filter_out : boolean, optional(false by default) (CONFIRMAR )
+        If set to true, the function will return the points of the trajectories with timestamp outside the time range. 
+        The points whitin the time range will be return if filter_out is set to false.
+        
+    Returns
+    -------
+    df : dataframe
+        Returns the filtered trajectories points
+    """
     
     try:
         if startDatetime is not None and endDatetime is not None:
@@ -46,6 +102,30 @@ def filter_by_datetime(df_, startDatetime=None, endDatetime=None, dic_labels=dic
         raise e
 
 def filter_by_label(df_, value, label_name, filter_out=False):
+    
+    """Filters trajectories points according to especified value and collum label
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+        
+    value : The type of the feature values to be use to filter the trajectories
+        Specifies the value used to filter the trajectories points
+        
+    label_name : String
+        Specifies the label of the colum used in the filtering 
+        
+    filter_out : boolean, optional(false by default) 
+        If set to True, it will return trajectory points with feature value different from the value specified in the parameters
+        The trajectories points with the same feature value as the one especifed in the parameters.  
+        
+    Returns
+    -------
+    df : dataframe
+        Returns the filtered trajectories points
+    """
+    
     try:
         filter_ = (df_[label_name] == value)
 
@@ -58,14 +138,52 @@ def filter_by_label(df_, value, label_name, filter_out=False):
         raise e
 
 def filter_by_id(df_, id_=None, label_id=dic_labels['id'], filter_out=False):
-    """
-        filter dataset from id
+    """Filters trajectories points according to especified trajectory id
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+        
+    id_ : Integer
+        Specifies the number of the id used to filter the trajectories points
+        
+    label_id : String, optional(dic_labels['id'] by default)
+        The label of the colum which contains the id of the trajectories
+        
+    filter_out : boolean, optional(false by default) 
+        If set to true, the function will return the points of the trajectories with the same id as the one especified by the parameter value. 
+        If set to false it will return the points of the trajectories with a different id from the one especified in the parameters.      
+        
+    Returns
+    -------
+    df : dataframe
+        Returns the filtered trajectories points
     """
     return filter_by_label(df_, id_, label_id, filter_out)
 
 def filter_by_tid(df_, tid_=None, label_tid=dic_features_label['tid'], filter_out=False):
-    """
-        filter dataset from id
+    """Filters trajectories points according to especified trajectory tid
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+        
+    tid_ : String
+        Specifies the number of the tid used to filter the trajectories points
+        
+    label_tid : String, optional(dic_features['tid'] by default)
+        The label of the colum which contains the tid of the trajectories
+        
+    filter_out : boolean, optional(false by default) 
+        If set to true, the function will return the points of the trajectories with the same tid as the one especified by the parameter value. 
+        If set to false it will return the points of the trajectories with a different tid from the one especified in the parameters.      
+        
+    Returns
+    -------
+    df : dataframe
+        Returns the filtered trajectories points
     """
     return filter_by_label(df_, tid_, label_tid, filter_out)
 
