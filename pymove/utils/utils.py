@@ -73,3 +73,4 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
                 (bbox_tuple[0], bbox_tuple[1]) ]
     folium.PolyLine(points_, weight=3, color=color).add_to(m)
     m.save(file) 
+
