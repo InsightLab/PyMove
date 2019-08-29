@@ -7,10 +7,41 @@ from scipy.interpolate import interp1d
 from pymove import utils as ut
 from pymove import gridutils
 
+"""main labels """
+dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
+
+dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next', 
+                    'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
+                    'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
+                    'situation':'situation'}
+
 def filter_bbox(df_, bbox, filter_out=False, dic_labels=dic_labels, inplace=False):
-    """
-    Filter bounding box.
-    Example: 
+    """Filters points of the trajectories according to especified bounding box.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+       The input trajectory data
+       
+    bbox : tuple
+        Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude of the bounding box.
+        
+    filter_out : boolean, optional(false by default)
+        If set to false the function will return the trajectories points within the bounding box, and the points outside otherwise
+        
+    dic_labels : dict, optional(the classe's dic_labels by default)
+        Dictionary mapping the user's dataframe labels to the pattern of the PyRoad's lib 
+        
+    inplace : boolean, optional(false by default)
+        if set to true the original dataframe will be altered to contain the result of the filtering, otherwise a copy will be returned. 
+        
+    Returns
+    -------
+    df : dataframe
+        Returns dataframe with trajectories points filtered by bounding box.
+        
+    Example
+    -------
         filter_bbox(df_, [-3.90, -38.67, -3.68, -38.38]) -> Fortaleza
             lat_down =  bbox[0], lon_left =  bbox[1], lat_up = bbox[2], lon_right = bbox[3]
     """
@@ -28,6 +59,31 @@ def filter_bbox(df_, bbox, filter_out=False, dic_labels=dic_labels, inplace=Fals
             raise e
 
 def filter_by_datetime(df_, startDatetime=None, endDatetime=None, dic_labels=dic_labels, filter_out=False):
+    """Filters trajectories points according to especified time range
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+        
+    startDatetime : String
+        The start date and time (Datetime format) of the time range used in the filtering
+        
+    endDatetime : String
+        The end date and time (Datetime format) of the time range used in the filtering
+        
+    dic_labels : dict, optional(the classe's dic_labels by default)
+        Dictionary mapping the user dataframe labels to the pattern of the PyRoad's lib 
+        
+    filter_out : boolean, optional(false by default) (CONFIRMAR )
+        If set to true, the function will return the points of the trajectories with timestamp outside the time range. 
+        The points whitin the time range will be return if filter_out is set to false.
+        
+    Returns
+    -------
+    df : dataframe
+        Returns dataframe with trajectories points filtered by especified time range.
+    """
     
     try:
         if startDatetime is not None and endDatetime is not None:
@@ -46,6 +102,30 @@ def filter_by_datetime(df_, startDatetime=None, endDatetime=None, dic_labels=dic
         raise e
 
 def filter_by_label(df_, value, label_name, filter_out=False):
+    
+    """Filters trajectories points according to especified value and collum label
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+        
+    value : The type of the feature values to be use to filter the trajectories
+        Specify the value used to filter the trajectories points
+        
+    label_name : String
+        Specify the label of the colum used in the filtering 
+        
+    filter_out : boolean, optional(false by default) 
+        If set to True, it will return trajectory points with feature value different from the value specified in the parameters
+        The trajectories points with the same feature value as the one especifed in the parameters.  
+        
+    Returns
+    -------
+    df : dataframe
+        Returns dataframe with trajectories points filtered by label.
+    """
+    
     try:
         filter_ = (df_[label_name] == value)
 
@@ -58,17 +138,56 @@ def filter_by_label(df_, value, label_name, filter_out=False):
         raise e
 
 def filter_by_id(df_, id_=None, label_id=dic_labels['id'], filter_out=False):
-    """
-        filter dataset from id
+    """Filters trajectories points according to especified trajectory id
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+        
+    id_ : Integer
+        Specifies the number of the id used to filter the trajectories points
+        
+    label_id : String, optional(dic_labels['id'] by default)
+        The label of the colum which contains the id of the trajectories
+        
+    filter_out : boolean, optional(false by default) 
+        If set to true, the function will return the points of the trajectories with the same id as the one especified by the parameter value. 
+        If set to false it will return the points of the trajectories with a different id from the one especified in the parameters.      
+        
+    Returns
+    -------
+    df : dataframe
+        Returns dataframe with trajectories points filtered by id.
     """
     return filter_by_label(df_, id_, label_id, filter_out)
 
 def filter_by_tid(df_, tid_=None, label_tid=dic_features_label['tid'], filter_out=False):
-    """
-        filter dataset from id
+    """Filters trajectories points according to especified trajectory tid
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+        
+    tid_ : String
+        Specifies the number of the tid used to filter the trajectories points
+        
+    label_tid : String, optional(dic_features['tid'] by default)
+        The label of the colum which contains the tid of the trajectories
+        
+    filter_out : boolean, optional(false by default) 
+        If set to true, the function will return the points of the trajectories with the same tid as the one especified by the parameter value. 
+        If set to false it will return the points of the trajectories with a different tid from the one especified in the parameters.      
+        
+    Returns
+    -------
+    df : dataframe
+        Returns dataframe with trajectories points filtered by tid.
     """
     return filter_by_label(df_, tid_, label_tid, filter_out)
 
+#Todo
 def filter_jumps(df_, jump_coefficient=3.0, threshold = 1, filter_out=False):
     
     if df_.index.name is not None:
@@ -91,11 +210,34 @@ def filter_jumps(df_, jump_coefficient=3.0, threshold = 1, filter_out=False):
         return df_
 
 """----------------------  FUCTIONS TO DATA CLEANING   ----------------------------------- """ 
-
+#DUVIDA SOBRE RETORNO
 def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, return_idx=False):
+    """Removes the duplicate rows of the Dataframe, optionally only certaind columns can be consider.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+
+    subset : String or Array of Strings, optional(None by default)
+        Specify  Column label or sequence of labels, considered for identifying duplicates. By default all columns are used.
+    
+    keep : String if the option are 'first' or 'last and boolean if False. Optional(first by default)
+        if keep is set as first, all the duplicates except for the first occurrence will be droped. On the other hand if seted to last, all duplicates except for the last occurrence will be droped. If set to False, all duplicates are droped. 
+    
+    inplace : boolean, optional(False by default)
+        if set to true the original dataframe will be altered, the duplicates will be droped in place, otherwise a copy will be returned. 
+        
+    sort : boolean, optional(True by default)
+        If set to True the data will be sorted by id and datetime, to increase performace. If set to False the data won't be sorted. 
+    
+    return_idx : boolean
+    
+    Returns
+    -------
+    
     """
-    Return DataFrame with duplicate rows removed, optionally only considering certain columns.
-    """
+    
     print('\nRemove rows duplicates by subset')
     if sort is True:
         print('...Sorting by {} and {} to increase performance\n'.format(dic_labels['id'], dic_labels['datetime']))
@@ -114,6 +256,30 @@ def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, r
         return return_idx
 
 def clean_consecutive_duplicates(df, subset=None, keep='first', inplace=False):
+    
+    """Removes consecutives duplicate rows of the Dataframe, optionally only certaind columns can be consider.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+
+    subset : Array of Strings, optional(None by default)
+        Specify  Column label or sequence of labels, considered for identifying duplicates. By default all columns are used.
+    
+    keep : String. Optional(first by default)
+        Determine wich duplicate will be removed.
+        if keep is set as first, all the duplicates except for the first occurrence will be droped. Otherwise, all duplicates except for the last occurrence will be droped. 
+    
+    inplace : boolean, optional(False by default)
+        if set to true the original dataframe will be altered, the duplicates will be droped in place, otherwise a copy will be returned. 
+            
+    Returns
+    -------
+    df : dataframe
+        The filtered trajectories points without duplicates.    
+    """
+
     if keep == 'first':
         n = 1
     else:
@@ -132,8 +298,35 @@ def clean_consecutive_duplicates(df, subset=None, keep='first', inplace=False):
 
 def clean_NaN_values(df_, axis=0, how='any', thresh=None, subset=None, inplace=True):
     #df.isna().sum()
+    """Removes missing values from the dataframe.
+
+    Parameters
+    ----------
+    axis : Integer or String (default 0)
+        Determines if rows or columns that contain missing values are removed. If set to 0 or 'index', the function drops the rows containing the missing value.
+        If set to 1 or 'columns', drops the columns containing the missing value.
+    
+    how : String, optional (default 'any')
+        Especifies if a row or column is droped for having at least one NA value or all value NA.
+        If set to 'any', the rows or columns will be droped, if it has any NA values. 
+        If set to 'all', the rows or columns will be droped, if all of it's values are NA.
+
+    thresh : Integer, optional (None by default)  
+        Minimum non-NA required value to avoid dropping
+
+    subset : array of String
+        Indicates the labels along the other axis to consider. E.g. if you want to drop columns, subset would indicate a list of rows to be included. 
+    
+    inplace : boolean, default(True by default)
+        if set to true the operation is done in place, the original dataframe will be altered and None is returned.
+
+    Returns
+    -------
+        The funciton returns None.       
+    """
     df_.dropna(axis=axis, how=how, thresh=thresh, subset=None, inplace=inplace)
-         
+
+#Todo
 def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient=3.0, threshold = 1, dic_labels=dic_labels, label_dtype=np.float64, sum_drop=0):
 
     create_update_dist_features(df_, label_id, dic_labels, label_dtype=label_dtype)
@@ -155,7 +348,7 @@ def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient
 
     except Exception as e:
        raise e
-
+#Todo
 def clean_gps_nearby_points_by_distances(df_, label_id=dic_labels['id'], dic_labels=dic_labels, radius_area=10.0, label_dtype=np.float64):
 
     create_update_dist_features(df_, label_id, dic_labels, label_dtype)
@@ -180,7 +373,7 @@ def clean_gps_nearby_points_by_distances(df_, label_id=dic_labels['id'], dic_lab
             print('...{} is not in the dataframe'.format(dic_features_label['dist_to_prev']))
     except Exception as e:
        raise e
-
+#Todo
 def clean_gps_nearby_points_by_speed(df_, label_id=dic_labels['id'], dic_labels=dic_labels, speed_radius=0.0, label_dtype=np.float64):
 
     create_update_dist_time_speed_features(df_, label_id, dic_labels, label_dtype)
@@ -205,7 +398,7 @@ def clean_gps_nearby_points_by_speed(df_, label_id=dic_labels['id'], dic_labels=
             print('...{} is not in the dataframe'.format(dic_features_label['dist_to_prev']))
     except Exception as e:
        raise e
-
+#Todo
 def clean_gps_speed_max_radius(df_, label_id=dic_labels['id'], dic_labels=dic_labels, speed_max=50.0, label_dtype=np.float64):
 
     create_update_dist_time_speed_features(df_, label_id, dic_labels=dic_labels, label_dtype=label_dtype)
@@ -224,7 +417,7 @@ def clean_gps_speed_max_radius(df_, label_id=dic_labels['id'], dic_labels=dic_la
             df_.drop(index=idx, inplace=True)
             print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
             clean_gps_speed_max_radius(df_, label_id, dic_labels, speed_max, label_dtype)
-
+#Todo
 def clean_trajectories_with_few_points(df_, label_tid=dic_features_label['tid'], dic_labels=dic_labels, min_points_per_trajectory=2, label_dtype=np.float64):
     if df_.index.name is not None:
         print('\n...Reset index for filtering\n')
@@ -243,7 +436,7 @@ def clean_trajectories_with_few_points(df_, label_tid=dic_features_label['tid'],
         print('\n...Tids after drop: {}'.format(df_[label_tid].unique().shape[0]))
         print('\n...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
         create_update_dist_time_speed_features(df_, label_tid, dic_labels, label_dtype)      
-
+#Todo
 def clean_trajectories_short_and_few_points_(df_,  label_id=dic_features_label['tid'], dic_labels=dic_labels, min_trajectory_distance=100, min_points_per_trajectory=2, label_dtype=np.float64):
     # remove_tids_with_few_points must be performed before updating features, because 
     # those features only can be computed with at least 2 points per trajactories

@@ -6,10 +6,30 @@ import time
 from pymove import utils as ut
 from pymove import gridutils
 
+"""main labels """
+dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
+
+dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next', 
+                    'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
+                    'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
+                    'situation':'situation'}
+                
 
 def bbox_split(bbox, number_grids):
-    """
-        split bound box in N grids of the same size
+    """splits the bounding box in N grids of the same size.
+
+    Parameters
+    ----------
+    bbox: tuple
+        Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude of the bounding box.
+
+    number_grids: Integer
+        Determines the number of grids to split the bounding box.
+        
+    Returns
+    -------
+    df : dataframe 
+        Returns the latittude and longitude coordenates of the grids after the split.
     """
     lat_min = bbox[0]
     lon_min = bbox[1]
