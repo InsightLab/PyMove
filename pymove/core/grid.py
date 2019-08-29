@@ -9,9 +9,32 @@ import pickle
 
 def lat_meters(Lat):
     """
-    Transform latitude degree to meters
-        Example: Latitude in Fortaleza: -3.8162973555
-    
+    Transform latitude degree to meters.
+
+    Parameters
+    ----------
+    lat : float
+            Latitude.
+
+    Returns
+    -------
+    meters : float
+
+
+    Examples
+    --------
+    Example: Latitude in Fortaleza: -3.8162973555
+    >>> from pymove.transformations import lat_meters
+    >>> ...
+    >>> dic_grid = create_virtual_grid(15, bbox)
+
+
+    Notes
+    -----
+
+    References
+    ----------
+
     """
     rlat = float(Lat) * math.pi / 180
     # meter per degree Latitude
