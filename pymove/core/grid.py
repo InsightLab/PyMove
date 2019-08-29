@@ -37,80 +37,73 @@ def lat_meters(lat):
     meters = (meters_lat + meters_lgn) / 2
     return meters
 
-# def create_virtual_grid(cell_size, bbox, meters_by_degree = lat_meters(-3.8162973555)):
-#     """
-#     Create a virtual grid based in dataset's bound box.
+def create_virtual_grid(cell_size, bbox, meters_by_degree = lat_meters(-3.8162973555)):
+    """
+    Create a virtual grid based in dataset's bound box.
 
-#     Parameters
-#     ----------
-#     cell_size : float
-#             Size of grid's cell.
+    Parameters
+    ----------
+    cell_size : float
+            Size of grid's cell.
 
-#     bbox : tuple
-#             Representa uma bound box, uma tupla de 4 valores com os limites minímo e máximo da latitude e longitude.
+    bbox : tuple
+            Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
 
-#     meters_by_degree : float
-#             Representa a metragem da latitude escolhida. por default a latitude setada é a de Fortaleza.
+    meters_by_degree : float
+            Represents the meters's degree of latitude. By default the latitude is set in Fortaleza.
 
-#     Returns
-#     -------
-#     virtual_grid : dict
-#             Contains informations about virtual grid, how
-#             - lon_min_x: longitude mínima.
-#             - lat_min_y: latitude miníma. 
-#             - grid_size_lat_y: tamanho da grid latitude. 
-#             - grid_size_lon_x: tamanho da longitude da grid.
-#             - cell_size_by_degree: tamanho da célula da Grid.
+    Returns
+    -------
+    virtual_grid : dict
+            Contains informations about virtual grid, how
+            - lon_min_x: minimum longitude.
+            - lat_min_y: minimum latitude. 
+            - grid_size_lat_y: size of latitude grid. 
+            - grid_size_lon_x: size of longitude grid.
+            - cell_size_by_degree: grid's cell size.
 
-#     Examples
-#     --------
-#     >>> from pymove.transformations import lat_meters
-#     >>> ...
-#     >>> dic_grid = create_virtual_grid(15, bbox)
+    Examples
+    --------
+    >>> from pymove.transformations import lat_meters
+    >>> ...
+    >>> dic_grid = create_virtual_grid(15, bbox)
 
-
-#     Notes
-#     -----
-
-#     References
-#     ----------
-
-#     """
-#     print('\nCreating a virtual grid without polygons')
+    """
+    print('\nCreating a virtual grid without polygons')
     
-#     # Latitude in Fortaleza: -3.8162973555
-#     cell_size_by_degree = cell_size/meters_by_degree
-#     print('...cell size by degree: {}'.format(cell_size_by_degree))
+    # Latitude in Fortaleza: -3.8162973555
+    cell_size_by_degree = cell_size/meters_by_degree
+    print('...cell size by degree: {}'.format(cell_size_by_degree))
 
-#     lat_min_y = bbox[0]
-#     lon_min_x = bbox[1]
-#     lat_max_y = bbox[2] 
-#     lon_max_x = bbox[3]
+    lat_min_y = bbox[0]
+    lon_min_x = bbox[1]
+    lat_max_y = bbox[2] 
+    lon_max_x = bbox[3]
 
-#     #If cell size does not fit in the grid area, an expansion is made
-#     if math.fmod((lat_max_y - lat_min_y), cell_size_by_degree) != 0:
-#         lat_max_y = lat_min_y + cell_size_by_degree * (math.floor((lat_max_y - lat_min_y) / cell_size_by_degree) + 1)
+    #If cell size does not fit in the grid area, an expansion is made
+    if math.fmod((lat_max_y - lat_min_y), cell_size_by_degree) != 0:
+        lat_max_y = lat_min_y + cell_size_by_degree * (math.floor((lat_max_y - lat_min_y) / cell_size_by_degree) + 1)
 
-#     if math.fmod((lon_max_x - lon_min_x), cell_size_by_degree) != 0:
-#         lon_max_x = lon_min_x + cell_size_by_degree * (math.floor((lon_max_x - lon_min_x) / cell_size_by_degree) + 1)
+    if math.fmod((lon_max_x - lon_min_x), cell_size_by_degree) != 0:
+        lon_max_x = lon_min_x + cell_size_by_degree * (math.floor((lon_max_x - lon_min_x) / cell_size_by_degree) + 1)
 
     
-#     # adjust grid size to lat and lon
-#     grid_size_lat_y = int(round((lat_max_y - lat_min_y) / cell_size_by_degree))
-#     grid_size_lon_x = int(round((lon_max_x - lon_min_x) / cell_size_by_degree))
+    # adjust grid size to lat and lon
+    grid_size_lat_y = int(round((lat_max_y - lat_min_y) / cell_size_by_degree))
+    grid_size_lon_x = int(round((lon_max_x - lon_min_x) / cell_size_by_degree))
     
-#     print('...grid_size_lat_y:{}\ngrid_size_lon_x:{}'.format(grid_size_lat_y, grid_size_lon_x))
+    print('...grid_size_lat_y:{}\ngrid_size_lon_x:{}'.format(grid_size_lat_y, grid_size_lon_x))
 
-#     # Return a dicionary virtual grid 
-#     virtual_grid = dict()
+    # Return a dicionary virtual grid 
+    virtual_grid = dict()
     
-#     virtual_grid['lon_min_x'] = lon_min_x
-#     virtual_grid['lat_min_y'] = lat_min_y
-#     virtual_grid['grid_size_lat_y'] = grid_size_lat_y
-#     virtual_grid['grid_size_lon_x'] = grid_size_lon_x
-#     virtual_grid['cell_size_by_degree'] = cell_size_by_degree
-#     print('\n..A virtual grid was created')
-#     return virtual_grid
+    virtual_grid['lon_min_x'] = lon_min_x
+    virtual_grid['lat_min_y'] = lat_min_y
+    virtual_grid['grid_size_lat_y'] = grid_size_lat_y
+    virtual_grid['grid_size_lon_x'] = grid_size_lon_x
+    virtual_grid['cell_size_by_degree'] = cell_size_by_degree
+    print('\n..A virtual grid was created')
+    return virtual_grid
 
 # def create_all_polygons_on_grid(dic_grid):
 #     """
@@ -119,7 +112,12 @@ def lat_meters(lat):
 #     Parameters
 #     ----------
 #     dic_grid : dict
-#               O que representa
+#               Contains informations about virtual grid, how
+                - lon_min_x: longitude mínima.
+                - lat_min_y: latitude miníma. 
+                - grid_size_lat_y: tamanho da grid latitude. 
+                - grid_size_lon_x: tamanho da longitude da grid.
+                - cell_size_by_degree: tamanho da célula da Grid.
 
 #     Returns
 #     -------
