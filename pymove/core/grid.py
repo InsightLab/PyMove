@@ -4,14 +4,12 @@ import math
 import numpy as np
 import matplotlib as plt
 import matplotlib.pyplot as plt
-
+from pymove.utils import utils
 from tqdm import tqdm_notebook as tqdm
 from geojson import Feature, FeatureCollection
 from shapely.geometry import Polygon
 from geojson import Polygon as jsonPolygon
 import pickle
-
-from pymove import trajutils
 
 def lat_meters(Lat):
     """
@@ -144,8 +142,10 @@ def read_grid_pkl(filename):
             return dic_grid
     except Exception as e:
         raise e
+        
+        
 
-def show_grid_polygons(df_, id_, label_id = trajutils.dic_labels['id'], label_polygon='polygon', figsize=(10,10)):   
+def show_grid_polygons(df_, id_, label_id = utils.dic_labels['id'], label_polygon='polygon', figsize=(10,10)):   
     fig = plt.figure(figsize=figsize)
     
     #filter dataframe by id

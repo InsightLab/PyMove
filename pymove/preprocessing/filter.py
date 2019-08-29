@@ -4,8 +4,8 @@ import pandas as pd
 import time
 from scipy.interpolate import interp1d
 
-from pymove import utils as ut
-from pymove import gridutils
+from pymove.utils import utils as ut
+from pymove.core import grid as gridutils
 
 """main labels """
 dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}

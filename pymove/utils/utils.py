@@ -1,13 +1,13 @@
+from __future__ import division
+
 # TODO: Andreza
 import numpy as np
 import pandas as pd
 import time
 from scipy.interpolate import interp1d
 
-from pymove import utils as ut
-from pymove import gridutils
+from pymove.core import grid
 
-from __future__ import division
 #from scipy.ndimage.interpolation import shift
 import math
 
@@ -36,6 +36,8 @@ def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     dic_labels['lat'] = current_lat
     dic_labels['datetime'] = current_datetime
     return dic_labels
+
+                       
     
 def show_trajectories_info(df_, dic_labels=dic_labels):
     """
