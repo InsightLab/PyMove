@@ -4,7 +4,6 @@ import pandas as pd
 import time
 
 from pymove import utils as ut
-from pymove import gridutils
 
 """main labels """
 dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
