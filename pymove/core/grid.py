@@ -4,7 +4,7 @@ import math
 import numpy as np
 import matplotlib as plt
 import matplotlib.pyplot as plt
-from pymove.utils import utils
+from pymove.utils import copia as utils
 from tqdm import tqdm_notebook as tqdm
 from geojson import Feature, FeatureCollection
 from shapely.geometry import Polygon
