@@ -217,7 +217,7 @@ def filter_jumps(df_, jump_coefficient=3.0, threshold = 1, filter_out=False):
         Returns
         -------
         df : dataframe
-            Returns a dataframe with the trajectories points filtered.
+            Returns a dataframe with the trajectories outiliers.
         """
     
     if df_.index.name is not None:
@@ -372,7 +372,7 @@ def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient
         The input trajectory data
 
     label_id : String, optional(the classe's dic_labels['id'] by default)
-         Indicates the id column in the user's dataframe.
+         Indicates the label of the id column in the user's dataframe.
 
     jump_coefficient : Float, optional(3.0 by default)
         #Nao sei exatamente como explicar
@@ -409,6 +409,8 @@ def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient
 
     except Exception as e:
        raise e
+
+
 #Todo
 def clean_gps_nearby_points_by_distances(df_, label_id=dic_labels['id'], dic_labels=dic_labels, radius_area=10.0, label_dtype=np.float64):
 
@@ -434,6 +436,8 @@ def clean_gps_nearby_points_by_distances(df_, label_id=dic_labels['id'], dic_lab
             print('...{} is not in the dataframe'.format(dic_features_label['dist_to_prev']))
     except Exception as e:
        raise e
+
+
 #Todo
 def clean_gps_nearby_points_by_speed(df_, label_id=dic_labels['id'], dic_labels=dic_labels, speed_radius=0.0, label_dtype=np.float64):
 
@@ -459,8 +463,35 @@ def clean_gps_nearby_points_by_speed(df_, label_id=dic_labels['id'], dic_labels=
             print('...{} is not in the dataframe'.format(dic_features_label['dist_to_prev']))
     except Exception as e:
        raise e
-#Todo
+
+
+#LABEL_DTYPE
 def clean_gps_speed_max_radius(df_, label_id=dic_labels['id'], dic_labels=dic_labels, speed_max=50.0, label_dtype=np.float64):
+    """Recursively removes trajectories points with speed higher than the value especifeid by the user.
+    Given any point p of the trajectory, the point will be removed if one of the following happens:
+    if the travel speed from the point before p to p is greater than the  max value of speed between adjacent
+    points set by the user. Or the travel speed between point p and the next point is greater than the value set by
+    the user. When the clening is done, the function will update the time and distance features in the dataframe and
+    will call itself again.
+    The function will finish processing when it can no longer find points disrespecting the limit of speed.
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+
+    label_id : String, optional(the classe's dic_labels['id'] by default)
+        Indicates the label of the id column in the user's dataframe.
+
+    dic_labels : dict, optional(the classe's dic_labels by default)
+        Dictionary mapping the user's dataframe labels to the pattern of the PyRoad's lib
+
+    speed_max : Float. Optional(50.0 by default)
+        Indicates the maximun value a point's speed_to_prev and speed_to_next should have, in order not to be dropped.
+
+    label_dtype :
+
+    """
 
     transformations.create_update_dist_time_speed_features(df_, label_id, dic_labels=dic_labels, label_dtype=label_dtype)
 
