@@ -6,6 +6,7 @@ import numpy as np
 from tqdm import tqdm_notebook as tqdm
 from shapely.geometry import Polygon
 import pickle
+import matplotlib.pyplot as plt
 
 from pymove.utils.utils import dic_labels, dic_features_label
 
@@ -435,21 +436,55 @@ def read_grid_pkl(filename):
     except Exception as e:
         raise e
 
-# def show_grid_polygons(df_, id_, label_id = trajutils.dic_labels['id'], label_polygon='polygon', figsize=(10,10)):   
-#     fig = plt.figure(figsize=figsize)
+# TODO: ajeitar que tá dando erro + finalizar comentários
+def show_grid_polygons(df_, id_, label_id = dic_labels['id'], label_polygon='polygon', figsize=(10,10)):   
+    """
+    Save a grid with new file .pkl. 
+
+    Parameters
+    ----------
+    df_ : pandas.core.frame.DataFrame
+          Represents the dataset with contains lat, long and datetime.
     
-#     #filter dataframe by id
-#     df_ = df_[ df_[label_id] == id_]
+    id_ : String
+          Represents the id.
     
-#     xs_start, ys_start = df_.iloc[0][label_polygon].exterior.xy
-#     #xs_end, ys_end = df_.iloc[1][label_polygon].exterior.xy
+    label_id : -
+               ----
     
-#     plt.plot(ys_start,xs_start, 'bo', markersize=20)             # start point
-#     #plt.plot(ys_end, xs_end, 'rX', markersize=20)           # end point
+    label_polygon : -
+                    -------
+
+    figsize : tuple
+              Represents the size (float: width, float: height) of a figure.
+
+    Returns
+    -------
+    df_ : pandas.core.frame.DataFrame
+     
+    fig : 
+
+
+    Examples
+    --------
+    >>> from pymove.core.grid import show_grid_polygons
+    >>> show_grid_polygons()
+
+    """
+    fig = plt.figure(figsize=figsize)
+    
+    #filter dataframe by id
+    df_ = df_[ df_[label_id] == id_]
+    
+    xs_start, ys_start = df_.iloc[0][label_polygon].exterior.xy
+    #xs_end, ys_end = df_.iloc[1][label_polygon].exterior.xy
+    
+    plt.plot(ys_start,xs_start, 'bo', markersize=20)             # start point
+    #plt.plot(ys_end, xs_end, 'rX', markersize=20)           # end point
    
 
-#     for idx in range(df_.shape[0]):
-#         xs, ys = df_[label_polygon].iloc[idx].exterior.xy
-#         plt.plot(ys,xs, 'g', linewidth=2, markersize=5) 
+    for idx in range(df_.shape[0]):
+        xs, ys = df_[label_polygon].iloc[idx].exterior.xy
+        plt.plot(ys,xs, 'g', linewidth=2, markersize=5) 
 
-#     return df_, fig
+    return df_, fig
