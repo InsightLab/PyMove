@@ -2,8 +2,9 @@
 import numpy as np
 import pandas as pd
 import time
+import datetime
 from scipy.interpolate import interp1d
-
+import folium
 # from pymove import utils as ut
 # from pymove import gridutils
 
@@ -12,7 +13,7 @@ from scipy.interpolate import interp1d
 import math
 
 #import timeutils
-import datetime
+
 from pandas._libs.tslibs.timestamps import Timestamp
 from ipywidgets import IntProgress, HTML, VBox
 from IPython.display import display
@@ -26,187 +27,400 @@ dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_n
                     'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
                     'situation':'situation'}
 
-# def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
-#     """ 
-#     Format the labels for the PyRoad lib pattern 
-#         labels output = lat, lon and datatime
-#     """ 
-#     dic_labels['id'] = current_id
-#     dic_labels['lon'] = current_lon
-#     dic_labels['lat'] = current_lat
-#     dic_labels['datetime'] = current_datetime
-#     return dic_labels
+def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
+    """
+    Format the labels for the PyMove lib pattern. 
+
+    Parameters
+    ----------
+    df_ : pandas.core.frame.DataFrame
+          Represents the dataset with contains lat, long and datetime.
     
-# def show_trajectories_info(df_, dic_labels=dic_labels):
-    # """
-    #     show dataset information from dataframe, this is number of rows, datetime interval, and bounding box 
-    # """
-    # try:
-    #     print('\n======================= INFORMATION ABOUT DATASET =======================\n')
-    #     print('Number of Points: {}\n'.format(df_.shape[0]))
-    #     if dic_labels['id'] in df_:
-    #         print('Number of IDs objects: {}\n'.format(df_[dic_labels['id']].nunique()))
-    #     if dic_features_label['tid'] in df_:
-    #         print('Number of TIDs trajectory: {}\n'.format(df_[dic_features_label['tid']].nunique()))
-    #     if dic_labels['datetime'] in df_:
-    #         print('Start Date:{}     End Date:{}\n'.format(df_[dic_labels['datetime']].min(), df_[dic_labels['datetime']].max()))
-    #     if dic_labels['lat'] and dic_labels['lon'] in df_:
-    #         print('Bounding Box:{}\n'.format(get_bbox(df_, dic_labels))) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
-    #     if dic_features_label['time_to_prev'] in df_:            
-    #         print('Gap time MAX:{}     Gap time MIN:{}\n'.format(round(df_[dic_features_label['time_to_prev']].max(),3), round(df_[dic_features_label['time_to_prev']].min(), 3)))
-    #     if dic_features_label['speed_to_prev'] in df_:            
-    #         print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[dic_features_label['speed_to_prev']].max(), 3), round(df_[dic_features_label['speed_to_prev']].min(), 3))) 
-    #     if dic_features_label['dist_to_prev'] in df_:            
-    #         print('Distance MAX:{}    Distance MIN:{}\n'.format(round(df_[dic_features_label['dist_to_prev']].max(),3), round(df_[dic_features_label['dist_to_prev']].min(), 3))) 
-            
-    #     print('\n=========================================================================\n')
-    # except Exception as e:
-    #     raise e    
+    current_id : String
+                 Represents the id in df_.
+    
+    current_lat : String
+                  Represents the latitude in df_.
+    
+    current_lon : String
+                  Represents the longitude in df_.
+
+    current_datetime : String
+                       Represents the datetime in df_.
+
+    Returns
+    -------
+    dic_labels : dict
+                 Represents mapping of column's header between values passed on params.
+     
+    Examples
+    --------
+    >>> from pymove.utils.utils import format_labels
+    >>> format_labels(df, 'a', 'lati', 'lng', 'time')
+    {'id': 'a', 'lat': 'lati', 'lon': 'lng', 'datetime': 'time'}
+
+    """
+    dic_labels['id'] = current_id
+    dic_labels['lon'] = current_lon
+    dic_labels['lat'] = current_lat
+    dic_labels['datetime'] = current_datetime
+    return dic_labels
 
 def get_bbox(df_, dic_labels=dic_labels):
     """
     A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
-    Latitude is a decimal number between -90.0 and 90.0. Longitude is a decimal number between -180.0 and 180.0.
+        - Latitude is a decimal number between -90.0 and 90.0. 
+        - Longitude is a decimal number between -180.0 and 180.0.
     They usually follow the standard format of: 
-    bbox = left,bottom,right,top 
-    bbox = min Longitude , min Latitude , max Longitude , max Latitude 
+    - bbox = left, bottom, right, top 
+    - bbox = min Longitude , min Latitude , max Longitude , max Latitude 
+
+    Parameters
+    ----------
+    df_ : pandas.core.frame.DataFrame
+          Represents the dataset with contains lat, long and datetime.
+    
+    dic_labels : dict
+                 Represents mapping of column's header between values passed on params.
+
+    Returns
+    -------
+    bbox : tuple
+            Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import get_bbox
+    >>> get_bbox(df, dic_labels)
+    (22.147577, 113.54884299999999, 41.132062, 121.156224)
+
     """
     try:
-        return (df_[dic_labels['lat']].min(), df_[dic_labels['lon']].min(), df_[dic_labels['lat']].max(), df_[dic_labels['lon']].max())
+        bbox = (df_[dic_labels['lat']].min(), df_[dic_labels['lon']].min(), df_[dic_labels['lat']].max(), df_[dic_labels['lon']].max())
+        return bbox
     except Exception as e:
         raise e
 
-# def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
-#     m = folium.Map(tiles=tiles)
-#     m.fit_bounds([ [bbox_tuple[0], bbox_tuple[1]], [bbox_tuple[2], bbox_tuple[3]] ])
-#     points_ = [ (bbox_tuple[0], bbox_tuple[1]), (bbox_tuple[0], bbox_tuple[3]), 
-#                 (bbox_tuple[2], bbox_tuple[3]), (bbox_tuple[2], bbox_tuple[1]),
-#                 (bbox_tuple[0], bbox_tuple[1]) ]
-#     folium.PolyLine(points_, weight=3, color=color).add_to(m)
-#     m.save(file) 
+def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
+    """
+    Save bbox as file .html using Folium.
 
+    Parameters
+    ----------
+    bbox_tuple : tuple
+                 Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
 
-#Funcoes do utils.py antigo
-
-# def log_progress(sequence, every=None, size=None, name='Items'):
-#     is_iterator = False
-#     if size is None:
-#         try:
-#             size = len(sequence)
-#         except TypeError:
-#             is_iterator = True
-#     if size is not None:
-#         if every is None:
-#             if size <= 200:
-#                 every = 1
-#             else:
-#                 every = int(size / 200)     # every 0.5%
-#     else:
-#         assert every is not None, 'sequence is iterator, set every'
-
-#     if is_iterator:
-#         progress = IntProgress(min=0, max=1, value=1)
-#         progress.bar_style = 'info'
-#     else:
-#         progress = IntProgress(min=0, max=size, value=0)
-#     label = HTML()
-#     box = VBox(children=[label, progress])
-#     display(box)
-
-#     index = 0
-#     try:
-#         for index, record in enumerate(sequence, 1):
-#             if index == 1 or index % every == 0:
-#                 if is_iterator:
-#                     label.value = '{name}: {index} / ?'.format(
-#                         name=name,
-#                         index=index
-#                     )
-#                 else:
-#                     progress.value = index
-#                     label.value = u'{name}: {index} / {size}'.format(
-#                         name=name,
-#                         index=index,
-#                         size=size
-#                     )
-#             yield record
-#     except:
-#         progress.bar_style = 'danger'
-#         raise
-#     else:
-#         progress.bar_style = 'success'
-#         progress.value = index
-#         label.value = "{name}: {index}".format(
-#             name=name,
-#             index=str(index or '?')
-#         )
-
-# def deltatime_str(deltatime_seconds):
-#     """
-#     input: time in seconds. e.g. 1082.7180936336517 -> output: '00:16:48.271'
-#     output example if more than 24 hours: 25:33:57.123
-#     https://stackoverflow.com/questions/3620943/measuring-elapsed-time-with-the-time-module 
-#     """
-#     time_int = int(deltatime_seconds)
-#     time_dec = int((deltatime_seconds - time_int) * 1000)
-#     time_str = '{:02d}:{:02d}:{:02d}.{:03d}'.format(time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec)
-#     return time_str
     
-# def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
-#     """
-#     update and print current progress.
-#     e.g.
-#     curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int)
-#     returns: curr_perc_int_new, deltatime_str
-#     """
-#     curr_perc_new = size_processed*100.0 / size_all
-#     curr_perc_int_new = int(curr_perc_new)
-#     if curr_perc_int_new != curr_perc_int and curr_perc_int_new % step_perc == 0:
-#         deltatime = time.time() - start_time
-#         deltatime_str_ = deltatime_str(deltatime)
-#         est_end = deltatime / curr_perc_new * 100
-#         est_time_str = deltatime_str(est_end - deltatime)
-#         print('({}/{}) {}% in {} - estimated end in {}'.format(size_processed, size_all, curr_perc_int_new, deltatime_str_, est_time_str))
-#         return curr_perc_int_new, deltatime_str
-#     else:
-#         return curr_perc_int_new, None
+    file : String
+           Represents filename.
 
-# def timestamp_to_millis(timestamp):
-#     """
-#     Converts a local datetime to a POSIX timestamp in milliseconds (like in Java).
-#     e.g. '2015-12-12 08:00:00.123000' -> 1449907200123 (UTC)
-#     Java: Sat Dec 12 08:00:00 BRT 2015        -> 1449918000123
-#     """
-#     return Timestamp(timestamp).value // 1000000
+    tiles : String
+            -
+    
+    color : String
+            Represents color of trajectorys on map.
 
-# def millis_to_timestamp(milliseconds):
-#     """
-#     Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
-#     e.g.  1449907200123 -> Timestamp('2015-12-12 08:00:00.123000')
-#     Java: 1449918000123 -> Sat Dec 12 08:00:00 BRT 2015
-#     """
-#     return Timestamp(milliseconds, unit='ms')
+    Returns
+    -------
+   
 
-# def date_to_str(date1):
-#     return date1.strftime('%Y-%m-%d')
+    Examples
+    --------
+    >>> from pymove.utils.utils import save_bbox
+    >>> bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
+    >>> save_bbox(bbox, 'bbox.html')
 
-# def time_to_str(time1):
-#     return time1.strftime('%H:%M:%S')
+    """
+    m = folium.Map(tiles=tiles)
+    m.fit_bounds([ [bbox_tuple[0], bbox_tuple[1]], [bbox_tuple[2], bbox_tuple[3]] ])
+    points_ = [ (bbox_tuple[0], bbox_tuple[1]), (bbox_tuple[0], bbox_tuple[3]), 
+                (bbox_tuple[2], bbox_tuple[3]), (bbox_tuple[2], bbox_tuple[1]),
+                (bbox_tuple[0], bbox_tuple[1]) ]
+    folium.PolyLine(points_, weight=3, color=color).add_to(m)
+    m.save(file) 
 
-# def str_to_datatime(dt_str):
-#     if len(dt_str) == 10:
-#         return datetime.datetime.strptime(dt_str, '%Y-%m-%d')
-#     else:
-#         return datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+def show_trajectories_info(df_, dic_labels=dic_labels):
+    """
+    Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box. 
 
-# def str_to_time(dt_str):
-#     return datetime.datetime.strptime(dt_str, '%H:%M:%S')
+    Parameters
+    ----------
+    df_ : pandas.core.frame.DataFrame
+          Represents the dataset with contains lat, long and datetime.
+    
+    dic_labels : dict
+                 Represents mapping of column's header between values passed on params.
 
-# def datetime_to_str(dt1):
-#     return dt1.strftime('%Y-%m-%d %H:%M:%S')
+    Returns
+    -------
+   
 
-# def now_str():
-#     return datetime_to_str(datetime.datetime.now())
+    Examples
+    --------
+    >>> from pymove.utils.utils import show_trajectories_info
+    >>> show_trajectories_info(df_, dic_labels)
+    ======================= INFORMATION ABOUT DATASET =======================
+
+    Number of Points: 217654
+
+    Number of IDs objects: 2
+
+    Start Date:2008-10-23 05:53:05     End Date:2009-03-19 05:46:37
+
+    Bounding Box:(22.147577, 113.54884299999999, 41.132062, 121.156224)
+
+
+    =========================================================================
+
+    """
+    try:
+        print('\n======================= INFORMATION ABOUT DATASET =======================\n')
+        print('Number of Points: {}\n'.format(df_.shape[0]))
+        if dic_labels['id'] in df_:
+            print('Number of IDs objects: {}\n'.format(df_[dic_labels['id']].nunique()))
+        if dic_features_label['tid'] in df_:
+            print('Number of TIDs trajectory: {}\n'.format(df_[dic_features_label['tid']].nunique()))
+        if dic_labels['datetime'] in df_:
+            print('Start Date:{}     End Date:{}\n'.format(df_[dic_labels['datetime']].min(), df_[dic_labels['datetime']].max()))
+        if dic_labels['lat'] and dic_labels['lon'] in df_:
+            print('Bounding Box:{}\n'.format(get_bbox(df_, dic_labels))) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
+        if dic_features_label['time_to_prev'] in df_:            
+            print('Gap time MAX:{}     Gap time MIN:{}\n'.format(round(df_[dic_features_label['time_to_prev']].max(),3), round(df_[dic_features_label['time_to_prev']].min(), 3)))
+        if dic_features_label['speed_to_prev'] in df_:            
+            print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[dic_features_label['speed_to_prev']].max(), 3), round(df_[dic_features_label['speed_to_prev']].min(), 3))) 
+        if dic_features_label['dist_to_prev'] in df_:            
+            print('Distance MAX:{}    Distance MIN:{}\n'.format(round(df_[dic_features_label['dist_to_prev']].max(),3), round(df_[dic_features_label['dist_to_prev']].min(), 3))) 
+            
+        print('\n=========================================================================\n')
+    except Exception as e:
+        raise e    
+
+#  CONVERSIONS
+def now_str():
+    """
+    Get datetime of now.
+
+    Parameters
+    ----------
+   
+    Returns
+    -------
+    date_time : String
+                Represents a data. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import now_str
+    >>> now_str()
+    '2019-09-02 13:54:16'
+
+    """
+    date_time = datetime_to_str(datetime.datetime.now())
+    return date_time
+
+def deltatime_str(deltatime_seconds):
+    """
+    Convert time in a format appropriate of time.
+
+    Parameters
+    ----------
+    deltatime_seconds : float
+          Represents the dataset with contains lat, long and datetime.    
+   
+    Returns
+    -------
+    time_str : String
+               Represents time in a format hh:mm:ss:---.
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import deltatime_str
+    >>> deltatime_str(1082.7180936336517)
+    '00:18:02.718'
+
+    Notes
+    -----
+    Output example if more than 24 hours: 25:33:57.123
+    https://stackoverflow.com/questions/3620943/measuring-elapsed-time-with-the-time-module 
+
+    """
+    time_int = int(deltatime_seconds)
+    time_dec = int((deltatime_seconds - time_int) * 1000)
+    time_str = '{:02d}:{:02d}:{:02d}.{:03d}'.format(time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec)
+    return time_str
+    
+def timestamp_to_millis(timestamp):
+    """
+    Converts a local datetime to a POSIX timestamp in milliseconds (like in Java).
+
+    Parameters
+    ----------
+    timestamp : String
+                Represents a data.    
+   
+    Returns
+    -------
+    millis : int
+             Represents millisecond results.
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import timestamp_to_millis
+    >>> timestamp_to_millis('2015-12-12 08:00:00.123000')
+    1449907200123 (UTC)
+
+    """
+    millis = Timestamp(timestamp).value // 1000000
+    return millis
+
+def millis_to_timestamp(milliseconds):
+    """
+    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+
+    Parameters
+    ----------
+    milliseconds : int
+                   Represents millisecond.
+   
+    Returns
+    -------
+    timestamp : String
+                Represents a data. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import millis_to_timestamp
+    >>> millis_to_timestamp(1449907200123)
+    '2015-12-12 08:00:00.123000'
+
+    """
+    timestamp = Timestamp(milliseconds, unit='ms')
+    return timestamp
+
+#TODO
+def date_to_str(date1):
+    """
+    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+
+    Parameters
+    ----------
+    milliseconds : int
+                   Represents millisecond.
+   
+    Returns
+    -------
+    timestamp : String
+                Represents a data. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import millis_to_timestamp
+    >>> millis_to_timestamp(1449907200123)
+    '2015-12-12 08:00:00.123000'
+
+    """
+    return date1.strftime('%Y-%m-%d')
+
+#TODO
+def time_to_str(time1):
+    """
+    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+
+    Parameters
+    ----------
+    milliseconds : int
+                   Represents millisecond.
+   
+    Returns
+    -------
+    timestamp : String
+                Represents a data. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import millis_to_timestamp
+    >>> millis_to_timestamp(1449907200123)
+    '2015-12-12 08:00:00.123000'
+
+    """
+    return time1.strftime('%H:%M:%S')
+
+#TODO
+def str_to_datatime(dt_str):
+    """
+    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+
+    Parameters
+    ----------
+    milliseconds : int
+                   Represents millisecond.
+   
+    Returns
+    -------
+    timestamp : String
+                Represents a data. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import millis_to_timestamp
+    >>> millis_to_timestamp(1449907200123)
+    '2015-12-12 08:00:00.123000'
+
+    """
+    if len(dt_str) == 10:
+        return datetime.datetime.strptime(dt_str, '%Y-%m-%d')
+    else:
+        return datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+
+#TODO
+def str_to_time(dt_str):
+    """
+    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+
+    Parameters
+    ----------
+    milliseconds : int
+                   Represents millisecond.
+   
+    Returns
+    -------
+    timestamp : String
+                Represents a data. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import millis_to_timestamp
+    >>> millis_to_timestamp(1449907200123)
+    '2015-12-12 08:00:00.123000'
+
+    """
+    return datetime.datetime.strptime(dt_str, '%H:%M:%S')
+
+#TODO
+def datetime_to_str(dt1):
+    """
+    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+
+    Parameters
+    ----------
+    milliseconds : int
+                   Represents millisecond.
+   
+    Returns
+    -------
+    timestamp : String
+                Represents a data. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import millis_to_timestamp
+    >>> millis_to_timestamp(1449907200123)
+    '2015-12-12 08:00:00.123000'
+
+    """
+    return dt1.strftime('%Y-%m-%d %H:%M:%S')
+
 
 # def datetime_to_min(datetime):
 #     """
@@ -420,6 +634,75 @@ def get_bbox(df_, dic_labels=dic_labels):
 #         result = arr
 #     return result
 
+# def log_progress(sequence, every=None, size=None, name='Items'):
+#     is_iterator = False
+#     if size is None:
+#         try:
+#             size = len(sequence)
+#         except TypeError:
+#             is_iterator = True
+#     if size is not None:
+#         if every is None:
+#             if size <= 200:
+#                 every = 1
+#             else:
+#                 every = int(size / 200)     # every 0.5%
+#     else:
+#         assert every is not None, 'sequence is iterator, set every'
 
+#     if is_iterator:
+#         progress = IntProgress(min=0, max=1, value=1)
+#         progress.bar_style = 'info'
+#     else:
+#         progress = IntProgress(min=0, max=size, value=0)
+#     label = HTML()
+#     box = VBox(children=[label, progress])
+#     display(box)
 
+#     index = 0
+#     try:
+#         for index, record in enumerate(sequence, 1):
+#             if index == 1 or index % every == 0:
+#                 if is_iterator:
+#                     label.value = '{name}: {index} / ?'.format(
+#                         name=name,
+#                         index=index
+#                     )
+#                 else:
+#                     progress.value = index
+#                     label.value = u'{name}: {index} / {size}'.format(
+#                         name=name,
+#                         index=index,
+#                         size=size
+#                     )
+#             yield record
+#     except:
+#         progress.bar_style = 'danger'
+#         raise
+#     else:
+#         progress.bar_style = 'success'
+#         progress.value = index
+#         label.value = "{name}: {index}".format(
+#             name=name,
+#             index=str(index or '?')
+#         )
+
+# def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
+#     """
+#     update and print current progress.
+#     e.g.
+#     curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int)
+#     returns: curr_perc_int_new, deltatime_str
+#     """
+#     curr_perc_new = size_processed*100.0 / size_all
+#     curr_perc_int_new = int(curr_perc_new)
+#     if curr_perc_int_new != curr_perc_int and curr_perc_int_new % step_perc == 0:
+#         deltatime = time.time() - start_time
+#         deltatime_str_ = deltatime_str(deltatime)
+#         est_end = deltatime / curr_perc_new * 100
+#         est_time_str = deltatime_str(est_end - deltatime)
+#         print('({}/{}) {}% in {} - estimated end in {}'.format(size_processed, size_all, curr_perc_int_new, deltatime_str_, est_time_str))
+#         return curr_perc_int_new, deltatime_str
+#     else:
+#         return curr_perc_int_new, None
 
