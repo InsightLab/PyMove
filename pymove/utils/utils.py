@@ -473,6 +473,27 @@ def min_to_datetime(min1):
 
 #TODO: vê o que são os parametros e tipo dos param
 def slot_of_day_to_time(slot_of_day1, time_window_duration=5):
+    """
+    Converts an int representation in minutes to a datetime.  
+    To do the reverse use: datetime_to_min.
+
+    Parameters
+    ----------
+    datetime : datetime.datetime
+        Represents a datetime in datetime's format.
+   
+    Returns
+    -------
+    minutes : int
+        Represents minutes from. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import min_to_datetime
+    >>> min_to_datetime(23143496)
+    datetime.datetime(2014, 1, 1, 20, 56)
+
+    """
     min1 = slot_of_day1 * time_window_duration
     return datetime.time(min1 // 60, min1 % 60)
 
