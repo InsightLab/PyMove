@@ -231,6 +231,7 @@ def segment_trajectory_by_speed(df_, label_id=dic_labels['id'], max_speed_betwee
     except Exception as e:
         raise e
 
+
 def segment_trajectory_by_time(df_, label_id=dic_labels['id'], max_time_between_adj_points=900.0, drop_single_points=True, label_new_tid='tid_time'):
     """Segments the trajectories into clusters based on time.
 

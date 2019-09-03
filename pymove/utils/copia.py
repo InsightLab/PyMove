@@ -262,12 +262,60 @@ def date_to_day_of_week_int(date):
     return date.weekday()
 
 def elapsed_time_dt(start_time):
-    return diff_time(start_time, datetime.datetime.now())
+    """Computes the elapsed time from a specific start time to the moment the function is called.
+
+    Parameters
+    ----------
+    start_time : Datetime
+        Specifies the start time of the time range to be computed.
+    
+    Returns
+    -------
+        time_dif : Integer
+            Represents the time elapsed from the start time to the current time (when the function was called).        
+
+    """
+    time_dif = diff_time(start_time, datetime.datetime.now())
+    return time_dif
 
 def diff_time(start_time, end_time):
-    return int((end_time - start_time).total_seconds() * 1000)
+    """Computes the elapsed time from the start time to the end time specifed by the user.
+
+    Parameters
+    ----------
+    start_time : Datetime
+        Specifies the start time of the time range to be computed.
+    
+    end_time : Datetime
+        Specifies the start time of the time range to be computed.
+
+    Returns
+    -------
+        time_dif : Integer
+            Represents the time elapsed from the start time to the current time (when the function was called).        
+
+    """
+
+    time_dif = int((end_time - start_time).total_seconds() * 1000)
+    return time_dif
 
 def working_day(dt, holidays):
+    """Indices if a day specified by the user is a working day.
+
+    Parameters
+    ----------
+    dt : Datetime
+        Specifies the day the user wants to know if it is a business day.
+    
+    holidays : Datetime
+        Indicates the days that are vacation days and therefore not working days. 
+
+    Returns
+    -------
+        result : boolean
+            if true, means that the day informed by the user is a working day.
+            if false, means that the day is not a working day.
+    """
     result = True
 
     if type(dt) == str:
@@ -286,9 +334,10 @@ def working_day(dt, holidays):
 
     return result
 
+#Nao entendi o que ela faz
 def std(sum_sq, size, avg):
     try:
-        # squaring with * is over 3 times as fast as with **2
+        # squaring with * is over 3 times as faster than with **2
         # http://stackoverflow.com/questions/29046346/comparison-of-power-to-multiplication-in-python
         result = math.sqrt(sum_sq / size - avg * avg)
     except ValueError:
@@ -308,7 +357,21 @@ def avg_std_sample(sum1, sum_sq, size):
     avg = sum1 / size
     return avg, std_sample(sum_sq, size, avg)
 
+#função está dando erro ao rodar
 def arrays_avg(values_array, weights_array=None):
+    """Computes the mean of the elements of the array.
+
+    values_array : array of floats
+        The numbers used to calculate the mean. 
+    
+    weights_array : array of floats
+        Used to calculate the weighted average, indicates the weight of each element in the array (values_array). 
+
+    Returns 
+    -------
+        result : Float
+            The mean of the array elements.         
+    """   
     n = len(values_array)
 
     if weights_array is None:
@@ -329,6 +392,16 @@ def arrays_avg(values_array, weights_array=None):
     return result
 
 def array_sum(values_array):
+    """Computes the sum of the elements of the array.
+
+    values_array : array of floats
+        The numbers to be added. 
+
+    Returns 
+    -------
+        sum1 : Float
+            The sum of the elements of the array         
+    """    
     sum1 = 0
     for item in values_array:
         sum1 += item
@@ -336,6 +409,23 @@ def array_sum(values_array):
     return sum1
 
 def array_stats(values_array):
+    """Computes the sum of all the elements in the array, the sum of the square of each element and the number of 
+        elements of the array.
+
+    values_array : array of floats 
+        The elements used to compute the operations
+    
+    Returns
+    -------
+        sum1 : Float
+            The sum of all the elements in the array
+
+        sum_sq : Float
+            The sum of the square value of each element in the array
+
+        n : Integer
+            The number of elements in the array
+    """
     sum1 = 0
     sum_sq = 0
     n = 0
@@ -372,9 +462,36 @@ def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, fil
     df.at[id_, feature_name] = values_feature
 
 def list_to_str(input_list, delimiter=','):
+    """Concatenates the elements of the array, joining them by the separator especified by the parameter "delimiter"
+
+    Parameters
+    ----------
+    input_list : array 
+        The elements to be joined
+    
+    delimiter : String, optional(',' by default)
+        The separator used between elements
+    
+    Returns
+    -------
+        String
+            Returns a string, wich is the concatenation of the elements of the array, separeted by the delimiter.
+    """
     return delimiter.join([x if type(x) == str else repr(x) for x in input_list])  # list comprehension
 
 def list_to_csv_str(input_list):
+    """Concatenates the elements of the array, joining them by ",".
+
+    Parameters
+    ----------
+    input_list : array 
+        The elements to be joined
+    
+    Returns
+    -------
+        String
+            Returns a string, wich is the concatenation of the elements of the array, separeted by ",".
+    """
     return list_to_str(input_list)  # list comprehension
 
 def fill_list_with_new_values(original_list, new_list_values):
