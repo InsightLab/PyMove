@@ -1,20 +1,18 @@
 # TODO: Andreza
+import time
+import math
+import folium
+import datetime
 import numpy as np
 import pandas as pd
-import time
-import datetime
-from scipy.interpolate import interp1d
-import folium
-
+from pandas._libs.tslibs.timestamps import Timestamp
+# from scipy.interpolate import interp1d
+#import timeutils
 # from __future__ import division
 #from scipy.ndimage.interpolation import shift
-import math
 
-#import timeutils
-
-from pandas._libs.tslibs.timestamps import Timestamp
-from ipywidgets import IntProgress, HTML, VBox
-from IPython.display import display
+# from ipywidgets import IntProgress, HTML, VBox
+# from IPython.display import display
 
 
 """main labels """
@@ -100,7 +98,6 @@ def get_bbox(df_, dic_labels=dic_labels):
     except Exception as e:
         raise e
 
-#TODO: vê o que é o tiles
 def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     """
     Save bbox as file .html using Folium.
@@ -115,7 +112,8 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
         Represents filename.
 
     tiles : String
-        -
+        Represents tyles's type.
+        Example: 'openstreetmap', 'cartodbpositron', 'stamentoner', 'stamenterrain', 'mapquestopen', 'MapQuest Open Aerial', 'Mapbox Control Room' and 'Mapbox Bright'.
     
     color : String
         Represents color of trajectorys on map.
@@ -196,6 +194,7 @@ def show_trajectories_info(df_, dic_labels=dic_labels):
         raise e    
 
 #  CONVERSIONS
+
 def now_str():
     """
     Get datetime of now.
@@ -759,21 +758,21 @@ def date_to_day_of_week_int(date):
 #         )
 
 # def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
-#     """
-#     update and print current progress.
-#     e.g.
-#     curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int)
-#     returns: curr_perc_int_new, deltatime_str
-#     """
-#     curr_perc_new = size_processed*100.0 / size_all
-#     curr_perc_int_new = int(curr_perc_new)
-#     if curr_perc_int_new != curr_perc_int and curr_perc_int_new % step_perc == 0:
-#         deltatime = time.time() - start_time
-#         deltatime_str_ = deltatime_str(deltatime)
-#         est_end = deltatime / curr_perc_new * 100
-#         est_time_str = deltatime_str(est_end - deltatime)
-#         print('({}/{}) {}% in {} - estimated end in {}'.format(size_processed, size_all, curr_perc_int_new, deltatime_str_, est_time_str))
-#         return curr_perc_int_new, deltatime_str
-#     else:
-#         return curr_perc_int_new, None
+    """
+    update and print current progress.
+    e.g.
+    curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int)
+    returns: curr_perc_int_new, deltatime_str
+    """
+    curr_perc_new = size_processed*100.0 / size_all
+    curr_perc_int_new = int(curr_perc_new)
+    if curr_perc_int_new != curr_perc_int and curr_perc_int_new % step_perc == 0:
+        deltatime = time.time() - start_time
+        deltatime_str_ = deltatime_str(deltatime)
+        est_end = deltatime / curr_perc_new * 100
+        est_time_str = deltatime_str(est_end - deltatime)
+        print('({}/{}) {}% in {} - estimated end in {}'.format(size_processed, size_all, curr_perc_int_new, deltatime_str_, est_time_str))
+        return curr_perc_int_new, deltatime_str
+    else:
+        return curr_perc_int_new, None
 
