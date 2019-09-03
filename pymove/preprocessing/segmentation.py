@@ -44,12 +44,10 @@ def bbox_split(bbox, number_grids):
         df = df.append({'lat_min':lat_min, 'lon_min': lon_min + (const_lon * i), 'lat_max': lat_max, 'lon_max':lon_min + (const_lon * (i + 1))}, ignore_index=True)
     return df
 
-""" segment trajectory based on threshold for each ID object"""
 
 def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_dist_between_adj_points=3000, max_time_between_adj_points=7200,
                       max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_part'):
     """Segments the trajectories into clusters based on distance, time and speed.
-
 
     Parameters
     ----------
@@ -57,7 +55,7 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_di
        The input trajectory data
 
     label_id : String, optional(dic_labels['id'] by default)
-        The label of the column which contains the id of the trajectories
+         Indicates the label of the id column in the user's dataframe.
 
     max_dist_between_adj_points : Float, optinal(3000 by default)
         Specify the maximun distance a point should have from the previous point, in order not to be dropped
@@ -76,7 +74,7 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_di
 
     Note
     -----
-    time, dist, speeed features must be updated after split.
+    Time, distance and speeed features must be updated after split.
     """
         
     print('\nSplit trajectories')
@@ -147,9 +145,29 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_di
     except Exception as e:
         raise e
 
+
 def segment_trajectory_by_speed(df_, label_id=dic_labels['id'], max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_speed'):
-    """ Index_name is the current id.
-    label_new_id is the new splitted id.
+    """Segments the trajectories into clusters based on speed.
+
+    Parameters
+    ----------
+    df_ : dataframe
+       The input trajectory data
+
+    label_id : String, optional(dic_labels['id'] by default)
+         Indicates the label of the id column in the user's dataframe.
+
+    max_speed_between_adj_points : Float, optinal(50.0 by default)
+        Specify the maximun speed of travel between two adjacent points
+
+    drop_single_points : boolean, optional(True by default)
+        If set to True, drops the trajectories with only one point.
+
+    label_new_tid : String, optional('tid_speed' by default)
+        The label of the column cointainig the ids of the formed clusters. Is the new splitted id.
+
+    Note
+    -----
     Speed features must be updated after split.
     """     
     print('\nSplit trajectories by max_speed_between_adj_points:', max_speed_between_adj_points) 
@@ -214,9 +232,27 @@ def segment_trajectory_by_speed(df_, label_id=dic_labels['id'], max_speed_betwee
         raise e
 
 def segment_trajectory_by_time(df_, label_id=dic_labels['id'], max_time_between_adj_points=900.0, drop_single_points=True, label_new_tid='tid_time'):
-    """
-    index_name is the current id.
-    label_new_id is the new splitted id.
+    """Segments the trajectories into clusters based on time.
+
+    Parameters
+    ----------
+    df_ : dataframe
+       The input trajectory data
+
+    label_id : String, optional(dic_labels['id'] by default)
+         Indicates the label of the id column in the user's dataframe.
+
+    max_time_between_adj_points : Float, optinal(50.0 by default)
+        Specify the maximun time of travel between two adjacent points
+
+    drop_single_points : boolean, optional(True by default)
+        If set to True, drops the trajectories with only one point.
+
+    label_new_tid : String, optional('tid_time' by default)
+        The label of the column cointainig the ids of the formed clusters. Is the new splitted id.
+
+    Note
+    -----
     Speed features must be updated after split.
     """     
     print('\nSplit trajectories by max_time_between_adj_points:', max_time_between_adj_points) 
