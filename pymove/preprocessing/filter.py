@@ -183,7 +183,7 @@ def filter_by_tid(df_, tid_=None, label_tid=dic_features_label['tid'], filter_ou
         Specifies the number of the tid used to filter the trajectories points
 
     label_tid : String, optional(dic_features_label['tid'] by default)
-        The label of the colum which contains the tid of the trajectories
+        The label of the colum in the user's dataframe which contains the tid of the trajectories
 
     filter_out : boolean, optional(false by default)
         If set to true, the function will return the points of the trajectories with the same tid as the one especified by the parameter value.
