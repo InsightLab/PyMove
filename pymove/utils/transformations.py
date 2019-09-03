@@ -296,7 +296,7 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
                 
                 "set Speed features"
                 df_.at[idx, dic_features_label['speed_to_prev']] = df_.at[idx, dic_features_label['dist_to_prev']] / (time_prev)  # unit: m/s
-                df_.at[idx, dic_features_label['speed_to_next']] = df_.at[idx, dic_features_label['dist_to_next']] / (time_next)  # unit: m/s
+                #df_.at[idx, dic_features_label['speed_to_next']] = df_.at[idx, dic_features_label['dist_to_next']] / (time_next)  # unit: m/s
 
 
                 #ut.change_df_feature_values_using_filter(df_, id_, 'delta_time', filter_points, delta_times)
