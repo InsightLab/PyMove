@@ -17,12 +17,12 @@ def lat_meters(lat):
     Parameters
     ----------
     lat : float
-            This represent latitude value.
+        This represent latitude value.
 
     Returns
     -------
     meters : float
-             Represents the corresponding latitude value in meters.
+        Represents the corresponding latitude value in meters.
 
     Examples
     --------
@@ -49,25 +49,25 @@ def create_update_index_grid_feature(df_, dic_grid=None, dic_labels=dic_labels, 
     Parameters
     ----------
     df_ : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
+        Represents the dataset with contains lat, long and datetime.
 
     dic_grid : dict
-               Contains informations about virtual grid, how
-                    - lon_min_x: longitude mínima.
-                    - lat_min_y: latitude miníma. 
-                    - grid_size_lat_y: tamanho da grid latitude. 
-                    - grid_size_lon_x: tamanho da longitude da grid.
-                    - cell_size_by_degree: tamanho da célula da Grid.
-               If value is none, the function ask user by dic_grid.
+        Contains informations about virtual grid, how
+            - lon_min_x: longitude mínima.
+            - lat_min_y: latitude miníma. 
+            - grid_size_lat_y: tamanho da grid latitude. 
+            - grid_size_lon_x: tamanho da longitude da grid.
+            - cell_size_by_degree: tamanho da célula da Grid.
+        If value is none, the function ask user by dic_grid.
 
     dic_labels : dict
-                 Represents dataframe column value mapping.
+        Represents dataframe column value mapping.
 
     label_dtype : String
-                  Represents the type of a value of new column in dataframe.
+        Represents the type of a value of new column in dataframe.
 
     sort : boolean
-           Represents the state of dataframe, if is sorted.
+        Represents the state of dataframe, if is sorted.
 
     Returns
     -------
@@ -103,18 +103,18 @@ def create_virtual_grid(cell_size, bbox, meters_by_degree = lat_meters(-3.816297
     Parameters
     ----------
     cell_size : float
-            Size of grid's cell.
+        Size of grid's cell.
 
     bbox : tuple
-            Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+        Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
 
     meters_by_degree : float
-            Represents the meters's degree of latitude. By default the latitude is set in Fortaleza.
+        Represents the meters's degree of latitude. By default the latitude is set in Fortaleza.
 
     Returns
     -------
     virtual_grid : dict
-            Contains informations about virtual grid, how
+        Contains informations about virtual grid, how
             - lon_min_x: minimum longitude.
             - lat_min_y: minimum latitude. 
             - grid_size_lat_y: size of latitude grid. 
@@ -179,23 +179,23 @@ def create_one_polygon_to_point_on_grid(dic_grid, index_grid_lat, index_grid_lon
     Parameters
     ----------
     dic_grid : dict
-              Contains informations about virtual grid, how
-                - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma. 
-                - grid_size_lat_y: tamanho da grid latitude. 
-                - grid_size_lon_x: tamanho da longitude da grid.
-                - cell_size_by_degree: tamanho da célula da Grid.
+        Contains informations about virtual grid, how
+            - lon_min_x: longitude mínima.
+            - lat_min_y: latitude miníma. 
+            - grid_size_lat_y: tamanho da grid latitude. 
+            - grid_size_lon_x: tamanho da longitude da grid.
+            - cell_size_by_degree: tamanho da célula da Grid.
 
     index_grid_lat : int
-                     Represents index of grid that reference latitude.
+        Represents index of grid that reference latitude.
 
     index_grid_lon : int
-                     Represents index of grid that reference longitude.
+        Represents index of grid that reference longitude.
 
     Returns
     -------
     polygon: Polygon
-             Represents a polygon of this cell in a grid.
+        Represents a polygon of this cell in a grid.
 
     Examples
     --------
@@ -220,12 +220,12 @@ def create_all_polygons_on_grid(dic_grid):
     Parameters
     ----------
     dic_grid : dict
-              Contains informations about virtual grid, how
-                - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma. 
-                - grid_size_lat_y: tamanho da grid latitude. 
-                - grid_size_lon_x: tamanho da longitude da grid.
-                - cell_size_by_degree: tamanho da célula da Grid.
+        Contains informations about virtual grid, how
+            - lon_min_x: longitude mínima.
+            - lat_min_y: latitude miníma. 
+            - grid_size_lat_y: tamanho da grid latitude. 
+            - grid_size_lon_x: tamanho da longitude da grid.
+            - cell_size_by_degree: tamanho da célula da Grid.
 
     Examples
     --------
@@ -261,20 +261,20 @@ def create_all_polygons_to_all_point_on_grid(df_, dic_grid):
     Parameters
     ----------
     df_ : pandas.core.frame.DataFrame
-          Represents the dataset with contains lat, long and datetime.
+        Represents the dataset with contains lat, long and datetime.
 
     dic_grid : dict
-               Contains informations about virtual grid, how
-                    - lon_min_x: longitude mínima.
-                    - lat_min_y: latitude miníma. 
-                    - grid_size_lat_y: tamanho da grid latitude. 
-                    - grid_size_lon_x: tamanho da longitude da grid.
-                    - cell_size_by_degree: tamanho da célula da Grid.
+        Contains informations about virtual grid, how
+            - lon_min_x: longitude mínima.
+            - lat_min_y: latitude miníma. 
+            - grid_size_lat_y: tamanho da grid latitude. 
+            - grid_size_lon_x: tamanho da longitude da grid.
+            - cell_size_by_degree: tamanho da célula da Grid.
 
     Returns
     -------
     df_polygons: pandas.core.frame.DataFrame
-                 Represents the same dataset with new key 'polygon' where polygons were saved. 
+        Represents the same dataset with new key 'polygon' where polygons were saved. 
 
     Examples
     --------
@@ -311,26 +311,26 @@ def point_to_index_grid(event_lat, event_lon, dic_grid):
     Parameters
     ----------
     event_lat : float
-                Represents the latitude of a point.
+        Represents the latitude of a point.
 
     event_lon : float 
-                Represents the longitude of a point.
+        Represents the longitude of a point.
 
     dic_grid : dict
-               Contains informations about virtual grid, how
-                    - lon_min_x: longitude mínima.
-                    - lat_min_y: latitude miníma. 
-                    - grid_size_lat_y: tamanho da grid latitude. 
-                    - grid_size_lon_x: tamanho da longitude da grid.
-                    - cell_size_by_degree: tamanho da célula da Grid.
+        Contains informations about virtual grid, how
+            - lon_min_x: longitude mínima.
+            - lat_min_y: latitude miníma. 
+            - grid_size_lat_y: tamanho da grid latitude. 
+            - grid_size_lon_x: tamanho da longitude da grid.
+            - cell_size_by_degree: tamanho da célula da Grid.
 
     Returns
     -------
     indexes_lat_y : int
-                    Represents the index y in a grid of a point (lat, long). 
+        Represents the index y in a grid of a point (lat, long). 
 
     indexes_lon_x : int
-                    Represents the index x in a grid of a point (lat, long).
+        Represents the index x in a grid of a point (lat, long).
 
     Examples
     --------
@@ -360,15 +360,15 @@ def save_grid_pkl(filename, dic_grid):
     Parameters
     ----------
     filename : String
-               Represents the name of a file.
+        Represents the name of a file.
 
     dic_grid : dict
-               Contains informations about virtual grid, how
-                    - lon_min_x: longitude mínima.
-                    - lat_min_y: latitude miníma. 
-                    - grid_size_lat_y: tamanho da grid latitude. 
-                    - grid_size_lon_x: tamanho da longitude da grid.
-                    - cell_size_by_degree: tamanho da célula da Grid.
+        Contains informations about virtual grid, how
+            - lon_min_x: longitude mínima.
+            - lat_min_y: latitude miníma. 
+            - grid_size_lat_y: tamanho da grid latitude. 
+            - grid_size_lon_x: tamanho da longitude da grid.
+            - cell_size_by_degree: tamanho da célula da Grid.
 
     Returns
     -------
@@ -407,13 +407,12 @@ def read_grid_pkl(filename):
     Returns
     -------
      dic_grid : dict
-                Contains informations about virtual grid, how
-                    - lon_min_x: longitude mínima.
-                    - lat_min_y: latitude miníma. 
-                    - grid_size_lat_y: tamanho da grid latitude. 
-                    - grid_size_lon_x: tamanho da longitude da grid.
-                    - cell_size_by_degree: tamanho da célula da Grid.
-
+        Contains informations about virtual grid, how
+            - lon_min_x: longitude mínima.
+            - lat_min_y: latitude miníma. 
+            - grid_size_lat_y: tamanho da grid latitude. 
+            - grid_size_lon_x: tamanho da longitude da grid.
+            - cell_size_by_degree: tamanho da célula da Grid.
 
     Examples
     --------
@@ -444,19 +443,19 @@ def show_grid_polygons(df_, id_, label_id = dic_labels['id'], label_polygon='pol
     Parameters
     ----------
     df_ : pandas.core.frame.DataFrame
-          Represents the dataset with contains lat, long and datetime.
+        Represents the dataset with contains lat, long and datetime.
     
     id_ : String
-          Represents the id.
+        Represents the id.
     
     label_id : -
-               ----
+        ----
     
     label_polygon : -
-                    -------
+        -------
 
     figsize : tuple
-              Represents the size (float: width, float: height) of a figure.
+        Represents the size (float: width, float: height) of a figure.
 
     Returns
     -------
