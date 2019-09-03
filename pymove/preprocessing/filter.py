@@ -118,10 +118,10 @@ def filter_by_label(df_, value, label_name, filter_out=False):
         The input trajectory data
 
     value : The type of the feature values to be use to filter the trajectories
-        Specify the value used to filter the trajectories points
+        Specifies the value used to filter the trajectories points
 
     label_name : String
-        Specify the label of the colum used in the filtering
+        Specifes the label of the colum used in the filtering
 
     filter_out : boolean, optional(false by default)
         If set to True, it will return trajectory points with feature value different from the value specified in the parameters
@@ -306,7 +306,7 @@ def clean_consecutive_duplicates(df, subset=None, keep='first', inplace=False):
         The input trajectory data
 
     subset : Array of Strings, optional(None by default)
-        Specify  Column label or sequence of labels, considered for identifying duplicates. By default all columns are used.
+        Specifies  Column label or sequence of labels, considered for identifying duplicates. By default all columns are used.
 
     keep : String. Optional(first by default)
         Determine wich duplicate will be removed.
@@ -576,7 +576,7 @@ def clean_trajectories_with_few_points(df_, label_tid=dic_features_label['tid'],
         Dictionary mapping the user's dataframe labels to the pattern of the PyRoad's lib
 
     min_points_per_trajectory: Integer, optional(2 by default)
-        Specify the minimun number of points a trajectory must have in order not to be dropped
+        Specifies the minimun number of points a trajectory must have in order not to be dropped
 
     label_dtype:
 
@@ -620,10 +620,10 @@ def clean_trajectories_short_and_few_points_(df_, label_id=dic_features_label['t
         Dictionary mapping the user's dataframe labels to the pattern of the PyRoad's lib
 
     min_trajectory_distance: Integer, optional(100 by default)
-        Specify the minimun lenght a trajectory must have in order not to be dropped
+        Specifies the minimun lenght a trajectory must have in order not to be dropped
 
     min_points_per_trajectory: Integer, optional(2 by default)
-        Specify the minimun number of points a trajectory must have in order not to be dropped
+        Specifies the minimun number of points a trajectory must have in order not to be dropped
 
     label_dtype:
 
