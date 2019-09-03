@@ -5,8 +5,6 @@ import time
 import datetime
 from scipy.interpolate import interp1d
 import folium
-# from pymove import utils as ut
-# from pymove import gridutils
 
 # from __future__ import division
 #from scipy.ndimage.interpolation import shift
