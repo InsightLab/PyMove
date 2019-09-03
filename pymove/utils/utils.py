@@ -34,24 +34,24 @@ def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     Parameters
     ----------
     df_ : pandas.core.frame.DataFrame
-          Represents the dataset with contains lat, long and datetime.
+        Represents the dataset with contains lat, long and datetime.
     
     current_id : String
-                 Represents the id in df_.
+        Represents the id in df_.
     
     current_lat : String
-                  Represents the latitude in df_.
+        Represents the latitude in df_.
     
     current_lon : String
-                  Represents the longitude in df_.
+        Represents the longitude in df_.
 
     current_datetime : String
-                       Represents the datetime in df_.
+        Represents the datetime in df_.
 
     Returns
     -------
     dic_labels : dict
-                 Represents mapping of column's header between values passed on params.
+        Represents mapping of column's header between values passed on params.
      
     Examples
     --------
@@ -78,15 +78,15 @@ def get_bbox(df_, dic_labels=dic_labels):
     Parameters
     ----------
     df_ : pandas.core.frame.DataFrame
-          Represents the dataset with contains lat, long and datetime.
+        Represents the dataset with contains lat, long and datetime.
     
     dic_labels : dict
-                 Represents mapping of column's header between values passed on params.
+        Represents mapping of column's header between values passed on params.
 
     Returns
     -------
     bbox : tuple
-            Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+        Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
 
 
     Examples
@@ -102,6 +102,7 @@ def get_bbox(df_, dic_labels=dic_labels):
     except Exception as e:
         raise e
 
+#TODO: vê o que é o tiles
 def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     """
     Save bbox as file .html using Folium.
@@ -109,17 +110,17 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     Parameters
     ----------
     bbox_tuple : tuple
-                 Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+        Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
 
     
     file : String
-           Represents filename.
+        Represents filename.
 
     tiles : String
-            -
+        -
     
     color : String
-            Represents color of trajectorys on map.
+        Represents color of trajectorys on map.
 
     Returns
     -------
@@ -147,10 +148,10 @@ def show_trajectories_info(df_, dic_labels=dic_labels):
     Parameters
     ----------
     df_ : pandas.core.frame.DataFrame
-          Represents the dataset with contains lat, long and datetime.
+        Represents the dataset with contains lat, long and datetime.
     
     dic_labels : dict
-                 Represents mapping of column's header between values passed on params.
+        Represents mapping of column's header between values passed on params.
 
     Returns
     -------
@@ -207,7 +208,7 @@ def now_str():
     Returns
     -------
     date_time : String
-                Represents a data. 
+        Represents a data. 
 
     Examples
     --------
@@ -226,12 +227,12 @@ def deltatime_str(deltatime_seconds):
     Parameters
     ----------
     deltatime_seconds : float
-          Represents the dataset with contains lat, long and datetime.    
+        Represents the dataset with contains lat, long and datetime.    
    
     Returns
     -------
     time_str : String
-               Represents time in a format hh:mm:ss:---.
+        Represents time in a format hh:mm:ss:---.
 
     Examples
     --------
@@ -257,12 +258,12 @@ def timestamp_to_millis(timestamp):
     Parameters
     ----------
     timestamp : String
-                Represents a data.    
+        Represents a data.    
    
     Returns
     -------
     millis : int
-             Represents millisecond results.
+        Represents millisecond results.
 
     Examples
     --------
@@ -276,17 +277,17 @@ def timestamp_to_millis(timestamp):
 
 def millis_to_timestamp(milliseconds):
     """
-    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+    Converts milliseconds to timestamp.
 
     Parameters
     ----------
     milliseconds : int
-                   Represents millisecond.
+        Represents millisecond.
    
     Returns
     -------
-    timestamp : String
-                Represents a data. 
+    timestamp : pandas._libs.tslibs.timestamps.Timestamp
+        Represents the date corresponding. 
 
     Examples
     --------
@@ -298,74 +299,73 @@ def millis_to_timestamp(milliseconds):
     timestamp = Timestamp(milliseconds, unit='ms')
     return timestamp
 
-#TODO
-def date_to_str(date1):
+def date_to_str(date):
     """
-    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+    Get date, in string's format, from timestamp.
 
     Parameters
     ----------
-    milliseconds : int
-                   Represents millisecond.
+    date : pandas._libs.tslibs.timestamps.Timestamp
+        Represents a date.
    
     Returns
     -------
-    timestamp : String
-                Represents a data. 
+    datestr : String
+        Represents the date in string's format. 
 
     Examples
     --------
-    >>> from pymove.utils.utils import millis_to_timestamp
-    >>> millis_to_timestamp(1449907200123)
-    '2015-12-12 08:00:00.123000'
+    >>> from pymove.utils.utils import date_to_str
+    >>> date_to_str('2015-12-12 08:00:00.123000')
+    '2015-12-12'
 
     """
-    return date1.strftime('%Y-%m-%d')
+    datestr = date.strftime('%Y-%m-%d')
+    return datestr
 
-#TODO
-def time_to_str(time1):
+def time_to_str(time):
     """
-    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+    Get time, in string's format, from timestamp.
 
     Parameters
     ----------
-    milliseconds : int
-                   Represents millisecond.
+    time : pandas._libs.tslibs.timestamps.Timestamp
+        Represents a time.
    
     Returns
     -------
-    timestamp : String
-                Represents a data. 
+    timestr : String
+        Represents the time in string's format. 
 
     Examples
     --------
-    >>> from pymove.utils.utils import millis_to_timestamp
-    >>> millis_to_timestamp(1449907200123)
-    '2015-12-12 08:00:00.123000'
+    >>> from pymove.utils.utils import time_to_str
+    >>> time_to_str('2015-12-12 08:00:00.123000')
+    '08:00:00'
 
     """
-    return time1.strftime('%H:%M:%S')
+    timestr = time1.strftime('%H:%M:%S')
+    return timestr
 
-#TODO
 def str_to_datatime(dt_str):
     """
-    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+    Converts a datetime in string's format '%Y-%m-%d' or '%Y-%m-%d %H:%M:%S' to datetime's format.
 
     Parameters
     ----------
-    milliseconds : int
-                   Represents millisecond.
+    dt_str : String
+        Represents a datetime in string's format.
    
     Returns
     -------
-    timestamp : String
-                Represents a data. 
+    datetime : datetime.datetime
+        Represents a datetime in datetime's format. 
 
     Examples
     --------
-    >>> from pymove.utils.utils import millis_to_timestamp
-    >>> millis_to_timestamp(1449907200123)
-    '2015-12-12 08:00:00.123000'
+    >>> from pymove.utils.utils import str_to_datatime
+    >>> str_to_datatime('2015-12-12')
+    datetime.datetime(2015, 12, 12, 0, 0)
 
     """
     if len(dt_str) == 10:
@@ -373,105 +373,178 @@ def str_to_datatime(dt_str):
     else:
         return datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
-#TODO
 def str_to_time(dt_str):
     """
-    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+    Converts a time in string's format '%H:%M:%S' to datetime's format.
 
     Parameters
     ----------
-    milliseconds : int
-                   Represents millisecond.
+    dt_str : String
+        Represents a time in string's format.
    
     Returns
     -------
-    timestamp : String
-                Represents a data. 
+    datetime_time : datetime.datetime
+        Represents a time in datetime's format. 
 
     Examples
     --------
-    >>> from pymove.utils.utils import millis_to_timestamp
-    >>> millis_to_timestamp(1449907200123)
-    '2015-12-12 08:00:00.123000'
+    >>> from pymove.utils.utils import str_to_time
+    >>> str_to_time('08:00:00')
+    datetime.datetime(1900, 1, 1, 8, 0)
 
     """
-    return datetime.datetime.strptime(dt_str, '%H:%M:%S')
+    
+    datetime_time = datetime.datetime.strptime(dt_str, '%H:%M:%S')
+    return datetime_time
 
-#TODO
-def datetime_to_str(dt1):
+def datetime_to_str(data):
     """
-    Converts a POSIX timestamp in milliseconds (like in Java) to a local datetime.
+    Converts a date in datetime's format to string's format.
 
     Parameters
     ----------
-    milliseconds : int
-                   Represents millisecond.
+    data : datetime.datetime
+        Represents a datetime in datetime's format.
    
     Returns
     -------
-    timestamp : String
-                Represents a data. 
+    datetime_str : datetime.datetime
+        Represents a datetime in string's format '%Y-%m-%d %H:%M:%S'. 
 
     Examples
     --------
-    >>> from pymove.utils.utils import millis_to_timestamp
-    >>> millis_to_timestamp(1449907200123)
-    '2015-12-12 08:00:00.123000'
+    >>> from pymove.utils.utils import datetime_to_str
+    >>> datetime_to_str(datetime.datetime(2019, 9, 3, 11, 11, 49, 520512))
+    '2019-09-03 11:11:49'
 
     """
-    return dt1.strftime('%Y-%m-%d %H:%M:%S')
+    datetime_str = data.strftime('%Y-%m-%d %H:%M:%S')
+    return datetime_str
 
+def datetime_to_min(datetime):
+    """
+    Converts a datetime to an int representation in minutes. 
+    To do the reverse use: min_to_datetime.
 
-# def datetime_to_min(datetime):
-#     """
-#     Converts a datetime to an int representation in minutes. 
-#     To do the reverse use: min_to_dtime.
-#     e.g. in:datetime.datetime(2014, 1, 1, 20, 56) -> out:23143496
-#     """
-#     # get an integer time slot from a datetime
-#     # e.g. in:datetime.datetime(2014, 1, 1, 20, 55) -> out:23143495
-#     # e.g. in:datetime.datetime(2014, 1, 1, 20, 56) -> out:23143496
-#     return int((datetime - datetime.datetime.utcfromtimestamp(0)).total_seconds() / 60)
+    Parameters
+    ----------
+    datetime : datetime.datetime
+        Represents a datetime in datetime's format.
+   
+    Returns
+    -------
+    minutes : int
+        Represents minutes from. 
 
-# def min_to_datatime(min1):
-#     """
-#     Converts an int representation in minutes to a datetime. 
-#     To do the reverse use: dtime_to_min.
-#     e.g. in:23143496 -> out:datetime.datetime(2014, 1, 1, 20, 56)
-#     """
-#     # get a datetime from an integer time slot
-#     # e.g. in:23143495 -> out:datetime.datetime(2014, 1, 1, 20, 55)
-#     # e.g. in:23143496 -> out:datetime.datetime(2014, 1, 1, 20, 56)
-#     #return datetime.timedelta(minutes=min1) + datetime.datetime.utcfromtimestamp(0)
-#     # utcfromtimestamp (below) is much faster than the line above
-#     return datetime.datetime.utcfromtimestamp(min1 * 60)
+    Examples
+    --------
+    >>> from pymove.utils.utils import datetime_to_min
+    >>> datetime_to_min(datetime.datetime(2014, 1, 1, 20, 56))
+    23143496
 
-# def slot_of_day_to_time(slot_of_day1, time_window_duration=5):
-#     min1 = slot_of_day1 * time_window_duration
-#     return datetime.time(min1 // 60, min1 % 60)
+    """
+    # get an integer time slot from a datetime
+    minutes = int((datetime - datetime.utcfromtimestamp(0)).total_seconds() / 60)
+    return minutes
 
-# def slot_of_day(dt1, time_window_duration=5):
-#     return (dt1.hour * 60 + dt1.minute) // time_window_duration
+def min_to_datetime(min1):
+    """
+    Converts an int representation in minutes to a datetime.  
+    To do the reverse use: datetime_to_min.
 
-# def datetime_slot(dt1, time_window_duration=5):
-#     minute = (dt1.minute // time_window_duration) * time_window_duration
-#     return datetime.datetime(dt1.year, dt1.month, dt1.day, dt1.hour, minute)
+    Parameters
+    ----------
+    datetime : datetime.datetime
+        Represents a datetime in datetime's format.
+   
+    Returns
+    -------
+    minutes : int
+        Represents minutes from. 
 
-# def datetime_str_to_min_slot(dt_str, time_window_duration=5):
-#     """
-#     Converts a datetime string to an int minute time slot (approximated to the time slot).
-#     Same as datetime_str_to_min_slot, but another implementation.
-#     To do almost the reverse (consider time slot approximation) use: min_to_dtime.
-#     e.g. in:'2014-01-01 20:56:00' -> out:23143495
-#     """
-#     dt = datetime_to_str(dt_str)
-#     dt_slot = datetime_slot(dt, time_window_duration)
-#     return dt_slot
+    Examples
+    --------
+    >>> from pymove.utils.utils import min_to_datetime
+    >>> min_to_datetime(23143496)
+    datetime.datetime(2014, 1, 1, 20, 56)
 
-# def date_to_day_of_week_int(date):
-#     # Monday == 0...Sunday == 6
-#     return date.weekday()
+    """
+    # get a datetime from an integer time slot
+    # utcfromtimestamp (below) is much faster than the line above
+    return datetime.datetime.utcfromtimestamp(min1 * 60)
 
+#TODO: vê o que são os parametros e tipo dos param
+def slot_of_day_to_time(slot_of_day1, time_window_duration=5):
+    min1 = slot_of_day1 * time_window_duration
+    return datetime.time(min1 // 60, min1 % 60)
+
+#TODO: vê o que são os parametros e tipo dos param
+def slot_of_day(dt1, time_window_duration=5):
+    return (dt1.hour * 60 + dt1.minute) // time_window_duration
+
+#TODO: vê o que são os parametros e tipo dos param
+def datetime_slot(dt1, time_window_duration=5):
+    minute = (dt1.minute // time_window_duration) * time_window_duration
+    return datetime.datetime(dt1.year, dt1.month, dt1.day, dt1.hour, minute)
+
+#TODO: Finalizar
+def datetime_str_to_min_slot(dt_str, time_window_duration=5):
+    """
+    Converts a datetime string to an int minute time slot (approximated to the time slot).
+    Same as datetime_str_to_min_slot, but another implementation.
+    To do almost the reverse (consider time slot approximation) use: min_to_datetime.
+
+    Parameters
+    ----------
+    dt_str : datetime.datetime
+        Represents a datetime in datetime's format.
+
+    time_window_duration: int
+
+   
+    Returns
+    -------
+    dt_slot : int
+        Represents minutes from. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import datetime_str_to_min_slot
+    >>> datetime_str_to_min_slot('2014-01-01 20:56:00)
+    23143495
+
+    """
+    dt = datetime_to_str(dt_str)
+    dt_slot = datetime_slot(dt, time_window_duration)
+    return dt_slot
+
+def date_to_day_of_week_int(date):
+    """
+    Get day of week of a date.  
+    Monday == 0...Sunday == 6
+
+    Parameters
+    ----------
+    date : datetime.datetime
+        Represents a datetime in datetime's format.
+   
+    Returns
+    -------
+    day_week : int
+        Represents day of week. 
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import date_to_day_of_week_int
+    >>> date_to_day_of_week_int(datetime.datetime(2014, 1, 1, 20, 56))
+    2
+
+    """
+    day_week = date.weekday()
+    return day_week
+
+###################### ARINA
 # def elapsed_time_dt(start_time):
 #     return diff_time(start_time, datetime.datetime.now())
 
