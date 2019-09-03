@@ -1,49 +1,65 @@
 # TODO: Andreza
-
 import numpy as np
 import pandas as pd
 import time
 from scipy.interpolate import interp1d
-
-# from pymove import utils as ut
-# from pymove import gridutils
-
 from pymove.utils.utils import dic_labels, dic_features_label
 
 """ ----------------------  FUCTIONS TO LAT AND LONG COORDINATES --------------------------- """ 
 
-# def lon2XSpherical(lon):
-#     """
-#     From Longitude to X EPSG:3857 WGS 84 / Pseudo-Mercator
-#     https://epsg.io/transform
-#     @param longitude in degrees
-#     @return X offset from your original position in meters.
-#     -38.501597 -> -4285978.17
-#     """
-#     return 6378137 * np.radians(lon)
+def lon2XSpherical(lon):
+    """
+    Convert from Longitude to X EPSG:3857 WGS 84 / Pseudo-Mercator 
 
-# def lat2YSpherical(lat):
-#     """
-#     From Latitude to Y EPSG:3857 WGS 84 / Pseudo-Mercator
-#     @param latitude in degrees
-#     @return Y offset from your original position in meters.
-#     -3.797864 -> -423086.22
-#     """
-#     return 6378137 * np.log(np.tan(np.pi / 4 + np.radians(lat) / 2.0))
+    Parameters
+    ----------
+    lon : float
+        Represents the dataset with contains lat, long and datetime.
 
-# def x2LonSpherical(x):
-#     """
-#     From X to Longitude.
-#     -4285978.17 -> -38.501597
-#     """
-#     return np.degrees(x / 6378137.0)
+    Returns
+    -------
+    xspherical : float
+        X offset from your original position in meters.
+     
+    Examples
+    --------
+    >>> from pymove.utils.utils import format_labels
+    >>> format_labels(df, 'a', 'lati', 'lng', 'time')
+    {'id': 'a', 'lat': 'lati', 'lon': 'lng', 'datetime': 'time'}
 
-# def y2LatSpherical(y):
-#     """
-#     From Y to Longitude.
-#     -423086.22 -> -3.797864 
-#     """
-#     return np.degrees(np.arctan(np.sinh(y / 6378137.0)))
+    """
+    """
+    
+    https://epsg.io/transform
+    @param longitude in degrees
+    @return 
+    -38.501597 -> -4285978.17
+    """
+    xspherical = 6378137 * np.radians(lon)
+    return xspherical
+
+def lat2YSpherical(lat):
+    """
+    From Latitude to Y EPSG:3857 WGS 84 / Pseudo-Mercator
+    @param latitude in degrees
+    @return Y offset from your original position in meters.
+    -3.797864 -> -423086.22
+    """
+    return 6378137 * np.log(np.tan(np.pi / 4 + np.radians(lat) / 2.0))
+
+def x2LonSpherical(x):
+    """
+    From X to Longitude.
+    -4285978.17 -> -38.501597
+    """
+    return np.degrees(x / 6378137.0)
+
+def y2LatSpherical(y):
+    """
+    From Y to Longitude.
+    -423086.22 -> -3.797864 
+    """
+    return np.degrees(np.arctan(np.sinh(y / 6378137.0)))
 
 # def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
     
