@@ -37,7 +37,6 @@ def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     dic_labels['datetime'] = current_datetime
     return dic_labels
 
-                       
     
 def show_trajectories_info(df_, dic_labels=dic_labels):
     """
@@ -261,6 +260,9 @@ def date_to_day_of_week_int(date):
     # Monday == 0...Sunday == 6
     return date.weekday()
 
+#FUNCOES ARINA
+
+
 def elapsed_time_dt(start_time):
     """Computes the elapsed time from a specific start time to the moment the function is called.
 
@@ -277,6 +279,7 @@ def elapsed_time_dt(start_time):
     """
     time_dif = diff_time(start_time, datetime.datetime.now())
     return time_dif
+
 
 def diff_time(start_time, end_time):
     """Computes the elapsed time from the start time to the end time specifed by the user.
@@ -298,6 +301,7 @@ def diff_time(start_time, end_time):
 
     time_dif = int((end_time - start_time).total_seconds() * 1000)
     return time_dif
+
 
 def working_day(dt, holidays):
     """Indices if a day specified by the user is a working day.
@@ -334,6 +338,7 @@ def working_day(dt, holidays):
 
     return result
 
+
 #Nao entendi o que ela faz
 def std(sum_sq, size, avg):
     try:
@@ -346,16 +351,20 @@ def std(sum_sq, size, avg):
         raise ValueError(e)
     return result
 
+
 def avg_std(sum1, sum_sq, size):
     avg = sum1 / size
     return avg, std(sum_sq, size, avg)
 
+
 def std_sample(sum_sq, size, avg):
     return std(sum_sq, size, avg) * math.sqrt(size / (size - 1))
+
 
 def avg_std_sample(sum1, sum_sq, size):
     avg = sum1 / size
     return avg, std_sample(sum_sq, size, avg)
+
 
 #função está dando erro ao rodar
 def arrays_avg(values_array, weights_array=None):
@@ -391,6 +400,7 @@ def arrays_avg(values_array, weights_array=None):
 
     return result
 
+
 def array_sum(values_array):
     """Computes the sum of the elements of the array.
 
@@ -407,6 +417,7 @@ def array_sum(values_array):
         sum1 += item
 
     return sum1
+
 
 def array_stats(values_array):
     """Computes the sum of all the elements in the array, the sum of the square of each element and the number of 
@@ -436,6 +447,7 @@ def array_stats(values_array):
 
     return sum1, sum_sq, n
 
+
 def change_df_feature_values_using_filter(df, id_, feature_name, filter_, values):
     """
     equivalent of: df.at[id_, feature_name][filter_] = values
@@ -449,6 +461,7 @@ def change_df_feature_values_using_filter(df, id_, feature_name, filter_, values
         values_feature[filter_] = values
         df.at[id_, feature_name] = values_feature
 
+
 def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, filter_, idxs, values):
     """
     equivalent of: df.at[id_, feature_name][filter_][idxs] = values
@@ -460,6 +473,7 @@ def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, fil
     values_feature_filter[idxs] = values
     values_feature[filter_] = values_feature_filter
     df.at[id_, feature_name] = values_feature
+
 
 def list_to_str(input_list, delimiter=','):
     """Concatenates the elements of the array, joining them by the separator especified by the parameter "delimiter"
@@ -479,6 +493,7 @@ def list_to_str(input_list, delimiter=','):
     """
     return delimiter.join([x if type(x) == str else repr(x) for x in input_list])  # list comprehension
 
+
 def list_to_csv_str(input_list):
     """Concatenates the elements of the array, joining them by ",".
 
@@ -494,7 +509,21 @@ def list_to_csv_str(input_list):
     """
     return list_to_str(input_list)  # list comprehension
 
+
+#erro se tentar converter int para str e funcao n verifica isso
 def fill_list_with_new_values(original_list, new_list_values):
+    """ Copies elements from one list to another. The elements will be positioned in the same position in the new list as
+    they were in their original list.
+
+    Parameters
+    ----------
+    original_list : array
+    The list to which the elements will be copied
+
+    new_list_values : array
+    The list from which elements will be copied
+
+    """
     for i in range(len(new_list_values)):
         type1 = type(original_list[i])
         if type1 == int:
@@ -504,6 +533,7 @@ def fill_list_with_new_values(original_list, new_list_values):
         else:
             original_list[i] = new_list_values[i]
 
+
 def list_to_svm_line(original_list):
     list_size = len(original_list)
     svm_line = '%s ' % original_list[0]
@@ -511,6 +541,7 @@ def list_to_svm_line(original_list):
         #svm_line += '{}:{} '.format(i, repr(original_list[i]))
         svm_line += '{}:{} '.format(i, original_list[i])
     return svm_line.rstrip()
+
 
 def interpolation(x0, y0, x1, y1, x):
     """
