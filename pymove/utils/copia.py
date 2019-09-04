@@ -535,6 +535,9 @@ def fill_list_with_new_values(original_list, new_list_values):
 
 
 def list_to_svm_line(original_list):
+    """
+
+    """
     list_size = len(original_list)
     svm_line = '%s ' % original_list[0]
     for i in range(1, list_size):
@@ -544,21 +547,69 @@ def list_to_svm_line(original_list):
 
 
 def interpolation(x0, y0, x1, y1, x):
-    """
-    Used for interpolation and extrapolation.
+    """Perfomers interpolation and extrapolation
+
+    Parameters
+    ----------
+    x0 : float
+        The coordinate of the first point on the x axis
+
+    y0 : float
+        The coordinate of the first point on the y axis
+
+    x1 : float
+        The coordinate of the second point on the x axis
+
+    y1 : float
+        The coordinate of the second point on the y axis
+
+    x : float
+        A value in the interval (x0, x1)
+
+    Returns
+    -------
+    y : float
+        Is the interpolated  or extrapolated value.
+
+    Examples
+    --------
     interpolation 1: (30, 3, 40, 5, 37) -> 4.4
     interpolation 2: (30, 3, 40, 5, 35) -> 4.0
     extrapolation 1: (30, 3, 40, 5, 25) -> 2.0
     extrapolation 2: (30, 3, 40, 5, 45) -> 6.0
     """
-    return y0 + (y1 - y0) * ( (x - x0)/(x1 - x0) )
+    y = y0 + (y1 - y0) * ((x - x0)/(x1 - x0))
+    return y
 
 def shift(arr, num, fill_value=np.nan):
+    """Shifts the elements of the given array by the number of periods specified.
+
+    Parameters
+    ----------
+    arr : array
+        The array to be shifed.
+
+    num : Integer
+        Number of periods to shift. Can be positive or negative. If posite, the elements will be pulled down, and pulled
+        up otherwise.
+
+    fill_value : Integer, optional(np.nan by default)
+        The scalar value used for newly introduced missing values.
+
+    Returns
+    -------
+    result : array
+        A new array with the same shape and type as the initial given array, but with the indexes shifted.
+
+    Notes
+    -----
+        Similar to pandas shift, but faster.
+
+    See also
+    --------
+        https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
     """
-    Similar to pandas shift, but faster.
-    See: https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
-    """
-    """ Return a new array with the same shape and type as a given array."""
+
     result = np.empty_like(arr)
 
     if num > 0:
