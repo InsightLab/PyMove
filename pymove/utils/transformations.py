@@ -9,12 +9,12 @@ from pymove.utils.utils import dic_labels, dic_features_label
 
 def lon2XSpherical(lon):
     """
-    Convert from Longitude to X EPSG:3857 WGS 84 / Pseudo-Mercator 
+    Convert longitude to to X EPSG:3857 WGS 84 / Pseudo-Mercator 
 
     Parameters
     ----------
     lon : float
-        Represents the dataset with contains lat, long and datetime.
+        Represents longitude.
 
     Returns
     -------
@@ -23,64 +23,156 @@ def lon2XSpherical(lon):
      
     Examples
     --------
-    >>> from pymove.utils.utils import format_labels
-    >>> format_labels(df, 'a', 'lati', 'lng', 'time')
-    {'id': 'a', 'lat': 'lati', 'lon': 'lng', 'datetime': 'time'}
+    >>> from pymove.utils.transformations import lon2XSpherical
+    >>> lon2XSpherical(-38.501597 )
+    -4285978.17
 
-    """
-    """
-    
+    References
+    ----------
     https://epsg.io/transform
-    @param longitude in degrees
-    @return 
-    -38.501597 -> -4285978.17
+
     """
     xspherical = 6378137 * np.radians(lon)
     return xspherical
 
 def lat2YSpherical(lat):
     """
-    From Latitude to Y EPSG:3857 WGS 84 / Pseudo-Mercator
-    @param latitude in degrees
-    @return Y offset from your original position in meters.
-    -3.797864 -> -423086.22
+    Convert latitude to Y EPSG:3857 WGS 84 / Pseudo-Mercator 
+
+    Parameters
+    ----------
+    lat : float
+        Represents latitude.
+
+    Returns
+    -------
+    yspherical : float
+        Y offset from your original position in meters.
+     
+    Examples
+    --------
+    >>> from pymove.utils.transformations import lat2YSpherical
+    >>> lat2YSpherical(-3.797864)
+    -423086.2213610324
+
+    References
+    ----------
+    https://epsg.io/transform
+
     """
-    return 6378137 * np.log(np.tan(np.pi / 4 + np.radians(lat) / 2.0))
+    yspherical = 6378137 * np.log(np.tan(np.pi / 4 + np.radians(lat) / 2.0))
+    return yspherical
 
 def x2LonSpherical(x):
     """
-    From X to Longitude.
-    -4285978.17 -> -38.501597
+    Convert X EPSG:3857 WGS 84 / Pseudo-Mercator to longitude.  
+
+    Parameters
+    ----------
+    x : float
+        X offset from your original position in meters.
+
+    Returns
+    -------
+    lon : float
+        Represents longitude.
+     
+    Examples
+    --------
+    >>> from pymove.utils.transformations import x2LonSpherical
+    >>> x2LonSpherical(-4285978.17)
+    -38.501597
+
+    References
+    ----------
+    https://epsg.io/transform
+
     """
-    return np.degrees(x / 6378137.0)
+    lon = np.degrees(x / 6378137.0)
+    return lon
 
 def y2LatSpherical(y):
     """
-    From Y to Longitude.
-    -423086.22 -> -3.797864 
+    Convert Y EPSG:3857 WGS 84 / Pseudo-Mercator to latitude.
+
+    Parameters
+    ----------
+    y : float
+        Y offset from your original position in meters.
+
+    Returns
+    -------
+    lat : float
+        Represents latitude.
+     
+    Examples
+    --------
+    >>> from pymove.utils.transformations import y2LatSpherical
+    >>> y2LatSpherical(-423086.22)
+    -3.797864 
+
+    References
+    ----------
+    https://epsg.io/transform
+
     """
-    return np.degrees(np.arctan(np.sinh(y / 6378137.0)))
+    lat = np.degrees(np.arctan(np.sinh(y / 6378137.0)))
+    return lat
 
-# def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
+def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
+    """
+    Calculate the great circle distance between two points on the earth (specified in decimal degrees or in radians).
+    All (lat, lon) coordinates must have numeric dtypes and be of equal length.
+    Result in meters. Use 3956 in earth radius for miles
+
+    Parameters
+    ----------
+    lat1 : float
+        Y offset from your original position in meters.
     
-#     """
-#     Vectorized haversine function: https://stackoverflow.com/questions/43577086/pandas-calculate-haversine-distance-within-each-group-of-rows
-#     About distance between two points: https://janakiev.com/blog/gps-points-distance-python/
-#     Calculate the great circle distance between two points on the earth (specified in decimal degrees or in radians).
-#     All (lat, lon) coordinates must have numeric dtypes and be of equal length.
-#     Result in meters. Use 3956 in earth radius for miles
-#     """
-#     try:
-#         if to_radians:
-#             lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
-#             a = np.sin((lat2-lat1)/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2-lon1)/2.0)**2
-#         #return earth_radius * 2 * np.arcsin(np.sqrt(a)) * 1000  # result in meters (* 1000)
-#         return 2 * 1000 * earth_radius * np.arctan2(a ** 0.5, (1-a) ** 0.5)
-#         #np.arctan2(np.sqrt(a), np.sqrt(1-a)) 
+    lon1 : float
+        Y offset from your original position in meters.
 
-#     except Exception as e:
-#         print('\nError Haverside fuction')
-#         raise e
+    lat2 : float
+        Y offset from your original position in meters.
+
+    lon2 : float
+        Y offset from your original position in meters.
+
+    to_radians : boolean
+        Y offset from your original position in meters.
+
+    earth_radius : int
+        Y offset from your original position in meters.
+
+    Returns
+    -------
+    lat : float
+        Represents latitude.
+     
+    Examples
+    --------
+    >>> from pymove.utils.transformations import haversine
+    >>> haversine(-423086.22)
+    -3.797864 
+
+    References
+    ----------
+    Vectorized haversine function: https://stackoverflow.com/questions/43577086/pandas-calculate-haversine-distance-within-each-group-of-rows
+    About distance between two points: https://janakiev.com/blog/gps-points-distance-python/
+
+    """
+    try:
+        if to_radians:
+            lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
+            a = np.sin((lat2-lat1)/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2-lon1)/2.0)**2
+        #return earth_radius * 2 * np.arcsin(np.sqrt(a)) * 1000  # result in meters (* 1000)
+        return 2 * 1000 * earth_radius * np.arctan2(a ** 0.5, (1-a) ** 0.5)
+        #np.arctan2(np.sqrt(a), np.sqrt(1-a)) 
+
+    except Exception as e:
+        print('\nError Haverside fuction')
+        raise e
 
 # """ ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON DATATIME  ----------------------------- """
 
