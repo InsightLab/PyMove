@@ -17,66 +17,66 @@ import numpy as np
 import json
 import resource
 
-def get_proc_info():
-	"""This functions retrieves informations about each jupyter notebook running in the machine. 
+# def get_proc_info():
+# 	"""This functions retrieves informations about each jupyter notebook running in the machine. 
 	
-	Returns
-	-------
-	df_mem : dataframe
-		A dataframe with the following informations about each jupyter notebook process:
-			- user : username 
-			- pid : process identifier
-			- memory_GB : memory usage  
-			- kernel_ID : kernel id
+# 	Returns
+# 	-------
+# 	df_mem : dataframe
+# 		A dataframe with the following informations about each jupyter notebook process:
+# 			- user : username 
+# 			- pid : process identifier
+# 			- memory_GB : memory usage  
+# 			- kernel_ID : kernel id
 	
-	Examples
-	--------
-	Example : 
-		>>> mem.get_proc_info()
-				user 	pid 	memory_GB 	kernel_ID
-			0 	999999 	11797 	0.239374 	74efe612-927f-4c1f-88a6-bb5fd32bc65c
-			1 	999999 	11818 	0.172012 	11c38dd6-8a65-4c45-90cf-0da5db65fa99
-	"""
+# 	Examples
+# 	--------
+# 	Example : 
+# 		>>> mem.get_proc_info()
+# 				user 	pid 	memory_GB 	kernel_ID
+# 			0 	999999 	11797 	0.239374 	74efe612-927f-4c1f-88a6-bb5fd32bc65c
+# 			1 	999999 	11818 	0.172012 	11c38dd6-8a65-4c45-90cf-0da5db65fa99
+# 	"""
 
-    UID = 1
+#     UID = 1
 
-    regex = re.compile(r'.+kernel-(.+)\.json')
-    port_regex = re.compile(r'port=(\d+)')
+#     regex = re.compile(r'.+kernel-(.+)\.json')
+#     port_regex = re.compile(r'port=(\d+)')
     
-    pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+#     pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 
-    # memory info from psutil.Process
-    df_mem = []
+#     # memory info from psutil.Process
+#     df_mem = []
 
-    for pid in pids:
-        try:
-            ret = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
-            ret_str = ret.decode('utf-8')
-        except IOError:  # proc has already terminated
-            continue
+#     for pid in pids:
+#         try:
+#             ret = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
+#             ret_str = ret.decode('utf-8')
+#         except IOError:  # proc has already terminated
+#             continue
 
-        # jupyter notebook processes
-        if len(ret_str) > 0 and ('jupyter' in ret_str or 'ipython' in ret_str) and 'kernel' in ret_str:
-            # kernel
-            kernel_ID = re.sub(regex, r'\1', ret_str)[0:-1]
-            #kernel_ID = filter(lambda x: x in string.printable, kernel_ID)
+#         # jupyter notebook processes
+#         if len(ret_str) > 0 and ('jupyter' in ret_str or 'ipython' in ret_str) and 'kernel' in ret_str:
+#             # kernel
+#             kernel_ID = re.sub(regex, r'\1', ret_str)[0:-1]
+#             #kernel_ID = filter(lambda x: x in string.printable, kernel_ID)
 
-            # memory
-            process = psutil.Process(int(pid))
-            mem = process.memory_info()[0] / float(1e9)
+#             # memory
+#             process = psutil.Process(int(pid))
+#             mem = process.memory_info()[0] / float(1e9)
 
-            # user name for pid
-            for ln in open('/proc/{0}/status'.format(int(pid))):
-                if ln.startswith('Uid:'):
-                    uid = int(ln.split()[UID])
-                    uname = pwd.getpwuid(uid).pw_name
+#             # user name for pid
+#             for ln in open('/proc/{0}/status'.format(int(pid))):
+#                 if ln.startswith('Uid:'):
+#                     uid = int(ln.split()[UID])
+#                     uname = pwd.getpwuid(uid).pw_name
 
-            # user, pid, memory, kernel_ID
-            df_mem.append([uname, pid, mem, kernel_ID])
+#             # user, pid, memory, kernel_ID
+#             df_mem.append([uname, pid, mem, kernel_ID])
 
-    df_mem = pd.DataFrame(df_mem)
-    df_mem.columns = ['user', 'pid', 'memory_GB', 'kernel_ID']
-    return df_mem
+#     df_mem = pd.DataFrame(df_mem)
+#     df_mem.columns = ['user', 'pid', 'memory_GB', 'kernel_ID']
+#     return df_mem
 
 def get_session_info(sessions_str):
     sessions = json.loads(sessions_str)
@@ -104,18 +104,26 @@ def stats(sessions_str):
     del(df_nb)
     return df.reset_index(drop=True)
 
-def mem():
-	"""Calculates the resource consumed the current process.
+# def mem():
+# 	"""Calculates the resource consumed the current process.
 
-	Returns
-	-------
-	mem : float
-		The used memory by the process in MB.
-	"""
-    mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
-    return mem # used memory in MB
+# 	Returns
+# 	-------
+# 	mem : float
+# 		The used memory by the process in MB.
+# 	"""
+#     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
+#     return mem # used memory in MB
 
 def reduce_mem_usage_automatic(df):
+	"""Reduces the memory usage of the given dataframe.
+
+	Parameter
+	---------
+	df : dataframe
+		The input data to which the operation of memory reduction will be performed.
+
+	"""
     start_mem = df.memory_usage().sum() / 1024**2
     print('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
 
