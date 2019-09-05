@@ -4,9 +4,9 @@ from sys import getsizeof, stderr
 from itertools import chain
 from collections import deque
 try:
-    from reprlib import repr
+	from reprlib import repr
 except ImportError:
-    pass
+	pass
 
 import re
 import os
@@ -17,103 +17,103 @@ import numpy as np
 import json
 import resource
 
-# def get_proc_info():
-# 	"""This functions retrieves informations about each jupyter notebook running in the machine. 
+def get_proc_info():
+	"""This functions retrieves informations about each jupyter notebook running in the machine. 
 	
-# 	Returns
-# 	-------
-# 	df_mem : dataframe
-# 		A dataframe with the following informations about each jupyter notebook process:
-# 			- user : username 
-# 			- pid : process identifier
-# 			- memory_GB : memory usage  
-# 			- kernel_ID : kernel id
+	Returns
+	-------
+	df_mem : dataframe
+		A dataframe with the following informations about each jupyter notebook process:
+			- user : username 
+			- pid : process identifier
+			- memory_GB : memory usage  
+			- kernel_ID : kernel id
 	
-# 	Examples
-# 	--------
-# 	Example : 
-# 		>>> mem.get_proc_info()
-# 				user 	pid 	memory_GB 	kernel_ID
-# 			0 	999999 	11797 	0.239374 	74efe612-927f-4c1f-88a6-bb5fd32bc65c
-# 			1 	999999 	11818 	0.172012 	11c38dd6-8a65-4c45-90cf-0da5db65fa99
-# 	"""
+	Examples
+	--------
+	Example : 
+		>>> mem.get_proc_info()
+				user 	pid 	memory_GB 	kernel_ID
+			0 	999999 	11797 	0.239374 	74efe612-927f-4c1f-88a6-bb5fd32bc65c
+			1 	999999 	11818 	0.172012 	11c38dd6-8a65-4c45-90cf-0da5db65fa99
+	"""
 
-#     UID = 1
+	UID = 1
 
-#     regex = re.compile(r'.+kernel-(.+)\.json')
-#     port_regex = re.compile(r'port=(\d+)')
-    
-#     pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+	regex = re.compile(r'.+kernel-(.+)\.json')
+	port_regex = re.compile(r'port=(\d+)')
+	
+	pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 
-#     # memory info from psutil.Process
-#     df_mem = []
+	# memory info from psutil.Process
+	df_mem = []
 
-#     for pid in pids:
-#         try:
-#             ret = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
-#             ret_str = ret.decode('utf-8')
-#         except IOError:  # proc has already terminated
-#             continue
+	for pid in pids:
+		try:
+			ret = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
+			ret_str = ret.decode('utf-8')
+		except IOError:  # proc has already terminated
+			continue
 
-#         # jupyter notebook processes
-#         if len(ret_str) > 0 and ('jupyter' in ret_str or 'ipython' in ret_str) and 'kernel' in ret_str:
-#             # kernel
-#             kernel_ID = re.sub(regex, r'\1', ret_str)[0:-1]
-#             #kernel_ID = filter(lambda x: x in string.printable, kernel_ID)
+		# jupyter notebook processes
+		if len(ret_str) > 0 and ('jupyter' in ret_str or 'ipython' in ret_str) and 'kernel' in ret_str:
+			# kernel
+			kernel_ID = re.sub(regex, r'\1', ret_str)[0:-1]
+			#kernel_ID = filter(lambda x: x in string.printable, kernel_ID)
 
-#             # memory
-#             process = psutil.Process(int(pid))
-#             mem = process.memory_info()[0] / float(1e9)
+			# memory
+			process = psutil.Process(int(pid))
+			mem = process.memory_info()[0] / float(1e9)
 
-#             # user name for pid
-#             for ln in open('/proc/{0}/status'.format(int(pid))):
-#                 if ln.startswith('Uid:'):
-#                     uid = int(ln.split()[UID])
-#                     uname = pwd.getpwuid(uid).pw_name
+			# user name for pid
+			for ln in open('/proc/{0}/status'.format(int(pid))):
+				if ln.startswith('Uid:'):
+					uid = int(ln.split()[UID])
+					uname = pwd.getpwuid(uid).pw_name
 
-#             # user, pid, memory, kernel_ID
-#             df_mem.append([uname, pid, mem, kernel_ID])
+			# user, pid, memory, kernel_ID
+			df_mem.append([uname, pid, mem, kernel_ID])
 
-#     df_mem = pd.DataFrame(df_mem)
-#     df_mem.columns = ['user', 'pid', 'memory_GB', 'kernel_ID']
-#     return df_mem
+	df_mem = pd.DataFrame(df_mem)
+	df_mem.columns = ['user', 'pid', 'memory_GB', 'kernel_ID']
+	return df_mem
 
 def get_session_info(sessions_str):
-    sessions = json.loads(sessions_str)
-    df_nb = []
-    kernels = []
-    for sess in sessions:
-        kernel_ID = sess['kernel']['id']
-        if kernel_ID not in kernels:
-            notebook_path = sess['notebook']['path']
-            df_nb.append([kernel_ID, notebook_path])
-            kernels.append(kernel_ID)
+	sessions = json.loads(sessions_str)
+	df_nb = []
+	kernels = []
+	for sess in sessions:
+		kernel_ID = sess['kernel']['id']
+		if kernel_ID not in kernels:
+			notebook_path = sess['notebook']['path']
+			df_nb.append([kernel_ID, notebook_path])
+			kernels.append(kernel_ID)
 
-    df_nb = pd.DataFrame(df_nb)
-    df_nb.columns = ['kernel_ID', 'notebook_path']
-    return df_nb
+	df_nb = pd.DataFrame(df_nb)
+	df_nb.columns = ['kernel_ID', 'notebook_path']
+	return df_nb
 
 def stats(sessions_str):
-    df_mem = get_proc_info()
-    df_nb = get_session_info(sessions_str)
+	df_mem = get_proc_info()
+	df_nb = get_session_info(sessions_str)
 
-    # joining tables
-    df = pd.merge(df_nb, df_mem, on=['kernel_ID'], how='right')
-    df = df.sort_values('memory_GB', ascending=False)
-    del(df_mem)
-    del(df_nb)
-    return df.reset_index(drop=True)
+	# joining tables
+	df = pd.merge(df_nb, df_mem, on=['kernel_ID'], how='right')
+	df = df.sort_values('memory_GB', ascending=False)
+	del(df_mem)
+	del(df_nb)
+	return df.reset_index(drop=True)
 
-# def mem():
-# 	"""Calculates the resource consumed the current process.
+def mem():
+	"""Calculates the resource consumed the current process.
 
-# 	Returns
-# 	-------
-# 	mem : float
-# 		The used memory by the process in MB.
-# 	"""
-#     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
-#     return mem # used memory in MB
+	Returns
+	-------
+	mem : float
+		The used memory by the process in MB.
+	"""
+	mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
+	return mem # used memory in MB
 
 def reduce_mem_usage_automatic(df):
 	"""Reduces the memory usage of the given dataframe.
@@ -124,46 +124,46 @@ def reduce_mem_usage_automatic(df):
 		The input data to which the operation of memory reduction will be performed.
 
 	"""
-    start_mem = df.memory_usage().sum() / 1024**2
-    print('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
+	start_mem = df.memory_usage().sum() / 1024**2
+	print('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
 
-    for col in df.columns:
-        col_type = df[col].dtype
-        if str(col_type) == 'int':
-            c_min = df[col].min()
-            c_max = df[col].max()
-            if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
-                df[col] = df[col].astype(np.int8)
-            elif c_min > np.iinfo(np.uint8).min and c_max < np.iinfo(np.uint8).max:
-                df[col] = df[col].astype(np.uint8)
-            elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
-                df[col] = df[col].astype(np.int16)
-            elif c_min > np.iinfo(np.uint16).min and c_max < np.iinfo(np.uint16).max:
-                df[col] = df[col].astype(np.uint16)
-            elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
-                df[col] = df[col].astype(np.int32)
-            elif c_min > np.iinfo(np.uint32).min and c_max < np.iinfo(np.uint32).max:
-                df[col] = df[col].astype(np.uint32)                    
-            elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
-                df[col] = df[col].astype(np.int64)
-            elif c_min > np.iinfo(np.uint64).min and c_max < np.iinfo(np.uint64).max:
-                df[col] = df[col].astype(np.uint64)
-        elif col_type == np.float:
-            c_min = df[col].min()
-            c_max = df[col].max()
-            if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
-                df[col] = df[col].astype(np.float16)
-            elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
-                df[col] = df[col].astype(np.float32)
-            else:
-                df[col] = df[col].astype(np.float64)
+	for col in df.columns:
+		col_type = df[col].dtype
+		if str(col_type) == 'int':
+			c_min = df[col].min()
+			c_max = df[col].max()
+			if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
+				df[col] = df[col].astype(np.int8)
+			elif c_min > np.iinfo(np.uint8).min and c_max < np.iinfo(np.uint8).max:
+				df[col] = df[col].astype(np.uint8)
+			elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
+				df[col] = df[col].astype(np.int16)
+			elif c_min > np.iinfo(np.uint16).min and c_max < np.iinfo(np.uint16).max:
+				df[col] = df[col].astype(np.uint16)
+			elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+				df[col] = df[col].astype(np.int32)
+			elif c_min > np.iinfo(np.uint32).min and c_max < np.iinfo(np.uint32).max:
+				df[col] = df[col].astype(np.uint32)                    
+			elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
+				df[col] = df[col].astype(np.int64)
+			elif c_min > np.iinfo(np.uint64).min and c_max < np.iinfo(np.uint64).max:
+				df[col] = df[col].astype(np.uint64)
+		elif col_type == np.float:
+			c_min = df[col].min()
+			c_max = df[col].max()
+			if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+				df[col] = df[col].astype(np.float16)
+			elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
+				df[col] = df[col].astype(np.float32)
+			else:
+				df[col] = df[col].astype(np.float64)
 
-    end_mem = df.memory_usage().sum() / 1024**2
-    print('Memory usage after optimization is: {:.2f} MB'.format(end_mem))
-    print('Decreased by {:.1f}%'.format(100 * (start_mem - end_mem) / start_mem))
+	end_mem = df.memory_usage().sum() / 1024**2
+	print('Memory usage after optimization is: {:.2f} MB'.format(end_mem))
+	print('Decreased by {:.1f}%'.format(100 * (start_mem - end_mem) / start_mem))
 
 def total_size(o, handlers={}, verbose=False):
-    """ Calculates the approximate memory footprint of an given object and all of its contents.
+	""" Calculates the approximate memory footprint of an given object and all of its contents.
 	Automatically finds the contents of the following builtin containers and
 	their subclasses:  tuple, list, deque, dict, set and frozenset.
 
@@ -188,41 +188,41 @@ def total_size(o, handlers={}, verbose=False):
 	-------
 	s : float
 		The memory used by the given object
-    """
-    dict_handler = lambda d: chain.from_iterable(d.items())
-    all_handlers = {tuple: iter,
-                    list: iter,
-                    deque: iter,
-                    dict: dict_handler,
-                    set: iter,
-                    frozenset: iter,
-                   }
-    all_handlers.update(handlers)     # user handlers take precedence
-    seen = set()                      # track which object id's have already been seen
-    default_size = getsizeof(0)       # estimate sizeof object without __sizeof__
+	"""
+	dict_handler = lambda d: chain.from_iterable(d.items())
+	all_handlers = {tuple: iter,
+					list: iter,
+					deque: iter,
+					dict: dict_handler,
+					set: iter,
+					frozenset: iter,
+				   }
+	all_handlers.update(handlers)     # user handlers take precedence
+	seen = set()                      # track which object id's have already been seen
+	default_size = getsizeof(0)       # estimate sizeof object without __sizeof__
 
-    def sizeof(o):
-        if id(o) in seen:       # do not double count the same object
-            return 0
-        seen.add(id(o))
-        s = getsizeof(o, default_size)
+	def sizeof(o):
+		if id(o) in seen:       # do not double count the same object
+			return 0
+		seen.add(id(o))
+		s = getsizeof(o, default_size)
 
-        if verbose:
-            print(s, type(o), repr(o), file=stderr)
+		if verbose:
+			print(s, type(o), repr(o), file=stderr)
 
-        for typ, handler in all_handlers.items():
-            if isinstance(o, typ):
-                s += sum(map(sizeof, handler(o)))
-                break
-        return s
+		for typ, handler in all_handlers.items():
+			if isinstance(o, typ):
+				s += sum(map(sizeof, handler(o)))
+				break
+		return s
 
-    return sizeof(o)
+	return sizeof(o)
 
 def test():
-    print('test')
+	print('test')
 
 ##### Example call #####
 
 if __name__ == '__main__':
-    d = dict(a=1, b=2, c=3, d=[4,5,6,7], e='a string of chars')
-    print(total_size(d, verbose=True))
+	d = dict(a=1, b=2, c=3, d=[4,5,6,7], e='a string of chars')
+	print(total_size(d, verbose=True))
