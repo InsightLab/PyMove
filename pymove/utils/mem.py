@@ -163,15 +163,31 @@ def reduce_mem_usage_automatic(df):
     print('Decreased by {:.1f}%'.format(100 * (start_mem - end_mem) / start_mem))
 
 def total_size(o, handlers={}, verbose=False):
-    """ Returns the approximate memory footprint an object and all of its contents.
+    """ Calculates the approximate memory footprint of an given object and all of its contents.
+	Automatically finds the contents of the following builtin containers and
+	their subclasses:  tuple, list, deque, dict, set and frozenset.
 
-    Automatically finds the contents of the following builtin containers and
-    their subclasses:  tuple, list, deque, dict, set and frozenset.
-    To search other containers, add handlers to iterate over their contents:
+	Parameters
+	----------
 
-        handlers = {SomeContainerClass: iter,
-                    OtherContainerClass: OtherContainerClass.get_elements}
+	o : object
+		The object to calculate his memory footprint.
+	
+	handlers : dict, optional(empty by default)
+		To search other containers, add handlers to iterate over their contents, example:
+			handlers = {SomeContainerClass: iter,
+						OtherContainerClass: OtherContainerClass.get_elements}
+	
+	verbose : boolean, optional(False by default)
+		If set to True, the following information will be printed for each content of the object:
+			- the size of the object in bytes.
+			- his type
+			- the object values 
 
+	Returns
+	-------
+	s : float
+		The memory used by the given object
     """
     dict_handler = lambda d: chain.from_iterable(d.items())
     all_handlers = {tuple: iter,
