@@ -10,7 +10,7 @@ except ImportError:
 
 import re
 import os
-#import psutil
+import psutil
 import pwd
 import pandas as pd
 import numpy as np
@@ -18,6 +18,26 @@ import json
 import resource
 
 def get_proc_info():
+	"""This functions retrieves informations about each jupyter notebook running in the machine. 
+	
+	Returns
+	-------
+	df_mem : dataframe
+		A dataframe with the following informations about each jupyter notebook process:
+			- user : username 
+			- pid : process identifier
+			- memory_GB : memory usage  
+			- kernel_ID : kernel id
+	
+	Examples
+	--------
+	Example : 
+		>>> mem.get_proc_info()
+				user 	pid 	memory_GB 	kernel_ID
+			0 	999999 	11797 	0.239374 	74efe612-927f-4c1f-88a6-bb5fd32bc65c
+			1 	999999 	11818 	0.172012 	11c38dd6-8a65-4c45-90cf-0da5db65fa99
+	"""
+
     UID = 1
 
     regex = re.compile(r'.+kernel-(.+)\.json')
@@ -85,6 +105,13 @@ def stats(sessions_str):
     return df.reset_index(drop=True)
 
 def mem():
+	"""Calculates the resource consumed the current process.
+
+	Returns
+	-------
+	mem : float
+		The used memory by the process in MB.
+	"""
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
     return mem # used memory in MB
 
