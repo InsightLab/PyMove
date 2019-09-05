@@ -414,17 +414,17 @@ def transform_time_from_minute_to_hours(df_, label_time=dic_features_label['time
 def transform_time_from_hours_to_minute(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
     """Convertes time features from hours to minutes.
 
-        Parameters
-        ----------
-        df : dataframe
-            The input trajectory data
+    Parameters
+    ----------
+    df : dataframe
+        The input trajectory data
 
-        label_time : String, optional("dic_features_label['time_to_prev']" by default)
-            Indicates the label of the column that contains the time data to be converted.
+    label_time : String, optional("dic_features_label['time_to_prev']" by default)
+        Indicates the label of the column that contains the time data to be converted.
 
-        new_label : String, optional(None by default)
-            The new label of the converted column, if set to none, the original label will be kept
-        """
+    new_label : String, optional(None by default)
+        The new label of the converted column, if set to none, the original label will be kept
+    """
     try:
         df_[label_time] = df_[label_time].apply(lambda row: row*60.0)
         if new_label is not None:
@@ -435,16 +435,16 @@ def transform_time_from_hours_to_minute(df_, label_time=dic_features_label['time
 def transform_time_from_seconds_to_hours(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
     """Convertes time features from seconds to hours.
 
-            Parameters
-            ----------
-            df : dataframe
-                The input trajectory data
+    Parameters
+    ----------
+    df : dataframe
+        The input trajectory data
 
-            label_time : String, optional("dic_features_label['time_to_prev']" by default)
-                Indicates the label of the column that contains the time data to be converted.
+    label_time : String, optional("dic_features_label['time_to_prev']" by default)
+        Indicates the label of the column that contains the time data to be converted.
 
-            new_label : String, optional(None by default)
-                The new label of the converted column, if set to none, the original label will be kept
+    new_label : String, optional(None by default)
+        The new label of the converted column, if set to none, the original label will be kept
     """
     try:
         df_[label_time] = df_[label_time].apply(lambda row: row/3600.0)
@@ -456,16 +456,16 @@ def transform_time_from_seconds_to_hours(df_, label_time=dic_features_label['tim
 def transform_time_from_hours_to_seconds(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
     """Convertes time features from hours to seconds.
 
-                Parameters
-                ----------
-                df : dataframe
-                    The input trajectory data
+    Parameters
+    ----------
+    df : dataframe
+        The input trajectory data
 
-                label_time : String, optional("dic_features_label['time_to_prev']" by default)
-                    Indicates the label of the column that contains the time data to be converted.
+    label_time : String, optional("dic_features_label['time_to_prev']" by default)
+        Indicates the label of the column that contains the time data to be converted.
 
-                new_label : String, optional(None by default)
-                    The new label of the converted column, if set to none, the original label will be kept
+    new_label : String, optional(None by default)
+        The new label of the converted column, if set to none, the original label will be kept
     """
     try:
         df_[label_time] = df_[label_time].apply(lambda row: row*3600.0)
