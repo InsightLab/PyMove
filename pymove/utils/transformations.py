@@ -174,7 +174,7 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
         print('\nError Haverside fuction')
         raise e
 
-# """ ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON DATATIME  ----------------------------- """
+""" ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON DATATIME  ----------------------------- """
 
 def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels, str_format="%Y%m%d%H", sort=True):
     """
@@ -304,6 +304,7 @@ def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_l
                 
                 # using pandas shift in a large dataset: 7min 21s
                 # using numpy shift above: 33.6 s
+
                 # use distance from previous to next
                 df_.at[idx, dic_features_label['dist_prev_to_next']] = haversine(prev_lat, prev_lon, next_lat, next_lon)
                 
@@ -334,18 +335,22 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
         if sort is True:
             print('...Sorting by {} and {} to increase performance\n'.format(label_id, dic_labels['datetime']))
             df_.sort_values([label_id, dic_labels['datetime']], inplace=True)
+            #time_sort = time.time()
  
         if df_.index.name is None:
             print('...Set {} as index to a higher peformance\n'.format(label_id))
             df_.set_index(label_id, inplace=True)
+           # time_index = time.time()
 
         """create new feature to time"""
         df_[dic_features_label['dist_to_prev']] = label_dtype(-1.0)
 
         """create new feature to time"""
+        #df_[dic_features_label['time_to_next']] = label_dtype(-1.0)
         df_[dic_features_label['time_to_prev']] = label_dtype(-1.0)
 
         """create new feature to speed"""
+        #df_[dic_features_label['speed_to_next']] = label_dtype(-1.0)
         df_[dic_features_label['speed_to_prev']] = label_dtype(-1.0)
 
         ids = df_.index.unique()
@@ -370,13 +375,35 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
                 prev_lon = ut.shift(curr_lon, 1)
                 # compute distance from previous to current point
                 df_.at[idx, dic_features_label['dist_to_prev']] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
+                
+                
+            #""" if data is numpy array, then it is a datetime object with size <= 1"""
+            #if type(df_.at[idx, dic_labels['datetime']]) is not np.ndarray:
+                #size_id = 1
+                #print('...id:{}, must have at least 2 GPS points\n'.format(idx))
+                #df_.at[idx, dic_features_label['time_to_prev']] = np.nan
+                #df_.at[idx, dic_features_label['speed_to_prev']] = np.nan   
+            #else:
+                #"""time_to_prev = current_datetime - prev_datetime 
+                #the time_delta must be in nanosecond, then we multiplie by 10-⁹ to tranform in seconds """
+                #size_id = df_.at[idx, dic_labels['datetime']].size
 
                 time_ = df_.at[idx, dic_labels['datetime']].astype(label_dtype)
                 time_prev = (time_ - ut.shift(time_, 1))*(10**-9)
                 df_.at[idx, dic_features_label['time_to_prev']] = time_prev
+
+                """ set time_to_next"""
+                #time_next = (ut.shift(time_, -1) - time_)*(10**-9)
+                #df_.at[idx, dic_features_label['time_to_next']] = time_next
                 
                 "set Speed features"
                 df_.at[idx, dic_features_label['speed_to_prev']] = df_.at[idx, dic_features_label['dist_to_prev']] / (time_prev)  # unit: m/s
+                #df_.at[idx, dic_features_label['speed_to_next']] = df_.at[idx, dic_features_label['dist_to_next']] / (time_next)  # unit: m/s
+
+
+                #ut.change_df_feature_values_using_filter(df_, id_, 'delta_time', filter_points, delta_times)
+                #ut.change_df_feature_values_using_filter(df_, id_, 'delta_dist', filter_points, delta_dists)
+                #ut.change_df_feature_values_using_filter(df_, id_, 'speed', filter_points, speeds)
 
                 sum_size_id  += size_id
                 curr_perc_int, est_time_str = ut.progress_update(sum_size_id , df_size, start_time, curr_perc_int, step_perc=20)
@@ -481,4 +508,3 @@ def transform_time_from_hours_to_seconds(df_, label_time=dic_features_label['tim
             df_.rename(columns = {label_time: new_label}, inplace=True) 
     except Exception as e:
         raise e
-

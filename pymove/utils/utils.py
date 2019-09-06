@@ -341,10 +341,10 @@ def time_to_str(time):
     '08:00:00'
 
     """
-    timestr = time1.strftime('%H:%M:%S')
+    timestr = time.strftime('%H:%M:%S')
     return timestr
 
-def str_to_datatime(dt_str):
+def str_to_datetime(dt_str):
     """
     Converts a datetime in string's format '%Y-%m-%d' or '%Y-%m-%d %H:%M:%S' to datetime's format.
 
@@ -360,8 +360,8 @@ def str_to_datatime(dt_str):
 
     Examples
     --------
-    >>> from pymove.utils.utils import str_to_datatime
-    >>> str_to_datatime('2015-12-12')
+    >>> from pymove.utils.utils import str_to_datetime
+    >>> str_to_datetime('2015-12-12')
     datetime.datetime(2015, 12, 12, 0, 0)
 
     """
@@ -406,7 +406,7 @@ def datetime_to_str(data):
    
     Returns
     -------
-    datetime_str : datetime.datetime
+    datetime_str : String
         Represents a datetime in string's format '%Y-%m-%d %H:%M:%S'. 
 
     Examples
@@ -445,20 +445,21 @@ def datetime_to_min(datetime):
     minutes = int((datetime - datetime.utcfromtimestamp(0)).total_seconds() / 60)
     return minutes
 
-def min_to_datetime(min1):
+#TODO ajeitar isso aqui
+def min_to_datetime(min):
     """
     Converts an int representation in minutes to a datetime.  
     To do the reverse use: datetime_to_min.
 
     Parameters
     ----------
-    datetime : datetime.datetime
-        Represents a datetime in datetime's format.
+    min : int
+        Represents minutes.
    
     Returns
     -------
-    minutes : int
-        Represents minutes from. 
+    min_datetime : datetime.datetime
+        Represents minutes in datetime's format. 
 
     Examples
     --------
@@ -469,7 +470,8 @@ def min_to_datetime(min1):
     """
     # get a datetime from an integer time slot
     # utcfromtimestamp (below) is much faster than the line above
-    return datetime.datetime.utcfromtimestamp(min1 * 60)
+    min_datetime = datetime.datetime.utcfromtimestamp(min * 60)
+    return min_datetime
 
 #TODO: vê o que são os parametros e tipo dos param
 def slot_of_day_to_time(slot_of_day1, time_window_duration=5):
@@ -779,21 +781,21 @@ def date_to_day_of_week_int(date):
 #         )
 
 # def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
-    """
-    update and print current progress.
-    e.g.
-    curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int)
-    returns: curr_perc_int_new, deltatime_str
-    """
-    curr_perc_new = size_processed*100.0 / size_all
-    curr_perc_int_new = int(curr_perc_new)
-    if curr_perc_int_new != curr_perc_int and curr_perc_int_new % step_perc == 0:
-        deltatime = time.time() - start_time
-        deltatime_str_ = deltatime_str(deltatime)
-        est_end = deltatime / curr_perc_new * 100
-        est_time_str = deltatime_str(est_end - deltatime)
-        print('({}/{}) {}% in {} - estimated end in {}'.format(size_processed, size_all, curr_perc_int_new, deltatime_str_, est_time_str))
-        return curr_perc_int_new, deltatime_str
-    else:
-        return curr_perc_int_new, None
+    # """
+    # update and print current progress.
+    # e.g.
+    # curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int)
+    # returns: curr_perc_int_new, deltatime_str
+    # """
+    # curr_perc_new = size_processed*100.0 / size_all
+    # curr_perc_int_new = int(curr_perc_new)
+    # if curr_perc_int_new != curr_perc_int and curr_perc_int_new % step_perc == 0:
+    #     deltatime = time.time() - start_time
+    #     deltatime_str_ = deltatime_str(deltatime)
+    #     est_end = deltatime / curr_perc_new * 100
+    #     est_time_str = deltatime_str(est_end - deltatime)
+    #     print('({}/{}) {}% in {} - estimated end in {}'.format(size_processed, size_all, curr_perc_int_new, deltatime_str_, est_time_str))
+    #     return curr_perc_int_new, deltatime_str # aqui era pra ser deltatime_str_ não?
+    # else:
+    #     return curr_perc_int_new, None
 
