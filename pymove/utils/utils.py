@@ -1,3 +1,5 @@
+from __future__ import division
+
 # TODO: Andreza
 import time
 import math
