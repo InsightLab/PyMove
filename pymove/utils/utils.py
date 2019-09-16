@@ -1,21 +1,14 @@
-from __future__ import division
-
-# TODO: Andreza
+# TODO: Andreza e Arina
 import time
 import math
 import folium
 import datetime
 import numpy as np
 import pandas as pd
+from __future__ import division
+from IPython.display import display
+from ipywidgets import IntProgress, HTML, VBox
 from pandas._libs.tslibs.timestamps import Timestamp
-# from scipy.interpolate import interp1d
-#import timeutils
-# from __future__ import division
-#from scipy.ndimage.interpolation import shift
-
-# from ipywidgets import IntProgress, HTML, VBox
-# from IPython.display import display
-
 
 """main labels """
 dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
@@ -546,237 +539,414 @@ def date_to_day_of_week_int(date):
     return day_week
 
 ###################### ARINA
-# def elapsed_time_dt(start_time):
-#     return diff_time(start_time, datetime.datetime.now())
+def elapsed_time_dt(start_time):
+    """Computes the elapsed time from a specific start time to the moment the function is called.
 
-# def diff_time(start_time, end_time):
-#     return int((end_time - start_time).total_seconds() * 1000)
+    Parameters
+    ----------
+    start_time : Datetime
+        Specifies the start time of the time range to be computed.
+    
+    Returns
+    -------
+        time_dif : Integer
+            Represents the time elapsed from the start time to the current time (when the function was called).        
 
-# def working_day(dt, holidays):
-#     result = True
+    """
+    time_dif = diff_time(start_time, datetime.datetime.now())
+    return time_dif
 
-#     if type(dt) == str:
-#         dt = date_to_str(dt)
+def diff_time(start_time, end_time):
+    """Computes the elapsed time from the start time to the end time specifed by the user.
 
-#     if type(dt) == datetime.datetime:
-#         dt = datetime.date(dt.year, dt.month, dt.day)
+    Parameters
+    ----------
+    start_time : Datetime
+        Specifies the start time of the time range to be computed.
+    
+    end_time : Datetime
+        Specifies the start time of the time range to be computed.
 
-#     if dt in holidays:
-#         result = False
-#     else:
-#         dow = date_to_day_of_week_int(dt)
-#         # 5 == saturday, 6 == sunday
-#         if dow == 5 or dow == 6:
-#             result = False
+    Returns
+    -------
+        time_dif : Integer
+            Represents the time elapsed from the start time to the current time (when the function was called).        
 
-#     return result
+    """
 
-# def std(sum_sq, size, avg):
-#     try:
-#         # squaring with * is over 3 times as fast as with **2
-#         # http://stackoverflow.com/questions/29046346/comparison-of-power-to-multiplication-in-python
-#         result = math.sqrt(sum_sq / size - avg * avg)
-#     except ValueError:
-#         e = '(size - avg^2) (size=%s, avg=%s, sum_sq=%s) should be non negative, but is %s' % \
-#             (size, avg, sum_sq, size - avg * avg)
-#         raise ValueError(e)
-#     return result
+    time_dif = int((end_time - start_time).total_seconds() * 1000)
+    return time_dif
 
-# def avg_std(sum1, sum_sq, size):
-#     avg = sum1 / size
-#     return avg, std(sum_sq, size, avg)
+def working_day(dt, holidays):
+    """Indices if a day specified by the user is a working day.
 
-# def std_sample(sum_sq, size, avg):
-#     return std(sum_sq, size, avg) * math.sqrt(size / (size - 1))
+    Parameters
+    ----------
+    dt : Datetime
+        Specifies the day the user wants to know if it is a business day.
+    
+    holidays : Datetime
+        Indicates the days that are vacation days and therefore not working days. 
 
-# def avg_std_sample(sum1, sum_sq, size):
-#     avg = sum1 / size
-#     return avg, std_sample(sum_sq, size, avg)
+    Returns
+    -------
+        result : boolean
+            if true, means that the day informed by the user is a working day.
+            if false, means that the day is not a working day.
+    """
+    result = True
 
-# def arrays_avg(values_array, weights_array=None):
-#     n = len(values_array)
+    if type(dt) == str:
+        dt = date_to_str(dt)
 
-#     if weights_array is None:
-#         weights_array = np.full(n, 1)
-#     elif len(weights_array) != n:
-#         raise ValueError('values_array and qt_array must have the same number of rows')
+    if type(dt) == datetime.datetime:
+        dt = datetime.date(dt.year, dt.month, dt.day)
 
-#     n_row = len(values_array[0])
-#     result = np.full(n_row, 0)
-#     for i, item in enumerate(values_array):
-#         for j in range(n_row):
-#             result[j] += item[j] * weights_array[i]
+    if dt in holidays:
+        result = False
+    else:
+        dow = date_to_day_of_week_int(dt)
+        # 5 == saturday, 6 == sunday
+        if dow == 5 or dow == 6:
+            result = False
 
-#     sum_qt = array_sum(weights_array)
-#     for i in range(n_row):
-#         result[i] /= sum_qt
+    return result
 
-#     return result
+def std(sum_sq, size, avg):
+    try:
+        # squaring with * is over 3 times as fast as with **2
+        # http://stackoverflow.com/questions/29046346/comparison-of-power-to-multiplication-in-python
+        result = math.sqrt(sum_sq / size - avg * avg)
+    except ValueError:
+        e = '(size - avg^2) (size=%s, avg=%s, sum_sq=%s) should be non negative, but is %s' % \
+            (size, avg, sum_sq, size - avg * avg)
+        raise ValueError(e)
+    return result
 
-# def array_sum(values_array):
-#     sum1 = 0
-#     for item in values_array:
-#         sum1 += item
+def avg_std(sum1, sum_sq, size):
+    avg = sum1 / size
+    return avg, std(sum_sq, size, avg)
 
-#     return sum1
+def std_sample(sum_sq, size, avg):
+    return std(sum_sq, size, avg) * math.sqrt(size / (size - 1))
 
-# def array_stats(values_array):
-#     sum1 = 0
-#     sum_sq = 0
-#     n = 0
-#     for item in values_array:
-#         sum1 += item
-#         sum_sq += item * item
-#         n += 1
+def avg_std_sample(sum1, sum_sq, size):
+    avg = sum1 / size
+    return avg, std_sample(sum_sq, size, avg)
 
-#     return sum1, sum_sq, n
+#função está dando erro ao rodar
+def arrays_avg(values_array, weights_array=None):
+    """Computes the mean of the elements of the array.
 
-# def change_df_feature_values_using_filter(df, id_, feature_name, filter_, values):
-#     """
-#     equivalent of: df.at[id_, feature_name][filter_] = values
-#     e.g. df.at[tid, 'time'][filter_nodes] = intp_result.astype(np.int64)
-#     dataframe must be indexed by id_: df.set_index(index_name, inplace=True)
-#     """
-#     values_feature = df.at[id_, feature_name]
-#     if filter_.shape == ():
-#         df.at[id_, feature_name] = values
-#     else:
-#         values_feature[filter_] = values
-#         df.at[id_, feature_name] = values_feature
+    values_array : array of floats
+        The numbers used to calculate the mean. 
+    
+    weights_array : array of floats
+        Used to calculate the weighted average, indicates the weight of each element in the array (values_array). 
 
-# def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, filter_, idxs, values):
-#     """
-#     equivalent of: df.at[id_, feature_name][filter_][idxs] = values
-#     e.g. df.at[tid, 'deleted'][filter_][idx_not_in_ascending_order] = True
-#     dataframe must be indexed by id_: df.set_index(index_name, inplace=True)
-#     """
-#     values_feature = df.at[id_, feature_name]
-#     values_feature_filter = values_feature[filter_]
-#     values_feature_filter[idxs] = values
-#     values_feature[filter_] = values_feature_filter
-#     df.at[id_, feature_name] = values_feature
+    Returns 
+    -------
+        result : Float
+            The mean of the array elements.         
+    """   
+    n = len(values_array)
 
-# def list_to_str(input_list, delimiter=','):
-#     return delimiter.join([x if type(x) == str else repr(x) for x in input_list])  # list comprehension
+    if weights_array is None:
+        weights_array = np.full(n, 1)
+    elif len(weights_array) != n:
+        raise ValueError('values_array and qt_array must have the same number of rows')
 
-# def list_to_csv_str(input_list):
-#     return list_to_str(input_list)  # list comprehension
+    n_row = len(values_array[0])
+    result = np.full(n_row, 0)
+    for i, item in enumerate(values_array):
+        for j in range(n_row):
+            result[j] += item[j] * weights_array[i]
 
-# def fill_list_with_new_values(original_list, new_list_values):
-#     for i in range(len(new_list_values)):
-#         type1 = type(original_list[i])
-#         if type1 == int:
-#             original_list[i] = int(new_list_values[i])
-#         elif type1 == float:
-#             original_list[i] = float(new_list_values[i])
-#         else:
-#             original_list[i] = new_list_values[i]
+    sum_qt = array_sum(weights_array)
+    for i in range(n_row):
+        result[i] /= sum_qt
 
-# def list_to_svm_line(original_list):
-#     list_size = len(original_list)
-#     svm_line = '%s ' % original_list[0]
-#     for i in range(1, list_size):
-#         #svm_line += '{}:{} '.format(i, repr(original_list[i]))
-#         svm_line += '{}:{} '.format(i, original_list[i])
-#     return svm_line.rstrip()
+    return result
 
-# def interpolation(x0, y0, x1, y1, x):
-#     """
-#     Used for interpolation and extrapolation.
-#     interpolation 1: (30, 3, 40, 5, 37) -> 4.4
-#     interpolation 2: (30, 3, 40, 5, 35) -> 4.0
-#     extrapolation 1: (30, 3, 40, 5, 25) -> 2.0
-#     extrapolation 2: (30, 3, 40, 5, 45) -> 6.0
-#     """
-#     return y0 + (y1 - y0) * ( (x - x0)/(x1 - x0) )
+def array_sum(values_array):
+    """Computes the sum of the elements of the array.
 
-# def shift(arr, num, fill_value=np.nan):
-#     """
-#     Similar to pandas shift, but faster.
-#     See: https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
-#     """
-#     """ Return a new array with the same shape and type as a given array."""
-#     result = np.empty_like(arr)
+    values_array : array of floats
+        The numbers to be added. 
 
-#     if num > 0:
-#         result[:num] = fill_value
-#         result[num:] = arr[:-num]
-#     elif num < 0:
-#         result[num:] = fill_value
-#         result[:num] = arr[-num:]
-#     else:
-#         result = arr
-#     return result
+    Returns 
+    -------
+        sum1 : Float
+            The sum of the elements of the array         
+    """    
+    sum1 = 0
+    for item in values_array:
+        sum1 += item
 
-# def log_progress(sequence, every=None, size=None, name='Items'):
-#     is_iterator = False
-#     if size is None:
-#         try:
-#             size = len(sequence)
-#         except TypeError:
-#             is_iterator = True
-#     if size is not None:
-#         if every is None:
-#             if size <= 200:
-#                 every = 1
-#             else:
-#                 every = int(size / 200)     # every 0.5%
-#     else:
-#         assert every is not None, 'sequence is iterator, set every'
+    return sum1
 
-#     if is_iterator:
-#         progress = IntProgress(min=0, max=1, value=1)
-#         progress.bar_style = 'info'
-#     else:
-#         progress = IntProgress(min=0, max=size, value=0)
-#     label = HTML()
-#     box = VBox(children=[label, progress])
-#     display(box)
+def array_stats(values_array):
+    """Computes the sum of all the elements in the array, the sum of the square of each element and the number of 
+        elements of the array.
 
-#     index = 0
-#     try:
-#         for index, record in enumerate(sequence, 1):
-#             if index == 1 or index % every == 0:
-#                 if is_iterator:
-#                     label.value = '{name}: {index} / ?'.format(
-#                         name=name,
-#                         index=index
-#                     )
-#                 else:
-#                     progress.value = index
-#                     label.value = u'{name}: {index} / {size}'.format(
-#                         name=name,
-#                         index=index,
-#                         size=size
-#                     )
-#             yield record
-#     except:
-#         progress.bar_style = 'danger'
-#         raise
-#     else:
-#         progress.bar_style = 'success'
-#         progress.value = index
-#         label.value = "{name}: {index}".format(
-#             name=name,
-#             index=str(index or '?')
-#         )
+    values_array : array of floats 
+        The elements used to compute the operations
+    
+    Returns
+    -------
+        sum1 : Float
+            The sum of all the elements in the array
 
-# def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
-    # """
-    # update and print current progress.
-    # e.g.
-    # curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int)
-    # returns: curr_perc_int_new, deltatime_str
-    # """
-    # curr_perc_new = size_processed*100.0 / size_all
-    # curr_perc_int_new = int(curr_perc_new)
-    # if curr_perc_int_new != curr_perc_int and curr_perc_int_new % step_perc == 0:
-    #     deltatime = time.time() - start_time
-    #     deltatime_str_ = deltatime_str(deltatime)
-    #     est_end = deltatime / curr_perc_new * 100
-    #     est_time_str = deltatime_str(est_end - deltatime)
-    #     print('({}/{}) {}% in {} - estimated end in {}'.format(size_processed, size_all, curr_perc_int_new, deltatime_str_, est_time_str))
-    #     return curr_perc_int_new, deltatime_str # aqui era pra ser deltatime_str_ não?
-    # else:
-    #     return curr_perc_int_new, None
+        sum_sq : Float
+            The sum of the square value of each element in the array
+
+        n : Integer
+            The number of elements in the array
+    """
+    sum1 = 0
+    sum_sq = 0
+    n = 0
+    for item in values_array:
+        sum1 += item
+        sum_sq += item * item
+        n += 1
+
+    return sum1, sum_sq, n
+
+def change_df_feature_values_using_filter(df, id_, feature_name, filter_, values):
+    """
+    equivalent of: df.at[id_, feature_name][filter_] = values
+    e.g. df.at[tid, 'time'][filter_nodes] = intp_result.astype(np.int64)
+    dataframe must be indexed by id_: df.set_index(index_name, inplace=True)
+    """
+    values_feature = df.at[id_, feature_name]
+    if filter_.shape == ():
+        df.at[id_, feature_name] = values
+    else:
+        values_feature[filter_] = values
+        df.at[id_, feature_name] = values_feature
+
+def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, filter_, idxs, values):
+    """
+    equivalent of: df.at[id_, feature_name][filter_][idxs] = values
+    e.g. df.at[tid, 'deleted'][filter_][idx_not_in_ascending_order] = True
+    dataframe must be indexed by id_: df.set_index(index_name, inplace=True)
+    """
+    values_feature = df.at[id_, feature_name]
+    values_feature_filter = values_feature[filter_]
+    values_feature_filter[idxs] = values
+    values_feature[filter_] = values_feature_filter
+    df.at[id_, feature_name] = values_feature
+
+def list_to_str(input_list, delimiter=','):
+    """Concatenates the elements of the array, joining them by the separator especified by the parameter "delimiter"
+
+    Parameters
+    ----------
+    input_list : array 
+        The elements to be joined
+    
+    delimiter : String, optional(',' by default)
+        The separator used between elements
+    
+    Returns
+    -------
+        String
+            Returns a string, wich is the concatenation of the elements of the array, separeted by the delimiter.
+    """
+    return delimiter.join([x if type(x) == str else repr(x) for x in input_list])  # list comprehension
+
+def list_to_csv_str(input_list):
+    """Concatenates the elements of the array, joining them by ",".
+
+    Parameters
+    ----------
+    input_list : array 
+        The elements to be joined
+    
+    Returns
+    -------
+        String
+            Returns a string, wich is the concatenation of the elements of the array, separeted by ",".
+    """
+    return list_to_str(input_list)  # list comprehension
+
+#erro se tentar converter int para str e funcao n verifica isso
+def fill_list_with_new_values(original_list, new_list_values):
+    """ Copies elements from one list to another. The elements will be positioned in the same position in the new list as
+    they were in their original list.
+
+    Parameters
+    ----------
+    original_list : array
+    The list to which the elements will be copied
+
+    new_list_values : array
+    The list from which elements will be copied
+
+    """
+    for i in range(len(new_list_values)):
+        type1 = type(original_list[i])
+        if type1 == int:
+            original_list[i] = int(new_list_values[i])
+        elif type1 == float:
+            original_list[i] = float(new_list_values[i])
+        else:
+            original_list[i] = new_list_values[i]
+
+def list_to_svm_line(original_list):
+    list_size = len(original_list)
+    svm_line = '%s ' % original_list[0]
+    for i in range(1, list_size):
+        #svm_line += '{}:{} '.format(i, repr(original_list[i]))
+        svm_line += '{}:{} '.format(i, original_list[i])
+    return svm_line.rstrip()
+
+def interpolation(x0, y0, x1, y1, x):
+    """Perfomers interpolation and extrapolation
+
+    Parameters
+    ----------
+    x0 : float
+        The coordinate of the first point on the x axis
+
+    y0 : float
+        The coordinate of the first point on the y axis
+
+    x1 : float
+        The coordinate of the second point on the x axis
+
+    y1 : float
+        The coordinate of the second point on the y axis
+
+    x : float
+        A value in the interval (x0, x1)
+
+    Returns
+    -------
+    y : float
+        Is the interpolated  or extrapolated value.
+
+    Examples
+    --------
+    interpolation 1: (30, 3, 40, 5, 37) -> 4.4
+    interpolation 2: (30, 3, 40, 5, 35) -> 4.0
+    extrapolation 1: (30, 3, 40, 5, 25) -> 2.0
+    extrapolation 2: (30, 3, 40, 5, 45) -> 6.0
+    """
+    y = y0 + (y1 - y0) * ((x - x0)/(x1 - x0))
+    return y
+
+def shift(arr, num, fill_value=np.nan):
+    """Shifts the elements of the given array by the number of periods specified.
+
+    Parameters
+    ----------
+    arr : array
+        The array to be shifed.
+
+    num : Integer
+        Number of periods to shift. Can be positive or negative. If posite, the elements will be pulled down, and pulled
+        up otherwise.
+
+    fill_value : Integer, optional(np.nan by default)
+        The scalar value used for newly introduced missing values.
+
+    Returns
+    -------
+    result : array
+        A new array with the same shape and type as the initial given array, but with the indexes shifted.
+
+    Notes
+    -----
+        Similar to pandas shift, but faster.
+
+    See also
+    --------
+        https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
+    """
+
+    result = np.empty_like(arr)
+
+    if num > 0:
+        result[:num] = fill_value
+        result[num:] = arr[:-num]
+    elif num < 0:
+        result[num:] = fill_value
+        result[:num] = arr[-num:]
+    else:
+        result = arr
+    return result
+
+def log_progress(sequence, every=None, size=None, name='Items'):
+    is_iterator = False
+    if size is None:
+        try:
+            size = len(sequence)
+        except TypeError:
+            is_iterator = True
+    if size is not None:
+        if every is None:
+            if size <= 200:
+                every = 1
+            else:
+                every = int(size / 200)     # every 0.5%
+    else:
+        assert every is not None, 'sequence is iterator, set every'
+
+    if is_iterator:
+        progress = IntProgress(min=0, max=1, value=1)
+        progress.bar_style = 'info'
+    else:
+        progress = IntProgress(min=0, max=size, value=0)
+    label = HTML()
+    box = VBox(children=[label, progress])
+    display(box)
+
+    index = 0
+    try:
+        for index, record in enumerate(sequence, 1):
+            if index == 1 or index % every == 0:
+                if is_iterator:
+                    label.value = '{name}: {index} / ?'.format(
+                        name=name,
+                        index=index
+                    )
+                else:
+                    progress.value = index
+                    label.value = u'{name}: {index} / {size}'.format(
+                        name=name,
+                        index=index,
+                        size=size
+                    )
+            yield record
+    except:
+        progress.bar_style = 'danger'
+        raise
+    else:
+        progress.bar_style = 'success'
+        progress.value = index
+        label.value = "{name}: {index}".format(
+            name=name,
+            index=str(index or '?')
+        )
+
+def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
+    """
+    update and print current progress.
+    e.g.
+    curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int)
+    returns: curr_perc_int_new, deltatime_str
+    """
+    curr_perc_new = size_processed*100.0 / size_all
+    curr_perc_int_new = int(curr_perc_new)
+    if curr_perc_int_new != curr_perc_int and curr_perc_int_new % step_perc == 0:
+        deltatime = time.time() - start_time
+        deltatime_str_ = deltatime_str(deltatime)
+        est_end = deltatime / curr_perc_new * 100
+        est_time_str = deltatime_str(est_end - deltatime)
+        print('({}/{}) {}% in {} - estimated end in {}'.format(size_processed, size_all, curr_perc_int_new, deltatime_str_, est_time_str))
+        return curr_perc_int_new, deltatime_str # aqui era pra ser deltatime_str_ não?
+    else:
+        return curr_perc_int_new, None
 
