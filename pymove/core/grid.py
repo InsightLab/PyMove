@@ -1,12 +1,12 @@
 # TODO: Modelar como classe
 # TODO: Andreza
 import math
-import pandas as pd
-import numpy as np
-from tqdm import tqdm_notebook as tqdm
-from shapely.geometry import Polygon
 import pickle
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from shapely.geometry import Polygon
+from tqdm import tqdm_notebook as tqdm
 
 from pymove.utils.utils import dic_labels, dic_features_label
 
@@ -434,7 +434,7 @@ def read_grid_pkl(filename):
             return dic_grid
     except Exception as e:
         raise e
-
+        
 # TODO: ajeitar que tá dando erro + finalizar comentários
 def show_grid_polygons(df_, id_, label_id = dic_labels['id'], label_polygon='polygon', figsize=(10,10)):   
     """
