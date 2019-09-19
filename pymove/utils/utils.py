@@ -1,11 +1,12 @@
 # TODO: Andreza e Arina
+from __future__ import division
 import time
 import math
 import folium
 import datetime
 import numpy as np
 import pandas as pd
-from __future__ import division
+
 from IPython.display import display
 from ipywidgets import IntProgress, HTML, VBox
 from pandas._libs.tslibs.timestamps import Timestamp
