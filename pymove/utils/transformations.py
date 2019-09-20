@@ -8,118 +8,6 @@ from pymove.utils.utils import dic_labels, dic_features_label
 
 """ ----------------------  FUCTIONS TO LAT AND LONG COORDINATES --------------------------- """ 
 
-def lon2XSpherical(lon):
-    """
-    Convert longitude to to X EPSG:3857 WGS 84 / Pseudo-Mercator 
-
-    Parameters
-    ----------
-    lon : float
-        Represents longitude.
-
-    Returns
-    -------
-    xspherical : float
-        X offset from your original position in meters.
-     
-    Examples
-    --------
-    >>> from pymove.utils.transformations import lon2XSpherical
-    >>> lon2XSpherical(-38.501597 )
-    -4285978.17
-
-    References
-    ----------
-    https://epsg.io/transform
-
-    """
-    xspherical = 6378137 * np.radians(lon)
-    return xspherical
-
-def lat2YSpherical(lat):
-    """
-    Convert latitude to Y EPSG:3857 WGS 84 / Pseudo-Mercator 
-
-    Parameters
-    ----------
-    lat : float
-        Represents latitude.
-
-    Returns
-    -------
-    yspherical : float
-        Y offset from your original position in meters.
-     
-    Examples
-    --------
-    >>> from pymove.utils.transformations import lat2YSpherical
-    >>> lat2YSpherical(-3.797864)
-    -423086.2213610324
-
-    References
-    ----------
-    https://epsg.io/transform
-
-    """
-    yspherical = 6378137 * np.log(np.tan(np.pi / 4 + np.radians(lat) / 2.0))
-    return yspherical
-
-def x2LonSpherical(x):
-    """
-    Convert X EPSG:3857 WGS 84 / Pseudo-Mercator to longitude.  
-
-    Parameters
-    ----------
-    x : float
-        X offset from your original position in meters.
-
-    Returns
-    -------
-    lon : float
-        Represents longitude.
-     
-    Examples
-    --------
-    >>> from pymove.utils.transformations import x2LonSpherical
-    >>> x2LonSpherical(-4285978.17)
-    -38.501597
-
-    References
-    ----------
-    https://epsg.io/transform
-
-    """
-    lon = np.degrees(x / 6378137.0)
-    return lon
-
-def y2LatSpherical(y):
-    """
-    Convert Y EPSG:3857 WGS 84 / Pseudo-Mercator to latitude.
-
-    Parameters
-    ----------
-    y : float
-        Y offset from your original position in meters.
-
-    Returns
-    -------
-    lat : float
-        Represents latitude.
-     
-    Examples
-    --------
-    >>> from pymove.utils.transformations import y2LatSpherical
-    >>> y2LatSpherical(-423086.22)
-    -3.797864 
-
-    References
-    ----------
-    https://epsg.io/transform
-
-    """
-    lat = np.degrees(np.arctan(np.sinh(y / 6378137.0)))
-    return lat
-
 def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
     """
     Calculate the great circle distance between two points on the earth (specified in decimal degrees or in radians).
@@ -427,138 +315,30 @@ def create_update_move_and_stop_by_radius(df_, radius=0, target_label='dist_to_p
     except Exception as e:
         raise e
 
-""" transform speed """
-def transform_speed_from_ms_to_kmh(df_, label_speed=dic_features_label['speed_to_prev'], new_label = None):
-    try:
-        df_[label_speed] = df_[label_speed].transform(lambda row: row*3.6)
-        if new_label is not None:
-            df_.rename(columns = {label_speed: new_label}, inplace=True) 
-    except Exception as e: 
-        raise e
-   
-def transform_speed_from_kmh_to_ms(df_, label_speed=dic_features_label['speed_to_prev'], new_label = None):
-    try:
-        df_[label_speed] = df_[label_speed].transform(lambda row: row/3.6)
-        if new_label is not None:
-            df_.rename(columns = {label_speed: new_label}, inplace=True) 
-    except Exception as e: 
-        raise e
 
-""" transform distances """
-def transform_dist_from_meters_to_kilometers(df_, label_distance=dic_features_label['dist_to_prev'], new_label=None):
-    try:
-        df_[label_distance] = df_[label_distance].transform(lambda row: row/1000)
-        if new_label is not None:
-            df_.rename(columns = {label_distance: new_label}, inplace=True) 
-    except Exception as e: 
-        raise e
-
-def transform_dist_from_to_kilometers_to_meters(df_, label_distance=dic_features_label['dist_to_prev'], new_label=None):
-    try:
-        df_[label_distance] = df_[label_distance].transform(lambda row: row*1000)
-        if new_label is not None:
-            df_.rename(columns = {label_distance: new_label}, inplace=True) 
-    except Exception as e: 
-        raise e
-
-""" transform time """
-def transform_time_from_seconds_to_minutes(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
-    try:
-        df_[label_time] = df_[label_time].transform(lambda row: row/60.0)
-        if new_label is not None:
-            df_.rename(columns = {label_time: new_label}, inplace=True) 
-    except Exception as e: 
-        raise e 
-
-def transform_time_from_minute_to_seconds(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
-    try:
-        df_[label_time] = df_[label_time].apply(lambda row: row*60.0)
-        if new_label is not None:
-            df_.rename(columns = {label_time: new_label}, inplace=True) 
-    except Exception as e: 
-        raise e 
-
-def transform_time_from_minute_to_hours(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
-    """Convertes times features from minutes to hours.
-
-    Parameters
-    ----------
-    df : dataframe
-        The input trajectory data
-
-    label_time : String, optional("dic_features_label['time_to_prev']" by default)
-        Indicates the label of the column that contains the time data to be converted.
-
-    new_label : String, optional(None by default)
-        The new label of the converted column, if set to none, the original label will be kept
+def change_df_feature_values_using_filter(df, id_, feature_name, filter_, values):
     """
-    try:
-        df_[label_time] = df_[label_time].apply(lambda row: row/60.0)
-        if new_label is not None:
-            df_.rename(columns = {label_time: new_label}, inplace=True) 
-    except Exception as e: 
-        raise e  
-
-def transform_time_from_hours_to_minute(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
-    """Convertes time features from hours to minutes.
-
-    Parameters
-    ----------
-    df : dataframe
-        The input trajectory data
-
-    label_time : String, optional("dic_features_label['time_to_prev']" by default)
-        Indicates the label of the column that contains the time data to be converted.
-
-    new_label : String, optional(None by default)
-        The new label of the converted column, if set to none, the original label will be kept
+    equivalent of: df.at[id_, feature_name][filter_] = values
+    e.g. df.at[tid, 'time'][filter_nodes] = intp_result.astype(np.int64)
+    dataframe must be indexed by id_: df.set_index(index_name, inplace=True)
     """
-    try:
-        df_[label_time] = df_[label_time].apply(lambda row: row*60.0)
-        if new_label is not None:
-            df_.rename(columns = {label_time: new_label}, inplace=True) 
-    except Exception as e:
-        raise e
+    values_feature = df.at[id_, feature_name]
+    if filter_.shape == ():
+        df.at[id_, feature_name] = values
+    else:
+        values_feature[filter_] = values
+        df.at[id_, feature_name] = values_feature
 
-def transform_time_from_seconds_to_hours(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
-    """Convertes time features from seconds to hours.
 
-    Parameters
-    ----------
-    df : dataframe
-        The input trajectory data
-
-    label_time : String, optional("dic_features_label['time_to_prev']" by default)
-        Indicates the label of the column that contains the time data to be converted.
-
-    new_label : String, optional(None by default)
-        The new label of the converted column, if set to none, the original label will be kept
+def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, filter_, idxs, values):
     """
-    try:
-        df_[label_time] = df_[label_time].apply(lambda row: row/3600.0)
-        if new_label is not None:
-            df_.rename(columns = {label_time: new_label}, inplace=True) 
-    except Exception as e:
-        raise e
-
-def transform_time_from_hours_to_seconds(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
-    """Convertes time features from hours to seconds.
-
-    Parameters
-    ----------
-    df : dataframe
-        The input trajectory data
-
-    label_time : String, optional("dic_features_label['time_to_prev']" by default)
-        Indicates the label of the column that contains the time data to be converted.
-
-    new_label : String, optional(None by default)
-        The new label of the converted column, if set to none, the original label will be kept
+    equivalent of: df.at[id_, feature_name][filter_][idxs] = values
+    e.g. df.at[tid, 'deleted'][filter_][idx_not_in_ascending_order] = True
+    dataframe must be indexed by id_: df.set_index(index_name, inplace=True)
     """
-    try:
-        df_[label_time] = df_[label_time].apply(lambda row: row*3600.0)
-        if new_label is not None:
-            df_.rename(columns = {label_time: new_label}, inplace=True) 
-    except Exception as e:
-        raise e
+    values_feature = df.at[id_, feature_name]
+    values_feature_filter = values_feature[filter_]
+    values_feature_filter[idxs] = values
+    values_feature[filter_] = values_feature_filter
+    df.at[id_, feature_name] = values_feature
 
