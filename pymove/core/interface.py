@@ -1,33 +1,15 @@
 import abc
-from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
-from pymove.utils.utils import format_labels
 
-LATITUDE = 'lat'
-LONGITUDE = 'lon'
-DATETIME = 'datetime'
-TRAJ_ID = 'id'
-ID = "id"
-TID = "tid"
-DIST_TO_PREV = 'dist_to_prev'
-class MoveDataFrame():
-    def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id = TRAJ_ID, type="pandas"):
-        self.type = type
-        if type == 'pandas':
-            
-            self.data = pm(data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id = TRAJ_ID)
-            # super(MoveDataFrame, self).__init__(self.data)
-        # if type == 'dask':
-        #     self.data = DaskMoveDataFrame()
- 
+class interface(abc.ABC):
+    #ddza
+    @abc.abstractmethod
     def head(self):
-        return self.data.head()
-    
-    def bla(self):
-        self.data.bla()
+        pass
 
 #     #ddza
-    # def read_file():
-    #     self.data.read_file()
+    @abc.abstractmethod   
+    def read_file(self):
+        pass
 
 #     #ddza
 #     @abc.abstractmethod

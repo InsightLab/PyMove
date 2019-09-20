@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pymove.core import MoveDataFrame
 from pymove.utils.utils import format_labels
 
 LATITUDE = 'lat'
@@ -67,8 +66,11 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'"%DATETIME)
         return self[DATETIME]
 
-    def head(self, num = 5):
-        self.head(num)
+    # def head(self):
+    #     return self.head()
+
+    def bla(self):
+        print(self['lat'])
         
    
     # def read_file(self, filename):
@@ -90,130 +92,130 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
     # def to_numpy():
     #     pass          
 
-    def write_file(self, file_name, separator = ','):
-        self.to_csv(file_name, sep=separator, encoding='utf-8', index=False)
+    # def write_file(self, file_name, separator = ','):
+    #     self.to_csv(file_name, sep=separator, encoding='utf-8', index=False)
 
 
-    def len(self):
-        return self.shape[0]
+    # def len(self):
+    #     return self.shape[0]
 
 
-    def to_dict(self):
-        df = self.copy()
-        data_dict = df.to_dict() 
-        return data_dict
+    # def to_dict(self):
+    #     df = self.copy()
+    #     data_dict = df.to_dict() 
+    #     return data_dict
 
-    def get_bbox(self):
-        try:
-            return (self[LATITUDE].min(), self[LONGITUDE].min(), self[LATITUDE].max(),
-                    self[LONGITUDE].max())
-        except Exception as e:
-            raise e
+    # def get_bbox(self):
+    #     try:
+    #         return (self[LATITUDE].min(), self[LONGITUDE].min(), self[LATITUDE].max(),
+    #                 self[LONGITUDE].max())
+    #     except Exception as e:
+    #         raise e
 
 
-    def to_grid(self, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
-        print('\nCreating a virtual grid without polygons')
+    # def to_grid(self, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
+    #     print('\nCreating a virtual grid without polygons')
         
-        bbox = self.get_bbox()
-        # Latitude in Fortaleza: -3.8162973555
-        cell_size_by_degree = cell_size/meters_by_degree
-        print('...cell size by degree: {}'.format(cell_size_by_degree))
+    #     bbox = self.get_bbox()
+    #     # Latitude in Fortaleza: -3.8162973555
+    #     cell_size_by_degree = cell_size/meters_by_degree
+    #     print('...cell size by degree: {}'.format(cell_size_by_degree))
 
-        lat_min_y = bbox[0]
-        lon_min_x = bbox[1]
-        lat_max_y = bbox[2] 
-        lon_max_x = bbox[3]
+    #     lat_min_y = bbox[0]
+    #     lon_min_x = bbox[1]
+    #     lat_max_y = bbox[2] 
+    #     lon_max_x = bbox[3]
 
-        #If cell size does not fit in the grid area, an expansion is made
-        if math.fmod((lat_max_y - lat_min_y), cell_size_by_degree) != 0:
-            lat_max_y = lat_min_y + cell_size_by_degree * (math.floor((lat_max_y - lat_min_y) / cell_size_by_degree) + 1)
+    #     #If cell size does not fit in the grid area, an expansion is made
+    #     if math.fmod((lat_max_y - lat_min_y), cell_size_by_degree) != 0:
+    #         lat_max_y = lat_min_y + cell_size_by_degree * (math.floor((lat_max_y - lat_min_y) / cell_size_by_degree) + 1)
 
-        if math.fmod((lon_max_x - lon_min_x), cell_size_by_degree) != 0:
-            lon_max_x = lon_min_x + cell_size_by_degree * (math.floor((lon_max_x - lon_min_x) / cell_size_by_degree) + 1)
+    #     if math.fmod((lon_max_x - lon_min_x), cell_size_by_degree) != 0:
+    #         lon_max_x = lon_min_x + cell_size_by_degree * (math.floor((lon_max_x - lon_min_x) / cell_size_by_degree) + 1)
 
         
-        # adjust grid size to lat and lon
-        grid_size_lat_y = int(round((lat_max_y - lat_min_y) / cell_size_by_degree))
-        grid_size_lon_x = int(round((lon_max_x - lon_min_x) / cell_size_by_degree))
+    #     # adjust grid size to lat and lon
+    #     grid_size_lat_y = int(round((lat_max_y - lat_min_y) / cell_size_by_degree))
+    #     grid_size_lon_x = int(round((lon_max_x - lon_min_x) / cell_size_by_degree))
         
-        print('...grid_size_lat_y:{}\ngrid_size_lon_x:{}'.format(grid_size_lat_y, grid_size_lon_x))
+    #     print('...grid_size_lat_y:{}\ngrid_size_lon_x:{}'.format(grid_size_lat_y, grid_size_lon_x))
 
-        # Return a dicionary virtual grid 
-        my_dict = dict()
+    #     # Return a dicionary virtual grid 
+    #     my_dict = dict()
         
-        my_dict['lon_min_x'] = lon_min_x
-        my_dict['lat_min_y'] = lat_min_y
-        my_dict['grid_size_lat_y'] = grid_size_lat_y
-        my_dict['grid_size_lon_x'] = grid_size_lon_x
-        my_dict['cell_size_by_degree'] = cell_size_by_degree
-        print('\n..A virtual grid was created')
-        return my_dict    
+    #     my_dict['lon_min_x'] = lon_min_x
+    #     my_dict['lat_min_y'] = lat_min_y
+    #     my_dict['grid_size_lat_y'] = grid_size_lat_y
+    #     my_dict['grid_size_lon_x'] = grid_size_lon_x
+    #     my_dict['cell_size_by_degree'] = cell_size_by_degree
+    #     print('\n..A virtual grid was created')
+    #     return my_dict    
   
 
 
-    def with_move_and_stop_by_radius(self, radius=0, target_label='dist_to_prev'):
-        if DIST_TO_PREV not in self:
-            transformations.create_update_dist_features(self)
-        try:
-            print('\nCreating or updating features MOVE and STOPS...\n')
-            conditions = (self[target_label] > radius), (self[target_label] <= radius)
-            choices = ['move', 'stop']
+    # def with_move_and_stop_by_radius(self, radius=0, target_label='dist_to_prev'):
+    #     if DIST_TO_PREV not in self:
+    #         transformations.create_update_dist_features(self)
+    #     try:
+    #         print('\nCreating or updating features MOVE and STOPS...\n')
+    #         conditions = (self[target_label] > radius), (self[target_label] <= radius)
+    #         choices = ['move', 'stop']
 
-            self["situation"] = np.select(conditions, choices, np.nan)
-            print('\n....There are {} stops to this parameters\n'.format(self[self["situation"] == 'stop'].shape[0]))
-        except Exception as e:
-            raise e
+    #         self["situation"] = np.select(conditions, choices, np.nan)
+    #         print('\n....There are {} stops to this parameters\n'.format(self[self["situation"] == 'stop'].shape[0]))
+    #     except Exception as e:
+    #         raise e
 
 
    
 
 
-    def plot_all_features(self , figsize=(21, 15), dtype=np.float64, save_fig=True, name='features.png'):
-        try:
-            col_float = self.select_dtypes(include=[dtype]).columns
-            tam = col_float.size
-            if (tam > 0):
-                fig, ax = plt.subplots(tam, 1, figsize=figsize)
-                ax_count = 0
-                for col in col_float:
-                    ax[ax_count].set_title(col)
-                    self[col].plot(subplots=True, ax=ax[ax_count])
-                    ax_count += 1
+    # def plot_all_features(self , figsize=(21, 15), dtype=np.float64, save_fig=True, name='features.png'):
+    #     try:
+    #         col_float = self.select_dtypes(include=[dtype]).columns
+    #         tam = col_float.size
+    #         if (tam > 0):
+    #             fig, ax = plt.subplots(tam, 1, figsize=figsize)
+    #             ax_count = 0
+    #             for col in col_float:
+    #                 ax[ax_count].set_title(col)
+    #                 self[col].plot(subplots=True, ax=ax[ax_count])
+    #                 ax_count += 1
 
-                if save_fig:
-                    plt.savefig(fname=name, fig=fig)
-        except Exception as e:
-            raise e
+    #             if save_fig:
+    #                 plt.savefig(fname=name, fig=fig)
+    #     except Exception as e:
+    #         raise e
 
 
-    def plot_trajs(self, figsize=(10,10), return_fig=True, markers= 'o',markersize=20):
-        fig = plt.figure(figsize=figsize)
-        ids = self["id"].unique()
+    # def plot_trajs(self, figsize=(10,10), return_fig=True, markers= 'o',markersize=20):
+    #     fig = plt.figure(figsize=figsize)
+    #     ids = self["id"].unique()
         
-        for id_ in ids:
-            df_id = self[ self["id"] == id_ ]
-            plt.plot(df_id[LONGITUDE], df_id[LATITUDE], markers, markersize=markersize)
-        if return_fig:
-            return fig
+    #     for id_ in ids:
+    #         df_id = self[ self["id"] == id_ ]
+    #         plt.plot(df_id[LONGITUDE], df_id[LATITUDE], markers, markersize=markersize)
+    #     if return_fig:
+    #         return fig
 
-    def plot_traj_id(self, tid, figsize=(10,10)):
-        fig = plt.figure(figsize=figsize)
-        if TID not in self:
-            transformations.create_update_tid_based_on_id_datatime(self)
-        df_ = self[ self[TID] == tid ]
-        plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)             # start point
-        plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)           # end point
+    # def plot_traj_id(self, tid, figsize=(10,10)):
+    #     fig = plt.figure(figsize=figsize)
+    #     if TID not in self:
+    #         transformations.create_update_tid_based_on_id_datatime(self)
+    #     df_ = self[ self[TID] == tid ]
+    #     plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)             # start point
+    #     plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)           # end point
         
-        if 'isNode'not in df_:
-            plt.plot(df_[LONGITUDE], df_[LATITUDE])
-            plt.plot(df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], 'r.', markersize=8)  # points
-        else:
-            filter_ = df_['isNode'] == 1
-            df_nodes = df_.loc[filter_]
-            df_points = df_.loc[~filter_]
-            plt.plot(df_nodes[LONGITUDE], df_nodes[LATITUDE], linewidth=3)
-            plt.plot(df_points[LONGITUDE], df_points[LATITUDE])
-            plt.plot(df_nodes[LONGITUDE], df_nodes[LATITUDE], 'go', markersize=10)   # nodes
-            plt.plot(df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=8)  # points  
-        return df_, fig
+    #     if 'isNode'not in df_:
+    #         plt.plot(df_[LONGITUDE], df_[LATITUDE])
+    #         plt.plot(df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], 'r.', markersize=8)  # points
+    #     else:
+    #         filter_ = df_['isNode'] == 1
+    #         df_nodes = df_.loc[filter_]
+    #         df_points = df_.loc[~filter_]
+    #         plt.plot(df_nodes[LONGITUDE], df_nodes[LATITUDE], linewidth=3)
+    #         plt.plot(df_points[LONGITUDE], df_points[LATITUDE])
+    #         plt.plot(df_nodes[LONGITUDE], df_nodes[LATITUDE], 'go', markersize=10)   # nodes
+    #         plt.plot(df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=8)  # points  
+    #     return df_, fig
 
