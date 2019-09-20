@@ -117,3 +117,40 @@ def array_stats(values_array):
         n += 1
 
     return sum1, sum_sq, n
+
+
+# duvida se era para ficar aqui ou no math_utils
+def interpolation(x0, y0, x1, y1, x):
+    """Perfomers interpolation and extrapolation
+
+    Parameters
+    ----------
+    x0 : float
+        The coordinate of the first point on the x axis
+
+    y0 : float
+        The coordinate of the first point on the y axis
+
+    x1 : float
+        The coordinate of the second point on the x axis
+
+    y1 : float
+        The coordinate of the second point on the y axis
+
+    x : float
+        A value in the interval (x0, x1)
+
+    Returns
+    -------
+    y : float
+        Is the interpolated  or extrapolated value.
+
+    Examples
+    --------
+    interpolation 1: (30, 3, 40, 5, 37) -> 4.4
+    interpolation 2: (30, 3, 40, 5, 35) -> 4.0
+    extrapolation 1: (30, 3, 40, 5, 25) -> 2.0
+    extrapolation 2: (30, 3, 40, 5, 45) -> 6.0
+    """
+    y = y0 + (y1 - y0) * ((x - x0) / (x1 - x0))
+    return y

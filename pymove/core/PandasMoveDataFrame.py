@@ -219,3 +219,67 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
     #         plt.plot(df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=8)  # points  
     #     return df_, fig
 
+    #def show_trajectories_info(df_, dic_labels=dic_labels):
+        """
+        Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box.
+
+        Parameters
+        ----------
+        df_ : pandas.core.frame.DataFrame
+            Represents the dataset with contains lat, long and datetime.
+
+        dic_labels : dict
+            Represents mapping of column's header between values passed on params.
+
+        Returns
+        -------
+
+
+        Examples
+        --------
+        >>> from pymove.utils.utils import show_trajectories_info
+        >>> show_trajectories_info(df_, dic_labels)
+        ======================= INFORMATION ABOUT DATASET =======================
+
+        Number of Points: 217654
+
+        Number of IDs objects: 2
+
+        Start Date:2008-10-23 05:53:05     End Date:2009-03-19 05:46:37
+
+        Bounding Box:(22.147577, 113.54884299999999, 41.132062, 121.156224)
+
+
+        =========================================================================
+
+        """
+        """try:
+            print('\n======================= INFORMATION ABOUT DATASET =======================\n')
+            print('Number of Points: {}\n'.format(df_.shape[0]))
+            if dic_labels['id'] in df_:
+                print('Number of IDs objects: {}\n'.format(df_[dic_labels['id']].nunique()))
+            if dic_features_label['tid'] in df_:
+                print('Number of TIDs trajectory: {}\n'.format(df_[dic_features_label['tid']].nunique()))
+            if dic_labels['datetime'] in df_:
+                print('Start Date:{}     End Date:{}\n'.format(df_[dic_labels['datetime']].min(),
+                                                               df_[dic_labels['datetime']].max()))
+            if dic_labels['lat'] and dic_labels['lon'] in df_:
+                print('Bounding Box:{}\n'.format(
+                    get_bbox(df_, dic_labels)))  # bbox return =  Lat_min , Long_min, Lat_max, Long_max)
+            if dic_features_label['time_to_prev'] in df_:
+                print(
+                    'Gap time MAX:{}     Gap time MIN:{}\n'.format(
+                        round(df_[dic_features_label['time_to_prev']].max(), 3),
+                        round(df_[dic_features_label['time_to_prev']].min(), 3)))
+            if dic_features_label['speed_to_prev'] in df_:
+                print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[dic_features_label['speed_to_prev']].max(), 3),
+                                                              round(df_[dic_features_label['speed_to_prev']].min(), 3)))
+            if dic_features_label['dist_to_prev'] in df_:
+                print('Distance MAX:{}    Distance MIN:{}\n'.format(
+                    round(df_[dic_features_label['dist_to_prev']].max(), 3),
+                    round(df_[dic_features_label['dist_to_prev']].min(),
+                          3)))
+
+            print('\n=========================================================================\n')
+        except Exception as e:
+            raise e"""
