@@ -4,23 +4,23 @@ import pandas as pd
 import time
 from scipy.interpolate import interp1d
 
-from pymove.utils import utils as ut
 from pymove.core import grid as gridutils
 from pymove.utils import transformations
+from pymove.utils import constants
 
 """main labels """
-dic_labels = {"id": 'id', 'lat': 'lat', 'lon': 'lon', 'datetime': 'datetime'}
+# dic_labels = {"id": 'id', 'lat': 'lat', 'lon': 'lon', 'datetime': 'datetime'}
+#
+# dic_features_label = {'tid': 'tid', 'dist_to_prev': 'dist_to_prev', "dist_to_next": 'dist_to_next',
+#                       'dist_prev_to_next': 'dist_prev_to_next',
+#                       'time_to_prev': 'time_to_prev', 'time_to_next': 'time_to_next', 'speed_to_prev': 'speed_to_prev',
+#                       'speed_to_next': 'speed_to_next',
+#                       'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat',
+#                       'index_grid_lon': 'index_grid_lon',
+#                       'situation': 'situation'}
 
-dic_features_label = {'tid': 'tid', 'dist_to_prev': 'dist_to_prev', "dist_to_next": 'dist_to_next',
-                      'dist_prev_to_next': 'dist_prev_to_next',
-                      'time_to_prev': 'time_to_prev', 'time_to_next': 'time_to_next', 'speed_to_prev': 'speed_to_prev',
-                      'speed_to_next': 'speed_to_next',
-                      'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat',
-                      'index_grid_lon': 'index_grid_lon',
-                      'situation': 'situation'}
 
-
-def filter_bbox(df_, bbox, filter_out=False, dic_labels=dic_labels, inplace=False):
+def filter_bbox(df_, bbox, filter_out=False, inplace=False):
     """Filters points of the trajectories according to especified bounding box.
 
     Parameters
@@ -51,8 +51,8 @@ def filter_bbox(df_, bbox, filter_out=False, dic_labels=dic_labels, inplace=Fals
             lat_down =  bbox[0], lon_left =  bbox[1], lat_up = bbox[2], lon_right = bbox[3]
     """
     try:
-        filter_ = (df_[dic_labels['lat']] >= bbox[0]) & (df_[dic_labels['lat']] <= bbox[2]) & (
-                    df_[dic_labels['lon']] >= bbox[1]) & (df_[dic_labels['lon']] <= bbox[3])
+        filter_ = (df_[constants.LATITUDE] >= bbox[0]) & (df_[constants.LATITUDE] <= bbox[2]) & (
+                    df_[constants.LONGITUDE] >= bbox[1]) & (df_[constants.LONGITUDE] <= bbox[3])
         if filter_out:
             filter_ = ~filter_
 
@@ -65,7 +65,7 @@ def filter_bbox(df_, bbox, filter_out=False, dic_labels=dic_labels, inplace=Fals
         raise e
 
 
-def filter_by_datetime(df_, startDatetime=None, endDatetime=None, dic_labels=dic_labels, filter_out=False):
+def filter_by_datetime(df_, startDatetime=None, endDatetime=None, filter_out=False):
     """Filters trajectories points according to especified time range
 
     Parameters
@@ -94,11 +94,11 @@ def filter_by_datetime(df_, startDatetime=None, endDatetime=None, dic_labels=dic
 
     try:
         if startDatetime is not None and endDatetime is not None:
-            filter_ = (df_[dic_labels['datetime']] > startDatetime) & (df_[dic_labels['datetime']] <= endDatetime)
+            filter_ = (df_[constants.DATETIME] > startDatetime) & (df_[constants.DATETIME] <= endDatetime)
         elif endDatetime is not None:
-            filter_ = (df_[dic_labels['datetime']] <= endDatetime)
+            filter_ = (df_[constants.DATETIME] <= endDatetime)
         else:
-            filter_ = (df_[dic_labels['datetime']] > startDatetime)
+            filter_ = (df_[constants.DATETIME] > startDatetime)
 
         if filter_out:
             filter_ = ~filter_
@@ -145,7 +145,7 @@ def filter_by_label(df_, value, label_name, filter_out=False):
         raise e
 
 
-def filter_by_id(df_, id_=None, label_id=dic_labels['id'], filter_out=False):
+def filter_by_id(df_, id_=None, label_id=constants.TRAJ_ID, filter_out=False):
     """Filters trajectories points according to especified trajectory id
 
     Parameters
@@ -171,7 +171,7 @@ def filter_by_id(df_, id_=None, label_id=dic_labels['id'], filter_out=False):
     return filter_by_label(df_, id_, label_id, filter_out)
 
 
-def filter_by_tid(df_, tid_=None, label_tid=dic_features_label['tid'], filter_out=False):
+def filter_by_tid(df_, tid_=None, label_tid=constants.TID, filter_out=False):
     """Filters trajectories points according to especified trajectory tid
 
     Parameters
@@ -229,13 +229,13 @@ def filter_jumps(df_, jump_coefficient=3.0, threshold=1, filter_out=False):
 
     if dic_features_label['dist_to_prev'] in df_ and dic_features_label['dist_to_next'] and dic_features_label[
         'dist_prev_to_next'] in df_:
-        filter_ = (df_[dic_features_label['dist_to_next']] > threshold) & (
-                    df_[dic_features_label['dist_to_prev']] > threshold) & (
-                              df_[dic_features_label['dist_prev_to_next']] > threshold) & \
-                  (jump_coefficient * df_[dic_features_label['dist_prev_to_next']] < df_[
-                      dic_features_label['dist_to_next']]) & \
-                  (jump_coefficient * df_[dic_features_label['dist_prev_to_next']] < df_[
-                      dic_features_label['dist_to_prev']])
+        filter_ = (df_[constants.DIST_TO_NEXT] > threshold) & (
+                    df_[constants.DIST_TO_PREV] > threshold) & (
+                              df_[constants.DIST_PREV_TO_NEXT] > threshold) & \
+                  (jump_coefficient * df_[constants.DIST_PREV_TO_NEXT] < df_[
+                      constants.DIST_TO_NEXT]) & \
+                  (jump_coefficient * df_[constants.DIST_PREV_TO_NEXT] < df_[
+                      constants.DIST_TO_PREV])
 
         if filter_out:
             filter_ = ~filter_
@@ -281,8 +281,8 @@ def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, r
 
     print('\nRemove rows duplicates by subset')
     if sort is True:
-        print('...Sorting by {} and {} to increase performance\n'.format(dic_labels['id'], dic_labels['datetime']))
-        df_.sort_values([dic_labels['id'], dic_labels['datetime']], inplace=True)
+        print('...Sorting by {} and {} to increase performance\n'.format(constants.TRAJ_ID, constants.DATETIME))
+        df_.sort_values([constants.TRAJ_ID, constants.DATETIME], inplace=True)
 
     idx = df_.duplicated(subset=subset)
     tam_drop = df_[idx].shape[0]
@@ -367,8 +367,7 @@ def clean_NaN_values(df_, axis=0, how='any', thresh=None, subset=None, inplace=T
 
 
 # Duvida sobre label_dtype
-def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient=3.0, threshold=1,
-                                dic_labels=dic_labels, label_dtype=np.float64, sum_drop=0):
+def clean_gps_jumps_by_distance(df_, label_id=constants.TRAJ_ID, jump_coefficient=3.0, threshold=1, label_dtype=np.float64, sum_drop=0):
     """Removes the trajectories points that are outliers from the dataframe.
 
     Parameters
@@ -395,8 +394,7 @@ def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient
         Specifies the number of colums that have been droped.
 
     """
-    transformations.create_update_dist_features(df_, label_id, dic_labels, label_dtype=label_dtype)
-
+    transformations.create_update_dist_features(df_ = df_, label_id = label_id,  label_dtype=label_dtype)
     try:
         print('\nCleaning gps jumps by distance to jump_coefficient {}...\n'.format(jump_coefficient))
         df_jumps = filter_jumps(df_, jump_coefficient, threshold)
@@ -408,7 +406,7 @@ def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient
             df_.drop(index=df_jumps.index, inplace=True)
             sum_drop = sum_drop + rows_to_drop
             print('...Rows before: {}, Rows after:{}, Sum drop:{}\n'.format(shape_before, df_.shape[0], sum_drop))
-            clean_gps_jumps_by_distance(df_, label_id, jump_coefficient, threshold, dic_labels, label_dtype, sum_drop)
+            clean_gps_jumps_by_distance(df_, label_id, jump_coefficient, threshold, label_dtype, sum_drop)
         else:
             print('{} GPS points were dropped'.format(sum_drop))
 
@@ -417,7 +415,7 @@ def clean_gps_jumps_by_distance(df_, label_id=dic_labels['id'], jump_coefficient
 
 
 # Lsbel_dtype
-def clean_gps_nearby_points_by_distances(df_, label_id=dic_labels['id'], dic_labels=dic_labels, radius_area=10.0,
+def clean_gps_nearby_points_by_distances(df_, label_id=constants.TRAJ_ID, radius_area=10.0,
                                          label_dtype=np.float64):
     """Removes points from the trajectories when the distance between them and the point before is smaller than the
     value set by the user.
@@ -439,15 +437,16 @@ def clean_gps_nearby_points_by_distances(df_, label_id=dic_labels['id'], dic_lab
     label_dtype :
 
     """
-    transformations.create_update_dist_features(df_, label_id, dic_labels, label_dtype)
+    transformations.create_update_dist_features(df_ = df_, label_id = label_id,  label_dtype=label_dtyp)
+
     try:
         print('\nCleaning gps points from radius of {} meters\n'.format(radius_area))
         if df_.index.name is not None:
             print('...Reset index for filtering\n')
             df_.reset_index(inplace=True)
 
-        if dic_features_label['dist_to_prev'] in df_:
-            filter_nearby_points = (df_[dic_features_label['dist_to_prev']] <= radius_area)
+        if constants.DIST_TO_PREV in df_:
+            filter_nearby_points = (df_[constants.DIST_TO_PREV] <= radius_area)
 
             idx = df_[filter_nearby_points].index
             print('...There are {} gps points to drop\n'.format(idx.shape[0]))
@@ -456,16 +455,15 @@ def clean_gps_nearby_points_by_distances(df_, label_id=dic_labels['id'], dic_lab
                 shape_before = df_.shape[0]
                 df_.drop(index=idx, inplace=True)
                 print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
-                clean_gps_nearby_points_by_distances(df_, label_id, dic_labels, radius_area, label_dtype)
+                clean_gps_nearby_points_by_distances(df_, label_id, radius_area, label_dtype)
         else:
-            print('...{} is not in the dataframe'.format(dic_features_label['dist_to_prev']))
+            print('...{} is not in the dataframe'.format(constants.DIST_TO_PREV))
     except Exception as e:
         raise e
 
 
 # Lsbel_dtype
-def clean_gps_nearby_points_by_speed(df_, label_id=dic_labels['id'], dic_labels=dic_labels, speed_radius=0.0,
-                                     label_dtype=np.float64):
+def clean_gps_nearby_points_by_speed(df_, label_id=constants.TRAJ_ID, speed_radius=0.0, label_dtype=np.float64):
     """Removes points from the trajectories when the speed of travel between them and the point before is smaller than the
            value set by the user.
 
@@ -486,15 +484,15 @@ def clean_gps_nearby_points_by_speed(df_, label_id=dic_labels['id'], dic_labels=
     label_dtype :
 
     """
-    transformations.create_update_dist_time_speed_features(df_, label_id, dic_labels, label_dtype)
+    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
     try:
         print('\nCleaning gps points using {} speed radius\n'.format(speed_radius))
         if df_.index.name is not None:
             print('...Reset index for filtering\n')
             df_.reset_index(inplace=True)
 
-        if dic_features_label['speed_to_prev'] in df_:
-            filter_nearby_points = (df_[dic_features_label['speed_to_prev']] <= speed_radius)
+        if constants.SPEED_TO_PREV in df_:
+            filter_nearby_points = (df_[constants.SPEED_TO_PREV] <= speed_radius)
 
             idx = df_[filter_nearby_points].index
             print('...There are {} gps points to drop\n'.format(idx.shape[0]))
@@ -503,16 +501,16 @@ def clean_gps_nearby_points_by_speed(df_, label_id=dic_labels['id'], dic_labels=
                 shape_before = df_.shape[0]
                 df_.drop(index=idx, inplace=True)
                 print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
-                clean_gps_nearby_points_by_speed(df_, label_id, dic_labels, speed_radius, label_dtype)
+                clean_gps_nearby_points_by_speed(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
         else:
-            print('...{} is not in the dataframe'.format(dic_features_label['dist_to_prev']))
+            print('...{} is not in the dataframe'.format(constants.DIST_TO_PREV))
     except Exception as e:
         raise e
 
 
 # LABEL_DTYPE
-def clean_gps_speed_max_radius(df_, label_id=dic_labels['id'], dic_labels=dic_labels, speed_max=50.0,
-                               label_dtype=np.float64):
+def clean_gps_speed_max_radius(df_, label_id=constants.TRAJ_ID, speed_max=50.0, label_dtype=np.float64):
+
     """Recursively removes trajectories points with speed higher than the value especifeid by the user.
     Given any point p of the trajectory, the point will be removed if one of the following happens:
     if the travel speed from the point before p to p is greater than the  max value of speed between adjacent
@@ -539,14 +537,13 @@ def clean_gps_speed_max_radius(df_, label_id=dic_labels['id'], dic_labels=dic_la
 
     """
 
-    transformations.create_update_dist_time_speed_features(df_, label_id, dic_labels=dic_labels,
-                                                           label_dtype=label_dtype)
+    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
 
     print('\nClean gps points with speed max > {} meters by seconds'.format(speed_max))
 
-    if dic_features_label['speed_to_prev'] in df_:
-        filter_ = (df_[dic_features_label['speed_to_prev']] > speed_max) | (
-                    df_[dic_features_label['speed_to_next']] > speed_max)
+    if constants.SPEED_TO_PREV in df_:
+        filter_ = (df_[constants.SPEED_TO_PREV] > speed_max) | (
+                    df_[constants.SPEED_TO_PREV] > speed_max)
 
         idx = df_[filter_].index
 
@@ -556,11 +553,11 @@ def clean_gps_speed_max_radius(df_, label_id=dic_labels['id'], dic_labels=dic_la
             shape_before = df_.shape[0]
             df_.drop(index=idx, inplace=True)
             print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
-            clean_gps_speed_max_radius(df_, label_id, dic_labels, speed_max, label_dtype)
+            clean_gps_speed_max_radius(df_, label_id, speed_max, label_dtype)
 
 
 # DESCUBRIR O QUE EH LABEL_DTYPE
-def clean_trajectories_with_few_points(df_, label_tid=dic_features_label['tid'], dic_labels=dic_labels,
+def clean_trajectories_with_few_points(df_, label_tid=constants.TID,
                                        min_points_per_trajectory=2, label_dtype=np.float64):
     """Eliminates from the given dataframe, trajectories with fewer points than was especified by the user
 
@@ -596,14 +593,15 @@ def clean_trajectories_with_few_points(df_, label_tid=dic_features_label['tid'],
         df_.drop(index=idx, inplace=True)
         print('\n...Tids after drop: {}'.format(df_[label_tid].unique().shape[0]))
         print('\n...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-        transformations.create_update_dist_time_speed_features(df_, label_tid, dic_labels, label_dtype)
+        transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
+
 
 
 # confirmar se remove_tids_with_few_points eh o clean_trajectories_with_few_points
 # updating features no notes, nao se refere a propria funcao?
 # DESCUBRIR O QUE EH LABEL_DTYPE
-def clean_trajectories_short_and_few_points_(df_, label_id=dic_features_label['tid'], dic_labels=dic_labels,
-                                             min_trajectory_distance=100, min_points_per_trajectory=2,
+def clean_trajectories_short_and_few_points_(df_, label_id=constants.TID, min_trajectory_distance=100,
+                                             min_points_per_trajectory=2,
                                              label_dtype=np.float64):
     """Eliminates from the given dataframe trajectories with fewer points and shorter length than specified values
        by the user.
@@ -634,18 +632,18 @@ def clean_trajectories_short_and_few_points_(df_, label_id=dic_features_label['t
 
     """
     print('\nRemove short trajectories...')
-    clean_trajectories_with_few_points(df_, label_id, dic_labels, min_points_per_trajectory, label_dtype)
+    clean_trajectories_with_few_points(df_, label_id, min_points_per_trajectory, label_dtype)
 
-    transformations.create_update_dist_time_speed_features(df_, label_id, dic_labels, label_dtype)
+    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
 
     if df_.index.name is not None:
         print('reseting index')
         df_.reset_index(inplace=True)
 
     print('\n...Dropping unnecessary trajectories...')
-    df_agg_tid = df_.groupby(by=label_id).agg({dic_features_label['dist_to_prev']: 'sum'})
+    df_agg_tid = df_.groupby(by=label_id).agg({constants.DIST_TO_PREV: 'sum'})
 
-    filter_ = (df_agg_tid[dic_features_label['dist_to_prev']] < min_trajectory_distance)
+    filter_ = (df_agg_tid[constants.DIST_TO_PREV] < min_trajectory_distance)
     tid_selection = df_agg_tid[filter_].index
     print('\n...short trajectories and trajectories with a minimum distance ({}): {}'.format(df_agg_tid.shape[0],
                                                                                              min_trajectory_distance))
@@ -657,5 +655,5 @@ def clean_trajectories_short_and_few_points_(df_, label_id=dic_features_label['t
         df_.drop(index=idx, inplace=True)
         print('\n...Tids - before drop: {} - after drop: {}'.format(tids_before_drop, df_[label_id].unique().shape[0]))
         print('\n...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-        clean_trajectories_short_and_few_points_(df_, dic_labels, min_trajectory_distance, min_points_per_trajectory,
+        clean_trajectories_short_and_few_points_(df_, min_trajectory_distance, min_points_per_trajectory,
                                                  label_dtype)

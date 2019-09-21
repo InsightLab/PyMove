@@ -1,26 +1,25 @@
 # TODO: Andreza e Arina
 from __future__ import division
 import time
-import math
 import folium
-import datetime
 import numpy as np
 import pandas as pd
 
+from pymove.utils.time_utils import deltatime_str
+
+
 from IPython.display import display
 from ipywidgets import IntProgress, HTML, VBox
-from pandas._libs.tslibs.timestamps import Timestamp
 
 """main labels """
 dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
 
-dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next', 
+dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next',
                     'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
                     'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
                     'situation':'situation'}
 
 
-#esses dois ultimos nao sei onde ficam
 def log_progress(sequence, every=None, size=None, name='Items'):
     is_iterator = False
     if size is None:

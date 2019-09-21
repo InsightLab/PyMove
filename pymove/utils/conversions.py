@@ -1,18 +1,19 @@
-from __future__ import division
-import time
-import math
-import folium
-import datetime
+#from __future__ import division
+#import time
+#import math
+#import folium
+#import datetime
 import numpy as np
-import pandas as pd
+#import pandas as pd
 
-from scipy.interpolate import interp1d
-from pymove.utils.utils import dic_labels, dic_features_label
+#from scipy.interpolate import interp1d
+#from pymove.utils.utils import dic_labels, dic_features_label
 
-from IPython.display import display
-from ipywidgets import IntProgress, HTML, VBox
-from pandas._libs.tslibs.timestamps import Timestamp
+#from IPython.display import display
+#from ipywidgets import IntProgress, HTML, VBox
+#from pandas._libs.tslibs.timestamps import Timestamp
 
+from pymove.utils import constants
 
 def list_to_str(input_list, delimiter=','):
     """Concatenates the elements of the array, joining them by the separator especified by the parameter "delimiter"
@@ -175,7 +176,7 @@ def y2LatSpherical(y):
 
 
 """ transform speed """
-def transform_speed_from_ms_to_kmh(df_, label_speed=dic_features_label['speed_to_prev'], new_label = None):
+def transform_speed_from_ms_to_kmh(df_, label_speed = constants.SPEED_TO_PREV, new_label = None):
     try:
         df_[label_speed] = df_[label_speed].transform(lambda row: row*3.6)
         if new_label is not None:
@@ -183,7 +184,9 @@ def transform_speed_from_ms_to_kmh(df_, label_speed=dic_features_label['speed_to
     except Exception as e:
         raise e
 
-def transform_speed_from_kmh_to_ms(df_, label_speed=dic_features_label['speed_to_prev'], new_label = None):
+
+
+def transform_speed_from_kmh_to_ms(df_, label_speed = constants.SPEED_TO_PREV, new_label = None):
     try:
         df_[label_speed] = df_[label_speed].transform(lambda row: row/3.6)
         if new_label is not None:
@@ -191,8 +194,9 @@ def transform_speed_from_kmh_to_ms(df_, label_speed=dic_features_label['speed_to
     except Exception as e:
         raise e
 
+
 """ transform distances """
-def transform_dist_from_meters_to_kilometers(df_, label_distance=dic_features_label['dist_to_prev'], new_label=None):
+def transform_dist_from_meters_to_kilometers(df_, label_distance = constants.DIST_TO_PREV, new_label=None):
     try:
         df_[label_distance] = df_[label_distance].transform(lambda row: row/1000)
         if new_label is not None:
@@ -200,7 +204,8 @@ def transform_dist_from_meters_to_kilometers(df_, label_distance=dic_features_la
     except Exception as e:
         raise e
 
-def transform_dist_from_to_kilometers_to_meters(df_, label_distance=dic_features_label['dist_to_prev'], new_label=None):
+
+def transform_dist_from_to_kilometers_to_meters(df_, label_distance = constants.DIST_TO_PREV, new_label=None):
     try:
         df_[label_distance] = df_[label_distance].transform(lambda row: row*1000)
         if new_label is not None:
@@ -208,8 +213,9 @@ def transform_dist_from_to_kilometers_to_meters(df_, label_distance=dic_features
     except Exception as e:
         raise e
 
+
 """ transform time """
-def transform_time_from_seconds_to_minutes(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
+def transform_time_from_seconds_to_minutes(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     try:
         df_[label_time] = df_[label_time].transform(lambda row: row/60.0)
         if new_label is not None:
@@ -217,7 +223,8 @@ def transform_time_from_seconds_to_minutes(df_, label_time=dic_features_label['t
     except Exception as e:
         raise e
 
-def transform_time_from_minute_to_seconds(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
+
+def transform_time_from_minute_to_seconds(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     try:
         df_[label_time] = df_[label_time].apply(lambda row: row*60.0)
         if new_label is not None:
@@ -225,7 +232,8 @@ def transform_time_from_minute_to_seconds(df_, label_time=dic_features_label['ti
     except Exception as e:
         raise e
 
-def transform_time_from_minute_to_hours(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
+
+def transform_time_from_minute_to_hours(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     """Convertes times features from minutes to hours.
 
     Parameters
@@ -246,7 +254,8 @@ def transform_time_from_minute_to_hours(df_, label_time=dic_features_label['time
     except Exception as e:
         raise e
 
-def transform_time_from_hours_to_minute(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
+
+def transform_time_from_hours_to_minute(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     """Convertes time features from hours to minutes.
 
     Parameters
@@ -267,7 +276,8 @@ def transform_time_from_hours_to_minute(df_, label_time=dic_features_label['time
     except Exception as e:
         raise e
 
-def transform_time_from_seconds_to_hours(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
+
+def transform_time_from_seconds_to_hours(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     """Convertes time features from seconds to hours.
 
     Parameters
@@ -288,7 +298,8 @@ def transform_time_from_seconds_to_hours(df_, label_time=dic_features_label['tim
     except Exception as e:
         raise e
 
-def transform_time_from_hours_to_seconds(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
+
+def transform_time_from_hours_to_seconds(df_, label_time=constants.TIME_TO_PREV, new_label=None):
     """Convertes time features from hours to seconds.
 
     Parameters
