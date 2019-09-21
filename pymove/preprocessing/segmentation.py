@@ -2,16 +2,16 @@
 import numpy as np
 import pandas as pd
 import time
+from pymove.utils.traj_utils import progress_update
+from pymove.utils import constants
 
-from pymove import utils as ut
-
-"""main labels """
-dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
-
-dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next', 
-                    'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
-                    'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
-                    'situation':'situation'}
+# """main labels """
+# dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
+#
+# dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next',
+#                     'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
+#                     'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
+#                     'situation':'situation'}
                 
 
 def bbox_split(bbox, number_grids):
@@ -45,7 +45,7 @@ def bbox_split(bbox, number_grids):
     return df
 
 
-def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_dist_between_adj_points=3000, max_time_between_adj_points=7200,
+def segment_trajectory_by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_dist_between_adj_points=3000, max_time_between_adj_points=7200,
                       max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_part'):
     """Segments the trajectories into clusters based on distance, time and speed.
 
@@ -100,9 +100,9 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_di
         for idx in ids:
             curr_tid += 1
             
-            filter_ = (df_.at[idx, dic_features_label['time_to_prev']] > max_time_between_adj_points) | \
-                        (df_.at[idx, dic_features_label['dist_to_prev']] > max_dist_between_adj_points) | \
-                        (df_.at[idx, dic_features_label['speed_to_prev']] > max_speed_between_adj_points)        
+            filter_ = (df_.at[idx, constants.TIME_TO_PREV] > max_time_between_adj_points) | \
+                        (df_.at[idx, constants.DIST_TO_PREV] > max_dist_between_adj_points) | \
+                        (df_.at[idx, constants.SPEED_TO_PREV] > max_speed_between_adj_points)
 
             """ check if object have only one point to be removed """
             if filter_.shape == ():
@@ -120,7 +120,7 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_di
                 count += tids.shape[0]
                 df_.at[idx, label_new_tid] = tids
             
-            curr_perc_int, est_time_str = ut.progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
 
         if label_id == label_new_tid:
             df_.reset_index(drop=True, inplace=True)
@@ -146,7 +146,7 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_di
         raise e
 
 
-def segment_trajectory_by_speed(df_, label_id=dic_labels['id'], max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_speed'):
+def segment_trajectory_by_speed(df_, label_id=constants.TRAJ_ID, max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_speed'):
     """Segments the trajectories into clusters based on speed.
 
     Parameters
@@ -191,7 +191,7 @@ def segment_trajectory_by_speed(df_, label_id=dic_labels['id'], max_speed_betwee
             curr_tid += 1
 
             """ filter speed max"""
-            speed = (df_.at[idx, dic_features_label['speed_to_prev']] > max_speed_between_adj_points)        
+            speed = (df_.at[idx, constants.SPEED_TO_PREV] > max_speed_between_adj_points)
                      
             """ check if object have only one point to be removed """
             if speed.shape == ():
@@ -208,7 +208,7 @@ def segment_trajectory_by_speed(df_, label_id=dic_labels['id'], max_speed_betwee
                 count += tids.shape[0]
                 df_.at[idx, label_new_tid] = tids
 
-            curr_perc_int, est_time_str = ut.progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
 
         if label_id == label_new_tid:
             df_.reset_index(drop=True, inplace=True)
@@ -232,7 +232,7 @@ def segment_trajectory_by_speed(df_, label_id=dic_labels['id'], max_speed_betwee
         raise e
 
 
-def segment_trajectory_by_time(df_, label_id=dic_labels['id'], max_time_between_adj_points=900.0, drop_single_points=True, label_new_tid='tid_time'):
+def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between_adj_points=900.0, drop_single_points=True, label_new_tid='tid_time'):
     """Segments the trajectories into clusters based on time.
 
     Parameters
@@ -277,7 +277,7 @@ def segment_trajectory_by_time(df_, label_id=dic_labels['id'], max_time_between_
             curr_tid += 1
 
             """ filter time max"""
-            times = (df_.at[idx, dic_features_label['time_to_prev']] > max_time_between_adj_points)        
+            times = (df_.at[idx, constants.TIME_TO_PREV] > max_time_between_adj_points)
                      
             """ check if object have only one point to be removed """
             if times.shape == ():
@@ -294,7 +294,7 @@ def segment_trajectory_by_time(df_, label_id=dic_labels['id'], max_time_between_
                 count += tids.shape[0]
                 df_.at[idx, label_new_tid] = tids
 
-            curr_perc_int, est_time_str = ut.progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
 
         if label_id == label_new_tid:
             df_.reset_index(drop=True, inplace=True)
