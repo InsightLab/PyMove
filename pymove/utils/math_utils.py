@@ -1,14 +1,5 @@
-from __future__ import division
-import time
 import math
-import folium
-import datetime
 import numpy as np
-import pandas as pd
-
-from IPython.display import display
-from ipywidgets import IntProgress, HTML, VBox
-from pandas._libs.tslibs.timestamps import Timestamp
 
 
 def std(sum_sq, size, avg):
@@ -36,7 +27,7 @@ def avg_std_sample(sum1, sum_sq, size):
     avg = sum1 / size
     return avg, std_sample(sum_sq, size, avg)
 
-#isto eh math mesmo ou deveria estar no array_utils. No fundo o que ele ta fazendo eh a media
+
 # função está dando erro ao rodar
 def arrays_avg(values_array, weights_array=None):
     """Computes the mean of the elements of the array.
@@ -71,7 +62,7 @@ def arrays_avg(values_array, weights_array=None):
 
     return result
 
-#isto eh math mesmo ou deveria estar no array_utils.
+
 def array_sum(values_array):
     """Computes the sum of the elements of the array.
 
@@ -89,7 +80,7 @@ def array_sum(values_array):
 
     return sum1
 
-#isto eh math mesmo ou deveria estar no array_utils.
+
 def array_stats(values_array):
     """Computes the sum of all the elements in the array, the sum of the square of each element and the number of
         elements of the array.
@@ -119,7 +110,6 @@ def array_stats(values_array):
     return sum1, sum_sq, n
 
 
-# duvida se era para ficar aqui ou no math_utils
 def interpolation(x0, y0, x1, y1, x):
     """Perfomers interpolation and extrapolation
 

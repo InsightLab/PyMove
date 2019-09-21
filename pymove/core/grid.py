@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from shapely.geometry import Polygon
 from tqdm import tqdm_notebook as tqdm
 
-from pymove.utils.utils import dic_labels, dic_features_label
+from pymove.utils.traj_utils import dic_labels, dic_features_label
 
 def lat_meters(lat):
     """

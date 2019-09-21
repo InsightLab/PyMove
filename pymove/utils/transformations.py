@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import time
 from scipy.interpolate import interp1d
-from pymove.utils.utils import dic_labels, dic_features_label
+from pymove.utils.traj_utils import dic_labels, dic_features_label, shift, progress_update
 
 
 """ ----------------------  FUCTIONS TO LAT AND LONG COORDINATES --------------------------- """ 
@@ -181,13 +181,13 @@ def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_l
                 #df_.at[idx, dic_features_label['dist_prev_to_next']] = np.nan    
                 
             else:
-                prev_lat = ut.shift(curr_lat, 1)
-                prev_lon = ut.shift(curr_lon, 1)
+                prev_lat = shift(curr_lat, 1)
+                prev_lon = shift(curr_lon, 1)
                 # compute distance from previous to current point
                 df_.at[idx, dic_features_label['dist_to_prev']] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
                 
-                next_lat = ut.shift(curr_lat, -1)
-                next_lon = ut.shift(curr_lon, -1)
+                next_lat = shift(curr_lat, -1)
+                next_lon = shift(curr_lon, -1)
                 # compute distance to next point
                 df_.at[idx, dic_features_label['dist_to_next']] = haversine(curr_lat, curr_lon, next_lat, next_lon)
                 
@@ -198,7 +198,7 @@ def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_l
                 df_.at[idx, dic_features_label['dist_prev_to_next']] = haversine(prev_lat, prev_lon, next_lat, next_lon)
                 
                 sum_size_id += size_id
-                curr_perc_int, est_time_str = ut.progress_update(sum_size_id, df_size, start_time, curr_perc_int, step_perc=20)
+                curr_perc_int, est_time_str = progress_update(sum_size_id, df_size, start_time, curr_perc_int, step_perc=20)
         df_.reset_index(inplace=True)
         print('...Reset index\n')
         print('..Total Time: {}'.format((time.time() - start_time)))
@@ -260,8 +260,9 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
                 df_.at[idx, dic_features_label['time_to_prev']] = np.nan
                 df_.at[idx, dic_features_label['speed_to_prev']] = np.nan   
             else:
-                prev_lat = ut.shift(curr_lat, 1)
-                prev_lon = ut.shift(curr_lon, 1)
+                prev_lat = shift(curr_lat, 1)
+                prev_lon = shift(curr_lon, 1)
+                prev_lon = shift(curr_lon, 1)
                 # compute distance from previous to current point
                 df_.at[idx, dic_features_label['dist_to_prev']] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
                 
@@ -278,7 +279,7 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
                 #size_id = df_.at[idx, dic_labels['datetime']].size
 
                 time_ = df_.at[idx, dic_labels['datetime']].astype(label_dtype)
-                time_prev = (time_ - ut.shift(time_, 1))*(10**-9)
+                time_prev = (time_ - shift(time_, 1))*(10**-9)
                 df_.at[idx, dic_features_label['time_to_prev']] = time_prev
 
                 """ set time_to_next"""
@@ -295,7 +296,7 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
                 #ut.change_df_feature_values_using_filter(df_, id_, 'speed', filter_points, speeds)
 
                 sum_size_id  += size_id
-                curr_perc_int, est_time_str = ut.progress_update(sum_size_id , df_size, start_time, curr_perc_int, step_perc=20)
+                curr_perc_int, est_time_str = progress_update(sum_size_id , df_size, start_time, curr_perc_int, step_perc=20)
         print('...Reset index...\n')
         df_.reset_index(inplace=True)
         print('..Total Time: {:.3f}'.format((time.time() - start_time)))
