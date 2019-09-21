@@ -2,22 +2,11 @@
 import numpy as np
 import pandas as pd
 import time
-from scipy.interpolate import interp1d
 
 from pymove.core import grid as gridutils
 from pymove.utils import transformations
 from pymove.utils import constants
 
-"""main labels """
-# dic_labels = {"id": 'id', 'lat': 'lat', 'lon': 'lon', 'datetime': 'datetime'}
-#
-# dic_features_label = {'tid': 'tid', 'dist_to_prev': 'dist_to_prev', "dist_to_next": 'dist_to_next',
-#                       'dist_prev_to_next': 'dist_prev_to_next',
-#                       'time_to_prev': 'time_to_prev', 'time_to_next': 'time_to_next', 'speed_to_prev': 'speed_to_prev',
-#                       'speed_to_next': 'speed_to_next',
-#                       'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat',
-#                       'index_grid_lon': 'index_grid_lon',
-#                       'situation': 'situation'}
 
 
 def filter_bbox(df_, bbox, filter_out=False, inplace=False):
@@ -227,8 +216,7 @@ def filter_jumps(df_, jump_coefficient=3.0, threshold=1, filter_out=False):
         print('...Reset index for filtering\n')
         df_.reset_index(inplace=True)
 
-    if dic_features_label['dist_to_prev'] in df_ and dic_features_label['dist_to_next'] and dic_features_label[
-        'dist_prev_to_next'] in df_:
+    if constants.DIST_TO_PREV in df_ and constants.DIST_TO_NEXT and constants.DIST_PREV_TO_NEXT in df_:
         filter_ = (df_[constants.DIST_TO_NEXT] > threshold) & (
                     df_[constants.DIST_TO_PREV] > threshold) & (
                               df_[constants.DIST_PREV_TO_NEXT] > threshold) & \
@@ -437,7 +425,7 @@ def clean_gps_nearby_points_by_distances(df_, label_id=constants.TRAJ_ID, radius
     label_dtype :
 
     """
-    transformations.create_update_dist_features(df_ = df_, label_id = label_id,  label_dtype=label_dtyp)
+    transformations.create_update_dist_features(df_ = df_, label_id = label_id,  label_dtype=label_dtype)
 
     try:
         print('\nCleaning gps points from radius of {} meters\n'.format(radius_area))
@@ -484,7 +472,7 @@ def clean_gps_nearby_points_by_speed(df_, label_id=constants.TRAJ_ID, speed_radi
     label_dtype :
 
     """
-    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
+    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtype)
     try:
         print('\nCleaning gps points using {} speed radius\n'.format(speed_radius))
         if df_.index.name is not None:
@@ -537,7 +525,7 @@ def clean_gps_speed_max_radius(df_, label_id=constants.TRAJ_ID, speed_max=50.0, 
 
     """
 
-    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
+    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtype)
 
     print('\nClean gps points with speed max > {} meters by seconds'.format(speed_max))
 
@@ -593,7 +581,7 @@ def clean_trajectories_with_few_points(df_, label_tid=constants.TID,
         df_.drop(index=idx, inplace=True)
         print('\n...Tids after drop: {}'.format(df_[label_tid].unique().shape[0]))
         print('\n...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-        transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
+        transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_tid, label_dtype = label_dtype)
 
 
 
@@ -634,7 +622,7 @@ def clean_trajectories_short_and_few_points_(df_, label_id=constants.TID, min_tr
     print('\nRemove short trajectories...')
     clean_trajectories_with_few_points(df_, label_id, min_points_per_trajectory, label_dtype)
 
-    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
+    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtype)
 
     if df_.index.name is not None:
         print('reseting index')
