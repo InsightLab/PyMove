@@ -3,7 +3,9 @@ import numpy as np
 import pandas as pd
 import time
 from scipy.interpolate import interp1d
-from pymove.utils.traj_utils import dic_labels, dic_features_label, shift, progress_update
+# from pymove.utils.traj_utils import dic_labels, dic_features_label, shift, progress_update
+from pymove.utils.traj_utils import shift, progress_update
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY
 
 
 """ ----------------------  FUCTIONS TO LAT AND LONG COORDINATES --------------------------- """ 
@@ -65,7 +67,7 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 
 """ ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON DATATIME  ----------------------------- """
 
-def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels, str_format="%Y%m%d%H", sort=True):
+def create_update_tid_based_on_id_datatime(df_,  str_format="%Y%m%d%H", sort=True):
     """
         Create or update trajectory id  
             Exampĺe: ID = M00001 and datetime = 2019-04-28 00:00:56  -> tid = M000012019042800
@@ -84,7 +86,7 @@ def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels, str_forma
     except Exception as e:
         raise e
 
-def create_update_date_features(df_, dic_labels=dic_labels):
+def create_update_date_features(df_):
     try:
         print('Creating date features...')
         if dic_labels['datetime'] in df_:
@@ -93,7 +95,7 @@ def create_update_date_features(df_, dic_labels=dic_labels):
     except Exception as e:
         raise e
     
-def create_update_hour_features(df_, dic_labels=dic_labels):    
+def create_update_hour_features(df_):    
     try:
         print('\nCreating or updating a feature for hour...\n')
         if dic_labels['datetime'] in df_:
@@ -102,7 +104,7 @@ def create_update_hour_features(df_, dic_labels=dic_labels):
     except Exception as e:
         raise e
 
-def create_update_day_of_the_week_features(df_, dic_labels=dic_labels):
+def create_update_day_of_the_week_features(df_):
     """
         Create or update a feature day of the week from datatime
             Exampĺe: datetime = 2019-04-28 00:00:56  -> day = Sunday
@@ -114,7 +116,7 @@ def create_update_day_of_the_week_features(df_, dic_labels=dic_labels):
     except Exception as e:
         raise e
 
-def create_update_time_of_day_features(df_, dic_labels=dic_labels):
+def create_update_time_of_day_features(df_):
     """
         Create a feature time of day or period from datatime
             Examples: 
@@ -136,7 +138,7 @@ def create_update_time_of_day_features(df_, dic_labels=dic_labels):
         raise e
 
 """ ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON LAT AND LON COORDINATES  ----------------------------- """
-def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_labels, label_dtype = np.float64, sort=True):
+def create_update_dist_features(df_, label_id=TRAJ_ID, dic_labels=dic_labels, label_dtype = np.float64, sort=True):
     """
         Create three distance in meters to an GPS point P (lat, lon)
             Example:
