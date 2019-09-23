@@ -2,14 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pymove.utils.utils import format_labels
-
-LATITUDE = 'lat'
-LONGITUDE = 'lon'
-DATETIME = 'datetime'
-TRAJ_ID = 'id'
-ID = "id"
-TID = "tid"
-DIST_TO_PREV = 'dist_to_prev'
+from pymove.utils.constantes import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, ID, TID, DIST_TO_PREV
 
 #TODO: tirar o data do format_labels
 #TODO: mover constantes para um arquivo
