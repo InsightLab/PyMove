@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pymove.utils.utils import format_labels
+from pymove.utils.traj_utils import format_labels
+from pymove.core import MoveDataFrameAbstractModel
 
 LATITUDE = 'lat'
 LONGITUDE = 'lon'
@@ -13,7 +14,7 @@ DIST_TO_PREV = 'dist_to_prev'
 
 #TODO: tirar o data do format_labels
 #TODO: mover constantes para um arquivo
-class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
+class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua estrutura de dados
     def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id = TRAJ_ID):
         # formatar os labels que foram passados pro que usado no pymove -> format_labels
         # renomeia as colunas do dado passado pelo novo dict
@@ -26,7 +27,7 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
         
         if self._has_columns(tdf):
             self._validate_move_data_frame(tdf)
-            super(PandasMoveDataFrame, self).__init__(tdf)
+            pd.DataFrame.__init__(self, tdf)
             
             
     def _has_columns(self, data):
@@ -66,8 +67,8 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'"%DATETIME)
         return self[DATETIME]
 
-    # def head(self):
-    #     return self.head()
+    def head2(self, n = 10):
+        return self.head(n)
 
     def bla(self):
         print(self['lat'])
