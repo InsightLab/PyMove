@@ -8,7 +8,7 @@ import pandas as pd
 from pymove.utils.time_utils import deltatime_str
 from IPython.display import display
 from ipywidgets import IntProgress, HTML, VBox
-from pymove.utils.constants import LATITUDE, LONGITUDE
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, SPEED_TO_PREV, TIME_TO_PREV, DIST_TO_PREV
 # """main labels """
 # dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
 
@@ -226,7 +226,7 @@ def get_bbox(df_):
     except Exception as e:
         raise e
 
-def show_trajectories_info(df_, dic_labels=dic_labels):
+def show_trajectories_info(df_):
     """
     Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box. 
     Parameters
@@ -234,15 +234,13 @@ def show_trajectories_info(df_, dic_labels=dic_labels):
     df_ : pandas.core.frame.DataFrame
         Represents the dataset with contains lat, long and datetime.
     
-    dic_labels : dict
-        Represents mapping of column's header between values passed on params.
     Returns
     -------
    
     Examples
     --------
     >>> from pymove.utils.utils import show_trajectories_info
-    >>> show_trajectories_info(df_, dic_labels)
+    >>> show_trajectories_info(df_)
     ======================= INFORMATION ABOUT DATASET =======================
     Number of Points: 217654
     Number of IDs objects: 2
@@ -253,20 +251,20 @@ def show_trajectories_info(df_, dic_labels=dic_labels):
     try:
         print('\n======================= INFORMATION ABOUT DATASET =======================\n')
         print('Number of Points: {}\n'.format(df_.shape[0]))
-        if dic_labels['id'] in df_:
-            print('Number of IDs objects: {}\n'.format(df_[dic_labels['id']].nunique()))
-        if dic_features_label['tid'] in df_:
-            print('Number of TIDs trajectory: {}\n'.format(df_[dic_features_label['tid']].nunique()))
-        if dic_labels['datetime'] in df_:
-            print('Start Date:{}     End Date:{}\n'.format(df_[dic_labels['datetime']].min(), df_[dic_labels['datetime']].max()))
-        if dic_labels['lat'] and dic_labels['lon'] in df_:
-            print('Bounding Box:{}\n'.format(get_bbox(df_, dic_labels))) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
-        if dic_features_label['time_to_prev'] in df_:            
-            print('Gap time MAX:{}     Gap time MIN:{}\n'.format(round(df_[dic_features_label['time_to_prev']].max(),3), round(df_[dic_features_label['time_to_prev']].min(), 3)))
-        if dic_features_label['speed_to_prev'] in df_:            
-            print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[dic_features_label['speed_to_prev']].max(), 3), round(df_[dic_features_label['speed_to_prev']].min(), 3))) 
-        if dic_features_label['dist_to_prev'] in df_:            
-            print('Distance MAX:{}    Distance MIN:{}\n'.format(round(df_[dic_features_label['dist_to_prev']].max(),3), round(df_[dic_features_label['dist_to_prev']].min(), 3))) 
+        if TRAJ_ID in df_:
+            print('Number of IDs objects: {}\n'.format(df_[TRAJ_ID].nunique()))
+        if TID in df_:
+            print('Number of TIDs trajectory: {}\n'.format(df_[TID].nunique()))
+        if DATETIME in df_:
+            print('Start Date:{}     End Date:{}\n'.format(df_[DATETIME].min(), df_[DATETIME].max()))
+        if LATITUDE and LONGITUDE in df_:
+            print('Bounding Box:{}\n'.format(get_bbox(df_))) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
+        if TIME_TO_PREV in df_:            
+            print('Gap time MAX:{}     Gap time MIN:{}\n'.format(round(df_[TIME_TO_PREV].max(),3), round(df_[TIME_TO_PREV].min(), 3)))
+        if SPEED_TO_PREV in df_:            
+            print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[SPEED_TO_PREV].max(), 3), round(df_[SPEED_TO_PREV].min(), 3))) 
+        if DIST_TO_PREV in df_:            
+            print('Distance MAX:{}    Distance MIN:{}\n'.format(round(df_[DIST_TO_PREV].max(),3), round(df_[DIST_TO_PREV].min(), 3))) 
             
         print('\n=========================================================================\n')
     except Exception as e:
