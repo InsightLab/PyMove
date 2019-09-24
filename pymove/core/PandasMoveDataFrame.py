@@ -3,13 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pymove.utils.utils import format_labels
 
-LATITUDE = 'lat'
-LONGITUDE = 'lon'
-DATETIME = 'datetime'
-TRAJ_ID = 'id'
-ID = "id"
-TID = "tid"
-DIST_TO_PREV = 'dist_to_prev'
+from pymove.utils import constants
+
+
 
 #TODO: tirar o data do format_labels
 #TODO: mover constantes para um arquivo
@@ -106,6 +102,28 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
     #     return data_dict
 
     # def get_bbox(self):
+            """
+            A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
+                - Latitude is a decimal number between -90.0 and 90.0. 
+                - Longitude is a decimal number between -180.0 and 180.0.
+            They usually follow the standard format of: 
+            - bbox = left, bottom, right, top 
+            - bbox = min Longitude , min Latitude , max Longitude , max Latitude 
+            Parameters
+            ----------
+            df_ : pandas.core.frame.DataFrame
+                Represents the dataset with contains lat, long and datetime.
+            
+            Returns
+            -------
+            bbox : tuple
+                Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+            Examples
+            --------
+            >>> from pymove.utils.utils import get_bbox
+            >>> get_bbox(df)
+            (22.147577, 113.54884299999999, 41.132062, 121.156224)
+            """
     #     try:
     #         return (self[LATITUDE].min(), self[LONGITUDE].min(), self[LATITUDE].max(),
     #                 self[LONGITUDE].max())
@@ -166,8 +184,20 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
     #     except Exception as e:
     #         raise e
 
+    # def time_interval(self):
+    #     time_diff = self[constants.DATETIME].max() - self[constants.DATETIME].min()
+    #     return time_diff
 
-   
+
+    #AJEITAR ESSES 2
+    # def __setattr__(atributo, coluna, indice, valor):
+    #     atributo.loc[indice, coluna] = valor
+    #     # self.__dict__[name] = value
+    #
+    #
+    # def __getattr__(atributo, indice, coluna):
+    #     print("entrou aqui")
+    #     return atributo.loc[indice, coluna]
 
 
     # def plot_all_features(self , figsize=(21, 15), dtype=np.float64, save_fig=True, name='features.png'):
@@ -194,7 +224,7 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
         
     #     for id_ in ids:
     #         df_id = self[ self["id"] == id_ ]
-    #         plt.plot(df_id[LONGITUDE], df_id[LATITUDE], markers, markersize=markersize)
+    #         plt.plot(df_id[constants.LONGITUDE], df_id[constants.LATITUDE], markers, markersize=markersize)
     #     if return_fig:
     #         return fig
 
@@ -203,20 +233,20 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
     #     if TID not in self:
     #         transformations.create_update_tid_based_on_id_datatime(self)
     #     df_ = self[ self[TID] == tid ]
-    #     plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)             # start point
-    #     plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)           # end point
+    #     plt.plot(df_.iloc[0][constants.LONGITUDE], df_.iloc[0][constants.LATITUDE], 'yo', markersize=20)             # start point
+    #     plt.plot(df_.iloc[-1][constants.LONGITUDE], df_.iloc[-1][constants.LATITUDE], 'yX', markersize=20)           # end point
         
     #     if 'isNode'not in df_:
-    #         plt.plot(df_[LONGITUDE], df_[LATITUDE])
-    #         plt.plot(df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], 'r.', markersize=8)  # points
+    #         plt.plot(df_[constants.LONGITUDE], df_[constants.LATITUDE])
+    #         plt.plot(df_.loc[:, constants.LONGITUDE], df_.loc[:, constants.LATITUDE], 'r.', markersize=8)  # points
     #     else:
     #         filter_ = df_['isNode'] == 1
     #         df_nodes = df_.loc[filter_]
     #         df_points = df_.loc[~filter_]
-    #         plt.plot(df_nodes[LONGITUDE], df_nodes[LATITUDE], linewidth=3)
-    #         plt.plot(df_points[LONGITUDE], df_points[LATITUDE])
-    #         plt.plot(df_nodes[LONGITUDE], df_nodes[LATITUDE], 'go', markersize=10)   # nodes
-    #         plt.plot(df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=8)  # points  
+    #         plt.plot(df_nodes[constants.LONGITUDE], df_nodes[constants.LATITUDE], linewidth=3)
+    #         plt.plot(df_points[constants.LONGITUDE], df_points[constants.LATITUDE])
+    #         plt.plot(df_nodes[constants.LONGITUDE], df_nodes[constants.LATITUDE], 'go', markersize=10)   # nodes
+    #         plt.plot(df_points[constants.LONGITUDE], df_points[constants.LATITUDE], 'r.', markersize=8)  # points
     #     return df_, fig
 
     #def show_trajectories_info(df_, dic_labels=dic_labels):
@@ -256,28 +286,28 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
         """try:
             print('\n======================= INFORMATION ABOUT DATASET =======================\n')
             print('Number of Points: {}\n'.format(df_.shape[0]))
-            if dic_labels['id'] in df_:
-                print('Number of IDs objects: {}\n'.format(df_[dic_labels['id']].nunique()))
-            if dic_features_label['tid'] in df_:
-                print('Number of TIDs trajectory: {}\n'.format(df_[dic_features_label['tid']].nunique()))
+            if constants.TRAJ_ID in df_:
+                print('Number of IDs objects: {}\n'.format(df_[constants.TRAJ_ID].nunique()))
+            if constants.TID in df_:
+                print('Number of TIDs trajectory: {}\n'.format(df_[constants.TID].nunique()))
             if dic_labels['datetime'] in df_:
-                print('Start Date:{}     End Date:{}\n'.format(df_[dic_labels['datetime']].min(),
-                                                               df_[dic_labels['datetime']].max()))
-            if dic_labels['lat'] and dic_labels['lon'] in df_:
+                print('Start Date:{}     End Date:{}\n'.format(df_[constants.DATETIME].min(),
+                                                               df_[constants.DATETIME].max()))
+            if constants.LATITUDE and constants.LONGITUDE in df_:
                 print('Bounding Box:{}\n'.format(
-                    get_bbox(df_, dic_labels)))  # bbox return =  Lat_min , Long_min, Lat_max, Long_max)
-            if dic_features_label['time_to_prev'] in df_:
+                    self.get_bbox()))  # bbox return =  Lat_min , Long_min, Lat_max, Long_max)
+            if constants.TIME_TO_PREV in df_:
                 print(
                     'Gap time MAX:{}     Gap time MIN:{}\n'.format(
-                        round(df_[dic_features_label['time_to_prev']].max(), 3),
-                        round(df_[dic_features_label['time_to_prev']].min(), 3)))
-            if dic_features_label['speed_to_prev'] in df_:
-                print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[dic_features_label['speed_to_prev']].max(), 3),
-                                                              round(df_[dic_features_label['speed_to_prev']].min(), 3)))
-            if dic_features_label['dist_to_prev'] in df_:
+                        round(df_[constants.TIME_TO_PREV].max(), 3),
+                        round(df_[constants.TIME_TO_PREV].min(), 3)))
+            if constants.SPEED_TO_PREV in df_:
+                print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[constants.SPEED_TO_PREV].max(), 3),
+                                                              round(df_[constants.SPEED_TO_PREV].min(), 3)))
+            if constants.DIST_TO_PREV in df_:
                 print('Distance MAX:{}    Distance MIN:{}\n'.format(
-                    round(df_[dic_features_label['dist_to_prev']].max(), 3),
-                    round(df_[dic_features_label['dist_to_prev']].min(),
+                    round(df_[constants.DIST_TO_PREV].max(), 3),
+                    round(df_[constants.DIST_TO_PREV].min(),
                           3)))
 
             print('\n=========================================================================\n')
