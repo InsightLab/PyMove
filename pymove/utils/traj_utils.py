@@ -5,11 +5,15 @@ import folium
 import numpy as np
 import pandas as pd
 
+import sys
+
+
 from pymove.utils.time_utils import deltatime_str
 
 
 from IPython.display import display
 from ipywidgets import IntProgress, HTML, VBox
+from pymove.utils import constants
 
 """main labels """
 dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
@@ -198,4 +202,9 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
                (bbox_tuple[0], bbox_tuple[1])]
     folium.PolyLine(points_, weight=3, color=color).add_to(m)
     m.save(file)
+
+
+
+
+
 
