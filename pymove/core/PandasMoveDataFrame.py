@@ -1,25 +1,22 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from pymove.utils.utils import format_labels
-from pymove.utils.constantes import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, ID, TID, DIST_TO_PREV
+from pymove.utils.traj_utils import format_labels
+from pymove.core import MoveDataFrameAbstractModel
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID
 
 #TODO: tirar o data do format_labels
 #TODO: mover constantes para um arquivo
-class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
+class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua estrutura de dados
     def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id = TRAJ_ID):
         # formatar os labels que foram passados pro que usado no pymove -> format_labels
         # renomeia as colunas do dado passado pelo novo dict
         # cria o dataframe
     
         mapping_columns = format_labels(data, traj_id, latitude, longitude, datetime)
-    
         tdf = data.rename(columns=mapping_columns)
-        columns = tdf.columns
         
         if self._has_columns(tdf):
             self._validate_move_data_frame(tdf)
-            super(PandasMoveDataFrame, self).__init__(tdf)
+            pd.DataFrame.__init__(self, tdf)
             
             
     def _has_columns(self, data):
@@ -59,13 +56,9 @@ class PandasMoveDataFrame(pd.DataFrame): # dask sua estrutura de dados
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'"%DATETIME)
         return self[DATETIME]
 
-    # def head(self):
-    #     return self.head()
-
-    def bla(self):
-        print(self['lat'])
+    def head(self, n=5):
+        return self.head(n)
         
-   
     # def read_file(self, filename):
     #     return self.read_file(filename)
 
