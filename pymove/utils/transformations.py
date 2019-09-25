@@ -136,7 +136,10 @@ def create_update_time_of_day_features(df_, dic_labels=dic_labels):
         raise e
 
 """ ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON LAT AND LON COORDINATES  ----------------------------- """
-def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_labels, label_dtype = np.float64, sort=True):
+
+
+def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_labels, label_dtype=np.float64,
+                                sort=True):
     """
         Create three distance in meters to an GPS point P (lat, lon)
             Example:
@@ -145,6 +148,7 @@ def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_l
                 P.previous to P.next = 1 meters
     """
     try:
+        print(type(df_))
         print('\nCreating or updating distance features in meters...\n')
         start_time = time.time()
 
@@ -155,12 +159,11 @@ def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_l
         if df_.index.name is None:
             print('...Set {} as index to increase attribution performance\n'.format(label_id))
             df_.set_index(label_id, inplace=True)
-        
+
         """ create ou update columns"""
         df_[dic_features_label['dist_to_prev']] = label_dtype(-1.0)
         df_[dic_features_label['dist_to_next']] = label_dtype(-1.0)
-        df_[dic_features_label['dist_prev_to_next']]= label_dtype(-1.0)
-
+        df_[dic_features_label['dist_prev_to_next']] = label_dtype(-1.0)
         ids = df_.index.unique()
         df_size = df_.shape[0]
         curr_perc_int = -1
@@ -173,39 +176,39 @@ def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_l
             curr_lon = df_.at[idx, dic_labels['lon']]
 
             size_id = curr_lat.size
-            
+
             if size_id <= 1:
                 print('...id:{}, must have at least 2 GPS points\n'.format(idx))
-                #df_.at[idx, dic_features_label['dist_to_next']] = np.nan
+                # df_.at[idx, dic_features_label['dist_to_next']] = np.nan
                 df_.at[idx, dic_features_label['dist_to_prev']] = np.nan
-                #df_.at[idx, dic_features_label['dist_prev_to_next']] = np.nan    
-                
+                # df_.at[idx, dic_features_label['dist_prev_to_next']] = np.nan
+
             else:
                 prev_lat = shift(curr_lat, 1)
                 prev_lon = shift(curr_lon, 1)
                 # compute distance from previous to current point
                 df_.at[idx, dic_features_label['dist_to_prev']] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
-                
+
                 next_lat = shift(curr_lat, -1)
                 next_lon = shift(curr_lon, -1)
                 # compute distance to next point
                 df_.at[idx, dic_features_label['dist_to_next']] = haversine(curr_lat, curr_lon, next_lat, next_lon)
-                
+
                 # using pandas shift in a large dataset: 7min 21s
                 # using numpy shift above: 33.6 s
 
                 # use distance from previous to next
                 df_.at[idx, dic_features_label['dist_prev_to_next']] = haversine(prev_lat, prev_lon, next_lat, next_lon)
-                
+
                 sum_size_id += size_id
-                curr_perc_int, est_time_str = progress_update(sum_size_id, df_size, start_time, curr_perc_int, step_perc=20)
+                curr_perc_int, est_time_str = progress_update(sum_size_id, df_size, start_time, curr_perc_int,
+                                                                 step_perc=20)
         df_.reset_index(inplace=True)
         print('...Reset index\n')
         print('..Total Time: {}'.format((time.time() - start_time)))
     except Exception as e:
         print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
         raise e
-
 def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_labels=dic_labels, label_dtype = np.float64, sort=True):
     """
     Firstly, create three distance to an GPS point P (lat, lon)
