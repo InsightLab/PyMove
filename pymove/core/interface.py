@@ -1,15 +1,13 @@
 import abc
 
-class interface(abc.ABC):
-    #ddza
+class MoveDataFrameAbstractModel(abc.ABC):
     @abc.abstractmethod
-    def head(self):
+    def head(self, n=5):
         pass
 
 #     #ddza
-    @abc.abstractmethod   
-    def read_file(self):
-        pass
+    # def read_file():
+    #     self.data.read_file()
 
 #     #ddza
 #     @abc.abstractmethod
@@ -137,5 +135,3 @@ class interface(abc.ABC):
 #     #@property
 #     def datetime(self):
 #         pass
-
-    
