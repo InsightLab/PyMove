@@ -1,14 +1,7 @@
 import abc
-from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
 from pymove.utils.traj_utils import format_labels
-
-LATITUDE = 'lat'
-LONGITUDE = 'lon'
-DATETIME = 'datetime'
-TRAJ_ID = 'id'
-ID = "id"
-TID = "tid"
-DIST_TO_PREV = 'dist_to_prev'
+from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID
  
 class MoveDataFrame():
     @staticmethod

@@ -2,11 +2,7 @@ import abc
 
 class MoveDataFrameAbstractModel(abc.ABC):
     @abc.abstractmethod
-    def head2(self, n = 10):
-        pass
-    
-    @abc.abstractmethod
-    def bla(self):
+    def head(self, n=5):
         pass
 
 #     #ddza
