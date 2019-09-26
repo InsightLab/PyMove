@@ -1,33 +1,22 @@
 # TODO: Andreza e Arina
 from __future__ import division
+import sys
 import time
 import folium
 import numpy as np
 import pandas as pd
-
-import sys
-
-
-from pymove.utils.time_utils import deltatime_str
-
-
 from IPython.display import display
 from ipywidgets import IntProgress, HTML, VBox
-from pymove.utils import constants
+from pymove.utils.time_utils import deltatime_str
 
-"""main labels """
-dic_labels = {'id' : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
-
-dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next',
-                    'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
-                    'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
-                    'situation':'situation'}
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, SPEED_TO_PREV, TIME_TO_PREV, DIST_TO_PREV
 
 def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     """ 
     Format the labels for the PyRoad lib pattern 
         labels output = lat, lon and datatime
     """ 
+    dic_labels = {}
     dic_labels['id'] = current_id
     dic_labels['lon'] = current_lon
     dic_labels['lat'] = current_lat
@@ -213,8 +202,75 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     folium.PolyLine(points_, weight=3, color=color).add_to(m)
     m.save(file)
 
+def get_bbox(df_):
+    """
+    A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
+        - Latitude is a decimal number between -90.0 and 90.0. 
+        - Longitude is a decimal number between -180.0 and 180.0.
+    They usually follow the standard format of: 
+    - bbox = left, bottom, right, top 
+    - bbox = min Longitude , min Latitude , max Longitude , max Latitude 
+    Parameters
+    ----------
+    df_ : pandas.core.frame.DataFrame
+        Represents the dataset with contains lat, long and datetime.
+    
+    Returns
+    -------
+    bbox : tuple
+        Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+    Examples
+    --------
+    >>> from pymove.utils.utils import get_bbox
+    >>> get_bbox(df)
+    (22.147577, 113.54884299999999, 41.132062, 121.156224)
+    """
+    try:
+        bbox = (df_[LATITUDE].min(), df_[LONGITUDE].min(), df_[LATITUDE].max(), df_[LONGITUDE].max())
+        return bbox
+    except Exception as e:
+        raise e
 
-
-
-
-
+def show_trajectories_info(df_):
+    """
+    Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box. 
+    Parameters
+    ----------
+    df_ : pandas.core.frame.DataFrame
+        Represents the dataset with contains lat, long and datetime.
+    
+    Returns
+    -------
+   
+    Examples
+    --------
+    >>> from pymove.utils.utils import show_trajectories_info
+    >>> show_trajectories_info(df_)
+    ======================= INFORMATION ABOUT DATASET =======================
+    Number of Points: 217654
+    Number of IDs objects: 2
+    Start Date:2008-10-23 05:53:05     End Date:2009-03-19 05:46:37
+    Bounding Box:(22.147577, 113.54884299999999, 41.132062, 121.156224)
+    =========================================================================
+    """
+    try:
+        print('\n======================= INFORMATION ABOUT DATASET =======================\n')
+        print('Number of Points: {}\n'.format(df_.shape[0]))
+        if TRAJ_ID in df_:
+            print('Number of IDs objects: {}\n'.format(df_[TRAJ_ID].nunique()))
+        if TID in df_:
+            print('Number of TIDs trajectory: {}\n'.format(df_[TID].nunique()))
+        if DATETIME in df_:
+            print('Start Date:{}     End Date:{}\n'.format(df_[DATETIME].min(), df_[DATETIME].max()))
+        if LATITUDE and LONGITUDE in df_:
+            print('Bounding Box:{}\n'.format(get_bbox(df_))) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
+        if TIME_TO_PREV in df_:            
+            print('Gap time MAX:{}     Gap time MIN:{}\n'.format(round(df_[TIME_TO_PREV].max(),3), round(df_[TIME_TO_PREV].min(), 3)))
+        if SPEED_TO_PREV in df_:            
+            print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[SPEED_TO_PREV].max(), 3), round(df_[SPEED_TO_PREV].min(), 3))) 
+        if DIST_TO_PREV in df_:            
+            print('Distance MAX:{}    Distance MIN:{}\n'.format(round(df_[DIST_TO_PREV].max(),3), round(df_[DIST_TO_PREV].min(), 3))) 
+            
+        print('\n=========================================================================\n')
+    except Exception as e:
+        raise e    
