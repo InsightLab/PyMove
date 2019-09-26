@@ -16,7 +16,6 @@ from pymove.utils.constants import (
 	DAY,
 	PERIOD)
 from pymove.core.grid import lat_meters
-from pymove.utils import transformations
 import math
 import time
 import matplotlib.pyplot as plt
@@ -582,7 +581,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 			plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE], 'r.', markersize=8)  # points
 		return self, fig
 
-	def show_trajectories_info(df):
+	def show_trajectories_info(self):
 		"""
 		Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box.
 
@@ -623,7 +622,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 				print('Number of IDs objects: {}\n'.format(self[TRAJ_ID].nunique()))
 			if TID in self:
 				print('Number of TIDs trajectory: {}\n'.format(self[TID].nunique()))
-			if dic_labels['datetime'] in self:
+			if DATETIME in self:
 				print('Start Date:{}     End Date:{}\n'.format(self[DATETIME].min(),
 															   self[DATETIME].max()))
 			if LATITUDE and LONGITUDE in self:
