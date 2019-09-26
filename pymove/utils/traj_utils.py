@@ -1,27 +1,22 @@
 # TODO: Andreza e Arina
 from __future__ import division
+import sys
 import time
 import folium
 import numpy as np
 import pandas as pd
-
-from pymove.utils.time_utils import deltatime_str
 from IPython.display import display
 from ipywidgets import IntProgress, HTML, VBox
-from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, SPEED_TO_PREV, TIME_TO_PREV, DIST_TO_PREV
-# """main labels """
-# dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
+from pymove.utils.time_utils import deltatime_str
 
-# dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next',
-#                     'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
-#                     'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
-#                     'situation':'situation'}
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, SPEED_TO_PREV, TIME_TO_PREV, DIST_TO_PREV
 
 def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     """ 
     Format the labels for the PyRoad lib pattern 
         labels output = lat, lon and datatime
     """ 
+    dic_labels = {}
     dic_labels['id'] = current_id
     dic_labels['lon'] = current_lon
     dic_labels['lat'] = current_lat

@@ -5,7 +5,6 @@ import numpy as np
 # import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-# from pymove.utils.utils import dic_features_label, dic_labels
 from pymove.utils.transformations import create_update_date_features, create_update_hour_features, create_update_day_of_the_week_features, create_update_time_of_day_features
 from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY
 
