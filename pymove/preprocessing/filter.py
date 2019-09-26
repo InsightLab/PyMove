@@ -1,12 +1,6 @@
 # TODO: Arina
 import numpy as np
-import pandas as pd
-import time
-
-from pymove.core import grid as gridutils
-from pymove.utils import transformations
 from pymove.utils import constants
-
 
 
 def filter_bbox(df_, bbox, filter_out=False, inplace=False):
@@ -382,7 +376,7 @@ def clean_gps_jumps_by_distance(df_, label_id=constants.TRAJ_ID, jump_coefficien
         Specifies the number of colums that have been droped.
 
     """
-    transformations.create_update_dist_features(df_ = df_, label_id = label_id,  label_dtype=label_dtype)
+    df_.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
     try:
         print('\nCleaning gps jumps by distance to jump_coefficient {}...\n'.format(jump_coefficient))
         df_jumps = filter_jumps(df_, jump_coefficient, threshold)
@@ -425,7 +419,7 @@ def clean_gps_nearby_points_by_distances(df_, label_id=constants.TRAJ_ID, radius
     label_dtype :
 
     """
-    transformations.create_update_dist_features(df_ = df_, label_id = label_id,  label_dtype=label_dtype)
+    df_.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
 
     try:
         print('\nCleaning gps points from radius of {} meters\n'.format(radius_area))
@@ -472,7 +466,7 @@ def clean_gps_nearby_points_by_speed(df_, label_id=constants.TRAJ_ID, speed_radi
     label_dtype :
 
     """
-    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtype)
+    df_.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
     try:
         print('\nCleaning gps points using {} speed radius\n'.format(speed_radius))
         if df_.index.name is not None:
@@ -525,7 +519,7 @@ def clean_gps_speed_max_radius(df_, label_id=constants.TRAJ_ID, speed_max=50.0, 
 
     """
 
-    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtype)
+    df_.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
 
     print('\nClean gps points with speed max > {} meters by seconds'.format(speed_max))
 
@@ -581,7 +575,7 @@ def clean_trajectories_with_few_points(df_, label_tid=constants.TID,
         df_.drop(index=idx, inplace=True)
         print('\n...Tids after drop: {}'.format(df_[label_tid].unique().shape[0]))
         print('\n...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-        transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_tid, label_dtype = label_dtype)
+        df_.generate_dist_time_speed_features(label_id = label_tid, label_dtype = label_dtype)
 
 
 
@@ -622,7 +616,7 @@ def clean_trajectories_short_and_few_points_(df_, label_id=constants.TID, min_tr
     print('\nRemove short trajectories...')
     clean_trajectories_with_few_points(df_, label_id, min_points_per_trajectory, label_dtype)
 
-    transformations.create_update_dist_time_speed_features(df_ = df_, label_id = label_id, label_dtype = label_dtype)
+    df_.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
 
     if df_.index.name is not None:
         print('reseting index')

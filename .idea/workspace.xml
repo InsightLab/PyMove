@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e8a3c1dd-90de-499d-a972-10a3572c949c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Untitled.ipynb" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pymove/utils/traj_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/utils/traj_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pymove/utils/transformations.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/utils/transformations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pymove/visualization/visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/visualization/visualization.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,18 +14,20 @@
     <session id="-918079501">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="1" />
           <entry key="project.open.time.1" value="1" />
-          <entry key="project.opened" value="1" />
+          <entry key="project.open.time.5" value="1" />
+          <entry key="project.opened" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="10" />
+          <entry key="py" value="11" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="10" />
+          <entry key="Python" value="11" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -45,86 +43,7 @@
     </session>
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="249">
-              <caret line="524" column="24" lean-forward="true" selection-start-line="524" selection-start-column="24" selection-end-line="524" selection-end-column="24" />
-              <folding>
-                <element signature="e#0#19#0" expanded="true" />
-                <element signature="e#1071#1165#0" />
-                <element signature="e#1213#1577#0" />
-                <element signature="e#1608#1746#0" />
-                <element signature="e#1777#1916#0" />
-                <element signature="e#1954#2090#0" />
-                <element signature="e#2116#2135#0" />
-                <element signature="e#2428#2496#0" />
-                <element signature="e#2517#2537#0" />
-                <element signature="e#2601#2664#0" />
-                <element signature="e#2745#4131#0" />
-                <element signature="e#4346#5299#0" />
-                <element signature="e#5383#6837#0" />
-                <element signature="e#6977#7563#0" />
-                <element signature="e#7696#8303#0" />
-                <element signature="e#8415#9132#0" />
-                <element signature="e#9240#10613#0" />
-                <element signature="e#10929#13893#0" />
-                <element signature="e#14058#17454#0" />
-                <element signature="e#17537#17985#0" />
-                <element signature="e#18015#18089#0" />
-                <element signature="e#18464#18859#0" />
-                <element signature="e#18948#19180#0" />
-                <element signature="e#19231#20180#0" />
-                <element signature="e#11232#13356#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pymove/utils/constants.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="14" column="6" selection-start-line="14" selection-end-line="14" selection-end-column="6" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pymove/utils/traj_utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="18" column="18" selection-start-line="18" selection-start-column="18" selection-end-line="18" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pymove/core/MoveDataFrame.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pymove/utils/transformations.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2380">
-              <caret line="140" selection-start-line="140" selection-end-line="207" selection-end-column="57" />
-              <folding>
-                <element signature="e#16#34#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -167,7 +86,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -196,6 +114,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -231,17 +150,10 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24966443" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25302014" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Python Console" />
-      <window_info anchor="bottom" id="Terminal" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -249,11 +161,17 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="SciView" />
-      <window_info anchor="right" id="Database" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="SciView" order="3" />
+      <window_info anchor="right" id="Database" order="4" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -263,23 +181,17 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/pymove/core/MoveDataFrame.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pymove/visualization/visualization.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="408">
           <caret line="24" column="12" lean-forward="true" selection-start-line="24" selection-start-column="12" selection-end-line="24" selection-end-column="12" />
-          <folding>
-            <element signature="e#16#29#0" expanded="true" />
-          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pymove/utils/constants.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="14" column="6" selection-start-line="14" selection-end-line="14" selection-end-column="6" />
         </state>
       </provider>
     </entry>
@@ -292,52 +204,38 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pymove/utils/transformations.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2380">
-          <caret line="140" selection-start-line="140" selection-end-line="207" selection-end-column="57" />
+        <state relative-caret-position="1496">
+          <caret line="348" selection-start-line="348" selection-end-line="348" />
           <folding>
             <element signature="e#16#34#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pymove/utils/constants.py">
+    <entry file="file://$PROJECT_DIR$/pymove/core/MoveDataFrame.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
-          <caret line="14" column="6" selection-start-line="14" selection-end-line="14" selection-end-column="6" />
+          <caret line="14" column="4" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="249">
-          <caret line="524" column="24" lean-forward="true" selection-start-line="524" selection-start-column="24" selection-end-line="524" selection-end-column="24" />
+        <state relative-caret-position="1051">
+          <caret line="618" column="20" lean-forward="true" selection-start-line="618" selection-start-column="20" selection-end-line="618" selection-end-column="20" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <element signature="e#1071#1165#0" />
-            <element signature="e#1213#1577#0" />
-            <element signature="e#1608#1746#0" />
-            <element signature="e#1777#1916#0" />
-            <element signature="e#1954#2090#0" />
-            <element signature="e#2116#2135#0" />
-            <element signature="e#2428#2496#0" />
-            <element signature="e#2517#2537#0" />
-            <element signature="e#2601#2664#0" />
-            <element signature="e#2745#4131#0" />
-            <element signature="e#4346#5299#0" />
-            <element signature="e#5383#6837#0" />
-            <element signature="e#6977#7563#0" />
-            <element signature="e#7696#8303#0" />
-            <element signature="e#8415#9132#0" />
-            <element signature="e#9240#10613#0" />
-            <element signature="e#10929#13893#0" />
-            <element signature="e#14058#17454#0" />
-            <element signature="e#17537#17985#0" />
-            <element signature="e#18015#18089#0" />
-            <element signature="e#18464#18859#0" />
-            <element signature="e#18948#19180#0" />
-            <element signature="e#19231#20180#0" />
-            <element signature="e#11232#13356#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PyMove - Cópia/pymove/core/PandasMoveDataFrame.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="12" lean-forward="true" selection-end-line="646" selection-end-column="19" />
         </state>
       </provider>
     </entry>

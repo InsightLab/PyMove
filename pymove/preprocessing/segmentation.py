@@ -138,7 +138,7 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_d
                 df_.drop(index=idx, inplace=True)
                 print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
                 print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-                create_update_dist_time_speed_features(df_, label_id, dic_labels)
+                df_.generate_dist_time_speed_features()
             else:
                 print('...No trajs with only one point.', df_.shape)
 
@@ -312,7 +312,7 @@ def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between
                 df_.drop(index=idxsegment_trajectory_by_dist_time_speed, inplace=True)
                 print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
                 print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-                create_update_dist_time_speed_features(df_, label_id, dic_labels)
+                df_.generate_dist_time_speed_features()
             else:
                 print('...No trajs with only one point.', df_.shape)
     except Exception as e:
