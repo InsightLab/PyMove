@@ -67,7 +67,7 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 """ ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON DATATIME  ----------------------------- """
 #TODO botar o check pra replace
 #TODO trocar nome da func
-def create_update_tid_based_on_id_datatime(df_,  str_format="%Y%m%d%H", sort=True):
+def generate_tid_based_on_id_datatime(df_,  str_format="%Y%m%d%H", sort=True):
     """
     Create or update trajectory id based on id e datetime.  
 
@@ -96,8 +96,8 @@ def create_update_tid_based_on_id_datatime(df_,  str_format="%Y%m%d%H", sort=Tru
     --------
     ID = M00001 and datetime = 2019-04-28 00:00:56  -> tid = M000012019042800
 
-    >>> from pymove.utils.transformations import create_update_tid_based_on_id_datatime
-    >>> create_update_tid_based_on_id_datatime(df)
+    >>> from pymove.utils.transformations import generate_tid_based_on_id_datatime
+    >>> generate_tid_based_on_id_datatime(df)
 
     """
     try:
@@ -115,7 +115,7 @@ def create_update_tid_based_on_id_datatime(df_,  str_format="%Y%m%d%H", sort=Tru
 #TODO complementar oq ela faz
 #TODO botar o check pra replace
 #TODO trocar nome da func
-def create_update_date_features(df_):
+def generate_date_features(df_):
     """
     Create or update date feature.  
 
@@ -132,8 +132,8 @@ def create_update_date_features(df_):
     --------
     
 
-    >>> from pymove.utils.transformations import create_update_date_features
-    >>> create_update_date_features(df)
+    >>> from pymove.utils.transformations import generate_date_features
+    >>> generate_date_features(df)
 
     """
     try:
@@ -147,7 +147,7 @@ def create_update_date_features(df_):
 #TODO complementar oq ela faz
 #TODO botar o check pra replace
 #TODO trocar nome da func
-def create_update_hour_features(df_):    
+def generate_hour_features(df_):    
     """
     Create or update hour feature.  
 
@@ -164,8 +164,8 @@ def create_update_hour_features(df_):
     --------
     
 
-    >>> from pymove.utils.transformations import create_update_hour_features
-    >>> create_update_date_features(df)
+    >>> from pymove.utils.transformations import generate_hour_features
+    >>> generate_date_features(df)
 
     """
     try:
@@ -179,7 +179,7 @@ def create_update_hour_features(df_):
 
 #TODO botar o check pra replace
 #TODO trocar nome da func
-def create_update_day_of_the_week_features(df_):
+def generate_day_of_the_week_features(df_):
     """
     Create or update a feature day of the week from datatime.  
 
@@ -196,8 +196,8 @@ def create_update_day_of_the_week_features(df_):
     --------
     Exampĺe: datetime = 2019-04-28 00:00:56  -> day = Sunday
 
-    >>> from pymove.utils.transformations import create_update_day_of_the_week_features
-    >>> create_update_day_of_the_week_features(df)
+    >>> from pymove.utils.transformations import generate_day_of_the_week_features
+    >>> generate_day_of_the_week_features(df)
 
     """
     try:
@@ -210,7 +210,7 @@ def create_update_day_of_the_week_features(df_):
 
 #TODO botar o check pra replace
 #TODO trocar nome da func
-def create_update_time_of_day_features(df_):
+def generate_time_of_day_features(df_):
     """
     Create a feature time of day or period from datatime.
 
@@ -230,8 +230,8 @@ def create_update_time_of_day_features(df_):
     - datetime3 = 2019-04-28 14:00:56 -> period = afternoon
     - datetime4 = 2019-04-28 20:00:56 -> period = evening
 
-    >>> from pymove.utils.transformations import create_update_time_of_day_features
-    >>> create_update_time_of_day_features(df)
+    >>> from pymove.utils.transformations import generate_time_of_day_features
+    >>> generate_time_of_day_features(df)
 
     """
     try:
@@ -250,7 +250,7 @@ def create_update_time_of_day_features(df_):
 #TODO complementar oq ela faz
 #TODO botar o check pra replace
 #TODO trocar nome da func
-def create_update_dist_features(df_, label_id=TRAJ_ID, label_dtype = np.float64, sort=True):
+def generate_dist_features(df_, label_id=TRAJ_ID, label_dtype = np.float64, sort=True):
     """
      Create three distance in meters to an GPS point P (lat, lon).
 
@@ -278,11 +278,12 @@ def create_update_dist_features(df_, label_id=TRAJ_ID, label_dtype = np.float64,
                 P to P.previous = 1 meter
                 P.previous to P.next = 1 meters
 
-    >>> from pymove.utils.transformations import create_update_dist_features
-    >>> create_update_dist_features(df)
+    >>> from pymove.utils.transformations import generate_dist_features
+    >>> generate_dist_features(df)
 
     """
     try:
+        print(type(df_))
         print('\nCreating or updating distance features in meters...\n')
         start_time = time.time()
 
@@ -293,12 +294,11 @@ def create_update_dist_features(df_, label_id=TRAJ_ID, label_dtype = np.float64,
         if df_.index.name is None:
             print('...Set {} as index to increase attribution performance\n'.format(label_id))
             df_.set_index(label_id, inplace=True)
-        
+
         """ create ou update columns"""
         df_[DIST_TO_PREV] = label_dtype(-1.0)
         df_[DIST_TO_NEXT] = label_dtype(-1.0)
         df_[DIST_PREV_TO_NEXT]= label_dtype(-1.0)
-
         ids = df_.index.unique()
         df_size = df_.shape[0]
         curr_perc_int = -1
@@ -311,11 +311,10 @@ def create_update_dist_features(df_, label_id=TRAJ_ID, label_dtype = np.float64,
             curr_lon = df_.at[idx, LONGITUDE]
 
             size_id = curr_lat.size
-            
+
             if size_id <= 1:
                 print('...id:{}, must have at least 2 GPS points\n'.format(idx))
                 df_.at[idx, DIST_TO_PREV] = np.nan  
-                
             else:
                 prev_lat = shift(curr_lat, 1)
                 prev_lon = shift(curr_lon, 1)
@@ -332,9 +331,9 @@ def create_update_dist_features(df_, label_id=TRAJ_ID, label_dtype = np.float64,
 
                 # use distance from previous to next
                 df_.at[idx, DIST_PREV_TO_NEXT] = haversine(prev_lat, prev_lon, next_lat, next_lon)
-                
                 sum_size_id += size_id
-                curr_perc_int, est_time_str = progress_update(sum_size_id, df_size, start_time, curr_perc_int, step_perc=20)
+                curr_perc_int, est_time_str = progress_update(sum_size_id, df_size, start_time, curr_perc_int,
+                                                                 step_perc=20)
         df_.reset_index(inplace=True)
         print('...Reset index\n')
         print('..Total Time: {}'.format((time.time() - start_time)))
@@ -344,7 +343,7 @@ def create_update_dist_features(df_, label_id=TRAJ_ID, label_dtype = np.float64,
 
 #TODO botar o check pra replace
 #TODO trocar nome da func
-def create_update_dist_time_speed_features(df_, label_id=TRAJ_ID,  label_dtype = np.float64, sort=True):
+def generate_dist_time_speed_features(df_, label_id=TRAJ_ID,  label_dtype = np.float64, sort=True):
     """
     Firstly, create three distance to an GPS point P (lat, lon)
     After, create two feature to time between two P: time to previous and time to next 
@@ -374,8 +373,8 @@ def create_update_dist_time_speed_features(df_, label_id=TRAJ_ID,  label_dtype =
                 time_to_prev = 60 seconds, time_prev = 60.0 seconds
                 speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
 
-    >>> from pymove.utils.transformations import create_update_dist_time_speed_features
-    >>> create_update_dist_time_speed_features(df)
+    >>> from pymove.utils.transformations import generate_dist_time_speed_features
+    >>> generate_dist_time_speed_features(df)
 
     """
     try:
@@ -447,7 +446,7 @@ def create_update_dist_time_speed_features(df_, label_id=TRAJ_ID,  label_dtype =
 #TODO complementar oq ela faz
 #TODO botar o check pra replace
 #TODO trocar nome da func
-def create_update_move_and_stop_by_radius(df_, radius=0, target_label=DIST_TO_PREV, new_label=SITUATION):
+def generate_move_and_stop_by_radius(df_, radius=0, target_label=DIST_TO_PREV, new_label=SITUATION):
     """
     ?
     Create or update move and stop by radius.
@@ -474,8 +473,8 @@ def create_update_move_and_stop_by_radius(df_, radius=0, target_label=DIST_TO_PR
     --------
     -
 
-    >>> from pymove.utils.transformations import create_update_move_and_stop_by_radius
-    >>> create_update_move_and_stop_by_radius(df)
+    >>> from pymove.utils.transformations import generate_move_and_stop_by_radius
+    >>> generate_move_and_stop_by_radius(df)
 
     """
     try:
