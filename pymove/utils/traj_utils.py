@@ -17,10 +17,10 @@ def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
         labels output = lat, lon and datatime
     """ 
     dic_labels = {}
-    dic_labels['id'] = current_id
-    dic_labels['lon'] = current_lon
-    dic_labels['lat'] = current_lat
-    dic_labels['datetime'] = current_datetime
+    dic_labels[TRAJ_ID] = current_id
+    dic_labels[LONGITUDE] = current_lon
+    dic_labels[LATITUDE] = current_lat
+    dic_labels[DATETIME] = current_datetime
     return dic_labels
     
 def log_progress(sequence, every=None, size=None, name='Items'):

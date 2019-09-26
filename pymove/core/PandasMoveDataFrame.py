@@ -7,12 +7,14 @@ from pymove.utils.traj_utils import format_labels, shift, progress_update
 from pymove.core.grid import lat_meters
 from pymove.utils import transformations
 from pymove.core import MoveDataFrameAbstractModel
+from pymove.core.grid import create_virtual_grid
 from pymove.utils.constants import (
 	LATITUDE,
 	LONGITUDE,
 	DATETIME,
 	TRAJ_ID,
 	TID,
+	UID,
 	TIME_TO_PREV,
 	SPEED_TO_PREV,
 	DIST_TO_PREV,
@@ -76,23 +78,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
 	def head(self, n=5):
 		return self.head(n)
-		
-    #TODO ajeitar o num de parametros
-    # Testar
-	def read_csv(self, filename, separator = ','):
-        # https://pandas.pydata.org/pandas-docs/version/0.15/io.html
-        # Ler arquivo, ver se tem as colunas e validar o tipo das colunas 
-		tdf = pd.read_csv(filename)
-		if self._has_columns(tdf):
-			self._validate_move_data_frame(tdf)
-			pd.DataFrame.__init__(self, tdf)
-		return self
 
-	def get_user_number(self):
-	    return self[TID].nunique()
+	def get_users_number(self):
+		if UID in self:
+			return self[UID].nunique()
+		return 1 
 
 	def to_numpy(self):
-	    return self.values          
+		return self.values          
 
 	def write_file(self, file_name, separator = ','):
 		self.to_csv(file_name, sep=separator, encoding='utf-8', index=False)
@@ -107,42 +100,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		return data_dict
 
 	def to_grid(self, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
-		print('\nCreating a virtual grid without polygons')
-		
-		bbox = self.get_bbox()
-		#Latitude in Fortaleza: -3.8162973555
-		cell_size_by_degree = cell_size/meters_by_degree
-		print('...cell size by degree: {}'.format(cell_size_by_degree))
-
-		lat_min_y = bbox[0]
-		lon_min_x = bbox[1]
-		lat_max_y = bbox[2] 
-		lon_max_x = bbox[3]
-
-		#If cell size does not fit in the grid area, an expansion is made
-		if math.fmod((lat_max_y - lat_min_y), cell_size_by_degree) != 0:
-			lat_max_y = lat_min_y + cell_size_by_degree * (math.floor((lat_max_y - lat_min_y) / cell_size_by_degree) + 1)
-
-		if math.fmod((lon_max_x - lon_min_x), cell_size_by_degree) != 0:
-			lon_max_x = lon_min_x + cell_size_by_degree * (math.floor((lon_max_x - lon_min_x) / cell_size_by_degree) + 1)
-
-		
-		# adjust grid size to lat and lon
-		grid_size_lat_y = int(round((lat_max_y - lat_min_y) / cell_size_by_degree))
-		grid_size_lon_x = int(round((lon_max_x - lon_min_x) / cell_size_by_degree))
-		
-		print('...grid_size_lat_y:{}\ngrid_size_lon_x:{}'.format(grid_size_lat_y, grid_size_lon_x))
-
-		#Return a dicionary virtual grid 
-		my_dict = dict()
-		
-		my_dict['lon_min_x'] = lon_min_x
-		my_dict['lat_min_y'] = lat_min_y
-		my_dict['grid_size_lat_y'] = grid_size_lat_y
-		my_dict['grid_size_lon_x'] = grid_size_lon_x
-		my_dict['cell_size_by_degree'] = cell_size_by_degree
-		print('\n..A virtual grid was created')
-		return my_dict  
+		return create_virtual_grid(cell_size, self.get_bbox(), meters_by_degree) 
 
 	def get_bbox(self):
 		"""
@@ -172,29 +130,29 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
 	def generate_tid_based_on_id_datatime(self, str_format="%Y%m%d%H", sort=True):
 		"""
-        Create or update trajectory id based on id e datetime.  
-        Parameters
-        ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        str_format : String
-            Contains informations about virtual grid, how
-                - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma. 
-                - grid_size_lat_y: tamanho da grid latitude. 
-                - grid_size_lon_x: tamanho da longitude da grid.
-                - cell_size_by_degree: tamanho da célula da Grid.
-            If value is none, the function ask user by dic_grid.
-        sort : boolean
-            Represents the state of dataframe, if is sorted. By default it's true.
-        Returns
-        -------
-        Examples
-        --------
-        ID = M00001 and datetime = 2019-04-28 00:00:56  -> tid = M000012019042800
-        >>> from pymove.utils.transformations import generate_tid_based_on_id_datatime
-        >>> generate_tid_based_on_id_datatime(df)
-        """
+		Create or update trajectory id based on id e datetime.  
+		Parameters
+		----------
+		self : pandas.core.frame.DataFrame
+			Represents the dataset with contains lat, long and datetime.
+		str_format : String
+			Contains informations about virtual grid, how
+				- lon_min_x: longitude mínima.
+				- lat_min_y: latitude miníma. 
+				- grid_size_lat_y: tamanho da grid latitude. 
+				- grid_size_lon_x: tamanho da longitude da grid.
+				- cell_size_by_degree: tamanho da célula da Grid.
+			If value is none, the function ask user by dic_grid.
+		sort : boolean
+			Represents the state of dataframe, if is sorted. By default it's true.
+		Returns
+		-------
+		Examples
+		--------
+		ID = M00001 and datetime = 2019-04-28 00:00:56  -> tid = M000012019042800
+		>>> from pymove.utils.transformations import generate_tid_based_on_id_datatime
+		>>> generate_tid_based_on_id_datatime(df)
+		"""
 		try:
 			print('\nCreating or updating tid feature...\n')
 			if sort is True:
@@ -211,18 +169,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	# TODO botar o check pra replace
 	def generate_date_features(self):
 		"""
-        Create or update date feature.  
-        Parameters
-        ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        Returns
-        -------
-        Examples
-        --------
-        >>> from pymove.utils.transformations import generate_date_features
-        >>> generate_date_features(df)
-        """
+		Create or update date feature.  
+		Parameters
+		----------
+		self : pandas.core.frame.DataFrame
+			Represents the dataset with contains lat, long and datetime.
+		Returns
+		-------
+		Examples
+		--------
+		>>> from pymove.utils.transformations import generate_date_features
+		>>> generate_date_features(df)
+		"""
 		try:
 			print('Creating date features...')
 			if DATETIME in self:
@@ -235,18 +193,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	# TODO botar o check pra replace
 	def generate_hour_features(self):
 		"""
-        Create or update hour feature.  
-        Parameters
-        ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        Returns
-        -------
-        Examples
-        --------
-        >>> from pymove.utils.transformations import generate_hour_features
-        >>> generate_date_features(df)
-        """
+		Create or update hour feature.  
+		Parameters
+		----------
+		self : pandas.core.frame.DataFrame
+			Represents the dataset with contains lat, long and datetime.
+		Returns
+		-------
+		Examples
+		--------
+		>>> from pymove.utils.transformations import generate_hour_features
+		>>> generate_date_features(df)
+		"""
 		try:
 			print('\nCreating or updating a feature for hour...\n')
 			if DATETIME in self:
@@ -258,19 +216,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	# TODO botar o check pra replace
 	def generate_day_of_the_week_features(self):
 		"""
-        Create or update a feature day of the week from datatime.  
-        Parameters
-        ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        Returns
-        -------
-        Examples
-        --------
-        Exampĺe: datetime = 2019-04-28 00:00:56  -> day = Sunday
-        >>> from pymove.utils.transformations import generate_day_of_the_week_features
-        >>> generate_day_of_the_week_features(df)
-        """
+		Create or update a feature day of the week from datatime.  
+		Parameters
+		----------
+		self : pandas.core.frame.DataFrame
+			Represents the dataset with contains lat, long and datetime.
+		Returns
+		-------
+		Examples
+		--------
+		Exampĺe: datetime = 2019-04-28 00:00:56  -> day = Sunday
+		>>> from pymove.utils.transformations import generate_day_of_the_week_features
+		>>> generate_day_of_the_week_features(df)
+		"""
 		try:
 			print('\nCreating or updating day of the week feature...\n')
 			self[DAY] = self[DATETIME].dt.day_name()
@@ -281,22 +239,22 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	# TODO botar o check pra replace
 	def generate_time_of_day_features(self):
 		"""
-        Create a feature time of day or period from datatime.
-        Parameters
-        ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        Returns
-        -------
-        Examples
-        --------
-        - datetime1 = 2019-04-28 02:00:56 -> period = early morning
-        - datetime2 = 2019-04-28 08:00:56 -> period = morning
-        - datetime3 = 2019-04-28 14:00:56 -> period = afternoon
-        - datetime4 = 2019-04-28 20:00:56 -> period = evening
-        >>> from pymove.utils.transformations import generate_time_of_day_features
-        >>> generate_time_of_day_features(df)
-        """
+		Create a feature time of day or period from datatime.
+		Parameters
+		----------
+		self : pandas.core.frame.DataFrame
+			Represents the dataset with contains lat, long and datetime.
+		Returns
+		-------
+		Examples
+		--------
+		- datetime1 = 2019-04-28 02:00:56 -> period = early morning
+		- datetime2 = 2019-04-28 08:00:56 -> period = morning
+		- datetime3 = 2019-04-28 14:00:56 -> period = afternoon
+		- datetime4 = 2019-04-28 20:00:56 -> period = evening
+		>>> from pymove.utils.transformations import generate_time_of_day_features
+		>>> generate_time_of_day_features(df)
+		"""
 		try:
 			print(
 				'\nCreating or updating period feature\n...early morning from 0H to 6H\n...morning from 6H to 12H\n...afternoon from 12H to 18H\n...evening from 18H to 24H')
@@ -314,27 +272,27 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	# TODO botar o check pra replace
 	def generate_dist_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True):
 		"""
-         Create three distance in meters to an GPS point P (lat, lon).
-        Parameters
-        ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        label_id : String
-            Represents name of column of trajectore's id. By default it's 'id'.
-        label_dtype : String
-            Represents column id type. By default it's np.float64.
-        sort : boolean
-            Represents the state of dataframe, if is sorted. By default it's true.
-        Returns
-        -------
-        Examples
-        --------
-        Example:    P to P.next = 2 meters
-                    P to P.previous = 1 meter
-                    P.previous to P.next = 1 meters
-        >>> from pymove.utils.transformations import generate_dist_features
-        >>> generate_dist_features(df)
-        """
+		 Create three distance in meters to an GPS point P (lat, lon).
+		Parameters
+		----------
+		self : pandas.core.frame.DataFrame
+			Represents the dataset with contains lat, long and datetime.
+		label_id : String
+			Represents name of column of trajectore's id. By default it's 'id'.
+		label_dtype : String
+			Represents column id type. By default it's np.float64.
+		sort : boolean
+			Represents the state of dataframe, if is sorted. By default it's true.
+		Returns
+		-------
+		Examples
+		--------
+		Example:    P to P.next = 2 meters
+					P to P.previous = 1 meter
+					P.previous to P.next = 1 meters
+		>>> from pymove.utils.transformations import generate_dist_features
+		>>> generate_dist_features(df)
+		"""
 		try:
 			print('\nCreating or updating distance features in meters...\n')
 			start_time = time.time()
@@ -399,29 +357,29 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	# TODO botar o check pra replace
 	def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True):
 		"""
-        Firstly, create three distance to an GPS point P (lat, lon)
-        After, create two feature to time between two P: time to previous and time to next 
-        Lastly, create two feature to speed using time and distance features
-        Parameters
-        ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        label_id : String
-            Represents name of column of trajectore's id. By default it's 'id'.
-        label_dtype : String
-            Represents column id type. By default it's np.float64.
-        sort : boolean
-            Represents the state of dataframe, if is sorted. By default it's true.
-        Returns
-        -------
-        Examples
-        --------
-        Example:    dist_to_prev =  248.33 meters, dist_to_prev 536.57 meters
-                    time_to_prev = 60 seconds, time_prev = 60.0 seconds
-                    speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
-        >>> from pymove.utils.transformations import generate_dist_time_speed_features
-        >>> generate_dist_time_speed_features(df)
-        """
+		Firstly, create three distance to an GPS point P (lat, lon)
+		After, create two feature to time between two P: time to previous and time to next 
+		Lastly, create two feature to speed using time and distance features
+		Parameters
+		----------
+		self : pandas.core.frame.DataFrame
+			Represents the dataset with contains lat, long and datetime.
+		label_id : String
+			Represents name of column of trajectore's id. By default it's 'id'.
+		label_dtype : String
+			Represents column id type. By default it's np.float64.
+		sort : boolean
+			Represents the state of dataframe, if is sorted. By default it's true.
+		Returns
+		-------
+		Examples
+		--------
+		Example:    dist_to_prev =  248.33 meters, dist_to_prev 536.57 meters
+					time_to_prev = 60 seconds, time_prev = 60.0 seconds
+					speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
+		>>> from pymove.utils.transformations import generate_dist_time_speed_features
+		>>> generate_dist_time_speed_features(df)
+		"""
 		try:
 
 			print('\nCreating or updating distance, time and speed features in meters by seconds\n')
@@ -508,8 +466,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	# 		if DATETIME in df_:
 	# 			DATE = df_[DATETIME].dt.date
 	# 			print('..Date features was created...\n')
-    # 	except Exception as e:
-    #     	raise e
+	# 	except Exception as e:
+	#     	raise e
 
 	def time_interval(self):
 		time_diff = self[DATETIME].max() - self[DATETIME].min()
