@@ -6,6 +6,7 @@ DATE = 'date'
 HOUR = 'hour'
 TRAJ_ID = 'id'
 TID = "tid"
+UID = "user_id"
 
 DIST_TO_PREV = 'dist_to_prev'
 DIST_TO_NEXT = 'dist_to_next'

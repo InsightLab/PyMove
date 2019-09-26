@@ -23,7 +23,7 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_caab6bc17e584206af38511707c08b3d {
+                #map_55f9098aaafd4b49b8b0e2acd48dadee {
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -35,13 +35,13 @@
 </head>
 <body>    
     
-            <div class="folium-map" id="map_caab6bc17e584206af38511707c08b3d" ></div>
+            <div class="folium-map" id="map_55f9098aaafd4b49b8b0e2acd48dadee" ></div>
         
 </body>
 <script>    
     
-            var map_caab6bc17e584206af38511707c08b3d = L.map(
-                "map_caab6bc17e584206af38511707c08b3d",
+            var map_55f9098aaafd4b49b8b0e2acd48dadee = L.map(
+                "map_55f9098aaafd4b49b8b0e2acd48dadee",
                 {
                     center: [0, 0],
                     crs: L.CRS.EPSG3857,
@@ -55,21 +55,21 @@
 
         
     
-            var tile_layer_d163eb9ad2c14173b97a484ca5e3a639 = L.tileLayer(
+            var tile_layer_6391b16561184a77aed0f40a9e5750bd = L.tileLayer(
                 "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {"attribution": "Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
-            ).addTo(map_caab6bc17e584206af38511707c08b3d);
+            ).addTo(map_55f9098aaafd4b49b8b0e2acd48dadee);
         
     
-            map_caab6bc17e584206af38511707c08b3d.fitBounds(
+            map_55f9098aaafd4b49b8b0e2acd48dadee.fitBounds(
                 [[22.147577, 113.54884299999999], [41.132062, 121.156224]],
                 {}
             );
         
     
-            var poly_line_8e8382725609447fbea782d5dcf03ad2 = L.polyline(
+            var poly_line_e6ec5c9b1c544cdc85e21f91fe87dc4f = L.polyline(
                 [[22.147577, 113.54884299999999], [22.147577, 121.156224], [41.132062, 121.156224], [41.132062, 113.54884299999999], [22.147577, 113.54884299999999]],
                 {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "red", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 3}
-            ).addTo(map_caab6bc17e584206af38511707c08b3d);
+            ).addTo(map_55f9098aaafd4b49b8b0e2acd48dadee);
         
 </script>

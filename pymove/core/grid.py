@@ -479,7 +479,8 @@ def show_grid_polygons(df_, id_, label_id = TRAJ_ID, label_polygon='polygon', fi
    
 
     for idx in range(df_.shape[0]):
-        xs, ys = df_[label_polygon].iloc[idx].exterior.xy
-        plt.plot(ys,xs, 'g', linewidth=2, markersize=5) 
+        if type(df_[label_polygon.iloc[idx]]) != float:
+            xs, ys = df_[label_polygon].iloc[idx].exterior.xy
+            plt.plot(ys,xs, 'g', linewidth=2, markersize=5) 
 
     return df_, fig

@@ -10,12 +10,7 @@ class MoveDataFrameAbstractModel(abc.ABC):
 
 #     #ddza
     @abc.abstractmethod
-    def read_csv(self, filename, separator = ','):
-        pass
-
-#     #ddza
-    @abc.abstractmethod
-    def get_user_number(self):
+    def get_users_number(self):
         pass
 
 #     #ddza
@@ -28,15 +23,15 @@ class MoveDataFrameAbstractModel(abc.ABC):
     def to_numpy(self):
         pass          
 
-#     #arina
-#     @abc.abstractmethod   
-#     def write_file(self,  file_name, separator = ','):
-#         pass
+    #arina
+    @abc.abstractmethod   
+    def write_file(self,  file_name, separator = ','):
+        pass
 
-# #     #arina
-#     @abc.abstractmethod
-#     def len(self):
-#         pass
+#     #arina
+    @abc.abstractmethod
+    def len(self):
+        pass
 
 #     #arina
 #     @abc.abstractmethod
@@ -48,24 +43,24 @@ class MoveDataFrameAbstractModel(abc.ABC):
 #     def __setattr__(self):
 #         pass
 
-#     #arina
-#     @abc.abstractmethod
-#     def to_dict():
-#         pass
+    #arina
+    @abc.abstractmethod
+    def to_dict():
+        pass
 
-#     #arina
-    # @abc.abstractmethod
-    # def to_grid(self, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
-    #     pass
+    #arina
+    @abc.abstractmethod
+    def to_grid(self, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
+        pass
 
 #     # Primeiros 7 andreza, os outros 7 arina
     @abc.abstractmethod
     def generate_tid_based_on_id_datatime(self, str_format="%Y%m%d%H", sort=True):
         pass
 
-    # @abc.abstractmethod
-    # def generate_date_features(self):
-    #     pass
+    @abc.abstractmethod
+    def generate_date_features(self):
+        pass
 
     @abc.abstractmethod
     def generate_hour_features(self):
@@ -75,41 +70,41 @@ class MoveDataFrameAbstractModel(abc.ABC):
     def generate_day_of_the_week_features(self):
         pass
 
-    # @abc.abstractmethod
-    # def generate_time_of_day_features(self):
-    #     pass
+    @abc.abstractmethod
+    def generate_time_of_day_features(self):
+        pass
 
-    # @abc.abstractmethod
-    # def generate_dist_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True):
-    #     pass
+    @abc.abstractmethod
+    def generate_dist_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True):
+        pass
 
-    # @abc.abstractmethod
-    # def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True):
-    #     pass
+    @abc.abstractmethod
+    def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True):
+        pass
 
-#     @abc.abstractmethod
-#     def generate_move_and_stop_by_radius():
-#         pass
+    @abc.abstractmethod
+    def generate_move_and_stop_by_radius():
+        pass
 
-#     @abc.abstractmethod
-#     def time_interval():
-#         pass
+    @abc.abstractmethod
+    def time_interval():
+        pass
     
-#         @abc.abstractmethod
-#     def get_bbox():
-#         pass
+    @abc.abstractmethod
+    def get_bbox():
+        pass
 
-#     @abc.abstractmethod   
-#     def plot_all_features():
-#         pass
+    @abc.abstractmethod   
+    def plot_all_features():
+        pass
 
-#     @abc.abstractmethod   
-#     def plot_trajs(self):
-#         pass
+    @abc.abstractmethod   
+    def plot_trajs(self):
+        pass
 
-#     @abc.abstractmethod
-#     def plot_traj_id():
-#         pass
+    @abc.abstractmethod
+    def plot_traj_id():
+        pass
 
     @abc.abstractmethod
     def show_trajectories_info(self):
