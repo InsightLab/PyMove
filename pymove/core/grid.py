@@ -7,8 +7,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from shapely.geometry import Polygon
 from tqdm import tqdm_notebook as tqdm
-
-from pymove.utils.traj_utils import dic_labels, dic_features_label
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, INDEX_GRID_LON, INDEX_GRID_LAT
+# from pymove.utils.traj_utils import get_bbox
 
 def lat_meters(lat):
     """
@@ -40,11 +40,10 @@ def lat_meters(lat):
     meters = (meters_lat + meters_lgn) / 2
     return meters
 
-def create_update_index_grid_feature(df_, dic_grid=None, dic_labels=dic_labels, label_dtype=np.int64, sort=True):
+def create_update_index_grid_feature(df_, dic_grid=None, label_dtype=np.int64, sort=True):
     """
     Create or update index grid feature.
     It's not necessary pass dic_grid, because if don't pass, the function create a dic_grid.
-    It's not necessary pass dic_labels, because if don't pass, the function use a dic_labels by default.
 
     Parameters
     ----------
@@ -59,9 +58,6 @@ def create_update_index_grid_feature(df_, dic_grid=None, dic_labels=dic_labels, 
             - grid_size_lon_x: tamanho da longitude da grid.
             - cell_size_by_degree: tamanho da célula da Grid.
         If value is none, the function ask user by dic_grid.
-
-    dic_labels : dict
-        Represents dataframe column value mapping.
 
     label_dtype : String
         Represents the type of a value of new column in dataframe.
@@ -85,11 +81,11 @@ def create_update_index_grid_feature(df_, dic_grid=None, dic_labels=dic_labels, 
     try:
         if dic_grid is not None:
             if sort:
-                df_.sort_values([dic_labels['id'], dic_labels['datetime']], inplace=True)
+                df_.sort_values([TRAJ_ID, DATETIME], inplace=True)
 
-            lat_, lon_ = point_to_index_grid(df_[dic_labels['lat'] ], df_[dic_labels['lon'] ], dic_grid)
-            df_[dic_features_label['index_grid_lat']] = label_dtype(lat_)
-            df_[dic_features_label['index_grid_lon']] = label_dtype(lon_)   
+            lat_, lon_ = point_to_index_grid(df_[LATITUDE], df_[LONGITUDE], dic_grid)
+            df_[INDEX_GRID_LAT] = label_dtype(lat_)
+            df_[INDEX_GRID_LON] = label_dtype(lon_)   
         else:
             # TODO fazer com que a própria função chame a create_virtual_grid
             print('... inform a grid virtual dictionary\n')
@@ -436,9 +432,9 @@ def read_grid_pkl(filename):
         raise e
         
 # TODO: ajeitar que tá dando erro + finalizar comentários
-def show_grid_polygons(df_, id_, label_id = dic_labels['id'], label_polygon='polygon', figsize=(10,10)):   
+def show_grid_polygons(df_, id_, label_id = TRAJ_ID, label_polygon='polygon', figsize=(10,10)):   
     """
-    Save a grid with new file .pkl. 
+    Show grid polygons  . 
 
     Parameters
     ----------

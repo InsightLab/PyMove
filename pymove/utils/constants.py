@@ -2,6 +2,8 @@
 LATITUDE = 'lat'
 LONGITUDE = 'lon'
 DATETIME = 'datetime'
+DATE = 'date'
+HOUR = 'hour'
 TRAJ_ID = 'id'
 TID = "tid"
 
