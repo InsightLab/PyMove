@@ -83,14 +83,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	def read_csv(self, filename, separator = ','):
         # https://pandas.pydata.org/pandas-docs/version/0.15/io.html
         # Ler arquivo, ver se tem as colunas e validar o tipo das colunas 
-		tdf = pd.read_csv(filename, separator = separator)
+		tdf = pd.read_csv(filename)
 		if self._has_columns(tdf):
 			self._validate_move_data_frame(tdf)
 			pd.DataFrame.__init__(self, tdf)
-		return self.read_file(filename)
+		return self
 
-	# def get_user_number(self):
-	#     pass
+	def get_user_number(self):
+	    return self[TID].nunique()
 
 	def to_numpy(self):
 	    return self.values          
@@ -211,7 +211,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
 	# TODO complementar oq ela faz
 	# TODO botar o check pra replace
-	def generate_update_date_features(self):
+	def generate_date_features(self):
 		"""
         Create or update date feature.  
         Parameters
@@ -512,14 +512,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		except Exception as e:
 			raise e
 
-	def generate_date_features(self, dic_labels=dic_labels):
-        try:
-        print('Creating date features...')
-        if DATETIME in df_:
-            DATE = df_[dic_labels['datetime']].dt.date
-            print('..Date features was created...\n')
-    except Exception as e:
-        raise e
+	# def generate_date_features(self):
+	# 	try:
+	# 		print('Creating date features...')
+	# 		if DATETIME in df_:
+	# 			DATE = df_[DATETIME].dt.date
+	# 			print('..Date features was created...\n')
+    # 	except Exception as e:
+    #     	raise e
 
 	def time_interval(self):
 		time_diff = self[DATETIME].max() - self[DATETIME].min()

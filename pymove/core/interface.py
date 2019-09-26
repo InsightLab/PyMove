@@ -14,9 +14,9 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
 #     #ddza
-#     @abc.abstractmethod
-#     def get_user_number(self):
-#         pass
+    @abc.abstractmethod
+    def get_user_number(self):
+        pass
 
 #     #ddza
     @abc.abstractmethod
@@ -111,23 +111,6 @@ class MoveDataFrameAbstractModel(abc.ABC):
 #     def plot_traj_id():
 #         pass
 
-#     @abc.abstractmethod
-#     def show_trajectories_info(self):
-#         pass
-
-# #####################
-
-#     #arina
-#     #@property
-#     def lat(self):
-#         pass
-
-#     #arina
-#     #@property
-#     def lng(self):
-#         pass
-
-#     #ddza
-#     #@property
-#     def datetime(self):
-#         pass
+    @abc.abstractmethod
+    def show_trajectories_info(self):
+        pass
