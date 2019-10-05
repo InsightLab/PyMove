@@ -45,7 +45,7 @@ class MoveDataFrameAbstractModel(abc.ABC):
 
     #arina
     @abc.abstractmethod
-    def to_dict():
+    def to_dict(self):
         pass
 
     #arina
@@ -109,3 +109,105 @@ class MoveDataFrameAbstractModel(abc.ABC):
     @abc.abstractmethod
     def show_trajectories_info(self):
         pass
+
+    @abc.abstractmethod
+    def min(self):
+        pass
+
+    @abc.abstractmethod
+    def mac(self):
+        pass
+
+    #https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.unique.html#pandas.Index.unique
+    #https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.unique.html
+    #example in transformations
+    @abc.abstractmethod
+    def unique(self, level=None):
+        pass
+
+    #duvida loc iloc values
+
+    @abc.abstractmethod
+    def count(self, axis=0, level=None, numeric_only=False ):
+        pass
+
+    @abc.abstractmethod
+    def reset_index(self,  level=None, drop=False, inplace=False, col_level=0, col_fill=''):
+        pass
+
+    @abc.abstractmethod
+    def groupby(self, by=None, axis=0, level=None, as_index=True, sort=True, group_keys=True, squeeze=False,
+                observed=False, **kwargs):
+
+
+    @abc.abstractmethod
+    def plot(self, *args, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def drop_duplicates(self, subset=None, keep='first', inplace=False):
+        pass
+
+    @abc.abstractmethod
+    def select_dtypes(self, include=None, exclude=None):
+        pass
+
+    #duvida columns
+
+    @abc.abstractmethod
+    def sort_values(self, by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last'):
+        pass
+
+    @abc.abstractmethod
+    def astype(self, dtype, copy=True, errors='raise', **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def set_index(self, keys, drop=True, append=False, inplace=False, verify_integrity=False):
+        pass
+
+    #duvida nesse aqui
+    @abc.abstractmethod
+    def index(self, labes):
+        pass
+
+    #duvida shape, at, in, dtype
+
+    @abc.abstractmethod
+    def drop(self, labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise'):
+        pass
+
+    @abc.abstractmethod
+    def duplicated(self, subset=None, keep='first'):
+        pass
+
+    @abc.abstractmethod
+    def shift(self, periods=1, freq=None, axis=0, fill_value=None):
+        pass
+
+    @abc.abstractmethod
+    def any(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
+        pass
+
+    @abc.abstractmethod
+    def isin(self, values):
+        pass
+
+    @abc.abstractmethod
+    def append(self, other, ignore_index=False, verify_integrity=False, sort=None):
+        pass
+
+    @abc.abstractmethod
+    def nunique(self, axis=0, dropna=True):
+        pass
+
+    @abc.abstractmethod
+    def to_csv(self, path_or_buf=None, sep=', ', na_rep='', float_format=None, columns=None, header=True, index=True,
+         index_label=None, mode='w', encoding=None, compression='infer', quoting=None, quotechar='"',
+         line_terminator=None, chunksize=None, date_format=None, doublequote=True, escapechar=None, decimal='.'):
+        pass
+
