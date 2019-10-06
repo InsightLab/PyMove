@@ -125,7 +125,6 @@ class MoveDataFrameAbstractModel(abc.ABC):
     def unique(self, level=None):
         pass
 
-    #duvida loc iloc values
 
     @abc.abstractmethod
     def count(self, axis=0, level=None, numeric_only=False ):
@@ -152,8 +151,6 @@ class MoveDataFrameAbstractModel(abc.ABC):
     def select_dtypes(self, include=None, exclude=None):
         pass
 
-    #duvida columns
-
     @abc.abstractmethod
     def sort_values(self, by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last'):
         pass
@@ -171,7 +168,6 @@ class MoveDataFrameAbstractModel(abc.ABC):
     def index(self, labes):
         pass
 
-    #duvida shape, at, in, dtype
 
     @abc.abstractmethod
     def drop(self, labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise'):
@@ -210,4 +206,10 @@ class MoveDataFrameAbstractModel(abc.ABC):
          index_label=None, mode='w', encoding=None, compression='infer', quoting=None, quotechar='"',
          line_terminator=None, chunksize=None, date_format=None, doublequote=True, escapechar=None, decimal='.'):
         pass
+
+    # duvida columns
+
+    # duvida loc iloc values
+
+    # duvida shape, at, in, dtype
 
