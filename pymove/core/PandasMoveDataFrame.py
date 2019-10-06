@@ -38,7 +38,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		
 		if self._has_columns(tdf):
 			self._validate_move_data_frame(tdf)
-			pd.DataFrame.__init__(self, tdf)
+			#pd.DataFrame.__init__(self, tdf)
+			self.data = tdf
 
 	def _has_columns(self, data):
 		if(LATITUDE in data and LONGITUDE in data and DATETIME in data):
