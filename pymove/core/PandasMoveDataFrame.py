@@ -27,7 +27,7 @@ from pymove.utils.transformations import haversine
 
 #TODO: tirar o data do format_labels
 #TODO: mover constantes para um arquivo
-class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua estrutura de dados
+class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua estrutura de dados
 	def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id = TRAJ_ID):
 		# formatar os labels que foram passados pro que usado no pymove -> format_labels
 		# renomeia as colunas do dado passado pelo novo dict
@@ -39,7 +39,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		if self._has_columns(tdf):
 			self._validate_move_data_frame(tdf)
 			#pd.DataFrame.__init__(self, tdf)
-			self.data = tdf
+			self._data = tdf
 
 	def _has_columns(self, data):
 		if(LATITUDE in data and LONGITUDE in data and DATETIME in data):
@@ -78,7 +78,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		return self[DATETIME]
 
 	def head(self, n=5):
-		return self.head(n)
+		return self._data.head(n)
 
 	def get_users_number(self):
 		if UID in self:
@@ -584,3 +584,79 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	# def __getattr__(atributo, indice, coluna):
 	# 	print("entrou aqui")
 	# 	return atributo.loc[indice, coluna]
+
+	def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
+		return self._data.min(axis, skipna, level, numeric_only, **kwargs)
+
+	def max(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
+		return self._data.max(axis, skipna, level, numeric_only, **kwargs)
+
+	def count(self, axis=0, level=None, numeric_only=False):
+		return self._data.count(axis, level, numeric_only)
+
+	def groupby(self, by=None, axis=0, level=None, as_index=True, sort=True, group_keys=True, squeeze=False,
+				observed=False, **kwargs):
+		return self._data.groupby(by, axis, level, as_index, sort, group_keys, squeeze,
+				observed, **kwargs)
+
+	def drop_duplicates(self, subset=None, keep='first', inplace=False):
+		return self._data.drop_duplicates(subset, keep, inplace)
+
+	def reset_index(self,  level=None, drop=False, inplace=False, col_level=0, col_fill=''):
+		return self._data.reset_index(level, drop, inplace, col_level, col_fill)
+
+	#duvida sobre erro quando sem paraetros, perguntar dd
+	def plot(self, *args, **kwargs):
+		return self._data.plot(*args, **kwargs)
+
+	def select_dtypes(self, include=None, exclude=None):
+		return self._data.select_dtypes(include, exclude)
+
+	def sort_values(self, by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last'):
+		return self._data.sort_values(by, axis, ascending, inplace, kind, na_position)
+
+	def astype(self, dtype, copy=True, errors='raise', **kwargs):
+		return self._data.astype(dtype, copy, errors, **kwargs)
+
+	def set_index(self, keys, drop=True, append=False, inplace=False, verify_integrity=False):
+		return self._data.set_index(keys, drop, append, inplace, verify_integrity)
+
+	def drop(self, labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise'):
+		return self._data.drop(labels, axis, index, columns, level, inplace, errors)
+
+	def duplicated(self, subset=None, keep='first'):
+		return self._data.duplicated(subset, keep)
+
+	def shift(self, periods=1, freq=None, axis=0, fill_value=None):
+		return self._data.shift(periods, freq, axis, fill_value)
+
+	def any(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
+		return self._data.any(axis, bool_only, skipna, level, **kwargs)
+
+	def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
+		return self._data.dropna(axis, how, thresh, subset, inplace)
+
+	def isin(self, values):
+		return self._data.isin(values)
+
+	def append(self, other, ignore_index=False, verify_integrity=False, sort=None):
+		return self._data.append(other, ignore_index, verify_integrity, sort)
+
+	def nunique(self, axis=0, dropna=True):
+		return self._data.nunique(axis, dropna)
+
+	#erro nao entendi
+	def to_csv(self, path_or_buf=None, sep=',', na_rep='', float_format=None, columns=None, header=True, index=True,
+			   index_label=None, mode='w', encoding=None, compression='infer', quoting=None, quotechar='"',
+			   line_terminator=None, chunksize=None, date_format=None, doublequote=True, escapechar=None, decimal='.'):
+		# self._data.to_csv(path_or_buf, sep, na_rep, float_format, columns, header, index,
+		#  index_label, mode, encoding, compression, quoting, quotechar,
+		#  line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
+		self._data.to_csv("teste3.csv")
+
+
+
+
+
+
+
