@@ -121,9 +121,9 @@ class MoveDataFrameAbstractModel(abc.ABC):
 	#https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.unique.html#pandas.Index.unique
 	#https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.unique.html
 	#example in transformations
-	@abc.abstractmethod
-	def unique(self, level=None):
-		pass
+	# @abc.abstractmethod
+	# def unique(self, level=None):
+	# 	pass
 
 	@abc.abstractmethod
 	def count(self, axis=0, level=None, numeric_only=False ):
