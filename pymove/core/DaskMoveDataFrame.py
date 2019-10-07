@@ -69,14 +69,17 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estr
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % DATETIME)
         return self[DATETIME]
 
-    def head(self, n=5):
-        return self._data.head(n, npartitions=1, compute=True)
+    def head(self, n=5, npartitions=1, compute=True):
+        return self._data.head(n, npartitions, compute)
 
     def min(self, axis=None, skipna=True, split_every=False, out=None):
         return self._data.min(axis, skipna, split_every, out)
 
     def max(self, axis=None, skipna=True, split_every=False, out=None):
         return self._data.max(axis, skipna, split_every, out)
+
+    def groupby(self, by=None, **kwargs):
+        return self._data.groupby(by)
 
 
 
