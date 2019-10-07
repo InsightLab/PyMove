@@ -2,14 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ad8908d2-1597-4cc8-9921-25114450290d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Exploring moveDataFrame.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Exploring moveDataFrame.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pymove/core/DaskMoveDataFrame.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/core/DaskMoveDataFrame.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pymove/core/MoveDataFrame.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/core/MoveDataFrame.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/features.png" beforeDir="false" afterPath="$PROJECT_DIR$/features.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pymove/core/interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/core/interface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_bbox.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/teste.csv" beforeDir="false" afterPath="$PROJECT_DIR$/teste.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/teste.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/teste3.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/texto.csv" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,29 +24,31 @@
     <session id="-918079501">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="1" />
           <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.6" value="1" />
-          <entry key="project.opened" value="2" />
+          <entry key="project.open.time.9" value="1" />
+          <entry key="project.opened" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="47" />
+          <entry key="py" value="49" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="47" />
+          <entry key="Python" value="49" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="1536" />
+          <entry key="py" value="1612" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="1536" />
+          <entry key="Python" value="1612" />
         </counts>
       </usages-collector>
     </session>
@@ -53,12 +58,75 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pymove/core/interface.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="555">
-              <caret line="212" lean-forward="true" selection-start-line="212" selection-end-line="212" />
+            <state relative-caret-position="-414">
+              <caret line="123" column="4" selection-start-line="123" selection-start-column="6" selection-end-line="125" selection-end-column="12" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
-                <marker date="1570389527186" expanded="true" signature="2880:2891" ph="..." />
+                <marker date="1570404271303" expanded="true" signature="2886:2897" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="544">
+              <caret line="97" column="22" selection-start-line="97" selection-start-column="22" selection-end-line="97" selection-end-column="22" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+                <element signature="e#1320#1414#0" />
+                <element signature="e#1462#1826#0" />
+                <element signature="e#1857#1995#0" />
+                <element signature="e#2026#2165#0" />
+                <element signature="e#2421#2477#0" />
+                <element signature="e#2503#2521#0" />
+                <element signature="e#2586#2654#0" />
+                <element signature="e#2674#2694#0" />
+                <element signature="e#2758#2821#0" />
+                <element signature="e#2902#2974#0" />
+                <element signature="e#3000#3888#0" />
+                <element signature="e#3972#5245#0" />
+                <element signature="e#5350#5859#0" />
+                <element signature="e#5964#6494#0" />
+                <element signature="e#6578#7213#0" />
+                <element signature="e#7293#8566#0" />
+                <element signature="e#8724#11531#0" />
+                <element signature="e#11668#14895#0" />
+                <element signature="e#14981#15429#0" />
+                <element signature="e#15697#15771#0" />
+                <element signature="e#15877#16272#0" />
+                <element signature="e#16361#16593#0" />
+                <element signature="e#16644#17593#0" />
+                <element signature="e#17632#19730#0" />
+                <element signature="e#20080#20146#0" />
+                <element signature="e#20231#20297#0" />
+                <element signature="e#20359#20409#0" />
+                <element signature="e#20550#20653#0" />
+                <element signature="e#20727#20783#0" />
+                <element signature="e#20877#20949#0" />
+                <element signature="e#21442#21497#0" />
+                <marker date="1570409124352" expanded="true" signature="20729:20801" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="21376:21438" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="22091:22152" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="22319:22322" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="22557:22605" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="22803:22872" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="23071:23074" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="23267:23312" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="23653:23654" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="23653:23655" ph="..." />
+                <marker date="1570409124352" expanded="true" signature="23653:23656" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pymove/core/grid.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-497">
+              <caret line="94" column="4" selection-start-line="94" selection-start-column="4" selection-end-line="94" selection-end-column="4" />
             </state>
           </provider>
         </entry>
@@ -73,7 +141,6 @@
       <find>values</find>
       <find>.values</find>
       <find>.value</find>
-      <find>unique</find>
       <find>df.in</find>
       <find>value</find>
       <find>plot</find>
@@ -82,6 +149,9 @@
       <find>select_dtypes</find>
       <find>name</find>
       <find>.index</find>
+      <find>unique</find>
+      <find>loc</find>
+      <find>ge</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -92,8 +162,8 @@
       <list>
         <option value="$PROJECT_DIR$/pymove/core/DaskMoveDataFrame.py" />
         <option value="$PROJECT_DIR$/pymove/core/MoveDataFrame.py" />
-        <option value="$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py" />
         <option value="$PROJECT_DIR$/pymove/core/interface.py" />
+        <option value="$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py" />
       </list>
     </option>
   </component>
@@ -104,16 +174,17 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-9" />
-    <option name="y" value="-9" />
-    <option name="width" value="978" />
-    <option name="height" value="1048" />
+    <option name="x" value="-10" />
+    <option name="y" value="-10" />
+    <option name="width" value="979" />
+    <option name="height" value="1049" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -154,7 +225,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -192,7 +262,7 @@
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.11208054" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.13557047" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -259,9 +329,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="197">
           <caret line="82" column="43" selection-start-line="82" selection-start-column="40" selection-end-line="82" selection-end-column="43" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -297,11 +364,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pymove/utils/math_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-31">
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
+        <state relative-caret-position="-31" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/pymove/preprocessing/filter.py">
@@ -315,13 +378,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="414">
           <caret line="261" column="64" selection-start-line="261" selection-start-column="59" selection-end-line="261" selection-end-column="64" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pymove/core/grid.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="166">
-          <caret line="104" column="59" selection-start-line="104" selection-start-column="53" selection-end-line="104" selection-end-column="59" />
         </state>
       </provider>
     </entry>
@@ -342,32 +398,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="644" column="15" selection-start-line="644" selection-start-column="8" selection-end-line="644" selection-end-column="15" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-            <element signature="e#1320#1414#0" />
-            <element signature="e#1462#1826#0" />
-            <element signature="e#1857#1995#0" />
-            <element signature="e#2026#2165#0" />
-            <element signature="e#2674#2694#0" />
-            <marker date="1570389239802" expanded="true" signature="20077:20149" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="20724:20786" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="21439:21500" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="21667:21670" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="21905:21953" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="22151:22220" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="22419:22422" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="22615:22660" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="23001:23002" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="23001:23003" ph="..." />
-            <marker date="1570389239802" expanded="true" signature="23001:23004" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pymove/core/MoveDataFrame.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -382,13 +412,72 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/pymove/core/grid.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-497">
+          <caret line="94" column="4" selection-start-line="94" selection-start-column="4" selection-end-line="94" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pymove/core/PandasMoveDataFrame.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="544">
+          <caret line="97" column="22" selection-start-line="97" selection-start-column="22" selection-end-line="97" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#1320#1414#0" />
+            <element signature="e#1462#1826#0" />
+            <element signature="e#1857#1995#0" />
+            <element signature="e#2026#2165#0" />
+            <element signature="e#2421#2477#0" />
+            <element signature="e#2503#2521#0" />
+            <element signature="e#2586#2654#0" />
+            <element signature="e#2674#2694#0" />
+            <element signature="e#2758#2821#0" />
+            <element signature="e#2902#2974#0" />
+            <element signature="e#3000#3888#0" />
+            <element signature="e#3972#5245#0" />
+            <element signature="e#5350#5859#0" />
+            <element signature="e#5964#6494#0" />
+            <element signature="e#6578#7213#0" />
+            <element signature="e#7293#8566#0" />
+            <element signature="e#8724#11531#0" />
+            <element signature="e#11668#14895#0" />
+            <element signature="e#14981#15429#0" />
+            <element signature="e#15697#15771#0" />
+            <element signature="e#15877#16272#0" />
+            <element signature="e#16361#16593#0" />
+            <element signature="e#16644#17593#0" />
+            <element signature="e#17632#19730#0" />
+            <element signature="e#20080#20146#0" />
+            <element signature="e#20231#20297#0" />
+            <element signature="e#20359#20409#0" />
+            <element signature="e#20550#20653#0" />
+            <element signature="e#20727#20783#0" />
+            <element signature="e#20877#20949#0" />
+            <element signature="e#21442#21497#0" />
+            <marker date="1570409124352" expanded="true" signature="20729:20801" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="21376:21438" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="22091:22152" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="22319:22322" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="22557:22605" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="22803:22872" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="23071:23074" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="23267:23312" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="23653:23654" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="23653:23655" ph="..." />
+            <marker date="1570409124352" expanded="true" signature="23653:23656" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/pymove/core/interface.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="555">
-          <caret line="212" lean-forward="true" selection-start-line="212" selection-end-line="212" />
+        <state relative-caret-position="-414">
+          <caret line="123" column="4" selection-start-line="123" selection-start-column="6" selection-end-line="125" selection-end-column="12" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
-            <marker date="1570389527186" expanded="true" signature="2880:2891" ph="..." />
+            <marker date="1570404271303" expanded="true" signature="2886:2897" ph="..." />
           </folding>
         </state>
       </provider>
