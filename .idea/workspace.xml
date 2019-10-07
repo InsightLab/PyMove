@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ad8908d2-1597-4cc8-9921-25114450290d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Exploring DaskMoveDataFrame.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Exploring DaskMoveDataFrame.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pymove/core/DaskMoveDataFrame.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/core/DaskMoveDataFrame.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pymove/core/interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/core/interface.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,7 +14,7 @@
     <session id="-918079501">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="3" />
+          <entry key="project.closed" value="4" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.7" value="1" />
           <entry key="project.open.time.8" value="1" />
@@ -64,8 +61,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pymove/core/DaskMoveDataFrame.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="579">
-              <caret line="81" selection-start-line="81" selection-end-line="81" />
+            <state relative-caret-position="1105">
+              <caret line="65" column="13" lean-forward="true" selection-start-line="65" selection-start-column="13" selection-end-line="65" selection-end-column="13" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -111,8 +108,8 @@
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="950" />
     <option name="y" value="-10" />
-    <option name="width" value="979" />
-    <option name="height" value="1049" />
+    <option name="width" value="980" />
+    <option name="height" value="1050" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -193,7 +190,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.13020134" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -275,8 +271,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pymove/core/DaskMoveDataFrame.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="579">
-          <caret line="81" selection-start-line="81" selection-end-line="81" />
+        <state relative-caret-position="1105">
+          <caret line="65" column="13" lean-forward="true" selection-start-line="65" selection-start-column="13" selection-end-line="65" selection-end-column="13" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
