@@ -27,7 +27,7 @@ from pymove.utils.transformations import haversine
 
 #TODO: tirar o data do format_labels
 #TODO: mover constantes para um arquivo
-class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua estrutura de dados
+class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua estrutura de dados
 	def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id = TRAJ_ID):
 		# formatar os labels que foram passados pro que usado no pymove -> format_labels
 		# renomeia as colunas do dado passado pelo novo dict
@@ -39,7 +39,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		if self._has_columns(tdf):
 			self._validate_move_data_frame(tdf)
 			#pd.DataFrame.__init__(self, tdf)
-			self.data = tdf
+			self._data = tdf
 
 	def _has_columns(self, data):
 		if(LATITUDE in data and LONGITUDE in data and DATETIME in data):
@@ -78,25 +78,25 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		return self[DATETIME]
 
 	def head(self, n=5):
-		return self.head(n)
+		return self._data.head(n)
 
 	def get_users_number(self):
-		if UID in self:
-			return self[UID].nunique()
+		if UID in self._data:
+			return self._data[UID].nunique()
 		return 1 
 
 	def to_numpy(self):
-		return self.values          
+		return self._data.values
 
 	def write_file(self, file_name, separator = ','):
-		self.to_csv(file_name, sep=separator, encoding='utf-8', index=False)
+		self._data.to_csv(file_name, sep=separator, encoding='utf-8', index=False)
 
 	def len(self):
-		return self.shape[0]
+		return self._data.shape[0]
 
 	#pocurar jeito mais otimizado de fazer
 	def to_dict(self):
-		df = self.copy()
+		df = self._data.copy()
 		data_dict = df.to_dict() 
 		return data_dict
 
@@ -125,7 +125,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		(22.147577, 113.54884299999999, 41.132062, 121.156224)
 		"""
 		try:
-			return (self[LATITUDE].min(), self[LONGITUDE].min(), self[LATITUDE].max(),self[LONGITUDE].max())
+			return (self._data[LATITUDE].min(), self._data[LONGITUDE].min(), self._data[LATITUDE].max(),self._data[LONGITUDE].max())
 		except Exception as e:
 			raise e
 
@@ -158,9 +158,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 			print('\nCreating or updating tid feature...\n')
 			if sort is True:
 				print('...Sorting by {} and {} to increase performance\n'.format(TRAJ_ID, DATETIME))
-				self.sort_values([TRAJ_ID, DATETIME], inplace=True)
+				self._data.sort_values([TRAJ_ID, DATETIME], inplace=True)
 
-			self[TID] = self[TRAJ_ID].astype(str) + self[DATETIME].dt.strftime(str_format)
+			self._data[TID] = self._data[TRAJ_ID].astype(str) + self._data[DATETIME].dt.strftime(str_format)
 			print('\n...tid feature was created...\n')
 
 		except Exception as e:
@@ -184,8 +184,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		"""
 		try:
 			print('Creating date features...')
-			if DATETIME in self:
-				self['date'] = self[DATETIME].dt.date
+			if DATETIME in self._data:
+				self._data['date'] = self._data[DATETIME].dt.date
 				print('..Date features was created...\n')
 		except Exception as e:
 			raise e
@@ -208,8 +208,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		"""
 		try:
 			print('\nCreating or updating a feature for hour...\n')
-			if DATETIME in self:
-				self['hour'] = self[DATETIME].dt.hour
+			if DATETIME in self._data:
+				self._data['hour'] = self._data[DATETIME].dt.hour
 				print('...Hour feature was created...\n')
 		except Exception as e:
 			raise e
@@ -232,7 +232,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		"""
 		try:
 			print('\nCreating or updating day of the week feature...\n')
-			self[DAY] = self[DATETIME].dt.day_name()
+			self._data[DAY] = self._data[DATETIME].dt.day_name()
 			print('...the day of the week feature was created...\n')
 		except Exception as e:
 			raise e
@@ -259,12 +259,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		try:
 			print(
 				'\nCreating or updating period feature\n...early morning from 0H to 6H\n...morning from 6H to 12H\n...afternoon from 12H to 18H\n...evening from 18H to 24H')
-			conditions = [(self[DATETIME].dt.hour >= 0) & (self[DATETIME].dt.hour < 6),
-						  (self[DATETIME].dt.hour >= 6) & (self[DATETIME].dt.hour < 12),
-						  (self[DATETIME].dt.hour >= 12) & (self[DATETIME].dt.hour < 18),
-						  (self[DATETIME].dt.hour >= 18) & (self[DATETIME].dt.hour < 24)]
+			conditions = [(self._data[DATETIME].dt.hour >= 0) & (self._data[DATETIME].dt.hour < 6),
+						  (self._data[DATETIME].dt.hour >= 6) & (self._data[DATETIME].dt.hour < 12),
+						  (self._data[DATETIME].dt.hour >= 12) & (self._data[DATETIME].dt.hour < 18),
+						  (self._data[DATETIME].dt.hour >= 18) & (self._data[DATETIME].dt.hour < 24)]
 			choices = ['early morning', 'morning', 'afternoon', 'evening']
-			self[PERIOD] = np.select(conditions, choices, 'undefined')
+			self._data[PERIOD] = np.select(conditions, choices, 'undefined')
 			print('...the period of day feature was created')
 		except Exception as e:
 			raise e
@@ -300,55 +300,55 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
 			if sort is True:
 				print('...Sorting by {} and {} to increase performance\n'.format(label_id, DATETIME))
-				self.sort_values([label_id, DATETIME], inplace=True)
+				self._data.sort_values([label_id, DATETIME], inplace=True)
 
-			if self.index.name is None:
+			if self._data.index.name is None:
 				print('...Set {} as index to increase attribution performance\n'.format(label_id))
-				self.set_index(label_id, inplace=True)
+				self._data.set_index(label_id, inplace=True)
 
 			""" create ou update columns"""
-			self[DIST_TO_PREV] = label_dtype(-1.0)
-			self[DIST_TO_NEXT] = label_dtype(-1.0)
-			self[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
+			self._data[DIST_TO_PREV] = label_dtype(-1.0)
+			self._data[DIST_TO_NEXT] = label_dtype(-1.0)
+			self._data[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
 
-			ids = self.index.unique()
-			selfsize = self.shape[0]
+			ids = self._data.index.unique()
+			selfsize = self._data.shape[0]
 			curr_perc_int = -1
 			start_time = time.time()
 			deltatime_str = ''
 			sum_size_id = 0
 			size_id = 0
 			for idx in ids:
-				curr_lat = self.at[idx, LATITUDE]
-				curr_lon = self.at[idx, LONGITUDE]
+				curr_lat = self._data.at[idx, LATITUDE]
+				curr_lon = self._data.at[idx, LONGITUDE]
 
 				size_id = curr_lat.size
 
 				if size_id <= 1:
 					print('...id:{}, must have at least 2 GPS points\n'.format(idx))
-					self.at[idx, DIST_TO_PREV] = np.nan
+					self._data.at[idx, DIST_TO_PREV] = np.nan
 
 				else:
 					prev_lat = shift(curr_lat, 1)
 					prev_lon = shift(curr_lon, 1)
 					# compute distance from previous to current point
-					self.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
+					self._data.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
 
 					next_lat = shift(curr_lat, -1)
 					next_lon = shift(curr_lon, -1)
 					# compute distance to next point
-					self.at[idx, DIST_TO_NEXT] = haversine(curr_lat, curr_lon, next_lat, next_lon)
+					self._data.at[idx, DIST_TO_NEXT] = haversine(curr_lat, curr_lon, next_lat, next_lon)
 
 					# using pandas shift in a large dataset: 7min 21s
 					# using numpy shift above: 33.6 s
 
 					# use distance from previous to next
-					self.at[idx, DIST_PREV_TO_NEXT] = haversine(prev_lat, prev_lon, next_lat, next_lon)
+					self._data.at[idx, DIST_PREV_TO_NEXT] = haversine(prev_lat, prev_lon, next_lat, next_lon)
 
 					sum_size_id += size_id
 					curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int,
 																  step_perc=20)
-			self.reset_index(inplace=True)
+			self._data.reset_index(inplace=True)
 			print('...Reset index\n')
 			print('..Total Time: {}'.format((time.time() - start_time)))
 		except Exception as e:
@@ -388,76 +388,76 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
 			if sort is True:
 				print('...Sorting by {} and {} to increase performance\n'.format(label_id, DATETIME))
-				self.sort_values([label_id, DATETIME], inplace=True)
+				self._data.sort_values([label_id, DATETIME], inplace=True)
 
-			if self.index.name is None:
+			if self._data.index.name is None:
 				print('...Set {} as index to a higher peformance\n'.format(label_id))
-				self.set_index(label_id, inplace=True)
+				self._data.set_index(label_id, inplace=True)
 
 			"""create new feature to time"""
-			self[DIST_TO_PREV] = label_dtype(-1.0)
+			self._data[DIST_TO_PREV] = label_dtype(-1.0)
 
 			"""create new feature to time"""
-			self[TIME_TO_PREV] = label_dtype(-1.0)
+			self._data[TIME_TO_PREV] = label_dtype(-1.0)
 
 			"""create new feature to speed"""
-			self[SPEED_TO_PREV] = label_dtype(-1.0)
+			self._data[SPEED_TO_PREV] = label_dtype(-1.0)
 
-			ids = self.index.unique()
-			selfsize = self.shape[0]
+			ids = self._data.index.unique()
+			selfsize = self._data.shape[0]
 			curr_perc_int = -1
 			sum_size_id = 0
 			size_id = 0
 
 			for idx in ids:
-				curr_lat = self.at[idx, LATITUDE]
-				curr_lon = self.at[idx, LONGITUDE]
+				curr_lat = self._data.at[idx, LATITUDE]
+				curr_lon = self._data.at[idx, LONGITUDE]
 
 				size_id = curr_lat.size
 
 				if size_id <= 1:
 					print('...id:{}, must have at least 2 GPS points\n'.format(idx))
-					self.at[idx, DIST_TO_PREV] = np.nan
-					self.at[idx, TIME_TO_PREV] = np.nan
-					self.at[idx, SPEED_TO_PREV] = np.nan
+					self._data.at[idx, DIST_TO_PREV] = np.nan
+					self._data.at[idx, TIME_TO_PREV] = np.nan
+					self._data.at[idx, SPEED_TO_PREV] = np.nan
 				else:
 					prev_lat = shift(curr_lat, 1)
 					prev_lon = shift(curr_lon, 1)
 					prev_lon = shift(curr_lon, 1)
 					# compute distance from previous to current point
-					self.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
+					self._data.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
 
-					time_ = self.at[idx, DATETIME].astype(label_dtype)
+					time_ = self._data.at[idx, DATETIME].astype(label_dtype)
 					time_prev = (time_ - shift(time_, 1)) * (10 ** -9)
-					self.at[idx, TIME_TO_PREV] = time_prev
+					self._data.at[idx, TIME_TO_PREV] = time_prev
 
 					""" set time_to_next"""
 					# time_next = (ut.shift(time_, -1) - time_)*(10**-9)
 					# self.at[idx, dic_features_label['time_to_next']] = time_next
 
 					"set Speed features"
-					self.at[idx, SPEED_TO_PREV] = self.at[idx, DIST_TO_PREV] / (time_prev)  # unit: m/s
+					self._data.at[idx, SPEED_TO_PREV] = self._data.at[idx, DIST_TO_PREV] / (time_prev)  # unit: m/s
 
 					sum_size_id += size_id
 					curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int,
 																  step_perc=20)
 			print('...Reset index...\n')
-			self.reset_index(inplace=True)
+			self._data.reset_index(inplace=True)
 			print('..Total Time: {:.3f}'.format((time.time() - start_time)))
 		except Exception as e:
 			print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
 			raise e
 
 	def generate_move_and_stop_by_radius(self, radius=0, target_label=DIST_TO_PREV):
-		if DIST_TO_PREV not in self:
-			self.generate_dist_features()
+		if DIST_TO_PREV not in self._data:
+			self._data.generate_dist_features()
 		try:
 			print('\nCreating or updating features MOVE and STOPS...\n')
-			conditions = (self[target_label] > radius), (self[target_label] <= radius)
+			conditions = (self._data[target_label] > radius), (self._data[target_label] <= radius)
 			choices = ['move', 'stop']
 
-			self["situation"] = np.select(conditions, choices, np.nan)
-			print('\n....There are {} stops to this parameters\n'.format(self[self["situation"] == 'stop'].shape[0]))
+			self._data["situation"] = np.select(conditions, choices, np.nan)
+			print('\n....There are {} stops to this parameters\n'.format(self._data[self._data["situation"] == 'stop'].shape[0]))
 		except Exception as e:
 			raise e
 
@@ -471,19 +471,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	#     	raise e
 
 	def time_interval(self):
-		time_diff = self[DATETIME].max() - self[DATETIME].min()
+		time_diff = self._data[DATETIME].max() - self._data[DATETIME].min()
 		return time_diff
 
 	def plot_all_features(self, figsize=(21, 15), dtype=np.float64, save_fig=True, name='features.png'):
 		try:
-			col_float = self.select_dtypes(include=[dtype]).columns
+			col_float = self._data.select_dtypes(include=[dtype]).columns
 			tam = col_float.size
 			if (tam > 0):
 				fig, ax = plt.subplots(tam, 1, figsize=figsize)
 				ax_count = 0
 				for col in col_float:
 					ax[ax_count].set_title(col)
-					self[col].plot(subplots=True, ax=ax[ax_count])
+					self._data[col].plot(subplots=True, ax=ax[ax_count])
 					ax_count += 1
 
 				if save_fig:
@@ -493,34 +493,34 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
 	def plot_trajs(self, figsize=(10,10), return_fig=True, markers= 'o',markersize=20):
 		fig = plt.figure(figsize=figsize)
-		ids = self["id"].unique()
+		ids = self._data["id"].unique()
 		
 		for id_ in ids:
-			selfid = self[ self["id"] == id_ ]
+			selfid = self._data[ self._data["id"] == id_ ]
 			plt.plot(selfid[LONGITUDE], selfid[LATITUDE], markers, markersize=markersize)
 		if return_fig:
 			return fig
 
 	def plot_traj_id(self, tid, figsize=(10,10)):
 		fig = plt.figure(figsize=figsize)
-		if TID not in self:
-			transformations.generate_tid_based_on_id_datatime(self)
-		self = self[ self[TID] == tid ]
-		plt.plot(self.iloc[0][LONGITUDE], self.iloc[0][LATITUDE], 'yo', markersize=20)             # start point
-		plt.plot(self.iloc[-1][LONGITUDE], self.iloc[-1][LATITUDE], 'yX', markersize=20)           # end point
+		if TID not in self._data:
+			self.generate_tid_based_on_id_datatime()
+		self._data = self._data[self._data[TID] == tid ]
+		plt.plot(self._data.iloc[0][LONGITUDE], self._data.iloc[0][LATITUDE], 'yo', markersize=20)             # start point
+		plt.plot(self._data.iloc[-1][LONGITUDE], self._data.iloc[-1][LATITUDE], 'yX', markersize=20)           # end point
 		
 		if 'isNode'not in self:
-			plt.plot(self[LONGITUDE], self[LATITUDE])
-			plt.plot(self.loc[:, LONGITUDE], self.loc[:, LATITUDE], 'r.', markersize=8)  # points
+			plt.plot(self._data[LONGITUDE], self._data[LATITUDE])
+			plt.plot(self._data.loc[:, LONGITUDE], self._data.loc[:, LATITUDE], 'r.', markersize=8)  # points
 		else:
-			filter_ = self['isNode'] == 1
-			selfnodes = self.loc[filter_]
-			selfpoints = self.loc[~filter_]
+			filter_ = self._data['isNode'] == 1
+			selfnodes = self._data.loc[filter_]
+			selfpoints = self._data.loc[~filter_]
 			plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], linewidth=3)
 			plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE])
 			plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], 'go', markersize=10)   # nodes
 			plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE], 'r.', markersize=8)  # points
-		return self, fig
+		return self._data, fig
 
 	def show_trajectories_info(self):
 		"""
@@ -546,29 +546,29 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		"""
 		try:
 			print('\n======================= INFORMATION ABOUT DATASET =======================\n')
-			print('Number of Points: {}\n'.format(self.shape[0]))
-			if TRAJ_ID in self:
-				print('Number of IDs objects: {}\n'.format(self[TRAJ_ID].nunique()))
-			if TID in self:
-				print('Number of TIDs trajectory: {}\n'.format(self[TID].nunique()))
-			if DATETIME in self:
-				print('Start Date:{}     End Date:{}\n'.format(self[DATETIME].min(),
-															   self[DATETIME].max()))
-			if LATITUDE and LONGITUDE in self:
+			print('Number of Points: {}\n'.format(self._data.shape[0]))
+			if TRAJ_ID in self._data:
+				print('Number of IDs objects: {}\n'.format(self._data[TRAJ_ID].nunique()))
+			if TID in self._data:
+				print('Number of TIDs trajectory: {}\n'.format(self._data[TID].nunique()))
+			if DATETIME in self._data:
+				print('Start Date:{}     End Date:{}\n'.format(self._data[DATETIME].min(),
+															   self._data[DATETIME].max()))
+			if LATITUDE and LONGITUDE in self._data:
 				print('Bounding Box:{}\n'.format(
 					self.get_bbox()))  # bbox return =  Lat_min , Long_min, Lat_max, Long_max)
-			if TIME_TO_PREV in self:
+			if TIME_TO_PREV in self._data:
 				print(
 					'Gap time MAX:{}     Gap time MIN:{}\n'.format(
-						round(self[TIME_TO_PREV].max(), 3),
-						round(self[TIME_TO_PREV].min(), 3)))
-			if SPEED_TO_PREV in self:
-				print('Speed MAX:{}    Speed MIN:{}\n'.format(round(self[SPEED_TO_PREV].max(), 3),
-															  round(self[SPEED_TO_PREV].min(), 3)))
-			if DIST_TO_PREV in self:
+						round(self._data[TIME_TO_PREV].max(), 3),
+						round(self._data[TIME_TO_PREV].min(), 3)))
+			if SPEED_TO_PREV in self._data:
+				print('Speed MAX:{}    Speed MIN:{}\n'.format(round(self._data[SPEED_TO_PREV].max(), 3),
+															  round(self._data[SPEED_TO_PREV].min(), 3)))
+			if DIST_TO_PREV in self._data:
 				print('Distance MAX:{}    Distance MIN:{}\n'.format(
-					round(self[DIST_TO_PREV].max(), 3),
-					round(self[DIST_TO_PREV].min(),
+					round(self._data[DIST_TO_PREV].max(), 3),
+					round(self._data[DIST_TO_PREV].min(),
 						  3)))
 
 			print('\n=========================================================================\n')
@@ -584,3 +584,79 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 	# def __getattr__(atributo, indice, coluna):
 	# 	print("entrou aqui")
 	# 	return atributo.loc[indice, coluna]
+
+	def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
+		return self._data.min(axis, skipna, level, numeric_only, **kwargs)
+
+	def max(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
+		return self._data.max(axis, skipna, level, numeric_only, **kwargs)
+
+	def count(self, axis=0, level=None, numeric_only=False):
+		return self._data.count(axis, level, numeric_only)
+
+	def groupby(self, by=None, axis=0, level=None, as_index=True, sort=True, group_keys=True, squeeze=False,
+				observed=False, **kwargs):
+		return self._data.groupby(by, axis, level, as_index, sort, group_keys, squeeze,
+				observed, **kwargs)
+
+	def drop_duplicates(self, subset=None, keep='first', inplace=False):
+		return self._data.drop_duplicates(subset, keep, inplace)
+
+	def reset_index(self,  level=None, drop=False, inplace=False, col_level=0, col_fill=''):
+		return self._data.reset_index(level, drop, inplace, col_level, col_fill)
+
+	#duvida sobre erro quando sem paraetros, perguntar dd
+	def plot(self, *args, **kwargs):
+		return self._data.plot(*args, **kwargs)
+
+	def select_dtypes(self, include=None, exclude=None):
+		return self._data.select_dtypes(include, exclude)
+
+	def sort_values(self, by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last'):
+		return self._data.sort_values(by, axis, ascending, inplace, kind, na_position)
+
+	def astype(self, dtype, copy=True, errors='raise', **kwargs):
+		return self._data.astype(dtype, copy, errors, **kwargs)
+
+	def set_index(self, keys, drop=True, append=False, inplace=False, verify_integrity=False):
+		return self._data.set_index(keys, drop, append, inplace, verify_integrity)
+
+	def drop(self, labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise'):
+		return self._data.drop(labels, axis, index, columns, level, inplace, errors)
+
+	def duplicated(self, subset=None, keep='first'):
+		return self._data.duplicated(subset, keep)
+
+	def shift(self, periods=1, freq=None, axis=0, fill_value=None):
+		return self._data.shift(periods, freq, axis, fill_value)
+
+	def any(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
+		return self._data.any(axis, bool_only, skipna, level, **kwargs)
+
+	def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
+		return self._data.dropna(axis, how, thresh, subset, inplace)
+
+	def isin(self, values):
+		return self._data.isin(values)
+
+	def append(self, other, ignore_index=False, verify_integrity=False, sort=None):
+		return self._data.append(other, ignore_index, verify_integrity, sort)
+
+	def nunique(self, axis=0, dropna=True):
+		return self._data.nunique(axis, dropna)
+
+	#erro nao entendi
+	def to_csv(self, path_or_buf=None, sep=',', na_rep='', float_format=None, columns=None, header=True, index=True,
+			   index_label=None, mode='w', encoding=None, compression='infer', quoting=None, quotechar='"',
+			   line_terminator=None, chunksize=None, date_format=None, doublequote=True, escapechar=None, decimal='.'):
+		self._data.to_csv(path_or_buf, sep, na_rep, float_format, columns, header, index,
+		 index_label, mode, encoding, compression, quoting, quotechar,
+		 line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
+		# self._data.to_csv("teste3.csv")
+
+
+
+
+
+
+
