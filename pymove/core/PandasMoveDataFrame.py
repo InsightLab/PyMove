@@ -26,7 +26,8 @@ from pymove.utils.constants import (
 	PERIOD,
 	TYPE_PANDAS)
 from pymove.utils.transformations import haversine
-
+from datetime import datetime
+import resource
 
 #TODO: tirar o data do format_labels
 #TODO: mover constantes para um arquivo
@@ -43,6 +44,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			#pd.DataFrame.__init__(self, tdf)
 			self._data = tdf
 			self._type = TYPE_PANDAS
+			self._last_operation_dict = {'name': '', 'time': '', 'mem_usage': ''}
 
 	def _has_columns(self, data):
 		if(LATITUDE in data and LONGITUDE in data and DATETIME in data):
@@ -81,14 +83,37 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		return self._data[DATETIME]
 
 	def head(self, n=5):
-		return self._data.head(n)
+		start = datetime.now().replace(microsecond=0)
+		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+		
+		_head = self._data.head(n)
+		
+		finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+		self._last_operation_dict['time'] = datetime.now().replace(microsecond=0) - start
+		self._last_operation_dict['name'] = 'head'
+		self._last_operation_dict['mem_usage'] = finish - init
+		
+		return _head
 
 	def get_users_number(self):
+		start = datetime.now().replace(microsecond=0)
+		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+		
 		if UID in self._data:
-			return self._data[UID].nunique()
-		return 1 
+			returno = self._data[UID].nunique()
+		else:
+			retorno = 1
+		
+		finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+		self._last_operation_dict['time'] = datetime.now().replace(microsecond=0) - start
+		self._last_operation_dict['name'] = 'head'
+		self._last_operation_dict['mem_usage'] = finish - init
+		return retorno
 
 	def to_numpy(self):
+		start = datetime.now().replace(microsecond=0)
+		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+		
 		return self._data.values
 
 	def write_file(self, file_name, separator = ','):
@@ -660,8 +685,17 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 	def get_type(self):
 		return self._type
 
+	def last_operation_time(self):
+		return self.last_operation_dict['time']
 
+	def last_operation_name(self):
+		return self.last_operation_dict['name']
 
+	def last_operation(self):
+		return self.last_operation_dict
+
+	def mem(self, format):
+		pass
 
 
 

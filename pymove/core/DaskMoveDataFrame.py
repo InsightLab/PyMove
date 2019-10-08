@@ -33,6 +33,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estr
 			self._validate_move_data_frame(dsk)
 			self._data = dask.dataframe.from_pandas(dsk, npartitions = n_partitions)
 			self._type = TYPE_DASK
+			self._last_operation_dict = {'name': '', 'time': '', 'mem_usage': ''}
 		else:
 			print("erroo")
 
@@ -245,3 +246,15 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estr
 	 
 	def to_csv(self):
 	    return 0
+
+	def last_operation_time(self):
+		return self._last_operation_dict['time']
+
+	def last_operation_name(self):
+		return self._last_operation_dict['name']
+
+	def last_operation(self):
+		return self._last_operation_dict
+
+	def mem(self, format):
+		return self._last_operation_dict['mem_usage']  #TODO ver a formula
