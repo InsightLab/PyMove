@@ -14,10 +14,16 @@ import pathlib
 
 from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, SPEED_TO_PREV, TIME_TO_PREV, DIST_TO_PREV
 
-def read_csv(filename, sep=',', encoding="utf-8", latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, type_dt="pandas", n_partitions=1):
-    df = pd.read_csv(filename, sep=sep, encoding=encoding)
-    from pymove.core. MoveDataFrame import MoveDataFrame as md
-    return md(df, latitude, longitude, datetime, traj_id)
+def read_csv(filename, sep=',', encoding="utf-8", latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, type="pandas", n_partitions=1):
+    df = pd.read_csv(filename, sep=sep, encoding=encoding, parse_dates=['datetime'])
+    from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
+    from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
+    if type == 'pandas':
+        return pm(df, latitude, longitude, datetime, traj_id)
+    if type == 'dask':
+        return dm(df, latitude, longitude, datetime, traj_id, n_partitions)
+
+
 
 def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     """ 
