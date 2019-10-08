@@ -205,6 +205,21 @@ class MoveDataFrameAbstractModel(abc.ABC):
 	def get_type(self):
 		pass
 	
+	@abc.abstractmethod
+	def last_operation_time(self):
+		pass
+
+	@abc.abstractmethod
+	def last_operation_name(self):
+		pass
+
+	@abc.abstractmethod
+	def last_operation(self):
+		pass
+
+	@abc.abstractmethod
+	def mem(self, format):
+		pass
 #
 # # duvida columns
 #
