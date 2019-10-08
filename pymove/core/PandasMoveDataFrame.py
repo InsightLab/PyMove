@@ -647,13 +647,8 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		return self._data.nunique(axis, dropna)
 
 	#erro nao entendi
-	def to_csv(self, path_or_buf=None, sep=',', na_rep='', float_format=None, columns=None, header=True, index=True,
-			   index_label=None, mode='w', encoding=None, compression='infer', quoting=None, quotechar='"',
-			   line_terminator=None, chunksize=None, date_format=None, doublequote=True, escapechar=None, decimal='.'):
-		self._data.to_csv(path_or_buf, sep, na_rep, float_format, columns, header, index,
-		 index_label, mode, encoding, compression, quoting, quotechar,
-		 line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
-		# self._data.to_csv("teste3.csv")
+	def to_csv(self, file_name, sep=',', encoding=None):
+		self._data.to_csv(file_name, sep, encoding)
 
 	def to_dask(self):
 		from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
