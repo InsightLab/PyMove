@@ -1,6 +1,7 @@
 import dask
 from dask.dataframe import DataFrame
 from pymove.utils.traj_utils import format_labels, shift, progress_update
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID
 from pymove.utils.constants import (
     LATITUDE,
     LONGITUDE,
@@ -14,7 +15,8 @@ from pymove.utils.constants import (
     DIST_PREV_TO_NEXT,
     DIST_TO_NEXT,
     DAY,
-    PERIOD)
+    PERIOD,
+    TYPE_DASK)
 from pymove.core import MoveDataFrameAbstractModel
 
 
@@ -30,6 +32,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estr
         if self._has_columns(dsk):
             self._validate_move_data_frame(dsk)
             self._data = dask.dataframe.from_pandas(dsk, npartitions = n_partitions)
+            self._type = TYPE_DASK
         else:
             print("erroo")
 
@@ -81,6 +84,11 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estr
     def groupby(self, by=None, **kwargs):
         return self._data.groupby(by)
 
+    def to_pandas(self):
+        df_pandas = self._data.compute()
+        print(type(df_pandas))
+        from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
+        return pm(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
 
-
-
+    def get_type(self):
+        return self._type

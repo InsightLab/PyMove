@@ -20,6 +20,8 @@ DAY = "day"
 INDEX_GRID_LAT = 'index_grid_lat'
 INDEX_GRID_LON = 'index_grid_lon'
 SITUATION = 'situation'
+TYPE_DASK = "pymove.core.DaskMoveDataFrame.DaskMoveDataFrame"
+TYPE_PANDAS = "pymove.core.PandasMoveDataFrame.PandasMoveDataFrame"
 
 
 

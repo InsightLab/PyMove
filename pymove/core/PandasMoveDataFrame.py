@@ -2,6 +2,8 @@ import math
 import time
 import numpy as np
 import pandas as pd
+import dask
+from dask.dataframe import DataFrame
 import matplotlib.pyplot as plt
 from pymove.utils.traj_utils import format_labels, shift, progress_update
 from pymove.core.grid import lat_meters
@@ -21,7 +23,8 @@ from pymove.utils.constants import (
 	DIST_PREV_TO_NEXT,
 	DIST_TO_NEXT,
 	DAY,
-	PERIOD)
+	PERIOD,
+	TYPE_PANDAS)
 from pymove.utils.transformations import haversine
 
 
@@ -40,6 +43,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			self._validate_move_data_frame(tdf)
 			#pd.DataFrame.__init__(self, tdf)
 			self._data = tdf
+			self._type = TYPE_PANDAS
 
 	def _has_columns(self, data):
 		if(LATITUDE in data and LONGITUDE in data and DATETIME in data):
@@ -654,8 +658,12 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		 line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
 		# self._data.to_csv("teste3.csv")
 
+	def to_dask(self):
+		from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
+		return dm(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, n_partitions=1)
 
-
+	def get_type(self):
+		return self._type
 
 
 
