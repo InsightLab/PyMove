@@ -38,7 +38,6 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 	
 		mapping_columns = format_labels(data, traj_id, latitude, longitude, datetime)
 		tdf = data.rename(columns=mapping_columns)
-		
 		if self._has_columns(tdf):
 			self._validate_move_data_frame(tdf)
 			#pd.DataFrame.__init__(self, tdf)
@@ -67,19 +66,19 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 	def lat(self):
 		if LATITUDE not in self:
 			raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % LATITUDE)
-		return self[LATITUDE]
+		return self._data[LATITUDE]
 
 	@property
 	def lng(self):
 		if LONGITUDE not in self:
 			raise AttributeError("The MoveDataFrame does not contain the column '%s.'"%LONGITUDE)
-		return self[LONGITUDE]
+		return self._data[LONGITUDE]
 
 	@property
 	def datetime(self):
 		if DATETIME not in self:
 			raise AttributeError("The MoveDataFrame does not contain the column '%s.'"%DATETIME)
-		return self[DATETIME]
+		return self._data[DATETIME]
 
 	def head(self, n=5):
 		return self._data.head(n)
@@ -100,9 +99,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 
 	#pocurar jeito mais otimizado de fazer
 	def to_dict(self):
-		df = self._data.copy()
-		data_dict = df.to_dict() 
-		return data_dict
+		return self._data.to_dict()
 
 	def to_grid(self, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
 		return create_virtual_grid(cell_size, self.get_bbox(), meters_by_degree) 
@@ -662,8 +659,16 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
 		return dm(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, n_partitions=1)
 
+	def to_pandas(self):
+		return self._data
+
 	def get_type(self):
 		return self._type
+
+
+
+
+
 
 
 

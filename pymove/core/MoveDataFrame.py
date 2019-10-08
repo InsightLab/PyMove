@@ -10,9 +10,10 @@ class MoveDataFrame():
     def __new__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, type="pandas",
                 n_partitions=1):
         self.type = type
+        
         if type == 'pandas':
-            return pm(data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
+            return pm(data, latitude, longitude, datetime, traj_id)
         if type == 'dask':
-            return dm(data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, n_partitions=1)
+            return dm(data, latitude, longitude, datetime, traj_id, n_partitions)
 
 
