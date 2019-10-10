@@ -23,5 +23,12 @@ SITUATION = 'situation'
 TYPE_DASK = "dask"
 TYPE_PANDAS = "pandas"
 
+# perguntar pra arina se deixa assim
+TB = "TB"
+GB = "GB"
+MB = "MG"
+KB = "KB"
+B = "bytes"
+
 
 
