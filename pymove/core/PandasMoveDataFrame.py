@@ -1093,14 +1093,14 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
     #TODO: Ver se os cálculos estão ok
     def mem(self, format):
         switcher = {
-            B: self._last_operation_dict.mem_usage,
-            KB: self._last_operation_dict.mem_usage / 1024,
-            MB: self._last_operation_dict.mem_usage / (1024 * 2),
-            GB: self._last_operation_dict.mem_usage / (1024 * 3),
-            TB: self._last_operation_dict.mem_usage / (1024 * 4),
+            B: self._last_operation_dict["mem_usage"],
+            KB: self._last_operation_dict["mem_usage"] / 1024,
+            MB: self._last_operation_dict["mem_usage"] / (1024 * 2),
+            GB: self._last_operation_dict["mem_usage"] / (1024 * 3),
+            TB: self._last_operation_dict["mem_usage"] / (1024 * 4),
         }
 
-        return switcher.format
+        return switcher[format]
 
     # TODO: AJEITAR ESSES 2
     # def __setattr__(atributo, coluna, indice, valor):
