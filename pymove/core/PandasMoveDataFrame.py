@@ -23,6 +23,7 @@ from pymove.utils.constants import (
 	DAY,
 	PERIOD)
 from pymove.utils.transformations import haversine
+from pymove.core import indexes
 
 
 #TODO: tirar o data do format_labels
@@ -575,17 +576,8 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		except Exception as e:
 			raise e
 
-# #AJEITAR ESSES 2
-	# def __setattr__(atributo, coluna, indice, valor):
-	# 	atributo.loc[indice, coluna] = valor
-	# 	# self.__dict__[name] = value
-	#
-	#
-	# def __getattr__(atributo, indice, coluna):
-	# 	print("entrou aqui")
-	# 	return atributo.loc[indice, coluna]
-
 	def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
+		print(self.obj._meta.loc)
 		return self._data.min(axis, skipna, level, numeric_only, **kwargs)
 
 	def max(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
@@ -652,9 +644,55 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		self._data.to_csv(path_or_buf, sep, na_rep, float_format, columns, header, index,
 		 index_label, mode, encoding, compression, quoting, quotechar,
 		 line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
-		# self._data.to_csv("teste3.csv")
+		# self._data.to_csv("teste3.csv")]
 
 
+	# @property
+	# def loc(self):
+	# 	return indexes._loc(self._data)
+
+	@property
+	def loc(self):
+		return self._data.loc
+
+	@property
+	def iloc(self):
+		return self._data.iloc
+
+	@property
+	def at(self):
+		return self._data.at
+
+	@property
+	def values(self):
+		return self._data.values
+
+	@property
+	def columns(self):
+		return self._data.columns
+
+	@property
+	def index(self):
+		return self._data.index
+
+	@property
+	def dtypes(self):
+		return self._data.dtypes
+
+	@property
+	def shape(self):
+		return self._data.shape
+
+	@property
+	def isin(self):
+		return self._data.isin
+
+# # #AJEITAR ESSES 2
+# 	def __setattr__(self, attr, value):
+# 		self._data.__dict__.attr = value
+#
+# 	def __getattr__(self, attr):
+# 		return self._data.attr
 
 
 
