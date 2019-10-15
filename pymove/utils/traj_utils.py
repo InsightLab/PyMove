@@ -10,8 +10,6 @@ from ipywidgets import IntProgress, HTML, VBox
 from pymove.utils.time_utils import deltatime_str
 from typing import Union
 import pathlib
-
-
 from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, SPEED_TO_PREV, TIME_TO_PREV, DIST_TO_PREV
 
 def read_csv(filename, sep=',', encoding="utf-8", latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, type="pandas", n_partitions=1):
