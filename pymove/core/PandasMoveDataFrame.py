@@ -688,11 +688,19 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		return self._data.isin
 
 # # #AJEITAR ESSES 2
-# 	def __setattr__(self, attr, value):
-# 		self._data.__dict__.attr = value
-#
-# 	def __getattr__(self, attr):
-# 		return self._data.attr
+	def __setattr__(self, attr, value):
+		print("arinaaaa")
+		if(attr == "_data"):
+			self.__dict__[attr] = value
+		else:
+			self.__dict__['_data'][attr] = value
+
+	def __getattr__(self, name):
+		print("aaaaaaaaaaa")
+		try:
+			return self.__dict__['_data']
+		except Exception as e:
+			raise e
 
 
 
