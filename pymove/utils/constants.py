@@ -20,6 +20,8 @@ DAY = "day"
 INDEX_GRID_LAT = 'index_grid_lat'
 INDEX_GRID_LON = 'index_grid_lon'
 SITUATION = 'situation'
+TYPE_DASK = "dask"
+TYPE_PANDAS = "pandas"
 
 
 
