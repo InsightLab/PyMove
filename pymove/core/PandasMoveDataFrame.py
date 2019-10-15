@@ -2,6 +2,8 @@ import math
 import time
 import numpy as np
 import pandas as pd
+import dask
+from dask.dataframe import DataFrame
 import matplotlib.pyplot as plt
 from pymove.utils.traj_utils import format_labels, shift, progress_update
 from pymove.core.grid import lat_meters
@@ -21,27 +23,39 @@ from pymove.utils.constants import (
 	DIST_PREV_TO_NEXT,
 	DIST_TO_NEXT,
 	DAY,
-	PERIOD)
+	PERIOD,
+	TYPE_PANDAS)
 from pymove.utils.transformations import haversine
 from pymove.core import indexes
 
 
 #TODO: tirar o data do format_labels
-#TODO: mover constantes para um arquivo
 class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua estrutura de dados
 	def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id = TRAJ_ID):
 		# formatar os labels que foram passados pro que usado no pymove -> format_labels
 		# renomeia as colunas do dado passado pelo novo dict
 		# cria o dataframe
-	
+		if isinstance(data, dict):
+			data = pd.DataFrame.from_dict(data)
+		elif (isinstance(data, list) or isinstance(data, np.ndarray)) and len(data) >= 4:
+			zip_list = [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
+			for i in range(len(data[0])):
+				try:
+					zip_list[i] = zip_list[i]
+				except KeyError:
+					zip_list.append(i)
+			data = pd.DataFrame(data, columns=zip_list)
+		
 		mapping_columns = format_labels(data, traj_id, latitude, longitude, datetime)
 		tdf = data.rename(columns=mapping_columns)
-		
-		if self._has_columns(tdf):
-			self._validate_move_data_frame(tdf)
-			#pd.DataFrame.__init__(self, tdf)
-			self._data = tdf
 
+		if self._has_columns(tdf):
+				self._validate_move_data_frame(tdf)
+				self._data = tdf
+				self._type = TYPE_PANDAS
+		else:
+			print("Could not instantiate new MoveDataFrame because data has missing columns")
+	
 	def _has_columns(self, data):
 		if(LATITUDE in data and LONGITUDE in data and DATETIME in data):
 			return True
@@ -56,7 +70,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			if(data.dtypes.lon != 'float32'):
 				data.lon.astype('float32') 
 			if(data.dtypes.datetime != 'datetime64[ns]'):
-				data.lon.astype('datetime64[ns]') 
+				data.datetime.astype('datetime64[ns]') 
 		except AttributeError as erro:
 			print(erro)
 
@@ -64,19 +78,19 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 	def lat(self):
 		if LATITUDE not in self:
 			raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % LATITUDE)
-		return self[LATITUDE]
+		return self._data[LATITUDE]
 
 	@property
 	def lng(self):
 		if LONGITUDE not in self:
 			raise AttributeError("The MoveDataFrame does not contain the column '%s.'"%LONGITUDE)
-		return self[LONGITUDE]
+		return self._data[LONGITUDE]
 
 	@property
 	def datetime(self):
 		if DATETIME not in self:
 			raise AttributeError("The MoveDataFrame does not contain the column '%s.'"%DATETIME)
-		return self[DATETIME]
+		return self._data[DATETIME]
 
 	def head(self, n=5):
 		return self._data.head(n)
@@ -97,9 +111,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 
 	#pocurar jeito mais otimizado de fazer
 	def to_dict(self):
-		df = self._data.copy()
-		data_dict = df.to_dict() 
-		return data_dict
+		return self._data.to_dict()
 
 	def to_grid(self, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
 		return create_virtual_grid(cell_size, self.get_bbox(), meters_by_degree) 
@@ -462,15 +474,6 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		except Exception as e:
 			raise e
 
-	# def generate_date_features(self):
-	# 	try:
-	# 		print('Creating date features...')
-	# 		if DATETIME in df_:
-	# 			DATE = df_[DATETIME].dt.date
-	# 			print('..Date features was created...\n')
-	# 	except Exception as e:
-	#     	raise e
-
 	def time_interval(self):
 		time_diff = self._data[DATETIME].max() - self._data[DATETIME].min()
 		return time_diff
@@ -577,7 +580,6 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			raise e
 
 	def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
-		print(self.obj._meta.loc)
 		return self._data.min(axis, skipna, level, numeric_only, **kwargs)
 
 	def max(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
@@ -637,19 +639,27 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 	def nunique(self, axis=0, dropna=True):
 		return self._data.nunique(axis, dropna)
 
-	#erro nao entendi
-	def to_csv(self, path_or_buf=None, sep=',', na_rep='', float_format=None, columns=None, header=True, index=True,
-			   index_label=None, mode='w', encoding=None, compression='infer', quoting=None, quotechar='"',
-			   line_terminator=None, chunksize=None, date_format=None, doublequote=True, escapechar=None, decimal='.'):
-		self._data.to_csv(path_or_buf, sep, na_rep, float_format, columns, header, index,
-		 index_label, mode, encoding, compression, quoting, quotechar,
-		 line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
+	def to_csv(self, file_name, sep=',', encoding=None):
+		self._data.to_csv(file_name, sep, encoding)
+
+	def to_dask(self):
+		from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
+		return dm(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, n_partitions=1)
+
+	def to_pandas(self):
+		return self._data
+
+	def get_type(self):
+		return self._type
+
+	#TODO: Ajeitar esse bug e deixar esse como central. erro nao entendi
+	# def to_csv(self, path_or_buf=None, sep=',', na_rep='', float_format=None, columns=None, header=True, index=True,
+	# 		   index_label=None, mode='w', encoding=None, compression='infer', quoting=None, quotechar='"',
+	# 		   line_terminator=None, chunksize=None, date_format=None, doublequote=True, escapechar=None, decimal='.'):
+	# 	self._data.to_csv(path_or_buf, sep, na_rep, float_format, columns, header, index,
+	# 	 index_label, mode, encoding, compression, quoting, quotechar,
+	# 	 line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
 		# self._data.to_csv("teste3.csv")]
-
-
-	# @property
-	# def loc(self):
-	# 	return indexes._loc(self._data)
 
 	@property
 	def loc(self):

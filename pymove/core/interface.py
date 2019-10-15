@@ -7,109 +7,104 @@ class MoveDataFrameAbstractModel(abc.ABC):
 	@abc.abstractmethod
 	def head(self):
 		pass
-
-#     #ddza
+	
 	@abc.abstractmethod
 	def get_users_number(self):
-		pass
-
-#     #ddza
+	    pass
+	
 	@abc.abstractmethod
 	def time_interval(self):
-		pass  
-
-#     #ddza
+	    pass
+	
 	@abc.abstractmethod
 	def to_numpy(self):
-		pass          
-
-	#arina
-	@abc.abstractmethod   
+	    pass
+	
+	@abc.abstractmethod
 	def write_file(self):
-		pass
-
-#     #arina
+	    pass
+	
 	@abc.abstractmethod
 	def len(self):
-		pass
-
-#     #arina
-#     @abc.abstractmethod
-#     def __getattr__(self):
-#         pass
-
-#     #arina
-#     @abc.abstractmethod
-#     def __setattr__(self):
-#         pass
-
-	#arina
+	    pass
+	
+	#     #arina
+	#     @abc.abstractmethod
+	#     def __getattr__(self):
+	#         pass
+	
+	#     #arina
+	#     @abc.abstractmethod
+	#     def __setattr__(self):
+	#         pass
+	
+	# arina
 	@abc.abstractmethod
 	def to_dict(self):
-		pass
-
-	#arina
+	    pass
+	
+	# arina
 	@abc.abstractmethod
 	def to_grid(self):
-		pass
-
-#     # Primeiros 7 andreza, os outros 7 arina
+	    pass
+	
+	#     # Primeiros 7 andreza, os outros 7 arina
 	@abc.abstractmethod
 	def generate_tid_based_on_id_datatime(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def generate_date_features(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def generate_hour_features(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def generate_day_of_the_week_features(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def generate_time_of_day_features(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def generate_dist_features(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def generate_dist_time_speed_features(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def generate_move_and_stop_by_radius(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def time_interval(self):
-		pass
+	    pass
 	
 	@abc.abstractmethod
 	def get_bbox(self):
-		pass
-
-	@abc.abstractmethod   
+	    pass
+	
+	@abc.abstractmethod
 	def plot_all_features(self):
-		pass
-
-	@abc.abstractmethod   
+	    pass
+	
+	@abc.abstractmethod
 	def plot_trajs(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def plot_traj_id():
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def show_trajectories_info(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def min(self):
 		pass
@@ -117,93 +112,104 @@ class MoveDataFrameAbstractModel(abc.ABC):
 	@abc.abstractmethod
 	def max(self):
 		pass
-
-	#https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.unique.html#pandas.Index.unique
-	#https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.unique.html
-	#example in transformations
-	# @abc.abstractmethod
-	# def unique(self, level=None):
-	# 	pass
-
+	
+	# # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.unique.html#pandas.Index.unique
+	# # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.unique.html
+	# # example in transformations
+	# # @abc.abstractmethod
+	# # def unique(self, level=None):
+	# #     pass
+	#
 	@abc.abstractmethod
 	def count(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def reset_index(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def groupby(self):
-		pass
-
-
+	    pass
+	
 	@abc.abstractmethod
 	def plot(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def drop_duplicates(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def select_dtypes(self):
-		pass
+	    pass
+	
 	#
 	@abc.abstractmethod
 	def sort_values(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def astype(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def set_index(self):
-		pass
-
-
+	    pass
+	
 	@abc.abstractmethod
 	def drop(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def duplicated(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def shift(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def any(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def dropna(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def isin(self):
-		pass
-
-
+	    pass
+	
 	@abc.abstractmethod
 	def append(self):
-		pass
-
+	    pass
+	
 	@abc.abstractmethod
 	def nunique(self):
+	    pass
+	
+	@abc.abstractmethod
+	def to_csv(self):
+	    pass
+
+	@abc.abstractmethod
+	def to_dask(self):
+		pass
+	
+	@abc.abstractmethod
+	def to_pandas(self):
 		pass
 
 	@abc.abstractmethod
-	def to_csv(self):
+	def get_type(self):
 		pass
-	#
-	# # duvida columns
-	#
-	# # duvida loc iloc values
-	#
-	# # duvida shape, at, in, dtype
-	#
-	# index
+	
+#
+# # duvida columns
+#
+# # duvida loc iloc values
+#
+# # duvida shape, at, in, dtype
+#
+# index
