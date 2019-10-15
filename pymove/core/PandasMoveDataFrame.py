@@ -687,18 +687,15 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 	def isin(self):
 		return self._data.isin
 
-# # #AJEITAR ESSES 2
-	def __setattr__(self, attr, value):
-		print("arinaaaa")
-		if(attr == "_data"):
-			self.__dict__[attr] = value
-		else:
-			self.__dict__['_data'][attr] = value
+	def unique(self, values):
+		return self._data.unique(value)
 
-	def __getattr__(self, name):
-		print("aaaaaaaaaaa")
+	def __setitem__(self, attr, value):
+		self.__dict__['_data'][attr] = value
+
+	def __getitem__(self, name):
 		try:
-			return self.__dict__['_data']
+			return self.__dict__['_data'][name]
 		except Exception as e:
 			raise e
 
