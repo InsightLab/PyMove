@@ -1,4 +1,3 @@
-# TODO: Arina
 import numpy as np
 from pymove.utils import constants
 

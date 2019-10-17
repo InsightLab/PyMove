@@ -1,5 +1,3 @@
-import abc
-from pymove.utils.traj_utils import format_labels
 from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
 from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
 from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID

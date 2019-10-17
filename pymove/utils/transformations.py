@@ -1,13 +1,7 @@
-# TODO: Andreza
+
 import numpy as np
-import pandas as pd
-import time
-from scipy.interpolate import interp1d
-from pymove.utils.traj_utils import shift, progress_update
-from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, DIST_PREV_TO_NEXT, DIST_TO_PREV, SITUATION
 
 
-""" ----------------------  FUCTIONS TO LAT AND LONG COORDINATES --------------------------- """ 
 
 def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
     """
@@ -66,9 +60,9 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 
 
 #TODO complementar oq ela faz
-#TODO botar o check pra replace
 #TODO trocar nome da func
-def change_df_feature_values_using_filter(df, id_, feature_name, filter_, values):
+from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame
+def change_df_feature_values_using_filter(df, id_, feature_name, filter_, values, inplace = True):
     """
     ?
     equivalent of: df.at[id_, feature_name][filter_] = values
@@ -104,20 +98,21 @@ def change_df_feature_values_using_filter(df, id_, feature_name, filter_, values
     >>> change_df_feature_values_using_filter(df, -, -, -, -)
 
     """
-    """
-    
-    """
+    if inplace == False:
+        df = PandasMoveDataFrame(data = df.to_DataFrame())
+
     values_feature = df.at[id_, feature_name]
     if filter_.shape == ():
         df.at[id_, feature_name] = values
     else:
         values_feature[filter_] = values
         df.at[id_, feature_name] = values_feature
+    if inplace == False:
+        return df
 
 #TODO complementar oq ela faz
-#TODO botar o check pra replace
 #TODO trocar nome da func
-def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, filter_, idxs, values):
+def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, filter_, idxs, values, inplace = True):
     """
     ?
     Create or update move and stop by radius.
@@ -155,8 +150,12 @@ def change_df_feature_values_using_filter_and_indexes(df, id_, feature_name, fil
     >>> change_df_feature_values_using_filter_and_indexes(df)
 
     """
+    if inplace == False:
+        df = PandasMoveDataFrame(data = df.to_DataFrame())
     values_feature = df.at[id_, feature_name]
     values_feature_filter = values_feature[filter_]
     values_feature_filter[idxs] = values
     values_feature[filter_] = values_feature_filter
     df.at[id_, feature_name] = values_feature
+    if inplace == False:
+        return df

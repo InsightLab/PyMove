@@ -1,17 +1,4 @@
-#from __future__ import division
-#import time
-#import math
-#import folium
-#import datetime
 import numpy as np
-#import pandas as pd
-
-#from scipy.interpolate import interp1d
-#from pymove.utils.utils import dic_labels, dic_features_label
-
-#from IPython.display import display
-#from ipywidgets import IntProgress, HTML, VBox
-#from pandas._libs.tslibs.timestamps import Timestamp
 
 from pymove.utils import constants
 
