@@ -37,7 +37,7 @@ from pymove.utils.constants import (
 
 
 #TODO: tirar o data do format_labels
-class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua estrutura de dados
+class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua estrutura de dados
 	def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id = TRAJ_ID):
 		# formatar os labels que foram passados pro que usado no pymove -> format_labels
 		# renomeia as colunas do dado passado pelo novo dict
@@ -233,7 +233,6 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		self._last_operation_dict['mem_usage'] = finish - init
 		return  _grid
 
-	#TODO: perguntar pra Arina esses que tme try, se eu deixo duplicado mesmo
 	def get_bbox(self):
 		"""
 		A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
@@ -273,8 +272,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			self._last_operation_dict['mem_usage'] = finish - init
 			raise e
 
-	#TODO: botar inplace
-	def generate_tid_based_on_id_datatime(self, str_format="%Y%m%d%H", sort=True):
+	def generate_tid_based_on_id_datatime(self, str_format="%Y%m%d%H", sort=True, inplace=True):
 		"""
 		Create or update trajectory id based on id e datetime.  
 		Parameters
@@ -302,19 +300,27 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		start = time.time()
 		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
+		if inplace:
+			_data = self._data
+		else:
+			_data = PandasMoveDataFrame(data=self._data)
+
 		try:
 			print('\nCreating or updating tid feature...\n')
 			if sort is True:
 				print('...Sorting by {} and {} to increase performance\n'.format(TRAJ_ID, DATETIME))
-				self._data.sort_values([TRAJ_ID, DATETIME], inplace=True)
+				_data.sort_values([TRAJ_ID, DATETIME], inplace=True)
 
-			self._data[TID] = self._data[TRAJ_ID].astype(str) + self._data[DATETIME].dt.strftime(str_format)
+			_data[TID] = _data[TRAJ_ID].astype(str) + _data[DATETIME].dt.strftime(str_format)
 			print('\n...tid feature was created...\n')
 
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
 			self._last_operation_dict['name'] = 'generate_tid_based_on_id_datatime'
 			self._last_operation_dict['mem_usage'] = finish - init
+
+			if inplace == False:
+				return _data
 		except Exception as e:
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
@@ -323,8 +329,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			raise e
 
 	# TODO complementar oq ela faz
-	# TODO: botar inplace
-	def generate_date_features(self):
+	def generate_date_features(self, inplace=True):
 		"""
 		Create or update date feature.  
 		Parameters
@@ -341,16 +346,24 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		start = time.time()
 		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
+		if inplace:
+			_data = self._data
+		else:
+			_data = PandasMoveDataFrame(data=self._data)
+
 		try:
 			print('Creating date features...')
-			if DATETIME in self._data:
-				self._data['date'] = self._data[DATETIME].dt.date
+			if DATETIME in _data:
+				_data['date'] = _data[DATETIME].dt.date
 				print('..Date features was created...\n')
 
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
 			self._last_operation_dict['name'] = 'generate_date_features'
 			self._last_operation_dict['mem_usage'] = finish - init
+
+			if inplace == False:
+				return _data
 		except Exception as e:
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
@@ -359,8 +372,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			raise e
 
 	# TODO complementar oq ela faz
-	# TODO: botar inplace
-	def generate_hour_features(self):
+	def generate_hour_features(self, inplace=True):
 		"""
 		Create or update hour feature.  
 		Parameters
@@ -377,16 +389,24 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		start = time.time()
 		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
+		if inplace:
+			_data = self._data
+		else:
+			_data = PandasMoveDataFrame(data=self._data)
+
 		try:
 			print('\nCreating or updating a feature for hour...\n')
-			if DATETIME in self._data:
-				self._data['hour'] = self._data[DATETIME].dt.hour
+			if DATETIME in _data:
+				_data['hour'] = _data[DATETIME].dt.hour
 				print('...Hour feature was created...\n')
 
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
 			self._last_operation_dict['name'] = 'generate_hour_features'
 			self._last_operation_dict['mem_usage'] = finish - init
+
+			if inplace == False:
+				return _data
 		except Exception as e:
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
@@ -396,7 +416,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 
 
 	# TODO: botar inplace
-	def generate_day_of_the_week_features(self):
+	def generate_day_of_the_week_features(self, inplace=True):
 		"""
 		Create or update a feature day of the week from datatime.  
 		Parameters
@@ -414,14 +434,22 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		start = time.time()
 		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
+		if inplace:
+			_data = self._data
+		else:
+			_data = PandasMoveDataFrame(data=self._data)
+
 		try:
 			print('\nCreating or updating day of the week feature...\n')
-			self._data[DAY] = self._data[DATETIME].dt.day_name()
+			_data[DAY] = _data[DATETIME].dt.day_name()
 			print('...the day of the week feature was created...\n')
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
 			self._last_operation_dict['name'] = 'generate_day_of_the_week_features'
 			self._last_operation_dict['mem_usage'] = finish - init
+
+			if inplace == False:
+				return _data
 		except Exception as e:
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
@@ -430,7 +458,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			raise e
 
 	# TODO: botar inplace
-	def generate_time_of_day_features(self):
+	def generate_time_of_day_features(self, inplace=True):
 		"""
 		Create a feature time of day or period from datatime.
 		Parameters
@@ -451,21 +479,29 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		start = time.time()
 		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
+		if inplace:
+			_data = self._data
+		else:
+			_data = PandasMoveDataFrame(data=self._data)
+
 		try:
 			print(
 				'\nCreating or updating period feature\n...early morning from 0H to 6H\n...morning from 6H to 12H\n...afternoon from 12H to 18H\n...evening from 18H to 24H')
-			conditions = [(self._data[DATETIME].dt.hour >= 0) & (self._data[DATETIME].dt.hour < 6),
-						  (self._data[DATETIME].dt.hour >= 6) & (self._data[DATETIME].dt.hour < 12),
-						  (self._data[DATETIME].dt.hour >= 12) & (self._data[DATETIME].dt.hour < 18),
-						  (self._data[DATETIME].dt.hour >= 18) & (self._data[DATETIME].dt.hour < 24)]
+			conditions = [(_data[DATETIME].dt.hour >= 0) & (_data[DATETIME].dt.hour < 6),
+						  (_data[DATETIME].dt.hour >= 6) & (_data[DATETIME].dt.hour < 12),
+						  (_data[DATETIME].dt.hour >= 12) & (_data[DATETIME].dt.hour < 18),
+						  (_data[DATETIME].dt.hour >= 18) & (_data[DATETIME].dt.hour < 24)]
 			choices = ['early morning', 'morning', 'afternoon', 'evening']
-			self._data[PERIOD] = np.select(conditions, choices, 'undefined')
+			_data[PERIOD] = np.select(conditions, choices, 'undefined')
 			print('...the period of day feature was created')
 
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
 			self._last_operation_dict['name'] = 'generate_time_of_day_features'
 			self._last_operation_dict['mem_usage'] = finish - init
+
+			if inplace == False:
+				return _data
 		except Exception as e:
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
@@ -474,8 +510,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			raise e
 
 	# TODO complementar oq ela faz
-	# TODO: botar inplace
-	def generate_dist_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True):
+	def generate_dist_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
 		"""
 		 Create three distance in meters to an GPS point P (lat, lon).
 		Parameters
@@ -501,61 +536,65 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		start = time.time()
 		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
+		if inplace:
+			_data = self._data
+		else:
+			_data = PandasMoveDataFrame(data=self._data)
+
 		try:
 			print('\nCreating or updating distance features in meters...\n')
 			start_time = time.time()
 
 			if sort is True:
 				print('...Sorting by {} and {} to increase performance\n'.format(label_id, DATETIME))
-				self._data.sort_values([label_id, DATETIME], inplace=True)
+				_data.sort_values([label_id, DATETIME], inplace=True)
 
-			if self._data.index.name is None:
+			if _data.index.name is None:
 				print('...Set {} as index to increase attribution performance\n'.format(label_id))
-				self._data.set_index(label_id, inplace=True)
+				_data.set_index(label_id, inplace=True)
 
 			""" create ou update columns"""
-			self._data[DIST_TO_PREV] = label_dtype(-1.0)
-			self._data[DIST_TO_NEXT] = label_dtype(-1.0)
-			self._data[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
+			_data[DIST_TO_PREV] = label_dtype(-1.0)
+			_data[DIST_TO_NEXT] = label_dtype(-1.0)
+			_data[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
 
-			ids = self._data.index.unique()
-			selfsize = self._data.shape[0]
+			ids = _data.index.unique()
+			selfsize = _data.shape[0]
 			curr_perc_int = -1
 			start_time = time.time()
 			deltatime_str = ''
 			sum_size_id = 0
 			size_id = 0
 			for idx in ids:
-				curr_lat = self._data.at[idx, LATITUDE]
-				curr_lon = self._data.at[idx, LONGITUDE]
+				curr_lat = _data.at[idx, LATITUDE]
+				curr_lon = _data.at[idx, LONGITUDE]
 
 				size_id = curr_lat.size
 
 				if size_id <= 1:
 					print('...id:{}, must have at least 2 GPS points\n'.format(idx))
-					self._data.at[idx, DIST_TO_PREV] = np.nan
+					_data.at[idx, DIST_TO_PREV] = np.nan
 
 				else:
 					prev_lat = shift(curr_lat, 1)
 					prev_lon = shift(curr_lon, 1)
 					# compute distance from previous to current point
-					self._data.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
+					_data.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
 
 					next_lat = shift(curr_lat, -1)
 					next_lon = shift(curr_lon, -1)
 					# compute distance to next point
-					self._data.at[idx, DIST_TO_NEXT] = haversine(curr_lat, curr_lon, next_lat, next_lon)
+					_data.at[idx, DIST_TO_NEXT] = haversine(curr_lat, curr_lon, next_lat, next_lon)
 
 					# using pandas shift in a large dataset: 7min 21s
 					# using numpy shift above: 33.6 s
 
 					# use distance from previous to next
-					self._data.at[idx, DIST_PREV_TO_NEXT] = haversine(prev_lat, prev_lon, next_lat, next_lon)
+					_data.at[idx, DIST_PREV_TO_NEXT] = haversine(prev_lat, prev_lon, next_lat, next_lon)
 
 					sum_size_id += size_id
-					curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int,
-																  step_perc=20)
-			self._data.reset_index(inplace=True)
+					curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int, step_perc=20)
+			_data.reset_index(inplace=True)
 			print('...Reset index\n')
 			print('..Total Time: {}'.format((time.time() - start_time)))
 
@@ -563,6 +602,9 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			self._last_operation_dict['time'] = time.time() - start
 			self._last_operation_dict['name'] = 'generate_dist_features'
 			self._last_operation_dict['mem_usage'] = finish - init
+
+			if inplace == False:
+				return _data
 		except Exception as e:
 			print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -572,8 +614,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			raise e
 
 
-	# TODO: botar inplace
-	def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True):
+	def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
 		"""
 		Firstly, create three distance to an GPS point P (lat, lon)
 		After, create two feature to time between two P: time to previous and time to next 
@@ -588,6 +629,8 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			Represents column id type. By default it's np.float64.
 		sort : boolean
 			Represents the state of dataframe, if is sorted. By default it's true.
+		inplace : boolean
+			Represents te of dataframe, if is sorted. By default it's true.
 		Returns
 		-------
 		Examples
@@ -601,74 +644,80 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		start = time.time()
 		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-		try:
+		if inplace:
+			_data = self._data
+		else:
+			_data = PandasMoveDataFrame(data=self._data)
 
+		try:
 			print('\nCreating or updating distance, time and speed features in meters by seconds\n')
 			start_time = time.time()
 
 			if sort is True:
 				print('...Sorting by {} and {} to increase performance\n'.format(label_id, DATETIME))
-				self._data.sort_values([label_id, DATETIME], inplace=True)
+				_data.sort_values([label_id, DATETIME], inplace=True)
 
-			if self._data.index.name is None:
+			if _data.index.name is None:
 				print('...Set {} as index to a higher peformance\n'.format(label_id))
-				self._data.set_index(label_id, inplace=True)
+				_data.set_index(label_id, inplace=True)
 
 			"""create new feature to time"""
-			self._data[DIST_TO_PREV] = label_dtype(-1.0)
+			_data[DIST_TO_PREV] = label_dtype(-1.0)
 
 			"""create new feature to time"""
-			self._data[TIME_TO_PREV] = label_dtype(-1.0)
+			_data[TIME_TO_PREV] = label_dtype(-1.0)
 
 			"""create new feature to speed"""
-			self._data[SPEED_TO_PREV] = label_dtype(-1.0)
+			_data[SPEED_TO_PREV] = label_dtype(-1.0)
 
-			ids = self._data.index.unique()
-			selfsize = self._data.shape[0]
+			ids = _data.index.unique()
+			selfsize = _data.shape[0]
 			curr_perc_int = -1
 			sum_size_id = 0
 			size_id = 0
 
 			for idx in ids:
-				curr_lat = self._data.at[idx, LATITUDE]
-				curr_lon = self._data.at[idx, LONGITUDE]
+				curr_lat = _data.at[idx, LATITUDE]
+				curr_lon = _data.at[idx, LONGITUDE]
 
 				size_id = curr_lat.size
 
 				if size_id <= 1:
 					print('...id:{}, must have at least 2 GPS points\n'.format(idx))
-					self._data.at[idx, DIST_TO_PREV] = np.nan
-					self._data.at[idx, TIME_TO_PREV] = np.nan
-					self._data.at[idx, SPEED_TO_PREV] = np.nan
+					_data.at[idx, DIST_TO_PREV] = np.nan
+					_data.at[idx, TIME_TO_PREV] = np.nan
+					_data.at[idx, SPEED_TO_PREV] = np.nan
 				else:
 					prev_lat = shift(curr_lat, 1)
 					prev_lon = shift(curr_lon, 1)
 					prev_lon = shift(curr_lon, 1)
 					# compute distance from previous to current point
-					self._data.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
+					_data.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
 
-					time_ = self._data.at[idx, DATETIME].astype(label_dtype)
+					time_ = _data.at[idx, DATETIME].astype(label_dtype)
 					time_prev = (time_ - shift(time_, 1)) * (10 ** -9)
-					self._data.at[idx, TIME_TO_PREV] = time_prev
+					_data.at[idx, TIME_TO_PREV] = time_prev
 
 					""" set time_to_next"""
 					# time_next = (ut.shift(time_, -1) - time_)*(10**-9)
 					# self.at[idx, dic_features_label['time_to_next']] = time_next
 
 					"set Speed features"
-					self._data.at[idx, SPEED_TO_PREV] = self._data.at[idx, DIST_TO_PREV] / (time_prev)  # unit: m/s
+					_data.at[idx, SPEED_TO_PREV] = _data.at[idx, DIST_TO_PREV] / (time_prev)  # unit: m/s
 
 					sum_size_id += size_id
-					curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int,
-																  step_perc=20)
+					curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int, step_perc=20)
 			print('...Reset index...\n')
-			self._data.reset_index(inplace=True)
+			_data.reset_index(inplace=True)
 			print('..Total Time: {:.3f}'.format((time.time() - start_time)))
 
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
 			self._last_operation_dict['name'] = 'generate_dist_time_speed_features'
 			self._last_operation_dict['mem_usage'] = finish - init
+
+			if inplace == False:
+				return _data
 		except Exception as e:
 			print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -678,25 +727,32 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 			raise e
 
 
-	# TODO: botar inplace
-	def generate_move_and_stop_by_radius(self, radius=0, target_label=DIST_TO_PREV):
+	def generate_move_and_stop_by_radius(self, radius=0, target_label=DIST_TO_PREV, inplace=True):
 		start = time.time()
 		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-		if DIST_TO_PREV not in self._data:
-			self._data.generate_dist_features()
+		if inplace:
+			_data = self._data
+		else:
+			_data = PandasMoveDataFrame(data=self._data)
+
+		if DIST_TO_PREV not in _data:
+			_data.generate_dist_features()
 		try:
 			print('\nCreating or updating features MOVE and STOPS...\n')
-			conditions = (self._data[target_label] > radius), (self._data[target_label] <= radius)
+			conditions = (_data[target_label] > radius), (_data[target_label] <= radius)
 			choices = ['move', 'stop']
 
-			self._data["situation"] = np.select(conditions, choices, np.nan)
-			print('\n....There are {} stops to this parameters\n'.format(self._data[self._data["situation"] == 'stop'].shape[0]))
+			_data["situation"] = np.select(conditions, choices, np.nan)
+			print('\n....There are {} stops to this parameters\n'.format(_data[_data["situation"] == 'stop'].shape[0]))
 
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
 			self._last_operation_dict['name'] = 'generate_move_and_stop_by_radius'
 			self._last_operation_dict['mem_usage'] = finish - init
+
+			if inplace == False:
+				return _data
 		except Exception as e:
 			finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 			self._last_operation_dict['time'] = time.time() - start
