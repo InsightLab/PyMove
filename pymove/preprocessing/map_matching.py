@@ -1,15 +1,19 @@
 import time
 import numpy as np
-
-from scipy.interpolate import interp1d
-from pymove import utils as ut
 from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame
+from pymove.utils.traj_utils import progress_update
+from pymove.utils.traj_utils import shift
+from pymove.utils.transformations import change_df_feature_values_using_filter_and_indexes, change_df_feature_values_using_filter
+from pymove.utils.constants import TID
 
 """ Fuction to solve problems after Map-matching"""
 def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points=5000, max_time_between_adj_points=900, max_speed=30, inplace = True):
     if inplace == False:
         df = PandasMoveDataFrame(data = df.to_DataFrame())
     try:
+        if TID not in df:
+            df.generate_tid_based_on_id_datatime()
+
         if df.index.name is not None:
             print('reseting index...')
             df.reset_index(inplace=True)
@@ -40,7 +44,7 @@ def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points
             
             size_id = 1 if filter_.shape == () else filter_.shape[0]
             count += size_id
-            curr_perc_int, est_time_str = ut.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
             
 
         count = 0
@@ -52,13 +56,13 @@ def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points
             filter_ = (df.at[tid,'isNode'] != 1)
 
             dists = df.at[tid, 'distFromTrajStartToCurrPoint'][filter_]
-            delta_dists = (ut.shift(dists, -1) - dists)[:-1]   # do not use last element (np.nan)
+            delta_dists = (shift(dists, -1) - dists)[:-1]   # do not use last element (np.nan)
                           
             assert np.all(delta_dists <= max_dist_between_adj_points), \
                           'delta_dists must be <= {}'.format(max_dist_between_adj_points)
             
             times = df.at[tid, 'time'][filter_].astype(np.float64)
-            delta_times = ((ut.shift(times, -1) - times) / 1000.0)[:-1] # do not use last element (np.nan)
+            delta_times = ((shift(times, -1) - times) / 1000.0)[:-1] # do not use last element (np.nan)
                           
             assert np.all(delta_times <= max_time_between_adj_points), \
                           'delta_times must be <= {}'.format(max_time_between_adj_points)
@@ -72,7 +76,7 @@ def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points
             
             size_id = 1 if filter_.shape == () else filter_.shape[0]
             count += size_id
-            curr_perc_int, est_time_str = ut.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
             
 
         df.reset_index(inplace=True)
@@ -82,10 +86,13 @@ def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points
     except Exception as e:
         print('{}: {} - size: {}'.format(index_name, tid, size_id))
         raise e
-        
+
 def fix_time_not_in_ascending_order_id(df, tid, index_name='tid', inplace = True):
     if inplace == False:
         df = PandasMoveDataFrame(data = df.to_DataFrame())
+
+    if TID not in df:
+        df.generate_tid_based_on_id_datatime()
 
     if 'deleted' not in df:
         df['deleted'] = False
@@ -111,7 +118,7 @@ def fix_time_not_in_ascending_order_id(df, tid, index_name='tid', inplace = True
         if idx_not_in_ascending_order.shape[0] > 0:
             #print(tid, 'idx_not_in_ascending_order:', idx_not_in_ascending_order, 'times.shape', times.shape)
 
-            ut.change_df_feature_values_using_filter_and_indexes(df, tid, 'deleted', filter_, idx_not_in_ascending_order, True)
+            change_df_feature_values_using_filter_and_indexes(df, tid, 'deleted', filter_, idx_not_in_ascending_order, True)
             # equivalent of: df.at[tid, 'deleted'][filter_][idx_not_in_ascending_order] = True
 
             fix_time_not_in_ascending_order_id(df, tid, index_name=index_name)
@@ -126,6 +133,10 @@ def fix_time_not_in_ascending_order_all(df, index_name='tid', drop_marked_to_del
         df = PandasMoveDataFrame(data = df.to_DataFrame())
 
     try:
+
+        if TID not in df:
+            df.generate_tid_based_on_id_datatime()
+
         if df.index.name is not None:
             print('reseting index...')
             df.reset_index(inplace=True)
@@ -150,7 +161,7 @@ def fix_time_not_in_ascending_order_all(df, index_name='tid', drop_marked_to_del
             size_id = fix_time_not_in_ascending_order_id(df, tid, index_name)
 
             count += size_id
-            curr_perc_int, est_time_str = ut.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
 
         df.reset_index(inplace=True)
         idxs = df[ df['deleted'] ].index
@@ -176,6 +187,10 @@ def interpolate_add_deltatime_speed_features(df, label_id='tid', max_time_betwee
     """
     if inplace == False:
         df = PandasMoveDataFrame(data = df.to_DataFrame())
+
+    if TID not in df:
+        df.generate_tid_based_on_id_datatime()
+
     if df.index.name is not None:
         print('reseting index...')
         df.reset_index(inplace=True)
@@ -208,7 +223,7 @@ def interpolate_add_deltatime_speed_features(df, label_id='tid', max_time_betwee
             if y_.shape[0] < 2:
                 #print('traj: {} - insuficient points ({}) for interpolation. adding to drop list...'.format(tid,  y_.shape[0]))
                 drop_trajectories.append(tid)
-                curr_perc_int, est_time_str = ut.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+                curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
                 continue
 
             assert np.all(y_[1:] >= y_[:-1]), 'time feature is not in ascending order'
@@ -227,14 +242,14 @@ def interpolate_add_deltatime_speed_features(df, label_id='tid', max_time_betwee
             if y_.shape[0] < 2:
                 #print('traj: {} - insuficient points ({}) for interpolation. adding to drop list...'.format(tid,  y_.shape[0]))
                 drop_trajectories.append(tid)
-                curr_perc_int, est_time_str = ut.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+                curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
                 continue
 
             # compute delta_time and distance between points
             #values = (ut.shift(df.at[tid, 'time'][filter_nodes].astype(np.float64), -1) - df.at[tid, 'time'][filter_nodes]) / 1000
             #ut.change_df_feature_values_using_filter(df, tid, 'delta_time', filter_nodes, values)
-            delta_time = ( (ut.shift(y_.astype(np.float64), -1) - y_) / 1000.0 )[:-1]
-            dist_curr_to_next = (ut.shift(x_, -1) - x_)[:-1]
+            delta_time = ( (shift(y_.astype(np.float64), -1) - y_) / 1000.0 )[:-1]
+            dist_curr_to_next = (shift(x_, -1) - x_)[:-1]
             speed = (dist_curr_to_next / delta_time)[:-1]
 
             assert np.all(delta_time <= max_time_between_adj_points), 'delta_time between points cannot be more than {}'.format(max_time_between_adj_points)
@@ -255,17 +270,17 @@ def interpolate_add_deltatime_speed_features(df, label_id='tid', max_time_betwee
 
             # update time features for nodes. initially they are empty.
             values = intp_result.astype(np.int64)
-            ut.change_df_feature_values_using_filter(df, tid, 'time', filter_nodes, values)
+            change_df_feature_values_using_filter(df, tid, 'time', filter_nodes, values)
 
             # create delta_time feature
-            values = (ut.shift(df.at[tid, 'time'][filter_nodes].astype(np.float64), -1) - df.at[tid, 'time'][filter_nodes]) / 1000
-            ut.change_df_feature_values_using_filter(df, tid, 'delta_time', filter_nodes, values)
+            values = (shift(df.at[tid, 'time'][filter_nodes].astype(np.float64), -1) - df.at[tid, 'time'][filter_nodes]) / 1000
+            change_df_feature_values_using_filter(df, tid, 'delta_time', filter_nodes, values)
 
             # create speed feature
             values = df.at[tid, 'edgeDistance'][filter_nodes] / df.at[tid, 'delta_time'][filter_nodes]
-            ut.change_df_feature_values_using_filter(df, tid, 'speed', filter_nodes, values)
+            change_df_feature_values_using_filter(df, tid, 'speed', filter_nodes, values)
 
-            curr_perc_int, est_time_str = ut.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
 
     except Exception as e:
         print('{}: {} - size: {} - count: {}'.format(label_id, tid, size_id, count))

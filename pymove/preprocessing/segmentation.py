@@ -5,6 +5,8 @@ import time
 from pymove.utils.traj_utils import progress_update
 from pymove.utils import constants
 from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame
+from pymove.utils.constants import TIME_TO_PREV, SPEED_TO_PREV
+
 
 def bbox_split(bbox, number_grids):
     """splits the bounding box in N grids of the same size.
@@ -78,6 +80,10 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_d
     print('...max_speed:', max_speed_between_adj_points)
     
     try:
+
+        if TIME_TO_PREV not in df_:
+            df_.generate_dist_time_speed_features()
+
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
@@ -172,6 +178,9 @@ def segment_trajectory_by_speed(df_, label_id=constants.TRAJ_ID, max_speed_betwe
 
     print('\nSplit trajectories by max_speed_between_adj_points:', max_speed_between_adj_points) 
     try:
+        if SPEED_TO_PREV not in df_:
+            df_.generate_dist_time_speed_features()
+
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
@@ -263,6 +272,10 @@ def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between
 
     print('\nSplit trajectories by max_time_between_adj_points:', max_time_between_adj_points)
     try:
+
+        if TIME_TO_PREV not in df_:
+            df_.generate_dist_time_speed_features()
+
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
@@ -314,7 +327,7 @@ def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between
             if idx.shape[0] > 0:
                 print('...Drop Trajectory with a unique GPS point\n')
                 ids_before_drop = df_[label_id].unique().shape[0]
-                df_.drop(index=idxsegment_trajectory_by_dist_time_speed, inplace=True)
+                df_.drop(index=idx, inplace=True)
                 print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
                 print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
                 df_.generate_dist_time_speed_features()
