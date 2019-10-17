@@ -684,7 +684,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
 		if DIST_TO_PREV not in self._data:
-			self._data.generate_dist_features()
+			self.generate_dist_features()
 		try:
 			print('\nCreating or updating features MOVE and STOPS...\n')
 			conditions = (self._data[target_label] > radius), (self._data[target_label] <= radius)
@@ -774,17 +774,17 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		fig = plt.figure(figsize=figsize)
 		if TID not in self._data:
 			self.generate_tid_based_on_id_datatime()
-		self._data = self._data[self._data[TID] == tid ]
-		plt.plot(self._data.iloc[0][LONGITUDE], self._data.iloc[0][LATITUDE], 'yo', markersize=20)             # start point
-		plt.plot(self._data.iloc[-1][LONGITUDE], self._data.iloc[-1][LATITUDE], 'yX', markersize=20)           # end point
+		df_ = self._data[self._data[TID] == tid ]
+		plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)             # start point
+		plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)           # end point
 		
 		if 'isNode'not in self:
-			plt.plot(self._data[LONGITUDE], self._data[LATITUDE])
-			plt.plot(self._data.loc[:, LONGITUDE], self._data.loc[:, LATITUDE], 'r.', markersize=8)  # points
+			plt.plot(df_[LONGITUDE], df_[LATITUDE])
+			plt.plot(df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], 'r.', markersize=8)  # points
 		else:
-			filter_ = self._data['isNode'] == 1
-			selfnodes = self._data.loc[filter_]
-			selfpoints = self._data.loc[~filter_]
+			filter_ = df_['isNode'] == 1
+			selfnodes = df_.loc[filter_]
+			selfpoints = df_.loc[~filter_]
 			plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], linewidth=3)
 			plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE])
 			plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], 'go', markersize=10)   # nodes
@@ -795,7 +795,7 @@ class PandasMoveDataFrame(pd.DataFrame,MoveDataFrameAbstractModel): # dask sua e
 		self._last_operation_dict['time'] = time.time() - start
 		self._last_operation_dict['name'] = 'plot_traj_id'
 		self._last_operation_dict['mem_usage'] = finish - init
-		return self._data, fig
+		return df_, fig
 
 	def show_trajectories_info(self):
 		"""
