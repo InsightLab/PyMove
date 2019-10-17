@@ -4,15 +4,7 @@ import pandas as pd
 import time
 from pymove.utils.traj_utils import progress_update
 from pymove.utils import constants
-
-# """main labels """
-# dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
-#
-# dic_features_label = {'tid' : 'tid', 'dist_to_prev' : 'dist_to_prev', "dist_to_next" : 'dist_to_next', 'dist_prev_to_next' : 'dist_prev_to_next',
-#                     'time_to_prev' : 'time_to_prev', 'time_to_next' : 'time_to_next', 'speed_to_prev': 'speed_to_prev', 'speed_to_next': 'speed_to_next',
-#                     'period': 'period', 'day': 'day', 'index_grid_lat': 'index_grid_lat', 'index_grid_lon' : 'index_grid_lon',
-#                     'situation':'situation'}
-                
+from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame
 
 def bbox_split(bbox, number_grids):
     """splits the bounding box in N grids of the same size.
@@ -46,7 +38,7 @@ def bbox_split(bbox, number_grids):
 
 
 def segment_trajectory_by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_dist_between_adj_points=3000, max_time_between_adj_points=7200,
-                      max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_part'):
+                      max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_part', inplace=True):
     """Segments the trajectories into clusters based on distance, time and speed.
 
     Parameters
@@ -76,6 +68,9 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_d
     -----
     Time, distance and speeed features must be updated after split.
     """
+
+    if inplace == False:
+        df_ = PandasMoveDataFrame(data = df_.to_DataFrame())
         
     print('\nSplit trajectories')
     print('...max_time_between_adj_points:', max_time_between_adj_points)
@@ -142,11 +137,13 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_d
             else:
                 print('...No trajs with only one point.', df_.shape)
 
+        if inplace == False:
+            return df_
     except Exception as e:
         raise e
 
 
-def segment_trajectory_by_speed(df_, label_id=constants.TRAJ_ID, max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_speed'):
+def segment_trajectory_by_speed(df_, label_id=constants.TRAJ_ID, max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_speed', inplace=True):
     """Segments the trajectories into clusters based on speed.
 
     Parameters
@@ -169,7 +166,10 @@ def segment_trajectory_by_speed(df_, label_id=constants.TRAJ_ID, max_speed_betwe
     Note
     -----
     Speed features must be updated after split.
-    """     
+    """
+    if inplace == False:
+        df_ = PandasMoveDataFrame(data = df_.to_DataFrame())
+
     print('\nSplit trajectories by max_speed_between_adj_points:', max_speed_between_adj_points) 
     try:
         if df_.index.name is None:
@@ -228,11 +228,13 @@ def segment_trajectory_by_speed(df_, label_id=constants.TRAJ_ID, max_speed_betwe
                 print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
             else:
                 print('...No trajs with only one point.', df_.shape)
+
+        if inplace == False:
+            return  df_
     except Exception as e:
         raise e
 
-
-def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between_adj_points=900.0, drop_single_points=True, label_new_tid='tid_time'):
+def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between_adj_points=900.0, drop_single_points=True, label_new_tid='tid_time', inplace=True):
     """Segments the trajectories into clusters based on time.
 
     Parameters
@@ -256,7 +258,10 @@ def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between
     -----
     Speed features must be updated after split.
     """     
-    print('\nSplit trajectories by max_time_between_adj_points:', max_time_between_adj_points) 
+    if inplace == False:
+        df_ = PandasMoveDataFrame(data = df_.to_DataFrame())
+
+    print('\nSplit trajectories by max_time_between_adj_points:', max_time_between_adj_points)
     try:
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
@@ -315,6 +320,9 @@ def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between
                 df_.generate_dist_time_speed_features()
             else:
                 print('...No trajs with only one point.', df_.shape)
+
+        if inplace == False:
+            return df_
     except Exception as e:
         raise e
 

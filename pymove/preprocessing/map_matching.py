@@ -1,14 +1,14 @@
-# TODO: Arina
-import numpy as np
-import pandas as pd
 import time
-from scipy.interpolate import interp1d
+import numpy as np
 
+from scipy.interpolate import interp1d
 from pymove import utils as ut
-from pymove import gridutils
+from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame
 
 """ Fuction to solve problems after Map-matching"""
-def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points=5000, max_time_between_adj_points=900, max_speed=30):
+def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points=5000, max_time_between_adj_points=900, max_speed=30, inplace = True):
+    if inplace == False:
+        df = PandasMoveDataFrame(data = df.to_DataFrame())
     try:
         if df.index.name is not None:
             print('reseting index...')
@@ -76,12 +76,17 @@ def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points
             
 
         df.reset_index(inplace=True)
+        if inplace == False:
+            return df
     
     except Exception as e:
         print('{}: {} - size: {}'.format(index_name, tid, size_id))
         raise e
         
-def fix_time_not_in_ascending_order_id(df, tid, index_name='tid'):
+def fix_time_not_in_ascending_order_id(df, tid, index_name='tid', inplace = True):
+    if inplace == False:
+        df = PandasMoveDataFrame(data = df.to_DataFrame())
+
     if 'deleted' not in df:
         df['deleted'] = False
         
@@ -111,9 +116,15 @@ def fix_time_not_in_ascending_order_id(df, tid, index_name='tid'):
 
             fix_time_not_in_ascending_order_id(df, tid, index_name=index_name)
     
-    return size_id        
-        
-def fix_time_not_in_ascending_order_all(df, index_name='tid', drop_marked_to_delete=False):
+    if inplace:
+        return size_id
+    else:
+        return  df, size_id
+
+def fix_time_not_in_ascending_order_all(df, index_name='tid', drop_marked_to_delete=False, inplace = True):
+    if inplace == False:
+        df = PandasMoveDataFrame(data = df.to_DataFrame())
+
     try:
         if df.index.name is not None:
             print('reseting index...')
@@ -150,17 +161,21 @@ def fix_time_not_in_ascending_order_all(df, index_name='tid', drop_marked_to_del
             df.drop(index=idxs, inplace=True )
             df.drop(labels='deleted', axis=1, inplace=True)
             print('shape after dropping: {}'.format(df.shape))
-    
+
+        if inplace == False:
+            return  df
     except Exception as e:
         print('{}: {} - size: {}'.format(index_name, tid, size_id))
         raise e
        
 def interpolate_add_deltatime_speed_features(df, label_id='tid', max_time_between_adj_points=900, 
-                                             max_dist_between_adj_points=5000, max_speed=30):
+                                             max_dist_between_adj_points=5000, max_speed=30, inplace = True):
     """
     interpolate distances (x) to find times (y).
     max_time_between_adj_points, max_dist_between_adj_points and max_speed are used only for verification.
     """
+    if inplace == False:
+        df = PandasMoveDataFrame(data = df.to_DataFrame())
     if df.index.name is not None:
         print('reseting index...')
         df.reset_index(inplace=True)
@@ -251,7 +266,7 @@ def interpolate_add_deltatime_speed_features(df, label_id='tid', max_time_betwee
             ut.change_df_feature_values_using_filter(df, tid, 'speed', filter_nodes, values)
 
             curr_perc_int, est_time_str = ut.progress_update(count, size, start_time, curr_perc_int, step_perc=20)
-            
+
     except Exception as e:
         print('{}: {} - size: {} - count: {}'.format(label_id, tid, size_id, count))
         raise e
@@ -266,3 +281,6 @@ def interpolate_add_deltatime_speed_features(df, label_id='tid', max_time_betwee
         print('shape before dropping: {}'.format(df.shape))
         df.drop(index=idxs_drop, inplace=True )
         print('shape after dropping: {}'.format(df.shape))
+
+    if inplace == False:
+        return df

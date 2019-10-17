@@ -1,17 +1,11 @@
-import math
 import time
-import dask
 import resource
 import numpy as np
 import pandas as pd
-from datetime import datetime
-from pymove.core import indexes
 import matplotlib.pyplot as plt
-from dask.dataframe import DataFrame
 from pymove.utils.transformations import haversine
 from pymove.utils.traj_utils import format_labels, shift, progress_update
 from pymove.core.grid import lat_meters
-from pymove.utils import transformations
 from pymove.core import MoveDataFrameAbstractModel
 from pymove.core.grid import create_virtual_grid
 from pymove.utils.constants import (
@@ -137,7 +131,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		return self._data.isin
 
 	def unique(self, values):
-		return self._data.unique(value)
+		return self._data.unique(values)
 
 	def __setitem__(self, attr, value):
 		self.__dict__['_data'][attr] = value
@@ -233,6 +227,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 		self._last_operation_dict['mem_usage'] = finish - init
 		return  _grid
 
+	def to_DataFrame(self):
+		return self._data
 	def get_bbox(self):
 		"""
 		A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
@@ -1222,7 +1218,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
 		return self._last_operation_dict
 
-	#TODO: Ver se os cálculos estão ok
 	def mem(self, format):
 		switcher = {
 			B: self._last_operation_dict["mem_usage"],
