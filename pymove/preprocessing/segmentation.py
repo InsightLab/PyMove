@@ -4,7 +4,26 @@ import pandas as pd
 import time
 from pymove.utils.traj_utils import progress_update
 from pymove.utils import constants
-
+from pymove.utils.constants import (
+	LATITUDE,
+	LONGITUDE,
+	DATETIME,
+	TRAJ_ID,
+	TID,
+	UID,
+	TIME_TO_PREV,
+	SPEED_TO_PREV,
+	DIST_TO_PREV,
+	DIST_PREV_TO_NEXT,
+	DIST_TO_NEXT,
+	DAY,
+	PERIOD,
+	TYPE_PANDAS,
+	TB,
+	GB,
+	MB,
+	KB,
+	B)
 # """main labels """
 # dic_labels = {"id" : 'id', 'lat' : 'lat', 'lon' : 'lon', 'datetime' : 'datetime'}
 #
@@ -83,6 +102,10 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_d
     print('...max_speed:', max_speed_between_adj_points)
     
     try:
+
+        if TIME_TO_PREV not in df_:
+            df_.generate_dist_time_speed_features()
+
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
@@ -172,6 +195,9 @@ def segment_trajectory_by_speed(df_, label_id=constants.TRAJ_ID, max_speed_betwe
     """     
     print('\nSplit trajectories by max_speed_between_adj_points:', max_speed_between_adj_points) 
     try:
+        if SPEED_TO_PREV not in df_:
+            df_.generate_dist_time_speed_features()
+
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
@@ -258,6 +284,10 @@ def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between
     """     
     print('\nSplit trajectories by max_time_between_adj_points:', max_time_between_adj_points) 
     try:
+
+        if TIME_TO_PREV not in df_:
+            df_.generate_dist_time_speed_features()
+
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
