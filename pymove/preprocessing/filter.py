@@ -1,5 +1,25 @@
 import numpy as np
 from pymove.utils import constants
+from pymove.utils.constants import (
+	LATITUDE,
+	LONGITUDE,
+	DATETIME,
+	TRAJ_ID,
+	TID,
+	UID,
+	TIME_TO_PREV,
+	SPEED_TO_PREV,
+	DIST_TO_PREV,
+	DIST_PREV_TO_NEXT,
+	DIST_TO_NEXT,
+	DAY,
+	PERIOD,
+	TYPE_PANDAS,
+	TB,
+	GB,
+	MB,
+	KB,
+	B)
 
 
 def filter_bbox(df_, bbox, filter_out=False, inplace=False):
@@ -176,6 +196,8 @@ def filter_by_tid(df_, tid_=None, label_tid=constants.TID, filter_out=False):
     df : dataframe
         Returns a dataframe with trajectories points filtered.
     """
+    if TID not in df_:
+        df_.generate_tid_based_on_id_datatime()
     return filter_by_label(df_, tid_, label_tid, filter_out)
 
 
@@ -204,18 +226,20 @@ def filter_jumps(df_, jump_coefficient=3.0, threshold=1, filter_out=False):
         df : dataframe
             Returns a dataframe with the trajectories outiliers.
         """
+    if DIST_TO_PREV not in df_:
+        df_.generate_dist_features()
 
     if df_.index.name is not None:
         print('...Reset index for filtering\n')
         df_.reset_index(inplace=True)
 
-    if constants.DIST_TO_PREV in df_ and constants.DIST_TO_NEXT and constants.DIST_PREV_TO_NEXT in df_:
-        filter_ = (df_[constants.DIST_TO_NEXT] > threshold) & (
-                    df_[constants.DIST_TO_PREV] > threshold) & (
-                              df_[constants.DIST_PREV_TO_NEXT] > threshold) & \
-                  (jump_coefficient * df_[constants.DIST_PREV_TO_NEXT] < df_[
+    if DIST_TO_PREV in df_ and DIST_TO_NEXT and DIST_PREV_TO_NEXT in df_:
+        filter_ = (df_[DIST_TO_NEXT] > threshold) & (
+                    df_[DIST_TO_PREV] > threshold) & (
+                              df_[DIST_PREV_TO_NEXT] > threshold) & \
+                  (jump_coefficient * df_[DIST_PREV_TO_NEXT] < df_[
                       constants.DIST_TO_NEXT]) & \
-                  (jump_coefficient * df_[constants.DIST_PREV_TO_NEXT] < df_[
+                  (jump_coefficient * df_[DIST_PREV_TO_NEXT] < df_[
                       constants.DIST_TO_PREV])
 
         if filter_out:
@@ -262,8 +286,8 @@ def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, r
 
     print('\nRemove rows duplicates by subset')
     if sort is True:
-        print('...Sorting by {} and {} to increase performance\n'.format(constants.TRAJ_ID, constants.DATETIME))
-        df_.sort_values([constants.TRAJ_ID, constants.DATETIME], inplace=True)
+        print('...Sorting by {} and {} to increase performance\n'.format(TRAJ_ID, DATETIME))
+        df_.sort_values([TRAJ_ID, DATETIME], inplace=True)
 
     idx = df_.duplicated(subset=subset)
     tam_drop = df_[idx].shape[0]
@@ -375,7 +399,8 @@ def clean_gps_jumps_by_distance(df_, label_id=constants.TRAJ_ID, jump_coefficien
         Specifies the number of colums that have been droped.
 
     """
-    df_.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
+    if DIST_TO_PREV not in df_:
+        df_.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
     try:
         print('\nCleaning gps jumps by distance to jump_coefficient {}...\n'.format(jump_coefficient))
         df_jumps = filter_jumps(df_, jump_coefficient, threshold)
@@ -418,7 +443,8 @@ def clean_gps_nearby_points_by_distances(df_, label_id=constants.TRAJ_ID, radius
     label_dtype :
 
     """
-    df_.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
+    if DIST_TO_PREV not in df_:
+        df_.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
 
     try:
         print('\nCleaning gps points from radius of {} meters\n'.format(radius_area))
@@ -465,7 +491,8 @@ def clean_gps_nearby_points_by_speed(df_, label_id=constants.TRAJ_ID, speed_radi
     label_dtype :
 
     """
-    df_.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
+    if SPEED_TO_PREV not in df_:
+        df_.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
     try:
         print('\nCleaning gps points using {} speed radius\n'.format(speed_radius))
         if df_.index.name is not None:
@@ -482,7 +509,7 @@ def clean_gps_nearby_points_by_speed(df_, label_id=constants.TRAJ_ID, speed_radi
                 shape_before = df_.shape[0]
                 df_.drop(index=idx, inplace=True)
                 print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
-                clean_gps_nearby_points_by_speed(df_ = df_, label_id = label_id, label_dtype = label_dtyp)
+                clean_gps_nearby_points_by_speed(df_ = df_, label_id = label_id, label_dtype = label_dtype)
         else:
             print('...{} is not in the dataframe'.format(constants.DIST_TO_PREV))
     except Exception as e:
@@ -517,8 +544,8 @@ def clean_gps_speed_max_radius(df_, label_id=constants.TRAJ_ID, speed_max=50.0, 
     label_dtype :
 
     """
-
-    df_.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
+    if SPEED_TO_PREV not in df_:
+        df_.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
 
     print('\nClean gps points with speed max > {} meters by seconds'.format(speed_max))
 
@@ -559,6 +586,9 @@ def clean_trajectories_with_few_points(df_, label_tid=constants.TID,
     label_dtype:
 
     """
+    if TID not in df_:
+        df_.generate_tid_based_on_id_datatime()
+
     if df_.index.name is not None:
         print('\n...Reset index for filtering\n')
         df_.reset_index(inplace=True)
@@ -615,7 +645,8 @@ def clean_trajectories_short_and_few_points_(df_, label_id=constants.TID, min_tr
     print('\nRemove short trajectories...')
     clean_trajectories_with_few_points(df_, label_id, min_points_per_trajectory, label_dtype)
 
-    df_.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
+    if DIST_TO_PREV not in df_:
+        df_.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
 
     if df_.index.name is not None:
         print('reseting index')
