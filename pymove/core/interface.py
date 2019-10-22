@@ -4,6 +4,41 @@ from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID
 from pymove.core.grid import lat_meters
 
 class MoveDataFrameAbstractModel(abc.ABC):
+	@property
+	def loc(self):
+		pass
+
+	@property
+	def iloc(self):
+		pass
+
+	@property
+	def at(self):
+		pass
+
+	@property
+	def values(self):
+		pass
+
+	@property
+	def columns(self):
+		pass
+
+	@property
+	def index(self):
+		pass
+
+	@property
+	def dtypes(self):
+		pass
+
+	@property
+	def shape(self):
+		pass
+
+	def unique(self, values):
+		pass
+
 	@abc.abstractmethod
 	def head(self):
 		pass
@@ -28,27 +63,17 @@ class MoveDataFrameAbstractModel(abc.ABC):
 	def len(self):
 	    pass
 	
-	#     #arina
-	#     @abc.abstractmethod
-	#     def __getattr__(self):
-	#         pass
-	
-	#     #arina
-	#     @abc.abstractmethod
-	#     def __setattr__(self):
-	#         pass
-	
-	# arina
 	@abc.abstractmethod
 	def to_dict(self):
 	    pass
 	
-	# arina
 	@abc.abstractmethod
 	def to_grid(self):
-	    pass
-	
-	#     # Primeiros 7 andreza, os outros 7 arina
+
+	@abc.abstractmethod
+	def to_DataFrame(self):
+		pass
+
 	@abc.abstractmethod
 	def generate_tid_based_on_id_datatime(self):
 	    pass
@@ -112,14 +137,7 @@ class MoveDataFrameAbstractModel(abc.ABC):
 	@abc.abstractmethod
 	def max(self):
 		pass
-	
-	# # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.unique.html#pandas.Index.unique
-	# # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.unique.html
-	# # example in transformations
-	# # @abc.abstractmethod
-	# # def unique(self, level=None):
-	# #     pass
-	#
+
 	@abc.abstractmethod
 	def count(self):
 	    pass
@@ -143,8 +161,7 @@ class MoveDataFrameAbstractModel(abc.ABC):
 	@abc.abstractmethod
 	def select_dtypes(self):
 	    pass
-	
-	#
+
 	@abc.abstractmethod
 	def sort_values(self):
 	    pass
@@ -216,11 +233,4 @@ class MoveDataFrameAbstractModel(abc.ABC):
 	@abc.abstractmethod
 	def mem(self, format):
 		pass
-#
-# # duvida columns
-#
-# # duvida loc iloc values
-#
-# # duvida shape, at, in, dtype
-#
-# index
+
