@@ -194,11 +194,7 @@ class MoveDataFrameAbstractModel(abc.ABC):
 	    pass
 
 	@abc.abstractmethod
-	def to_dask(self):
-		pass
-	
-	@abc.abstractmethod
-	def to_pandas(self):
+	def convert_to(self, new_type):
 		pass
 
 	@abc.abstractmethod

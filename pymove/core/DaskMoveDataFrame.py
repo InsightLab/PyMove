@@ -85,13 +85,13 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estr
 	def groupby(self, by=None, **kwargs):
 		return self._data.groupby(by)
 
-	def to_dask(self):
-		return self._data
-
-	def to_pandas(self):
-		df_pandas = self._data.compute()
-		from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
-		return pm(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
+	def convert_to(self, new_type):
+		if(new_type == "dask"):
+			return self._data
+		elif(new_type == "pandas"):
+			df_pandas = self._data.compute()
+			from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
+			return pm(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
 
 	def get_type(self):
 		return self._type
