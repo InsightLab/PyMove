@@ -1169,28 +1169,23 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
     #    line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
         # self._data.to_csv("teste3.csv")]
 
-
-    def to_dask(self):
+    def convert_to(self, new_type):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-
-        from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
-
-        _dask = dm(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, n_partitions=1)
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'to_dask'
-        self._last_operation_dict['mem_usage'] = finish - init
-        return _dask
-
-    def to_pandas(self):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'to_pandas'
-        self._last_operation_dict['mem_usage'] = finish - init
-        return self._data
+        self._last_operation_dict['name'] = 'convert_to'
+        if (new_type == "dask"):
+            from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
+            _dask = dm(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID,
+                       n_partitions=1)
+            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            self._last_operation_dict['time'] = time.time() - start
+            self._last_operation_dict['mem_usage'] = finish - init
+            return _dask
+        elif (new_type == "pandas"):
+            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            self._last_operation_dict['time'] = time.time() - start
+            self._last_operation_dict['mem_usage'] = finish - init
+            return self._data
 
     def get_type(self):
         start = time.time()
