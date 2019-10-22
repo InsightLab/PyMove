@@ -1,4 +1,6 @@
 import datetime
+from pandas._libs.tslibs.timestamps import Timestamp
+
 
 
 def date_to_str(date):
@@ -53,7 +55,7 @@ def str_to_datetime(dt_str):
         return datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
 
-def datetime_to_str(data):
+def to_str(data):
     """
     Converts a date in datetime's format to string's format.
 
@@ -78,7 +80,7 @@ def datetime_to_str(data):
     return datetime_str
 
 
-def datetime_to_min(datetime):
+def to_min(datetime):
     """
     Converts a datetime to an int representation in minutes.
     To do the reverse use: min_to_datetime.
@@ -134,23 +136,25 @@ def min_to_datetime(min):
     return min_datetime
 
 
-#TODO: vê o que são os parametros e tipo dos param
+#TODO: ve o que sao os parametros e tipo dos param
 def slot_of_day_to_time(slot_of_day1, time_window_duration=5):
     min1 = slot_of_day1 * time_window_duration
     return datetime.time(min1 // 60, min1 % 60)
+
 
 #TODO: vê o que são os parametros e tipo dos param
 def slot_of_day(dt1, time_window_duration=5):
     return (dt1.hour * 60 + dt1.minute) // time_window_duration
 
+
 #TODO: vê o que são os parametros e tipo dos param
-def datetime_slot(dt1, time_window_duration=5):
+def slot(dt1, time_window_duration=5):
     minute = (dt1.minute // time_window_duration) * time_window_duration
     return datetime.datetime(dt1.year, dt1.month, dt1.day, dt1.hour, minute)
 
 
 # TODO: Finalizar
-def datetime_str_to_min_slot(dt_str, time_window_duration=5):
+def str_to_min_slot(dt_str, time_window_duration=5):
     """
     Converts a datetime string to an int minute time slot (approximated to the time slot).
     Same as datetime_str_to_min_slot, but another implementation.
@@ -181,7 +185,7 @@ def datetime_str_to_min_slot(dt_str, time_window_duration=5):
     return dt_slot
 
 
-def date_to_day_of_week_int(date):
+def to_day_of_week_int(date):
     """
     Get day of week of a date.
     Monday == 0...Sunday == 6
@@ -264,3 +268,176 @@ def now_str():
     """
     date_time = datetime_to_str(datetime.datetime.now())
     return date_time
+
+
+def deltatime_str(deltatime_seconds):
+    """
+    Convert time in a format appropriate of time.
+
+    Parameters
+    ----------
+    deltatime_seconds : float
+        Represents the dataset with contains lat, long and datetime.
+
+    Returns
+    -------
+    time_str : String
+        Represents time in a format hh:mm:ss:---.
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import deltatime_str
+    >>> deltatime_str(1082.7180936336517)
+    '00:18:02.718'
+
+    Notes
+    -----
+    Output example if more than 24 hours: 25:33:57.123
+    https://stackoverflow.com/questions/3620943/measuring-elapsed-time-with-the-time-module
+
+    """
+    time_int = int(deltatime_seconds)
+    time_dec = int((deltatime_seconds - time_int) * 1000)
+    time_str = '{:02d}:{:02d}:{:02d}.{:03d}'.format(time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec)
+    return time_str
+
+
+def timestamp_to_millis(timestamp):
+    """
+    Converts a local datetime to a POSIX timestamp in milliseconds (like in Java).
+
+    Parameters
+    ----------
+    timestamp : String
+        Represents a data.
+
+    Returns
+    -------
+    millis : int
+        Represents millisecond results.
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import timestamp_to_millis
+    >>> timestamp_to_millis('2015-12-12 08:00:00.123000')
+    1449907200123 (UTC)
+
+    """
+    millis = Timestamp(timestamp).value // 1000000
+    return millis
+
+
+def millis_to_timestamp(milliseconds):
+    """
+    Converts milliseconds to timestamp.
+
+    Parameters
+    ----------
+    milliseconds : int
+        Represents millisecond.
+
+    Returns
+    -------
+    timestamp : pandas._libs.tslibs.timestamps.Timestamp
+        Represents the date corresponding.
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import millis_to_timestamp
+    >>> millis_to_timestamp(1449907200123)
+    '2015-12-12 08:00:00.123000'
+
+    """
+    timestamp = Timestamp(milliseconds, unit='ms')
+    return timestamp
+
+
+def time_to_str(time):
+    """
+    Get time, in string's format, from timestamp.
+
+    Parameters
+    ----------
+    time : pandas._libs.tslibs.timestamps.Timestamp
+        Represents a time.
+
+    Returns
+    -------
+    timestr : String
+        Represents the time in string's format.
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import time_to_str
+    >>> time_to_str('2015-12-12 08:00:00.123000')
+    '08:00:00'
+
+    """
+    timestr = time.strftime('%H:%M:%S')
+    return timestr
+
+
+def str_to_time(dt_str):
+    """
+    Converts a time in string's format '%H:%M:%S' to datetime's format.
+
+    Parameters
+    ----------
+    dt_str : String
+        Represents a time in string's format.
+
+    Returns
+    -------
+    datetime_time : datetime.datetime
+        Represents a time in datetime's format.
+
+    Examples
+    --------
+    >>> from pymove.utils.utils import str_to_time
+    >>> str_to_time('08:00:00')
+    datetime.datetime(1900, 1, 1, 8, 0)
+
+    """
+
+    datetime_time = datetime.datetime.strptime(dt_str, '%H:%M:%S')
+    return datetime_time
+
+
+def elapsed_time_dt(start_time):
+    """Computes the elapsed time from a specific start time to the moment the function is called.
+
+    Parameters
+    ----------
+    start_time : Datetime
+        Specifies the start time of the time range to be computed.
+
+    Returns
+    -------
+        time_dif : Integer
+            Represents the time elapsed from the start time to the current time (when the function was called).
+
+    """
+    time_dif = diff_time(start_time, datetime.datetime.now())
+    return time_dif
+
+
+def diff_time(start_time, end_time):
+    """Computes the elapsed time from the start time to the end time specifed by the user.
+
+    Parameters
+    ----------
+    start_time : Datetime
+        Specifies the start time of the time range to be computed.
+
+    end_time : Datetime
+        Specifies the start time of the time range to be computed.
+
+    Returns
+    -------
+        time_dif : Integer
+            Represents the time elapsed from the start time to the current time (when the function was called).
+
+    """
+
+    time_dif = int((end_time - start_time).total_seconds() * 1000)
+    return time_dif
