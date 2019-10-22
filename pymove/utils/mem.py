@@ -17,7 +17,8 @@ import numpy as np
 import json
 import resource
 
-def get_proc_info():
+#tirei o get
+def proc_info():
 	"""This functions retrieves informations about each jupyter notebook running in the machine. 
 	
 	Returns
@@ -78,7 +79,8 @@ def get_proc_info():
 	df_mem.columns = ['user', 'pid', 'memory_GB', 'kernel_ID']
 	return df_mem
 
-def get_session_info(sessions_str):
+#tirei o get
+def session_info(sessions_str):
 	sessions = json.loads(sessions_str)
 	df_nb = []
 	kernels = []
@@ -218,8 +220,7 @@ def total_size(o, handlers={}, verbose=False):
 
 	return sizeof(o)
 
-def test():
-	print('test')
+
 
 ##### Example call #####
 
