@@ -229,6 +229,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
     def to_DataFrame(self):
         return self._data
+
     def get_bbox(self):
         """
         A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
