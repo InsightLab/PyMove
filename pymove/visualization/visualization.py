@@ -1,7 +1,7 @@
 import folium
 import numpy as np
 import matplotlib.pyplot as plt
-from folium.plugins import HeatMap, HeatMapWithTime
+from folium.plugins import HeatMap, HeatMapWithTime, MarkerCluster, FastMarkerCluster
 from pymove.utils.constants import LATITUDE, LONGITUDE, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, COUNT
 
 def rgb(rgb_colors):
@@ -271,16 +271,20 @@ def generateBaseMap(default_location, default_zoom_start=12):
     base_map = folium.Map(location=default_location, control_scale=True, zoom_start=default_zoom_start)
     return base_map
 
-def heatmap(df_, n_rows, lat_origin=None, lon_origin=None, zoom_start=12, radius = 8, max_zoom = 13, base_map=None, save_as_html=False, filename='heatmap.html'):
+def heatmap(df_, n_rows = None, lat_origin=None, lon_origin=None, zoom_start=12, radius = 8, max_zoom = 13, base_map=None, save_as_html=False, filename='heatmap.html'):
     if base_map is None:
         if lat_origin is None and lon_origin is None:
             lat_origin = df_.loc[0][LATITUDE]
             lon_origin = df_.loc[0][LONGITUDE]
         base_map = generateBaseMap(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
 
+    if n_rows is None:
+        n_rows = df_.shape[0]
+
     df_[COUNT] = 1
     HeatMap(data=df_.loc[:n_rows, [LATITUDE, LONGITUDE, COUNT]].groupby([LATITUDE, LONGITUDE]).sum().reset_index().values.tolist(),
         radius=radius, max_zoom=max_zoom).add_to(base_map)
+    # base_map.add_child(folium.ClickForMarker(popup='Potential Location')) # habilita marcações no mapa
     df_.drop(columns=[COUNT], inplace=True)
     if save_as_html:
         base_map.save(outfile=filename)
@@ -288,7 +292,7 @@ def heatmap(df_, n_rows, lat_origin=None, lon_origin=None, zoom_start=12, radius
         return base_map
 
 
-def heatmap_with_time(df_, n_rows, lat_origin=None, lon_origin=None, zoom_start=12, radius = 5, min_opacity = 0.5, max_opacity = 0.8, base_map=None, save_as_html=False,
+def heatmap_with_time(df_, n_rows = None, lat_origin=None, lon_origin=None, zoom_start=12, radius = 5, min_opacity = 0.5, max_opacity = 0.8, base_map=None, save_as_html=False,
                       filename='heatmap_with_time.html'):
     if base_map is None:
         if lat_origin is None and lon_origin is None:
@@ -296,7 +300,10 @@ def heatmap_with_time(df_, n_rows, lat_origin=None, lon_origin=None, zoom_start=
             lon_origin = df_.loc[0][LONGITUDE]
         base_map = generateBaseMap(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
 
-    df_[HOUR] = df_.datetime.apply(lambda x: x.hour)
+    if n_rows is None:
+        n_rows = df_.shape[0]
+
+    df_[HOUR] = df_.datetime.dt.hour
     df_[COUNT] = 1
     df_hour_list = []
     for hour in df_.hour.sort_values().unique():
@@ -312,4 +319,67 @@ def heatmap_with_time(df_, n_rows, lat_origin=None, lon_origin=None, zoom_start=
     else:
         return base_map
 
-# def clustered(df):
+def cluster(df_, n_rows = None, lat_origin=None, lon_origin=None, zoom_start=12,  base_map=None, save_as_html=False, filename='cluster.html'):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = df_.loc[0][LATITUDE]
+            lon_origin = df_.loc[0][LONGITUDE]
+        base_map = generateBaseMap(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = df_.shape[0]
+
+    mc = MarkerCluster()
+    for row in df_[:n_rows].iterrows():
+        pop = "<b>Latitude:</b> " + str(row[1].lat) + "\n<b>Longitude:</b> " + str(row[1].lon) + "\n<b>Datetime:</b> " + str(row[1].datetime)
+        mc.add_child(folium.Marker(location=[row[1].lat, row[1].lon], popup=pop))
+    base_map.add_child(mc)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+def faster_cluster(df_, n_rows = None, lat_origin=None, lon_origin=None, zoom_start=12,  base_map=None, save_as_html=False, filename='faster_cluster.html'):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = df_.loc[0][LATITUDE]
+            lon_origin = df_.loc[0][LONGITUDE]
+        base_map = generateBaseMap(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = df_.shape[0]
+
+    callback = """\
+    function (row) {
+        var marker;
+        marker = L.circle(new L.LatLng(row[0], row[1]), {color:'red'});
+        return marker;
+    };
+    """
+    FastMarkerCluster(df_.loc[:n_rows, [LATITUDE, LONGITUDE]].values.tolist(), callback=callback).add_to(base_map)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+def plot_trejectory_with_folium(df_, n_rows = None, lat_origin=None, lon_origin=None, zoom_start=12,  base_map=None, save_as_html=False, filename='plot_trejectory_with_folium.html'):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = df_.loc[0][LATITUDE]
+            lon_origin = df_.loc[0][LONGITUDE]
+        base_map = generateBaseMap(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = df_.shape[0]
+
+    for each in df_[:n_rows].iterrows():
+        pop = "<b>Latitude:</b> " + str(each[1].lat) + "\n<b>Longitude:</b> " + str(
+            each[1].lon) + "\n<b>Datetime:</b> " + str(each[1].datetime)
+        folium.Marker(location=[each[1]['lat'], each[1]['lon']], clustered_marker=True, popup=pop).add_to(base_map)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
