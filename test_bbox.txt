@@ -7,11 +7,11 @@
             L_DISABLE_3D = false;
         </script>
     
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.4.0/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.4.0/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"/>
@@ -23,7 +23,7 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_1d92f206d8ed46cd84f3ea423ec7913f {
+                #map_15beb619ded04ee38d3ce2ebf9fa34cb {
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -35,13 +35,13 @@
 </head>
 <body>    
     
-            <div class="folium-map" id="map_1d92f206d8ed46cd84f3ea423ec7913f" ></div>
+            <div class="folium-map" id="map_15beb619ded04ee38d3ce2ebf9fa34cb" ></div>
         
 </body>
 <script>    
     
-            var map_1d92f206d8ed46cd84f3ea423ec7913f = L.map(
-                "map_1d92f206d8ed46cd84f3ea423ec7913f",
+            var map_15beb619ded04ee38d3ce2ebf9fa34cb = L.map(
+                "map_15beb619ded04ee38d3ce2ebf9fa34cb",
                 {
                     center: [0, 0],
                     crs: L.CRS.EPSG3857,
@@ -55,21 +55,21 @@
 
         
     
-            var tile_layer_d0f859e6e3a24d2999077045c9f97e9e = L.tileLayer(
+            var tile_layer_54e6e8d97f114c1083fcda7f61820696 = L.tileLayer(
                 "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {"attribution": "Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
-            ).addTo(map_1d92f206d8ed46cd84f3ea423ec7913f);
+            ).addTo(map_15beb619ded04ee38d3ce2ebf9fa34cb);
         
     
-            map_1d92f206d8ed46cd84f3ea423ec7913f.fitBounds(
+            map_15beb619ded04ee38d3ce2ebf9fa34cb.fitBounds(
                 [[22.147577, 113.54884299999999], [41.132062, 121.156224]],
                 {}
             );
         
     
-            var poly_line_ad4dae55c71d441089068eef11f2e05c = L.polyline(
+            var poly_line_d62f0ed61306410dac120cec65a215ae = L.polyline(
                 [[22.147577, 113.54884299999999], [22.147577, 121.156224], [41.132062, 121.156224], [41.132062, 113.54884299999999], [22.147577, 113.54884299999999]],
                 {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "red", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 3}
-            ).addTo(map_1d92f206d8ed46cd84f3ea423ec7913f);
+            ).addTo(map_15beb619ded04ee38d3ce2ebf9fa34cb);
         
 </script>
