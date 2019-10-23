@@ -2,7 +2,6 @@ import datetime
 from pandas._libs.tslibs.timestamps import Timestamp
 
 
-
 def date_to_str(date):
     """
     Get date, in string's format, from timestamp.
@@ -239,7 +238,7 @@ def working_day(dt, holidays):
     if dt in holidays:
         result = False
     else:
-        dow = date_to_day_of_week_int(dt)
+        dow = to_day_of_week_int(dt)
         # 5 == saturday, 6 == sunday
         if dow == 5 or dow == 6:
             result = False
@@ -266,7 +265,7 @@ def now_str():
     '2019-09-02 13:54:16'
 
     """
-    date_time = datetime_to_str(datetime.datetime.now())
+    date_time = to_str(datetime.datetime.now())
     return date_time
 
 

@@ -7,21 +7,19 @@ import numpy as np
 import pandas as pd
 from IPython.display import display
 from ipywidgets import IntProgress, HTML, VBox
-from pymove.utils.time_utils import deltatime_str
+from pymove.utils.datetime import deltatime_str
 from typing import Union
 import pathlib
 from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, SPEED_TO_PREV, TIME_TO_PREV, DIST_TO_PREV
 
 def read_csv(filename, sep=',', encoding="utf-8", latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, type="pandas", n_partitions=1):
     df = pd.read_csv(filename, sep=sep, encoding=encoding, parse_dates=['datetime'])
-    from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
-    from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
+    from pymove.core.dataframe import PandasMoveDataFrame as pm
+    from pymove.core.dataframe import DaskMoveDataFrame as dm
     if type == 'pandas':
         return pm(df, latitude, longitude, datetime, traj_id)
     if type == 'dask':
         return dm(df, latitude, longitude, datetime, traj_id, n_partitions)
-
-
 
 def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     """ 
@@ -88,7 +86,6 @@ def log_progress(sequence, every=None, size=None, name='Items'):
             index=str(index or '?')
         )
 
-
 def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
     """
     update and print current progress.
@@ -107,7 +104,6 @@ def progress_update(size_processed, size_all, start_time, curr_perc_int, step_pe
         return curr_perc_int_new, deltatime_str # aqui era pra ser deltatime_str_ não?
     else:
         return curr_perc_int_new, None
-
 
 def shift(arr, num, fill_value=np.nan):
     """Shifts the elements of the given array by the number of periods specified.
@@ -150,7 +146,6 @@ def shift(arr, num, fill_value=np.nan):
         result = arr
     return result
 
-
 # erro se tentar converter int para str e funcao n verifica isso
 def fill_list_with_new_values(original_list, new_list_values):
     """ Copies elements from one list to another. The elements will be positioned in the same position in the new list as
@@ -173,7 +168,6 @@ def fill_list_with_new_values(original_list, new_list_values):
             original_list[i] = float(new_list_values[i])
         else:
             original_list[i] = new_list_values[i]
-
 
 def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     """
