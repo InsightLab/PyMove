@@ -1,12 +1,8 @@
-# TODO: Andreza
 import folium
-import colorsys
 import numpy as np
-# import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
-from pymove.utils.transformations import create_update_date_features, create_update_hour_features, create_update_day_of_the_week_features, create_update_time_of_day_features
-from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY
+from folium.plugins import HeatMap, HeatMapWithTime
+from pymove.utils.constants import LATITUDE, LONGITUDE, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, COUNT
 
 def rgb(rgb_colors):
     """
@@ -197,16 +193,16 @@ def invert_map(map_):
 
 def show_object_id_by_date(df_, create_features=True, figsize=(21,9), save_fig=True, name='shot_points_by_date.png', low_memory=True):
     fig, ax = plt.subplots(2,2,figsize=figsize)
-    create_update_date_features(df_)
+    df_.generate_date_features()
     df_.loc[:,[DATE, TRAJ_ID]].groupby([TRAJ_ID, DATE]).count().reset_index().groupby(DATE).count().plot(subplots=True, kind = 'line', grid=True, ax=ax[1][0], rot=45, fontsize=12)
-    create_update_hour_features(df_)
+    df_.generate_hour_features(df_)
     df_.loc[:,[HOUR, TRAJ_ID]].groupby([HOUR, TRAJ_ID]).count().reset_index().groupby(HOUR).count().plot(subplots=True, kind = 'line', grid=True, ax=ax[1][1], fontsize=12)
     del df_[DATE]    
     del df_[HOUR]
-    create_update_day_of_the_week_features(df_)
+    df_.generate_day_of_the_week_features()
     df_.loc[:,[PERIOD, TRAJ_ID]].groupby([PERIOD, TRAJ_ID]).count().reset_index().groupby(PERIOD).count().plot(subplots=True, kind = 'bar', rot=0, ax=ax[0][0], fontsize=12)
     del df_[PERIOD]
-    create_update_time_of_day_features(df_)  
+    df_.generate_time_of_day_features(df_)
     df_.loc[:,[DAY, TRAJ_ID]].groupby([DAY, TRAJ_ID]).count().reset_index().groupby(DAY).count().plot(subplots=True,  kind = 'bar', ax=ax[0][1], rot=0, fontsize=12)
     del df_[DAY]
 
@@ -270,3 +266,50 @@ def show_traj_id(df, tid, label_tid=TID,  figsize=(10,10)):
         plt.plot(df_nodes[LONGITUDE], df_nodes[LATITUDE], 'go', markersize=10)   # nodes
         plt.plot(df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=8)  # points  
     return df_, fig
+
+def generateBaseMap(default_location, default_zoom_start=12):
+    base_map = folium.Map(location=default_location, control_scale=True, zoom_start=default_zoom_start)
+    return base_map
+
+def heatmap(df_, n_rows, lat_origin=None, lon_origin=None, zoom_start=12, radius = 8, max_zoom = 13, base_map=None, save_as_html=False, filename='heatmap.html'):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = df_.loc[0][LATITUDE]
+            lon_origin = df_.loc[0][LONGITUDE]
+        base_map = generateBaseMap(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    df_[COUNT] = 1
+    HeatMap(data=df_.loc[:n_rows, [LATITUDE, LONGITUDE, COUNT]].groupby([LATITUDE, LONGITUDE]).sum().reset_index().values.tolist(),
+        radius=radius, max_zoom=max_zoom).add_to(base_map)
+    df_.drop(columns=[COUNT], inplace=True)
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+
+def heatmap_with_time(df_, n_rows, lat_origin=None, lon_origin=None, zoom_start=12, radius = 5, min_opacity = 0.5, max_opacity = 0.8, base_map=None, save_as_html=False,
+                      filename='heatmap_with_time.html'):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = df_.loc[0][LATITUDE]
+            lon_origin = df_.loc[0][LONGITUDE]
+        base_map = generateBaseMap(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    df_[HOUR] = df_.datetime.apply(lambda x: x.hour)
+    df_[COUNT] = 1
+    df_hour_list = []
+    for hour in df_.hour.sort_values().unique():
+        df_hour_list.append(df_.loc[df_.hour == hour, [LATITUDE, LONGITUDE, COUNT]].groupby(
+            [LATITUDE, LONGITUDE]).sum().reset_index().values.tolist())
+
+    HeatMapWithTime(df_hour_list[:n_rows], radius=radius, gradient={0.2: 'blue', 0.4: 'lime', 0.6: 'orange', 1: 'red'},
+                    min_opacity=min_opacity, max_opacity=max_opacity, use_local_extrema=True).add_to(base_map)
+
+    df_.drop(columns=[COUNT, HOUR], inplace=True)
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+# def clustered(df):
