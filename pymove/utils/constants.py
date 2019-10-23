@@ -29,6 +29,7 @@ GB = "GB"
 MB = "MG"
 KB = "KB"
 B = "bytes"
+COUNT = 'count'
 
 
 
