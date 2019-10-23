@@ -1,6 +1,7 @@
 #TODO complementar oq ela faz
 #TODO trocar nome da func
-from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame
+from pymove.core.dataframe import PandasMoveDataFrame
+
 
 def feature_values_using_filter(df, id_, feature_name, filter_, values, inplace = True):
     """
@@ -18,17 +19,17 @@ def feature_values_using_filter(df, id_, feature_name, filter_, values, inplace 
         ?
 
     feature_name : String
-        ?. 
+        ?.
 
     filter_ : ?
-        ?. 
+        ?.
 
     values : ?
         ?.
 
     Returns
     -------
-    
+
 
     Examples
     --------
@@ -61,15 +62,15 @@ def feature_values_using_filter_and_indexes(df, id_, feature_name, filter_, idxs
     ----------
     df_ : pandas.core.frame.DataFrame
         Represents the dataset with contains lat, long and datetime.
-    
+
     id_ : String
         ?
 
     feature_name : String
-        ?. 
+        ?.
 
     filter_ : ?
-        ?. 
+        ?.
 
     idxs: ?
         ?.
@@ -77,10 +78,10 @@ def feature_values_using_filter_and_indexes(df, id_, feature_name, filter_, idxs
     values : ?
         ?.
 
-   
+
     Returns
     -------
-    
+
 
     Examples
     --------

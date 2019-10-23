@@ -2,9 +2,9 @@
 import numpy as np
 import pandas as pd
 import time
-from pymove.utils.traj_utils import progress_update
+from pymove.utils.trajectories import progress_update
 from pymove.utils import constants
-from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame
+from pymove.core.dataframe import PandasMoveDataFrame
 from pymove.utils.constants import TIME_TO_PREV, SPEED_TO_PREV
 
 

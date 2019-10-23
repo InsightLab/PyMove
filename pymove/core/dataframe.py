@@ -1,6 +1,6 @@
 import time
 import dask
-import resource
+# import resource
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -31,7 +31,6 @@ from pymove.utils.constants import (
     MB,
     KB,
     B)
-
 
 
 class MoveDataFrame():
@@ -1187,8 +1186,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_dict['name'] = 'convert_to'
         if (new_type == "dask"):
-            from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
-            _dask = dm(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID,
+            _dask = DaskMoveDataFrame(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID,
                        n_partitions=1)
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_dict['time'] = time.time() - start
@@ -1237,7 +1235,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         }
 
         return switcher[format]
-
 
 class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estrutura de dados
     def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID,
@@ -1309,8 +1306,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estr
             return self._data
         elif (new_type == "pandas"):
             df_pandas = self._data.compute()
-            from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
-            return pm(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
+            return PandasMoveDataFrame(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
 
     def get_type(self):
         return self._type
@@ -1427,6 +1423,15 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estr
         return 0
 
     def to_csv(self):
+        return 0
+
+    def at(self):
+        return 0
+
+    def to_DataFrame(self):
+        return 0
+
+    def unique(self, values):
         return 0
 
     def last_operation_time(self):
