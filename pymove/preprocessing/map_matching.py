@@ -1,9 +1,8 @@
 import time
 import numpy as np
-from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame
-from pymove.utils.traj_utils import progress_update
-from pymove.utils.traj_utils import shift
-from pymove.utils.transformations import change_df_feature_values_using_filter_and_indexes, change_df_feature_values_using_filter
+from pymove.core.dataframe import PandasMoveDataFrame
+from pymove.utils.trajectories import shift,progress_update
+from pymove.utils.transformations import feature_values_using_filter_and_indexes, feature_values_using_filter
 from pymove.utils.constants import TID
 
 """ Fuction to solve problems after Map-matching"""
@@ -118,7 +117,7 @@ def fix_time_not_in_ascending_order_id(df, tid, index_name='tid', inplace = True
         if idx_not_in_ascending_order.shape[0] > 0:
             #print(tid, 'idx_not_in_ascending_order:', idx_not_in_ascending_order, 'times.shape', times.shape)
 
-            change_df_feature_values_using_filter_and_indexes(df, tid, 'deleted', filter_, idx_not_in_ascending_order, True)
+            df_feature_values_using_filter_and_indexes(df, tid, 'deleted', filter_, idx_not_in_ascending_order, True)
             # equivalent of: df.at[tid, 'deleted'][filter_][idx_not_in_ascending_order] = True
 
             fix_time_not_in_ascending_order_id(df, tid, index_name=index_name)
@@ -270,15 +269,15 @@ def interpolate_add_deltatime_speed_features(df, label_id='tid', max_time_betwee
 
             # update time features for nodes. initially they are empty.
             values = intp_result.astype(np.int64)
-            change_df_feature_values_using_filter(df, tid, 'time', filter_nodes, values)
+            feature_values_using_filter(df, tid, 'time', filter_nodes, values)
 
             # create delta_time feature
             values = (shift(df.at[tid, 'time'][filter_nodes].astype(np.float64), -1) - df.at[tid, 'time'][filter_nodes]) / 1000
-            change_df_feature_values_using_filter(df, tid, 'delta_time', filter_nodes, values)
+            feature_values_using_filter(df, tid, 'delta_time', filter_nodes, values)
 
             # create speed feature
             values = df.at[tid, 'edgeDistance'][filter_nodes] / df.at[tid, 'delta_time'][filter_nodes]
-            change_df_feature_values_using_filter(df, tid, 'speed', filter_nodes, values)
+            feature_values_using_filter(df, tid, 'speed', filter_nodes, values)
 
             curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
 

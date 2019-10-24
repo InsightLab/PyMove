@@ -2,9 +2,9 @@
 import numpy as np
 import pandas as pd
 import time
-from pymove.utils.traj_utils import progress_update
+from pymove.utils.trajectories import progress_update
 from pymove.utils import constants
-from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame
+from pymove.core.dataframe import PandasMoveDataFrame
 from pymove.utils.constants import TIME_TO_PREV, SPEED_TO_PREV
 
 
@@ -39,7 +39,7 @@ def bbox_split(bbox, number_grids):
     return df
 
 
-def segment_trajectory_by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_dist_between_adj_points=3000, max_time_between_adj_points=7200,
+def by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_dist_between_adj_points=3000, max_time_between_adj_points=7200,
                       max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_part', inplace=True):
     """Segments the trajectories into clusters based on distance, time and speed.
 
@@ -149,7 +149,7 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=constants.TRAJ_ID, max_d
         raise e
 
 
-def segment_trajectory_by_speed(df_, label_id=constants.TRAJ_ID, max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_speed', inplace=True):
+def by_speed(df_, label_id=constants.TRAJ_ID, max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_speed', inplace=True):
     """Segments the trajectories into clusters based on speed.
 
     Parameters
@@ -243,7 +243,7 @@ def segment_trajectory_by_speed(df_, label_id=constants.TRAJ_ID, max_speed_betwe
     except Exception as e:
         raise e
 
-def segment_trajectory_by_time(df_, label_id=constants.TRAJ_ID, max_time_between_adj_points=900.0, drop_single_points=True, label_new_tid='tid_time', inplace=True):
+def by_time(df_, label_id=constants.TRAJ_ID, max_time_between_adj_points=900.0, drop_single_points=True, label_new_tid='tid_time', inplace=True):
     """Segments the trajectories into clusters based on time.
 
     Parameters
