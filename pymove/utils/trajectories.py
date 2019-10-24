@@ -7,21 +7,19 @@ import numpy as np
 import pandas as pd
 from IPython.display import display
 from ipywidgets import IntProgress, HTML, VBox
-from pymove.utils.time_utils import deltatime_str
+from pymove.utils.datetime import deltatime_str
 from typing import Union
 import pathlib
 from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, SPEED_TO_PREV, TIME_TO_PREV, DIST_TO_PREV
 
 def read_csv(filename, sep=',', encoding="utf-8", latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, type="pandas", n_partitions=1):
     df = pd.read_csv(filename, sep=sep, encoding=encoding, parse_dates=['datetime'])
-    from pymove.core.PandasMoveDataFrame import PandasMoveDataFrame as pm
-    from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
+    from pymove.core.dataframe import PandasMoveDataFrame as pm
+    from pymove.core.dataframe import DaskMoveDataFrame as dm
     if type == 'pandas':
         return pm(df, latitude, longitude, datetime, traj_id)
     if type == 'dask':
         return dm(df, latitude, longitude, datetime, traj_id, n_partitions)
-
-
 
 def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     """ 
@@ -88,7 +86,6 @@ def log_progress(sequence, every=None, size=None, name='Items'):
             index=str(index or '?')
         )
 
-
 def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
     """
     update and print current progress.
@@ -107,7 +104,6 @@ def progress_update(size_processed, size_all, start_time, curr_perc_int, step_pe
         return curr_perc_int_new, deltatime_str # aqui era pra ser deltatime_str_ não?
     else:
         return curr_perc_int_new, None
-
 
 def shift(arr, num, fill_value=np.nan):
     """Shifts the elements of the given array by the number of periods specified.
@@ -150,7 +146,6 @@ def shift(arr, num, fill_value=np.nan):
         result = arr
     return result
 
-
 # erro se tentar converter int para str e funcao n verifica isso
 def fill_list_with_new_values(original_list, new_list_values):
     """ Copies elements from one list to another. The elements will be positioned in the same position in the new list as
@@ -173,7 +168,6 @@ def fill_list_with_new_values(original_list, new_list_values):
             original_list[i] = float(new_list_values[i])
         else:
             original_list[i] = new_list_values[i]
-
 
 def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     """
@@ -243,46 +237,3 @@ def get_bbox(df_):
     except Exception as e:
         raise e
 
-def show_trajectories_info(df_):
-    """
-    Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box. 
-    Parameters
-    ----------
-    df_ : pandas.core.frame.DataFrame
-        Represents the dataset with contains lat, long and datetime.
-    
-    Returns
-    -------
-   
-    Examples
-    --------
-    >>> from pymove.utils.utils import show_trajectories_info
-    >>> show_trajectories_info(df_)
-    ======================= INFORMATION ABOUT DATASET =======================
-    Number of Points: 217654
-    Number of IDs objects: 2
-    Start Date:2008-10-23 05:53:05     End Date:2009-03-19 05:46:37
-    Bounding Box:(22.147577, 113.54884299999999, 41.132062, 121.156224)
-    =========================================================================
-    """
-    try:
-        print('\n======================= INFORMATION ABOUT DATASET =======================\n')
-        print('Number of Points: {}\n'.format(df_.shape[0]))
-        if TRAJ_ID in df_:
-            print('Number of IDs objects: {}\n'.format(df_[TRAJ_ID].nunique()))
-        if TID in df_:
-            print('Number of TIDs trajectory: {}\n'.format(df_[TID].nunique()))
-        if DATETIME in df_:
-            print('Start Date:{}     End Date:{}\n'.format(df_[DATETIME].min(), df_[DATETIME].max()))
-        if LATITUDE and LONGITUDE in df_:
-            print('Bounding Box:{}\n'.format(get_bbox(df_))) # bbox return =  Lat_min , Long_min, Lat_max, Long_max) 
-        if TIME_TO_PREV in df_:            
-            print('Gap time MAX:{}     Gap time MIN:{}\n'.format(round(df_[TIME_TO_PREV].max(),3), round(df_[TIME_TO_PREV].min(), 3)))
-        if SPEED_TO_PREV in df_:            
-            print('Speed MAX:{}    Speed MIN:{}\n'.format(round(df_[SPEED_TO_PREV].max(), 3), round(df_[SPEED_TO_PREV].min(), 3))) 
-        if DIST_TO_PREV in df_:            
-            print('Distance MAX:{}    Distance MIN:{}\n'.format(round(df_[DIST_TO_PREV].max(),3), round(df_[DIST_TO_PREV].min(), 3))) 
-            
-        print('\n=========================================================================\n')
-    except Exception as e:
-        raise e    

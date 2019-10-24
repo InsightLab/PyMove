@@ -163,8 +163,10 @@ def y2LatSpherical(y):
 
 
 """ transform speed """
-def transform_speed_from_ms_to_kmh(df_, label_speed = constants.SPEED_TO_PREV, new_label = None):
+def ms_to_kmh(df_, label_speed = constants.SPEED_TO_PREV, new_label = None):
     try:
+        if label_speed not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_speed] = df_[label_speed].transform(lambda row: row*3.6)
         if new_label is not None:
             df_.rename(columns = {label_speed: new_label}, inplace=True)
@@ -173,8 +175,10 @@ def transform_speed_from_ms_to_kmh(df_, label_speed = constants.SPEED_TO_PREV, n
 
 
 
-def transform_speed_from_kmh_to_ms(df_, label_speed = constants.SPEED_TO_PREV, new_label = None):
+def kmh_to_ms(df_, label_speed = constants.SPEED_TO_PREV, new_label = None):
     try:
+        if label_speed not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_speed] = df_[label_speed].transform(lambda row: row/3.6)
         if new_label is not None:
             df_.rename(columns = {label_speed: new_label}, inplace=True)
@@ -183,8 +187,10 @@ def transform_speed_from_kmh_to_ms(df_, label_speed = constants.SPEED_TO_PREV, n
 
 
 """ transform distances """
-def transform_dist_from_meters_to_kilometers(df_, label_distance = constants.DIST_TO_PREV, new_label=None):
+def meters_to_kilometers(df_, label_distance = constants.DIST_TO_PREV, new_label=None):
     try:
+        if label_distance not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_distance] = df_[label_distance].transform(lambda row: row/1000)
         if new_label is not None:
             df_.rename(columns = {label_distance: new_label}, inplace=True)
@@ -192,8 +198,10 @@ def transform_dist_from_meters_to_kilometers(df_, label_distance = constants.DIS
         raise e
 
 
-def transform_dist_from_to_kilometers_to_meters(df_, label_distance = constants.DIST_TO_PREV, new_label=None):
+def kilometers_to_meters(df_, label_distance = constants.DIST_TO_PREV, new_label=None):
     try:
+        if label_distance not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_distance] = df_[label_distance].transform(lambda row: row*1000)
         if new_label is not None:
             df_.rename(columns = {label_distance: new_label}, inplace=True)
@@ -202,8 +210,10 @@ def transform_dist_from_to_kilometers_to_meters(df_, label_distance = constants.
 
 
 """ transform time """
-def transform_time_from_seconds_to_minutes(df_, label_time = constants.TIME_TO_PREV, new_label=None):
+def seconds_to_minutes(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     try:
+        if label_time not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_time] = df_[label_time].transform(lambda row: row/60.0)
         if new_label is not None:
             df_.rename(columns = {label_time: new_label}, inplace=True)
@@ -211,8 +221,10 @@ def transform_time_from_seconds_to_minutes(df_, label_time = constants.TIME_TO_P
         raise e
 
 
-def transform_time_from_minute_to_seconds(df_, label_time = constants.TIME_TO_PREV, new_label=None):
+def minute_to_seconds(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     try:
+        if label_time not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_time] = df_[label_time].apply(lambda row: row*60.0)
         if new_label is not None:
             df_.rename(columns = {label_time: new_label}, inplace=True)
@@ -220,7 +232,7 @@ def transform_time_from_minute_to_seconds(df_, label_time = constants.TIME_TO_PR
         raise e
 
 
-def transform_time_from_minute_to_hours(df_, label_time = constants.TIME_TO_PREV, new_label=None):
+def minute_to_hours(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     """Convertes times features from minutes to hours.
 
     Parameters
@@ -235,6 +247,8 @@ def transform_time_from_minute_to_hours(df_, label_time = constants.TIME_TO_PREV
         The new label of the converted column, if set to none, the original label will be kept
     """
     try:
+        if label_time not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_time] = df_[label_time].apply(lambda row: row/60.0)
         if new_label is not None:
             df_.rename(columns = {label_time: new_label}, inplace=True)
@@ -242,7 +256,7 @@ def transform_time_from_minute_to_hours(df_, label_time = constants.TIME_TO_PREV
         raise e
 
 
-def transform_time_from_hours_to_minute(df_, label_time = constants.TIME_TO_PREV, new_label=None):
+def hours_to_minute(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     """Convertes time features from hours to minutes.
 
     Parameters
@@ -257,6 +271,8 @@ def transform_time_from_hours_to_minute(df_, label_time = constants.TIME_TO_PREV
         The new label of the converted column, if set to none, the original label will be kept
     """
     try:
+        if label_time not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_time] = df_[label_time].apply(lambda row: row*60.0)
         if new_label is not None:
             df_.rename(columns = {label_time: new_label}, inplace=True)
@@ -264,7 +280,7 @@ def transform_time_from_hours_to_minute(df_, label_time = constants.TIME_TO_PREV
         raise e
 
 
-def transform_time_from_seconds_to_hours(df_, label_time = constants.TIME_TO_PREV, new_label=None):
+def seconds_to_hours(df_, label_time = constants.TIME_TO_PREV, new_label=None):
     """Convertes time features from seconds to hours.
 
     Parameters
@@ -279,6 +295,8 @@ def transform_time_from_seconds_to_hours(df_, label_time = constants.TIME_TO_PRE
         The new label of the converted column, if set to none, the original label will be kept
     """
     try:
+        if label_time not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_time] = df_[label_time].apply(lambda row: row/3600.0)
         if new_label is not None:
             df_.rename(columns = {label_time: new_label}, inplace=True)
@@ -286,7 +304,7 @@ def transform_time_from_seconds_to_hours(df_, label_time = constants.TIME_TO_PRE
         raise e
 
 
-def transform_time_from_hours_to_seconds(df_, label_time=constants.TIME_TO_PREV, new_label=None):
+def hours_to_seconds(df_, label_time=constants.TIME_TO_PREV, new_label=None):
     """Convertes time features from hours to seconds.
 
     Parameters
@@ -301,6 +319,8 @@ def transform_time_from_hours_to_seconds(df_, label_time=constants.TIME_TO_PREV,
         The new label of the converted column, if set to none, the original label will be kept
     """
     try:
+        if label_time not in df_:
+            df_.generate_dist_time_speed_features()
         df_[label_time] = df_[label_time].apply(lambda row: row*3600.0)
         if new_label is not None:
             df_.rename(columns = {label_time: new_label}, inplace=True)

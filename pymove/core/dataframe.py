@@ -1,13 +1,15 @@
 import time
+import dask
 import resource
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pymove.utils.transformations import haversine
-from pymove.utils.traj_utils import format_labels, shift, progress_update
+from dask.dataframe import DataFrame
 from pymove.core.grid import lat_meters
-from pymove.core import MoveDataFrameAbstractModel
+from pymove.utils.distances import haversine
 from pymove.core.grid import create_virtual_grid
+from pymove.core import MoveDataFrameAbstractModel
+from pymove.utils.trajectories import format_labels, shift, progress_update
 from pymove.utils.constants import (
     LATITUDE,
     LONGITUDE,
@@ -23,6 +25,7 @@ from pymove.utils.constants import (
     DAY,
     PERIOD,
     TYPE_PANDAS,
+    TYPE_DASK,
     TB,
     GB,
     MB,
@@ -30,9 +33,20 @@ from pymove.utils.constants import (
     B)
 
 
-#TODO: tirar o data do format_labels
-class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua estrutura de dados
-    def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id = TRAJ_ID):
+class MoveDataFrame():
+    @staticmethod
+    def __new__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, type="pandas",
+                n_partitions=1):
+        self.type = type
+
+        if type == 'pandas':
+            return PandasMoveDataFrame(data, latitude, longitude, datetime, traj_id)
+        if type == 'dask':
+            return DaskMoveDataFrame(data, latitude, longitude, datetime, traj_id, n_partitions)
+
+# TODO: tirar o data do format_labels
+class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua estrutura de dados
+    def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID):
         # formatar os labels que foram passados pro que usado no pymove -> format_labels
         # renomeia as colunas do dado passado pelo novo dict
         # cria o dataframe
@@ -46,33 +60,35 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
                 except KeyError:
                     zip_list.append(i)
             data = pd.DataFrame(data, columns=zip_list)
-        
+
         mapping_columns = format_labels(data, traj_id, latitude, longitude, datetime)
         tdf = data.rename(columns=mapping_columns)
 
         if self._has_columns(tdf):
-                self._validate_move_data_frame(tdf)
-                self._data = tdf
-                self._type = TYPE_PANDAS
-                self._last_operation_dict = {'name': '', 'time': '', 'mem_usage': ''}
+            self._validate_move_data_frame(tdf)
+            self._data = tdf
+            self._type = TYPE_PANDAS
+            self._last_operation_name = ''
+            self._last_operation_mem_usage = 0
+            self._last_operation_time_duration = 0
         else:
             print("Could not instantiate new MoveDataFrame because data has missing columns")
-    
+
     def _has_columns(self, data):
-        if(LATITUDE in data and LONGITUDE in data and DATETIME in data):
+        if (LATITUDE in data and LONGITUDE in data and DATETIME in data):
             return True
         return False
 
     def _validate_move_data_frame(self, data):
-        # chama a função de validação   
-            # deverá verificar se tem as colunas e os tipos
+        # chama a função de validação
+        # deverá verificar se tem as colunas e os tipos
         try:
-            if(data.dtypes.lat != 'float32'):
-                data.lat.astype('float32') 
-            if(data.dtypes.lon != 'float32'):
-                data.lon.astype('float32') 
-            if(data.dtypes.datetime != 'datetime64[ns]'):
-                data.datetime.astype('datetime64[ns]') 
+            if (data.dtypes.lat != 'float32'):
+                data.lat.astype('float32')
+            if (data.dtypes.lon != 'float32'):
+                data.lon.astype('float32')
+            if (data.dtypes.datetime != 'datetime64[ns]'):
+                data.datetime.astype('datetime64[ns]')
         except AttributeError as erro:
             print(erro)
 
@@ -85,52 +101,80 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
     @property
     def lng(self):
         if LONGITUDE not in self:
-            raise AttributeError("The MoveDataFrame does not contain the column '%s.'"%LONGITUDE)
+            raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % LONGITUDE)
         return self._data[LONGITUDE]
 
     @property
     def datetime(self):
         if DATETIME not in self:
-            raise AttributeError("The MoveDataFrame does not contain the column '%s.'"%DATETIME)
+            raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % DATETIME)
         return self._data[DATETIME]
 
     @property
     def loc(self):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'loc'
+        self._last_operation_mem_usag = 0
         return self._data.loc
 
     @property
     def iloc(self):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'iloc'
+        self._last_operation_mem_usag = 0
         return self._data.iloc
 
     @property
     def at(self):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'at'
+        self._last_operation_mem_usag = 0
         return self._data.at
 
     @property
     def values(self):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'values'
+        self._last_operation_mem_usag = 0
         return self._data.values
 
     @property
     def columns(self):
+
         return self._data.columns
 
     @property
     def index(self):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'index'
+        self._last_operation_mem_usag = 0
         return self._data.index
 
     @property
     def dtypes(self):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'dtypes'
+        self._last_operation_mem_usag = 0
         return self._data.dtypes
 
     @property
     def shape(self):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'shape'
+        self._last_operation_mem_usag = 0
         return self._data.shape
 
     @property
     def isin(self):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'isin'
+        self._last_operation_mem_usag = 0
         return self._data.isin
 
     def unique(self, values):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'unique'
+        self._last_operation_mem_usag = 0
         return self._data.unique(values)
 
     def __setitem__(self, attr, value):
@@ -141,33 +185,25 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
             return self.__dict__['_data'][name]
         except Exception as e:
             raise e
-    
+
     def head(self, n=5):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        
         _head = self._data.head(n)
-        
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'head'
-        self._last_operation_dict['mem_usage'] = finish - init
-        
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'head'
+        self._last_operation_mem_usag = 0
+
         return _head
 
     def get_users_number(self):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        
+
         if UID in self._data:
             returno = self._data[UID].nunique()
         else:
             retorno = 1
-        
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'get_users_number'
-        self._last_operation_dict['mem_usage'] = finish - init
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'get_users_number'
+        self._last_operation_mem_usag = 0
         return retorno
 
     def to_numpy(self):
@@ -177,71 +213,77 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
         _numpy = self._data.values
 
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'to_numpy'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = time.time() - start
+        self._last_operation_name = 'to_numpy'
+        self._last_operation_mem_usag = finish - init
         return _numpy
 
-    def write_file(self, file_name, separator = ','):
+    def write_file(self, file_name, separator=','):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         self._data.to_csv(file_name, sep=separator, encoding='utf-8', index=False)
 
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'write_file'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = time.time() - start
+        self._last_operation_name = 'write_file'
+        self._last_operation_mem_usag = finish - init
 
     def len(self):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _len = self._data.shape[0]
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'len'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'len'
+        self._last_operation_mem_usag = 0
         return _len
 
     def to_dict(self):
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _dict = self._data.to_dict()
 
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'to_dict'
-        self._last_operation_dict['mem_usage'] = finish - init
+
+        self._last_operation_time_duration = time.time() - start
+        self._last_operation_name = 'to_dict'
+        self._last_operation_mem_usag = finish - init
         return _dict
 
-    def to_grid(self, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
+    def to_grid(self, cell_size, meters_by_degree=lat_meters(-3.8162973555)):
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
         _grid = create_virtual_grid(cell_size, self.get_bbox(), meters_by_degree)
+
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'to_grid'
-        self._last_operation_dict['mem_usage'] = finish - init
-        return  _grid
+        self._last_operation_time_duration = time.time() - start
+        self._last_operation_name = 'to_grid'
+        self._last_operation_mem_usag = finish - init
+        return _grid
 
     def to_DataFrame(self):
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'to_DataFrame'
+        self._last_operation_mem_usag = 0
         return self._data
+
     def get_bbox(self):
         """
         A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
-            - Latitude is a decimal number between -90.0 and 90.0. 
+            - Latitude is a decimal number between -90.0 and 90.0.
             - Longitude is a decimal number between -180.0 and 180.0.
-        They usually follow the standard format of: 
-        - bbox = left, bottom, right, top 
-        - bbox = min Longitude , min Latitude , max Longitude , max Latitude 
+        They usually follow the standard format of:
+        - bbox = left, bottom, right, top
+        - bbox = min Longitude , min Latitude , max Longitude , max Latitude
         Parameters
         ----------
         self : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
-        
+
         Returns
         -------
         bbox : tuple
@@ -250,27 +292,24 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
         --------
         (22.147577, 113.54884299999999, 41.132062, 121.156224)
         """
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         try:
-            _bbox = (self._data[LATITUDE].min(), self._data[LONGITUDE].min(), self._data[LATITUDE].max(),self._data[LONGITUDE].max())
+            _bbox = (self._data[LATITUDE].min(), self._data[LONGITUDE].min(), self._data[LATITUDE].max(),
+                     self._data[LONGITUDE].max())
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'get_bbox'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = 0
+            self._last_operation_name = 'get_bbox'
+            self._last_operation_mem_usag = 0
             return _bbox
         except Exception as e:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'get_bbox'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = 0
+            self._last_operation_name = 'get_bbox'
+            self._last_operation_mem_usag = 0
             raise e
 
     def generate_tid_based_on_id_datatime(self, str_format="%Y%m%d%H", sort=True, inplace=True):
         """
-        Create or update trajectory id based on id e datetime.  
+        Create or update trajectory id based on id e datetime.
         Parameters
         ----------
         self : pandas.core.frame.DataFrame
@@ -278,8 +317,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
         str_format : String
             Contains informations about virtual grid, how
                 - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma. 
-                - grid_size_lat_y: tamanho da grid latitude. 
+                - lat_min_y: latitude miníma.
+                - grid_size_lat_y: tamanho da grid latitude.
                 - grid_size_lon_x: tamanho da longitude da grid.
                 - cell_size_by_degree: tamanho da célula da Grid.
             If value is none, the function ask user by dic_grid.
@@ -311,23 +350,23 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
             print('\n...tid feature was created...\n')
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_tid_based_on_id_datatime'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_tid_based_on_id_datatime'
+            self._last_operation_mem_usag = finish - init
 
             if inplace == False:
                 return _data
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_tid_based_on_id_datatime'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_tid_based_on_id_datatime'
+            self._last_operation_mem_usag = finish - init
             raise e
 
     # TODO complementar oq ela faz
     def generate_date_features(self, inplace=True):
         """
-        Create or update date feature.  
+        Create or update date feature.
         Parameters
         ----------
         self : pandas.core.frame.DataFrame
@@ -354,23 +393,23 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
                 print('..Date features was created...\n')
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_date_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_date_features'
+            self._last_operation_mem_usag = finish - init
 
             if inplace == False:
                 return _data
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_date_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_date_features'
+            self._last_operation_mem_usag = finish - init
             raise e
 
     # TODO complementar oq ela faz
     def generate_hour_features(self, inplace=True):
         """
-        Create or update hour feature.  
+        Create or update hour feature.
         Parameters
         ----------
         self : pandas.core.frame.DataFrame
@@ -397,24 +436,23 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
                 print('...Hour feature was created...\n')
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_hour_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_hour_features'
+            self._last_operation_mem_usag = finish - init
 
             if inplace == False:
                 return _data
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_hour_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_hour_features'
+            self._last_operation_mem_usag = finish - init
             raise e
-
 
     # TODO: botar inplace
     def generate_day_of_the_week_features(self, inplace=True):
         """
-        Create or update a feature day of the week from datatime.  
+        Create or update a feature day of the week from datatime.
         Parameters
         ----------
         self : pandas.core.frame.DataFrame
@@ -440,17 +478,17 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
             _data[DAY] = _data[DATETIME].dt.day_name()
             print('...the day of the week feature was created...\n')
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_day_of_the_week_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_day_of_the_week_features'
+            self._last_operation_mem_usag = finish - init
 
             if inplace == False:
                 return _data
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_day_of_the_week_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_day_of_the_week_features'
+            self._last_operation_mem_usag = finish - init
             raise e
 
     # TODO: botar inplace
@@ -492,17 +530,17 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
             print('...the period of day feature was created')
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_time_of_day_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_time_of_day_features'
+            self._last_operation_mem_usag = finish - init
 
             if inplace == False:
                 return _data
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_time_of_day_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_time_of_day_features'
+            self._last_operation_mem_usag = finish - init
             raise e
 
     # TODO complementar oq ela faz
@@ -589,31 +627,31 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
                     _data.at[idx, DIST_PREV_TO_NEXT] = haversine(prev_lat, prev_lon, next_lat, next_lon)
 
                     sum_size_id += size_id
-                    curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int, step_perc=20)
+                    curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int,
+                                                                  step_perc=20)
             _data.reset_index(inplace=True)
             print('...Reset index\n')
             print('..Total Time: {}'.format((time.time() - start_time)))
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_dist_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_dist_features'
+            self._last_operation_mem_usag = finish - init
 
             if inplace == False:
                 return _data
         except Exception as e:
             print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_dist_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_dist_features'
+            self._last_operation_mem_usag = finish - init
             raise e
-
 
     def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
         """
         Firstly, create three distance to an GPS point P (lat, lon)
-        After, create two feature to time between two P: time to previous and time to next 
+        After, create two feature to time between two P: time to previous and time to next
         Lastly, create two feature to speed using time and distance features
         Parameters
         ----------
@@ -702,26 +740,26 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
                     _data.at[idx, SPEED_TO_PREV] = _data.at[idx, DIST_TO_PREV] / (time_prev)  # unit: m/s
 
                     sum_size_id += size_id
-                    curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int, step_perc=20)
+                    curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int,
+                                                                  step_perc=20)
             print('...Reset index...\n')
             _data.reset_index(inplace=True)
             print('..Total Time: {:.3f}'.format((time.time() - start_time)))
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_dist_time_speed_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_dist_time_speed_features'
+            self._last_operation_mem_usag = finish - init
 
             if inplace == False:
                 return _data
         except Exception as e:
             print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_dist_time_speed_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_dist_time_speed_features'
+            self._last_operation_mem_usag = finish - init
             raise e
-
 
     def generate_move_and_stop_by_radius(self, radius=0, target_label=DIST_TO_PREV, inplace=True):
         start = time.time()
@@ -744,29 +782,26 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
             print('\n....There are {} stops to this parameters\n'.format(_data[_data["situation"] == 'stop'].shape[0]))
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_move_and_stop_by_radius'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_move_and_stop_by_radius'
+            self._last_operation_mem_usag = finish - init
 
             if inplace == False:
                 return _data
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'generate_move_and_stop_by_radius'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_move_and_stop_by_radius'
+            self._last_operation_mem_usag = finish - init
             raise e
 
     def time_interval(self):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         time_diff = self._data[DATETIME].max() - self._data[DATETIME].min()
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'time_interval'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'time_interval'
+        self._last_operation_mem_usag = 0
         return time_diff
 
     def plot_all_features(self, figsize=(21, 15), dtype=np.float64, save_fig=True, name='features.png'):
@@ -788,50 +823,50 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
                     plt.savefig(fname=name, fig=fig)
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'plot_all_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'plot_all_features'
+            self._last_operation_mem_usag = finish - init
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'plot_all_features'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'plot_all_features'
+            self._last_operation_mem_usag = finish - init
             raise e
 
-    def plot_trajs(self, figsize=(10,10), return_fig=True, markers= 'o',markersize=20):
+    def plot_trajs(self, figsize=(10, 10), return_fig=True, markers='o', markersize=20):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         fig = plt.figure(figsize=figsize)
         ids = self._data["id"].unique()
-        
+
         for id_ in ids:
-            selfid = self._data[ self._data["id"] == id_ ]
+            selfid = self._data[self._data["id"] == id_]
             plt.plot(selfid[LONGITUDE], selfid[LATITUDE], markers, markersize=markersize)
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'plot_trajs'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'plot_trajs'
+            self._last_operation_mem_usag = finish - init
         if return_fig:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'plot_trajs'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'plot_trajs'
+            self._last_operation_mem_usag = finish - init
             return fig
 
-    def plot_traj_id(self, tid, figsize=(10,10)):
+    def plot_traj_id(self, tid, figsize=(10, 10)):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         fig = plt.figure(figsize=figsize)
         if TID not in self._data:
             self.generate_tid_based_on_id_datatime()
-        df_ = self._data[self._data[TID] == tid ]
-        plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)             # start point
-        plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)           # end point
-        
-        if 'isNode'not in self:
+        df_ = self._data[self._data[TID] == tid]
+        plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)  # start point
+        plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)  # end point
+
+        if 'isNode' not in self:
             plt.plot(df_[LONGITUDE], df_[LATITUDE])
             plt.plot(df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], 'r.', markersize=8)  # points
         else:
@@ -840,14 +875,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
             selfpoints = df_.loc[~filter_]
             plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], linewidth=3)
             plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE])
-            plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], 'go', markersize=10)   # nodes
+            plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], 'go', markersize=10)  # nodes
             plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE], 'r.', markersize=8)  # points
 
-
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'plot_traj_id'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = time.time() - start
+        self._last_operation_name = 'plot_traj_id'
+        self._last_operation_mem_usag = finish - init
         return df_, fig
 
     def show_trajectories_info(self):
@@ -904,92 +938,73 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
             print('\n=========================================================================\n')
 
-
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'show_trajectories_info'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'show_trajectories_info'
+            self._last_operation_mem_usag = finish - init
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            self._last_operation_dict['time'] = time.time() - start
-            self._last_operation_dict['name'] = 'show_trajectories_info'
-            self._last_operation_dict['mem_usage'] = finish - init
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'show_trajectories_info'
+            self._last_operation_mem_usag = finish - init
             raise e
 
     def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _min = self._data.min(axis, skipna, level, numeric_only, **kwargs)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'min'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'min'
+        self._last_operation_mem_usag = 0
         return _min
 
     def max(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _max = self._data.max(axis, skipna, level, numeric_only, **kwargs)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'max'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'max'
+        self._last_operation_mem_usag = 0
         return _max
 
     def count(self, axis=0, level=None, numeric_only=False):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _count = self._data.count(axis, level, numeric_only)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'count'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'count'
+        self._last_operation_mem_usag = 0
         return _count
 
     def groupby(self, by=None, axis=0, level=None, as_index=True, sort=True, group_keys=True, squeeze=False,
                 observed=False, **kwargs):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _groupby = self._data.groupby(by, axis, level, as_index, sort, group_keys, squeeze, observed, **kwargs)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'groupby'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'groupby'
+        self._last_operation_mem_usag = 0
         return _groupby
 
     def drop_duplicates(self, subset=None, keep='first', inplace=False):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _drop_duplicates = self._data.drop_duplicates(subset, keep, inplace)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'drop_duplicates'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'drop_duplicates'
+        self._last_operation_mem_usag = 0
         return _drop_duplicates
 
-    def reset_index(self,  level=None, drop=False, inplace=False, col_level=0, col_fill=''):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    def reset_index(self, level=None, drop=False, inplace=False, col_level=0, col_fill=''):
 
         _reset_index = self._data.reset_index(level, drop, inplace, col_level, col_fill)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'reset_index'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'reset_index'
+        self._last_operation_mem_usag = 0
         return _reset_index
 
-    #TODO: duvida sobre erro quando sem paraetros, perguntar dd
+    # TODO: duvida sobre erro quando sem paraetros, perguntar dd
     def plot(self, *args, **kwargs):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -997,158 +1012,121 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
         _plot = self._data.plot(*args, **kwargs)
 
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'plot'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = time.time() - start
+        self._last_operation_name = 'plot'
+        self._last_operation_mem_usag = finish - init
         return _plot
 
     def select_dtypes(self, include=None, exclude=None):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _select_dtypes = self._data.select_dtypes(include, exclude)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'select_dtypes'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'select_dtypes'
+        self._last_operation_mem_usag = 0
         return _select_dtypes
 
     def sort_values(self, by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last'):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _sort_values = self._data.sort_values(by, axis, ascending, inplace, kind, na_position)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = '_sort_values'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = '_sort_values'
+        self._last_operation_mem_usag = 0
         return _sort_values
 
     def astype(self, dtype, copy=True, errors='raise', **kwargs):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _astype = self._data.astype(dtype, copy, errors, **kwargs)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'astype'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'astype'
+        self._last_operation_mem_usag = 0
         return _astype
 
     def set_index(self, keys, drop=True, append=False, inplace=False, verify_integrity=False):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _set_index = self._data.set_index(keys, drop, append, inplace, verify_integrity)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = '_set_index'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = '_set_index'
+        self._last_operation_mem_usag = 0
         return _set_index
 
     def drop(self, labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise'):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _drop = self._data.drop(labels, axis, index, columns, level, inplace, errors)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'drop'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'drop'
+        self._last_operation_mem_usag = 0
         return _drop
 
     def duplicated(self, subset=None, keep='first'):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _duplicated = self._data.duplicated(subset, keep)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'duplicated'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'duplicated'
+        self._last_operation_mem_usag = 0
         return _duplicated
 
     def shift(self, periods=1, freq=None, axis=0, fill_value=None):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _shift = self._data.shift(periods, freq, axis, fill_value)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'shift'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'shift'
+        self._last_operation_mem_usag = 0
         return _shift
 
-
     def any(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _any = self._data.any(axis, bool_only, skipna, level, **kwargs)
-        
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'any'
-        self._last_operation_dict['mem_usage'] = finish - init
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'any'
+        self._last_operation_mem_usag = 0
         return _any
 
     def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'dropna'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'dropna'
+        self._last_operation_mem_usag = 0
         return _dropna
 
     def isin(self, values):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _isin = self._data.isin(values)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'isin'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'isin'
+        self._last_operation_mem_usag = 0
         return _isin
 
     def append(self, other, ignore_index=False, verify_integrity=False, sort=None):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _append = self._data.append(other, ignore_index, verify_integrity, sort)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'append'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'append'
+        self._last_operation_mem_usag = 0
         return _append
 
     def nunique(self, axis=0, dropna=True):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _nunique = self._data.nunique(axis, dropna)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'nunique'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'nunique'
+        self._last_operation_mem_usag = 0
 
         return _nunique
 
-    #TODO: botar os parâmetros
+    # TODO: botar os parâmetros
     def to_csv(self, file_name, sep=',', encoding=None):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -1156,68 +1134,58 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
         self._data.to_csv(file_name, sep, encoding)
 
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'to_csv'
-        self._last_operation_dict['mem_usage'] = finish - init
-    
-    #TODO: Ajeitar esse bug e deixar esse como central. erro nao entendi
+        self._last_operation_time_duration = time.time() - start
+        self._last_operation_name = 'to_csv'
+        self._last_operation_mem_usag = finish - init
+
+    # TODO: Ajeitar esse bug e deixar esse como central. erro nao entendi
     # def to_csv(self, path_or_buf=None, sep=',', na_rep='', float_format=None, columns=None, header=True, index=True,
     #          index_label=None, mode='w', encoding=None, compression='infer', quoting=None, quotechar='"',
     #          line_terminator=None, chunksize=None, date_format=None, doublequote=True, escapechar=None, decimal='.'):
     #   self._data.to_csv(path_or_buf, sep, na_rep, float_format, columns, header, index,
     #    index_label, mode, encoding, compression, quoting, quotechar,
     #    line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
-        # self._data.to_csv("teste3.csv")]
+    # self._data.to_csv("teste3.csv")]
 
-
-    def to_dask(self):
+    def convert_to(self, new_type):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-
-        from pymove.core.DaskMoveDataFrame import DaskMoveDataFrame as dm
-
-        _dask = dm(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, n_partitions=1)
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'to_dask'
-        self._last_operation_dict['mem_usage'] = finish - init
-        return _dask
-
-    def to_pandas(self):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'to_pandas'
-        self._last_operation_dict['mem_usage'] = finish - init
-        return self._data
+        self._last_operation_name = 'convert_to'
+        if (new_type == "dask"):
+            _dask = DaskMoveDataFrame(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID,
+                       n_partitions=1)
+            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_mem_usag = finish - init
+            return _dask
+        elif (new_type == "pandas"):
+            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_mem_usag = finish - init
+            return self._data
 
     def get_type(self):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_dict['time'] = time.time() - start
-        self._last_operation_dict['name'] = 'get_type'
-        self._last_operation_dict['mem_usage'] = finish - init
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'get_type'
+        self._last_operation_mem_usag = 0
         return self._type
 
     def last_operation_time(self):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-        return self._last_operation_dict['time']
+        return self._last_operation_time_duration
 
     def last_operation_name(self):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-
-        return self._last_operation_dict['name']
+        return self._last_operation_name
 
     def last_operation(self):
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-        return self._last_operation_dict
+        return self.self._last_operation_mem_usag
 
     def mem(self, format):
         switcher = {
@@ -1230,3 +1198,214 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel): # dask sua 
 
         return switcher[format]
 
+class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estrutura de dados
+    def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID,
+                 n_partitions=1):
+        # formatar os labels que foram return 0ados pro que usado no pymove -> format_labels
+        # renomeia as colunas do dado return 0ado pelo novo dict
+        # cria o dataframe
+        mapping_columns = format_labels(data, traj_id, latitude, longitude, datetime)
+        dsk = data.rename(columns=mapping_columns)
+
+        if self._has_columns(dsk):
+            self._validate_move_data_frame(dsk)
+            self._data = dask.dataframe.from_pandas(dsk, npartitions=n_partitions)
+            self._type = TYPE_DASK
+            self._last_operation_name = ''
+            self._last_operation_mem_usage = 0
+            self._last_operation_time_duration = 0
+        else:
+            print("erroo")
+
+    def _has_columns(self, data):
+        if (LATITUDE in data and LONGITUDE in data and DATETIME in data):
+            return True
+        return False
+
+    def _validate_move_data_frame(self, data):
+        # chama a função de validação
+        # deverá verificar se tem as colunas e os tipos
+        try:
+            if (data.dtypes.lat != 'float32'):
+                data.lat.astype('float32')
+            if (data.dtypes.lon != 'float32'):
+                data.lon.astype('float32')
+            if (data.dtypes.datetime != 'datetime64[ns]'):
+                data.lon.astype('datetime64[ns]')
+        except AttributeError as erro:
+            print(erro)
+
+    @property
+    def lat(self):
+        if LATITUDE not in self:
+            raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % LATITUDE)
+        return self[LATITUDE]
+
+    @property
+    def lng(self):
+        if LONGITUDE not in self:
+            raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % LONGITUDE)
+        return self[LONGITUDE]
+
+    @property
+    def datetime(self):
+        if DATETIME not in self:
+            raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % DATETIME)
+        return self[DATETIME]
+
+    def head(self, n=5, npartitions=1, compute=True):
+        return self._data.head(n, npartitions, compute)
+
+    def min(self, axis=None, skipna=True, split_every=False, out=None):
+        return self._data.min(axis, skipna, split_every, out)
+
+    def max(self, axis=None, skipna=True, split_every=False, out=None):
+        return self._data.max(axis, skipna, split_every, out)
+
+    def groupby(self, by=None, **kwargs):
+        return self._data.groupby(by)
+
+    def convert_to(self, new_type):
+        if (new_type == "dask"):
+            return self._data
+        elif (new_type == "pandas"):
+            df_pandas = self._data.compute()
+            return PandasMoveDataFrame(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
+
+    def get_type(self):
+        return self._type
+
+    def get_users_number(self):
+        return 0
+
+    def time_interval(self):
+        return 0
+
+    def to_numpy(self):
+        return 0
+
+    def write_file(self):
+        return 0
+
+    def len(self):
+        return 0
+
+    def to_dict(self):
+        return 0
+
+    def to_grid(self):
+        return 0
+
+    def generate_tid_based_on_id_datatime(self):
+        return 0
+
+    def generate_date_features(self):
+        return 0
+
+    def generate_hour_features(self):
+        return 0
+
+    def generate_day_of_the_week_features(self):
+        return 0
+
+    def generate_time_of_day_features(self):
+        return 0
+
+    def generate_dist_features(self):
+        return 0
+
+    def generate_dist_time_speed_features(self):
+        return 0
+
+    def generate_move_and_stop_by_radius(self):
+        return 0
+
+    def time_interval(self):
+        return 0
+
+    def get_bbox(self):
+        return 0
+
+    def plot_all_features(self):
+        return 0
+
+    def plot_trajs(self):
+        return 0
+
+    def plot_traj_id():
+        return 0
+
+    def show_trajectories_info(self):
+        return 0
+
+    def count(self):
+        return 0
+
+    def reset_index(self):
+        return 0
+
+    def plot(self):
+        return 0
+
+    def drop_duplicates(self):
+        return 0
+
+    def select_dtypes(self):
+        return 0
+
+    def sort_values(self):
+        return 0
+
+    def astype(self):
+        return 0
+
+    def set_index(self):
+        return 0
+
+    def drop(self):
+        return 0
+
+    def duplicated(self):
+        return 0
+
+    def shift(self):
+        return 0
+
+    def any(self):
+        return 0
+
+    def dropna(self):
+        return 0
+
+    def isin(self):
+        return 0
+
+    def append(self):
+        return 0
+
+    def nunique(self):
+        return 0
+
+    def to_csv(self):
+        return 0
+
+    def at(self):
+        return 0
+
+    def to_DataFrame(self):
+        return 0
+
+    def unique(self, values):
+        return 0
+
+    def last_operation_time(self):
+        return self._last_operation_time_duration
+
+    def last_operation_name(self):
+        return self._last_operation_name
+
+    def last_operation(self):
+        return self._last_operation_dict
+
+    def mem(self, format):
+        return self._last_operation_dict['mem_usage']  # TODO ver a formula

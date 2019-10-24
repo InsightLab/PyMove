@@ -22,7 +22,7 @@ from pymove.utils.constants import (
 	B)
 
 
-def filter_bbox(df_, bbox, filter_out=False, inplace=False):
+def by_bbox(df_, bbox, filter_out=False, inplace=False):
     """Filters points of the trajectories according to especified bounding box.
 
     Parameters
@@ -67,7 +67,7 @@ def filter_bbox(df_, bbox, filter_out=False, inplace=False):
         raise e
 
 
-def filter_by_datetime(df_, startDatetime=None, endDatetime=None, filter_out=False):
+def by_datetime(df_, startDatetime=None, endDatetime=None, filter_out=False):
     """Filters trajectories points according to especified time range
 
     Parameters
@@ -111,7 +111,7 @@ def filter_by_datetime(df_, startDatetime=None, endDatetime=None, filter_out=Fal
         raise e
 
 
-def filter_by_label(df_, value, label_name, filter_out=False):
+def by_label(df_, value, label_name, filter_out=False):
     """Filters trajectories points according to especified value and collum label
 
     Parameters
@@ -147,7 +147,7 @@ def filter_by_label(df_, value, label_name, filter_out=False):
         raise e
 
 
-def filter_by_id(df_, id_=None, label_id=constants.TRAJ_ID, filter_out=False):
+def by_id(df_, id_=None, label_id=constants.TRAJ_ID, filter_out=False):
     """Filters trajectories points according to especified trajectory id
 
     Parameters
@@ -170,10 +170,10 @@ def filter_by_id(df_, id_=None, label_id=constants.TRAJ_ID, filter_out=False):
     df : dataframe
         Returns dataframe with trajectories points filtered by id.
     """
-    return filter_by_label(df_, id_, label_id, filter_out)
+    return by_label(df_, id_, label_id, filter_out)
 
 
-def filter_by_tid(df_, tid_=None, label_tid=constants.TID, filter_out=False):
+def by_tid(df_, tid_=None, label_tid=constants.TID, filter_out=False):
     """Filters trajectories points according to especified trajectory tid
 
     Parameters
@@ -198,11 +198,11 @@ def filter_by_tid(df_, tid_=None, label_tid=constants.TID, filter_out=False):
     """
     if TID not in df_:
         df_.generate_tid_based_on_id_datatime()
-    return filter_by_label(df_, tid_, label_tid, filter_out)
+    return by_label(df_, tid_, label_tid, filter_out)
 
 
-# confirmar se retorna mesmo os outliers
-def filter_jumps(df_, jump_coefficient=3.0, threshold=1, filter_out=False):
+# nome antigo era jumps, mas outliers fica mais claro
+def outliers(df_, jump_coefficient=3.0, threshold=1, filter_out=False):
     """Filters trajectories points that are outliers.
 
         Parameters
@@ -403,7 +403,7 @@ def clean_gps_jumps_by_distance(df_, label_id=constants.TRAJ_ID, jump_coefficien
         df_.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
     try:
         print('\nCleaning gps jumps by distance to jump_coefficient {}...\n'.format(jump_coefficient))
-        df_jumps = filter_jumps(df_, jump_coefficient, threshold)
+        df_jumps = outliers(df_, jump_coefficient, threshold)
         rows_to_drop = df_jumps.shape[0]
 
         if rows_to_drop > 0:
