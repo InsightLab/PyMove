@@ -193,19 +193,20 @@ def invert_map(map_):
 
 def show_object_id_by_date(df_, create_features=True, figsize=(21,9), save_fig=True, name='shot_points_by_date.png', low_memory=True):
     fig, ax = plt.subplots(2,2,figsize=figsize)
+
     df_.generate_date_features()
     df_.loc[:,[DATE, TRAJ_ID]].groupby([TRAJ_ID, DATE]).count().reset_index().groupby(DATE).count().plot(subplots=True, kind = 'line', grid=True, ax=ax[1][0], rot=45, fontsize=12)
-    df_.generate_hour_features(df_)
-    df_.loc[:,[HOUR, TRAJ_ID]].groupby([HOUR, TRAJ_ID]).count().reset_index().groupby(HOUR).count().plot(subplots=True, kind = 'line', grid=True, ax=ax[1][1], fontsize=12)
-    del df_[DATE]    
-    del df_[HOUR]
-    df_.generate_day_of_the_week_features()
-    df_.loc[:,[PERIOD, TRAJ_ID]].groupby([PERIOD, TRAJ_ID]).count().reset_index().groupby(PERIOD).count().plot(subplots=True, kind = 'bar', rot=0, ax=ax[0][0], fontsize=12)
-    del df_[PERIOD]
-    df_.generate_time_of_day_features(df_)
-    df_.loc[:,[DAY, TRAJ_ID]].groupby([DAY, TRAJ_ID]).count().reset_index().groupby(DAY).count().plot(subplots=True,  kind = 'bar', ax=ax[0][1], rot=0, fontsize=12)
-    del df_[DAY]
 
+    df_.generate_hour_features()
+    df_.loc[:,[HOUR, TRAJ_ID]].groupby([HOUR, TRAJ_ID]).count().reset_index().groupby(HOUR).count().plot(subplots=True, kind = 'line', grid=True, ax=ax[1][1], fontsize=12)
+
+    df_.generate_time_of_day_features()
+    df_.loc[:,[PERIOD, TRAJ_ID]].groupby([PERIOD, TRAJ_ID]).count().reset_index().groupby(PERIOD).count().plot(subplots=True, kind = 'bar', rot=0, ax=ax[0][0], fontsize=12)
+
+    df_.generate_day_of_the_week_features()
+    df_.loc[:,[DAY, TRAJ_ID]].groupby([DAY, TRAJ_ID]).count().reset_index().groupby(DAY).count().plot(subplots=True,  kind = 'bar', ax=ax[0][1], rot=0, fontsize=12)
+
+    df_.drop(columns=[DATE, HOUR, PERIOD, DAY], inplace=True)
     if save_fig:
         plt.savefig(fname=name, fig=fig)
 
@@ -248,7 +249,7 @@ def show_traj(df, label_tid=TRAJ_ID, figsize=(10,10), return_fig=True, markers= 
     if return_fig:
         return fig
 
-def show_traj_id(df, tid, label_tid=TID,  figsize=(10,10)):
+def show_traj_id(df, tid, label_tid=TRAJ_ID,  figsize=(10,10)):
     fig = plt.figure(figsize=figsize)
     df_ = df[ df[label_tid] == tid ]
     plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)             # start point
