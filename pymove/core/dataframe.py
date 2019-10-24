@@ -239,17 +239,26 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         return _len
 
     def to_dict(self):
+
+        start = time.time()
+        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
         _dict = self._data.to_dict()
 
-        self._last_operation_time_duration = 0
+        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
+        self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_dict'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usag = finish - init
         return _dict
 
     def to_grid(self, cell_size, meters_by_degree=lat_meters(-3.8162973555)):
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
         _grid = create_virtual_grid(cell_size, self.get_bbox(), meters_by_degree)
+
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_grid'
@@ -969,15 +978,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
     def groupby(self, by=None, axis=0, level=None, as_index=True, sort=True, group_keys=True, squeeze=False,
                 observed=False, **kwargs):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _groupby = self._data.groupby(by, axis, level, as_index, sort, group_keys, squeeze, observed, **kwargs)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_time_duration = time.time() - start
+        self._last_operation_time_duration = 0
         self._last_operation_name = 'groupby'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usag = 0
         return _groupby
 
     def drop_duplicates(self, subset=None, keep='first', inplace=False):
@@ -1021,15 +1027,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         return _select_dtypes
 
     def sort_values(self, by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last'):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _sort_values = self._data.sort_values(by, axis, ascending, inplace, kind, na_position)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_time_duration = time.time() - start
+        self._last_operation_time_duration = 0
         self._last_operation_name = '_sort_values'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usag = 0
         return _sort_values
 
     def astype(self, dtype, copy=True, errors='raise', **kwargs):
@@ -1060,27 +1063,21 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         return _drop
 
     def duplicated(self, subset=None, keep='first'):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _duplicated = self._data.duplicated(subset, keep)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_time_duration = time.time() - start
+        self._last_operation_time_duration = 0
         self._last_operation_name = 'duplicated'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usag = 0
         return _duplicated
 
     def shift(self, periods=1, freq=None, axis=0, fill_value=None):
-        start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _shift = self._data.shift(periods, freq, axis, fill_value)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        self._last_operation_time_duration = time.time() - start
+        self._last_operation_time_duration = 0
         self._last_operation_name = 'shift'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usag = 0
         return _shift
 
     def any(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
