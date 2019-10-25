@@ -125,17 +125,50 @@ def min_to_datetime(min):
 
 #TODO: ve o que sao os parametros e tipo dos param
 def slot_of_day_to_time(slot_of_day1, time_window_duration=5):
+    """Converts a slot of day to a time (datetime)
+
+    Parameters
+    ----------
+    slot_of_day1 :
+
+    time_window_duration: Integer, optional(5 by default)
+
+    Returns
+    -------
+    """
     min1 = slot_of_day1 * time_window_duration
     return datetime.time(min1 // 60, min1 % 60)
 
 
 #TODO: vê o que são os parametros e tipo dos param
 def slot_of_day(dt1, time_window_duration=5):
+    """Converts
+
+    Parameters
+    ----------
+    slot_of_day1 :
+
+    time_window_duration: Integer, optional(5 by default)
+
+    Returns
+    -------
+    """
     return (dt1.hour * 60 + dt1.minute) // time_window_duration
 
 
 #TODO: vê o que são os parametros e tipo dos param
 def slot(dt1, time_window_duration=5):
+    """Converts
+
+    Parameters
+    ----------
+    slot_of_day1 :
+
+    time_window_duration: Integer, optional(5 by default)
+
+    Returns
+    -------
+    """
     minute = (dt1.minute // time_window_duration) * time_window_duration
     return datetime.datetime(dt1.year, dt1.month, dt1.day, dt1.hour, minute)
 

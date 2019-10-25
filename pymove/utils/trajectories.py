@@ -208,32 +208,3 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     folium.PolyLine(points_, weight=3, color=color).add_to(m)
     m.save(file)
 
-def get_bbox(df_):
-    """
-    A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
-        - Latitude is a decimal number between -90.0 and 90.0. 
-        - Longitude is a decimal number between -180.0 and 180.0.
-    They usually follow the standard format of: 
-    - bbox = left, bottom, right, top 
-    - bbox = min Longitude , min Latitude , max Longitude , max Latitude 
-    Parameters
-    ----------
-    df_ : pandas.core.frame.DataFrame
-        Represents the dataset with contains lat, long and datetime.
-    
-    Returns
-    -------
-    bbox : tuple
-        Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
-    Examples
-    --------
-    >>> from pymove.utils.utils import get_bbox
-    >>> get_bbox(df)
-    (22.147577, 113.54884299999999, 41.132062, 121.156224)
-    """
-    try:
-        bbox = (df_[LATITUDE].min(), df_[LONGITUDE].min(), df_[LATITUDE].max(), df_[LONGITUDE].max())
-        return bbox
-    except Exception as e:
-        raise e
-
