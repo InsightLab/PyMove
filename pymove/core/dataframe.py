@@ -564,8 +564,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         Example:    P to P.next = 2 meters
                     P to P.previous = 1 meter
                     P.previous to P.next = 1 meters
-        >>> from pymove.utils.transformations import generate_dist_features
-        >>> generate_dist_features(df)
         """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
