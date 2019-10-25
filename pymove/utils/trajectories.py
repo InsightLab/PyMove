@@ -1,6 +1,4 @@
-# TODO: Andreza e Arina
 from __future__ import division
-import sys
 import time
 import folium
 import numpy as np
@@ -8,20 +6,45 @@ import pandas as pd
 from IPython.display import display
 from ipywidgets import IntProgress, HTML, VBox
 from pymove.utils.datetime import deltatime_str
-from typing import Union
-import pathlib
-from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, PERIOD, DATE, HOUR, DAY, SPEED_TO_PREV, TIME_TO_PREV, DIST_TO_PREV
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID
 
-def read_csv(filename, sep=',', encoding="utf-8", latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, type="pandas", n_partitions=1):
+
+def read_csv(
+    filename,
+    sep=',',
+    encoding="utf-8",
+    latitude=LATITUDE,
+    longitude=LONGITUDE,
+    datetime=DATETIME,
+    traj_id=TRAJ_ID,
+    type="pandas",
+    n_partitions=1):
+    """
+
+    filename:
+    sep:
+    encoding:
+    latitude:
+    longitude:
+    datetime:
+    traj_id:
+    type:
+    n_partitions:
+
+
+    """
     df = pd.read_csv(filename, sep=sep, encoding=encoding, parse_dates=['datetime'])
-    from pymove.core.dataframe import PandasMoveDataFrame as pm
-    from pymove.core.dataframe import DaskMoveDataFrame as dm
+
+    from pymove import PandasMoveDataFrame as pm
+    from pymove import DaskMoveDataFrame as dm
+
     if type == 'pandas':
         return pm(df, latitude, longitude, datetime, traj_id)
     if type == 'dask':
         return dm(df, latitude, longitude, datetime, traj_id, n_partitions)
 
-def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
+
+def format_labels(move_data, current_id, current_lat, current_lon, current_datetime):
     """ 
     Format the labels for the PyRoad lib pattern 
         labels output = lat, lon and datatime
@@ -32,7 +55,8 @@ def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     dic_labels[LATITUDE] = current_lat
     dic_labels[DATETIME] = current_datetime
     return dic_labels
-    
+
+
 def log_progress(sequence, every=None, size=None, name='Items'):
     is_iterator = False
     if size is None:
@@ -86,6 +110,7 @@ def log_progress(sequence, every=None, size=None, name='Items'):
             index=str(index or '?')
         )
 
+
 def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
     """
     update and print current progress.
@@ -104,6 +129,7 @@ def progress_update(size_processed, size_all, start_time, curr_perc_int, step_pe
         return curr_perc_int_new, deltatime_str # aqui era pra ser deltatime_str_ não?
     else:
         return curr_perc_int_new, None
+
 
 def shift(arr, num, fill_value=np.nan):
     """Shifts the elements of the given array by the number of periods specified.
@@ -146,9 +172,11 @@ def shift(arr, num, fill_value=np.nan):
         result = arr
     return result
 
+
 # erro se tentar converter int para str e funcao n verifica isso
 def fill_list_with_new_values(original_list, new_list_values):
-    """ Copies elements from one list to another. The elements will be positioned in the same position in the new list as
+    """
+    Copies elements from one list to another. The elements will be positioned in the same position in the new list as
     they were in their original list.
 
     Parameters
@@ -168,6 +196,7 @@ def fill_list_with_new_values(original_list, new_list_values):
             original_list[i] = float(new_list_values[i])
         else:
             original_list[i] = new_list_values[i]
+
 
 def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     """
@@ -207,33 +236,3 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
                (bbox_tuple[0], bbox_tuple[1])]
     folium.PolyLine(points_, weight=3, color=color).add_to(m)
     m.save(file)
-
-def get_bbox(df_):
-    """
-    A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
-        - Latitude is a decimal number between -90.0 and 90.0. 
-        - Longitude is a decimal number between -180.0 and 180.0.
-    They usually follow the standard format of: 
-    - bbox = left, bottom, right, top 
-    - bbox = min Longitude , min Latitude , max Longitude , max Latitude 
-    Parameters
-    ----------
-    df_ : pandas.core.frame.DataFrame
-        Represents the dataset with contains lat, long and datetime.
-    
-    Returns
-    -------
-    bbox : tuple
-        Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
-    Examples
-    --------
-    >>> from pymove.utils.utils import get_bbox
-    >>> get_bbox(df)
-    (22.147577, 113.54884299999999, 41.132062, 121.156224)
-    """
-    try:
-        bbox = (df_[LATITUDE].min(), df_[LONGITUDE].min(), df_[LATITUDE].max(), df_[LONGITUDE].max())
-        return bbox
-    except Exception as e:
-        raise e
-
