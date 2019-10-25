@@ -17,7 +17,7 @@ def by_bbox(move_data, bbox, filter_out=False, inplace=False):
     Parameters
     ----------
     move_data : dataframe
-       The input trajectory data
+       The input trajectories data
     bbox : tuple
         Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude of the bounding box.
     filter_out : boolean, optional(false by default)
@@ -322,7 +322,7 @@ def clean_consecutive_duplicates(move_data, subset=None, keep="first", inplace=F
         return move_data.loc[filter_]
 
 
-def clean_NaN_values(move_data, axis=0, how="any", thresh=None, subset=None, inplace=True):
+def clean_nan_values(move_data, axis=0, how="any", thresh=None, subset=None, inplace=True):
     """Removes missing values from the dataframe.
 
     Parameters
@@ -377,7 +377,7 @@ def clean_gps_jumps_by_distance(
     """
 
     if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
+        move_data.generate_dist_features(label_id=label_id,  label_dtype=label_dtype)
 
     try:
         print("\nCleaning gps jumps by distance to jump_coefficient {}...\n".format(jump_coefficient))
@@ -418,7 +418,7 @@ def clean_gps_nearby_points_by_distances(move_data, label_id=TRAJ_ID, radius_are
     """
 
     if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
+        move_data.generate_dist_features(label_id=label_id,  label_dtype=label_dtype)
 
     try:
         print("\nCleaning gps points from radius of {} meters\n".format(radius_area))
@@ -465,7 +465,7 @@ def clean_gps_nearby_points_by_speed(move_data, label_id=TRAJ_ID, speed_radius=0
     """
 
     if SPEED_TO_PREV not in move_data:
-        move_data.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
+        move_data.generate_dist_time_speed_features(label_id=label_id, label_dtype=label_dtype)
 
     try:
         print("\nCleaning gps points using {} speed radius\n".format(speed_radius))
@@ -486,7 +486,7 @@ def clean_gps_nearby_points_by_speed(move_data, label_id=TRAJ_ID, speed_radius=0
                 move_data.drop(index=idx, inplace=True)
                 print("...Rows before: {}, Rows after:{}\n".format(shape_before, move_data.shape[0]))
 
-                clean_gps_nearby_points_by_speed(move_data = move_data, label_id = label_id, label_dtype = label_dtype)
+                clean_gps_nearby_points_by_speed(move_data=move_data, label_id=label_id, label_dtype=label_dtype)
         else:
             print("...{} is not in the dataframe".format(DIST_TO_PREV))
     except Exception as e:
@@ -516,7 +516,7 @@ def clean_gps_speed_max_radius(move_data, label_id=TRAJ_ID, speed_max=50.0, labe
         Represents column id type. By default it"s np.float64.
     """
     if SPEED_TO_PREV not in move_data:
-        move_data.generate_dist_time_speed_features(label_id = label_id, label_dtype = label_dtype)
+        move_data.generate_dist_time_speed_features(label_id=label_id, label_dtype=label_dtype)
 
     print("\nClean gps points with speed max > {} meters by seconds".format(speed_max))
 
@@ -576,7 +576,7 @@ def clean_trajectories_with_few_points(
         print("\n...Tids after drop: {}".format(move_data[label_tid].unique().shape[0]))
         print("\n...Shape - before drop: {} - after drop: {}".format(shape_before_drop, move_data.shape))
 
-        move_data.generate_dist_time_speed_features(label_id = label_tid, label_dtype = label_dtype)
+        move_data.generate_dist_time_speed_features(label_id=label_tid, label_dtype=label_dtype)
 
 
 def clean_trajectories_short_and_few_points_(
@@ -614,7 +614,7 @@ def clean_trajectories_short_and_few_points_(
     clean_trajectories_with_few_points(move_data, label_id, min_points_per_trajectory, label_dtype)
 
     if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features(label_id = label_id,  label_dtype=label_dtype)
+        move_data.generate_dist_features(label_id=label_id,  label_dtype=label_dtype)
 
     if move_data.index.name is not None:
         print("reseting index")
