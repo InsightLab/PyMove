@@ -244,12 +244,12 @@ def clean_duplicates(move_data, subset=None, keep="first", inplace=False, sort=T
     subset : String or Array of Strings, optional(None by default)
         Specify  Column label or sequence of labels, considered for identifying duplicates.
         By default all columns are used.
-    keep : String if the option are "first" or "last and boolean if False. Optional(first by default)
-        if keep is set as first, all the duplicates except for the first occurrence will be droped.
-        On the other hand if seted to last, all duplicates except for the last occurrence will be droped.
-        If set to False, all duplicates are droped.
+    keep : String if the option are "first" or "last" and False. Optional(first by default)
+        if keep is set as first, all the duplicates except for the first occurrence will be dropped.
+        On the other hand if set to last, all duplicates except for the last occurrence will be dropped.
+        If set to False, all duplicates are dropped.
     inplace : boolean, optional(False by default)
-        if set to true the original dataframe will be altered, the duplicates will be droped in place,
+        if set to true the original dataframe will be altered, the duplicates will be dropped in place,
         otherwise a copy will be returned.
     sort : boolean, optional(True by default)
         If set to True the data will be sorted by id and datetime, to increase performace.
