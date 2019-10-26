@@ -30,13 +30,22 @@ from pymove.utils.constants import (
     GB,
     MB,
     KB,
-    B)
+    B
+)
 
 
 class MoveDataFrame():
     @staticmethod
-    def __new__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID, type="pandas",
-                n_partitions=1):
+    def __new__(
+        self,
+        data,
+        latitude=LATITUDE,
+        longitude=LONGITUDE,
+        datetime=DATETIME,
+        traj_id=TRAJ_ID,
+        type="pandas",
+        n_partitions=1
+    ):
         self.type = type
 
         if type == 'pandas':
@@ -44,8 +53,9 @@ class MoveDataFrame():
         if type == 'dask':
             return DaskMoveDataFrame(data, latitude, longitude, datetime, traj_id, n_partitions)
 
-# TODO: tirar o data do format_labels
-class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua estrutura de dados
+
+class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
+    #TODO: Documentar
     def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID):
         # formatar os labels que foram passados pro que usado no pymove -> format_labels
         # renomeia as colunas do dado passado pelo novo dict
@@ -74,11 +84,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         else:
             print("Could not instantiate new MoveDataFrame because data has missing columns")
 
+    @staticmethod
     def _has_columns(self, data):
-        if (LATITUDE in data and LONGITUDE in data and DATETIME in data):
+        if LATITUDE in data and LONGITUDE in data and DATETIME in data:
             return True
         return False
 
+    @staticmethod
     def _validate_move_data_frame(self, data):
         # chama a função de validação
         # deverá verificar se tem as colunas e os tipos
@@ -112,6 +124,25 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
     @property
     def loc(self):
+        """
+        Access a group of rows and columns by label(s) or a boolean array. .loc[] is primarily label based, but may
+        also be used with a boolean array.
+
+        Allowed inputs are:
+        - A single label, e.g. 5 or 'a', (note that 5 is interpreted as a label of the index, and never as an integer
+        position along the index).
+        - A list or array of labels, e.g. ['a', 'b', 'c'].
+        - A slice object with labels, e.g. 'a':'f'.
+            Warning Note that contrary to usual python slices, both the start and the stop are included
+            A boolean array of the same length as the axis being sliced, e.g. [True, False, True].
+        - A callable function with one argument (the calling Series or DataFrame) and that returns valid output for
+        indexing (one of the above)
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.loc.html
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'loc'
         self._last_operation_mem_usage = 0
@@ -119,6 +150,27 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
     @property
     def iloc(self):
+        """
+        Purely integer-location based indexing for selection by position. .iloc[] is primarily integer position based
+        (from 0 to length-1 of the axis), but may also be used with a boolean array.
+
+        Allowed inputs are:
+        - An integer, e.g. 5.
+        - A list or array of integers, e.g. [4, 3, 0].
+        - A slice object with ints, e.g. 1:7.
+        - A boolean array.
+        - A callable function with one argument (the calling Series or DataFrame) and that returns valid output for
+        indexing (one of the above). This is useful in method chains, when you don’t have a reference to the calling
+        object, but would like to base your selection on some value.
+
+        .iloc will raise IndexError if a requested indexer is out-of-bounds, except slice indexers which allow
+        out-of-bounds indexing (this conforms with python/numpy slice semantics).
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.iloc.html
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'iloc'
         self._last_operation_mem_usage = 0
@@ -126,6 +178,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
     @property
     def at(self):
+        """
+        Access a single value for a row/column label pair. Similar to loc, in that both provide label-based lookups.
+        Use at if you only need to get or set a single value in a DataFrame or Series.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.at.html#pandas.DataFrame.at
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'at'
         self._last_operation_mem_usage = 0
@@ -133,6 +194,21 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
     @property
     def values(self):
+        """
+        Return a Numpy representation of the DataFrame.
+        Only the values in the DataFrame will be returned, the axes labels will be removed.
+        Warning We recommend using DataFrame.to_numpy() instead.
+
+        Returns
+        -------
+        numpy.ndarray
+            The values of the DataFrame.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.values.html
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'values'
         self._last_operation_mem_usage = 0
@@ -140,11 +216,27 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
     @property
     def columns(self):
+        """
+        The column labels of the DataFrame.
 
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.columns.html#pandas.DataFrame.columns
+
+        """
         return self._data.columns
 
     @property
     def index(self):
+        """
+        The index (row labels) of the DataFrame.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.index.html#pandas.DataFrame.index
+
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'index'
         self._last_operation_mem_usage = 0
@@ -152,6 +244,21 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
     @property
     def dtypes(self):
+        """
+        Return the dtypes in the DataFrame. This returns a Series with the data type of each column.
+        The result’s index is the original DataFrame’s columns. Columns with mixed types are stored with the object
+        dtype. See the User Guide for more.
+
+        Returns
+        -------
+        pandas.Series
+            The data type of each column.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dtypes.html
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'dtypes'
         self._last_operation_mem_usage = 0
@@ -159,6 +266,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
     @property
     def shape(self):
+        """
+        Return a tuple representing the dimensionality of the DataFrame.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.shape.html
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'shape'
         self._last_operation_mem_usage = 0
@@ -166,12 +281,46 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
     @property
     def isin(self):
+        """
+        Whether each element in the DataFrame is contained in values.
+
+        Parameters
+        ----------
+        values : iterable, Series, DataFrame or dict
+            The result will only be true at a location if all the labels match. If values is a Series, that’s the index.
+            If values is a dict, the keys must be the column names, which must match. If values is a DataFrame, then
+            both the index and column labels must match.
+
+        Returns
+        -------
+        DataFrame
+            DataFrame of booleans showing whether each element in the DataFrame is contained in values.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.isin.html
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'isin'
         self._last_operation_mem_usage = 0
         return self._data.isin
 
     def unique(self, values):
+        """
+        Return unique values of Series object. Uniques are returned in order of appearance. Hash table-based unique,
+        therefore does NOT sort.
+
+        Returns
+        -------
+        ndarray or ExtensionArray
+            The unique values returned as a NumPy array.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.unique.html
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'unique'
         self._last_operation_mem_usage = 0
@@ -367,12 +516,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
     def generate_date_features(self, inplace=True):
         """
         Create or update date feature.
+
         Parameters
         ----------
         self : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
+
         Returns
         -------
+
         Examples
         --------
         >>> from pymove.utils.transformations import generate_date_features
@@ -887,14 +1039,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
     def show_trajectories_info(self):
         """
         Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box.
+
         Parameters
         ----------
         self : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
+
         dic_labels : dict
             Represents mapping of column's header between values passed on params.
+
         Returns
         -------
+
         Examples
         --------
         ======================= INFORMATION ABOUT DATASET =======================
@@ -949,19 +1105,24 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             raise e
 
     def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
-        """Finds and returns the minimum values for the requested axis of the dataframe.
+        """
+        Finds and returns the minimum values for the requested axis of the dataframe.
 
         Parameters
         ----------
-        axis: Integer, None by default, {index (0), columns (1)}
+        axis: Integer, None by default, {index (0), columns (1)}.
             Axis for the function to be applied on.
-        skipna: bool, optional(None by default)
+
+        skipna: bool, optional, default None.
             Specifies whether NA / null values ​​should be discarded when calculating result.
-        level: Integer or String, optional (None by default)
-            If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series
+
+        level: Integer or String, optional, default None.
+            If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series.
+
         numeric_only: bool, optional (None by default)
             Include only float, int, boolean columns.
             If None, will attempt to use everything, then use only numeric data.
+
         kwargs:
             Additional keyword arguments to be passed to the function
 
@@ -972,8 +1133,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         Notes
         -----
         for more informations : https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.min.html
-        """
 
+        """
         _min = self._data.min(axis, skipna, level, numeric_only, **kwargs)
 
         self._last_operation_time_duration = 0
@@ -989,15 +1150,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         ----------
         axis: Integer, None by default, {index (0), columns (1)}
             Axis for the function to be applied on.
-        skipna: bool, optional(None by default)
+
+        skipna: bool, optional(None by default).
             Specifies whether NA / null values ​should be discarded when calculating result.
-        level: Integer or String, optional (None by default)
-            If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series
-        numeric_only: bool, optional (None by default)
+
+        level: Integer or String, optional (None by default).
+            If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series.
+
+        numeric_only: bool, optional (None by default).
             Include only float, int, boolean columns.
             If None, will attempt to use everything, then use only numeric data.
-        kwargs: keywords
-            Additional keyword arguments to be passed to the function
+
+        kwargs: keywords.
+            Additional keyword arguments to be passed to the function.
 
         Returns
         -------
@@ -1624,7 +1789,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
         return switcher[format]
 
-class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):  # dask sua estrutura de dados
+
+class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID,
                  n_partitions=1):
         # formatar os labels que foram return 0ados pro que usado no pymove -> format_labels
