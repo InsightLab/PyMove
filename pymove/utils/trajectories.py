@@ -20,16 +20,41 @@ def read_csv(
     type="pandas",
     n_partitions=1):
     """
+    Reads a .csv file and structures the data into the desired structure supported by PyMove.
 
-    filename:
-    sep:
-    encoding:
-    latitude:
-    longitude:
-    datetime:
-    traj_id:
-    type:
-    n_partitions:
+    Parameters
+    ----------
+    filename : String.
+        Represents coordinates lat, lon which will be the center of the map.
+
+    sep : String, optional, default ','.
+        Represents .
+
+    encoding : String, optional, default 'utf-8'.
+        Represents .
+
+    latitude : String, optional, default 'lat'.
+        Represents the column name of feature latitude.
+
+    longitude : String, optional, default 'lon'.
+        Represents the column name of feature longitude.
+
+    datetime : String, optional, default 'datetime'.
+        Represents the column name of feature datetime.
+
+    traj_id : String, optional, default 'id'.
+        Represents the column name of feature id trajectory.
+
+    type : String, optional, default 'pandas'.
+        Represents the type of                    \
+
+    n_partitions : int, optional, default 1.
+        Represents .
+
+    Returns
+    -------
+    base_map : pymove.core.MoveDataFrameAbstract subclass.
+        Trajectory data with id specified.
 
 
     """
@@ -45,7 +70,8 @@ def read_csv(
 
 
 def format_labels(move_data, current_id, current_lat, current_lon, current_datetime):
-    """ 
+    """
+
     Format the labels for the PyRoad lib pattern 
         labels output = lat, lon and datatime
     """ 
@@ -58,6 +84,14 @@ def format_labels(move_data, current_id, current_lat, current_lon, current_datet
 
 
 def log_progress(sequence, every=None, size=None, name='Items'):
+    """
+
+    :param sequence:
+    :param every:
+    :param size:
+    :param name:
+    :return:
+    """
     is_iterator = False
     if size is None:
         try:
@@ -132,7 +166,8 @@ def progress_update(size_processed, size_all, start_time, curr_perc_int, step_pe
 
 
 def shift(arr, num, fill_value=np.nan):
-    """Shifts the elements of the given array by the number of periods specified.
+    """
+    Shifts the elements of the given array by the number of periods specified.
 
     Parameters
     ----------
@@ -204,19 +239,19 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
 
     Parameters
     ----------
-    bbox_tuple : tuple
+    bbox_tuple : tuple.
         Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
 
 
-    file : String
+    file : String.
         Represents filename.
 
-    tiles : String
+    tiles : String, optional, default 'OpenStreetMap'.
         Represents tyles's type.
         Example: 'openstreetmap', 'cartodbpositron', 'stamentoner', 'stamenterrain', 'mapquestopen', 'MapQuest Open Aerial', 'Mapbox Control Room' and 'Mapbox Bright'.
 
-    color : String
-        Represents color of trajectorys on map.
+    color : String, optional, default 'red'.
+        Represents color of lines on map.
 
     Returns
     -------
