@@ -109,7 +109,7 @@ def avg_std_sample(sum1, sum_sq, size):
     return avg, std_sample(sum_sq, size, avg)
 
 
-# função está dando erro ao rodar
+# TODO: função está dando erro ao rodar
 def arrays_avg(values_array, weights_array=None):
     """
     Computes the mean of the elements of the array.
