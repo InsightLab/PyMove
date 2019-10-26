@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="c0c80270-9cbe-4b1b-8809-fe5b7abc7175" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/pymove/utils/math.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/utils/math.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pymove/utils/trajectories.py" beforeDir="false" afterPath="$PROJECT_DIR$/pymove/utils/trajectories.py" afterDir="false" />
     </list>
+=======
+    <list default="true" id="ab87f0bb-bb69-48fc-9499-9a1b490b02ed" name="Default Changelist" comment="" />
+>>>>>>> f395a525dc0b4c236a80d08c39afbd2a49dbf3bc
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+<<<<<<< HEAD
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
     <option name="GROUP_DATA_SOURCES" value="true" />
@@ -161,6 +166,15 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+=======
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1Sh8WQqCL4oY0BBr5IfiPY6GyYc" />
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+>>>>>>> f395a525dc0b4c236a80d08c39afbd2a49dbf3bc
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -179,6 +193,7 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
+<<<<<<< HEAD
       <changelist id="c0c80270-9cbe-4b1b-8809-fe5b7abc7175" name="Default Changelist" comment="" />
       <created>1572030026035</created>
       <option name="number" value="Default" />
@@ -313,5 +328,40 @@
         </state>
       </provider>
     </entry>
+=======
+      <changelist id="ab87f0bb-bb69-48fc-9499-9a1b490b02ed" name="Default Changelist" comment="" />
+      <created>1572004498725</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1572004498725</updated>
+      <workItem from="1572004506367" duration="38377000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/pymove/core/dataframe.py</url>
+          <line>835</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+>>>>>>> f395a525dc0b4c236a80d08c39afbd2a49dbf3bc
   </component>
 </project>

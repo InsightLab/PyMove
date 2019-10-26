@@ -114,28 +114,28 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
     def loc(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'loc'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data.loc
 
     @property
     def iloc(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'iloc'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data.iloc
 
     @property
     def at(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'at'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data.at
 
     @property
     def values(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'values'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data.values
 
     @property
@@ -147,34 +147,34 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
     def index(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'index'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data.index
 
     @property
     def dtypes(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'dtypes'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data.dtypes
 
     @property
     def shape(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'shape'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data.shape
 
     @property
     def isin(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'isin'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data.isin
 
     def unique(self, values):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'unique'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data.unique(values)
 
     def __setitem__(self, attr, value):
@@ -190,7 +190,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         _head = self._data.head(n)
         self._last_operation_time_duration = 0
         self._last_operation_name = 'head'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
 
         return _head
 
@@ -203,7 +203,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'get_users_number'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return retorno
 
     def to_numpy(self):
@@ -215,7 +215,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_numpy'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usage = finish - init
         return _numpy
 
     def write_file(self, file_name, separator=','):
@@ -227,7 +227,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'write_file'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usage = finish - init
 
     def len(self):
 
@@ -235,7 +235,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'len'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return _len
 
     def to_dict(self):
@@ -249,7 +249,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_dict'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usage = finish - init
         return _dict
 
     def to_grid(self, cell_size, meters_by_degree=lat_meters(-3.8162973555)):
@@ -262,13 +262,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_grid'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usage = finish - init
         return _grid
 
     def to_DataFrame(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'to_DataFrame'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._data
 
     def get_bbox(self):
@@ -299,12 +299,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
             self._last_operation_time_duration = 0
             self._last_operation_name = 'get_bbox'
-            self._last_operation_mem_usag = 0
+            self._last_operation_mem_usage = 0
             return _bbox
         except Exception as e:
             self._last_operation_time_duration = 0
             self._last_operation_name = 'get_bbox'
-            self._last_operation_mem_usag = 0
+            self._last_operation_mem_usage = 0
             raise e
 
     def generate_tid_based_on_id_datatime(self, str_format="%Y%m%d%H", sort=True, inplace=True):
@@ -352,7 +352,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_tid_based_on_id_datatime'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return _data
@@ -360,7 +360,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_tid_based_on_id_datatime'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     # TODO complementar oq ela faz
@@ -395,7 +395,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_date_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return _data
@@ -403,7 +403,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_date_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     # TODO complementar oq ela faz
@@ -438,7 +438,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_hour_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return _data
@@ -446,7 +446,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_hour_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     # TODO: botar inplace
@@ -480,7 +480,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_day_of_the_week_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return _data
@@ -488,7 +488,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_day_of_the_week_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     # TODO: botar inplace
@@ -532,7 +532,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_time_of_day_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return _data
@@ -540,7 +540,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_time_of_day_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     # TODO complementar oq ela faz
@@ -564,6 +564,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         Example:    P to P.next = 2 meters
                     P to P.previous = 1 meter
                     P.previous to P.next = 1 meters
+        >>> from pymove.utils.transformations import generate_dist_features
+        >>> generate_dist_features(df)
         """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -634,7 +636,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_dist_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return _data
@@ -643,7 +645,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_dist_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
@@ -747,7 +749,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_dist_time_speed_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return _data
@@ -756,7 +758,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_dist_time_speed_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_move_and_stop_by_radius(self, radius=0, target_label=DIST_TO_PREV, inplace=True):
@@ -782,7 +784,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_move_and_stop_by_radius'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return _data
@@ -790,7 +792,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_move_and_stop_by_radius'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     def time_interval(self):
@@ -799,7 +801,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'time_interval'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return time_diff
 
     def plot_all_features(self, figsize=(21, 15), dtype=np.float64, save_fig=True, name='features.png'):
@@ -823,12 +825,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'plot_all_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'plot_all_features'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     def plot_trajs(self, figsize=(10, 10), return_fig=True, markers='o', markersize=20):
@@ -845,12 +847,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'plot_trajs'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
         if return_fig:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'plot_trajs'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             return fig
 
     def plot_traj_id(self, tid, figsize=(10, 10)):
@@ -879,7 +881,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'plot_traj_id'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usage = finish - init
         return df_, fig
 
     def show_trajectories_info(self):
@@ -895,8 +897,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         -------
         Examples
         --------
-        >>> from pymove.utils.utils import show_trajectories_info
-        >>> show_trajectories_info(df)
         ======================= INFORMATION ABOUT DATASET =======================
         Number of Points: 217654
         Number of IDs objects: 2
@@ -904,6 +904,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         Bounding Box:(22.147577, 113.54884299999999, 41.132062, 121.156224)
         =========================================================================
         """
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
@@ -939,71 +940,237 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'show_trajectories_info'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'show_trajectories_info'
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             raise e
 
     def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
+        """Finds and returns the minimum values for the requested axis of the dataframe.
+
+        Parameters
+        ----------
+        axis: Integer, None by default, {index (0), columns (1)}
+            Axis for the function to be applied on.
+        skipna: bool, optional(None by default)
+            Specifies whether NA / null values ​​should be discarded when calculating result.
+        level: Integer or String, optional (None by default)
+            If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series
+        numeric_only: bool, optional (None by default)
+            Include only float, int, boolean columns.
+            If None, will attempt to use everything, then use only numeric data.
+        kwargs:
+            Additional keyword arguments to be passed to the function
+
+        Returns
+        -------
+        The minimum values for the request axis.
+
+        Notes
+        -----
+        for more informations : https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.min.html
+        """
 
         _min = self._data.min(axis, skipna, level, numeric_only, **kwargs)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'min'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _min
 
     def max(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
+        """Finds the maximum  values for the requested axis of the dataframe.
+
+        Parameters
+        ----------
+        axis: Integer, None by default, {index (0), columns (1)}
+            Axis for the function to be applied on.
+        skipna: bool, optional(None by default)
+            Specifies whether NA / null values ​should be discarded when calculating result.
+        level: Integer or String, optional (None by default)
+            If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series
+        numeric_only: bool, optional (None by default)
+            Include only float, int, boolean columns.
+            If None, will attempt to use everything, then use only numeric data.
+        kwargs: keywords
+            Additional keyword arguments to be passed to the function
+
+        Returns
+        -------
+        The minimum values for the request axis.
+
+        Notes
+        -----
+        for more informations : https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.max.html
+        """
 
         _max = self._data.max(axis, skipna, level, numeric_only, **kwargs)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'max'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _max
 
     def count(self, axis=0, level=None, numeric_only=False):
+        """Uses the pandas's function count, to calculate the count of non-NA cells for each column or row.
 
+        Parameters
+        ----------
+        axis: Integer, None by default, {index (0), columns (1)}
+            if set to 0 or'index', will count for each column.
+            if set to 1 or'columns', will count for each row.
+        level: Integer or String, optional (None by default)
+            If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a DataFrame.
+            A str specifies the level name
+        numeric_only: Boolean, optional (False by default)
+            If set to true, only float, int or boolean data, will be included.
+
+        Returns
+        --------
+        A series or a DataFrame. 
+            The number of non-NA/null entries for each column/row. If level is specified returns a DataFrame.
+        """
+        
         _count = self._data.count(axis, level, numeric_only)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'count'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+        
         return _count
 
     def groupby(self, by=None, axis=0, level=None, as_index=True, sort=True, group_keys=True, squeeze=False,
                 observed=False, **kwargs):
+        """Groups DataFrame using a mapper or by a Series of columns.
+        A groupby operation involves some combination of splitting the object, applying a function, and
+        combining the results. This can be used to group large amounts of data and compute operations on these groups.
+
+        Parameters
+        ----------
+
+        by : mapping, function, label, or list of labels, optional(None by default)
+            Used to determine the groups for the groupby. If by is a function, it’s called on each value of the
+            object’s index. If a dict or Series is passed, the Series or dict VALUES will be used to determine the
+            groups (the Series’ values are first aligned; see .align() method). If an ndarray is passed, the values
+            are used as-is determine the groups. A label or list of labels may be passed to group by the columns in
+            self. Notice that a tuple is interpreted as a (single) key.
+        axis : Integer, None by default, {index (0), columns (1)}
+            Split along rows (0) or columns (1).
+        level : Integer, level name, or sequence of such, optional (default None)
+            If the axis is a MultiIndex (hierarchical), group by a particular level or levels.
+        as_index : boolean, optional (default True)
+            For aggregated output, return object with group labels as the index. Only relevant for DataFrame input.
+             as_index=False is effectively “SQL-style” grouped output.
+        sort : boolean, optional (default True)
+            Sort group keys. Get better performance by turning this off. Note this does not influence the order
+            of observations within each group. Groupby preserves the order of rows within each group.
+        group_keys : boolean, default True
+            When calling apply, add group keys to index to identify pieces.
+        squeeze : boolean, optional (default False)
+            Reduce the dimensionality of the return type if possible, otherwise return a consistent type.
+        observed : boolean, optional (default False)
+            This only applies if any of the groupers are Categoricals. If True: only show observed values for
+            categorical groupers. If False: show all values for categorical groupers.
+        **kwargs
+            Optional, only accepts keyword argument ‘mutated’ and is passed to groupby.
+
+        Returns
+        -------
+        DataFrameGroupBy
+            Returns groupby object that contains information about the groups.
+        """
 
         _groupby = self._data.groupby(by, axis, level, as_index, sort, group_keys, squeeze, observed, **kwargs)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'groupby'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return _groupby
 
     def drop_duplicates(self, subset=None, keep='first', inplace=False):
+        """Uses the pandas's function drop_duplicates, to remove duplicated rows from data.
+
+        Parameters
+        ----------
+        subset: Integer or String, optional (None by default)
+            Used to specify a particular subset of columns to use to identify duplicates.
+            If set to None, all columns will be used.
+        keep: String, optional('first' by default)
+            if keep is set as first, all the duplicates except for the first occurrence will be dropped.
+            On the other hand if set to last, all duplicates except for the last occurrence will be dropped.
+            If set to False, all duplicates are dropped.
+        Inplace: Boolean, optional(False by default)
+            if set to true the original dataframe will be altered, the duplicates will be dropped in place,
+            otherwise the operation will be made in a copy, that will be returned.
+        numeric_only: Boolean, optional (False by default)
+            If set to true, only float, int or boolean data, will be included.
+
+        Returns
+        --------
+        PandasMoveDataFrame with the duplicates dropped.
+        """
 
         _drop_duplicates = self._data.drop_duplicates(subset, keep, inplace)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'drop_duplicates'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return _drop_duplicates
 
     def reset_index(self, level=None, drop=False, inplace=False, col_level=0, col_fill=''):
+        """Resets the DataFrame's index, and use the default one.
+        One or more levels can be removed, if the DataFrame has a MultiIndex.
+
+        Parameters
+        ----------
+        level: int, str, tuple, or list. Optional (None by default)
+            Only the levels specify will be removed from the index. If set to None, all levels are removed.
+        drop: boolean, optional (False by default)
+            If set to True, the index won't be inserted into the dataframe columns.
+        inplace: Boolean, optional(False by default)
+            if set to true the original dataframe will be altered, the duplicates will be dropped in place,
+            otherwise the operation will be made in a copy, that will be returned.
+        col_level: int or str, default 0
+            If the columns have multiple levels, determines which level the labels are inserted into.
+            By default it is inserted into the first level.
+        col_fill: object, default ‘’
+            If the columns have multiple levels, determines how the other levels are named.
+            If None then the index name is repeated.
+
+        Returns
+        -------
+        PandasMoveDataFrame with _data with a new index.
+        """
 
         _reset_index = self._data.reset_index(level, drop, inplace, col_level, col_fill)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'reset_index'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _reset_index
 
-    # TODO: duvida sobre erro quando sem paraetros, perguntar dd
     def plot(self, *args, **kwargs):
+        """Makes a plot of _data.
+
+        Parameters
+        ----------
+        args:
+        kwargs: keywords
+            Additional keyword arguments to be passed to the function
+
+        Returns:
+        --------
+        class:`matplotlib.axes.Axes` or numpy.ndarray of them
+        If the backend is not the default matplotlib one, the return value
+        will be the object returned by the backend.
+        """
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
@@ -1012,115 +1179,376 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'plot'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usage = finish - init
+
         return _plot
 
     def select_dtypes(self, include=None, exclude=None):
+        """Returns a subset of the _data's columns based on the column dtypes.
+
+        Parameters
+        ----------
+        include: scalar or list-like
+            A selection of dtypes or strings to be included/excluded.
+        exclude: scalar or list-like
+            A selection of dtypes or strings to be included/excluded.
+
+        Returns
+        --------
+            DataFrame
+                The subset of the _data including the dtypes in
+                include and excluding the dtypes in exclude.
+
+        Notes
+        -----
+        One of the parameters: include or exclude must be supplied.
+        """
 
         _select_dtypes = self._data.select_dtypes(include, exclude)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'select_dtypes'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _select_dtypes
 
     def sort_values(self, by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last'):
+        """Sorts the values of the _data, along an axis.
+
+        Parameters
+        ----------
+        by: str or list of str
+            Name or list of names to sort the _data by.
+        axis: Integer, None by default, {index (0), columns (1)}
+            if set to 0 or'index', will count for each column.
+            if set to 1 or'columns', will count for each row
+        ascending: boolean or list of beoolean, default True.
+            Sort ascending vs. descending. Specify list for multiple sort orders.
+            If this is a list of bools, must match the length of the by.
+        inplace: Boolean, optional(False by default)
+            if set to true the original dataframe will be altered, the duplicates will be dropped in place,
+            otherwise the operation will be made in a copy, that will be returned.
+        kind: String, optional ('quicksort' by default), options: ‘quicksort’, ‘mergesort’, ‘heapsort’.
+            Choice of sorting algorithm.
+            For DataFrames, this option is only applied when sorting on a single column or label.
+        na_position: String, optional('last' by default), options: ‘first’, ‘last’.
+            If 'first' puts NaNs at the beginning;
+            If last puts NaNs at the end.
+
+        Returns
+        -------
+        Dataframe with sorted values if inplace=False, None otherwise.
+        """
 
         _sort_values = self._data.sort_values(by, axis, ascending, inplace, kind, na_position)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = '_sort_values'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _sort_values
 
     def astype(self, dtype, copy=True, errors='raise', **kwargs):
+        """Cast a pandas object to a specified dtype.
+
+        Parameters
+        ----------
+        dtype: data type, or dict of column name -> data type
+            Use a numpy.dtype or Python type to cast entire pandas object to the same type. Alternatively,
+            use {col: dtype, …}, where col is a column label and dtype is a numpy.dtype or Python type to
+            cast one or more of the DataFrame’s columns to column-specific types.
+        copy: Boolean, optional(True by default)
+            Return a copy when copy=True (be very careful setting copy=False as changes to values then
+            may propagate to other pandas objects).
+        errors: String, optional('raise' by default), options: 'raise', 'ignore'
+            Control raising of exceptions on invalid data for provided dtype.
+            raise : allow exceptions to be raised
+            ignore : suppress exceptions. On error return original object
+        kwargs:
+             keyword arguments to pass on to the constructor
+
+        Returns
+        -------
+        Casted _data to specified type.
+        """
 
         _astype = self._data.astype(dtype, copy, errors, **kwargs)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'astype'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _astype
 
     def set_index(self, keys, drop=True, append=False, inplace=False, verify_integrity=False):
+        """Set the DataFrame index (row labels) using one or more existing columns or arrays (of the correct length).
+
+        Parameters
+        ----------
+        keys: String or array of String.
+            label or array-like or list of labels/arrays. This parameter can be either a single column key, a single
+            array of the same length as the calling DataFrame, or a list containing an arbitrary combination of column keys and arrays.
+        drop: Boolean, optional (True by defautl)
+            Delete columns to be used as the new index.
+        append: Boolean, optional (False by defautl)
+            Whether to append columns to existing index.
+        inplace: Boolean, optional (False by defautl)
+            Modify the DataFrame in place (do not create a new object).
+        verify_integrity: Boolean, optional (False by defautl)
+            Check the new index for duplicates. Otherwise defer the check until necessary.
+            Setting to False will improve the performance of this method.
+
+        Returns
+        -------
+            DataFrame
+                _data with changed row labels.
+        """
 
         _set_index = self._data.set_index(keys, drop, append, inplace, verify_integrity)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = '_set_index'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _set_index
 
     def drop(self, labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise'):
+        """Remove rows or columns by specifying label names and corresponding axis, or by specifying directly index or
+           column names. When using a multi-index, labels on different levels can be removed by specifying the level.
+
+        Parameters
+        ----------
+        labels: String or array of String
+            Index or column labels to drop.
+        axis: String or Integer, optional (0 by default)
+            Whether to drop labels from the index (0 or ‘index’) or columns (1 or ‘columns’).
+        index: String or array of String, optional (None by defautl)
+            Alternative to specifying axis (labels, axis=0 is equivalent to index=labels).
+        columns: String or array of String, optional (None by defautl)
+            Alternative to specifying axis (labels, axis=1 is equivalent to columns=labels).
+        level: Integer or String, optional (None by defautl)
+            For MultiIndex, level from which the labels will be removed.
+        inplace: Boolean, optional (False by defautl)
+            If True, do operation inplace and return None. Otherwise, make a copy, do operations and return.
+        errors: String, optional ('raise' by default), options: ‘ignore’, ‘raise’.
+            If ‘ignore’, suppress error and only existing labels are dropped.
+
+        Returns
+        -------
+            DataFrame
+                _data without the removed index or column labels.
+
+        Raises
+        ------
+            KeyError
+            If any of the labels is not found in the selected axis.
+        """
 
         _drop = self._data.drop(labels, axis, index, columns, level, inplace, errors)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'drop'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _drop
 
     def duplicated(self, subset=None, keep='first'):
+        """Returns boolean Series denoting duplicate rows, optionally only considering certain columns.
+
+        Parameters
+        ----------
+        subset: String, array of String, optional (None by default)
+            Only consider certain columns for identifying duplicates, by default use all of the columns
+        keep: String, optional ('first' by default), options: first’, ‘last’, False.
+            first : Mark duplicates as True except for the first occurrence.
+            last : Mark duplicates as True except for the last occurrence.
+            False : Mark all duplicates as True.
+
+        Returns
+        -------
+            Series denoting duplicated rows.
+        """
 
         _duplicated = self._data.duplicated(subset, keep)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'duplicated'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _duplicated
 
     def shift(self, periods=1, freq=None, axis=0, fill_value=None):
+        """Shift index by desired number of periods with an optional time freq.
+
+        Parameters
+        ----------
+        periods: Integer, optional (1 by default)
+            Number of periods to shift. Can be positive or negative.
+        freq: pandas.DateOffset, pandas.Timedelta or string, optional(None by default).
+            Offset to use from the tseries module or time rule (e.g. ‘EOM’). If freq is specified then the index values
+            are shifted but the data is not realigned. That is, use freq if you would like to extend the index when
+            shifting and preserve the original data. When freq is not passed, shift the index without realigning the
+            data. If freq is passed (in this case, the index must be date or datetime, or it will raise a
+            NotImplementedError), the index will be increased using the periods and the freq.
+        axis: Integer, Strnig, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+            Shift direction.
+        fill_value: object, optional(None by default)
+            The scalar value to use for newly introduced missing values. the default depends on the dtype of self.
+            For numeric data, np.nan is used. For datetime, timedelta, or period data, etc.
+            NaT is used. For extension dtypes, self.dtype.na_value is used.
+
+        Returns
+        -------
+            A copy of the object, shifed.
+        """
 
         _shift = self._data.shift(periods, freq, axis, fill_value)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'shift'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _shift
 
     def any(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
+        """Inidicates if any element is True, potentially over an axis.
+        Returns False unless there at least one element within the Dataframe axis that is True or equivalent.
+
+        Prameters
+        ---------
+        axis: Integer or Strnig, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+            Indicate which axis or axes should be reduced.
+            0 / ‘index’ : reduce the index, return a Series whose index is the original column labels.
+            1 / ‘columns’ : reduce the columns, return a Series whose index is the original index.
+            None : reduce all axes, return a scalar.
+        bool_only: Boolean, optional (None by defautl)
+            Include only boolean columns.
+            If None, will attempt to use everything, then use only boolean data
+        skipna: Boolean, optional (True by defautl)
+            Exclude NA/null values. If the entire row/column is NA and skipna is True, then the result will be False,
+            as for an empty row/column. If skipna is False, then NA are treated as True,
+            because these are not equal to zero.
+        level: int or String(level name), optional (default None)
+            If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series.
+        kwargs: any, default None
+            Additional keywords have no effect but might be accepted for compatibility with NumPy.
+
+        Returns
+        -------
+        Series or DataFrame
+            If level is specified, then, DataFrame is returned; otherwise, Series is returned.
+        """
 
         _any = self._data.any(axis, bool_only, skipna, level, **kwargs)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'any'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _any
 
     def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
+        """Removes missing data.
 
+        axis: Integer or Strnig, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+            Determine if rows or columns which contain missing values are removed.
+            0, or ‘index’ : Drop rows which contain missing values.
+            1, or ‘columns’ : Drop columns which contain missing value.
+        how: String, optional ('any' by default), options: ‘any’, ‘all’
+            Determine if row or column is removed from DataFrame, when we have at least one NA or all NA.
+                ‘any’ : If any NA values are present, drop that row or column.
+                ‘all’ : If all values are NA, drop that row or column.
+        thresh: Integer, optional (None by default)
+            Require that many non-NA values.
+        subset: array-like, optional (None bu default)
+            Labels along other axis to consider,
+            e.g. if you are dropping rows these would be a list of columns to include.
+        inplace: boolean, optional (default False)
+            If True, do operation inplace and return None
+
+        Returns
+        -------
+        DataFrame with NA entries dropped from it.
+        """
         _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'dropna'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _dropna
 
     def isin(self, values):
+        """Determines whether each element in the DataFrame is contained in values.
+
+        values : iterable, Series, DataFrame or dict
+            The result will only be true at a location if all the labels match. If values is a Series,
+            that’s the index. If values is a dict, the keys must be the column names, which must match.
+            If values is a DataFrame, then both the index and column labels must match.
+
+        Returns
+        -------
+        DataFrame
+            DataFrame of booleans showing whether each element in the DataFrame is contained in values
+        """
 
         _isin = self._data.isin(values)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'isin'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return _isin
 
     def append(self, other, ignore_index=False, verify_integrity=False, sort=None):
+        """Append rows of other to the end of caller, returning a new object.
+        Columns in other that are not in the caller are added as new columns
 
+        Parameters
+        ----------
+        other : DataFrame or Series/dict-like object, or list of these
+            The data to append.
+        ignore_index : boolean, optional(False by default)
+            If True, do not use the index labels.
+        verify_integrity : boolean, optional (False by default)
+            If True, raise ValueError on creating index with duplicates.
+        sort : boolean, optional (None by default)
+            Sort columns if the columns of self and other are not aligned. The default sorting is deprecated and will
+            change to not-sorting in a future version of pandas. Explicitly pass sort=True to silence the warning and
+            sort. Explicitly pass sort=False to silence the warning and not sort.
+
+        Returns
+        -------
+        DataFrame
+            Dataframe with the appended data.
+        """
         _append = self._data.append(other, ignore_index, verify_integrity, sort)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'append'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
+
         return _append
 
     def nunique(self, axis=0, dropna=True):
+        """Count distinct observations over requested axis.
 
+        Parameters
+        ----------
+         axis : Integer or Strnig, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+            The axis to use. 0 or ‘index’ for row-wise, 1 or ‘columns’ for column-wise.
+        dropna : boolean, optional (default True)
+            Don’t include NaN in the counts.
+
+        Returns
+        -------
+        Series
+            Return Series with number of distinct observations
+        """
         _nunique = self._data.nunique(axis, dropna)
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'nunique'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
 
         return _nunique
 
@@ -1134,7 +1562,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_csv'
-        self._last_operation_mem_usag = finish - init
+        self._last_operation_mem_usage = finish - init
 
     # TODO: Ajeitar esse bug e deixar esse como central. erro nao entendi
     # def to_csv(self, path_or_buf=None, sep=',', na_rep='', float_format=None, columns=None, header=True, index=True,
@@ -1154,18 +1582,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
                        n_partitions=1)
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             return _dask
         elif (new_type == "pandas"):
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
-            self._last_operation_mem_usag = finish - init
+            self._last_operation_mem_usage = finish - init
             return self._data
 
     def get_type(self):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'get_type'
-        self._last_operation_mem_usag = 0
+        self._last_operation_mem_usage = 0
         return self._type
 
     def last_operation_time(self):
@@ -1183,7 +1611,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):  # dask sua
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-        return self.self._last_operation_mem_usag
+        return self.self._last_operation_mem_usage
 
     def mem(self, format):
         switcher = {
