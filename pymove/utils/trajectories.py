@@ -317,7 +317,7 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
 
     Examples
     --------
-    >>> from pymove.utils.utils import save_bbox
+    >>> from pymove.trajectories import save_bbox
     >>> bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
     >>> save_bbox(bbox, 'bbox.html')
 
