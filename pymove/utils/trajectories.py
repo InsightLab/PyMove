@@ -23,6 +23,7 @@ def read_csv(
     Reads a .csv file and structures the data into the desired structure supported by PyMove.
 
     Parameters
+
     ----------
     filename : String.
         Represents coordinates lat, lon which will be the center of the map.

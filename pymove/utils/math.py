@@ -3,45 +3,130 @@ import numpy as np
 
 
 def std(sum_sq, size, avg):
+    """
+    Compute standard deviation.
+
+    Parameters
+    ----------
+    sum_sq : float.
+        Represents the result of a summation of elements.
+
+    size : int.
+        Represents the size/number of elements.
+
+    avg: float.
+        Represents the result of a average of elements.
+
+    Returns
+    -------
+    float.
+        Represents the value of standart deviation.
+
+    References
+    ----------
+    squaring with * is over 3 times as fast as with **2
+    http://stackoverflow.com/questions/29046346/comparison-of-power-to-multiplication-in-python
+    """
     try:
-        # squaring with * is over 3 times as fast as with **2
-        # http://stackoverflow.com/questions/29046346/comparison-of-power-to-multiplication-in-python
-        result = math.sqrt(sum_sq / size - avg * avg)
+        result = math.sqrt(sum_sq/size - avg*avg)
     except ValueError:
         e = '(size - avg^2) (size=%s, avg=%s, sum_sq=%s) should be non negative, but is %s' % \
-            (size, avg, sum_sq, size - avg * avg)
+            (size, avg, sum_sq, size - avg*avg)
         raise ValueError(e)
     return result
 
 
-def avg_std(sum1, sum_sq, size):
-    avg = sum1 / size
+def avg_std(sum, sum_sq, size):
+    """
+    Compute the average of standard deviation.
+
+    Parameters
+    ----------
+    sum : float.
+        Represents the result of a summation of elements.
+
+    sum_sq: float.
+        Represents the result of a average of elements.
+
+    size : int.
+        Represents the size/number of elements.
+
+    Returns
+    -------
+    float.
+        Represents the value of average standart deviation.
+
+    """
+    avg = sum/size
     return avg, std(sum_sq, size, avg)
 
 
 def std_sample(sum_sq, size, avg):
-    return std(sum_sq, size, avg) * math.sqrt(size / (size - 1))
+    """
+    Compute the standard deviation of sample.
+
+    Parameters
+    ----------
+    sum_sq: float.
+        Represents the result of a summation of elements.
+
+    size : int.
+        Represents the size/number of elements.
+
+    avg : float.
+        Represents the average of elements.
+
+    Returns
+    -------
+    float.
+        Represents the value of standard deviation of sample.
+
+    """
+    return std(sum_sq, size, avg) * math.sqrt(size/(size-1))
 
 
 def avg_std_sample(sum1, sum_sq, size):
-    avg = sum1 / size
+    """
+    Compute the average of standard deviation of sample.
+
+    Parameters
+    ----------
+    sum1 : float.
+        Represents the summation elements.
+
+    sum_sq: float.
+        Represents the result of a summation of elements.
+
+    size : int.
+        Represents the size/number of elements.
+
+    Returns
+    -------
+    float.
+        Represents the value of average of standard deviation of sample.
+    """
+    avg = sum1/size
     return avg, std_sample(sum_sq, size, avg)
 
 
 # função está dando erro ao rodar
 def arrays_avg(values_array, weights_array=None):
-    """Computes the mean of the elements of the array.
+    """
+    Computes the mean of the elements of the array.
 
-    values_array : array of floats
+    Parameters
+    ----------
+    values_array : array.
         The numbers used to calculate the mean.
 
-    weights_array : array of floats
+    weights_array : array, optional, default None.
         Used to calculate the weighted average, indicates the weight of each element in the array (values_array).
 
     Returns
     -------
-        result : Float
-            The mean of the array elements.
+    result : float
+        The mean of the array elements.
+
     """
     n = len(values_array)
 
@@ -64,54 +149,61 @@ def arrays_avg(values_array, weights_array=None):
 
 
 def array_sum(values_array):
-    """Computes the sum of the elements of the array.
+    """
+    Computes the sum of the elements of the array.
 
-    values_array : array of floats
+    Parameters
+    ----------
+    values_array : list.
         The numbers to be added.
 
     Returns
     -------
-        sum1 : Float
-            The sum of the elements of the array
-    """
-    sum1 = 0
-    for item in values_array:
-        sum1 += item
+    sum_ : float.
+        The sum of the elements of the array.
 
-    return sum1
+    """
+    sum_ = 0
+    for item in values_array:
+        sum_ += item
+    return sum_
 
 
 def array_stats(values_array):
-    """Computes the sum of all the elements in the array, the sum of the square of each element and the number of
-        elements of the array.
+    """
+    Computes the sum of all the elements in the array, the sum of the square of each element and the number of
+    elements of the array.
 
+    Parameters
+    ----------
     values_array : array of floats
         The elements used to compute the operations
 
     Returns
     -------
-        sum1 : Float
-            The sum of all the elements in the array
+    sum_ : Float
+        The sum of all the elements in the array
 
-        sum_sq : Float
-            The sum of the square value of each element in the array
+    sum_sq : Float
+        The sum of the square value of each element in the array
 
-        n : Integer
-            The number of elements in the array
+    n : Integer
+        The number of elements in the array
+
     """
-    sum1 = 0
+    sum_ = 0
     sum_sq = 0
     n = 0
     for item in values_array:
-        sum1 += item
+        sum_ += item
         sum_sq += item * item
         n += 1
-
-    return sum1, sum_sq, n
+    return sum_, sum_sq, n
 
 
 def interpolation(x0, y0, x1, y1, x):
-    """Perfomers interpolation and extrapolation
+    """
+    Perfomers interpolation and extrapolation
 
     Parameters
     ----------
@@ -141,6 +233,7 @@ def interpolation(x0, y0, x1, y1, x):
     interpolation 2: (30, 3, 40, 5, 35) -> 4.0
     extrapolation 1: (30, 3, 40, 5, 25) -> 2.0
     extrapolation 2: (30, 3, 40, 5, 45) -> 6.0
+
     """
-    y = y0 + (y1 - y0) * ((x - x0) / (x1 - x0))
+    y = y0 + (y1 - y0) * ((x - x0)/(x1 - x0))
     return y
