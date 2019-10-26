@@ -1,3 +1,4 @@
+# coding=utf-8
 import time
 import dask
 import resource
@@ -986,14 +987,34 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def plot_trajs(self, figsize=(10, 10), return_fig=True, markers='o', markersize=20):
+        """Generate a visualization that show trajectories.
+
+        Parameters
+        ----------
+        figsize : tuple, optional, default (10, 10).
+            Represents dimensions of figure.
+        return_fig : bool, optional, default True.
+            Represents whether or not to save the generated picture.
+        markers : String, optional, default 'o'.
+            Represents visualization type marker.
+        markersize : int, optional, default 20.
+            Represents visualization size marker.
+
+        Returns
+        -------
+        fig : matplotlib.pyplot.figure
+            The generated picture.
+        """
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         fig = plt.figure(figsize=figsize)
-        ids = self._data["id"].unique()
 
+        ids = self._data["id"].unique()
         for id_ in ids:
             selfid = self._data[self._data["id"] == id_]
+
             plt.plot(selfid[LONGITUDE], selfid[LATITUDE], markers, markersize=markersize)
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -1008,13 +1029,34 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             return fig
 
     def plot_traj_id(self, tid, figsize=(10, 10)):
+        """Generate a visualization that shows a trajectory with the specified tid.
+
+        Parameters
+        ----------
+        tid : String.
+            Represents the trajectory tid.
+        figsize : tuple, optional, default (10,10).
+            Represents dimensions of figure.
+
+        Returns
+        -------
+        move_data : pymove.core.MoveDataFrameAbstract subclass.
+            Trajectory with the specified tid.
+
+        fig : matplotlib.pyplot.figure
+            The generated picture.
+        """
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         fig = plt.figure(figsize=figsize)
+
         if TID not in self._data:
             self.generate_tid_based_on_id_datatime()
+
         df_ = self._data[self._data[TID] == tid]
+
         plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)  # start point
         plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)  # end point
 
@@ -1048,9 +1090,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         dic_labels : dict
             Represents mapping of column's header between values passed on params.
 
-        Returns
-        -------
-
         Examples
         --------
         ======================= INFORMATION ABOUT DATASET =======================
@@ -1067,24 +1106,31 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         try:
             print('\n======================= INFORMATION ABOUT DATASET =======================\n')
             print('Number of Points: {}\n'.format(self._data.shape[0]))
+
             if TRAJ_ID in self._data:
                 print('Number of IDs objects: {}\n'.format(self._data[TRAJ_ID].nunique()))
+
             if TID in self._data:
                 print('Number of TIDs trajectory: {}\n'.format(self._data[TID].nunique()))
+
             if DATETIME in self._data:
                 print('Start Date:{}     End Date:{}\n'.format(self._data[DATETIME].min(),
                                                                self._data[DATETIME].max()))
+
             if LATITUDE and LONGITUDE in self._data:
                 print('Bounding Box:{}\n'.format(
                     self.get_bbox()))  # bbox return =  Lat_min , Long_min, Lat_max, Long_max)
+
             if TIME_TO_PREV in self._data:
                 print(
                     'Gap time MAX:{}     Gap time MIN:{}\n'.format(
                         round(self._data[TIME_TO_PREV].max(), 3),
                         round(self._data[TIME_TO_PREV].min(), 3)))
+
             if SPEED_TO_PREV in self._data:
                 print('Speed MAX:{}    Speed MIN:{}\n'.format(round(self._data[SPEED_TO_PREV].max(), 3),
                                                               round(self._data[SPEED_TO_PREV].min(), 3)))
+
             if DIST_TO_PREV in self._data:
                 print('Distance MAX:{}    Distance MIN:{}\n'.format(
                     round(self._data[DIST_TO_PREV].max(), 3),
@@ -1105,35 +1151,30 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
-        """
-        Finds and returns the minimum values for the requested axis of the dataframe.
+        """Returns and returns the minimum values for the requested axis of the dataframe.
 
         Parameters
         ----------
-        axis: Integer, None by default, {index (0), columns (1)}.
+        axis: int, None by default, {index (0), columns (1)}.
             Axis for the function to be applied on.
-
         skipna: bool, optional, default None.
-            Specifies whether NA / null values ​​should be discarded when calculating result.
-
-        level: Integer or String, optional, default None.
+            Exclude NA/null values when computing the result.
+        level: int or str, optional, default None.
             If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series.
-
         numeric_only: bool, optional (None by default)
             Include only float, int, boolean columns.
             If None, will attempt to use everything, then use only numeric data.
-
         kwargs:
             Additional keyword arguments to be passed to the function
 
         Returns
         -------
-        The minimum values for the request axis.
+        mim: Series or DataFrame (if level specified)
+            The minimum values for the request axis.
 
-        Notes
-        -----
-        for more informations : https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.min.html
-
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.min.html
         """
         _min = self._data.min(axis, skipna, level, numeric_only, **kwargs)
 
@@ -1144,33 +1185,30 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return _min
 
     def max(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
-        """Finds the maximum  values for the requested axis of the dataframe.
+        """Returns the maximum  values for the requested axis of the dataframe.
 
         Parameters
         ----------
-        axis: Integer, None by default, {index (0), columns (1)}
+        axis: int, None by default, {index (0), columns (1)}
             Axis for the function to be applied on.
-
         skipna: bool, optional(None by default).
-            Specifies whether NA / null values ​should be discarded when calculating result.
-
-        level: Integer or String, optional (None by default).
+            Exclude NA/null values when computing the result.
+        level: int or str, optional (None by default).
             If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series.
-
         numeric_only: bool, optional (None by default).
             Include only float, int, boolean columns.
             If None, will attempt to use everything, then use only numeric data.
-
         kwargs: keywords.
             Additional keyword arguments to be passed to the function.
 
         Returns
         -------
-        The minimum values for the request axis.
+        max: Series or DataFrame (if level specified)
+            The maximum values for the request axis.
 
-        Notes
-        -----
-        for more informations : https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.max.html
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.max.html
         """
 
         _max = self._data.max(axis, skipna, level, numeric_only, **kwargs)
@@ -1182,23 +1220,27 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return _max
 
     def count(self, axis=0, level=None, numeric_only=False):
-        """Uses the pandas's function count, to calculate the count of non-NA cells for each column or row.
+        """Uses the pandas's function count, to count the number of non-NA cells for each column or row.
 
         Parameters
         ----------
-        axis: Integer, None by default, {index (0), columns (1)}
+        axis: int, None by default, {index (0), columns (1)}
             if set to 0 or'index', will count for each column.
             if set to 1 or'columns', will count for each row.
-        level: Integer or String, optional (None by default)
+        level: int or str, optional (None by default)
             If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a DataFrame.
             A str specifies the level name
-        numeric_only: Boolean, optional (False by default)
+        numeric_only: bool, optional (False by default)
             If set to true, only float, int or boolean data, will be included.
 
         Returns
         --------
         A series or a DataFrame. 
             The number of non-NA/null entries for each column/row. If level is specified returns a DataFrame.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.count.html
         """
         
         _count = self._data.count(axis, level, numeric_only)
@@ -1209,22 +1251,31 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         
         return _count
 
-    def groupby(self, by=None, axis=0, level=None, as_index=True, sort=True, group_keys=True, squeeze=False,
-                observed=False, **kwargs):
+    def groupby(
+        self,
+        by=None,
+        axis=0,
+        level=None,
+        as_index=True,
+        sort=True,
+        group_keys=True,
+        squeeze=False,
+        observed=False,
+        **kwargs
+    ):
         """Groups DataFrame using a mapper or by a Series of columns.
         A groupby operation involves some combination of splitting the object, applying a function, and
         combining the results. This can be used to group large amounts of data and compute operations on these groups.
 
         Parameters
         ----------
-
         by : mapping, function, label, or list of labels, optional(None by default)
             Used to determine the groups for the groupby. If by is a function, it’s called on each value of the
             object’s index. If a dict or Series is passed, the Series or dict VALUES will be used to determine the
             groups (the Series’ values are first aligned; see .align() method). If an ndarray is passed, the values
             are used as-is determine the groups. A label or list of labels may be passed to group by the columns in
             self. Notice that a tuple is interpreted as a (single) key.
-        axis : Integer, None by default, {index (0), columns (1)}
+        axis : int, None by default, {index (0), columns (1)}
             Split along rows (0) or columns (1).
         level : Integer, level name, or sequence of such, optional (default None)
             If the axis is a MultiIndex (hierarchical), group by a particular level or levels.
@@ -1246,8 +1297,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        DataFrameGroupBy
+        DataFrameGroupBy:
             Returns groupby object that contains information about the groups.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html
         """
 
         _groupby = self._data.groupby(by, axis, level, as_index, sort, group_keys, squeeze, observed, **kwargs)
@@ -1262,22 +1317,22 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        subset: Integer or String, optional (None by default)
-            Used to specify a particular subset of columns to use to identify duplicates.
-            If set to None, all columns will be used.
-        keep: String, optional('first' by default)
-            if keep is set as first, all the duplicates except for the first occurrence will be dropped.
-            On the other hand if set to last, all duplicates except for the last occurrence will be dropped.
-            If set to False, all duplicates are dropped.
-        Inplace: Boolean, optional(False by default)
-            if set to true the original dataframe will be altered, the duplicates will be dropped in place,
-            otherwise the operation will be made in a copy, that will be returned.
-        numeric_only: Boolean, optional (False by default)
-            If set to true, only float, int or boolean data, will be included.
+        subset: int or str, optional (None by default)
+            Only consider certain columns for identifying duplicates, by default use all of the columns
+        keep: str, optional('first' by default)
+            - first : Drop duplicates except for the first occurrence.
+            - last : Drop duplicates except for the last occurrence.
+            - False : Drop all duplicates.
+        Inplace: bool, optional(False by default)
+            Whether to drop duplicates in place or to return a copy
 
         Returns
         --------
         PandasMoveDataFrame with the duplicates dropped.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html
         """
 
         _drop_duplicates = self._data.drop_duplicates(subset, keep, inplace)
@@ -1296,20 +1351,24 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         level: int, str, tuple, or list. Optional (None by default)
             Only the levels specify will be removed from the index. If set to None, all levels are removed.
         drop: boolean, optional (False by default)
-            If set to True, the index won't be inserted into the dataframe columns.
-        inplace: Boolean, optional(False by default)
-            if set to true the original dataframe will be altered, the duplicates will be dropped in place,
-            otherwise the operation will be made in a copy, that will be returned.
+            Do not try to insert index into dataframe columns. This resets the index to the default integer index.
+        inplace: bool, optional(False by default)
+            Modify the DataFrame in place (do not create a new object).
         col_level: int or str, default 0
             If the columns have multiple levels, determines which level the labels are inserted into.
-            By default it is inserted into the first level.
+            By default it is inserted into the first level..
         col_fill: object, default ‘’
             If the columns have multiple levels, determines how the other levels are named.
             If None then the index name is repeated.
 
         Returns
         -------
-        PandasMoveDataFrame with _data with a new index.
+        PandasMoveDataFrame
+            with _data with a new index.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html
         """
 
         _reset_index = self._data.reset_index(level, drop, inplace, col_level, col_fill)
@@ -1332,8 +1391,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Returns:
         --------
         class:`matplotlib.axes.Axes` or numpy.ndarray of them
-        If the backend is not the default matplotlib one, the return value
-        will be the object returned by the backend.
+            If the backend is not the default matplotlib one, the return value
+            will be the object returned by the backend.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.html
         """
 
         start = time.time()
@@ -1367,6 +1430,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Notes
         -----
         One of the parameters: include or exclude must be supplied.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.select_dtypes.html
         """
 
         _select_dtypes = self._data.select_dtypes(include, exclude)
@@ -1402,7 +1469,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        Dataframe with sorted values if inplace=False, None otherwise.
+        PandasDataframe:
+            _data with sorted values if inplace=False, None otherwise.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html
         """
 
         _sort_values = self._data.sort_values(by, axis, ascending, inplace, kind, na_position)
@@ -1422,19 +1494,24 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Use a numpy.dtype or Python type to cast entire pandas object to the same type. Alternatively,
             use {col: dtype, …}, where col is a column label and dtype is a numpy.dtype or Python type to
             cast one or more of the DataFrame’s columns to column-specific types.
-        copy: Boolean, optional(True by default)
+        copy: bool, optional(True by default)
             Return a copy when copy=True (be very careful setting copy=False as changes to values then
             may propagate to other pandas objects).
-        errors: String, optional('raise' by default), options: 'raise', 'ignore'
+        errors: str, optional('raise' by default), options: 'raise', 'ignore'
             Control raising of exceptions on invalid data for provided dtype.
-            raise : allow exceptions to be raised
-            ignore : suppress exceptions. On error return original object
+            - raise : allow exceptions to be raised
+            - ignore : suppress exceptions. On error return original object
         kwargs:
              keyword arguments to pass on to the constructor
 
         Returns
         -------
-        Casted _data to specified type.
+        DataFrame:
+            Casted _data to specified type.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html
         """
 
         _astype = self._data.astype(dtype, copy, errors, **kwargs)
@@ -1450,16 +1527,17 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        keys: String or array of String.
+        keys: str or array of String.
             label or array-like or list of labels/arrays. This parameter can be either a single column key, a single
-            array of the same length as the calling DataFrame, or a list containing an arbitrary combination of column keys and arrays.
-        drop: Boolean, optional (True by defautl)
+            array of the same length as the calling DataFrame, or a list containing an arbitrary combination of
+            column keys and arrays.
+        drop: bool, optional (True by defautl)
             Delete columns to be used as the new index.
-        append: Boolean, optional (False by defautl)
+        append: bool, optional (False by defautl)
             Whether to append columns to existing index.
-        inplace: Boolean, optional (False by defautl)
+        inplace: bool, optional (False by defautl)
             Modify the DataFrame in place (do not create a new object).
-        verify_integrity: Boolean, optional (False by defautl)
+        verify_integrity: bool, optional (False by defautl)
             Check the new index for duplicates. Otherwise defer the check until necessary.
             Setting to False will improve the performance of this method.
 
@@ -1467,6 +1545,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         -------
             DataFrame
                 _data with changed row labels.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.set_index.html
         """
 
         _set_index = self._data.set_index(keys, drop, append, inplace, verify_integrity)
@@ -1483,19 +1565,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        labels: String or array of String
+        labels: str or array of String
             Index or column labels to drop.
-        axis: String or Integer, optional (0 by default)
+        axis: str or int, optional (0 by default)
             Whether to drop labels from the index (0 or ‘index’) or columns (1 or ‘columns’).
-        index: String or array of String, optional (None by defautl)
+        index: str or array of string, optional (None by defautl)
             Alternative to specifying axis (labels, axis=0 is equivalent to index=labels).
-        columns: String or array of String, optional (None by defautl)
+        columns: str or array of string, optional (None by defautl)
             Alternative to specifying axis (labels, axis=1 is equivalent to columns=labels).
-        level: Integer or String, optional (None by defautl)
+        level: int or str, optional (None by defautl)
             For MultiIndex, level from which the labels will be removed.
-        inplace: Boolean, optional (False by defautl)
+        inplace: bool, optional (False by defautl)
             If True, do operation inplace and return None. Otherwise, make a copy, do operations and return.
-        errors: String, optional ('raise' by default), options: ‘ignore’, ‘raise’.
+        errors: str, optional ('raise' by default), options: ‘ignore’, ‘raise’.
             If ‘ignore’, suppress error and only existing labels are dropped.
 
         Returns
@@ -1507,6 +1589,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ------
             KeyError
             If any of the labels is not found in the selected axis.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html
         """
 
         _drop = self._data.drop(labels, axis, index, columns, level, inplace, errors)
@@ -1522,9 +1608,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        subset: String, array of String, optional (None by default)
+        subset: str, array of str, optional (None by default)
             Only consider certain columns for identifying duplicates, by default use all of the columns
-        keep: String, optional ('first' by default), options: first’, ‘last’, False.
+        keep: str, optional ('first' by default), options: first’, ‘last’, False.
             first : Mark duplicates as True except for the first occurrence.
             last : Mark duplicates as True except for the last occurrence.
             False : Mark all duplicates as True.
@@ -1532,6 +1618,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Returns
         -------
             Series denoting duplicated rows.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.duplicated.html
         """
 
         _duplicated = self._data.duplicated(subset, keep)
@@ -1547,7 +1637,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        periods: Integer, optional (1 by default)
+        periods: int, optional (1 by default)
             Number of periods to shift. Can be positive or negative.
         freq: pandas.DateOffset, pandas.Timedelta or string, optional(None by default).
             Offset to use from the tseries module or time rule (e.g. ‘EOM’). If freq is specified then the index values
@@ -1555,7 +1645,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             shifting and preserve the original data. When freq is not passed, shift the index without realigning the
             data. If freq is passed (in this case, the index must be date or datetime, or it will raise a
             NotImplementedError), the index will be increased using the periods and the freq.
-        axis: Integer, Strnig, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+        axis: int, str, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
             Shift direction.
         fill_value: object, optional(None by default)
             The scalar value to use for newly introduced missing values. the default depends on the dtype of self.
@@ -1564,7 +1654,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-            A copy of the object, shifed.
+            DataFrame
+                A copy of the original object, shifed.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.shift.html
         """
 
         _shift = self._data.shift(periods, freq, axis, fill_value)
@@ -1581,15 +1676,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Prameters
         ---------
-        axis: Integer or Strnig, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+        axis: int or str, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
             Indicate which axis or axes should be reduced.
-            0 / ‘index’ : reduce the index, return a Series whose index is the original column labels.
-            1 / ‘columns’ : reduce the columns, return a Series whose index is the original index.
-            None : reduce all axes, return a scalar.
-        bool_only: Boolean, optional (None by defautl)
+            - 0 / ‘index’ : reduce the index, return a Series whose index is the original column labels.
+            - 1 / ‘columns’ : reduce the columns, return a Series whose index is the original index.
+            - None : reduce all axes, return a scalar.
+        bool_only: bool, optional (None by defautl)
             Include only boolean columns.
             If None, will attempt to use everything, then use only boolean data
-        skipna: Boolean, optional (True by defautl)
+        skipna: bool, optional (True by defautl)
             Exclude NA/null values. If the entire row/column is NA and skipna is True, then the result will be False,
             as for an empty row/column. If skipna is False, then NA are treated as True,
             because these are not equal to zero.
@@ -1602,6 +1697,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         -------
         Series or DataFrame
             If level is specified, then, DataFrame is returned; otherwise, Series is returned.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.any.html
         """
 
         _any = self._data.any(axis, bool_only, skipna, level, **kwargs)
@@ -1615,25 +1714,32 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
         """Removes missing data.
 
-        axis: Integer or Strnig, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+        Prameters
+        ---------
+        axis: int or str, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
             Determine if rows or columns which contain missing values are removed.
-            0, or ‘index’ : Drop rows which contain missing values.
-            1, or ‘columns’ : Drop columns which contain missing value.
-        how: String, optional ('any' by default), options: ‘any’, ‘all’
+            - 0, or ‘index’ : Drop rows which contain missing values.
+            - 1, or ‘columns’ : Drop columns which contain missing value.
+        how: str, optional ('any' by default), options: ‘any’, ‘all’
             Determine if row or column is removed from DataFrame, when we have at least one NA or all NA.
-                ‘any’ : If any NA values are present, drop that row or column.
-                ‘all’ : If all values are NA, drop that row or column.
-        thresh: Integer, optional (None by default)
+               - ‘any’ : If any NA values are present, drop that row or column.
+               - ‘all’ : If all values are NA, drop that row or column.
+        thresh: int, optional (None by default)
             Require that many non-NA values.
         subset: array-like, optional (None bu default)
             Labels along other axis to consider,
             e.g. if you are dropping rows these would be a list of columns to include.
-        inplace: boolean, optional (default False)
+        inplace: bool, optional (default False)
             If True, do operation inplace and return None
 
         Returns
         -------
-        DataFrame with NA entries dropped from it.
+        DataFrame:
+            _data with NA entries dropped from it.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dropna.html
         """
         _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
 
@@ -1653,8 +1759,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        DataFrame
+        DataFrame:
             DataFrame of booleans showing whether each element in the DataFrame is contained in values
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.isin.html
         """
 
         _isin = self._data.isin(values)
@@ -1672,11 +1782,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         other : DataFrame or Series/dict-like object, or list of these
             The data to append.
-        ignore_index : boolean, optional(False by default)
+        ignore_index : bool, optional(False by default)
             If True, do not use the index labels.
-        verify_integrity : boolean, optional (False by default)
+        verify_integrity : bool, optional (False by default)
             If True, raise ValueError on creating index with duplicates.
-        sort : boolean, optional (None by default)
+        sort : bool, optional (None by default)
             Sort columns if the columns of self and other are not aligned. The default sorting is deprecated and will
             change to not-sorting in a future version of pandas. Explicitly pass sort=True to silence the warning and
             sort. Explicitly pass sort=False to silence the warning and not sort.
@@ -1684,7 +1794,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Returns
         -------
         DataFrame
-            Dataframe with the appended data.
+            _data with the appended data.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.append.html
         """
         _append = self._data.append(other, ignore_index, verify_integrity, sort)
 
@@ -1699,15 +1813,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-         axis : Integer or Strnig, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+         axis : int or str, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
             The axis to use. 0 or ‘index’ for row-wise, 1 or ‘columns’ for column-wise.
-        dropna : boolean, optional (default True)
+        dropna : bool, optional (default True)
             Don’t include NaN in the counts.
 
         Returns
         -------
         Series
             Return Series with number of distinct observations
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.unique.html
         """
         _nunique = self._data.nunique(axis, dropna)
 
@@ -1717,8 +1835,23 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return _nunique
 
-    # TODO: botar os parâmetros
     def to_csv(self, file_name, sep=',', encoding=None):
+        """Write object to a comma-separated values (csv) file.
+
+        Parameters
+        ----------
+        file_name: str
+            File path or object
+        sep: str
+            String of length 1. Field delimiter for the output file.
+        encoding: str, optional (None default)
+            A string representing the encoding to use in the output file, defaults to ‘utf-8’
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_csv.html
+        """
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
@@ -1739,46 +1872,111 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     # self._data.to_csv("teste3.csv")]
 
     def convert_to(self, new_type):
+        """Convert an object from one type to another specified by the user.
+
+        Parameters
+        ----------
+        new_type: str
+            The type for which the object will be converted.
+
+        Returns
+        -------
+        A subclass of MoveDataFrameAbstractModel
+            The converted object.
+        """
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_name = 'convert_to'
+
         if (new_type == "dask"):
-            _dask = DaskMoveDataFrame(self._data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID,
-                       n_partitions=1)
+            _dask = DaskMoveDataFrame(
+                                      self._data,
+                                      latitude=LATITUDE,
+                                      longitude=LONGITUDE,
+                                      datetime=DATETIME,
+                                      traj_id=TRAJ_ID,
+                                      n_partitions=1)
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_mem_usage = finish - init
+
             return _dask
+
         elif (new_type == "pandas"):
+
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_mem_usage = finish - init
+
             return self._data
 
     def get_type(self):
+        """Returns the type of the object.
+
+        Returns
+        -------
+        A string representing the type of the object.
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'get_type'
         self._last_operation_mem_usage = 0
         return self._type
 
     def last_operation_time(self):
+        """Returns the execution time of the last function, called to the PandasMoveDataFrame object.
+
+        Returns
+        -------
+        A string of the execution time of the last function, called to the PandasMoveDataFrame object.
+        """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         return self._last_operation_time_duration
 
     def last_operation_name(self):
+        """Returns the name of the last function, called to the PandasMoveDataFrame object.
+
+        Returns
+        -------
+        A string of the name of the last function, called to the PandasMoveDataFrame object.
+        """
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
         return self._last_operation_name
 
     def last_operation(self):
+        """Returns the memory usage calculation, in bytes, of the last function,
+           called to the PandasMoveDataFrame object.
+
+        Returns
+        -------
+        A string of the memory usage calculation, in bytes, of the last function,
+        called to the PandasMoveDataFrame object.
+        """
+
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         return self.self._last_operation_mem_usage
 
     def mem(self, format):
+        """Returns the memory usage calculation of the last function, called to the PandasMoveDataFrame object,
+        in the data format required by the user.
+
+        Parameters
+        ----------
+        format : str
+            The data format to which the memory calculation must be converted to.
+
+        Returns
+        -------
+        A string of the memory usage calculation of the last function, called to the PandasMoveDataFrame object.
+        """
+
         switcher = {
             B: self._last_operation_dict["mem_usage"],
             KB: self._last_operation_dict["mem_usage"] / 1024,
@@ -1849,15 +2047,87 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return self._data.head(n, npartitions, compute)
 
     def min(self, axis=None, skipna=True, split_every=False, out=None):
+        """Return the minimum of the values for the requested axis..
+
+        Parameters
+        ----------
+        axis: int, None by default, {index (0), columns (1)}.
+            Axis for the function to be applied on.
+        skipna: bool, optional, default None.
+            Exclude NA/null values when computing the result.
+        split_every:
+        out:
+
+        Returns
+        -------
+        max:Series or DataFrame (if level specified)
+            The minimum values for the request axis.
+
+        References
+        ----------
+        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.min
+        """
         return self._data.min(axis, skipna, split_every, out)
 
     def max(self, axis=None, skipna=True, split_every=False, out=None):
+        """Return the maximum of the values for the requested axis..
+
+        Parameters
+        ----------
+        axis: int, None by default, {index (0), columns (1)}.
+            Axis for the function to be applied on.
+        skipna: bool, optional, default None.
+            Exclude NA/null values when computing the result.
+        split_every:
+        out:
+
+        Returns
+        -------
+        max:Series or DataFrame (if level specified)
+            The maximum values for the request axis.
+
+        References
+        ----------
+        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.max
+        """
         return self._data.max(axis, skipna, split_every, out)
 
     def groupby(self, by=None, **kwargs):
+        """Groups dask DataFrame using a mapper or by a Series of columns.
+
+        Parameters
+        ----------
+        by : mapping, function, label, or list of labels, optional(None by default)
+            Used to determine the groups for the groupby.
+        **kwargs
+            Optional, only accepts keyword argument ‘mutated’ and is passed to groupby.
+
+        Returns
+        -------
+        DataFrameGroupBy:
+            Returns groupby object that contains information about the groups.
+
+        References
+        ----------
+        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.groupby
+        """
+
         return self._data.groupby(by)
 
     def convert_to(self, new_type):
+        """Convert an object from one type to another specified by the user.
+
+        Parameters
+        ----------
+        new_type: str
+            The type for which the object will be converted.
+
+        Returns
+        -------
+        A subclass of MoveDataFrameAbstractModel
+            The converted object.
+        """
+
         if (new_type == "dask"):
             return self._data
         elif (new_type == "pandas"):
@@ -1865,6 +2135,12 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             return PandasMoveDataFrame(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
 
     def get_type(self):
+        """Returns the type of the object.
+
+        Returns
+        -------
+        A string representing the type of the object.
+        """
         return self._type
 
     def get_users_number(self):
@@ -1922,63 +2198,86 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return 0
 
     def plot_trajs(self):
+        #Generate a visualization that show trajectories.
+        
         return 0
 
-    def plot_traj_id():
+    def plot_traj_id(self):
+        # Generate a visualization that shows a trajectory with the specified tid.
         return 0
 
     def show_trajectories_info(self):
+        # Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box.
         return 0
 
     def count(self):
+        # CountS the non-NA cells for each column or row.
         return 0
 
     def reset_index(self):
+        # Resets the dask DataFrame's index, and use the default one.
         return 0
 
     def plot(self):
+        # Plot the data of the dask DataFrame.
         return 0
 
     def drop_duplicates(self):
+        # Removes duplicated rows from the data.
         return 0
 
     def select_dtypes(self):
+        # Returns a subset of the dask DataFrame columns based on the column dtypes.
         return 0
 
     def sort_values(self):
+        # Sorts the values of the dask DataFrame.
         return 0
 
     def astype(self):
+        # Casts a dask object to a specified dtype.
         return 0
 
     def set_index(self):
+        # Set the dask DataFrame index (row labels) using one or more existing columns or arrays (of the correct length).
         return 0
 
     def drop(self):
+        # Drops specified rows or columns of the dask Dataframe.
         return 0
 
     def duplicated(self):
+        # Returns boolean Series denoting duplicate rows, optionally only considering certain columns.
         return 0
 
     def shift(self):
+        # Shifts dask dataFrame index by desired number of periods with an optional time freq.
         return 0
 
     def any(self):
+        # Inidicates if any element is True, potentially over an axis.
+        # Returns False unless there at least one element within the dask Dataframe axis that is True or equivalent.
         return 0
 
     def dropna(self):
+        # Removes missing data from dask DataFrame.
         return 0
 
     def isin(self):
+        # Determines whether each element in the dask DataFrame is contained in values.
         return 0
 
     def append(self):
+        # Append rows of other to the end of caller, returning a new object.
+        # Columns in other that are not in the caller are added as new columns
         return 0
 
     def nunique(self):
+        # Count distinct observations over requested axis.
         return 0
 
     def to_csv(self):
+        # Write object to a comma-separated values (csv) file.
         return 0
 
     def at(self):
@@ -1991,13 +2290,49 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return 0
 
     def last_operation_time(self):
+        """Returns the execution time of the last function, called to the PandasMoveDataFrame object.
+
+        Returns
+        -------
+        A string of the execution time of the last function, called to the PandasMoveDataFrame object.
+        """
+
         return self._last_operation_time_duration
 
     def last_operation_name(self):
+        """Returns the name of the last function, called to the PandasMoveDataFrame object.
+
+        Returns
+        -------
+        A string of the name of the last function, called to the PandasMoveDataFrame object.
+        """
+
         return self._last_operation_name
 
     def last_operation(self):
+        """Returns the memory usage calculation, in bytes, of the last function,
+           called to the PandasMoveDataFrame object.
+
+        Returns
+        -------
+        A string of the memory usage calculation, in bytes, of the last function,
+        called to the PandasMoveDataFrame object.
+        """
+
         return self._last_operation_dict
 
     def mem(self, format):
+        """Returns the memory usage calculation of the last function, called to the PandasMoveDataFrame object,
+        in the data format required by the user.
+
+        Parameters
+        ----------
+        format : str
+            The data format to which the memory calculation must be converted to.
+
+        Returns
+        -------
+        A string of the memory usage calculation of the last function, called to the PandasMoveDataFrame object.
+        """
+        
         return self._last_operation_dict['mem_usage']  # TODO ver a formula
