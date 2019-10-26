@@ -124,7 +124,7 @@ def arrays_avg(values_array, weights_array=None):
 
     Returns
     -------
-    result : float
+    result : float.
         The mean of the array elements.
 
     """
@@ -176,19 +176,19 @@ def array_stats(values_array):
 
     Parameters
     ----------
-    values_array : array of floats
-        The elements used to compute the operations
+    values_array : array.
+        The elements used to compute the operations.
 
     Returns
     -------
-    sum_ : Float
-        The sum of all the elements in the array
+    sum_ : float.
+        The sum of all the elements in the array.
 
-    sum_sq : Float
-        The sum of the square value of each element in the array
+    sum_sq : float
+        The sum of the square value of each element in the array.
 
-    n : Integer
-        The number of elements in the array
+    n : int.
+        The number of elements in the array.
 
     """
     sum_ = 0
@@ -207,24 +207,24 @@ def interpolation(x0, y0, x1, y1, x):
 
     Parameters
     ----------
-    x0 : float
-        The coordinate of the first point on the x axis
+    x0 : float.
+        The coordinate of the first point on the x axis.
 
-    y0 : float
-        The coordinate of the first point on the y axis
+    y0 : float.
+        The coordinate of the first point on the y axis.
 
-    x1 : float
-        The coordinate of the second point on the x axis
+    x1 : float.
+        The coordinate of the second point on the x axis.
 
-    y1 : float
-        The coordinate of the second point on the y axis
+    y1 : float.
+        The coordinate of the second point on the y axis.
 
-    x : float
-        A value in the interval (x0, x1)
+    x : float.
+        A value in the interval (x0, x1).
 
     Returns
     -------
-    y : float
+    y : float.
         Is the interpolated  or extrapolated value.
 
     Examples
