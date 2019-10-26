@@ -17,8 +17,9 @@ def read_csv(
     longitude=LONGITUDE,
     datetime=DATETIME,
     traj_id=TRAJ_ID,
-    type="pandas",
-    n_partitions=1):
+    type_="pandas",
+    n_partitions=1
+):
     """
     Reads a .csv file and structures the data into the desired structure supported by PyMove.
 
@@ -46,7 +47,7 @@ def read_csv(
     traj_id : String, optional, default 'id'.
         Represents the column name of feature id trajectory.
 
-    type : String, optional, default 'pandas'.
+    type_ : String, optional, default 'pandas'.
         Represents the type of                    \
 
     n_partitions : int, optional, default 1.
@@ -54,9 +55,8 @@ def read_csv(
 
     Returns
     -------
-    base_map : pymove.core.MoveDataFrameAbstract subclass.
-        Trajectory data with id specified.
-
+    pymove.core.MoveDataFrameAbstract subclass.
+        Trajectory data.
 
     """
     df = pd.read_csv(filename, sep=sep, encoding=encoding, parse_dates=['datetime'])
@@ -64,17 +64,38 @@ def read_csv(
     from pymove import PandasMoveDataFrame as pm
     from pymove import DaskMoveDataFrame as dm
 
-    if type == 'pandas':
+    if type_ == 'pandas':
         return pm(df, latitude, longitude, datetime, traj_id)
-    if type == 'dask':
+    if type_ == 'dask':
         return dm(df, latitude, longitude, datetime, traj_id, n_partitions)
 
 
 def format_labels(move_data, current_id, current_lat, current_lon, current_datetime):
     """
+    Format the labels for the PyMove lib pattern labels output = lat, lon and datatime.
 
-    Format the labels for the PyRoad lib pattern 
-        labels output = lat, lon and datatime
+    Parameters
+    ----------
+    move_data : pymove.core.MoveDataFrameAbstract subclass.
+        Input trajectory data.
+
+    current_id : String.
+        Represents the column name of feature id.
+
+    current_lat : String.
+        Represents the column name of feature latitude.
+
+    current_lon : String.
+        Represents the column name of feature longitude.
+
+    current_datetime : String.
+         Represents the column name of feature datetime.
+
+    Returns
+    -------
+    dic_labels : dict.
+        Represents a dict with mapping current columns of data to format of PyMove column.
+
     """ 
     dic_labels = {}
     dic_labels[TRAJ_ID] = current_id
@@ -84,14 +105,28 @@ def format_labels(move_data, current_id, current_lat, current_lon, current_datet
     return dic_labels
 
 
+#TODO: COmpletar as infos
 def log_progress(sequence, every=None, size=None, name='Items'):
     """
+    Make and display a progress bar.
 
-    :param sequence:
-    :param every:
-    :param size:
-    :param name:
-    :return:
+    Parameters
+    ----------
+    sequence : list.
+        Represents a elements sequence.
+
+    every : ?, optional, default None.
+        Represents the column name of feature id.
+
+    size : int, optional, default None.
+        Represents the size/number elements in sequence.
+
+    name : String, optional, default 'Items'.
+        Represents the name of ?.
+
+    Returns
+    -------
+
     """
     is_iterator = False
     if size is None:
@@ -104,7 +139,7 @@ def log_progress(sequence, every=None, size=None, name='Items'):
             if size <= 200:
                 every = 1
             else:
-                every = int(size / 200)     # every 0.5%
+                every = int(size/200)
     else:
         assert every is not None, 'sequence is iterator, set every'
 
@@ -122,10 +157,7 @@ def log_progress(sequence, every=None, size=None, name='Items'):
         for index, record in enumerate(sequence, 1):
             if index == 1 or index % every == 0:
                 if is_iterator:
-                    label.value = '{name}: {index} / ?'.format(
-                        name=name,
-                        index=index
-                    )
+                    label.value = '{name}: {index} / ?'.format(name=name, index=index)
                 else:
                     progress.value = index
                     label.value = u'{name}: {index} / {size}'.format(
@@ -140,20 +172,41 @@ def log_progress(sequence, every=None, size=None, name='Items'):
     else:
         progress.bar_style = 'success'
         progress.value = index
-        label.value = "{name}: {index}".format(
-            name=name,
-            index=str(index or '?')
-        )
+        label.value = "{name}: {index}".format(name=name, index=str(index or '?'))
 
 
+#TODO: COmpletar as infos
 def progress_update(size_processed, size_all, start_time, curr_perc_int, step_perc=1):
     """
-    update and print current progress.
-    e.g.
-    curr_perc_int, _ = pu.progress_update(size_processed, size_all, start_time, curr_perc_int)
-    returns: curr_perc_int_new, deltatime_str
+    Update and print current progress.
+
+    Parameters
+    ----------
+    size_processed : int.
+        Represents a number of elements already processed.
+
+    size_all : int.
+        Represents the number of elements.
+
+    start_time : int, optional, default None.
+        Represents the size/number elements in sequence.
+
+    curr_perc_int : ?
+        Represents the name of ?.
+
+    step_perc : int, optional, default 1.
+        Represents the name of ?.
+
+    Returns
+    -------
+    curr_perc_int_new : ?
+        Represents ?.
+
+    deltatime_str : ?
+        Represents ?.
+
     """
-    curr_perc_new = size_processed*100.0 / size_all
+    curr_perc_new = size_processed*100.0/size_all
     curr_perc_int_new = int(curr_perc_new)
     if curr_perc_int_new != curr_perc_int and curr_perc_int_new % step_perc == 0:
         deltatime = time.time() - start_time
@@ -161,7 +214,7 @@ def progress_update(size_processed, size_all, start_time, curr_perc_int, step_pe
         est_end = deltatime / curr_perc_new * 100
         est_time_str = deltatime_str(est_end - deltatime)
         print('({}/{}) {}% in {} - estimated end in {}'.format(size_processed, size_all, curr_perc_int_new, deltatime_str_, est_time_str))
-        return curr_perc_int_new, deltatime_str # aqui era pra ser deltatime_str_ não?
+        return curr_perc_int_new, deltatime_str
     else:
         return curr_perc_int_new, None
 
@@ -172,28 +225,29 @@ def shift(arr, num, fill_value=np.nan):
 
     Parameters
     ----------
-    arr : array
+    arr : array.
         The array to be shifed.
 
-    num : Integer
+    num : int.
         Number of periods to shift. Can be positive or negative. If posite, the elements will be pulled down, and pulled
         up otherwise.
 
-    fill_value : Integer, optional(np.nan by default)
+    fill_value : int, optional, default np.nan.
         The scalar value used for newly introduced missing values.
 
     Returns
     -------
-    result : array
+    result : array.
         A new array with the same shape and type as the initial given array, but with the indexes shifted.
 
     Notes
     -----
         Similar to pandas shift, but faster.
 
-    See also
+    References
     --------
         https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
+
     """
 
     result = np.empty_like(arr)
@@ -209,7 +263,7 @@ def shift(arr, num, fill_value=np.nan):
     return result
 
 
-# erro se tentar converter int para str e funcao n verifica isso
+# TODO: erro se tentar converter int para str e funcao n verifica isso
 def fill_list_with_new_values(original_list, new_list_values):
     """
     Copies elements from one list to another. The elements will be positioned in the same position in the new list as
@@ -217,11 +271,14 @@ def fill_list_with_new_values(original_list, new_list_values):
 
     Parameters
     ----------
-    original_list : array
-    The list to which the elements will be copied
+    original_list : list.
+        The list to which the elements will be copied.
 
-    new_list_values : array
-    The list from which elements will be copied
+    new_list_values : list.
+        The list from which elements will be copied.
+
+    Returns
+    -------
 
     """
     for i in range(len(new_list_values)):
@@ -243,13 +300,13 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     bbox_tuple : tuple.
         Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
 
-
     file : String.
         Represents filename.
 
     tiles : String, optional, default 'OpenStreetMap'.
         Represents tyles's type.
-        Example: 'openstreetmap', 'cartodbpositron', 'stamentoner', 'stamenterrain', 'mapquestopen', 'MapQuest Open Aerial', 'Mapbox Control Room' and 'Mapbox Bright'.
+        Example: 'openstreetmap', 'cartodbpositron', 'stamentoner', 'stamenterrain', 'mapquestopen',
+        'MapQuest Open Aerial', 'Mapbox Control Room' and 'Mapbox Bright'.
 
     color : String, optional, default 'red'.
         Represents color of lines on map.
