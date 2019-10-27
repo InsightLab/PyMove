@@ -231,9 +231,6 @@ def outliers(move_data, jump_coefficient=3.0, threshold=1, filter_out=False):
         return move_data
 
 
-"""----------------------  FUCTIONS TO DATA CLEANING   ----------------------------------- """
-
-
 def clean_duplicates(move_data, subset=None, keep="first", inplace=False, sort=True, return_idx=False):
     """Removes the duplicate rows of the Dataframe, optionally only certaind columns can be consider.
 

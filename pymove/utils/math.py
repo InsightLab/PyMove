@@ -36,13 +36,13 @@ def std(sum_sq, size, avg):
     return result
 
 
-def avg_std(sum, sum_sq, size):
+def avg_std(sum_, sum_sq, size):
     """
     Compute the average of standard deviation.
 
     Parameters
     ----------
-    sum : float.
+    sum_ : float.
         Represents the result of a summation of elements.
 
     sum_sq: float.
@@ -54,10 +54,13 @@ def avg_std(sum, sum_sq, size):
     Returns
     -------
     float.
-        Represents the value of average standart deviation.
+        Represents the value of average.
+
+    float.
+        Represents the value of standart deviation.
 
     """
-    avg = sum/size
+    avg = sum_/size
     return avg, std(sum_sq, size, avg)
 
 
@@ -85,13 +88,13 @@ def std_sample(sum_sq, size, avg):
     return std(sum_sq, size, avg) * math.sqrt(size/(size-1))
 
 
-def avg_std_sample(sum1, sum_sq, size):
+def avg_std_sample(sum_, sum_sq, size):
     """
     Compute the average of standard deviation of sample.
 
     Parameters
     ----------
-    sum1 : float.
+    sum_ : float.
         Represents the summation elements.
 
     sum_sq: float.
@@ -105,7 +108,7 @@ def avg_std_sample(sum1, sum_sq, size):
     float.
         Represents the value of average of standard deviation of sample.
     """
-    avg = sum1/size
+    avg = sum_/size
     return avg, std_sample(sum_sq, size, avg)
 
 
