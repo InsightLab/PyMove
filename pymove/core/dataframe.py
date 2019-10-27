@@ -56,11 +56,37 @@ class MoveDataFrame():
 
 
 class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
-    #TODO: Documentar
     def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID):
-        # formatar os labels que foram passados pro que usado no pymove -> format_labels
-        # renomeia as colunas do dado passado pelo novo dict
-        # cria o dataframe
+        """
+        Checks whether past data has 'lat', 'lon', 'datetime' columns, and renames it with the PyMove lib standard.
+        After starts the attributes of the class.
+        - self._data : Represents trajectory data.
+        - self._type : Represents the type of layer below the data structure.
+        - self._last_operation_name : Represents the last operation name performed.
+        - self._last_operation_mem_usage : Represents memory usage last operation performed.
+        - self._last_operation_time_duration : Represents time spent last operation performed.
+
+        Parameters
+        ----------
+        data : dict, list, numpy array or pandas.core.DataFrame
+            Input trajectory data.
+
+        latitude : String, optional, default 'lat'.
+            Represents column name latitude.
+
+        longitude : String, optional, default 'lon'.
+            Represents column name longitude.
+
+        datetime : String, optional, default 'datetime'.
+            Represents column name datetime.
+
+        traj_id : String, optional, default 'id'.
+            Represents column name trajectory id.
+
+        Returns
+        -------
+
+        """
         if isinstance(data, dict):
             data = pd.DataFrame.from_dict(data)
         elif (isinstance(data, list) or isinstance(data, np.ndarray)) and len(data) >= 4:
@@ -86,39 +112,75 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             print("Could not instantiate new MoveDataFrame because data has missing columns")
 
     @staticmethod
-    def _has_columns(self, data):
+    def _has_columns(data):
+        """
+        Checks whether past data has 'lat', 'lon', 'datetime' columns.
+
+        Parameters
+        ----------
+        data : dict, list, numpy array or pandas.core.DataFrame.
+            Input trajectory data.
+
+        Returns
+        -------
+        bool
+            Represents whether or not you have the required columns.
+
+        """
         if LATITUDE in data and LONGITUDE in data and DATETIME in data:
             return True
         return False
 
     @staticmethod
-    def _validate_move_data_frame(self, data):
-        # chama a função de validação
-        # deverá verificar se tem as colunas e os tipos
+    def _validate_move_data_frame(data):
+        """
+        Converts the column type to the default PyMove lib used.
+
+        Parameters
+        ----------
+        data : dict, list, numpy array or pandas.core.DataFrame.
+            Input trajectory data.
+
+        Returns
+        -------
+
+        """
         try:
-            if (data.dtypes.lat != 'float32'):
+            if data.dtypes.lat != 'float32':
                 data.lat.astype('float32')
-            if (data.dtypes.lon != 'float32'):
+            if data.dtypes.lon != 'float32':
                 data.lon.astype('float32')
-            if (data.dtypes.datetime != 'datetime64[ns]'):
+            if data.dtypes.datetime != 'datetime64[ns]':
                 data.datetime.astype('datetime64[ns]')
-        except AttributeError as erro:
-            print(erro)
+        except AttributeError:
+            print(AttributeError)
 
     @property
     def lat(self):
+        """
+        Checks for the 'lat' column and returns its value.
+
+        """
         if LATITUDE not in self:
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % LATITUDE)
         return self._data[LATITUDE]
 
     @property
     def lng(self):
+        """
+        Checks for the 'lon' column and returns its value.
+
+        """
         if LONGITUDE not in self:
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % LONGITUDE)
         return self._data[LONGITUDE]
 
     @property
     def datetime(self):
+        """
+        Checks for the 'datetime' column and returns its value.
+
+        """
         if DATETIME not in self:
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % DATETIME)
         return self._data[DATETIME]
@@ -236,7 +298,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.index.html#pandas.DataFrame.index
 
-
         """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'index'
@@ -337,38 +398,96 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def head(self, n=5):
-        _head = self._data.head(n)
+        """
+        Return the first n rows.
+
+        This function returns the first n rows for the object based on position. It is useful for quickly testing if
+        your object has the right type of data in it.
+
+        Parameters
+        ----------
+        n : int, default 5
+            Number of rows to select.
+
+        Returns
+        -------
+        head_ : same type as caller
+            The first n rows of the caller object.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.head.html
+
+        """
+        head_ = self._data.head(n)
         self._last_operation_time_duration = 0
         self._last_operation_name = 'head'
         self._last_operation_mem_usage = 0
-
-        return _head
+        return head_
 
     def get_users_number(self):
+        """
+        Check and return number of users in trajectory data.
 
+        Parameters
+        ----------
+
+        Returns
+        -------
+        number_ : int
+            Represents the number of users in trajectory data.
+
+        """
         if UID in self._data:
-            returno = self._data[UID].nunique()
+            number_ = self._data[UID].nunique()
         else:
-            retorno = 1
+            number_ = 1
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'get_users_number'
         self._last_operation_mem_usage = 0
-        return retorno
+        return number_
 
     def to_numpy(self):
+        """
+        Converts trajectory data to numpy array format.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        numpy_ : np.array
+            Represents the trajectory in numpy array format.
+
+        """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-        _numpy = self._data.values
+        numpy_ = self._data.values
 
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_numpy'
         self._last_operation_mem_usage = finish - init
-        return _numpy
+        return numpy_
 
     def write_file(self, file_name, separator=','):
+        """
+        Write trajectory data to a new file.
+
+        Parameters
+        ----------
+        file_name : String.
+            Represents the filename.
+
+        separator : String, optional, default ','.
+            Represents the informations separator in a new file.
+
+        Returns
+        -------
+
+        """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
@@ -380,42 +499,92 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = finish - init
 
     def len(self):
+        """
+        Returns the length/row numbers in trajectory data.
 
-        _len = self._data.shape[0]
+        Parameters
+        ---------
+
+        Returns
+        -------
+        len_ : int
+            Represents the trajectory data length.
+
+        """
+        len_ = self._data.shape[0]
 
         self._last_operation_time_duration = 0
         self._last_operation_name = 'len'
         self._last_operation_mem_usage = 0
-        return _len
+        return len_
 
     def to_dict(self):
+        """
+        Converts trajectory data to dict format.
 
+        Parameters
+        ----------
+
+        Returns
+        -------
+        dict_ : dict
+            Represents the trajectory in dict format.
+
+        """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-        _dict = self._data.to_dict()
+        dict_ = self._data.to_dict()
 
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_dict'
         self._last_operation_mem_usage = finish - init
-        return _dict
+        return dict_
 
     def to_grid(self, cell_size, meters_by_degree=lat_meters(-3.8162973555)):
+        """
+        Converts trajectory data to grid format.
 
+        Parameters
+        ----------
+        cell_size : float.
+            Represents grid cell size.
+
+        meters_by_degree : float, optional, default lat_meters(-3.8162973555).
+            Represents the corresponding meters of lat by degree.
+
+        Returns
+        -------
+        grid_ : pymove.core.grid
+            Represents the trajectory in grid format.
+
+        """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-        _grid = create_virtual_grid(cell_size, self.get_bbox(), meters_by_degree)
+        grid_ = create_virtual_grid(cell_size, self.get_bbox(), meters_by_degree)
 
         finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_grid'
         self._last_operation_mem_usage = finish - init
-        return _grid
+        return grid_
 
     def to_DataFrame(self):
+        """
+        Converts trajectory data to DataFrame format.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        pandas.core.DataFrame
+            Represents the trajectory in DataFrame format.
+
+        """
         self._last_operation_time_duration = 0
         self._last_operation_name = 'to_DataFrame'
         self._last_operation_mem_usage = 0
@@ -431,26 +600,26 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         - bbox = min Longitude , min Latitude , max Longitude , max Latitude
         Parameters
         ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
 
         Returns
         -------
-        bbox : tuple
+        bbox_ : tuple
             Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+
         Examples
         --------
         (22.147577, 113.54884299999999, 41.132062, 121.156224)
+
         """
 
         try:
-            _bbox = (self._data[LATITUDE].min(), self._data[LONGITUDE].min(), self._data[LATITUDE].max(),
+            bbox_ = (self._data[LATITUDE].min(), self._data[LONGITUDE].min(), self._data[LATITUDE].max(),
                      self._data[LONGITUDE].max())
 
             self._last_operation_time_duration = 0
             self._last_operation_name = 'get_bbox'
             self._last_operation_mem_usage = 0
-            return _bbox
+            return bbox_
         except Exception as e:
             self._last_operation_time_duration = 0
             self._last_operation_name = 'get_bbox'
@@ -460,11 +629,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     def generate_tid_based_on_id_datatime(self, str_format="%Y%m%d%H", sort=True, inplace=True):
         """
         Create or update trajectory id based on id e datetime.
+
         Parameters
         ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        str_format : String
+        str_format : String, optional, default "%Y%m%d%H".
             Contains informations about virtual grid, how
                 - lon_min_x: longitude mínima.
                 - lat_min_y: latitude miníma.
@@ -472,31 +640,32 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 - grid_size_lon_x: tamanho da longitude da grid.
                 - cell_size_by_degree: tamanho da célula da Grid.
             If value is none, the function ask user by dic_grid.
-        sort : boolean
+
+        sort : bool, optional, default True.
             Represents the state of dataframe, if is sorted. By default it's true.
+
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
         Returns
         -------
-        Examples
-        --------
-        ID = M00001 and datetime = 2019-04-28 00:00:56  -> tid = M000012019042800
-        >>> from pymove.utils.transformations import generate_tid_based_on_id_datatime
-        >>> generate_tid_based_on_id_datatime(df)
+
         """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
-            _data = self._data
+            data_ = self._data
         else:
-            _data = PandasMoveDataFrame(data=self._data)
+            data_ = PandasMoveDataFrame(data=self._data)
 
         try:
             print('\nCreating or updating tid feature...\n')
             if sort is True:
                 print('...Sorting by {} and {} to increase performance\n'.format(TRAJ_ID, DATETIME))
-                _data.sort_values([TRAJ_ID, DATETIME], inplace=True)
+                data_.sort_values([TRAJ_ID, DATETIME], inplace=True)
 
-            _data[TID] = _data[TRAJ_ID].astype(str) + _data[DATETIME].dt.strftime(str_format)
+            data_[TID] = data_[TRAJ_ID].astype(str) + data_[DATETIME].dt.strftime(str_format)
             print('\n...tid feature was created...\n')
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -505,7 +674,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
 
             if inplace == False:
-                return _data
+                return data_
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
@@ -513,36 +682,31 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
-    # TODO complementar oq ela faz
     def generate_date_features(self, inplace=True):
         """
         Create or update date feature.
 
         Parameters
         ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
 
         Returns
         -------
 
-        Examples
-        --------
-        >>> from pymove.utils.transformations import generate_date_features
-        >>> generate_date_features(df)
         """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
-            _data = self._data
+            data_ = self._data
         else:
-            _data = PandasMoveDataFrame(data=self._data)
+            data_ = PandasMoveDataFrame(data=self._data)
 
         try:
             print('Creating date features...')
-            if DATETIME in _data:
-                _data['date'] = _data[DATETIME].dt.date
+            if DATETIME in data_:
+                data_['date'] = data_[DATETIME].dt.date
                 print('..Date features was created...\n')
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -551,7 +715,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
 
             if inplace == False:
-                return _data
+                return data_
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
@@ -559,33 +723,31 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
-    # TODO complementar oq ela faz
     def generate_hour_features(self, inplace=True):
         """
         Create or update hour feature.
+
         Parameters
         ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
         Returns
         -------
-        Examples
-        --------
-        >>> from pymove.utils.transformations import generate_hour_features
-        >>> generate_date_features(df)
+
         """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
-            _data = self._data
+            data_ = self._data
         else:
-            _data = PandasMoveDataFrame(data=self._data)
+            data_ = PandasMoveDataFrame(data=self._data)
 
         try:
             print('\nCreating or updating a feature for hour...\n')
-            if DATETIME in _data:
-                _data['hour'] = _data[DATETIME].dt.hour
+            if DATETIME in data_:
+                data_['hour'] = data_[DATETIME].dt.hour
                 print('...Hour feature was created...\n')
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -594,7 +756,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
 
             if inplace == False:
-                return _data
+                return data_
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
@@ -602,41 +764,39 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
-    # TODO: botar inplace
     def generate_day_of_the_week_features(self, inplace=True):
         """
         Create or update a feature day of the week from datatime.
+
         Parameters
         ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
         Returns
         -------
-        Examples
-        --------
-        Exampĺe: datetime = 2019-04-28 00:00:56  -> day = Sunday
-        >>> from pymove.utils.transformations import generate_day_of_the_week_features
-        >>> generate_day_of_the_week_features(df)
+
         """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
-            _data = self._data
+            data_ = self.data_
         else:
-            _data = PandasMoveDataFrame(data=self._data)
+            data_ = PandasMoveDataFrame(data=self._data)
 
         try:
             print('\nCreating or updating day of the week feature...\n')
-            _data[DAY] = _data[DATETIME].dt.day_name()
+            data_[DAY] = data_[DATETIME].dt.day_name()
             print('...the day of the week feature was created...\n')
+
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_day_of_the_week_features'
             self._last_operation_mem_usage = finish - init
 
             if inplace == False:
-                return _data
+                return data_
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
@@ -644,14 +804,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
-    # TODO: botar inplace
     def generate_time_of_day_features(self, inplace=True):
         """
         Create a feature time of day or period from datatime.
+
         Parameters
         ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
+         inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
         Returns
         -------
         Examples
@@ -660,26 +821,26 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         - datetime2 = 2019-04-28 08:00:56 -> period = morning
         - datetime3 = 2019-04-28 14:00:56 -> period = afternoon
         - datetime4 = 2019-04-28 20:00:56 -> period = evening
-        >>> from pymove.utils.transformations import generate_time_of_day_features
-        >>> generate_time_of_day_features(df)
+
         """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
-            _data = self._data
+            data_ = self._data
         else:
-            _data = PandasMoveDataFrame(data=self._data)
+            data_ = PandasMoveDataFrame(data=self._data)
 
         try:
-            print(
-                '\nCreating or updating period feature\n...early morning from 0H to 6H\n...morning from 6H to 12H\n...afternoon from 12H to 18H\n...evening from 18H to 24H')
-            conditions = [(_data[DATETIME].dt.hour >= 0) & (_data[DATETIME].dt.hour < 6),
-                          (_data[DATETIME].dt.hour >= 6) & (_data[DATETIME].dt.hour < 12),
-                          (_data[DATETIME].dt.hour >= 12) & (_data[DATETIME].dt.hour < 18),
-                          (_data[DATETIME].dt.hour >= 18) & (_data[DATETIME].dt.hour < 24)]
+            print('\nCreating or updating period feature\n...early morning from 0H to 6H\n... \
+            morning from 6H to 12H\n...afternoon from 12H to 18H\n...evening from 18H to 24H')
+
+            conditions = [(data_[DATETIME].dt.hour >= 0) & (data_[DATETIME].dt.hour < 6),
+                          (data_[DATETIME].dt.hour >= 6) & (data_[DATETIME].dt.hour < 12),
+                          (data_[DATETIME].dt.hour >= 12) & (data_[DATETIME].dt.hour < 18),
+                          (data_[DATETIME].dt.hour >= 18) & (data_[DATETIME].dt.hour < 24)]
             choices = ['early morning', 'morning', 'afternoon', 'evening']
-            _data[PERIOD] = np.select(conditions, choices, 'undefined')
+            data_[PERIOD] = np.select(conditions, choices, 'undefined')
             print('...the period of day feature was created')
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -688,7 +849,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
 
             if inplace == False:
-                return _data
+                return data_
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
@@ -696,37 +857,41 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
-    # TODO complementar oq ela faz
     def generate_dist_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
         """
-         Create three distance in meters to an GPS point P (lat, lon).
+        Create three distance in meters to an GPS point P (lat, lon).
+
         Parameters
         ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        label_id : String
-            Represents name of column of trajectore's id. By default it's 'id'.
-        label_dtype : String
-            Represents column id type. By default it's np.float64.
-        sort : boolean
-            Represents the state of dataframe, if is sorted. By default it's true.
+        label_id : String, optional, default 'id'.
+            Represents name of column of trajectore's id.
+
+        label_dtype : type, optional, default np.float64.
+            Represents column id type.
+
+        sort : bool, optional, default True.
+            Represents the state of dataframe, if is sorted.
+
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
         Returns
         -------
+
         Examples
         --------
         Example:    P to P.next = 2 meters
                     P to P.previous = 1 meter
                     P.previous to P.next = 1 meters
-        >>> from pymove.utils.transformations import generate_dist_features
-        >>> generate_dist_features(df)
+
         """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
-            _data = self._data
+            data_ = self._data
         else:
-            _data = PandasMoveDataFrame(data=self._data)
+            data_ = PandasMoveDataFrame(data=self._data)
 
         try:
             print('\nCreating or updating distance features in meters...\n')
@@ -734,55 +899,55 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
             if sort is True:
                 print('...Sorting by {} and {} to increase performance\n'.format(label_id, DATETIME))
-                _data.sort_values([label_id, DATETIME], inplace=True)
+                data_.sort_values([label_id, DATETIME], inplace=True)
 
-            if _data.index.name is None:
+            if data_.index.name is None:
                 print('...Set {} as index to increase attribution performance\n'.format(label_id))
-                _data.set_index(label_id, inplace=True)
+                data_.set_index(label_id, inplace=True)
 
             """ create ou update columns"""
-            _data[DIST_TO_PREV] = label_dtype(-1.0)
-            _data[DIST_TO_NEXT] = label_dtype(-1.0)
-            _data[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
+            data_[DIST_TO_PREV] = label_dtype(-1.0)
+            data_[DIST_TO_NEXT] = label_dtype(-1.0)
+            data_[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
 
-            ids = _data.index.unique()
-            selfsize = _data.shape[0]
+            ids = data_.index.unique()
+            selfsize = data_.shape[0]
             curr_perc_int = -1
             start_time = time.time()
             deltatime_str = ''
             sum_size_id = 0
             size_id = 0
             for idx in ids:
-                curr_lat = _data.at[idx, LATITUDE]
-                curr_lon = _data.at[idx, LONGITUDE]
+                curr_lat = data_.at[idx, LATITUDE]
+                curr_lon = data_.at[idx, LONGITUDE]
 
                 size_id = curr_lat.size
 
                 if size_id <= 1:
                     print('...id:{}, must have at least 2 GPS points\n'.format(idx))
-                    _data.at[idx, DIST_TO_PREV] = np.nan
+                    data_.at[idx, DIST_TO_PREV] = np.nan
 
                 else:
                     prev_lat = shift(curr_lat, 1)
                     prev_lon = shift(curr_lon, 1)
                     # compute distance from previous to current point
-                    _data.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
+                    data_.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
 
                     next_lat = shift(curr_lat, -1)
                     next_lon = shift(curr_lon, -1)
                     # compute distance to next point
-                    _data.at[idx, DIST_TO_NEXT] = haversine(curr_lat, curr_lon, next_lat, next_lon)
+                    data_.at[idx, DIST_TO_NEXT] = haversine(curr_lat, curr_lon, next_lat, next_lon)
 
                     # using pandas shift in a large dataset: 7min 21s
                     # using numpy shift above: 33.6 s
 
                     # use distance from previous to next
-                    _data.at[idx, DIST_PREV_TO_NEXT] = haversine(prev_lat, prev_lon, next_lat, next_lon)
+                    data_.at[idx, DIST_PREV_TO_NEXT] = haversine(prev_lat, prev_lon, next_lat, next_lon)
 
                     sum_size_id += size_id
                     curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int,
                                                                   step_perc=20)
-            _data.reset_index(inplace=True)
+            data_.reset_index(inplace=True)
             print('...Reset index\n')
             print('..Total Time: {}'.format((time.time() - start_time)))
 
@@ -792,7 +957,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
 
             if inplace == False:
-                return _data
+                return data_
         except Exception as e:
             print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -803,38 +968,41 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
         """
-        Firstly, create three distance to an GPS point P (lat, lon)
-        After, create two feature to time between two P: time to previous and time to next
-        Lastly, create two feature to speed using time and distance features
+        Firstly, create three distance to an GPS point P (lat, lon).
+        After, create two feature to time between two P: time to previous and time to next.
+        Lastly, create two feature to speed using time and distance features.
+
         Parameters
         ----------
-        self : pandas.core.frame.DataFrame
-            Represents the dataset with contains lat, long and datetime.
-        label_id : String
-            Represents name of column of trajectore's id. By default it's 'id'.
-        label_dtype : String
-            Represents column id type. By default it's np.float64.
-        sort : boolean
-            Represents the state of dataframe, if is sorted. By default it's true.
-        inplace : boolean
-            Represents te of dataframe, if is sorted. By default it's true.
+        label_id : String, optional, default 'id'.
+            Represents name of column of trajectore's id.
+
+        label_dtype : type, optional, default np.float64.
+            Represents column id type.
+
+        sort : bool, optional, default True.
+            Represents the state of dataframe, if is sorted.
+
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
         Returns
         -------
+
         Examples
         --------
         Example:    dist_to_prev =  248.33 meters, dist_to_prev 536.57 meters
                     time_to_prev = 60 seconds, time_prev = 60.0 seconds
                     speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
-        >>> from pymove.utils.transformations import generate_dist_time_speed_features
-        >>> generate_dist_time_speed_features(df)
+
         """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
-            _data = self._data
+            data_ = self._data
         else:
-            _data = PandasMoveDataFrame(data=self._data)
+            data_ = PandasMoveDataFrame(data=self._data)
 
         try:
             print('\nCreating or updating distance, time and speed features in meters by seconds\n')
@@ -842,61 +1010,61 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
             if sort is True:
                 print('...Sorting by {} and {} to increase performance\n'.format(label_id, DATETIME))
-                _data.sort_values([label_id, DATETIME], inplace=True)
+                data_.sort_values([label_id, DATETIME], inplace=True)
 
-            if _data.index.name is None:
+            if data_.index.name is None:
                 print('...Set {} as index to a higher peformance\n'.format(label_id))
-                _data.set_index(label_id, inplace=True)
+                data_.set_index(label_id, inplace=True)
 
             """create new feature to time"""
-            _data[DIST_TO_PREV] = label_dtype(-1.0)
+            data_[DIST_TO_PREV] = label_dtype(-1.0)
 
             """create new feature to time"""
-            _data[TIME_TO_PREV] = label_dtype(-1.0)
+            data_[TIME_TO_PREV] = label_dtype(-1.0)
 
             """create new feature to speed"""
-            _data[SPEED_TO_PREV] = label_dtype(-1.0)
+            data_[SPEED_TO_PREV] = label_dtype(-1.0)
 
-            ids = _data.index.unique()
-            selfsize = _data.shape[0]
+            ids = data_.index.unique()
+            selfsize = data_.shape[0]
             curr_perc_int = -1
             sum_size_id = 0
             size_id = 0
 
             for idx in ids:
-                curr_lat = _data.at[idx, LATITUDE]
-                curr_lon = _data.at[idx, LONGITUDE]
+                curr_lat = data_.at[idx, LATITUDE]
+                curr_lon = data_.at[idx, LONGITUDE]
 
                 size_id = curr_lat.size
 
                 if size_id <= 1:
                     print('...id:{}, must have at least 2 GPS points\n'.format(idx))
-                    _data.at[idx, DIST_TO_PREV] = np.nan
-                    _data.at[idx, TIME_TO_PREV] = np.nan
-                    _data.at[idx, SPEED_TO_PREV] = np.nan
+                    data_.at[idx, DIST_TO_PREV] = np.nan
+                    data_.at[idx, TIME_TO_PREV] = np.nan
+                    data_.at[idx, SPEED_TO_PREV] = np.nan
                 else:
                     prev_lat = shift(curr_lat, 1)
                     prev_lon = shift(curr_lon, 1)
                     prev_lon = shift(curr_lon, 1)
                     # compute distance from previous to current point
-                    _data.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
+                    data_.at[idx, DIST_TO_PREV] = haversine(prev_lat, prev_lon, curr_lat, curr_lon)
 
-                    time_ = _data.at[idx, DATETIME].astype(label_dtype)
+                    time_ = data_.at[idx, DATETIME].astype(label_dtype)
                     time_prev = (time_ - shift(time_, 1)) * (10 ** -9)
-                    _data.at[idx, TIME_TO_PREV] = time_prev
+                    data_.at[idx, TIME_TO_PREV] = time_prev
 
                     """ set time_to_next"""
                     # time_next = (ut.shift(time_, -1) - time_)*(10**-9)
                     # self.at[idx, dic_features_label['time_to_next']] = time_next
 
                     "set Speed features"
-                    _data.at[idx, SPEED_TO_PREV] = _data.at[idx, DIST_TO_PREV] / (time_prev)  # unit: m/s
+                    data_.at[idx, SPEED_TO_PREV] = data_.at[idx, DIST_TO_PREV]/time_prev  # unit: m/s
 
                     sum_size_id += size_id
                     curr_perc_int, est_time_str = progress_update(sum_size_id, selfsize, start_time, curr_perc_int,
                                                                   step_perc=20)
             print('...Reset index...\n')
-            _data.reset_index(inplace=True)
+            data_.reset_index(inplace=True)
             print('..Total Time: {:.3f}'.format((time.time() - start_time)))
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -905,7 +1073,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
 
             if inplace == False:
-                return _data
+                return data_
         except Exception as e:
             print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -915,24 +1083,42 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def generate_move_and_stop_by_radius(self, radius=0, target_label=DIST_TO_PREV, inplace=True):
+        """
+        Create or update column with move and stop points by radius.
+
+        Parameters
+        ----------
+        radius : int, optional, default 0.
+            Represents radius.
+
+        target_label : String, optional, default 'dist_to_prev.
+            Represents column id type.
+
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
+        Returns
+        -------
+
+        """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
-            _data = self._data
+            data_ = self._data
         else:
-            _data = PandasMoveDataFrame(data=self._data)
+            data_ = PandasMoveDataFrame(data=self._data)
 
         if DIST_TO_PREV not in self._data:
-            _data.generate_dist_features()
+            data_.generate_dist_features()
 
         try:
             print('\nCreating or updating features MOVE and STOPS...\n')
-            conditions = (_data[target_label] > radius), (_data[target_label] <= radius)
+            conditions = (data_[target_label] > radius), (data_[target_label] <= radius)
             choices = ['move', 'stop']
 
-            _data["situation"] = np.select(conditions, choices, np.nan)
-            print('\n....There are {} stops to this parameters\n'.format(_data[_data["situation"] == 'stop'].shape[0]))
+            data_["situation"] = np.select(conditions, choices, np.nan)
+            print('\n....There are {} stops to this parameters\n'.format(data_[data_["situation"] == 'stop'].shape[0]))
 
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
@@ -940,7 +1126,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
 
             if inplace == False:
-                return _data
+                return data_
         except Exception as e:
             finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
@@ -949,7 +1135,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def time_interval(self):
+        """
+        Get time difference between max and min datetime in trajectory data.
 
+        Parameters
+        ----------
+
+        Returns
+        -------
+        time_diff : datetime64
+            Represents the time difference.
+
+        """
         time_diff = self._data[DATETIME].max() - self._data[DATETIME].min()
 
         self._last_operation_time_duration = 0
@@ -958,13 +1155,34 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return time_diff
 
     def plot_all_features(self, figsize=(21, 15), dtype=np.float64, save_fig=True, name='features.png'):
+        """
+        Generate a visualization for each columns that type is equal dtype.
+
+        Parameters
+        ----------
+        figsize : tuple, optional, default (21, 15).
+            Represents dimensions of figure.
+
+        dtype : type, optional, default np.float64.
+            Represents column type.
+
+        save_fig : bool, optional, default True.
+            Represents whether or not to save the generated picture.
+
+        name : String, optional, default 'features.png'.
+            Represents name of a file.
+
+        Returns
+        -------
+
+        """
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         try:
             col_float = self._data.select_dtypes(include=[dtype]).columns
             tam = col_float.size
-            if (tam > 0):
+            if tam > 0:
                 fig, ax = plt.subplots(tam, 1, figsize=figsize)
                 ax_count = 0
                 for col in col_float:
@@ -2007,43 +2225,102 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         else:
             print("erroo")
 
-    def _has_columns(self, data):
-        if (LATITUDE in data and LONGITUDE in data and DATETIME in data):
+    @staticmethod
+    def _has_columns(data):
+        """
+        Checks whether past data has 'lat', 'lon', 'datetime' columns.
+
+        Parameters
+        ----------
+        data : dict, list, numpy array or pandas.core.DataFrame.
+            Input trajectory data.
+
+        Returns
+        -------
+        bool
+            Represents whether or not you have the required columns.
+        """
+        if LATITUDE in data and LONGITUDE in data and DATETIME in data:
             return True
         return False
 
-    def _validate_move_data_frame(self, data):
-        # chama a função de validação
-        # deverá verificar se tem as colunas e os tipos
+    @staticmethod
+    def _validate_move_data_frame(data):
+        """
+        Converts the column type to the default PyMove lib used.
+
+        Parameters
+        ----------
+        data : dict, list, numpy array or pandas.core.DataFrame.
+            Input trajectory data.
+
+        Returns
+        -------
+        """
         try:
-            if (data.dtypes.lat != 'float32'):
+            if data.dtypes.lat != 'float32':
                 data.lat.astype('float32')
-            if (data.dtypes.lon != 'float32'):
+            if data.dtypes.lon != 'float32':
                 data.lon.astype('float32')
-            if (data.dtypes.datetime != 'datetime64[ns]'):
+            if data.dtypes.datetime != 'datetime64[ns]':
                 data.lon.astype('datetime64[ns]')
         except AttributeError as erro:
             print(erro)
 
     @property
     def lat(self):
+        """
+        Checks for the 'lat' column and returns its value.
+
+        """
         if LATITUDE not in self:
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % LATITUDE)
         return self[LATITUDE]
 
     @property
     def lng(self):
+        """
+        Checks for the 'lon' column and returns its value.
+
+        """
         if LONGITUDE not in self:
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % LONGITUDE)
         return self[LONGITUDE]
 
     @property
     def datetime(self):
+        """
+        Checks for the 'datetime' column and returns its value
+
+        """
         if DATETIME not in self:
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % DATETIME)
         return self[DATETIME]
 
     def head(self, n=5, npartitions=1, compute=True):
+        """
+        Return the first n rows.
+
+        This function returns the first n rows for the object based on position. It is useful for quickly testing if
+        your object has the right type of data in it.
+
+        Parameters
+        ----------
+        n : int, optional, default 5
+            Number of rows to select.
+
+        npartitions : int, optional, default 1.
+            Represents the number partitions.
+
+        compute : bool, optional, default True.
+            Represents ?
+
+        Returns
+        -------
+        same type as caller
+            The first n rows of the caller object.
+
+        """
         return self._data.head(n, npartitions, compute)
 
     def min(self, axis=None, skipna=True, split_every=False, out=None):
@@ -2144,62 +2421,267 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return self._type
 
     def get_users_number(self):
+        """
+        Check and return number of users in trajectory data.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        int
+            Represents the number of users in trajectory data.
+
+        """
         return 0
 
     def time_interval(self):
+        """
+        Get time difference between max and min datetime in trajectory data.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        datetime64
+            Represents the time difference.
+
+        """
         return 0
 
     def to_numpy(self):
+        """
+        Converts trajectory data to numpy array format.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        np.array
+            Represents the trajectory in numpy array format.
+
+        """
         return 0
 
     def write_file(self):
+        """
+        Write trajectory data to a new file.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
         return 0
 
     def len(self):
+        """
+        Returns the length/row numbers in trajectory data.
+
+        Parameters
+        ---------
+
+        Returns
+        -------
+        int
+            Represents the trajectory data length.
+
+        """
         return 0
 
     def to_dict(self):
+        """
+        Converts trajectory data to dict format.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        dict
+            Represents the trajectory in dict format.
+
+        """
         return 0
 
     def to_grid(self):
+        """
+        Converts trajectory data to grid format.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        pymove.core.grid
+            Represents the trajectory in grid format.
+
+        """
         return 0
 
     def generate_tid_based_on_id_datatime(self):
+        """
+        Create or update trajectory id based on id e datetime.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
         return 0
 
     def generate_date_features(self):
+        """
+        Create or update date feature.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
         return 0
 
     def generate_hour_features(self):
+        """
+        Create or update hour feature.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
         return 0
 
     def generate_day_of_the_week_features(self):
+        """
+        Create or update a feature day of the week from datatime.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
         return 0
 
     def generate_time_of_day_features(self):
+        """
+        Create a feature time of day or period from datatime.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        Examples
+        --------
+        - datetime1 = 2019-04-28 02:00:56 -> period = early morning
+        - datetime2 = 2019-04-28 08:00:56 -> period = morning
+        - datetime3 = 2019-04-28 14:00:56 -> period = afternoon
+        - datetime4 = 2019-04-28 20:00:56 -> period = evening
+
+        """
         return 0
 
     def generate_dist_features(self):
         return 0
 
     def generate_dist_time_speed_features(self):
+        """
+        Firstly, create three distance to an GPS point P (lat, lon).
+        After, create two feature to time between two P: time to previous and time to next.
+        Lastly, create two feature to speed using time and distance features.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        Examples
+        --------
+        Example:    dist_to_prev =  248.33 meters, dist_to_prev 536.57 meters
+                    time_to_prev = 60 seconds, time_prev = 60.0 seconds
+                    speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
+
+        """
         return 0
 
     def generate_move_and_stop_by_radius(self):
+        """
+        Create or update column with move and stop points by radius.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
         return 0
 
     def time_interval(self):
+        """
+        Get time difference between max and min datetime in trajectory data.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
         return 0
 
     def get_bbox(self):
+        """
+        A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
+            - Latitude is a decimal number between -90.0 and 90.0.
+            - Longitude is a decimal number between -180.0 and 180.0.
+        They usually follow the standard format of:
+        - bbox = left, bottom, right, top
+        - bbox = min Longitude , min Latitude , max Longitude , max Latitude
+        Parameters
+        ----------
+
+        Returns
+        -------
+        tuple
+            Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+
+        Examples
+        --------
+        (22.147577, 113.54884299999999, 41.132062, 121.156224)
+
+        """
         return 0
 
     def plot_all_features(self):
+        """
+        Generate a visualization for each columns that type is equal dtype.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
         return 0
 
     def plot_trajs(self):
         #Generate a visualization that show trajectories.
-        
         return 0
 
     def plot_traj_id(self):
@@ -2335,4 +2817,4 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         A string of the memory usage calculation of the last function, called to the PandasMoveDataFrame object.
         """
         
-        return self._last_operation_dict['mem_usage']  # TODO ver a formula
+        return self._last_operation_dict['mem_usage']

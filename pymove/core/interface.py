@@ -1,7 +1,4 @@
 import abc
-import numpy as np
-from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID
-from pymove.core.grid import lat_meters
 
 class MoveDataFrameAbstractModel(abc.ABC):
 
