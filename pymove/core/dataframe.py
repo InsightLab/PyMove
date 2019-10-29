@@ -781,7 +781,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
-            data_ = self.data_
+            data_ = self._data
         else:
             data_ = PandasMoveDataFrame(data=self._data)
 
