@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import time
 from scipy.interpolate import interp1d
-
+from tqdm import tqdm_notebook as tqdm
 from pymove import utils as ut
 from pymove import gridutils
 
@@ -24,7 +24,189 @@ def format_labels(df_, current_id, current_lat, current_lon, current_datetime):
     dic_labels['lat'] = current_lat
     dic_labels['datetime'] = current_datetime
     return dic_labels
+
+
+def compress_segment_stop_to_point(df_, label_segment = 'segment_stop', label_stop = 'stop', point_mean = 'default', drop_moves=True):        
     
+    """ compreess a segment to point setting lat_mean e lon_mean to each segment"""
+    try:
+            
+        if (label_segment in df_) & (label_stop in df_):
+            #start_time = time.time()
+
+            print("...setting mean to lat and lon...")
+            df_['lat_mean'] = -1.0
+            df_['lon_mean'] = -1.0
+
+
+            if drop_moves is False:
+                df_.at[df_[df_[label_stop] == False].index, 'lat_mean'] = np.NaN
+                df_.at[df_[df_[label_stop] == False].index, 'lon_mean'] = np.NaN
+            else:
+                print('...move segments will be dropped...')
+
+
+            print("...get only segments stop...")
+            segments = df_[df_[label_stop] == True][label_segment].unique()
+            
+            sum_size_id = 0
+            df_size = df_[df_[label_stop] == True].shape[0]
+            curr_perc_int = -1
+            start_time = time.time()
+
+            for idx in tqdm(segments):
+                filter_ = (df_[label_segment] == idx)
+                
+                size_id = df_[filter_].shape[0]
+                # veirify se o filter is None
+                if(size_id > 1):
+                    # get first and last point of each stop segment
+                    ind_start = df_[filter_].iloc[[0]].index
+                    ind_end = df_[filter_].iloc[[-1]].index
+                    
+                    # default: point  
+                    if point_mean == 'default':
+                        #print('...Lat and lon are defined based on point that repeats most within the segment')
+                        p = df_[filter_].groupby(['lat', 'lon'], as_index=False).agg({'id':'count'}).sort_values(['id']).tail(1)                     
+                        df_.at[ind_start, 'lat_mean'] = p.iloc[0,0]
+                        df_.at[ind_start, 'lon_mean'] = p.iloc[0,1]    
+                        df_.at[ind_end, 'lat_mean'] = p.iloc[0,0]
+                        df_.at[ind_end, 'lon_mean'] = p.iloc[0,1] 
+                    
+                    elif point_mean == 'centroid':
+                        #print('...Lat and lon are defined by centroid of the all points into segment')
+                        # set lat and lon mean to first_point and last points to each segment
+                        df_.at[ind_start, 'lat_mean'] = df_.loc[filter_]['lat'].mean()
+                        df_.at[ind_start, 'lon_mean'] = df_.loc[filter_]['lon'].mean()     
+                        df_.at[ind_end, 'lat_mean'] = df_.loc[filter_]['lat'].mean()
+                        df_.at[ind_end, 'lon_mean'] = df_.loc[filter_]['lon'].mean()   
+                else:
+                    print('There are segments with only one point: {}'.format(idx))
+                
+                sum_size_id  += size_id
+                curr_perc_int, est_time_str = ut.progress_update(sum_size_id, df_size, start_time, curr_perc_int, step_perc=5)
+            
+            shape_before = df_.shape[0]
+
+            # filter points to drop
+            filter_drop = (df_['lat_mean'] == -1.0) & (df_['lon_mean'] == -1.0)
+            shape_drop = df_[filter_drop].shape[0]
+
+            if shape_drop > 0:
+                print("...Dropping {} points...".format(shape_drop))
+                df_.drop(df_[filter_drop].index, inplace=True)
+
+            print("...Shape_before: {}\n...Current shape: {}".format(shape_before,df_.shape[0]))
+            print('...Compression time: {:.3f} seconds'.format((time.time() - start_time)))
+            print('-----------------------------------------------------\n')
+        else:
+            print('{} or {} is not in dataframe'.format(label_stop, label_segment))
+    except Exception as e:
+        raise e
+
+def compress_segment_stop_to_point_optimizer(df_, label_segment = 'segment_stop', label_stop = 'stop', point_mean = 'default', drop_moves=True):        
+    
+    """ compreess a segment to point setting lat_mean e lon_mean to each segment"""
+    try:
+            
+        if (label_segment in df_) & (label_stop in df_):
+            #start_time = time.time()
+
+            print("...setting mean to lat and lon...")
+            #df_['lat_mean'] = -1.0
+            #df_['lon_mean'] = -1.0
+
+            lat_mean = np.full(df_.shape[0], -1.0, dtype=np.float32)
+            lon_mean = np.full(df_.shape[0], -1.0, dtype=np.float32)
+
+            if drop_moves is False:
+                lat_mean[df_[df_[label_stop] == False].index] = np.NaN
+                lon_mean[df_[df_[label_stop] == False].index] = np.NaN
+            else:
+                print('...move segments will be dropped...')
+
+            sum_size_id = 0
+            df_size = df_[df_[label_stop] == True].shape[0]
+            curr_perc_int = -1
+            start_time = time.time()
+            
+            print("...get only segments stop...")
+            segments = df_[df_[label_stop] == True][label_segment].unique()
+            for idx in tqdm(segments):
+                filter_ = (df_[label_segment] == idx)
+                
+                size_id = df_[filter_].shape[0]
+                # veirify se o filter is None
+                if(size_id > 1):
+                    # get first and last point of each stop segment
+                    ind_start = df_[filter_].iloc[[0]].index
+                    ind_end = df_[filter_].iloc[[-1]].index
+
+                    if point_mean == 'default':
+                        #print('...Lat and lon are defined based on point that repeats most within the segment')
+                        p = df_[filter_].groupby(['lat', 'lon'], as_index=False).agg({'id':'count'}).sort_values(['id']).tail(1)                     
+                        lat_mean[ind_start] = p.iloc[0,0]
+                        lon_mean[ind_start] = p.iloc[0,1] 
+                        lat_mean[ind_end] = p.iloc[0,0]
+                        lon_mean[ind_end] = p.iloc[0,1] 
+                        
+                    elif point_mean == 'centroid':
+                        #print('...Lat and lon are defined by centroid of the all points into segment')
+                        # set lat and lon mean to first_point and last points to each segment
+                        lat_mean[ind_start] = df_.loc[filter_]['lat'].mean()
+                        lon_mean[ind_start] = df_.loc[filter_]['lon'].mean() 
+                        lat_mean[ind_end] = df_.loc[filter_]['lat'].mean()
+                        lon_mean[ind_end] = df_.loc[filter_]['lon'].mean() 
+                else:
+                    print('There are segments with only one point: {}'.format(idx))
+                
+                sum_size_id  += size_id
+                curr_perc_int, est_time_str = ut.progress_update(sum_size_id, df_size, start_time, curr_perc_int, step_perc=10)
+            
+            df_['lat_mean'] = lat_mean
+            df_['lon_mean'] = lon_mean
+            del lat_mean
+            del lon_mean
+
+            shape_before = df_.shape[0]
+            # filter points to drop
+            filter_drop = (df_['lat_mean'] == -1.0) & (df_['lon_mean'] == -1.0)
+            shape_drop = df_[filter_drop].shape[0]
+
+            if shape_drop > 0:
+                print("...Dropping {} points...".format(shape_drop))
+                df_.drop(df_[filter_drop].index, inplace=True)
+
+            print("...Shape_before: {}\n...Current shape: {}".format(shape_before,df_.shape[0]))
+            print('...Compression time: {:.3f} seconds'.format((time.time() - start_time)))
+            print('-----------------------------------------------------\n')
+        else:
+            print('{} or {} is not in dataframe'.format(label_stop, label_segment))
+    except Exception as e:
+        raise e
+
+def create_or_update_move_stop_by_dist_time(df_, label_id='id', dist_radius=30, time_radius=900):
+    try:
+        start_time = time.time()
+        label_segment_stop = 'segment_stop'
+        trajutils.segment_traj_by_max_dist(df_, label_id=label_id, max_dist_between_adj_points=dist_radius, label_segment=label_segment_stop)
+        
+        if(label_segment_stop in df_):
+            #update dist, time and speed using segment_stop
+            trajutils.create_update_dist_time_speed_features(df_, label_id=label_segment_stop)     
+            
+            print('Create or update stop as True or False')
+            print('...Creating stop features as True or False using {} to time in seconds'.format(time_radius))
+            df_['stop'] = False
+            df_agg_tid = df_.groupby(by=label_segment_stop).agg({'time_to_prev':'sum'}).query('time_to_prev > '+str(time_radius)).index
+            idx = df_[df_[label_segment_stop].isin(df_agg_tid)].index
+            df_.at[idx, 'stop'] = True
+            print(df_['stop'].value_counts())
+            print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+            print('-----------------------------------------------------\n')
+    except Exception as e:
+        raise e
+
 def show_trajectories_info(df_, dic_labels=dic_labels):
     """
         show dataset information from dataframe, this is number of rows, datetime interval, and bounding box 
@@ -165,9 +347,6 @@ def filter_jumps(df_, jump_coefficient=3.0, threshold = 1, filter_out=False):
         print('...Distances features were not created')
         return df_
 
-
-""" ----------------------  FUCTIONS TO LAT AND LONG COORDINATES --------------------------- """ 
-
 def lon2XSpherical(lon):
     """
     From Longitude to X EPSG:3857 WGS 84 / Pseudo-Mercator
@@ -211,6 +390,20 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
     Result in meters. Use 3956 in earth radius for miles
     """
     try:
+        # convert sinfle points to array
+        """if type(lat1) is not np.ndarray:
+            print('...Converting lat1 in np.ndarray')
+            lat1 = np.array(lat1)
+        if type(lon1) is not np.ndarray:
+            print('...Converting lon1 in np.ndarray')
+            lon1 = np.array(lon1)
+        if type(lat2) is not np.ndarray:
+            print('...Converting lat2 in np.ndarray')
+            lat2 = np.array(lat2)
+        if type(lon2) is not np.ndarray:
+            print('...Converting lat1 in np.ndarray')
+            lon2 = np.array(lon2)
+"""
         if to_radians:
             lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
             a = np.sin((lat2-lat1)/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2-lon1)/2.0)**2
@@ -220,10 +413,9 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 
     except Exception as e:
         print('\nError Haverside fuction')
+        print('lat1:{}\nlon1:{}\nlat2:{}\nlon2:{}'.format(lat1, lon1, lat2, lon2))
+        print('type(lat1) = {}\ntype(lon1)= {}\ntype(lat2) = {}\ntype(lon2)= {}\n'.format(type(lat1), type(lon1), type(lat2), type(lon2)))
         raise e
-
-
-""" ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON DATATIME  ----------------------------- """
 
 def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels, str_format="%Y%m%d%H", sort=True):
     """
@@ -236,10 +428,8 @@ def create_update_tid_based_on_id_datatime(df_, dic_labels=dic_labels, str_forma
             print('...Sorting by {} and {} to increase performance\n'.format(dic_labels['id'], dic_labels['datetime']))
             df_.sort_values([dic_labels['id'], dic_labels['datetime']], inplace=True)
 
-
         df_[dic_features_label['tid']] = df_[dic_labels['id']].astype(str) + df_[dic_labels['datetime']].dt.strftime(str_format)  
-        #%.dt.date.astype(str)
-        
+        #%.dt.date.astype(str)        
         print('\n...tid feature was created...\n')      
     except Exception as e:
         raise e
@@ -262,6 +452,19 @@ def create_update_hour_features(df_, dic_labels=dic_labels):
     except Exception as e:
         raise e
 
+def create_update_datetime_in_format_cyclical(df_, label_datetime = 'datetime'):
+    try:
+        #https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+        #https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
+        print('Encoding cyclical continuous features - 24-hour time')
+        if label_datetime in df_:
+            hours = df_[label_datetime].dt.hour
+            df_['hour_sin'] = np.sin(2 * np.pi * hours/23.0)
+            df_['hour_cos'] = np.cos(2 * np.pi * hours/23.0)
+            print('...hour_sin and  hour_cos features were created...\n')
+    except Exception as e:
+        raise e
+
 def create_update_day_of_the_week_features(df_, dic_labels=dic_labels):
     """
         Create or update a feature day of the week from datatime
@@ -271,6 +474,21 @@ def create_update_day_of_the_week_features(df_, dic_labels=dic_labels):
         print('\nCreating or updating day of the week feature...\n')
         df_[dic_features_label['day']] = df_[dic_labels['datetime']].dt.day_name()
         print('...the day of the week feature was created...\n')
+    except Exception as e:
+        raise e
+
+def create_update_weekend_features(df_, label_date='datetime', create_day_of_week=False):
+    try:
+        create_update_day_of_the_week_features(df_)
+        print('Creating or updating a feature for weekend\n')
+        if 'day' in df_:
+            index_fds = df_[(df_['day'] == 'Saturday') | (df_['day'] == 'Sunday')].index
+            df_['weekend'] = 0
+            df_.at[index_fds, 'weekend'] = 1
+            print('...Weekend was set as 1 or 0...\n')         
+            if ~create_day_of_week:
+                print('...dropping colum day\n')
+                del df_['day']
     except Exception as e:
         raise e
 
@@ -295,7 +513,6 @@ def create_update_time_of_day_features(df_, dic_labels=dic_labels):
     except Exception as e:
         raise e
 
-""" ----------------------  FUCTIONS TO CREATE NEW FEATURES BASED ON LAT AND LON COORDINATES  ----------------------------- """
 def create_update_dist_features(df_, label_id=dic_labels['id'], dic_labels=dic_labels, label_dtype = np.float64, sort=True):
     """
         Create three distance in meters to an GPS point P (lat, lon)
@@ -377,17 +594,16 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
         speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
     """
     try:
-
-        print('\nCreating or updating distance, time and speed features in meters by seconds\n') 
+        print('Creating or updating distance, time and speed features in meters by seconds') 
         start_time = time.time()
 
         if sort is True:
-            print('...Sorting by {} and {} to increase performance\n'.format(label_id, dic_labels['datetime']))
+            print('...Sorting by {} and {} to increase performance'.format(label_id, dic_labels['datetime']))
             df_.sort_values([label_id, dic_labels['datetime']], inplace=True)
             #time_sort = time.time()
- 
+
         if df_.index.name is None:
-            print('...Set {} as index to a higher peformance\n'.format(label_id))
+            print('...Set {} as index to a higher peformance'.format(label_id))
             df_.set_index(label_id, inplace=True)
            # time_index = time.time()
 
@@ -415,7 +631,6 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
             size_id = curr_lat.size
             
             if size_id <= 1:
-                print('...id:{}, must have at least 2 GPS points\n'.format(idx))
                 df_.at[idx, dic_features_label['dist_to_prev']] = np.nan 
                 df_.at[idx, dic_features_label['time_to_prev']] = np.nan
                 df_.at[idx, dic_features_label['speed_to_prev']] = np.nan   
@@ -456,9 +671,10 @@ def create_update_dist_time_speed_features(df_, label_id=dic_labels['id'], dic_l
 
                 sum_size_id  += size_id
                 curr_perc_int, est_time_str = ut.progress_update(sum_size_id , df_size, start_time, curr_perc_int, step_perc=20)
-        print('...Reset index...\n')
+        print('...Reset index...')
         df_.reset_index(inplace=True)
-        print('..Total Time: {:.3f}'.format((time.time() - start_time)))
+        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+        print('-----------------------------------------------------\n')
     except Exception as e:
         print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id ))
         raise e
@@ -490,8 +706,6 @@ def create_update_index_grid_feature(df_, dic_grid=None, dic_labels=dic_labels, 
     except Exception as e:
         raise e
 
-"""----------------------  FUCTIONS TO DATA CLEANING   ----------------------------------- """ 
-
 def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, return_idx=False):
     """
     Return DataFrame with duplicate rows removed, optionally only considering certain columns.
@@ -513,22 +727,28 @@ def clean_duplicates(df_, subset=None, keep='first', inplace=False, sort=True, r
     if return_idx:
         return return_idx
 
-def clean_consecutive_duplicates(df, subset=None, keep='first', inplace=False):
+def clean_consecutive_duplicates(df_, subset=None, keep='first', inplace=False):
+    """
+        Return DataFrame with consecutive duplicated rows removed, considering a subset
+        
+        Ex:
+            clean_consecutive_duplicates(df, subset=['lat', 'lon'])
+    """
     if keep == 'first':
         n = 1
     else:
         n = -1
         
     if subset is None:
-        filter_ = (df.shift(n) != df).any(axis=1)
+        filter_ = (df_.shift(n) != df_).any(axis=1)
     else:
-        filter_ = (df[subset].shift(n) != df[subset]).any(axis=1)
+        filter_ = (df_[subset].shift(n) != df_[subset]).any(axis=1)
 
     if inplace:
-        df.drop( index=df[~filter_].index, inplace=True )
-        return df
+        df_.drop( index=df_[~filter_].index, inplace=True )
+        return df_
     else:
-        return df.loc[ filter_ ]
+        return df_.loc[ filter_ ]
 
 def clean_NaN_values(df_, axis=0, how='any', thresh=None, subset=None, inplace=True):
     #df.isna().sum()
@@ -625,18 +845,31 @@ def clean_gps_speed_max_radius(df_, label_id=dic_labels['id'], dic_labels=dic_la
             print('...Rows before: {}, Rows after:{}\n'.format(shape_before, df_.shape[0]))
             clean_gps_speed_max_radius(df_, label_id, dic_labels, speed_max, label_dtype)
 
-def clean_trajectories_with_few_points(df_, label_tid=dic_features_label['tid'], dic_labels=dic_labels, min_points_per_trajectory=2, label_dtype=np.float64):
+def clean_id_by_time_max(df_, label_id = 'id', time_max = 3600, return_idx=True):
+    print('\nClean gps points with time max by id < {} seconds'.format(time_max))
+    if 'time_to_prev' in df_:
+        df_id_drop = df_.groupby([label_id], as_index=False).agg({'time_to_prev':'sum'}).query('time_to_prev < {}'.format(time_max))
+        print("...Ids total: {}\nIds to drop:{}".format(df_[label_id].nunique(),df_id_drop[label_id].nunique()))
+        if df_id_drop.shape[0] > 0:
+            before_drop = df_.shape[0]
+            idx = df_[df_[label_id].isin(df_id_drop[label_id])].index
+            df_.drop(idx, inplace=True)
+            print("...Rows before drop: {}\n Rows after drop: {}".format(before_drop, df_.shape[0]))
+            if(return_idx):
+                return idx
+
+def clean_traj_with_few_points(df_, label_tid=dic_features_label['tid'], dic_labels=dic_labels, min_points_per_trajectory=2, label_dtype=np.float64):
+
     if df_.index.name is not None:
         print('\n...Reset index for filtering\n')
         df_.reset_index(inplace=True)
 
     df_count_tid = df_.groupby(by= label_tid).size()
-    
     tids_with_few_points = df_count_tid[ df_count_tid < min_points_per_trajectory ].index
+    idx = df_[ df_[label_tid].isin(tids_with_few_points) ].index
     
     print('\n...There are {} ids with few points'.format(tids_with_few_points.shape[0])) 
     shape_before_drop = df_.shape
-    idx = df_[ df_[label_tid].isin(tids_with_few_points) ].index
     if idx.shape[0] > 0:
         print('\n...Tids before drop: {}'.format(df_[label_tid].unique().shape[0]))
         df_.drop(index=idx, inplace=True)
@@ -644,11 +877,11 @@ def clean_trajectories_with_few_points(df_, label_tid=dic_features_label['tid'],
         print('\n...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
         create_update_dist_time_speed_features(df_, label_tid, dic_labels, label_dtype)      
 
-def clean_trajectories_short_and_few_points_(df_,  label_id=dic_features_label['tid'], dic_labels=dic_labels, min_trajectory_distance=100, min_points_per_trajectory=2, label_dtype=np.float64):
+def clean_traj_short_and_few_points_(df_,  label_id=dic_features_label['tid'], dic_labels=dic_labels, min_trajectory_distance=100, min_points_per_trajectory=2, label_dtype=np.float64):
     # remove_tids_with_few_points must be performed before updating features, because 
     # those features only can be computed with at least 2 points per trajactories
     print('\nRemove short trajectories...')
-    clean_trajectories_with_few_points(df_, label_id, dic_labels, min_points_per_trajectory, label_dtype)
+    clean_traj_with_few_points(df_, label_id, dic_labels, min_points_per_trajectory, label_dtype)
     
     create_update_dist_time_speed_features(df_, label_id, dic_labels, label_dtype)
 
@@ -658,31 +891,31 @@ def clean_trajectories_short_and_few_points_(df_,  label_id=dic_features_label['
         
     print('\n...Dropping unnecessary trajectories...')
     df_agg_tid = df_.groupby(by=label_id).agg({dic_features_label['dist_to_prev']:'sum'})
-
     filter_ = (df_agg_tid[dic_features_label['dist_to_prev']] < min_trajectory_distance)    
     tid_selection = df_agg_tid[ filter_ ].index
+    # Whether each element in the DataFrame is contained in values.
+    idx = df_[ df_[label_id].isin(tid_selection) ].index
     print('\n...short trajectories and trajectories with a minimum distance ({}): {}'.format(df_agg_tid.shape[0], min_trajectory_distance))
     print('\n...There are {} tid do drop'.format(tid_selection.shape[0]))
     shape_before_drop = df_.shape
-    idx = df_[ df_[label_id].isin(tid_selection) ].index
+
     if idx.shape[0] > 0:
         tids_before_drop = df_[label_id].unique().shape[0]
         df_.drop(index=idx, inplace=True)
         print('\n...Tids - before drop: {} - after drop: {}'.format(tids_before_drop, df_[label_id].unique().shape[0]))
         print('\n...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-        clean_trajectories_short_and_few_points_(df_, dic_labels, min_trajectory_distance, min_points_per_trajectory, label_dtype)    
+        clean_traj_short_and_few_points_(df_, dic_labels, min_trajectory_distance, min_points_per_trajectory, label_dtype)    
 
-""" segment trajectory based on threshold for each ID object"""
-
-def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_dist_between_adj_points=3000, max_time_between_adj_points=7200,
-                      max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_part'):
+def segment_traj_by_dist_time_speed(df_, label_id=dic_labels['id'], max_dist_between_adj_points=3000, max_time_between_adj_points=7200,
+                      max_speed_between_adj_points=50.0, label_segment='tid_part'):
+    """ segment trajectory based on threshold for each ID object"""
     """
     index_name is the current id.
     label_new_id is the new splitted id.
     time, dist, speeed features must be updated after split.
     """
         
-    print('\nSplit trajectories')
+    print('Split trajectories')
     print('...max_time_between_adj_points:', max_time_between_adj_points)
     print('...max_dist_between_adj_points:', max_dist_between_adj_points)
     print('...max_speed:', max_speed_between_adj_points)
@@ -693,8 +926,8 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_di
             df_.set_index(label_id, inplace=True)
 
         curr_tid = 0
-        if label_new_tid not in df_:
-            df_[label_new_tid] = curr_tid
+        if label_segment not in df_:
+            df_[label_segment] = curr_tid
 
         ids = df_.index.unique()
         count = 0
@@ -711,10 +944,9 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_di
 
             """ check if object have only one point to be removed """
             if filter_.shape == ():
-                # trajectories with only one point is useless for interpolation and so they must be removed.
-                count += 1
-                df_.at[idx, label_new_tid] = -1
-                curr_tid += -1
+                print('id: {} has not point to split'.format(id))
+                df_.at[idx, label_segment] = curr_tid
+                count+=1
             else:
                 tids = np.empty(filter_.shape[0], dtype=np.int64)
                 tids.fill(curr_tid)
@@ -723,47 +955,47 @@ def segment_trajectory_by_dist_time_speed(df_, label_id=dic_labels['id'], max_di
                         curr_tid += 1
                         tids[i:] = curr_tid
                 count += tids.shape[0]
-                df_.at[idx, label_new_tid] = tids
+                df_.at[idx, label_segment] = tids
             
             curr_perc_int, est_time_str = ut.progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
 
-        if label_id == label_new_tid:
+        if label_id == label_segment:
             df_.reset_index(drop=True, inplace=True)
-            print('... label_id = label_new_id, then reseting and drop index')
+            print('... label_id = label_segment, then reseting and drop index')
         else:
             df_.reset_index(inplace=True)
-            print('... Reseting index\n')
-        
-        if drop_single_points:
-            shape_before_drop = df_.shape
-            idx = df_[ df_[label_new_tid] == -1 ].index
-            if idx.shape[0] > 0:
-                print('...Drop Trajectory with a unique GPS point\n')
-                ids_before_drop = df_[label_id].unique().shape[0]
-                df_.drop(index=idx, inplace=True)
-                print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
-                print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-                create_update_dist_time_speed_features(df_, label_id, dic_labels)
-            else:
-                print('...No trajs with only one point.', df_.shape)
-
+            print('... Reseting index')
+        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+        print('------------------------------------------\n')
+        #if drop_single_points:
+         #   shape_before_drop = df_.shape
+         #   idx = df_[ df_[label_segment] == -1 ].index
+          #  if idx.shape[0] > 0:
+           #     print('...Drop Trajectory with a unique GPS point\n')
+            #    ids_before_drop = df_[label_id].unique().shape[0]
+             #   df_.drop(index=idx, inplace=True)
+              #  print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
+               # print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
+            #else:
+             #   print('...No trajs with only one point.', df_.shape)
     except Exception as e:
+        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
         raise e
 
-def segment_trajectory_by_speed(df_, label_id=dic_labels['id'], max_speed_between_adj_points=50.0, drop_single_points=True, label_new_tid='tid_speed'):
+def segment_traj_by_max_dist(df_, label_id=dic_labels['id'],  max_dist_between_adj_points=3000, label_segment='tid_dist'):
     """ Index_name is the current id.
     label_new_id is the new splitted id.
     Speed features must be updated after split.
     """     
-    print('\nSplit trajectories by max_speed_between_adj_points:', max_speed_between_adj_points) 
+    print('Split trajectories by max distance between adjacent points:', max_dist_between_adj_points) 
     try:
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
 
         curr_tid = 0
-        if label_new_tid not in df_:
-            df_[label_new_tid] = curr_tid
+        if label_segment not in df_:
+            df_[label_segment] = curr_tid
 
         ids = df_.index.unique()
         count = 0
@@ -775,62 +1007,52 @@ def segment_trajectory_by_speed(df_, label_id=dic_labels['id'], max_speed_betwee
             """ increment index to trajectory"""
             curr_tid += 1
 
-            """ filter speed max"""
-            speed = (df_.at[idx, dic_features_label['speed_to_prev']] > max_speed_between_adj_points)        
-                     
-            """ check if object have only one point to be removed """
-            if speed.shape == ():
-                count += 1
-                df_.at[idx, label_new_tid] = -1 # set object  = -1 to remove ahead
-                curr_tid += -1
+            """ filter dist max"""
+            dist = (df_.at[idx, dic_features_label['dist_to_prev']] > max_dist_between_adj_points)                      
+            """ check if object have more than one point to split"""
+            if dist.shape == ():   
+                print('id: {} has not point to split'.format(idx))
+                df_.at[idx, label_segment] = curr_tid
+                count+=1
             else: 
-                tids = np.empty(speed.shape[0], dtype=np.int64)
+                tids = np.empty(dist.shape[0], dtype=np.int64)
                 tids.fill(curr_tid)
-                for i, has_problem in enumerate(speed):
+                for i, has_problem in enumerate(dist):
                     if has_problem:
                         curr_tid += 1
                         tids[i:] = curr_tid
                 count += tids.shape[0]
-                df_.at[idx, label_new_tid] = tids
+                df_.at[idx, label_segment] = tids
 
             curr_perc_int, est_time_str = ut.progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
 
-        if label_id == label_new_tid:
+        if label_id == label_segment:
             df_.reset_index(drop=True, inplace=True)
             print('... label_id = label_new_id, then reseting and drop index')
         else:
             df_.reset_index(inplace=True)
-            print('... Reseting index\n')
-       
-        if drop_single_points:
-            shape_before_drop = df_.shape
-            idx = df_[df_[label_new_tid] == -1].index
-            if idx.shape[0] > 0:
-                print('...Drop Trajectory with a unique GPS point\n')
-                ids_before_drop = df_[label_id].unique().shape[0]
-                df_.drop(index=idx, inplace=True)
-                print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
-                print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-            else:
-                print('...No trajs with only one point.', df_.shape)
+            print('... Reseting index')
+        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+        print('------------------------------------------\n') 
     except Exception as e:
+        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
         raise e
 
-def segment_trajectory_by_time(df_, label_id=dic_labels['id'], max_time_between_adj_points=900.0, drop_single_points=True, label_new_tid='tid_time'):
+def segment_traj_by_max_time(df_, label_id=dic_labels['id'], max_time_between_adj_points=900.0, label_segment='tid_time'):
     """
     index_name is the current id.
     label_new_id is the new splitted id.
     Speed features must be updated after split.
     """     
-    print('\nSplit trajectories by max_time_between_adj_points:', max_time_between_adj_points) 
+    print('Split trajectories by max_time_between_adj_points:', max_time_between_adj_points) 
     try:
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
 
         curr_tid = 0
-        if label_new_tid not in df_:
-            df_[label_new_tid] = curr_tid
+        if label_segment not in df_:
+            df_[label_segment] = curr_tid
 
         ids = df_.index.unique()
         count = 0
@@ -847,9 +1069,9 @@ def segment_trajectory_by_time(df_, label_id=dic_labels['id'], max_time_between_
                      
             """ check if object have only one point to be removed """
             if times.shape == ():
-                count += 1
-                df_.at[idx, label_new_tid] = -1 # set object  = -1 to remove ahead
-                curr_tid += -1
+                print('id: {} has not point to split'.format(id))
+                df_.at[idx, label_segment] = curr_tid
+                count+=1
             else: 
                 tids = np.empty(times.shape[0], dtype=np.int64)
                 tids.fill(curr_tid)
@@ -858,34 +1080,106 @@ def segment_trajectory_by_time(df_, label_id=dic_labels['id'], max_time_between_
                         curr_tid += 1
                         tids[i:] = curr_tid
                 count += tids.shape[0]
-                df_.at[idx, label_new_tid] = tids
+                df_.at[idx, label_segment] = tids
 
             curr_perc_int, est_time_str = ut.progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
 
-        if label_id == label_new_tid:
+        if label_id == label_segment:
             df_.reset_index(drop=True, inplace=True)
             print('... label_id = label_new_id, then reseting and drop index')
         else:
             df_.reset_index(inplace=True)
-            print('... Reseting index\n')
-       
-        if drop_single_points:
-            shape_before_drop = df_.shape
-            idx = df_[ df_[label_new_tid] == -1 ].index
-            if idx.shape[0] > 0:
-                print('...Drop Trajectory with a unique GPS point\n')
-                ids_before_drop = df_[label_id].unique().shape[0]
-                df_.drop(index=idx, inplace=True)
-                print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
-                print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
-                create_update_dist_time_speed_features(df_, label_id, dic_labels)
-            else:
-                print('...No trajs with only one point.', df_.shape)
+            print('... Reseting index')
+        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+        print('------------------------------------------\n')      
+        #if drop_single_points:
+         #   shape_before_drop = df_.shape
+          #  idx = df_[ df_[label_segment] == -1 ].index
+           # if idx.shape[0] > 0:
+            #    print('...Drop Trajectory with a unique GPS point\n')
+             #   ids_before_drop = df_[label_id].unique().shape[0]
+              #  df_.drop(index=idx, inplace=True)
+               # print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
+               # print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
+            #else:
+             #   print('...No trajs with only one point.', df_.shape)
+
     except Exception as e:
+        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
         raise e
 
-""" transform speed """
+def segment_traj_by_max_speed(df_, label_id=dic_labels['id'], max_speed_between_adj_points=50.0, label_segment='tid_speed'):
+    """ Index_name is the current id.
+    label_new_id is the new splitted id.
+    Speed features must be updated after split.
+    """     
+    print('Split trajectories by max_speed_between_adj_points:', max_speed_between_adj_points) 
+    try:
+        if df_.index.name is None:
+            print('...setting {} as index'.format(label_id))
+            df_.set_index(label_id, inplace=True)
+
+        curr_tid = 0
+        if label_segment not in df_:
+            df_[label_segment] = curr_tid
+
+        ids = df_.index.unique()
+        count = 0
+        df_size = df_.shape[0]
+        curr_perc_int = -1
+        start_time = time.time()
+
+        for idx in ids:            
+            """ increment index to trajectory"""
+            curr_tid += 1
+
+            """ filter speed max"""
+            speed = (df_.at[idx, dic_features_label['speed_to_prev']] > max_speed_between_adj_points)        
+            """ check if object have only one point to be removed """
+            if speed.shape == ():
+                print('id: {} has not point to split'.format(id))
+                df_.at[idx, label_segment] = curr_tid
+                count+=1
+            else: 
+                tids = np.empty(speed.shape[0], dtype=np.int64)
+                tids.fill(curr_tid)
+                for i, has_problem in enumerate(speed):
+                    if has_problem:
+                        curr_tid += 1
+                        tids[i:] = curr_tid
+                count += tids.shape[0]
+                df_.at[idx, label_segment] = tids
+
+            curr_perc_int, est_time_str = ut.progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+
+        if label_id == label_segment:
+            df_.reset_index(drop=True, inplace=True)
+            print('... label_id = label_new_id, then reseting and drop index')
+        else:
+            df_.reset_index(inplace=True)
+            print('... Reseting index')
+        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+        print('------------------------------------------\n')
+       
+        #if drop_single_points:
+         #   shape_before_drop = df_.shape
+          #  idx = df_[df_[label_segment] == -1].index
+           # if idx.shape[0] > 0:
+            #    print('...Drop Trajectory with a unique GPS point\n')
+             #   ids_before_drop = df_[label_id].unique().shape[0]
+              #  df_.drop(index=idx, inplace=True)
+               # print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
+               # print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
+                #create_update_dist_time_speed_features(df_, label_segment, dic_labels)
+            #else:
+                #print('...No trajs with only one point.', df_.shape)
+
+    except Exception as e:
+        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
+        raise e
+
 def transform_speed_from_ms_to_kmh(df_, label_speed=dic_features_label['speed_to_prev'], new_label = None):
+    """ transform speed """
     try:
         df_[label_speed] = df_[label_speed].transform(lambda row: row*3.6)
         if new_label is not None:
@@ -901,8 +1195,8 @@ def transform_speed_from_kmh_to_ms(df_, label_speed=dic_features_label['speed_to
     except Exception as e: 
         raise e
 
-""" transform distances """
 def transform_dist_from_meters_to_kilometers(df_, label_distance=dic_features_label['dist_to_prev'], new_label=None):
+    """ transform distances """
     try:
         df_[label_distance] = df_[label_distance].transform(lambda row: row/1000)
         if new_label is not None:
@@ -918,8 +1212,8 @@ def transform_dist_from_to_kilometers_to_meters(df_, label_distance=dic_features
     except Exception as e: 
         raise e
 
-""" transform time """
 def transform_time_from_seconds_to_minutes(df_, label_time=dic_features_label['time_to_prev'], new_label=None):
+    """ transform time """
     try:
         df_[label_time] = df_[label_time].transform(lambda row: row/60.0)
         if new_label is not None:
@@ -967,9 +1261,8 @@ def transform_time_from_hours_to_seconds(df_, label_time=dic_features_label['tim
     except Exception as e:
         raise e
 
-
-""" Fuction to solve problems after Map-matching"""
 def check_time_dist(df, index_name='tid', tids=None, max_dist_between_adj_points=5000, max_time_between_adj_points=900, max_speed=30):
+    """ Fuction to solve problems after Map-matching"""
     try:
         if df.index.name is not None:
             print('reseting index...')
