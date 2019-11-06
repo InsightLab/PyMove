@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import colorsys
 import numpy as np
 import folium
+from folium.plugins import HeatMap, HeatMapWithTime
 from matplotlib.colors import LinearSegmentedColormap
+import itertools
 
 from pymove import trajutils
 
@@ -69,33 +71,36 @@ def invert_map(map_):
     
 """ https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html """
 
-def show_object_id_by_date(df_, create_features=True, figsize=(21,9), save_fig=True, name='shot_points_by_date.png', low_memory=True):
-    fig, ax = plt.subplots(2,2,figsize=figsize)
-    trajutils.create_update_date_features(df_)
-    df_.loc[:,['date', 'id']].groupby(['id', 'date']).count().reset_index().groupby('date').count().plot(subplots=True, kind = 'line', grid=True, ax=ax[1][0], rot=45, fontsize=12)
-    trajutils.create_update_hour_features(df_)
-    df_.loc[:,['hour', 'id']].groupby(['hour', 'id']).count().reset_index().groupby('hour').count().plot(subplots=True, kind = 'line', grid=True, ax=ax[1][1], fontsize=12)
-    del df_['date']    
-    del df_['hour']
-    trajutils.create_update_day_of_the_week_features(df_)
-    df_.loc[:,['period', 'id']].groupby(['period', 'id']).count().reset_index().groupby('period').count().plot(subplots=True, kind = 'bar', rot=0, ax=ax[0][0], fontsize=12)
-    del df_['period']
-    trajutils.create_update_time_of_day_features(df_)  
-    df_.loc[:,['day', 'id']].groupby(['day', 'id']).count().reset_index().groupby('day').count().plot(subplots=True,  kind = 'bar', ax=ax[0][1], rot=0, fontsize=12)
-    del df_['day']
+def show_object_id_by_date(df_, label_id = 'id', create_features=True,  kind=['bar', 'bar', 'line', 'line'], figsize=(21,9), save_fig=True, name='shot_points_by_date.png', low_memory=True):
+    
+    if low_memory:
+         fig, ax = plt.subplots(2,2,figsize=figsize)
+    
+    else:
+        fig, ax = plt.subplots(2,2,figsize=figsize)
+        trajutils.create_update_date_features(df_)
+        trajutils.create_update_day_of_the_week_features(df_)
+        trajutils.create_update_hour_features(df_)
+        trajutils.create_update_time_of_day_features(df_)  
+        
+        df_.groupby(['period'])['id'].nunique().plot(subplots=True, kind = kind[0], rot=0, ax=ax[0][0], fontsize=12)
+        df_.groupby(['day'])['id'].nunique().plot(subplots=True,  kind = kind[1], ax=ax[0][1], rot=0, fontsize=12)
+        df_.groupby(['date'])['id'].nunique().plot(subplots=True, kind = kind[2], grid=True, ax=ax[1][0], rot=90, fontsize=12)
+        df_.groupby(['hour'])['id'].nunique().plot(subplots=True, kind = kind[3], grid=True, ax=ax[1][1], fontsize=12)
 
     if save_fig:
         plt.savefig(fname=name, fig=fig)
 
-def show_lat_lon_GPS(df_, dic_labels=trajutils.dic_labels, kind='scatter', figsize=(21,9), save_fig=False, name='show_gps_points.png'):
+def show_lat_lon_GPS(df_, dic_labels=trajutils.dic_labels, kind='scatter', figsize=(21,9), save_fig=False, plot_start_and_end = True, name='show_gps_points.png'):
     try:
         if dic_labels['lat'] in df_ and dic_labels['lon'] in df_:
-            df_.drop_duplicates([dic_labels['lat'], dic_labels['lon']]).plot(kind=kind, x=dic_labels['lon'], y=dic_labels['lat'], figsize=figsize)
-            plt.plot(df_.iloc[0][dic_labels['lon']], df_.iloc[0][dic_labels['lat']], 'yo', markersize=10)             # start point
-            plt.plot(df_.iloc[-1][dic_labels['lon']], df_.iloc[-1][dic_labels['lat']], 'yX', markersize=10)           # end point
-            
+            df_.drop_duplicates([dic_labels['lat'], dic_labels['lon']]).plot(kind=kind, x=dic_labels['lon'], y=dic_labels['lat'], figsize=figsize)          
+        
+            if plot_start_and_end:     
+                plt.plot(df_.iloc[0][dic_labels['lon']], df_.iloc[0][dic_labels['lat']], 'yo', markersize=10)             # start point
+                plt.plot(df_.iloc[-1][dic_labels['lon']], df_.iloc[-1][dic_labels['lat']], 'yX', markersize=10)           # end point
             if save_fig == True:
-                plt.savefig(name)   
+                plt.savefig(name)  
     except Exception as e:
         raise e
 
@@ -116,33 +121,33 @@ def show_all_features(df_, figsize=(21,15), dtype=np.float64, save_fig=True, nam
     except Exception as e:
         raise e
 
-def show_traj(df, label_tid=trajutils.dic_labels['id'], dic_labels=trajutils.dic_labels, figsize=(10,10), return_fig=True, markers= 'o',markersize=20):
+def show_traj(df, label_tid=trajutils.dic_labels['id'], dic_labels=trajutils.dic_labels, figsize=(21,9), return_fig=True, markers='o', markersize=10):
     fig = plt.figure(figsize=figsize)
     ids = df[label_tid].unique()
-    
+    #colors = itertools.cycle(["r", "b", "g", "y", "black"])
     for id_ in ids:
         df_id = df[ df[label_tid] == id_ ]
-        plt.plot(df_id[dic_labels['lon']], df_id[dic_labels['lat']], markers, markersize=markersize)
+        plt.plot(df_id[dic_labels['lon']], df_id[dic_labels['lat']], markers,  markersize=markersize)
     if return_fig:
         return fig
 
-def show_traj_id(df, tid, label_tid=trajutils.dic_features_label['tid'], dic_labels=trajutils.dic_labels, figsize=(10,10)):
+def show_traj_id(df, tid, label_tid=trajutils.dic_features_label['tid'], dic_labels=trajutils.dic_labels, figsize=(10,10), markersize=10):
     fig = plt.figure(figsize=figsize)
     df_ = df[ df[label_tid] == tid ]
-    plt.plot(df_.iloc[0][dic_labels['lon']], df_.iloc[0][dic_labels['lat']], 'yo', markersize=20)             # start point
-    plt.plot(df_.iloc[-1][dic_labels['lon']], df_.iloc[-1][dic_labels['lat']], 'yX', markersize=20)           # end point
+    plt.plot(df_.iloc[0][dic_labels['lon']], df_.iloc[0][dic_labels['lat']], 'yo', markersize=markersize)             # start point
+    plt.plot(df_.iloc[-1][dic_labels['lon']], df_.iloc[-1][dic_labels['lat']], 'yX', markersize=markersize)           # end point
     
     if 'isNode'not in df_:
         plt.plot(df_[dic_labels['lon']], df_[dic_labels['lat']])
-        plt.plot(df_.loc[:, dic_labels['lon']], df_.loc[:, dic_labels['lat']], 'r.', markersize=8)  # points
+        plt.plot(df_.loc[:, dic_labels['lon']], df_.loc[:, dic_labels['lat']], 'r.', markersize=markersize)  # points
     else:
         filter_ = df_['isNode'] == 1
         df_nodes = df_.loc[filter_]
         df_points = df_.loc[~filter_]
         plt.plot(df_nodes[dic_labels['lon']], df_nodes[dic_labels['lat']], linewidth=3)
         plt.plot(df_points[dic_labels['lon']], df_points[dic_labels['lat']])
-        plt.plot(df_nodes[dic_labels['lon']], df_nodes[dic_labels['lat']], 'go', markersize=10)   # nodes
-        plt.plot(df_points[dic_labels['lon']], df_points[dic_labels['lat']], 'r.', markersize=8)  # points  
+        plt.plot(df_nodes[dic_labels['lon']], df_nodes[dic_labels['lat']], 'go', markersize=markersize)   # nodes
+        plt.plot(df_points[dic_labels['lon']], df_points[dic_labels['lat']], 'r.', markersize=markersize)  # points  
     return df_, fig
 
 def show_grid_polygons(df_, id_, label_id = trajutils.dic_labels['id'], label_polygon='polygon', figsize=(10,10)):   
@@ -172,3 +177,48 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
                 (bbox_tuple[0], bbox_tuple[1]) ]
     folium.PolyLine(points_, weight=3, color=color).add_to(m)
     m.save(file) 
+
+def generateBaseMap(default_location, default_zoom_start=12):
+    base_map = folium.Map(location=default_location, control_scale=True, zoom_start=default_zoom_start)
+    return base_map
+
+def heatmap(df_, n_rows, lat_origin=None, lon_origin=None, zoom_start=12, radius = 8, max_zoom = 13, base_map=None, save_as_html=False, filename='heatmap.html'):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = df_.loc[0]['lat']
+            lon_origin = df_.loc[0]['lon']
+        base_map = generateBaseMap(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    COUNT = 'count'
+    df_[COUNT] = 1
+    HeatMap(data=df_.loc[:n_rows, ['lat', 'lon', COUNT]].groupby(['lat', 'lon']).sum().reset_index().values.tolist(),
+        radius=radius, max_zoom=max_zoom).add_to(base_map)
+    df_.drop(columns=[COUNT], inplace=True)
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+def heatmap_with_time(df_, n_rows, lat_origin=None, lon_origin=None, zoom_start=12, radius = 5, min_opacity = 0.5, max_opacity = 0.8, base_map=None, save_as_html=False,
+                      filename='heatmap_with_time.html'):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = df_.loc[0]['lat']
+            lon_origin = df_.loc[0]['lon']
+        base_map = generateBaseMap(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+    COUNT = 'count'
+    df_['hour'] = df_.datetime.apply(lambda x: x.hour)
+    df_[COUNT] = 1
+    df_hour_list = []
+    for hour in df_.hour.sort_values().unique():
+        df_hour_list.append(df_.loc[df_.hour == hour, ['lat', 'lon', COUNT]].groupby(
+            ['lat', 'lon']).sum().reset_index().values.tolist())
+
+    HeatMapWithTime(df_hour_list[:n_rows], radius=radius, gradient={0.2: 'blue', 0.4: 'lime', 0.6: 'orange', 1: 'red'},
+                    min_opacity=min_opacity, max_opacity=max_opacity, use_local_extrema=True).add_to(base_map)
+
+    df_.drop(columns=[COUNT, 'hour'], inplace=True)
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
