@@ -280,7 +280,7 @@ def show_lat_lon_GPS(
         raise e
 
 
-def generate_base_map(default_location, default_zoom_start=12):
+def create_base_map(default_location, default_zoom_start=12):
     """
     Generate a folium map.
 
@@ -344,7 +344,7 @@ def heatmap(
         map by default.
 
     base_map : folium.folium.Map, optional, default None.
-        Represents the folium map. If not informed, a new map is generated using the function generate_base_map(), with
+        Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
     save_as_html : bool, optional, default False.
@@ -363,7 +363,7 @@ def heatmap(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = generate_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -425,7 +425,7 @@ def heatmap_with_time(
         The maximum opacity for the heatmap.
 
     base_map : folium.folium.Map, optional, default None.
-        Represents the folium map. If not informed, a new map is generated using the function generate_base_map(), with
+        Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
     save_as_html : bool, optional, default False.
@@ -444,7 +444,7 @@ def heatmap_with_time(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = generate_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -500,7 +500,7 @@ def cluster(
         Represents the trajectory id.
 
     base_map : folium.folium.Map, optional, default None.
-        Represents the folium map. If not informed, a new map is generated using the function generate_base_map(), with
+        Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
     save_as_html : bool, optional, default False.
@@ -519,7 +519,7 @@ def cluster(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = generate_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -571,7 +571,7 @@ def faster_cluster(
         Represents the trajectory id.
 
     base_map : folium.folium.Map, optional, default None.
-        Represents the folium map. If not informed, a new map is generated using the function generate_base_map(), with
+        Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
     save_as_html : bool, optional, default False.
@@ -590,7 +590,7 @@ def faster_cluster(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = generate_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -610,7 +610,7 @@ def faster_cluster(
         return base_map
 
 
-def plot_trejectory_with_folium(
+def plot_markers(
     move_data,
     n_rows=None,
     lat_origin=None,
@@ -618,7 +618,7 @@ def plot_trejectory_with_folium(
     zoom_start=12,
     base_map=None,
     save_as_html=False,
-    filename='plot_trejectory_with_folium.html'
+    filename='plot_markers.html'
 ):
     """
     Generate visualization of trajectory with folium.
@@ -643,7 +643,7 @@ def plot_trejectory_with_folium(
         Represents the trajectory id.
 
     base_map : folium.folium.Map, optional, default None.
-        Represents the folium map. If not informed, a new map is generated using the function generate_base_map(), with
+        Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
     save_as_html : bool, optional, default False.
@@ -662,7 +662,7 @@ def plot_trejectory_with_folium(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = generate_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -672,6 +672,39 @@ def plot_trejectory_with_folium(
               + "\n<b>Longitude:</b> " + str(each[1].lon) \
               + "\n<b>Datetime:</b> " + str(each[1].datetime)
         folium.Marker(location=[each[1]['lat'], each[1]['lon']], clustered_marker=True, popup=pop).add_to(base_map)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+# TODO: adicionar se le vai querer como linha ou ponto
+def plot_trajectories_with_folium(
+    move_data,
+    n_rows=None,
+    lat_origin=None,
+    lon_origin=None,
+    zoom_start=12,
+    base_map=None,
+    save_as_html=False,
+    color='black',
+    filename='plot_trejectory_with_folium.html'
+):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = move_data.loc[0][LATITUDE]
+            lon_origin = move_data.loc[0][LONGITUDE]
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = move_data.shape[0]
+
+    folium.PolyLine(move_data.loc[:n_rows, [LATITUDE, LONGITUDE]], color=color, weight=2.5, opacity=1).add_to(base_map)
+    # for each in move_data[:n_rows].iterrows():
+    #     pop = "<b>Latitude:</b> " + str(each[1].lat) \
+    #           + "\n<b>Longitude:</b> " + str(each[1].lon) \
+    #           + "\n<b>Datetime:</b> " + str(each[1].datetime)
+    #     folium.Marker(location=[each[1]['lat'], each[1]['lon']], clustered_marker=True, popup=pop).add_to(base_map)
 
     if save_as_html:
         base_map.save(outfile=filename)
