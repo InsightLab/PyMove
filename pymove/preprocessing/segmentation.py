@@ -8,7 +8,8 @@ from pymove.utils.constants import (
     TIME_TO_PREV,
     DIST_TO_PREV,
     SPEED_TO_PREV,
-    TRAJ_ID)
+    TRAJ_ID,
+    TID_DIST)
 from pymove.utils.trajectories import progress_update
 
 
@@ -362,3 +363,64 @@ def by_time(
             return move_data
     except Exception as e:
         raise e
+
+def segment_traj_by_max_dist(df_, label_id=TRAJ_ID,  max_dist_between_adj_points=3000, label_segment=TID_DIST):
+    """ Index_name is the current id.
+    label_new_id is the new splitted id.
+    Speed features must be updated after split.
+    """
+    print('Split trajectories by max distance between adjacent points:', max_dist_between_adj_points)
+    try:
+        if df_.index.name is None:
+            print('...setting {} as index'.format(label_id))
+            df_.set_index(label_id, inplace=True)
+
+        curr_tid = 0
+        if label_segment not in df_:
+            df_[label_segment] = curr_tid
+
+        ids = df_.index.unique()
+        count = 0
+        df_size = df_.shape[0]
+        curr_perc_int = -1
+        start_time = time.time()
+
+        if DIST_TO_PREV not in df_:
+            df_.generate_dist_features()
+
+        for idx in ids:
+            """ increment index to trajectory"""
+            curr_tid += 1
+
+            """ filter dist max"""
+            dist = (df_.at[idx, DIST_TO_PREV] > max_dist_between_adj_points)
+            """ check if object have more than one point to split"""
+            if dist.shape == ():
+                print('id: {} has not point to split'.format(idx))
+                df_.at[idx, label_segment] = curr_tid
+                count+=1
+            else:
+                tids = np.empty(dist.shape[0], dtype=np.int64)
+                tids.fill(curr_tid)
+                for i, has_problem in enumerate(dist):
+                    if has_problem:
+                        curr_tid += 1
+                        tids[i:] = curr_tid
+                count += tids.shape[0]
+                df_.at[idx, label_segment] = tids
+
+            curr_perc_int, est_time_str = progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+
+        if label_id == label_segment:
+            df_.reset_index(drop=True, inplace=True)
+            print('... label_id = label_new_id, then reseting and drop index')
+        else:
+            df_.reset_index(inplace=True)
+            print('... Reseting index')
+        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+        print('------------------------------------------\n')
+    except Exception as e:
+        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
+        raise e
+
+

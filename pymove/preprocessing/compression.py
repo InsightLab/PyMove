@@ -1,3 +1,4 @@
+import time
 from pymove.utils.trajectories import progress_update
 
 def compress_segment_stop_to_point(move_data, label_segment='segment_stop', label_stop='stop', point_mean='default',
