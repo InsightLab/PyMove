@@ -35,7 +35,6 @@ def create_or_update_move_stop_by_dist_time(move_data, label_id=TRAJ_ID , dist_r
             # update dist, time and speed using segment_stop
 
             move_data.generate_dist_time_speed_features(label_id=label_segment_stop)
-            print(move_data)
 
             print('Create or update stop as True or False')
             print('...Creating stop features as True or False using {} to time in seconds'.format(time_radius))
