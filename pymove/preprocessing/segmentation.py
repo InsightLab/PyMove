@@ -371,6 +371,10 @@ def segment_traj_by_max_dist(df_, label_id=TRAJ_ID,  max_dist_between_adj_points
     """
     print('Split trajectories by max distance between adjacent points:', max_dist_between_adj_points)
     try:
+
+        if DIST_TO_PREV not in df_:
+            df_.generate_dist_features()
+
         if df_.index.name is None:
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
@@ -385,8 +389,6 @@ def segment_traj_by_max_dist(df_, label_id=TRAJ_ID,  max_dist_between_adj_points
         curr_perc_int = -1
         start_time = time.time()
 
-        if DIST_TO_PREV not in df_:
-            df_.generate_dist_features()
 
         for idx in ids:
             """ increment index to trajectory"""

@@ -11,7 +11,8 @@ def compress_segment_stop_to_point(move_data, label_segment='segment_stop', labe
 
         #if (label_segment not in move_data) & (label_stop not in move_data):
             # start_time = time.time()
-        create_or_update_move_stop_by_dist_time(move_data, label_id, dist_radius, time_radius)
+        if (label_segment not in move_data) & (label_stop not in move_data):
+            create_or_update_move_stop_by_dist_time(move_data, label_id, dist_radius, time_radius)
 
         print("...setting mean to lat and lon...")
         move_data['lat_mean'] = -1.0
