@@ -38,5 +38,39 @@ KB = "KB"
 B = "bytes"
 COUNT = 'count'
 
-
+COLORS = {
+    0: "#000000", # black
+    1: "#808080", # gray
+    2: "#D3D3D3", # lightgray
+    3: "#FFFFFF", # white
+    4: "#800000", # red maroon
+    5: "#B22222", # red fire brick
+    6: "#DC143C", # red crimson
+    7: "#FF7F50", # coral
+    8: "#FF8C00", # dark orange
+    9: "#FFD700", # gold
+    10: "#FFFF00", # yellow
+    11: "#ADFF2F", # green yellow
+    12: "#9ACD32", # yellow green
+    13: "#6B8E23", # olive drab
+    14: "#808000", # olive
+    15: "#00FF00", # lime
+    16: "#008000", # green
+    17: "#3CB371", # medium sea green
+    12: "#00FF7F", # spring green
+    13: "#E0FFFF", # pale turquoise
+    14: "#00FFFF", # aqua/cyan
+    15: "#87CEFA", # light sky blue
+    16: "#00BFFF", # deep sky blue
+    17: "#1E90FF", # dodger blue
+    18: "#0000FF", # blue
+    19: "#6A5ACD", # slate blue
+    20: "#4B0082", # indigo
+    21: "#FF00FF", # fuchsia / magenta
+    22: "#EE82EE", # violet
+    23: "#8A2BE2", # blue violet
+    24: "#C71585", # medium violet red
+    25: "#FF1493", # deep pink
+    26: "#FFB6C1", # light pink
+}
 

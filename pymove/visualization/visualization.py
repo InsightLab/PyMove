@@ -3,7 +3,11 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 from folium.plugins import HeatMap, HeatMapWithTime, MarkerCluster, FastMarkerCluster
-from pymove.utils.constants import LATITUDE, LONGITUDE, TRAJ_ID, PERIOD, DATE, HOUR, DAY, COUNT
+from pymove.utils.constants import LATITUDE, LONGITUDE, TRAJ_ID, PERIOD, DATE, HOUR, DAY, COUNT, COLORS
+
+
+def generate_color():
+    return COLORS[np.random.randint(0, len(COLORS))]
 
 
 def rgb(rgb_colors):
@@ -678,6 +682,7 @@ def plot_markers(
     else:
         return base_map
 
+
 # TODO: adicionar se le vai querer como linha ou ponto
 def plot_trajectories_with_folium(
     move_data,
@@ -705,6 +710,203 @@ def plot_trajectories_with_folium(
     #           + "\n<b>Longitude:</b> " + str(each[1].lon) \
     #           + "\n<b>Datetime:</b> " + str(each[1].datetime)
     #     folium.Marker(location=[each[1]['lat'], each[1]['lon']], clustered_marker=True, popup=pop).add_to(base_map)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+
+def plot_trajectory_by_id_with_folium(
+    move_data,
+    id_,
+    n_rows=None,
+    lat_origin=None,
+    lon_origin=None,
+    zoom_start=12,
+    base_map=None,
+    save_as_html=False,
+    color='black',
+    filename='plot_trajectory_by_id_with_folium.html'
+):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = move_data.loc[0][LATITUDE]
+            lon_origin = move_data.loc[0][LONGITUDE]
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = move_data.shape[0]
+
+    folium.PolyLine(move_data[move_data[TRAJ_ID] == id_].reset_index().loc[:n_rows, [LATITUDE, LONGITUDE]],
+                    color=color, weight=2.5, opacity=1).add_to(base_map)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+
+def plot_trajectory_by_period(
+    move_data,
+    period,
+    n_rows=None,
+    lat_origin=None,
+    lon_origin=None,
+    zoom_start=12,
+    base_map=None,
+    save_as_html=False,
+    color='black',
+    filename='plot_trajectory_by_id_with_folium.html'
+):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = move_data.loc[0][LATITUDE]
+            lon_origin = move_data.loc[0][LONGITUDE]
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = move_data.shape[0]
+
+    if PERIOD not in move_data:
+        move_data.generate_time_of_day_features()
+
+    folium.PolyLine(move_data[move_data[PERIOD] == period].reset_index().loc[:n_rows, [LATITUDE, LONGITUDE]],
+                    color=color, weight=2.5, opacity=1).add_to(base_map)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+
+def plot_trajectory_by_day_week(
+    move_data,
+    day_week,
+    n_rows=None,
+    lat_origin=None,
+    lon_origin=None,
+    zoom_start=12,
+    base_map=None,
+    save_as_html=False,
+    color='black',
+    filename='plot_trajectory_by_day_week.html'
+):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = move_data.loc[0][LATITUDE]
+            lon_origin = move_data.loc[0][LONGITUDE]
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = move_data.shape[0]
+
+    if DAY not in move_data:
+        move_data.generate_day_of_the_week_features()
+
+    folium.PolyLine(move_data[move_data[DAY] == day_week].reset_index().loc[:n_rows, [LATITUDE, LONGITUDE]],
+                    color=color, weight=2.5, opacity=1).add_to(base_map)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+
+def plot_trajectory_by_date(
+    move_data,
+    start_date,
+    end_date,
+    n_rows=None,
+    lat_origin=None,
+    lon_origin=None,
+    zoom_start=12,
+    base_map=None,
+    save_as_html=False,
+    color='black',
+    filename='plot_trajectory_by_date.html'
+):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = move_data.loc[0][LATITUDE]
+            lon_origin = move_data.loc[0][LONGITUDE]
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = move_data.shape[0]
+
+    if DATE not in move_data:
+        move_data.generate_date_features()
+
+    folium.PolyLine(move_df[(move_df[DATE] <= end_date) & (move_df[DATE] >= start_date)].reset_index().loc[:n_rows,
+                    [LATITUDE, LONGITUDE]], color=color, weight=2.5, opacity=1).add_to(base_map)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+
+def plot_trajectory_by_hour(
+    move_data,
+    start_hour,
+    end_hour,
+    n_rows=None,
+    lat_origin=None,
+    lon_origin=None,
+    zoom_start=12,
+    base_map=None,
+    save_as_html=False,
+    color='black',
+    filename='plot_trajectory_by_hour.html'
+):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = move_data.loc[0][LATITUDE]
+            lon_origin = move_data.loc[0][LONGITUDE]
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = move_data.shape[0]
+
+    if HOUR not in move_data:
+        move_data.generate_hour_features()
+
+    folium.PolyLine(move_df[(move_df[HOUR] <= end_hour) & (move_df[HOUR] >= start_hour)].reset_index().loc[:n_rows, [LATITUDE, LONGITUDE]],
+                    color=color, weight=2.5, opacity=1).add_to(base_map)
+
+    if save_as_html:
+        base_map.save(outfile=filename)
+    else:
+        return base_map
+
+
+def plot_stops(
+    move_data,
+    n_rows=None,
+    lat_origin=None,
+    lon_origin=None,
+    zoom_start=12,
+    base_map=None,
+    save_as_html=False,
+    color='black',
+    filename='plot_trajectory_by_hour.html'
+):
+    if base_map is None:
+        if lat_origin is None and lon_origin is None:
+            lat_origin = move_data.loc[0][LATITUDE]
+            lon_origin = move_data.loc[0][LONGITUDE]
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+
+    if n_rows is None:
+        n_rows = move_data.shape[0]
+
+    # TODO: Chamar função que detecta os stops
+    for stop in stops.iterrows():
+        popup_ = "Texto"
+        base_map.add_child(folium.RegularPolygonMarker([stop[1][LATITUDE], stop[1][LONGITUDE]],
+                                                       color=color, weight=3, radius=20, opacity=0.5, popup=popup_,
+                                                       fill_opacity=0.5, fill_color=color))
 
     if save_as_html:
         base_map.save(outfile=filename)
