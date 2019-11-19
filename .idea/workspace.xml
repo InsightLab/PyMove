@@ -1,18 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="878e3d0a-d9ea-4d7b-9075-a8862426fd01" name="Default Changelist" comment="" />
+    <list default="true" id="878e3d0a-d9ea-4d7b-9075-a8862426fd01" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/PyMove.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exploring Filters.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exploring Utils.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Exploring Visualization.ipynb" beforeDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1Sf1BWH1kx3QDvyxkq6mtZFxVbD" />
   <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
   </component>
   <component name="RunDashboard">
@@ -40,7 +59,8 @@
       <workItem from="1571939728197" duration="3183000" />
       <workItem from="1572354056031" duration="1578000" />
       <workItem from="1573676628869" duration="295000" />
-      <workItem from="1573744467218" duration="287000" />
+      <workItem from="1573744467218" duration="519000" />
+      <workItem from="1574170999121" duration="1846000" />
     </task>
     <servers />
   </component>
