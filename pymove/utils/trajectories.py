@@ -98,10 +98,10 @@ def format_labels(move_data, current_id, current_lat, current_lon, current_datet
 
     """ 
     dic_labels = {}
-    dic_labels[TRAJ_ID] = current_id
-    dic_labels[LONGITUDE] = current_lon
-    dic_labels[LATITUDE] = current_lat
-    dic_labels[DATETIME] = current_datetime
+    dic_labels[current_id] = TRAJ_ID
+    dic_labels[current_lon] = LONGITUDE
+    dic_labels[current_lat] = LATITUDE
+    dic_labels[current_datetime] = DATETIME
     return dic_labels
 
 
