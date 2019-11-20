@@ -22,11 +22,17 @@ def compress_segment_stop_to_point(move_data, label_segment='segment_stop', labe
     drop_moves : Boolean, optional(True by default)
         If set to true, the moving points will be dropped from the dataframe.
     label_id : String, optional(dic_labels["id"] by default)
+         Used to create the stay points used in the compression. If the dataset already has the stop move, this
+         parameter should be ignored.
          Indicates the label of the id column in the user"s dataframe.
     dist_radius : Double, optional(30 by default)
+        Used to create the stay points used in the compression. If the dataset already has the stop move, this
+        parameter should be ignored.
         The first step in this function is segmenting the trajectory. The segments are used to find the stop points.
         The dist_radius defines the distance used in the segmentation.
     time_radius :  Double, optional(900 by default)
+        Used to create the stay points used in the compression. If the dataset already has the stop move, this
+         parameter should be ignored.
         The time_radius used to determine if a segment is a stop. If the user stayed in the segment for a time
         greater than time_radius, than the segment is a stop.
 
