@@ -59,7 +59,7 @@ def by_dist_time_speed(
         label_new_tid="tid_part",
         inplace=True
 ):
-    """Segments the trajectories into clusters based on distance, time and speed.
+    """Segments the trajectories into segments based on distance, time and speed.
 
     Parameters
     ----------
@@ -76,7 +76,12 @@ def by_dist_time_speed(
     drop_single_points : boolean, optional(True by default)
         If set to True, drops the trajectories with only one point.
     label_new_tid : String, optional("tid_part" by default)
-        The label of the column cointainig the ids of the formed clusters. Is the new splitted id.
+        The label of the column cointainig the ids of the formed segments. Is the new splitted id.
+
+    Returns
+    ------
+    Returns the dataFrame with the aditional features: label_new_tid, that indicates the trajectory segment
+        to which the point belongs to.
 
     Note
     -----
@@ -171,7 +176,7 @@ def by_speed(
         label_new_tid="tid_speed",
         inplace=True
 ):
-    """Segments the trajectories into clusters based on speed.
+    """Segments the trajectories into segments based on speed.
 
     Parameters
     ----------
@@ -184,7 +189,12 @@ def by_speed(
     drop_single_points : boolean, optional(True by default)
         If set to True, drops the trajectories with only one point.
     label_new_tid : String, optional("tid_speed" by default)
-        The label of the column cointainig the ids of the formed clusters. Is the new splitted id.
+        The label of the column cointainig the ids of the formed segments. Is the new splitted id.
+
+    Returns
+    ------
+    Returns the dataFrame with the aditional features: label_new_tid, that indicates the trajectory segment
+        to which the point belongs to.
 
     Note
     -----
@@ -254,6 +264,7 @@ def by_speed(
                 print("...Object - before drop: {} - after drop: {}".format(ids_before_drop,
                                                                             move_data[label_id].unique().shape[0]))
                 print("...Shape - before drop: {} - after drop: {}".format(shape_before_drop, move_data.shape))
+                move_data.generate_dist_time_speed_features()
             else:
                 print("...No trajs with only one point.", move_data.shape)
 
@@ -271,7 +282,7 @@ def by_time(
         label_new_tid="tid_time",
         inplace=True
 ):
-    """Segments the trajectories into clusters based on time.
+    """Segments the trajectories into segments based on time.
 
     Parameters
     ----------
@@ -284,11 +295,12 @@ def by_time(
     drop_single_points : boolean, optional(True by default)
         If set to True, drops the trajectories with only one point.
     label_new_tid : String, optional("tid_time" by default)
-        The label of the column cointainig the ids of the formed clusters. Is the new splitted id.
+        The label of the column cointainig the ids of the formed segments. Is the new splitted id.
 
-    Note
-    -----
-    Speed features must be updated after split.
+    Returns
+    ------
+    Returns the dataFrame with the aditional features: label_new_tid, that indicates the trajectory segment
+        to which the point belongs to.
     """
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
@@ -364,28 +376,45 @@ def by_time(
     except Exception as e:
         raise e
 
-def segment_traj_by_max_dist(df_, label_id=TRAJ_ID,  max_dist_between_adj_points=3000, label_segment=TID_DIST):
-    """ Index_name is the current id.
-    label_new_id is the new splitted id.
+def by_max_dist(move_data, label_id=TRAJ_ID,  max_dist_between_adj_points=3000, label_segment=TID_DIST):
+    """ Segments the trajectories into based on distance.
+    Parameters
+    ----------
+    move_data : dataframe
+       The input trajectory data
+    label_id : String, optional(dic_labels["id"] by default)
+         Indicates the label of the id column in the user"s dataframe.
+    max_dist_between_adj_points : Float, optinal(50.0 by default)
+        Specify the maximun dist between two adjacent points
+    label_segment : String, optional("tid_dist" by default)
+        The label of the column cointainig the ids of the formed segments. Is the new splitted id.
+
+    Returns
+    ------
+    Returns the dataFrame with the aditional features: label_segment, that indicates the trajectory segment
+        to which the point belongs to.
+
+    Note
+    -----
     Speed features must be updated after split.
     """
     print('Split trajectories by max distance between adjacent points:', max_dist_between_adj_points)
     try:
 
-        if DIST_TO_PREV not in df_:
-            df_.generate_dist_features()
+        if DIST_TO_PREV not in move_data:
+            move_data.generate_dist_features()
 
-        if df_.index.name is None:
+        if move_data.index.name is None:
             print('...setting {} as index'.format(label_id))
-            df_.set_index(label_id, inplace=True)
+            move_data.set_index(label_id, inplace=True)
 
         curr_tid = 0
-        if label_segment not in df_:
-            df_[label_segment] = curr_tid
+        if label_segment not in move_data:
+            move_data[label_segment] = curr_tid
 
-        ids = df_.index.unique()
+        ids = move_data.index.unique()
         count = 0
-        df_size = df_.shape[0]
+        df_size = move_data.shape[0]
         curr_perc_int = -1
         start_time = time.time()
 
@@ -395,11 +424,11 @@ def segment_traj_by_max_dist(df_, label_id=TRAJ_ID,  max_dist_between_adj_points
             curr_tid += 1
 
             """ filter dist max"""
-            dist = (df_.at[idx, DIST_TO_PREV] > max_dist_between_adj_points)
+            dist = (move_data.at[idx, DIST_TO_PREV] > max_dist_between_adj_points)
             """ check if object have more than one point to split"""
             if dist.shape == ():
                 print('id: {} has not point to split'.format(idx))
-                df_.at[idx, label_segment] = curr_tid
+                move_data.at[idx, label_segment] = curr_tid
                 count+=1
             else:
                 tids = np.empty(dist.shape[0], dtype=np.int64)
@@ -409,15 +438,15 @@ def segment_traj_by_max_dist(df_, label_id=TRAJ_ID,  max_dist_between_adj_points
                         curr_tid += 1
                         tids[i:] = curr_tid
                 count += tids.shape[0]
-                df_.at[idx, label_segment] = tids
+                move_data.at[idx, label_segment] = tids
 
             curr_perc_int, est_time_str = progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
 
         if label_id == label_segment:
-            df_.reset_index(drop=True, inplace=True)
+            move_data.reset_index(drop=True, inplace=True)
             print('... label_id = label_new_id, then reseting and drop index')
         else:
-            df_.reset_index(inplace=True)
+            move_data.reset_index(inplace=True)
             print('... Reseting index')
         print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
         print('------------------------------------------\n')
