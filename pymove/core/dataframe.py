@@ -1,7 +1,7 @@
 # coding=utf-8
 import time
 import dask
-import resource
+#import resource
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -462,14 +462,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         numpy_ = self._data.values
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_numpy'
-        self._last_operation_mem_usage = finish - init
+        #self._last_operation_mem_usage = finish - init
         return numpy_
 
     def write_file(self, file_name, separator=','):
@@ -489,14 +489,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         self._data.to_csv(file_name, sep=separator, encoding='utf-8', index=False)
 
-        #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        ##finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'write_file'
-        self._last_operation_mem_usage = finish - init
+        #self._last_operation_mem_usage = finish - init
 
     def len(self):
         """
@@ -532,15 +532,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         dict_ = self._data.to_dict()
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_dict'
-        self._last_operation_mem_usage = finish - init
+        #self._last_operation_mem_usage = finish - init
         return dict_
 
     def to_grid(self, cell_size, meters_by_degree=lat_meters(-3.8162973555)):
@@ -562,14 +562,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         grid_ = create_virtual_grid(cell_size, self.get_bbox(), meters_by_degree)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_grid'
-        self._last_operation_mem_usage = finish - init
+        #self._last_operation_mem_usage = finish - init
         return grid_
 
     def to_DataFrame(self):
@@ -652,7 +652,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
             data_ = self._data
@@ -668,18 +668,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_[TID] = data_[TRAJ_ID].astype(str) + data_[DATETIME].dt.strftime(str_format)
             print('\n...tid feature was created...\n')
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_tid_based_on_id_datatime'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return data_
         except Exception as e:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_tid_based_on_id_datatime'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_date_features(self, inplace=True):
@@ -696,7 +696,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
             data_ = self._data
@@ -709,18 +709,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 data_['date'] = data_[DATETIME].dt.date
                 print('..Date features was created...\n')
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_date_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return data_
         except Exception as e:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_date_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_hour_features(self, inplace=True):
@@ -737,7 +737,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
             data_ = self._data
@@ -750,18 +750,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 data_['hour'] = data_[DATETIME].dt.hour
                 print('...Hour feature was created...\n')
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_hour_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return data_
         except Exception as e:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_hour_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_day_of_the_week_features(self, inplace=True):
@@ -778,7 +778,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
             data_ = self._data
@@ -790,18 +790,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_[DAY] = data_[DATETIME].dt.day_name()
             print('...the day of the week feature was created...\n')
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_day_of_the_week_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return data_
         except Exception as e:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_day_of_the_week_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_time_of_day_features(self, inplace=True):
@@ -824,7 +824,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
             data_ = self._data
@@ -843,18 +843,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_[PERIOD] = np.select(conditions, choices, 'undefined')
             print('...the period of day feature was created')
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_time_of_day_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return data_
         except Exception as e:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_time_of_day_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_dist_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
@@ -886,7 +886,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
             data_ = self._data
@@ -924,7 +924,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 size_id = curr_lat.size
 
                 if size_id <= 1:
-                    print('...id:{}, must have at least 2 GPS points\n'.format(idx))
+                    #print('...id:{}, must have at least 2 GPS points\n'.format(idx))
                     data_.at[idx, DIST_TO_PREV] = np.nan
 
                 else:
@@ -951,19 +951,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             print('...Reset index\n')
             print('..Total Time: {}'.format((time.time() - start_time)))
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_dist_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return data_
         except Exception as e:
             print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_dist_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
@@ -997,7 +997,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
             data_ = self._data
@@ -1038,7 +1038,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 size_id = curr_lat.size
 
                 if size_id <= 1:
-                    print('...id:{}, must have at least 2 GPS points\n'.format(idx))
+                    #print('...id:{}, must have at least 2 GPS points\n'.format(idx))
                     data_.at[idx, DIST_TO_PREV] = np.nan
                     data_.at[idx, TIME_TO_PREV] = np.nan
                     data_.at[idx, SPEED_TO_PREV] = np.nan
@@ -1067,19 +1067,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_.reset_index(inplace=True)
             print('..Total Time: {:.3f}'.format((time.time() - start_time)))
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_dist_time_speed_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return data_
         except Exception as e:
             print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_dist_time_speed_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_move_and_stop_by_radius(self, radius=0, target_label=DIST_TO_PREV, inplace=True):
@@ -1102,7 +1102,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         if inplace:
             data_ = self._data
@@ -1120,18 +1120,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_["situation"] = np.select(conditions, choices, np.nan)
             print('\n....There are {} stops to this parameters\n'.format(data_[data_["situation"] == 'stop'].shape[0]))
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_move_and_stop_by_radius'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             if inplace == False:
                 return data_
         except Exception as e:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_move_and_stop_by_radius'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def time_interval(self):
@@ -1177,7 +1177,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         try:
             col_float = self._data.select_dtypes(include=[dtype]).columns
@@ -1193,15 +1193,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 if save_fig:
                     plt.savefig(fname=name, fig=fig)
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'plot_all_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
         except Exception as e:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'plot_all_features'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def plot_trajs(self, figsize=(10, 10), return_fig=True, markers='o', markersize=20):
@@ -1225,7 +1225,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         fig = plt.figure(figsize=figsize)
 
@@ -1235,15 +1235,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
             plt.plot(selfid[LONGITUDE], selfid[LATITUDE], markers, markersize=markersize)
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'plot_trajs'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
         if return_fig:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'plot_trajs'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             return fig
 
     def plot_traj_id(self, tid, figsize=(10, 10)):
@@ -1266,7 +1266,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         fig = plt.figure(figsize=figsize)
 
@@ -1290,10 +1290,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], 'go', markersize=10)  # nodes
             plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE], 'r.', markersize=8)  # points
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'plot_traj_id'
-        self._last_operation_mem_usage = finish - init
+        #self._last_operation_mem_usage = finish - init
         return df_, fig
 
     def show_trajectories_info(self):
@@ -1319,7 +1319,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         try:
             print('\n======================= INFORMATION ABOUT DATASET =======================\n')
@@ -1357,15 +1357,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
             print('\n=========================================================================\n')
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'show_trajectories_info'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
         except Exception as e:
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'show_trajectories_info'
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
             raise e
 
     def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
@@ -1618,14 +1618,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         _plot = self._data.plot(*args, **kwargs)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'plot'
-        self._last_operation_mem_usage = finish - init
+        #self._last_operation_mem_usage = finish - init
 
         return _plot
 
@@ -2071,14 +2071,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         self._data.to_csv(file_name, sep, encoding)
 
-        finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'to_csv'
-        self._last_operation_mem_usage = finish - init
+        #self._last_operation_mem_usage = finish - init
 
     # TODO: Ajeitar esse bug e deixar esse como central. erro nao entendi
     # def to_csv(self, path_or_buf=None, sep=',', na_rep='', float_format=None, columns=None, header=True, index=True,
@@ -2104,7 +2104,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_name = 'convert_to'
 
         if (new_type == "dask"):
@@ -2115,17 +2115,17 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                                       datetime=DATETIME,
                                       traj_id=TRAJ_ID,
                                       n_partitions=1)
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             return _dask
 
         elif (new_type == "pandas"):
 
-            finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             self._last_operation_time_duration = time.time() - start
-            self._last_operation_mem_usage = finish - init
+            #self._last_operation_mem_usage = finish - init
 
             return self._data
 
@@ -2149,7 +2149,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         A string of the execution time of the last function, called to the PandasMoveDataFrame object.
         """
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         return self._last_operation_time_duration
 
@@ -2162,7 +2162,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         return self._last_operation_name
 
@@ -2177,7 +2177,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         start = time.time()
-        init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
         return self.self._last_operation_mem_usage
 
