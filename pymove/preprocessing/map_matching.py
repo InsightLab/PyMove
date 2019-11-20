@@ -131,7 +131,7 @@ def check_time_dist(
 
 
 def fix_time_not_in_ascending_order_id(move_data, tid, index_name="tid", inplace=True):
-    """Used to correct time order between points of a especified trajectory, after map matching operations.
+    """Used to correct time order between points of a  trajectory, after map matching operations.
 
     Parameters
     ----------

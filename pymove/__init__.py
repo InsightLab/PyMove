@@ -8,6 +8,8 @@ from pymove.utils import math
 from pymove.preprocessing import filters
 from pymove.preprocessing import map_matching
 from pymove.preprocessing import segmentation
+from pymove.preprocessing import stay_point_detection
+from pymove.preprocessing import compression
 from pymove.utils.trajectories import (read_csv)
 from pymove.core.dataframe import MoveDataFrame
 from pymove.core.dataframe import PandasMoveDataFrame
