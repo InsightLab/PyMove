@@ -7,15 +7,34 @@ from pymove.utils.constants import (
     STOP)
 import time
 import numpy as np
+from pymove.preprocessing.segmentation import by_max_dist
 from pymove.preprocessing.segmentation import segment_traj_by_max_dist
 
 
 
 
 def create_update_datetime_in_format_cyclical(move_data, label_datetime=DATETIME):
+    """Converts the time data into a cyclical format.
+
+    Parameters
+    ----------
+    move_data : dataframe
+       The input trajectory data
+    label_datetime : String, optional(datetime by default)
+        Indicates the column with the data to be converted.
+
+    Returns
+    ------
+    Returns the dataFrame with 2 aditional features: hour_sin and hour_cos.
+
+    Notes
+    -----
+        https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+        https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
+
+    """
     try:
-        # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
-        # https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
+
         print('Encoding cyclical continuous features - 24-hour time')
         if label_datetime in move_data:
             hours = move_data[label_datetime].dt.hour
@@ -27,10 +46,31 @@ def create_update_datetime_in_format_cyclical(move_data, label_datetime=DATETIME
 
 
 def create_or_update_move_stop_by_dist_time(move_data, label_id=TRAJ_ID , dist_radius=30, time_radius=900):
+    """Finds the stops and moves points of the dataframe, if these points already exist, they will be updated.
+
+    Parameters
+    ----------
+    move_data : dataframe
+       The input trajectory data
+    label_id : String, optional(dic_labels["id"] by default)
+         Indicates the label of the id column in the user"s dataframe.
+    dist_radius : Double, optional(30 by default)
+        The first step in this function is segmenting the trajectory. The segments are used to find the stop points.
+        The dist_radius defines the distance used in the segmentation.
+    time_radius :  Double, optional(900 by default)
+        The time_radius used to determine if a segment is a stop. If the user stayed in the segment for a time
+        greater than time_radius, than the segment is a stop.
+
+    Returns
+    ------
+    Returns the dataFrame with 2 aditional features: segment_stop and stop.
+        segment_stop indicates the trajectory segment to which the point belongs to.
+        stop indicates if the point represents a stop.
+    """
     try:
         start_time = time.time()
         label_segment_stop = 'segment_stop'
-        segment_traj_by_max_dist(move_data, label_id=label_id, max_dist_between_adj_points=dist_radius,
+        by_max_dist(move_data, label_id=label_id, max_dist_between_adj_points=dist_radius,
                                            label_segment=label_segment_stop)
 
         if (label_segment_stop in move_data):
@@ -54,6 +94,26 @@ def create_or_update_move_stop_by_dist_time(move_data, label_id=TRAJ_ID , dist_r
 
 def create_update_move_and_stop_by_radius(move_data, radius=0, target_label=DIST_TO_PREV,
                                           new_label=SITUATION):
+    """Finds the stops and moves points of the dataframe, if these points already exist, they will be updated.
+
+        Parameters
+        ----------
+        move_data : dataframe
+           The input trajectory data
+        radius :  Double, optional(900 by default)
+            The radius value is used to determine if a segment is a stop. If the value of the point in target_label is
+            greater than radius, the segment is a stop, otherwise it's a move.
+        target_label : String, optional(dist_to_prev by default)
+            The feature used to calculate the stay points.
+        new_label : String, optional(situation by default)
+            Is the name of the column created to indicates if a point is a stop of a move.
+
+        Returns
+        ------
+        Returns the dataFrame with 2 aditional features: segment_stop and new_label.
+            segment_stop indicates the trajectory segment to which the point belongs to.
+            new_label indicates if the point represents a stop point or a moving point.
+        """
     try:
         print('\nCreating or updating features MOVE and STOPS...\n')
 

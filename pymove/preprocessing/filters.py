@@ -11,8 +11,9 @@ from pymove.utils.constants import (
 	DIST_TO_NEXT)
 
 
+
 def by_bbox(move_data, bbox, filter_out=False, inplace=False):
-    """Filters points of the trajectories according to especified bounding box.
+    """Filters points of the trajectories according to specified bounding box.
 
     Parameters
     ----------
@@ -57,7 +58,7 @@ def by_bbox(move_data, bbox, filter_out=False, inplace=False):
 
 
 def by_datetime(move_data, start_datetime=None, end_datetime=None, filter_out=False):
-    """Filters trajectories points according to especified time range
+    """Filters trajectories points according to specified time range
 
     Parameters
     ----------
@@ -76,7 +77,7 @@ def by_datetime(move_data, start_datetime=None, end_datetime=None, filter_out=Fa
     Returns
     -------
     move_data : dataframe
-        Returns dataframe with trajectories points filtered by especified time range.
+        Returns dataframe with trajectories points filtered by specified time range.
     """
 
     try:
@@ -97,7 +98,7 @@ def by_datetime(move_data, start_datetime=None, end_datetime=None, filter_out=Fa
 
 
 def by_label(move_data, value, label_name, filter_out=False):
-    """Filters trajectories points according to especified value and collum label
+    """Filters trajectories points according to specified value and collum label
 
     Parameters
     ----------
@@ -130,7 +131,7 @@ def by_label(move_data, value, label_name, filter_out=False):
 
 
 def by_id(move_data, id_=None, label_id=TRAJ_ID, filter_out=False):
-    """Filters trajectories points according to especified trajectory id
+    """Filters trajectories points according to specified trajectory id
 
     Parameters
     ----------
@@ -142,9 +143,9 @@ def by_id(move_data, id_=None, label_id=TRAJ_ID, filter_out=False):
         The label of the colum which contains the id of the trajectories
     filter_out : boolean, optional(false by default)
         If set to true, the function will return the points of the trajectories with the same
-        id as the one especified by the parameter value.
+        id as the one specified by the parameter value.
         If set to false it will return the points of the trajectories with a different id from
-        the one especified in the parameters.
+        the one specified in the parameters.
 
     Returns
     -------
@@ -155,7 +156,7 @@ def by_id(move_data, id_=None, label_id=TRAJ_ID, filter_out=False):
 
 
 def by_tid(move_data, tid_=None, label_tid=TID, filter_out=False):
-    """Filters trajectories points according to especified trajectory tid
+    """Filters trajectories points according to a specified  trajectory tid
 
     Parameters
     ----------
@@ -167,9 +168,9 @@ def by_tid(move_data, tid_=None, label_tid=TID, filter_out=False):
         The label of the colum in the user"s dataframe which contains the tid of the trajectories
     filter_out : boolean, optional(false by default)
         If set to true, the function will return the points of the trajectories with the same
-        tid as the one especified by the parameter value.
+        tid as the one specified by the parameter value.
         If set to false it will return the points of the trajectories with a different tid from
-        the one especified in the parameters.
+        the one specified in the parameters.
 
     Returns
     -------
@@ -329,7 +330,7 @@ def clean_nan_values(move_data, axis=0, how="any", thresh=None, subset=None, inp
         the function drops the rows containing the missing value.
         If set to 1 or "columns", drops the columns containing the missing value.
     how : String, optional (default "any")
-        Especifies if a row or column is droped for having at least one NA value or all value NA.
+        Determines if a row or column is droped for having at least one NA value or all value NA.
         If set to "any", the rows or columns will be droped, if it has any NA values.
         If set to "all", the rows or columns will be droped, if all of it"s values are NA.
     thresh : Integer, optional (None by default)
@@ -538,7 +539,7 @@ def clean_trajectories_with_few_points(
     min_points_per_trajectory=2,
     label_dtype=np.float64
 ):
-    """Eliminates from the given dataframe, trajectories with fewer points than was especified by the user
+    """Removes from the given dataframe, trajectories with fewer points than was specified by the user
 
     Parameters
     ----------
