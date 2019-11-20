@@ -628,7 +628,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_tid_based_on_id_datatime(self, str_format="%Y%m%d%H", sort=True, inplace=True):
         """
-        Create or update trajectory id based on id e datetime.
+        Create or update trajectory id based on id and datetime.
 
         Parameters
         ----------
@@ -2080,15 +2080,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'to_csv'
         self._last_operation_mem_usage = finish - init
 
-    # TODO: Ajeitar esse bug e deixar esse como central. erro nao entendi
-    # def to_csv(self, path_or_buf=None, sep=',', na_rep='', float_format=None, columns=None, header=True, index=True,
-    #          index_label=None, mode='w', encoding=None, compression='infer', quoting=None, quotechar='"',
-    #          line_terminator=None, chunksize=None, date_format=None, doublequote=True, escapechar=None, decimal='.'):
-    #   self._data.to_csv(path_or_buf, sep, na_rep, float_format, columns, header, index,
-    #    index_label, mode, encoding, compression, quoting, quotechar,
-    #    line_terminator, chunksize, date_format, doublequote, escapechar, decimal)
-    # self._data.to_csv("teste3.csv")]
-
     def convert_to(self, new_type):
         """Convert an object from one type to another specified by the user.
 
@@ -2167,19 +2158,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return self._last_operation_name
 
     def last_operation(self):
-        """Returns the memory usage calculation, in bytes, of the last function,
-           called to the PandasMoveDataFrame object.
+        """Returns the name, memory and time usage calculation, of the last function.
 
         Returns
         -------
-        A string of the memory usage calculation, in bytes, of the last function,
+        A dict that contains the memory usage calculation, in bytes, of the last function,
         called to the PandasMoveDataFrame object.
         """
 
         start = time.time()
         init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-        return self.self._last_operation_mem_usage
+        return {'name': self._last_operation_name, 'time': self._last_operation_time_duration, 'mem': self._last_operation_mem_usage}
 
     def mem(self, format):
         """Returns the memory usage calculation of the last function, called to the PandasMoveDataFrame object,
