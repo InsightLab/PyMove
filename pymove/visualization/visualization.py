@@ -4,7 +4,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from folium.plugins import HeatMap, HeatMapWithTime, MarkerCluster, FastMarkerCluster
 from pymove.utils.datetime import str_to_datetime
-from pymove.utils.constants import LATITUDE, LONGITUDE, TRAJ_ID, PERIOD, DATE, HOUR, DAY, COUNT, COLORS
+from pymove.utils.constants import (
+    LATITUDE,
+    LONGITUDE,
+    TRAJ_ID,
+    PERIOD,
+    DATE,
+    HOUR,
+    DAY,
+    COUNT,
+    COLORS,
+    SITUATION,
+    STOP,
+    DATETIME
+)
+
+from pymove.preprocessing.stay_point_detection import (
+    create_or_update_move_stop_by_dist_time,
+    create_update_move_and_stop_by_radius
+)
 
 
 def generate_color():
@@ -1138,6 +1156,8 @@ def plot_trajectory_by_hour(
 
 def plot_stops(
     move_data,
+    radius=0,
+    weight=3,
     n_rows=None,
     lat_origin=None,
     lon_origin=None,
@@ -1154,6 +1174,10 @@ def plot_stops(
     ----------
     move_data : pymove.core.MoveDataFrameAbstract subclass.
         Input trajectory data.
+
+    radius :  Double, optional(900 by default)
+        The radius value is used to determine if a segment is a stop. If the value of the point in target_label is
+        greater than radius, the segment is a stop, otherwise it's a move.
 
     n_rows : int, optional, default None.
         Represents number of data rows that are will plot.
@@ -1194,12 +1218,13 @@ def plot_stops(
     if n_rows is None:
         n_rows = move_data.shape[0]
 
-    # TODO: Chamar função que detecta os stops
+    create_update_move_and_stop_by_radius(move_data, radius=radius)
+    stops = move_data[move_data[SITUATION] == STOP].loc[:n_rows, [LATITUDE, LONGITUDE, DATETIME]]
+
     for stop in stops.iterrows():
-        popup_ = "Texto"
-        base_map.add_child(folium.RegularPolygonMarker([stop[1][LATITUDE], stop[1][LONGITUDE]],
-                                                       color=color, weight=3, radius=20, opacity=0.5, popup=popup_,
-                                                       fill_opacity=0.5, fill_color=color))
+        base_map.add_child(
+            folium.Circle([stop[1][LATITUDE], stop[1][LONGITUDE]], color=color, weight=weight,
+                          radius=20, opacity=0.5, popup=stop[1][DATETIME], fill_color=color, fill_opacity=0.5))
 
     if save_as_html:
         base_map.save(outfile=filename)

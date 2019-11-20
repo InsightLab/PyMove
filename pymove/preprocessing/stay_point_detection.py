@@ -6,8 +6,10 @@ from pymove.utils.constants import (
     MOVE,
     STOP)
 import time
-from pymove.preprocessing.segmentation import segment_traj_by_max_dist
 import numpy as np
+from pymove.preprocessing.segmentation import segment_traj_by_max_dist
+
+
 
 
 def create_update_datetime_in_format_cyclical(move_data, label_datetime=DATETIME):
