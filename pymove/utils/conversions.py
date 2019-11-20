@@ -4,7 +4,7 @@ from pymove.utils import constants
 
 def list_to_str(input_list, delimiter=','):
     """
-    Concatenates list elements, joining them by the separator especified by the parameter "delimiter".
+    Concatenates list elements, joining them by the separator specified by the parameter "delimiter".
 
     Parameters
     ----------

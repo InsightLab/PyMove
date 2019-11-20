@@ -1,5 +1,4 @@
 # TODO: Modelar como classe
-# TODO: Andreza
 import math
 import pickle
 import numpy as np
@@ -8,7 +7,7 @@ import matplotlib.pyplot as plt
 from shapely.geometry import Polygon
 from tqdm import tqdm_notebook as tqdm
 from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, INDEX_GRID_LON, INDEX_GRID_LAT
-# from pymove.utils.traj_utils import get_bbox
+
 
 def lat_meters(lat):
     """
@@ -39,6 +38,7 @@ def lat_meters(lat):
     meters_lgn = 111412.84 * math.cos(rlat) - 93.5 * math.cos(3 * rlat)
     meters = (meters_lat + meters_lgn) / 2
     return meters
+
 
 def create_update_index_grid_feature(df_, dic_grid=None, label_dtype=np.int64, sort=True):
     """
@@ -91,6 +91,7 @@ def create_update_index_grid_feature(df_, dic_grid=None, label_dtype=np.int64, s
             print('... inform a grid virtual dictionary\n')
     except Exception as e:
         raise e
+
 
 def create_virtual_grid(cell_size, bbox, meters_by_degree = lat_meters(-3.8162973555)):
     """
@@ -168,6 +169,7 @@ def create_virtual_grid(cell_size, bbox, meters_by_degree = lat_meters(-3.816297
     print('\n..A virtual grid was created')
     return virtual_grid
 
+
 def create_one_polygon_to_point_on_grid(dic_grid, index_grid_lat, index_grid_lon):
     """
     Create one polygon to point on grid. 
@@ -209,6 +211,7 @@ def create_one_polygon_to_point_on_grid(dic_grid, index_grid_lat, index_grid_lon
                                             ))
     return polygon
 
+
 def create_all_polygons_on_grid(dic_grid):
     """
     Create all polygons that are represented in a grid and store them in a new dic_grid key . 
@@ -249,6 +252,7 @@ def create_all_polygons_on_grid(dic_grid):
         print('...geometry was created to a virtual grid')
     except Exception as e:
         raise e
+
 
 def create_all_polygons_to_all_point_on_grid(df_, dic_grid):
     """
@@ -300,6 +304,7 @@ def create_all_polygons_to_all_point_on_grid(df_, dic_grid):
         print('size:{}, i:{}'.format(size, i))
         raise e  
 
+
 def point_to_index_grid(event_lat, event_lon, dic_grid):
     """
     Locate the coordinates x and y in a grid of point (lat, long). 
@@ -349,6 +354,7 @@ def point_to_index_grid(event_lat, event_lon, dic_grid):
     print('...[{},{}] indexes were created to lat and lon'.format(indexes_lat_y.size, indexes_lon_x.size))
     return indexes_lat_y, indexes_lon_x
 
+
 def save_grid_pkl(filename, dic_grid):
     """
     Save a grid with new file .pkl. 
@@ -391,6 +397,7 @@ def save_grid_pkl(filename, dic_grid):
     except Exception as e:
         raise e
 
+
 def read_grid_pkl(filename):
     """
     Save a grid with new file .pkl. 
@@ -431,6 +438,7 @@ def read_grid_pkl(filename):
     except Exception as e:
         raise e
         
+
 # TODO: ajeitar que tá dando erro + finalizar comentários
 def show_grid_polygons(df_, id_, label_id = TRAJ_ID, label_polygon='polygon', figsize=(10,10)):   
     """
