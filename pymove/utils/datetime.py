@@ -3,7 +3,7 @@ from pandas._libs.tslibs.timestamps import Timestamp
 
 
 def date_to_str(date):
-    """Get date, in string"s format, from timestamp.
+    """Get date, in string's format, from timestamp.
 
     Parameters
     ----------
