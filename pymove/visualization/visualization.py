@@ -16,7 +16,8 @@ from pymove.utils.constants import (
     COLORS,
     SITUATION,
     STOP,
-    DATETIME
+    DATETIME,
+    TILES
 )
 
 from pymove.preprocessing.stay_point_detection import (
@@ -302,7 +303,7 @@ def show_lat_lon_GPS(
         raise e
 
 
-def create_base_map(default_location, default_zoom_start=12):
+def create_base_map(default_location, tile, default_zoom_start=12):
     """
     Generate a folium map.
 
@@ -314,13 +315,16 @@ def create_base_map(default_location, default_zoom_start=12):
     default_zoom_start : int, optional, default 12.
         Represents the zoom which will be the center of the map.
 
+    tile : String.
+        Represents the map's tiles.
+
     Returns
     -------
     base_map : folium.folium.Map.
         Represents a folium map.
 
     """
-    base_map = folium.Map(location=default_location, control_scale=True, zoom_start=default_zoom_start)
+    base_map = folium.Map(location=default_location, control_scale=True, zoom_start=default_zoom_start, tiles=tile)
     return base_map
 
 
@@ -333,6 +337,7 @@ def heatmap(
     radius=8,
     max_zoom=13,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     filename='heatmap.html'
 ):
@@ -375,6 +380,9 @@ def heatmap(
     filename : String, optional, default 'heatmap.html'.
         Represents the file name of new file .html.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     Returns
     -------
     base_map : folium.folium.Map.
@@ -385,7 +393,7 @@ def heatmap(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -496,6 +504,7 @@ def cluster(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     filename='cluster.html'
 ):
@@ -525,6 +534,9 @@ def cluster(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -541,7 +553,7 @@ def cluster(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -567,6 +579,7 @@ def faster_cluster(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     filename='faster_cluster.html'
 ):
@@ -596,6 +609,9 @@ def faster_cluster(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -612,7 +628,7 @@ def faster_cluster(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -639,6 +655,7 @@ def plot_markers(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     filename='plot_markers.html'
 ):
@@ -668,6 +685,9 @@ def plot_markers(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -684,7 +704,7 @@ def plot_markers(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -708,6 +728,7 @@ def plot_trajectories_with_folium(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     color='black',
     filename='plot_trajectories_with_folium.html'
@@ -738,6 +759,9 @@ def plot_trajectories_with_folium(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -754,7 +778,7 @@ def plot_trajectories_with_folium(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -780,6 +804,7 @@ def plot_trajectory_by_id_with_folium(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     color='black',
     filename='plot_trajectory_by_id_with_folium.html'
@@ -813,6 +838,9 @@ def plot_trajectory_by_id_with_folium(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -829,7 +857,7 @@ def plot_trajectory_by_id_with_folium(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -851,6 +879,7 @@ def plot_trajectory_by_period(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     color='black',
     filename='plot_trajectory_by_period_with_folium.html'
@@ -884,6 +913,9 @@ def plot_trajectory_by_period(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -900,7 +932,7 @@ def plot_trajectory_by_period(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -925,6 +957,7 @@ def plot_trajectory_by_day_week(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     color='black',
     filename='plot_trajectory_by_day_week.html'
@@ -958,6 +991,9 @@ def plot_trajectory_by_day_week(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -974,7 +1010,7 @@ def plot_trajectory_by_day_week(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -1000,6 +1036,7 @@ def plot_trajectory_by_date(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     color='black',
     filename='plot_trajectory_by_date.html'
@@ -1036,6 +1073,9 @@ def plot_trajectory_by_date(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -1053,7 +1093,7 @@ def plot_trajectory_by_date(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -1085,6 +1125,7 @@ def plot_trajectory_by_hour(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     color='black',
     filename='plot_trajectory_by_hour.html'
@@ -1121,6 +1162,9 @@ def plot_trajectory_by_hour(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -1137,7 +1181,7 @@ def plot_trajectory_by_hour(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -1163,6 +1207,7 @@ def plot_stops(
     lon_origin=None,
     zoom_start=12,
     base_map=None,
+    tile=TILES[0],
     save_as_html=False,
     color='black',
     filename='plot_stops.html'
@@ -1197,6 +1242,9 @@ def plot_stops(
         Represents the folium map. If not informed, a new map is generated using the function create_base_map(), with
         the lat_origin, lon_origin and zoom_start.
 
+    tile : String, optional, default 'OpenStreetMap'.
+        Represents the map's tiles.
+
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
 
@@ -1213,7 +1261,7 @@ def plot_stops(
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
             lon_origin = move_data.loc[0][LONGITUDE]
-        base_map = create_base_map(default_location=[lat_origin, lon_origin], default_zoom_start=zoom_start)
+        base_map = create_base_map(default_location=[lat_origin, lon_origin], tile=tile, default_zoom_start=zoom_start)
 
     if n_rows is None:
         n_rows = move_data.shape[0]
