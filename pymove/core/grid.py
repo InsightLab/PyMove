@@ -1,4 +1,3 @@
-# TODO: Modelar como classe
 import math
 import pickle
 import numpy as np
@@ -6,489 +5,340 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from shapely.geometry import Polygon
 from tqdm import tqdm_notebook as tqdm
-from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, INDEX_GRID_LON, INDEX_GRID_LAT
+from pymove.utils.conversions import lat_meters
+from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, INDEX_GRID_LON, INDEX_GRID_LAT, POLYGON
 
 
-def lat_meters(lat):
-    """
-    Transform latitude degree to meters.
+class Grid():
+    def __init__(self, data, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
+        self._create_virtual_grid(data, cell_size, meters_by_degree)
+       
+    def get_grid(self):
+        return {
+            "lon_min_x": self.lon_min_x,
+            "lat_min_y": self.lat_min_y,
+            "grid_size_lat_y": self.grid_size_lat_y,
+            "grid_size_lon_x": self.grid_size_lon_x,
+            "cell_size_by_degree": self.cell_size_by_degree
+        }
 
-    Parameters
-    ----------
-    lat : float
-        This represent latitude value.
+    def _create_virtual_grid(self, data, cell_size, meters_by_degree):
+        """
+        Create a virtual grid based in dataset's bound box.
 
-    Returns
-    -------
-    meters : float
-        Represents the corresponding latitude value in meters.
+        Parameters
+        ----------
+        cell_size : float
+            Size of grid's cell.
 
-    Examples
-    --------
-    Example: Latitude in Fortaleza: -3.8162973555
-    >>> from pymove.core.grid import lat_meters
-    >>> lat_meters(-3.8162973555)
-        110826.6722516857
+        bbox : tuple
+            Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
 
-    """
-    rlat = float(lat) * math.pi / 180
-    # meter per degree Latitude
-    meters_lat = 111132.92 - 559.82 * math.cos(2 * rlat) + 1.175 * math.cos(4 * rlat)
-    # meter per degree Longitude
-    meters_lgn = 111412.84 * math.cos(rlat) - 93.5 * math.cos(3 * rlat)
-    meters = (meters_lat + meters_lgn) / 2
-    return meters
+        meters_by_degree : float
+            Represents the meters's degree of latitude. By default the latitude is set in Fortaleza.
 
+        Returns
+        -------
+        virtual_grid : dict
+            Contains informations about virtual grid, how
+                - lon_min_x: minimum longitude.
+                - lat_min_y: minimum latitude. 
+                - grid_size_lat_y: size of latitude grid. 
+                - grid_size_lon_x: size of longitude grid.
+                - cell_size_by_degree: grid's cell size.
 
-def create_update_index_grid_feature(df_, dic_grid=None, label_dtype=np.int64, sort=True):
-    """
-    Create or update index grid feature.
-    It's not necessary pass dic_grid, because if don't pass, the function create a dic_grid.
-
-    Parameters
-    ----------
-    df_ : pandas.core.frame.DataFrame
-        Represents the dataset with contains lat, long and datetime.
-
-    dic_grid : dict
-        Contains informations about virtual grid, how
-            - lon_min_x: longitude mínima.
-            - lat_min_y: latitude miníma. 
-            - grid_size_lat_y: tamanho da grid latitude. 
-            - grid_size_lon_x: tamanho da longitude da grid.
-            - cell_size_by_degree: tamanho da célula da Grid.
-        If value is none, the function ask user by dic_grid.
-
-    label_dtype : String
-        Represents the type of a value of new column in dataframe.
-
-    sort : boolean
-        Represents the state of dataframe, if is sorted.
-
-    Returns
-    -------
+        """
+        bbox = data.get_bbox()
+        print('\nCreating a virtual grid without polygons')
     
+        # Latitude in Fortaleza: -3.8162973555
+        cell_size_by_degree = cell_size/meters_by_degree
+        print('...cell size by degree: {}'.format(cell_size_by_degree))
 
-    Examples
-    --------
-    >>> from pymove.core.grid import create_update_index_grid_feature
-    >>> create_update_index_grid_feature(df, dic_grid)
-    Creating or updating index of the grid feature..
-    ...[217654,217654] indexes were created to lat and lon
+        lat_min_y = bbox[0]
+        lon_min_x = bbox[1]
+        lat_max_y = bbox[2] 
+        lon_max_x = bbox[3]
 
-    """
-    print('\nCreating or updating index of the grid feature..\n')
-    try:
-        if dic_grid is not None:
+        #If cell size does not fit in the grid area, an expansion is made
+        if math.fmod((lat_max_y - lat_min_y), cell_size_by_degree) != 0:
+            lat_max_y = lat_min_y + cell_size_by_degree * (math.floor((lat_max_y - lat_min_y) / cell_size_by_degree) + 1)
+
+        if math.fmod((lon_max_x - lon_min_x), cell_size_by_degree) != 0:
+            lon_max_x = lon_min_x + cell_size_by_degree * (math.floor((lon_max_x - lon_min_x) / cell_size_by_degree) + 1)
+
+        
+        # adjust grid size to lat and lon
+        grid_size_lat_y = int(round((lat_max_y - lat_min_y) / cell_size_by_degree))
+        grid_size_lon_x = int(round((lon_max_x - lon_min_x) / cell_size_by_degree))
+        
+        print('...grid_size_lat_y:{}\ngrid_size_lon_x:{}'.format(grid_size_lat_y, grid_size_lon_x))
+
+        self.lon_min_x = lon_min_x
+        self.lat_min_y = lat_min_y
+        self.grid_size_lat_y = grid_size_lat_y
+        self.grid_size_lon_x = grid_size_lon_x
+        self.cell_size_by_degree = cell_size_by_degree
+        print('\n..A virtual grid was created')
+
+
+    def create_update_index_grid_feature(self, data, label_dtype=np.int64, sort=True):
+        """
+        Create or update index grid feature.
+        It's not necessary pass dic_grid, because if don't pass, the function create a dic_grid.
+
+        Parameters
+        ----------
+        data : pandas.core.frame.DataFrame
+            Represents the dataset with contains lat, long and datetime.
+
+        label_dtype : String
+            Represents the type of a value of new column in dataframe.
+
+        sort : boolean
+            Represents the state of dataframe, if is sorted.
+
+        Returns
+        -------
+        
+        """
+        print('\nCreating or updating index of the grid feature..\n')
+        try:
             if sort:
-                df_.sort_values([TRAJ_ID, DATETIME], inplace=True)
-
-            lat_, lon_ = point_to_index_grid(df_[LATITUDE], df_[LONGITUDE], dic_grid)
-            df_[INDEX_GRID_LAT] = label_dtype(lat_)
-            df_[INDEX_GRID_LON] = label_dtype(lon_)   
-        else:
-            # TODO fazer com que a própria função chame a create_virtual_grid
-            print('... inform a grid virtual dictionary\n')
-    except Exception as e:
-        raise e
-
-
-def create_virtual_grid(cell_size, bbox, meters_by_degree = lat_meters(-3.8162973555)):
-    """
-    Create a virtual grid based in dataset's bound box.
-
-    Parameters
-    ----------
-    cell_size : float
-        Size of grid's cell.
-
-    bbox : tuple
-        Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
-
-    meters_by_degree : float
-        Represents the meters's degree of latitude. By default the latitude is set in Fortaleza.
-
-    Returns
-    -------
-    virtual_grid : dict
-        Contains informations about virtual grid, how
-            - lon_min_x: minimum longitude.
-            - lat_min_y: minimum latitude. 
-            - grid_size_lat_y: size of latitude grid. 
-            - grid_size_lon_x: size of longitude grid.
-            - cell_size_by_degree: grid's cell size.
-
-    Examples
-    --------
-    >>> from pymove.core.grid import create_virtual_grid
-    >>> from pymove.utils.utils import get_bbox
-    >>> ...
-    >>> dic_grid = create_virtual_grid(15, get_bbox(data))
-    >>> dic_grid
-
-    {'lon_min_x': 113.54884299999999,
-    'lat_min_y': 22.147577,
-    'grid_size_lat_y': 140266,
-    'grid_size_lon_x': 56207,
-    'cell_size_by_degree': 0.0001353464801860623}
-
-    """
-    print('\nCreating a virtual grid without polygons')
+                data.sort_values([TRAJ_ID, DATETIME], inplace=True)
+            lat_, lon_ = self.point_to_index_grid(data[LATITUDE], data[LONGITUDE])
+            data[INDEX_GRID_LAT] = label_dtype(lat_)
+            data[INDEX_GRID_LON] = label_dtype(lon_)   
     
-    # Latitude in Fortaleza: -3.8162973555
-    cell_size_by_degree = cell_size/meters_by_degree
-    print('...cell size by degree: {}'.format(cell_size_by_degree))
+        except Exception as e:
+            raise e
 
-    lat_min_y = bbox[0]
-    lon_min_x = bbox[1]
-    lat_max_y = bbox[2] 
-    lon_max_x = bbox[3]
+    def create_one_polygon_to_point_on_grid(self, index_grid_lat, index_grid_lon):
+        """
+        Create one polygon to point on grid. 
 
-    #If cell size does not fit in the grid area, an expansion is made
-    if math.fmod((lat_max_y - lat_min_y), cell_size_by_degree) != 0:
-        lat_max_y = lat_min_y + cell_size_by_degree * (math.floor((lat_max_y - lat_min_y) / cell_size_by_degree) + 1)
+        Parameters
+        ----------
+        index_grid_lat : int
+            Represents index of grid that reference latitude.
 
-    if math.fmod((lon_max_x - lon_min_x), cell_size_by_degree) != 0:
-        lon_max_x = lon_min_x + cell_size_by_degree * (math.floor((lon_max_x - lon_min_x) / cell_size_by_degree) + 1)
+        index_grid_lon : int
+            Represents index of grid that reference longitude.
 
-    
-    # adjust grid size to lat and lon
-    grid_size_lat_y = int(round((lat_max_y - lat_min_y) / cell_size_by_degree))
-    grid_size_lon_x = int(round((lon_max_x - lon_min_x) / cell_size_by_degree))
-    
-    print('...grid_size_lat_y:{}\ngrid_size_lon_x:{}'.format(grid_size_lat_y, grid_size_lon_x))
-
-    # Return a dicionary virtual grid 
-    virtual_grid = dict()
-    
-    virtual_grid['lon_min_x'] = lon_min_x
-    virtual_grid['lat_min_y'] = lat_min_y
-    virtual_grid['grid_size_lat_y'] = grid_size_lat_y
-    virtual_grid['grid_size_lon_x'] = grid_size_lon_x
-    virtual_grid['cell_size_by_degree'] = cell_size_by_degree
-    print('\n..A virtual grid was created')
-    return virtual_grid
+        Returns
+        -------
+        polygon: Polygon
+            Represents a polygon of this cell in a grid.
 
 
-def create_one_polygon_to_point_on_grid(dic_grid, index_grid_lat, index_grid_lon):
-    """
-    Create one polygon to point on grid. 
-
-    Parameters
-    ----------
-    dic_grid : dict
-        Contains informations about virtual grid, how
-            - lon_min_x: longitude mínima.
-            - lat_min_y: latitude miníma. 
-            - grid_size_lat_y: tamanho da grid latitude. 
-            - grid_size_lon_x: tamanho da longitude da grid.
-            - cell_size_by_degree: tamanho da célula da Grid.
-
-    index_grid_lat : int
-        Represents index of grid that reference latitude.
-
-    index_grid_lon : int
-        Represents index of grid that reference longitude.
-
-    Returns
-    -------
-    polygon: Polygon
-        Represents a polygon of this cell in a grid.
-
-    Examples
-    --------
-    >>> from pymove.core.grid import create_one_polygon_to_point_on_grid
-    >>> create_one_polygon_to_point_on_grid(dic_grid, 10, 12)
-
-    """
-    
-    lat_init = dic_grid['lat_min_y'] + dic_grid['cell_size_by_degree'] * index_grid_lat
-    lon_init = dic_grid['lon_min_x'] + dic_grid['cell_size_by_degree'] * index_grid_lon
-    polygon = Polygon(((lat_init, lon_init),
-         (lat_init + dic_grid['cell_size_by_degree'], lon_init),
-         (lat_init + dic_grid['cell_size_by_degree'], lon_init + dic_grid['cell_size_by_degree']),
-         (lat_init, lon_init + dic_grid['cell_size_by_degree'])
-                                            ))
-    return polygon
-
-
-def create_all_polygons_on_grid(dic_grid):
-    """
-    Create all polygons that are represented in a grid and store them in a new dic_grid key . 
-
-    Parameters
-    ----------
-    dic_grid : dict
-        Contains informations about virtual grid, how
-            - lon_min_x: longitude mínima.
-            - lat_min_y: latitude miníma. 
-            - grid_size_lat_y: tamanho da grid latitude. 
-            - grid_size_lon_x: tamanho da longitude da grid.
-            - cell_size_by_degree: tamanho da célula da Grid.
-
-    Examples
-    --------
-    >>> from pymove.core.grid import create_all_polygons_on_grid
-    >>> create_all_polygons_on_grid(dic_grid)
-
-    """
-    # Cria o vetor vazio de gometrias da grid
-    try:
-        print('\nCreating all polygons on virtual grid')
-        grid_polygon = np.array([[None for i in range(dic_grid['grid_size_lon_x'])] for j in range(dic_grid['grid_size_lat_y'])])
-        lat_init = dic_grid['lat_min_y']    
-        for i in tqdm(range(dic_grid['grid_size_lat_y'])):
-            lon_init = dic_grid['lon_min_x']
-            for j in range(dic_grid['grid_size_lon_x']):
-                # Cria o polygon da célula
-                grid_polygon[i][j] = Polygon(((lat_init, lon_init),
-                                            (lat_init + dic_grid['cell_size_by_degree'], lon_init),
-                                            (lat_init + dic_grid['cell_size_by_degree'], lon_init + dic_grid['cell_size_by_degree']),
-                                            (lat_init, lon_init + dic_grid['cell_size_by_degree'])
-                                            ))
-                lon_init += dic_grid['cell_size_by_degree']
-            lat_init += dic_grid['cell_size_by_degree']
-        dic_grid['grid_polygon'] = grid_polygon
-        print('...geometry was created to a virtual grid')
-    except Exception as e:
-        raise e
-
-
-def create_all_polygons_to_all_point_on_grid(df_, dic_grid):
-    """
-    Create all polygons to all points represented in a grid. 
-
-    Parameters
-    ----------
-    df_ : pandas.core.frame.DataFrame
-        Represents the dataset with contains lat, long and datetime.
-
-    dic_grid : dict
-        Contains informations about virtual grid, how
-            - lon_min_x: longitude mínima.
-            - lat_min_y: latitude miníma. 
-            - grid_size_lat_y: tamanho da grid latitude. 
-            - grid_size_lon_x: tamanho da longitude da grid.
-            - cell_size_by_degree: tamanho da célula da Grid.
-
-    Returns
-    -------
-    df_polygons: pandas.core.frame.DataFrame
-        Represents the same dataset with new key 'polygon' where polygons were saved. 
-
-    Examples
-    --------
-    >>> from pymove.core.grid import create_all_polygons_on_grid
-    >>> df = create_all_polygons_on_grid(df, dic_grid)
-
-    """
-    try:
-        create_update_index_grid_feature(df_, dic_grid)
-        df_polygons = df_.loc[:,['index_grid_lat', 'index_grid_lon']].drop_duplicates()
-        size = df_polygons.shape[0]
+        """
         
-        """transform series in numpyarray"""
-        index_grid_lat = np.array(df_['index_grid_lat'])
-        index_grid_lon = np.array(df_['index_grid_lon'])
+        lat_init = self.lat_min_y + self.cell_size_by_degree * index_grid_lat
+        lon_init = self.lon_min_x + self.cell_size_by_degree * index_grid_lon
+        polygon = Polygon(((lat_init, lon_init),
+            (lat_init + self.cell_size_by_degree, lon_init),
+            (lat_init + self.cell_size_by_degree, lon_init + self.cell_size_by_degree),
+            (lat_init, lon_init + self.cell_size_by_degree)
+            ))
+        return polygon
 
-        """transform series in numpyarray"""
-        polygons = np.array([])
+    def create_all_polygons_on_grid(self):
+        """
+        Create all polygons that are represented in a grid and store them in a new dic_grid key . 
 
-        for i in tqdm(range(size)):
-            p = create_one_polygon_to_point_on_grid(dic_grid, index_grid_lat[i], index_grid_lon[i])
-            polygons = np.append(polygons, p)
-        print('...polygons were created')
-        df_polygons['polygon'] = polygons
-        return df_polygons
-    except Exception as e:
-        print('size:{}, i:{}'.format(size, i))
-        raise e  
+        Parameters
+        ----------
 
+        """
+        # Cria o vetor vazio de gometrias da grid
+        try:
+            print('\nCreating all polygons on virtual grid')
+            grid_polygon = np.array([[None for i in range(self.grid_size_lon_x)] for j in range(self.grid_size_lat_y)])
+            lat_init = self.lat_min_y
+            for i in tqdm(range(self.grid_size_lat_y)):
+                lon_init = self.lon_min_x
+                for j in range(self.grid_size_lon_x):
+                    # Cria o polygon da célula
+                    grid_polygon[i][j] = Polygon(((lat_init, lon_init),
+                                                (lat_init + self.cell_size_by_degree, lon_init),
+                                                (lat_init + self.cell_size_by_degree, lon_init + self.cell_size_by_degree),
+                                                (lat_init, lon_init + self.cell_size_by_degree)
+                                                ))
+                    lon_init += self.cell_size_by_degree
+                lat_init += self.cell_size_by_degree
+            self.grid_polygon = grid_polygon
+            print('...geometry was created in a object Grid') # TODO: vê se a frase desse print tá ok
+        except Exception as e:
+            raise e
 
-def point_to_index_grid(event_lat, event_lon, dic_grid):
-    """
-    Locate the coordinates x and y in a grid of point (lat, long). 
+    def create_all_polygons_to_all_point_on_grid(self, data):
+        """
+        Create all polygons to all points represented in a grid. 
 
-    Parameters
-    ----------
-    event_lat : float
-        Represents the latitude of a point.
+        Parameters
+        ----------
+        data : pandas.core.frame.DataFrame
+            Represents the dataset with contains lat, long and datetime.
 
-    event_lon : float 
-        Represents the longitude of a point.
+        dic_grid : dict
+            Contains informations about virtual grid, how
+                - lon_min_x: longitude mínima.
+                - lat_min_y: latitude miníma. 
+                - grid_size_lat_y: tamanho da grid latitude. 
+                - grid_size_lon_x: tamanho da longitude da grid.
+                - cell_size_by_degree: tamanho da célula da Grid.
 
-    dic_grid : dict
-        Contains informations about virtual grid, how
-            - lon_min_x: longitude mínima.
-            - lat_min_y: latitude miníma. 
-            - grid_size_lat_y: tamanho da grid latitude. 
-            - grid_size_lon_x: tamanho da longitude da grid.
-            - cell_size_by_degree: tamanho da célula da Grid.
+        Returns
+        -------
+        datapolygons: pandas.core.frame.DataFrame
+            Represents the same dataset with new key 'polygon' where polygons were saved. 
 
-    Returns
-    -------
-    indexes_lat_y : int
-        Represents the index y in a grid of a point (lat, long). 
+       
+        """
+        try:
+            self.create_update_index_grid_feature(data)
+            datapolygons = data.loc[:,['id', 'index_grid_lat', 'index_grid_lon']].drop_duplicates()
+            size = datapolygons.shape[0]
+            
+            """transform series in numpyarray"""
+            index_grid_lat = np.array(data['index_grid_lat'])
+            index_grid_lon = np.array(data['index_grid_lon'])
 
-    indexes_lon_x : int
-        Represents the index x in a grid of a point (lat, long).
+            """transform series in numpyarray"""
+            polygons = np.array([])
 
-    Examples
-    --------
-    >>> from pymove.core.grid import point_to_index_grid
-    >>> dic_grid = {'lon_min_x': 113.54884299999999,
-                    'lat_min_y': 22.147577,
-                    'grid_size_lat_y': 140266,
-                    'grid_size_lon_x': 56207,
-                    'cell_size_by_degree': 0.0001353464801860623}
-    >>> y, x  = point_to_index_grid(39.984094, 116.319236, dic_grid)
-    >>> y
-    131784.0
+            for i in tqdm(range(size)):
+                p = self.create_one_polygon_to_point_on_grid(index_grid_lat[i], index_grid_lon[i])
+                polygons = np.append(polygons, p)
+            print('...polygons were created')
+            datapolygons['polygon'] = polygons
+            return datapolygons
+        except Exception as e:
+            print('size:{}, i:{}'.format(size, i))
+            raise e  
 
-    >>> x
-    20468.0
+    def point_to_index_grid(self, event_lat, event_lon):
+        """
+        Locate the coordinates x and y in a grid of point (lat, long). 
 
-    """
-    indexes_lat_y = np.floor((np.float64(event_lat) - dic_grid['lat_min_y'])/ dic_grid['cell_size_by_degree'])
-    indexes_lon_x = np.floor((np.float64(event_lon) - dic_grid['lon_min_x'])/ dic_grid['cell_size_by_degree'])
-    print('...[{},{}] indexes were created to lat and lon'.format(indexes_lat_y.size, indexes_lon_x.size))
-    return indexes_lat_y, indexes_lon_x
+        Parameters
+        ----------
+        event_lat : float
+            Represents the latitude of a point.
 
+        event_lon : float 
+            Represents the longitude of a point.
 
-def save_grid_pkl(filename, dic_grid):
-    """
-    Save a grid with new file .pkl. 
+        Returns
+        -------
+        indexes_lat_y : int
+            Represents the index y in a grid of a point (lat, long). 
 
-    Parameters
-    ----------
-    filename : String
-        Represents the name of a file.
+        indexes_lon_x : int
+            Represents the index x in a grid of a point (lat, long).
 
-    dic_grid : dict
-        Contains informations about virtual grid, how
-            - lon_min_x: longitude mínima.
-            - lat_min_y: latitude miníma. 
-            - grid_size_lat_y: tamanho da grid latitude. 
-            - grid_size_lon_x: tamanho da longitude da grid.
-            - cell_size_by_degree: tamanho da célula da Grid.
-
-    Returns
-    -------
-    
-
-    Examples
-    --------
-    >>> from pymove.core.grid import save_grid
-    >>> dic_grid = {'lon_min_x': 113.54884299999999,
-                    'lat_min_y': 22.147577,
-                    'grid_size_lat_y': 140266,
-                    'grid_size_lon_x': 56207,
-                    'cell_size_by_degree': 0.0001353464801860623}
-    >>> grid_file = 'grid.pkl'
-    
-    >>> save_grid(grid_file, dict_grid)
-    
-    """
-    try:
-        f = open(filename,"wb")
-        pickle.dump(dic_grid,f)
-        f.close()
-        print('\nA file was saved')
-    except Exception as e:
-        raise e
-
-
-def read_grid_pkl(filename):
-    """
-    Save a grid with new file .pkl. 
-
-    Parameters
-    ----------
-    filename : String
-               Represents the name of a file.
-
-    Returns
-    -------
-     dic_grid : dict
-        Contains informations about virtual grid, how
-            - lon_min_x: longitude mínima.
-            - lat_min_y: latitude miníma. 
-            - grid_size_lat_y: tamanho da grid latitude. 
-            - grid_size_lon_x: tamanho da longitude da grid.
-            - cell_size_by_degree: tamanho da célula da Grid.
-
-    Examples
-    --------
-    >>> from pymove.core.grid import read_grid_pkl
-    >>> grid_file = 'grid.pkl'
-    >>> read_grid_pkl(grid_file)
-
-    {'lon_min_x': 113.54884299999999,
-    'lat_min_y': 22.147577,
-    'grid_size_lat_y': 140266,
-    'grid_size_lon_x': 56207,
-    'cell_size_by_degree': 0.0001353464801860623}
-
-    """
-    try:
-        with open(filename, 'rb') as f:
-            dic_grid = pickle.load(f)
-            f.close()
-            return dic_grid
-    except Exception as e:
-        raise e
         
+        """
+        indexes_lat_y = np.floor((np.float64(event_lat) - self.lat_min_y)/ self.cell_size_by_degree)
+        indexes_lon_x = np.floor((np.float64(event_lon) - self.lon_min_x)/ self.cell_size_by_degree)
+        print('...[{},{}] indexes were created to lat and lon'.format(indexes_lat_y.size, indexes_lon_x.size))
+        return indexes_lat_y, indexes_lon_x
 
-# TODO: ajeitar que tá dando erro + finalizar comentários
-def show_grid_polygons(df_, id_, label_id = TRAJ_ID, label_polygon='polygon', figsize=(10,10)):   
-    """
-    Show grid polygons  . 
+    def save_grid_pkl(self, filename):
+        """
+        Save a grid with new file .pkl. 
 
-    Parameters
-    ----------
-    df_ : pandas.core.frame.DataFrame
-        Represents the dataset with contains lat, long and datetime.
-    
-    id_ : String
-        Represents the id.
-    
-    label_id : -
-        ----
-    
-    label_polygon : -
+        Parameters
+        ----------
+        filename : String
+            Represents the name of a file.
+
+        dic_grid : dict
+            Contains informations about virtual grid, how
+                - lon_min_x: longitude mínima.
+                - lat_min_y: latitude miníma. 
+                - grid_size_lat_y: tamanho da grid latitude. 
+                - grid_size_lon_x: tamanho da longitude da grid.
+                - cell_size_by_degree: tamanho da célula da Grid.
+
+        Returns
         -------
 
-    figsize : tuple
-        Represents the size (float: width, float: height) of a figure.
+        """
+        try:
+            f = open(filename,"wb")
+            pickle.dump({'lon_min_x': self.lon_min_x, 
+                        'lat_min_y': self.lat_min_y,
+                        'grid_size_lat_y': self.grid_size_lat_y,
+                        'grid_size_lon_x': self.grid_size_lon_x,
+                        'cell_size_by_degree': self.cell_size_by_degree},f)
+            f.close()
+            print('\nA file was saved')
+        except Exception as e:
+            raise e
 
-    Returns
-    -------
-    df_ : pandas.core.frame.DataFrame
-     
-    fig : 
+    def read_grid_pkl(self, filename):
+        """
+        Save a grid with new file .pkl. 
 
+        Parameters
+        ----------
+        filename : String
+                Represents the name of a file.
 
-    Examples
-    --------
-    >>> from pymove.core.grid import show_grid_polygons
-    >>> show_grid_polygons()
+        Returns
+        -------
+        dic_grid : dict
+            Contains informations about virtual grid, how
+                - lon_min_x: longitude mínima.
+                - lat_min_y: latitude miníma. 
+                - grid_size_lat_y: tamanho da grid latitude. 
+                - grid_size_lon_x: tamanho da longitude da grid.
+                - cell_size_by_degree: tamanho da célula da Grid.
 
-    """
-    fig = plt.figure(figsize=figsize)
-    
-    #filter dataframe by id
-    df_ = df_[ df_[label_id] == id_]
-    
-    xs_start, ys_start = df_.iloc[0][label_polygon].exterior.xy
-    #xs_end, ys_end = df_.iloc[1][label_polygon].exterior.xy
-    
-    plt.plot(ys_start,xs_start, 'bo', markersize=20)             # start point
-    #plt.plot(ys_end, xs_end, 'rX', markersize=20)           # end point
+       
+        """
+        try:
+            with open(filename, 'rb') as f:
+                dic_grid = pickle.load(f)
+                f.close()
+                return dic_grid
+        except Exception as e:
+            raise e
+            
    
+    def show_grid_polygons(self, data, id_, figsize=(10,10)):   
+        """
+        Generate a visualization with grid polygons. 
 
-    for idx in range(df_.shape[0]):
-        if type(df_[label_polygon.iloc[idx]]) != float:
-            xs, ys = df_[label_polygon].iloc[idx].exterior.xy
-            plt.plot(ys,xs, 'g', linewidth=2, markersize=5) 
+        Parameters
+        ----------
+        data : pymove.core.MoveDataFrameAbstract subclass.
+            Input trajectory data.
+        
+        id_ : String
+            Represents the id.
+        
+        figsize : tuple
+            Represents the size (float: width, float: height) of a figure.
 
-    return df_, fig
+        Returns
+        -------
+        fig : matplotlib.pyplot.figure
+            The generated picture.
+
+       """
+        fig = plt.figure(figsize=figsize)
+        
+        #filter dataframe by id
+        data = data[data[TRAJ_ID] == id_]
+        
+        xs_start, ys_start = data.iloc[0][POLYGON].exterior.xy
+        
+        plt.plot(ys_start, xs_start, 'bo', markersize=20) # start point
+
+        for idx in range(data.shape[0]):
+            if type(data[POLYGON].iloc[idx]) != float:
+                xs, ys = data[POLYGON].iloc[idx].exterior.xy
+                plt.plot(ys,xs, 'g', linewidth=2, markersize=5) 
+        return fig

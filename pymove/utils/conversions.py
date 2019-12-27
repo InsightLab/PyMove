@@ -1,7 +1,35 @@
 import numpy as np
+import math
 from pymove.utils import constants
 
 
+def lat_meters(lat):
+    """
+    Transform latitude degree to meters.
+    Parameters
+    ----------
+    lat : float
+        This represent latitude value.
+    Returns
+    -------
+    meters : float
+        Represents the corresponding latitude value in meters.
+    Examples
+    --------
+    Example: Latitude in Fortaleza: -3.8162973555
+    >>> from pymove.core.grid import lat_meters
+    >>> lat_meters(-3.8162973555)
+        110826.6722516857
+    """
+    rlat = float(lat) * math.pi / 180
+    # meter per degree Latitude
+    meters_lat = 111132.92 - 559.82 * math.cos(2 * rlat) + 1.175 * math.cos(4 * rlat)
+    # meter per degree Longitude
+    meters_lgn = 111412.84 * math.cos(rlat) - 93.5 * math.cos(3 * rlat)
+    meters = (meters_lat + meters_lgn) / 2
+    return meters
+
+    
 def list_to_str(input_list, delimiter=','):
     """
     Concatenates list elements, joining them by the separator specified by the parameter "delimiter".
