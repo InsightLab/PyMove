@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from dask.dataframe import DataFrame
-from pymove.core.grid import lat_meters
+from pymove.utils.conversions import lat_meters
 from pymove.utils.distances import haversine
-from pymove.core.grid import create_virtual_grid
+from pymove.core.grid import Grid
 from pymove.core import MoveDataFrameAbstractModel
 from pymove.utils.trajectories import format_labels, shift, progress_update
 from pymove.utils.constants import (
@@ -564,7 +564,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         start = time.time()
         #init = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-        grid_ = create_virtual_grid(cell_size, self.get_bbox(), meters_by_degree)
+        grid_ = Grid(cell_size, self.get_bbox(), meters_by_degree)
 
         #finish = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         self._last_operation_time_duration = time.time() - start
