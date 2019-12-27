@@ -8,7 +8,6 @@ from pymove.utils.constants import (
 import time
 import numpy as np
 from pymove.preprocessing.segmentation import by_max_dist
-from pymove.preprocessing.segmentation import segment_traj_by_max_dist
 
 
 
