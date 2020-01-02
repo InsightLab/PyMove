@@ -17,9 +17,6 @@ def date_to_str(date):
 
     Examples
     --------
-    >>> from pymove import datetime
-    >>> datetime.date_to_str("2015-12-12 08:00:00.123000")
-    "2015-12-12"
 
     """
     date_str = date.strftime("%Y-%m-%d")
@@ -47,7 +44,7 @@ def str_to_datetime(dt_str):
 
 
 def to_str(data):
-    """Converts a date in datetime"s format to string"s format.
+    """Converts a date in datetime's format to string"s format.
 
     Parameters
     ----------
@@ -61,9 +58,6 @@ def to_str(data):
 
     Examples
     --------
-    >>> from pymove.utils.utils import datetime
-    >>> datetime.to_str(datetime.datetime(2019, 9, 3, 11, 11, 49, 520512))
-    "2019-09-03 11:11:49"
 
     """
 
@@ -87,9 +81,6 @@ def to_min(datetime):
 
     Examples
     --------
-    >>> from pymove.utils.utils import datetime
-    >>> datetime.to_min(datetime.datetime(2014, 1, 1, 20, 56))
-    23143496
 
     """
     # get an integer time slot from a datetime
@@ -113,9 +104,7 @@ def min_to_datetime(min):
 
     Examples
     --------
-    >>> from pymove import datetime.min_to_datetime
-    >>> min_to_datetime(23143496)
-    datetime.datetime(2014, 1, 1, 20, 56)
+
     """
     # get a datetime from an integer time slot
     # utcfromtimestamp (below) is much faster than the line above
@@ -355,7 +344,7 @@ def millis_to_timestamp(milliseconds):
 
 
 def time_to_str(time):
-    """Get time, in string"s format, from timestamp.
+    """Get time, in string's format, from timestamp.
 
     Parameters
     ----------
@@ -379,7 +368,7 @@ def time_to_str(time):
 
 
 def str_to_time(dt_str):
-    """Converts a time in string"s format "%H:%M:%S" to datetime"s format.
+    """Converts a time in string's format "%H:%M:%S" to datetime's format.
 
     Parameters
     ----------

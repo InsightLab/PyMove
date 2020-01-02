@@ -81,7 +81,6 @@ class Grid():
         self.cell_size_by_degree = cell_size_by_degree
         print('\n..A virtual grid was created')
 
-
     def create_update_index_grid_feature(self, data, label_dtype=np.int64, sort=True):
         """
         Create or update index grid feature.
@@ -305,8 +304,7 @@ class Grid():
                 return dic_grid
         except Exception as e:
             raise e
-            
-   
+
     def show_grid_polygons(self, data, id_, figsize=(10,10)):   
         """
         Generate a visualization with grid polygons. 
@@ -330,7 +328,6 @@ class Grid():
        """
         fig = plt.figure(figsize=figsize)
         
-        #filter dataframe by id
         data = data[data[TRAJ_ID] == id_]
         
         xs_start, ys_start = data.iloc[0][POLYGON].exterior.xy

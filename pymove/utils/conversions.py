@@ -17,7 +17,7 @@ def lat_meters(lat):
     Examples
     --------
     Example: Latitude in Fortaleza: -3.8162973555
-    >>> from pymove.core.grid import lat_meters
+    >>> from pymove.utils.conversions import lat_meters
     >>> lat_meters(-3.8162973555)
         110826.6722516857
     """
@@ -107,7 +107,7 @@ def list_to_svm_line(original_list):
 
 def lon_to_x_spherical(lon):
     """
-    Convert longitude to to X EPSG:3857 WGS 84/Pseudo-Mercator
+    Convert longitude to X EPSG:3857 WGS 84/Pseudo-Mercator
 
     Parameters
     ----------
