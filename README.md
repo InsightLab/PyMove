@@ -1,11 +1,5 @@
 # Use PyMove and go much further...
 
-# Table of Contents
-
-[TOCM]
-
-[TOC]
-
 ---
 
 # Informations
