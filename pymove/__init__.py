@@ -15,4 +15,5 @@ from pymove.core.dataframe import MoveDataFrame
 from pymove.core.dataframe import PandasMoveDataFrame
 from pymove.core.dataframe import DaskMoveDataFrame
 from pymove.core import grid
+from pymove.models.pattern_mining import clustering
 
