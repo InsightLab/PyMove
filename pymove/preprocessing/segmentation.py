@@ -454,4 +454,142 @@ def by_max_dist(move_data, label_id=TRAJ_ID,  max_dist_between_adj_points=3000, 
         print('label_id:{}\nidx:{}\n'.format(label_id, idx))
         raise e
 
+def by_max_time(df_, label_id=dic_labels['id'], max_time_between_adj_points=900.0, label_segment='tid_time'):
+    """
+    index_name is the current id.
+    label_new_id is the new splitted id.
+    Speed features must be updated after split.
+    """
+    print('Split trajectories by max_time_between_adj_points:', max_time_between_adj_points)
+    try:
+        if df_.index.name is None:
+            print('...setting {} as index'.format(label_id))
+            df_.set_index(label_id, inplace=True)
 
+        curr_tid = 0
+        if label_segment not in df_:
+            df_[label_segment] = curr_tid
+
+        ids = df_.index.unique()
+        count = 0
+        df_size = df_.shape[0]
+        curr_perc_int = -1
+        start_time = time.time()
+
+        for idx in ids:
+            """ increment index to trajectory"""
+            curr_tid += 1
+
+            """ filter time max"""
+            times = (df_.at[idx, dic_features_label['time_to_prev']] > max_time_between_adj_points)
+
+            """ check if object have only one point to be removed """
+            if times.shape == ():
+                print('id: {} has not point to split'.format(id))
+                df_.at[idx, label_segment] = curr_tid
+                count+=1
+            else:
+                tids = np.empty(times.shape[0], dtype=np.int64)
+                tids.fill(curr_tid)
+                for i, has_problem in enumerate(times):
+                    if has_problem:
+                        curr_tid += 1
+                        tids[i:] = curr_tid
+                count += tids.shape[0]
+                df_.at[idx, label_segment] = tids
+
+            curr_perc_int, est_time_str = ut.progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+
+        if label_id == label_segment:
+            df_.reset_index(drop=True, inplace=True)
+            print('... label_id = label_new_id, then reseting and drop index')
+        else:
+            df_.reset_index(inplace=True)
+            print('... Reseting index')
+        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+        print('------------------------------------------\n')
+        #if drop_single_points:
+         #   shape_before_drop = df_.shape
+          #  idx = df_[ df_[label_segment] == -1 ].index
+           # if idx.shape[0] > 0:
+            #    print('...Drop Trajectory with a unique GPS point\n')
+             #   ids_before_drop = df_[label_id].unique().shape[0]
+              #  df_.drop(index=idx, inplace=True)
+               # print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
+               # print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
+            #else:
+             #   print('...No trajs with only one point.', df_.shape)
+
+    except Exception as e:
+        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
+        raise e
+
+def by_max_speed(df_, label_id=dic_labels['id'], max_speed_between_adj_points=50.0, label_segment='tid_speed'):
+    """ Index_name is the current id.
+    label_new_id is the new splitted id.
+    Speed features must be updated after split.
+    """
+    print('Split trajectories by max_speed_between_adj_points:', max_speed_between_adj_points)
+    try:
+        if df_.index.name is None:
+            print('...setting {} as index'.format(label_id))
+            df_.set_index(label_id, inplace=True)
+
+        curr_tid = 0
+        if label_segment not in df_:
+            df_[label_segment] = curr_tid
+
+        ids = df_.index.unique()
+        count = 0
+        df_size = df_.shape[0]
+        curr_perc_int = -1
+        start_time = time.time()
+
+        for idx in ids:
+            """ increment index to trajectory"""
+            curr_tid += 1
+
+            """ filter speed max"""
+            speed = (df_.at[idx, dic_features_label['speed_to_prev']] > max_speed_between_adj_points)
+            """ check if object have only one point to be removed """
+            if speed.shape == ():
+                print('id: {} has not point to split'.format(id))
+                df_.at[idx, label_segment] = curr_tid
+                count+=1
+            else:
+                tids = np.empty(speed.shape[0], dtype=np.int64)
+                tids.fill(curr_tid)
+                for i, has_problem in enumerate(speed):
+                    if has_problem:
+                        curr_tid += 1
+                        tids[i:] = curr_tid
+                count += tids.shape[0]
+                df_.at[idx, label_segment] = tids
+
+            curr_perc_int, est_time_str = ut.progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+
+        if label_id == label_segment:
+            df_.reset_index(drop=True, inplace=True)
+            print('... label_id = label_new_id, then reseting and drop index')
+        else:
+            df_.reset_index(inplace=True)
+            print('... Reseting index')
+        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+        print('------------------------------------------\n')
+
+        #if drop_single_points:
+         #   shape_before_drop = df_.shape
+          #  idx = df_[df_[label_segment] == -1].index
+           # if idx.shape[0] > 0:
+            #    print('...Drop Trajectory with a unique GPS point\n')
+             #   ids_before_drop = df_[label_id].unique().shape[0]
+              #  df_.drop(index=idx, inplace=True)
+               # print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, df_[label_id].unique().shape[0]))
+               # print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, df_.shape))
+                #create_update_dist_time_speed_features(df_, label_segment, dic_labels)
+            #else:
+                #print('...No trajs with only one point.', df_.shape)
+
+    except Exception as e:
+        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
+        raise e

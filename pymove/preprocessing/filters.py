@@ -641,3 +641,18 @@ def clean_trajectories_short_and_few_points_(
                                                  min_trajectory_distance,
                                                  min_points_per_trajectory,
                                                  label_dtype)
+
+def clean_id_by_time_max(move_data, label_id = TRAJ_ID, time_max = 3600, return_idx=True):
+    print('\nClean gps points with time max by id < {} seconds'.format(time_max))
+    if 'time_to_prev' in move_data:
+        move_dataid_drop = move_data.groupby([label_id], as_index=False).agg({'time_to_prev': 'sum'}).query(
+            'time_to_prev < {}'.format(time_max))
+        print("...Ids total: {}\nIds to drop:{}".format(move_data[label_id].nunique(),
+                                                        move_dataid_drop[label_id].nunique()))
+        if move_dataid_drop.shape[0] > 0:
+            before_drop = move_data.shape[0]
+            idx = move_data[move_data[label_id].isin(move_dataid_drop[label_id])].index
+            move_data.drop(idx, inplace=True)
+            print("...Rows before drop: {}\n Rows after drop: {}".format(before_drop, move_data.shape[0]))
+            if (return_idx):
+                return idx
