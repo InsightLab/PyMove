@@ -105,7 +105,15 @@ class MoveDataFrameAbstractModel(abc.ABC):
     @abc.abstractmethod
     def generate_move_and_stop_by_radius(self):
         pass
-    
+
+    @abc.abstractmethod
+    def generate_datetime_in_format_cyclical(self):
+        pass
+
+    @abc.abstractmethod
+    def generate_weekend_features(self):
+        pass
+
     @abc.abstractmethod
     def time_interval(self):
         pass

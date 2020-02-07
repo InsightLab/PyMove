@@ -45,7 +45,7 @@ def create_update_datetime_in_format_cyclical(move_data, label_datetime=DATETIME
 
 
 def create_or_update_move_stop_by_dist_time(move_data, label_id=TRAJ_ID , dist_radius=30, time_radius=900):
-    """Finds the stops and moves points of the dataframe, if these points already exist, they will be updated.
+    """Determines the stops and moves points of the dataframe, if these points already exist, they will be updated.
 
     Parameters
     ----------

@@ -1149,6 +1149,34 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
+    def generate_datetime_in_format_cyclical(self, label_datetime = DATETIME):
+        try:
+            # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+            # https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
+            print('Encoding cyclical continuous features - 24-hour time')
+            if label_datetime in self._data:
+                hours = self._data[label_datetime].dt.hour
+                self._data[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
+                self._data[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
+                print('...hour_sin and  hour_cos features were created...\n')
+        except Exception as e:
+            raise e
+
+    def generate_weekend_features(self, label_date='datetime', create_day_of_week=False):
+        try:
+            self.generate_day_of_the_week_features()
+            print('Creating or updating a feature for weekend\n')
+            if 'day' in self._data:
+                index_fds = self._data[(self._data[DAY] == 'Saturday') | (self._data[DAY] == 'Sunday')].index
+                self._data['weekend'] = 0
+                self._data.at[index_fds, 'weekend'] = 1
+                print('...Weekend was set as 1 or 0...\n')
+                if ~create_day_of_week:
+                    print('...dropping colum day\n')
+                    del self._data['day']
+        except Exception as e:
+            raise e
+
     def time_interval(self):
         """
         Get time difference between max and min datetime in trajectory data.
@@ -2635,6 +2663,14 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
 
         """
+        return 0
+
+    def generate_datetime_in_format_cyclical(self):
+
+        return 0
+
+    def generate_weekend_features(self):
+
         return 0
 
     def time_interval(self):

@@ -1,4 +1,3 @@
-
 LATITUDE = 'lat'
 LONGITUDE = 'lon'
 DATETIME = 'datetime'
@@ -10,6 +9,8 @@ DATE = 'date'
 HOUR = 'hour'
 PERIOD = "period"
 DAY = "day"
+HOUR_SIN = "hour_sin"
+HOUR_COS = "hour_cos"
 
 SITUATION = 'situation'
 TYPE_DASK = "dask"
