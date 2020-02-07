@@ -1162,18 +1162,40 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         except Exception as e:
             raise e
 
-    def generate_weekend_features(self, label_date='datetime', create_day_of_week=False):
+    def generate_weekend_features(self, create_day_of_week=False, inplace=True):
+        """
+        Create or update the feature weekend to the dataframe, if this resource is set to 1 it indicates that the
+        given day is is the weekend, otherwise, it is a day of the week.
+
+        Parameters
+        ----------
+        create_day_of_week : bool, optional (False by default).
+            Indicates if the column day should be keeped in the dataframe. If set to False the column will be dropped.
+
+        inplace : bool, optional, default True.
+            Indicates whether the operation will be performed on the data provided or in a copy.
+        """
+
         try:
+            if inplace:
+                data_ = self._data
+            else:
+                data_ = PandasMoveDataFrame(data=self._data)
+
             self.generate_day_of_the_week_features()
             print('Creating or updating a feature for weekend\n')
-            if 'day' in self._data:
-                index_fds = self._data[(self._data[DAY] == 'Saturday') | (self._data[DAY] == 'Sunday')].index
-                self._data['weekend'] = 0
-                self._data.at[index_fds, 'weekend'] = 1
+            if 'day' in data_:
+                index_fds = data_[(data_[DAY] == 'Saturday') | (data_[DAY] == 'Sunday')].index
+                data_['weekend'] = 0
+                data_.at[index_fds, 'weekend'] = 1
                 print('...Weekend was set as 1 or 0...\n')
                 if ~create_day_of_week:
                     print('...dropping colum day\n')
-                    del self._data['day']
+                    del data_['day']
+
+            if inplace == False:
+                return data_
+
         except Exception as e:
             raise e
 
