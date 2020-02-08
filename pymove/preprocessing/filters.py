@@ -8,7 +8,8 @@ from pymove.utils.constants import (
 	SPEED_TO_PREV,
 	DIST_TO_PREV,
 	DIST_PREV_TO_NEXT,
-	DIST_TO_NEXT)
+	DIST_TO_NEXT,
+    TIME_TO_PREV)
 
 
 
@@ -591,10 +592,10 @@ def clean_trajectories_short_and_few_points_(
     ----------
     move_data : dataframe
         The input trajectory data
-    label_id : String, optional(dic_features_label["tid"] by default)
+    label_id : String, optional( tid by default)
         The label of the colum which contains the tid of the trajectories
     dic_labels : dict, optional(the classe"s dic_labels by default)
-        Dictionary mapping the user"s dataframe labels to the pattern of the PyRoad"s lib
+        Dictionary mapping the user's dataframe labels to the pattern of the PyRoad"s lib
     min_trajectory_distance: Integer, optional(100 by default)
         Specifies the minimun lenght a trajectory must have in order not to be dropped
     min_points_per_trajectory: Integer, optional(2 by default)
@@ -643,8 +644,28 @@ def clean_trajectories_short_and_few_points_(
                                                  label_dtype)
 
 def clean_id_by_time_max(move_data, label_id = TRAJ_ID, time_max = 3600, return_idx=True):
+    """Clears GPS points with time by ID greater than a user-defined limit.
+
+    Parameters
+    ----------
+    move_data: dataframe.
+        The input data.
+    label_id: string, optional( id by default).
+        The label of the colum which contains the id of the trajectories.
+    time_max: float. optional(3600 by default).
+        Indicates the maximum value time a set of points with the same id should have in order not to be dropped.
+    return_idx: bool, optional(True by default).
+        If set to True the index of the dropped ids will be returned.
+
+    Returns
+    -------
+        idx : pandas.core.indexes.numeric.Int64Index.
+            The index of the dropped ids.
+
+    """
+
     print('\nClean gps points with time max by id < {} seconds'.format(time_max))
-    if 'time_to_prev' in move_data:
+    if TIME_TO_PREV in move_data:
         move_dataid_drop = move_data.groupby([label_id], as_index=False).agg({'time_to_prev': 'sum'}).query(
             'time_to_prev < {}'.format(time_max))
         print("...Ids total: {}\nIds to drop:{}".format(move_data[label_id].nunique(),
