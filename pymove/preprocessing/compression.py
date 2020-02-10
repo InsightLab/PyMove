@@ -28,7 +28,7 @@ def compress_segment_stop_to_point(
     label_stop : String, optional(stop by default)
         Is the name of the column that indicates if a point is a stop.
     point_mean : String, optional(default by default)
-         
+        Indicates whether the mean points should be calculated using centroids or the point that repeat the most.
     drop_moves : Boolean, optional(True by default)
         If set to true, the moving points will be dropped from the dataframe.
     label_id : String, optional(id by default)
@@ -142,7 +142,31 @@ def compress_segment_stop_to_point_optimizer(
     point_mean='default',
     drop_moves=True
 ):
-    """ compreess a segment to point setting lat_mean e lon_mean to each segment"""
+    """ Compress the trajectories using the stop points in the dataframe.
+    Compreess a segment to point setting lat_mean e lon_mean to each segment
+
+    Parameters
+    ----------
+    move_data : dataframe
+       The input trajectory data
+    label_segment : String, optional("segment_stop" by default)
+        The label of the column cointainig the ids of the formed segments. Is the new splitted id.
+    label_stop : String, optional(stop by default)
+        Is the name of the column that indicates if a point is a stop.
+    point_mean : String, optional(default by default)
+        Indicates whether the mean points should be calculated using centroids or the point that repeat the most.
+    drop_moves : Boolean, optional(True by default)
+        If set to true, the moving points will be dropped from the dataframe.
+
+    ------
+    Returns the dataFrame with 2 aditional features: segment_stop, stop, lat_mean and lon_mean.
+        segment_stop indicates the trajectory segment to which the point belongs to.
+        lat_mean and lon_mean:
+            if the default option is used, lat_mean and lon_mean are defined based on point that repeats most within
+            the segment
+            On the other hand, if centroid option is used, lat_mean and lon_mean are defined by centroid of the
+            all points into segment
+    """
     try:
 
         if (label_segment in move_data) & (label_stop in move_data):

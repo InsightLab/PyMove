@@ -32,7 +32,9 @@ from pymove.utils.constants import (
     GB,
     MB,
     KB,
-    B
+    B,
+    HOUR_SIN,
+    HOUR_COS
 )
 
 
@@ -571,7 +573,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         init = process.memory_info()[0]
         start = time.time()
 
-        grid_ = Grid(cell_size, self.get_bbox(), meters_by_degree)
+        grid_ = Grid(self, cell_size, meters_by_degree)
 
         finish = process.memory_info()[0]
         self._last_operation_time_duration = time.time() - start

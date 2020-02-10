@@ -583,7 +583,7 @@ def by_max_speed(move_data, label_id=TRAJ_ID, max_speed_between_adj_points=50.0,
             curr_tid += 1
 
             """ filter speed max"""
-            speed = (move_data.at[idx, dic_features_label['speed_to_prev']] > max_speed_between_adj_points)
+            speed = (move_data.at[idx, SPEED_TO_PREV] > max_speed_between_adj_points)
             """ check if object have only one point to be removed """
             if speed.shape == ():
                 print('id: {} has not point to split'.format(id))

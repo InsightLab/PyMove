@@ -661,7 +661,6 @@ def clean_id_by_time_max(move_data, label_id = TRAJ_ID, time_max = 3600, return_
     -------
         idx : pandas.core.indexes.numeric.Int64Index.
             The index of the dropped ids.
-
     """
 
     print('\nClean gps points with time max by id < {} seconds'.format(time_max))
