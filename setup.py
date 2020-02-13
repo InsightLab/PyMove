@@ -10,7 +10,7 @@ except Exception as e:
       raise e
 
 DEPENDENCIES = ['tqdm', 'numpy', 'pandas', 'scipy', 'geojson', 'matplotlib', 'shapely', 'folium', 'mplleaflet',
-                ,'matplotlib', 'IPython', 'psutil', 'ipywidgets', 'resource', 'dask']
+                'matplotlib', 'IPython', 'psutil', 'ipywidgets', 'resource', 'dask']
 
 setup(
       name="pymove",
