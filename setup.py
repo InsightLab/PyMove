@@ -13,16 +13,17 @@ DEPENDENCIES = ['tqdm', 'numpy', 'pandas', 'scipy', 'geojson', 'matplotlib', 'sh
                 'matplotlib', 'IPython', 'psutil', 'ipywidgets', 'resource', 'dask']
 
 setup(
-      name="pymove",
-      version="0.1",
+      name="pymoves",
+      version="3.12",
       author="Insight Data Science Lab",
       author_email='insightlab@dc.ufc.br',
       license='MIT',
       python_requires='>=3.6',
       description='A lib python to processing and visualization of trajectories and other spatial-temporal data',
       long_description=long_description,
+      long_description_content_type="text/markdown",
       url="https://github.com/InsightLab/PyMove",
-      packages=['pymove'],
+      packages=['pymove', 'pymove.core', 'pymove.models', 'pymove.models.pattern_mining', 'pymove.osm_module', 'pymove.preprocessing', 'pymove.uncertainty', 'pymove.utils', 'pymove.visualization'],
       classifiers=[
             'Development Status :: 4 - Beta',
             "Programming Language :: Python :: 3",
