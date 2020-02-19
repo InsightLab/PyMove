@@ -13,8 +13,8 @@ DEPENDENCIES = ['tqdm', 'numpy', 'pandas', 'scipy', 'geojson', 'matplotlib', 'sh
                 'matplotlib', 'IPython', 'psutil', 'ipywidgets', 'resource', 'dask']
 
 setup(
-      name="pymoves",
-      version="3.12",
+      name="pymove",
+      version="1.0",
       author="Insight Data Science Lab",
       author_email='insightlab@dc.ufc.br',
       license='MIT',
