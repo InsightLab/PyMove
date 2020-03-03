@@ -350,6 +350,7 @@ def heatmap(
         Represents a folium map with visualization.
 
     """
+    move_data = move_data.reset_index()
     if base_map is None:
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
@@ -418,6 +419,8 @@ def cluster(
         Represents a folium map with visualization.
 
     """
+    move_data = move_data.reset_index()
+
     if base_map is None:
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
@@ -487,6 +490,8 @@ def faster_cluster(
         Represents a folium map with visualization.
 
     """
+    move_data = move_data.reset_index()
+
     if base_map is None:
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
@@ -558,6 +563,8 @@ def plot_markers(
         Represents a folium map with visualization.
 
     """
+    move_data = move_data.reset_index()
+
     if base_map is None:
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
@@ -637,6 +644,8 @@ def plot_trajectories_with_folium(
         Represents a folium map with visualization.
 
     """
+    move_data = move_data.reset_index()
+
     if base_map is None:
         if lat_origin is None and lon_origin is None:
             lat_origin = move_data.loc[0][LATITUDE]
