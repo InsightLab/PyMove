@@ -1,0 +1,16 @@
+language: python
+python: "3.6"
+script:
+  - python setup.py sdist >/dev/null
+  - python setup.py install
+deploy:
+  skip_existing: true
+  provider: pypi
+  server: https://test.pypi.org/legacy/ # Remove for deployment to official PyPi repo 
+  user: "__token__"
+  password:
+    
+  on:
+    tags: true
+  on:
+    branch: developer

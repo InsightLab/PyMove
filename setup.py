@@ -9,12 +9,16 @@ try:
 except Exception as e:
       raise e
 
+import versioneer
+
+cmdclass = versioneer.get_cmdclass()
+
 DEPENDENCIES = ['tqdm', 'numpy', 'pandas', 'scipy', 'geojson', 'matplotlib', 'shapely', 'folium', 'mplleaflet',
                 'matplotlib', 'IPython', 'psutil', 'ipywidgets', 'resource', 'dask']
 
 setup(
       name="pymove",
-      version="1.0",
+      version=versioneer.get_version(),
       author="Insight Data Science Lab",
       author_email='insightlab@dc.ufc.br',
       license='MIT',
