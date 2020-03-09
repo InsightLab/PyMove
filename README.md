@@ -1,6 +1,67 @@
 # Use PyMove and go much further...
 
 ---
+
+# Informations
+
+<table>
+<tr>
+  <td>Package Status</td>
+  <td>
+		<a href="https://pypi.org/project/pandas/">
+		<img src="https://img.shields.io/pypi/status/pandas.svg" alt="status" />
+		</a>
+  </td>
+</tr>
+<tr>
+  <td>License</td>
+  <td>
+    <a href="https://github.com/pandas-dev/pandas/blob/master/LICENSE">
+    <img src="https://img.shields.io/pypi/l/pandas.svg" alt="license" />
+    </a>
+</td>
+</tr>
+<tr>
+  <td>Build Status</td>
+  <td>
+    <a href="https://travis-ci.org/pandas-dev/pandas">
+    <img src="https://travis-ci.org/pandas-dev/pandas.svg?branch=master" alt="travis build status" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Downloads</td>
+  <td>
+    <a href="https://pandas.pydata.org">
+    <img src="https://anaconda.org/conda-forge/pandas/badges/downloads.svg" alt="conda-forge downloads" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Stars</td>
+  <td>
+    <img src="https://img.shields.io/github/stars/pandao/editor.md.svg"/>
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Forks</td>
+  <td>
+    <img src="https://img.shields.io/github/forks/pandao/editor.md.svg"/>
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Issues</td>
+  <td>
+    <img src="https://img.shields.io/github/issues/pandao/editor.md.svg"/>
+    </a>
+  </td>
+</tr>
+</table>
+
+---
+
 # What is PyMove?
 
 PyMove is a Python library to processing and visualization of trajectories and other spatial-temporal data.
@@ -20,6 +81,39 @@ PyMove **proposes**:
 
 ---
 
+# Github installation
+
+1. Clone this repository
+
+`git clone https://github.com/InsightLab/PyMove`
+
+2. Make a branch developer
+
+`git branch developer`
+
+3. Switch to a new branch 
+
+`git checkout developer`
+
+4. Make a pull of branch
+
+`git pull origin developer`
+
+5. Switch to folder PyMove
+
+`cd PyMove`
+
+6. Now, use this command to use PyMove! 
+
+`import pymove`
+
+---
+
+# Pip installation
+
+1. pip install pymove
+
+---
 # Examples
 
 You can access examples of how to use PyMove [here](https://github.com/InsightLab/PyMove/tree/developer/examples)
