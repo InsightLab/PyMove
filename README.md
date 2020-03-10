@@ -6,14 +6,6 @@
 
 <table>
 <tr>
-  <td>Latest Release</td>
-  <td>
-    <a href="https://pypi.org/project/pymove/">
-    <img src="https://img.shields.io/pypi/v/pymove" alt="latest release" />
-    </a>
-  </td>
-</tr>
-<tr>
   <td>Package Status</td>
   <td>
     <a href="https://pypi.org/project/pymove/">
@@ -26,6 +18,14 @@
   <td>
     <a href="https://github.com/InsightLab/PyMove/blob/developer/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="license" />
+    </a>
+</td>
+</tr>
+<tr>
+  <td>PythonVersion</td>
+  <td>
+    <a href="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue">
+    <img src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue" alt="license" />
     </a>
 </td>
 </tr>
