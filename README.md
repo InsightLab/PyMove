@@ -6,11 +6,19 @@
 
 <table>
 <tr>
+  <td>Latest Release</td>
+  <td>
+    <a href="https://pypi.org/project/pymove/">
+    <img src="https://img.shields.io/pypi/v/pymove" alt="latest release" />
+    </a>
+  </td>
+</tr>
+<tr>
   <td>Package Status</td>
   <td>
-		<a href="https://pypi.org/project/pandas/">
-		<img src="https://img.shields.io/pypi/status/pandas.svg" alt="status" />
-		</a>
+    <a href="https://pypi.org/project/pymove/">
+    <img src="https://img.shields.io/pypi/status/pymove.svg" alt="status" />
+    </a>
   </td>
 </tr>
 <tr>
@@ -20,6 +28,45 @@
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="license" />
     </a>
 </td>
+</tr>
+<tr>
+  <td>Build Status</td>
+  <td>
+    <a href="https://travis-ci.org/InsightLab/PyMove/">
+    <img src="https://api.travis-ci.org/InsightLab/PyMove.svg?branch=developer" alt="travis build status" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Downloads</td>
+  <td>
+    <img src="https://img.shields.io/pypi/dd/pymove" alt="PyPi downloads" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Stars</td>
+  <td>
+    <a href="https://github.com/InsightLab/PyMove/stargazers">
+    <img src="https://img.shields.io/github/stars/InsightLab/PyMove?style=social"/>
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Forks</td>
+  <td>
+      <a href="https://github.com/InsightLab/PyMove/network/members">
+    <img src="https://img.shields.io/github/forks/InsightLab/PyMove?style=social"/>
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Issues</td>
+  <td>
+    <a href="https://github.com/InsightLab/PyMove/issues">
+    <img src="https://img.shields.io/github/issues/InsightLab/PyMove"/>
+    </a>
+  </td>
 </tr>
 </table>
 
