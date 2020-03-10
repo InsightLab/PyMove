@@ -21,43 +21,6 @@
     </a>
 </td>
 </tr>
-<tr>
-  <td>Build Status</td>
-  <td>
-    <a href="https://travis-ci.org/pandas-dev/pandas">
-    <img src="https://travis-ci.org/pandas-dev/pandas.svg?branch=master" alt="travis build status" />
-    </a>
-  </td>
-</tr>
-<tr>
-  <td>Downloads</td>
-  <td>
-    <a href="https://pandas.pydata.org">
-    <img src="https://anaconda.org/conda-forge/pandas/badges/downloads.svg" alt="conda-forge downloads" />
-    </a>
-  </td>
-</tr>
-<tr>
-  <td>Stars</td>
-  <td>
-    <img src="https://img.shields.io/github/stars/pandao/editor.md.svg"/>
-    </a>
-  </td>
-</tr>
-<tr>
-  <td>Forks</td>
-  <td>
-    <img src="https://img.shields.io/github/forks/pandao/editor.md.svg"/>
-    </a>
-  </td>
-</tr>
-<tr>
-  <td>Issues</td>
-  <td>
-    <img src="https://img.shields.io/github/issues/pandao/editor.md.svg"/>
-    </a>
-  </td>
-</tr>
 </table>
 
 ---
@@ -114,9 +77,16 @@ PyMove **proposes**:
 1. pip install pymove
 
 ---
+
 # Examples
 
 You can access examples of how to use PyMove [here](https://github.com/InsightLab/PyMove/tree/developer/examples)
+
+---
+
+# Papers
+
+(list of publications using/with Pymove)
 
 ---
 
