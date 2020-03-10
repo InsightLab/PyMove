@@ -16,8 +16,8 @@
 <tr>
   <td>License</td>
   <td>
-    <a href="https://github.com/pandas-dev/pandas/blob/master/LICENSE">
-    <img src="https://img.shields.io/pypi/l/pandas.svg" alt="license" />
+    <a href="https://github.com/InsightLab/PyMove/blob/developer/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="license" />
     </a>
 </td>
 </tr>
