@@ -91,6 +91,7 @@ You can access examples of how to use PyMove [here](https://github.com/InsightLa
 ---
 
 # Useful list of related libraries and links
+
 - [Handling GPS Data with Python](https://github.com/FlorianWilhelm/gps_data_with_python/tree/master/notebooks)
 - [mplleaflet - Easily convert matplotlib plots from Python into interactive Leaflet web maps](https://github.com/jwass/mplleaflet)
 - [Pykalman](https://github.com/pykalman/pykalman)
