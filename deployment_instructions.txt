@@ -29,7 +29,6 @@ Use the .travis.yml file to configure your deploy:
         python: "package version"
         script:
               - python setup.py sdist >/dev/null
-              - python setup.py install
         deploy:
           skip_existing: true
           provider: pypi
