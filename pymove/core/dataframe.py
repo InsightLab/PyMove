@@ -2001,6 +2001,56 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return _any
 
+    def fillna(self, value=None, method=None, axis=None, inplace=False, limit=None, downcast=None):
+        """Fill NA/NaN values using the specified method.
+
+        Parameters
+        ----------
+        value : scalar, dict, Series, or DataFrame
+            Value to use to fill holes (e.g. 0), alternately a
+            dict/Series/DataFrame of values specifying which value to use for
+            each index (for a Series) or column (for a DataFrame).  Values not
+            in the dict/Series/DataFrame will not be filled. This value cannot
+            be a list.
+        method : {'backfill', 'bfill', 'pad', 'ffill', None}, default None
+            Method to use for filling holes in reindexed Series
+            pad / ffill: propagate last valid observation forward to next valid
+            backfill / bfill: use next valid observation to fill gap.
+        axis : {0 or 'index', 1 or 'columns'}
+            Axis along which to fill missing values.
+        inplace : bool, default False
+            If True, fill in-place. Note: this will modify any
+            other views on this object (e.g., a no-copy slice for a column in a
+            DataFrame).
+        limit : int, default None
+            If method is specified, this is the maximum number of consecutive
+            NaN values to forward/backward fill. In other words, if there is
+            a gap with more than this number of consecutive NaNs, it will only
+            be partially filled. If method is not specified, this is the
+            maximum number of entries along the entire axis where NaNs will be
+            filled. Must be greater than 0 if not None.
+        downcast : dict, default is None
+            A dict of item->dtype of what to downcast if possible,
+            or the string 'infer' which will try to downcast to an appropriate
+            equal type (e.g. float64 to int64 if possible).
+
+        Returns
+        -------
+        DataFrame or None
+            Object with missing values filled or None if ``inplace=True``.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.fillna.html
+        """
+        _fillna = self._data.fillna(value, method, axis, inplace, limit, downcast)
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'fillna'
+        self._last_operation_mem_usage = 0
+
+        return _fillna
+
     def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
         """Removes missing data.
 
@@ -2038,6 +2088,67 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = 0
 
         return _dropna
+
+    def sample(self, n=None, frac=None, replace=False, weights=None, random_state=None, axis=None):
+        """Return a random sample of items from an axis of object.
+
+        You can use `random_state` for reproducibility.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of items from axis to return. Cannot be used with `frac`.
+            Default = 1 if `frac` = None.
+        frac : float, optional
+            Fraction of axis items to return. Cannot be used with `n`.
+        replace : bool, default False
+            Allow or disallow sampling of the same row more than once.
+        weights : str or ndarray-like, optional
+            Default 'None' results in equal probability weighting.
+            If passed a Series, will align with target object on index. Index
+            values in weights not found in sampled object will be ignored and
+            index values in sampled object not in weights will be assigned
+            weights of zero.
+            If called on a DataFrame, will accept the name of a column
+            when axis = 0.
+            Unless weights are a Series, weights must be same length as axis
+            being sampled.
+            If weights do not sum to 1, they will be normalized to sum to 1.
+            Missing values in the weights column will be treated as zero.
+            Infinite values not allowed.
+        random_state : int or numpy.random.RandomState, optional
+            Seed for the random number generator (if int), or numpy RandomState
+            object.
+        axis : {0 or ‘index’, 1 or ‘columns’, None}, default None
+            Axis to sample. Accepts axis number or name. Default is stat axis
+            for given data type (0 for Series and DataFrames).
+
+        Returns
+        -------
+        Series or DataFrame
+            A new object of same type as caller containing `n` items randomly
+            sampled from the caller object.
+
+        See Also
+        --------
+        numpy.random.choice: Generates a random sample from a given 1-D numpy
+            array.
+
+        Notes
+        -----
+        If `frac` > 1, `replacement` should be set to `True`.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sample.html
+        """
+        _sample = self._data.sample(n, frac, replace, weights, random_state, axis)
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'sample'
+        self._last_operation_mem_usage = 0
+
+        return _sample
 
     def isin(self, values):
         """Determines whether each element in the DataFrame is contained in values.
@@ -2806,8 +2917,16 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         # Returns False unless there at least one element within the dask Dataframe axis that is True or equivalent.
         return 0
 
+    def fillna(self):
+        # Fills missing data in the dask DataFrame
+        return 0
+
     def dropna(self):
         # Removes missing data from dask DataFrame.
+        return 0
+
+    def sample(self):
+        # Samples data from the dask DataFrame
         return 0
 
     def isin(self):
