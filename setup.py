@@ -14,7 +14,7 @@ import versioneer
 cmdclass = versioneer.get_cmdclass()
 
 DEPENDENCIES = ['tqdm', 'numpy', 'pandas', 'scipy', 'geojson', 'matplotlib', 'shapely', 'folium', 'mplleaflet',
-                'matplotlib', 'IPython', 'psutil', 'ipywidgets', 'resource', 'dask']
+                'matplotlib', 'IPython', 'psutil', 'ipywidgets', 'resource', 'dask[dataframe]', 'sklearn']
 
 setup(
       name="pymove",
