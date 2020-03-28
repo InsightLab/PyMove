@@ -199,7 +199,15 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
     
     @abc.abstractmethod
+    def fillna(self):
+        pass
+    
+    @abc.abstractmethod
     def dropna(self):
+        pass
+    
+    @abc.abstractmethod
+    def sample(self):
         pass
     
     @abc.abstractmethod
