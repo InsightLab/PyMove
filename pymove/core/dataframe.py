@@ -2247,6 +2247,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.append.html
         """
+        if isinstance(other, PandasMoveDataFrame):
+            other = other._data
+            
         _append = self._data.append(other, ignore_index, verify_integrity, sort)
 
         self._last_operation_time_duration = 0
@@ -2311,6 +2314,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.join.html
         """
+        if isinstance(other, PandasMoveDataFrame):
+            other = other._data
+            
         _join = self._data.join(other, on, how, lsuffix, rsuffix, sort)
 
         self._last_operation_time_duration = 0
