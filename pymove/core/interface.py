@@ -35,7 +35,7 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def unique(self, values):
+    def unique(self):
         pass
 
     @abc.abstractmethod
@@ -195,7 +195,15 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
     
     @abc.abstractmethod
+    def all(self):
+        pass
+    
+    @abc.abstractmethod
     def any(self):
+        pass
+    
+    @abc.abstractmethod
+    def isna(self):
         pass
     
     @abc.abstractmethod
@@ -218,6 +226,10 @@ class MoveDataFrameAbstractModel(abc.ABC):
     def append(self):
         pass
     
+    @abc.abstractmethod
+    def join(self):
+        pass
+
     @abc.abstractmethod
     def nunique(self):
         pass
