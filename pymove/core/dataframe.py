@@ -2256,7 +2256,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'append'
         self._last_operation_mem_usage = 0
 
-        return _append
+        return PandasMoveDataFrame(_append)
 
     def join(self, other, on=None, how='left', lsuffix='', rsuffix='', sort=False):
         """Join columns of another DataFrame.
@@ -2323,7 +2323,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'join'
         self._last_operation_mem_usage = 0
 
-        return _join
+        return PandasMoveDataFrame(_join)
 
     def nunique(self, axis=0, dropna=True):
         """Count distinct observations over requested axis.
