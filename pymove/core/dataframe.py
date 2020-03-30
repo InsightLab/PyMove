@@ -112,7 +112,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = 0
             self._last_operation_time_duration = 0
         else:
-            print("Could not instantiate new MoveDataFrame because data has missing columns")
+            raise AttributeError("Could not instantiate new MoveDataFrame because data has missing columns")
 
     @staticmethod
     def _has_columns(data):
@@ -343,33 +343,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'shape'
         self._last_operation_mem_usage = 0
         return self._data.shape
-
-    @property
-    def isin(self):
-        """
-        Whether each element in the DataFrame is contained in values.
-
-        Parameters
-        ----------
-        values : iterable, Series, DataFrame or dict
-            The result will only be true at a location if all the labels match. If values is a Series, that’s the index.
-            If values is a dict, the keys must be the column names, which must match. If values is a DataFrame, then
-            both the index and column labels must match.
-
-        Returns
-        -------
-        DataFrame
-            DataFrame of booleans showing whether each element in the DataFrame is contained in values.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.isin.html
-
-        """
-        self._last_operation_time_duration = 0
-        self._last_operation_name = 'isin'
-        self._last_operation_mem_usage = 0
-        return self._data.isin
 
     def unique(self, values):
         """
@@ -1629,7 +1602,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_time_duration = 0
         self._last_operation_name = 'drop_duplicates'
         self._last_operation_mem_usage = 0
-        return _drop_duplicates
+        
+        if inplace:
+            return None
+        return PandasMoveDataFrame(_drop_duplicates)
 
     def reset_index(self, level=None, drop=False, inplace=False, col_level=0, col_fill=''):
         """Resets the DataFrame's index, and use the default one.
@@ -1666,7 +1642,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'reset_index'
         self._last_operation_mem_usage = 0
 
-        return _reset_index
+        if inplace:
+            return None
+        return PandasMoveDataFrame(_reset_index)
 
     def plot(self, *args, **kwargs):
         """Makes a plot of _data.
@@ -1773,7 +1751,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = '_sort_values'
         self._last_operation_mem_usage = 0
 
-        return _sort_values
+        if inplace:
+            return None
+        return PandasMoveDataFrame(_sort_values)
 
     def astype(self, dtype, copy=True, errors='raise', **kwargs):
         """Cast a pandas object to a specified dtype.
@@ -1944,7 +1924,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-            DataFrame
+            PandasMoveDataFrame
                 A copy of the original object, shifed.
 
         References
@@ -1958,7 +1938,48 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'shift'
         self._last_operation_mem_usage = 0
 
-        return _shift
+        return PandasMoveDataFrame(_shift)
+
+    def all(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
+        """Inidicates if all elements are True, potentially over an axis.
+        Returns True unless there at least one element within the Dataframe axis that is False or equivalent.
+
+        Prameters
+        ---------
+        axis: int or str, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+            Indicate which axis or axes should be reduced.
+            - 0 / ‘index’ : reduce the index, return a Series whose index is the original column labels.
+            - 1 / ‘columns’ : reduce the columns, return a Series whose index is the original index.
+            - None : reduce all axes, return a scalar.
+        bool_only: bool, optional (None by defautl)
+            Include only boolean columns.
+            If None, will attempt to use everything, then use only boolean data
+        skipna: bool, optional (True by defautl)
+            Exclude NA/null values. If the entire row/column is NA and skipna is True, then the result will be True,
+            as for an empty row/column. If skipna is False, then NA are treated as True,
+            because these are not equal to zero.
+        level: int or String(level name), optional (default None)
+            If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series.
+        kwargs: any, default None
+            Additional keywords have no effect but might be accepted for compatibility with NumPy.
+
+        Returns
+        -------
+        Series or DataFrame
+            If level is specified, then, DataFrame is returned; otherwise, Series is returned.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.all.html
+        """
+
+        _all = self._data.all(axis, bool_only, skipna, level, **kwargs)
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'all'
+        self._last_operation_mem_usage = 0
+
+        return _all
 
     def any(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
         """Inidicates if any element is True, potentially over an axis.
@@ -2000,6 +2021,28 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = 0
 
         return _any
+
+    def isna(self):
+        """Detect missing values.
+
+        Return a boolean same-sized object indicating if the values are NA.
+        NA values, such as None or numpy.NaN, gets mapped to True values.
+        Everything else gets mapped to False values.
+        Characters such as empty strings '' or numpy.inf are not considered NA values 
+        (unless you set pandas.options.mode.use_inf_as_na = True).
+
+        Returns
+        -------
+        DataFrame:
+            DataFrame of booleans showing for each element in DataFrame that indicates 
+            whether an element is not an NA value.
+        """
+        _isna = self._data.isna()
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'isna'
+        self._last_operation_mem_usage = 0
+        return _isna
 
     def fillna(self, value=None, method=None, axis=None, inplace=False, limit=None, downcast=None):
         """Fill NA/NaN values using the specified method.
@@ -2049,7 +2092,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'fillna'
         self._last_operation_mem_usage = 0
 
-        return _fillna
+        if inplace:
+            return None
+        return PandasMoveDataFrame(_fillna)
 
     def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
         """Removes missing data.
@@ -2075,7 +2120,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Returns
         -------
         DataFrame:
-            _data with NA entries dropped from it.
+            DataFrame or None
+            Object with NA entries dropped or None if ``inplace=True``.
 
         References
         ----------
@@ -2125,7 +2171,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        Series or DataFrame
+        PandasMoveDataFrame
             A new object of same type as caller containing `n` items randomly
             sampled from the caller object.
 
@@ -2148,7 +2194,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'sample'
         self._last_operation_mem_usage = 0
 
-        return _sample
+        return PandasMoveDataFrame(_sample)
 
     def isin(self, values):
         """Determines whether each element in the DataFrame is contained in values.
@@ -2209,6 +2255,70 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return _append
 
+    def join(self, other, on=None, how='left', lsuffix='', rsuffix='', sort=False):
+        """Join columns of another DataFrame.
+
+        Join columns with `other` DataFrame either on index or on a key
+        column. Efficiently join multiple DataFrame objects by index at once by
+        passing a list.
+
+        Parameters
+        ----------
+        other : DataFrame, Series, or list of DataFrame
+            Index should be similar to one of the columns in this one. If a
+            Series is passed, its name attribute must be set, and that will be
+            used as the column name in the resulting joined DataFrame.
+        on : str, list of str, or array-like, optional
+            Column or index level name(s) in the caller to join on the index
+            in `other`, otherwise joins index-on-index. If multiple
+            values given, the `other` DataFrame must have a MultiIndex. Can
+            pass an array as the join key if it is not already contained in
+            the calling DataFrame. Like an Excel VLOOKUP operation.
+        how : {'left', 'right', 'outer', 'inner'}, default 'left'
+            How to handle the operation of the two objects.
+
+            * left: use calling frame's index (or column if on is specified)
+            * right: use `other`'s index.
+            * outer: form union of calling frame's index (or column if on is
+            specified) with `other`'s index, and sort it.
+            lexicographically.
+            * inner: form intersection of calling frame's index (or column if
+            on is specified) with `other`'s index, preserving the order
+            of the calling's one.
+        lsuffix : str, default ''
+            Suffix to use from left frame's overlapping columns.
+        rsuffix : str, default ''
+            Suffix to use from right frame's overlapping columns.
+        sort : bool, default False
+            Order result DataFrame lexicographically by the join key. If False,
+            the order of the join key depends on the join type (how keyword).
+
+        Returns
+        -------
+        DataFrame
+            A dataframe containing columns from both the caller and `other`.
+
+        See Also
+        --------
+        DataFrame.merge : For column(s)-on-columns(s) operations.
+
+        Notes
+        -----
+        Parameters `on`, `lsuffix`, and `rsuffix` are not supported when
+        passing a list of `DataFrame` objects.
+        
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.join.html
+        """
+        _join = self._data.join(other, on, how, lsuffix, rsuffix, sort)
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'join'
+        self._last_operation_mem_usage = 0
+
+        return _join
+
     def nunique(self, axis=0, dropna=True):
         """Count distinct observations over requested axis.
 
@@ -2236,7 +2346,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return _nunique
 
-    def to_csv(self, file_name, sep=',', encoding=None):
+    def to_csv(self, file_name, sep=',', index=True, encoding=None):
         """Write object to a comma-separated values (csv) file.
 
         Parameters
@@ -2245,6 +2355,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             File path or object
         sep: str
             String of length 1. Field delimiter for the output file.
+        index: bool
+            Boolean indicating whether to save row indexes
         encoding: str, optional (None default)
             A string representing the encoding to use in the output file, defaults to ‘utf-8’
 
@@ -2257,7 +2369,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         process = psutil.Process(os.getpid())
         init = process.memory_info()[0]
 
-        self._data.to_csv(file_name, sep, encoding)
+        self._data.to_csv(file_name, sep=sep, index=index, encoding=encoding)
 
         finish = process.memory_info()[0]
         self._last_operation_time_duration = time.time() - start
@@ -2303,7 +2415,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_time_duration = time.time() - start
             self._last_operation_mem_usage = finish - init
 
-            return self._data
+            return self
 
     def get_type(self):
         """Returns the type of the object.
@@ -2391,7 +2503,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = 0
             self._last_operation_time_duration = 0
         else:
-            print("erroo")
+            raise AttributeError("Could not instantiate new MoveDataFrame because data has missing columns")
 
     @staticmethod
     def _has_columns(data):
@@ -2574,7 +2686,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
 
         if (new_type == "dask"):
-            return self._data
+            return self
         elif (new_type == "pandas"):
             df_pandas = self._data.compute()
             return PandasMoveDataFrame(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
@@ -2601,7 +2713,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Represents the number of users in trajectory data.
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def time_interval(self):
         """
@@ -2616,7 +2728,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Represents the time difference.
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def to_numpy(self):
         """
@@ -2631,7 +2743,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Represents the trajectory in numpy array format.
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def write_file(self):
         """
@@ -2644,7 +2756,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def len(self):
         """
@@ -2659,7 +2771,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Represents the trajectory data length.
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def to_dict(self):
         """
@@ -2674,7 +2786,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Represents the trajectory in dict format.
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def to_grid(self):
         """
@@ -2689,7 +2801,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Represents the trajectory in grid format.
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_tid_based_on_id_datatime(self):
         """
@@ -2702,7 +2814,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_date_features(self):
         """
@@ -2715,7 +2827,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_hour_features(self):
         """
@@ -2728,7 +2840,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_day_of_the_week_features(self):
         """
@@ -2741,7 +2853,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_time_of_day_features(self):
         """
@@ -2761,10 +2873,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         - datetime4 = 2019-04-28 20:00:56 -> period = evening
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_dist_features(self):
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_dist_time_speed_features(self):
         """
@@ -2785,7 +2897,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
                     speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_move_and_stop_by_radius(self):
         """
@@ -2798,15 +2910,15 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_datetime_in_format_cyclical(self):
 
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def generate_weekend_features(self):
 
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def time_interval(self):
         """
@@ -2819,7 +2931,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def get_bbox(self):
         """
@@ -2842,7 +2954,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         (22.147577, 113.54884299999999, 41.132062, 121.156224)
 
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def plot_all_features(self):
         """
@@ -2854,106 +2966,119 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         Returns
         -------
         """
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def plot_trajs(self):
         #Generate a visualization that show trajectories.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def plot_traj_id(self):
         # Generate a visualization that shows a trajectory with the specified tid.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def show_trajectories_info(self):
         # Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def count(self):
         # CountS the non-NA cells for each column or row.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def reset_index(self):
         # Resets the dask DataFrame's index, and use the default one.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def plot(self):
         # Plot the data of the dask DataFrame.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def drop_duplicates(self):
         # Removes duplicated rows from the data.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def select_dtypes(self):
         # Returns a subset of the dask DataFrame columns based on the column dtypes.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def sort_values(self):
         # Sorts the values of the dask DataFrame.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def astype(self):
         # Casts a dask object to a specified dtype.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def set_index(self):
         # Set the dask DataFrame index (row labels) using one or more existing columns or arrays (of the correct length).
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def drop(self):
         # Drops specified rows or columns of the dask Dataframe.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def duplicated(self):
         # Returns boolean Series denoting duplicate rows, optionally only considering certain columns.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def shift(self):
         # Shifts dask dataFrame index by desired number of periods with an optional time freq.
-        return 0
+        raise NotImplementedError("To be implemented")
+
+    def all(self):
+        # Inidicates if all elements are True, potentially over an axis.
+        # Returns True unless there at least one element within the Dataframe axis that is False or equivalent.
+        raise NotImplementedError("To be implemented")
 
     def any(self):
         # Inidicates if any element is True, potentially over an axis.
         # Returns False unless there at least one element within the dask Dataframe axis that is True or equivalent.
-        return 0
+        raise NotImplementedError("To be implemented")
+
+    def isna(self):
+        # Detect missing values
+        raise NotImplementedError("To be implemented")
 
     def fillna(self):
         # Fills missing data in the dask DataFrame
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def dropna(self):
         # Removes missing data from dask DataFrame.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def sample(self):
         # Samples data from the dask DataFrame
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def isin(self):
         # Determines whether each element in the dask DataFrame is contained in values.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def append(self):
         # Append rows of other to the end of caller, returning a new object.
         # Columns in other that are not in the caller are added as new columns
-        return 0
+        raise NotImplementedError("To be implemented")
+
+    def join(self):
+        # Join columns of another DataFrame.
+        raise NotImplementedError("To be implemented")
 
     def nunique(self):
         # Count distinct observations over requested axis.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def to_csv(self):
         # Write object to a comma-separated values (csv) file.
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def at(self):
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def to_DataFrame(self):
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def unique(self, values):
-        return 0
+        raise NotImplementedError("To be implemented")
 
     def last_operation_time(self):
         """Returns the execution time of the last function, called to the PandasMoveDataFrame object.
