@@ -660,7 +660,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_date_features(self, inplace=True):
         """
-        Create or update date feature.
+        Create or update date feature based on datetime.
 
         Parameters
         ----------
@@ -702,7 +702,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_hour_features(self, inplace=True):
         """
-        Create or update hour feature.
+        Create or update hour feature based on datetime.
 
         Parameters
         ----------
@@ -839,7 +839,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_dist_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
         """
-        Create three distance in meters to an GPS point P (lat, lon).
+        Create the three distance in meters to an GPS point P (lat, lon).
 
         Parameters
         ----------
@@ -949,9 +949,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
         """
-        Firstly, create three distance to an GPS point P (lat, lon).
-        After, create two feature to time between two P: time to previous and time to next.
-        Lastly, create two feature to speed using time and distance features.
+        Firstly, create the three distance to an GPS point P (lat, lon).
+        After, create two time features to point P: time to previous and time to next.
+        Lastly, create two features to speed using time and distance features.
 
         Parameters
         ----------
@@ -998,7 +998,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print('...Set {} as index to a higher peformance\n'.format(label_id))
                 data_.set_index(label_id, inplace=True)
 
-            """create new feature to time"""
+            """create new feature to distance"""
             data_[DIST_TO_PREV] = label_dtype(-1.0)
 
             """create new feature to time"""
@@ -1039,7 +1039,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     # time_next = (ut.shift(time_, -1) - time_)*(10**-9)
                     # self.at[idx, dic_features_label['time_to_next']] = time_next
 
-                    "set Speed features"
+                    "set speed features"
                     data_.at[idx, SPEED_TO_PREV] = data_.at[idx, DIST_TO_PREV]/time_prev  # unit: m/s
 
                     sum_size_id += size_id
@@ -1340,10 +1340,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         self : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
-
-        dic_labels : dict
-            Represents mapping of column's header between values passed on params.
-
+            
         Examples
         --------
         ======================= INFORMATION ABOUT DATASET =======================
@@ -1406,7 +1403,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
-        """Returns and returns the minimum values for the requested axis of the dataframe.
+        """Returns the minimum values for the requested axis of the dataframe.
 
         Parameters
         ----------
