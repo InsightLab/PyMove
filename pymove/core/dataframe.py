@@ -117,7 +117,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     @staticmethod
     def _has_columns(data):
         """
-        Checks whether past data has 'lat', 'lon', 'datetime' columns.
+        Checks whether the received dataset has 'lat', 'lon', 'datetime' columns.
 
         Parameters
         ----------
@@ -137,7 +137,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     @staticmethod
     def _validate_move_data_frame(data):
         """
-        Converts the column type to the default PyMove lib used.
+        Converts the column type to the default type used by PyMove lib.
 
         Parameters
         ----------
@@ -615,16 +615,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         str_format : String, optional, default "%Y%m%d%H".
-            Contains informations about virtual grid, how
-                - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma.
-                - grid_size_lat_y: tamanho da grid latitude.
-                - grid_size_lon_x: tamanho da longitude da grid.
-                - cell_size_by_degree: tamanho da célula da Grid.
-            If value is none, the function ask user by dic_grid.
 
         sort : bool, optional, default True.
-            Represents the state of dataframe, if is sorted. By default it's true.
+	    If sort == True the dataframe will be sorted.
 
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
@@ -857,7 +850,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Represents column id type.
 
         sort : bool, optional, default True.
-            Represents the state of dataframe, if is sorted.
+            If sort == True the dataframe will be sorted.
 
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
@@ -969,7 +962,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Represents column id type.
 
         sort : bool, optional, default True.
-            Represents the state of dataframe, if is sorted.
+            If sort == True the dataframe will be sorted.
 
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
