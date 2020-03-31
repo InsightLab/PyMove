@@ -624,6 +624,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
 
         """
         process = psutil.Process(os.getpid())
@@ -633,7 +635,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = PandasMoveDataFrame(data=self._data)
+            data_ = self._data.copy()
 
         try:
             print('\nCreating or updating tid feature...\n')
@@ -649,8 +651,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_name = 'generate_tid_based_on_id_datatime'
             self._last_operation_mem_usage = finish - init
 
-            if inplace == False:
-                return data_
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
         except Exception as e:
             finish = process.memory_info()[0]
             self._last_operation_time_duration = time.time() - start
@@ -669,7 +672,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
         """
         process = psutil.Process(os.getpid())
         init = process.memory_info()[0]
@@ -678,7 +682,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = PandasMoveDataFrame(data=self._data)
+            data_ = self._data.copy()
 
         try:
             print('Creating date features...')
@@ -691,8 +695,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_name = 'generate_date_features'
             self._last_operation_mem_usage = finish - init
 
-            if inplace == False:
-                return data_
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
         except Exception as e:
             finish = process.memory_info()[0]
             self._last_operation_time_duration = time.time() - start
@@ -711,7 +716,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
         """
         process = psutil.Process(os.getpid())
         init = process.memory_info()[0]
@@ -720,7 +726,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = PandasMoveDataFrame(data=self._data)
+            data_ = self._data
 
         try:
             print('\nCreating or updating a feature for hour...\n')
@@ -733,8 +739,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_name = 'generate_hour_features'
             self._last_operation_mem_usage = finish - init
 
-            if inplace == False:
-                return data_
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
         except Exception as e:
             finish = process.memory_info()[0]
             self._last_operation_time_duration = time.time() - start
@@ -753,7 +760,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
         """
         process = psutil.Process(os.getpid())
         init = process.memory_info()[0]
@@ -762,7 +770,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = PandasMoveDataFrame(data=self._data)
+            data_ = self._data.copy()
 
         try:
             print('\nCreating or updating day of the week feature...\n')
@@ -774,8 +782,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_name = 'generate_day_of_the_week_features'
             self._last_operation_mem_usage = finish - init
 
-            if inplace == False:
-                return data_
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
         except Exception as e:
             finish = process.memory_info()[0]
             self._last_operation_time_duration = time.time() - start
@@ -794,6 +803,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
+
         Examples
         --------
         - datetime1 = 2019-04-28 02:00:56 -> period = early morning
@@ -809,7 +821,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = PandasMoveDataFrame(data=self._data)
+            data_ = self._data.copy()
 
         try:
             print('\nCreating or updating period feature\n...early morning from 0H to 6H\n... \
@@ -828,8 +840,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_name = 'generate_time_of_day_features'
             self._last_operation_mem_usage = finish - init
 
-            if inplace == False:
-                return data_
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
         except Exception as e:
             finish = process.memory_info()[0]
             self._last_operation_time_duration = time.time() - start
@@ -857,6 +870,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
 
         Examples
         --------
@@ -872,7 +887,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = PandasMoveDataFrame(data=self._data)
+            data_ = self._data.copy()
 
         try:
             print('\nCreating or updating distance features in meters...\n')
@@ -937,8 +952,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_name = 'generate_dist_features'
             self._last_operation_mem_usage = finish - init
 
-            if inplace == False:
-                return data_
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
         except Exception as e:
             print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
             finish = process.memory_info()[0]
@@ -969,6 +985,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
 
         Examples
         --------
@@ -984,7 +1002,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = PandasMoveDataFrame(data=self._data)
+            data_ = self._data.copy()
 
         try:
             print('\nCreating or updating distance, time and speed features in meters by seconds\n')
@@ -1054,8 +1072,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_name = 'generate_dist_time_speed_features'
             self._last_operation_mem_usage = finish - init
 
-            if inplace == False:
-                return data_
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
         except Exception as e:
             print('label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}'.format(label_id, idx, size_id, sum_size_id))
             finish = process.memory_info()[0]
@@ -1081,7 +1100,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
         """
         start = time.time()
         process = psutil.Process(os.getpid())
@@ -1090,7 +1110,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = PandasMoveDataFrame(data=self._data)
+            data_ = self._data.copy()
 
         if DIST_TO_PREV not in self._data:
             data_.generate_dist_features()
@@ -1108,8 +1128,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_name = 'generate_move_and_stop_by_radius'
             self._last_operation_mem_usage = finish - init
 
-            if inplace == False:
-                return data_
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
         except Exception as e:
             finish = process.memory_info()[0]
             self._last_operation_time_duration = time.time() - start
@@ -1117,17 +1138,58 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
-    def generate_datetime_in_format_cyclical(self, label_datetime = DATETIME):
+    def generate_datetime_in_format_cyclical(self, label_datetime=DATETIME, inplace=True):
+        """
+        Create or update column with cyclical datetime feature.
+
+        Parameters
+        ----------
+        label_datetime : String, optional, default 'datetime.
+            Represents column id type.
+
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
+        Returns
+        -------
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
+        
+        References
+        ----------
+        # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+        # https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
+        """
+        start = time.time()
+        process = psutil.Process(os.getpid())
+        init = process.memory_info()[0]
+        
+        if inplace:
+            data_ = self._data
+        else:
+            data_ = self._data.copy()
+
         try:
-            # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
-            # https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
             print('Encoding cyclical continuous features - 24-hour time')
             if label_datetime in self._data:
-                hours = self._data[label_datetime].dt.hour
-                self._data[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
-                self._data[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
+                hours = data_[label_datetime].dt.hour
+                data_[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
+                data_[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
                 print('...hour_sin and  hour_cos features were created...\n')
+            
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_datetime_in_format_cyclical'
+            self._last_operation_mem_usage = finish - init
+
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
         except Exception as e:
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_datetime_in_format_cyclical'
+            self._last_operation_mem_usage = finish - init
             raise e
 
     def generate_weekend_features(self, create_day_of_week=False, inplace=True):
@@ -1142,13 +1204,21 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         inplace : bool, optional, default True.
             Indicates whether the operation will be performed on the data provided or in a copy.
+
+        Returns
+        ----------
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
         """
+        start = time.time()
+        process = psutil.Process(os.getpid())
+        init = process.memory_info()[0]
 
         try:
             if inplace:
                 data_ = self._data
             else:
-                data_ = PandasMoveDataFrame(data=self._data)
+                data_ = self._data.copy()
 
             self.generate_day_of_the_week_features()
             print('Creating or updating a feature for weekend\n')
@@ -1161,10 +1231,20 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     print('...dropping colum day\n')
                     del data_['day']
 
-            if inplace == False:
-                return data_
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_weekend_features'
+            self._last_operation_mem_usage = finish - init
+
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
 
         except Exception as e:
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_weekend_features'
+            self._last_operation_mem_usage = finish - init
             raise e
 
     def time_interval(self):
@@ -1580,7 +1660,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         --------
-        PandasMoveDataFrame with the duplicates dropped.
+        PandasMoveDataFrame or None
+            Object with duplicated rows or None if ``inplace=True``.
 
         References
         ----------
@@ -1595,7 +1676,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         
         if inplace:
             return None
-        return PandasMoveDataFrame(_drop_duplicates)
+        return PandasMoveDataFrame(data=_drop_duplicates)
 
     def reset_index(self, level=None, drop=False, inplace=False, col_level=0, col_fill=''):
         """Resets the DataFrame's index, and use the default one.
@@ -1618,8 +1699,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        PandasMoveDataFrame
-            with _data with a new index.
+        PandasMoveDataFrame or None
+            Object with a new index or None if ``inplace=True``.
 
         References
         ----------
@@ -1634,7 +1715,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace:
             return None
-        return PandasMoveDataFrame(_reset_index)
+        return PandasMoveDataFrame(data=_reset_index)
 
     def plot(self, *args, **kwargs):
         """Makes a plot of _data.
@@ -1727,8 +1808,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        PandasDataframe:
-            _data with sorted values if inplace=False, None otherwise.
+        PandasDataframe or None
+            Object with sorted values or None if ``inplace=True``.
 
         References
         ----------
@@ -1743,7 +1824,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace:
             return None
-        return PandasMoveDataFrame(_sort_values)
+        return PandasMoveDataFrame(data=_sort_values)
 
     def astype(self, dtype, copy=True, errors='raise', **kwargs):
         """Cast a pandas object to a specified dtype.
@@ -1928,7 +2009,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'shift'
         self._last_operation_mem_usage = 0
 
-        return PandasMoveDataFrame(_shift)
+        return PandasMoveDataFrame(data=_shift)
 
     def all(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
         """Inidicates if all elements are True, potentially over an axis.
@@ -2069,7 +2150,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        DataFrame or None
+        PandasMoveDataFrame or None
             Object with missing values filled or None if ``inplace=True``.
 
         References
@@ -2084,7 +2165,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace:
             return None
-        return PandasMoveDataFrame(_fillna)
+        return PandasMoveDataFrame(data=_fillna)
 
     def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
         """Removes missing data.
@@ -2109,8 +2190,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        DataFrame:
-            DataFrame or None
+        PandasMoveDataFrame or None
             Object with NA entries dropped or None if ``inplace=True``.
 
         References
@@ -2184,7 +2264,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'sample'
         self._last_operation_mem_usage = 0
 
-        return PandasMoveDataFrame(_sample)
+        return PandasMoveDataFrame(data=_sample)
 
     def isin(self, values):
         """Determines whether each element in the DataFrame is contained in values.
@@ -2230,8 +2310,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        DataFrame
-            _data with the appended data.
+        PandasMoveDataFrame
+            A dataframe containing rows from both the caller and `other`.
 
         References
         ----------
@@ -2246,12 +2326,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'append'
         self._last_operation_mem_usage = 0
 
-        return PandasMoveDataFrame(_append)
+        return PandasMoveDataFrame(data=_append)
 
     def join(self, other, on=None, how='left', lsuffix='', rsuffix='', sort=False):
-        """Join columns of another DataFrame.
+        """Join columns of other, returning a new object.
 
-        Join columns with `other` DataFrame either on index or on a key
+        Join columns with `other` PandasMoveDataFrame either on index or on a key
         column. Efficiently join multiple DataFrame objects by index at once by
         passing a list.
 
@@ -2288,12 +2368,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        DataFrame
+        PandasMoveDataFrame
             A dataframe containing columns from both the caller and `other`.
-
-        See Also
-        --------
-        DataFrame.merge : For column(s)-on-columns(s) operations.
 
         Notes
         -----
@@ -2313,7 +2389,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'join'
         self._last_operation_mem_usage = 0
 
-        return PandasMoveDataFrame(_join)
+        return PandasMoveDataFrame(data=_join)
 
     def nunique(self, axis=0, dropna=True):
         """Count distinct observations over requested axis.
