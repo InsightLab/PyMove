@@ -117,7 +117,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     @staticmethod
     def _has_columns(data):
         """
-        Checks whether past data has 'lat', 'lon', 'datetime' columns.
+        Checks whether the received dataset has 'lat', 'lon', 'datetime' columns.
 
         Parameters
         ----------
@@ -137,7 +137,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     @staticmethod
     def _validate_move_data_frame(data):
         """
-        Converts the column type to the default PyMove lib used.
+        Converts the column type to the default type used by PyMove lib.
 
         Parameters
         ----------
@@ -615,16 +615,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         str_format : String, optional, default "%Y%m%d%H".
-            Contains informations about virtual grid, how
-                - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma.
-                - grid_size_lat_y: tamanho da grid latitude.
-                - grid_size_lon_x: tamanho da longitude da grid.
-                - cell_size_by_degree: tamanho da célula da Grid.
-            If value is none, the function ask user by dic_grid.
 
         sort : bool, optional, default True.
-            Represents the state of dataframe, if is sorted. By default it's true.
+	    If sort == True the dataframe will be sorted.
 
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
@@ -667,7 +660,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_date_features(self, inplace=True):
         """
-        Create or update date feature.
+        Create or update date feature based on datetime.
 
         Parameters
         ----------
@@ -709,7 +702,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_hour_features(self, inplace=True):
         """
-        Create or update hour feature.
+        Create or update hour feature based on datetime.
 
         Parameters
         ----------
@@ -846,7 +839,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_dist_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
         """
-        Create three distance in meters to an GPS point P (lat, lon).
+        Create the three distance in meters to an GPS point P (lat, lon).
 
         Parameters
         ----------
@@ -857,7 +850,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Represents column id type.
 
         sort : bool, optional, default True.
-            Represents the state of dataframe, if is sorted.
+            If sort == True the dataframe will be sorted.
 
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
@@ -956,9 +949,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def generate_dist_time_speed_features(self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True):
         """
-        Firstly, create three distance to an GPS point P (lat, lon).
-        After, create two feature to time between two P: time to previous and time to next.
-        Lastly, create two feature to speed using time and distance features.
+        Firstly, create the three distance to an GPS point P (lat, lon).
+        After, create two time features to point P: time to previous and time to next.
+        Lastly, create two features to speed using time and distance features.
 
         Parameters
         ----------
@@ -969,7 +962,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Represents column id type.
 
         sort : bool, optional, default True.
-            Represents the state of dataframe, if is sorted.
+            If sort == True the dataframe will be sorted.
 
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
@@ -1005,7 +998,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print('...Set {} as index to a higher peformance\n'.format(label_id))
                 data_.set_index(label_id, inplace=True)
 
-            """create new feature to time"""
+            """create new feature to distance"""
             data_[DIST_TO_PREV] = label_dtype(-1.0)
 
             """create new feature to time"""
@@ -1046,7 +1039,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     # time_next = (ut.shift(time_, -1) - time_)*(10**-9)
                     # self.at[idx, dic_features_label['time_to_next']] = time_next
 
-                    "set Speed features"
+                    "set speed features"
                     data_.at[idx, SPEED_TO_PREV] = data_.at[idx, DIST_TO_PREV]/time_prev  # unit: m/s
 
                     sum_size_id += size_id
@@ -1347,10 +1340,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         self : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
-
-        dic_labels : dict
-            Represents mapping of column's header between values passed on params.
-
+            
         Examples
         --------
         ======================= INFORMATION ABOUT DATASET =======================
@@ -1413,7 +1403,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def min(self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs):
-        """Returns and returns the minimum values for the requested axis of the dataframe.
+        """Returns the minimum values for the requested axis of the dataframe.
 
         Parameters
         ----------
