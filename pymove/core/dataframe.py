@@ -344,6 +344,26 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = 0
         return self._data.shape
 
+    def len(self):
+        """
+        Returns the length/row numbers in trajectory data.
+
+        Parameters
+        ---------
+
+        Returns
+        -------
+        len_ : int
+            Represents the trajectory data length.
+
+        """
+        len_ = self._data.shape[0]
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'len'
+        self._last_operation_mem_usage = 0
+        return len_
+
     def unique(self, values):
         """
         Return unique values of Series object. Uniques are returned in order of appearance. Hash table-based unique,
@@ -450,54 +470,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = finish - init
         return numpy_
 
-    def write_file(self, file_name, separator=','):
-        """
-        Write trajectory data to a new file.
-
-        Parameters
-        ----------
-        file_name : String.
-            Represents the filename.
-
-        separator : String, optional, default ','.
-            Represents the informations separator in a new file.
-
-        Returns
-        -------
-
-        """
-        process = psutil.Process(os.getpid())
-        init = process.memory_info()[0]
-
-        start = time.time()
-
-        self._data.to_csv(file_name, sep=separator, encoding='utf-8', index=False)
-
-        finish = process.memory_info()[0]
-        self._last_operation_time_duration = time.time() - start
-        self._last_operation_name = 'write_file'
-        self._last_operation_mem_usage = finish - init
-
-    def len(self):
-        """
-        Returns the length/row numbers in trajectory data.
-
-        Parameters
-        ---------
-
-        Returns
-        -------
-        len_ : int
-            Represents the trajectory data length.
-
-        """
-        len_ = self._data.shape[0]
-
-        self._last_operation_time_duration = 0
-        self._last_operation_name = 'len'
-        self._last_operation_mem_usage = 0
-        return len_
-
     def to_dict(self):
         """
         Converts trajectory data to dict format.
@@ -571,42 +543,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'to_DataFrame'
         self._last_operation_mem_usage = 0
         return self._data
-
-    def get_bbox(self):
-        """
-        A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
-            - Latitude is a decimal number between -90.0 and 90.0.
-            - Longitude is a decimal number between -180.0 and 180.0.
-        They usually follow the standard format of:
-        - bbox = left, bottom, right, top
-        - bbox = min Longitude , min Latitude , max Longitude , max Latitude
-        Parameters
-        ----------
-
-        Returns
-        -------
-        bbox_ : tuple
-            Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
-
-        Examples
-        --------
-        (22.147577, 113.54884299999999, 41.132062, 121.156224)
-
-        """
-
-        try:
-            bbox_ = (self._data[LATITUDE].min(), self._data[LONGITUDE].min(), self._data[LATITUDE].max(),
-                     self._data[LONGITUDE].max())
-
-            self._last_operation_time_duration = 0
-            self._last_operation_name = 'get_bbox'
-            self._last_operation_mem_usage = 0
-            return bbox_
-        except Exception as e:
-            self._last_operation_time_duration = 0
-            self._last_operation_name = 'get_bbox'
-            self._last_operation_mem_usage = 0
-            raise e
 
     def generate_tid_based_on_id_datatime(self, str_format="%Y%m%d%H", sort=True, inplace=True):
         """
@@ -792,6 +728,61 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
+    def generate_weekend_features(self, create_day_of_week=False, inplace=True):
+        """
+        Create or update the feature weekend to the dataframe, if this resource is set to 1 it indicates that the
+        given day is is the weekend, otherwise, it is a day of the week.
+
+        Parameters
+        ----------
+        create_day_of_week : bool, optional (False by default).
+            Indicates if the column day should be keeped in the dataframe. If set to False the column will be dropped.
+
+        inplace : bool, optional, default True.
+            Indicates whether the operation will be performed on the data provided or in a copy.
+
+        Returns
+        ----------
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
+        """
+        start = time.time()
+        process = psutil.Process(os.getpid())
+        init = process.memory_info()[0]
+
+        try:
+            if inplace:
+                data_ = self._data
+            else:
+                data_ = self._data.copy()
+
+            self.generate_day_of_the_week_features()
+            print('Creating or updating a feature for weekend\n')
+            if 'day' in data_:
+                index_fds = data_[(data_[DAY] == 'Saturday') | (data_[DAY] == 'Sunday')].index
+                data_['weekend'] = 0
+                data_.at[index_fds, 'weekend'] = 1
+                print('...Weekend was set as 1 or 0...\n')
+                if ~create_day_of_week:
+                    print('...dropping colum day\n')
+                    del data_['day']
+
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_weekend_features'
+            self._last_operation_mem_usage = finish - init
+
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
+
+        except Exception as e:
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_weekend_features'
+            self._last_operation_mem_usage = finish - init
+            raise e
+
     def generate_time_of_day_features(self, inplace=True):
         """
         Create a feature time of day or period from datatime.
@@ -847,6 +838,60 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             finish = process.memory_info()[0]
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'generate_time_of_day_features'
+            self._last_operation_mem_usage = finish - init
+            raise e
+
+    def generate_datetime_in_format_cyclical(self, label_datetime=DATETIME, inplace=True):
+        """
+        Create or update column with cyclical datetime feature.
+
+        Parameters
+        ----------
+        label_datetime : String, optional, default 'datetime.
+            Represents column id type.
+
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
+        Returns
+        -------
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
+        
+        References
+        ----------
+        # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+        # https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
+        """
+        start = time.time()
+        process = psutil.Process(os.getpid())
+        init = process.memory_info()[0]
+        
+        if inplace:
+            data_ = self._data
+        else:
+            data_ = self._data.copy()
+
+        try:
+            print('Encoding cyclical continuous features - 24-hour time')
+            if label_datetime in self._data:
+                hours = data_[label_datetime].dt.hour
+                data_[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
+                data_[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
+                print('...hour_sin and  hour_cos features were created...\n')
+            
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_datetime_in_format_cyclical'
+            self._last_operation_mem_usage = finish - init
+
+            if inplace:
+                return None
+            return PandasMoveDataFrame(data=data_)
+        except Exception as e:
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_datetime_in_format_cyclical'
             self._last_operation_mem_usage = finish - init
             raise e
 
@@ -1138,115 +1183,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
-    def generate_datetime_in_format_cyclical(self, label_datetime=DATETIME, inplace=True):
-        """
-        Create or update column with cyclical datetime feature.
-
-        Parameters
-        ----------
-        label_datetime : String, optional, default 'datetime.
-            Represents column id type.
-
-        inplace : bool, optional, default True.
-            Represents whether the operation will be performed on the data provided or in a copy.
-
-        Returns
-        -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
-        
-        References
-        ----------
-        # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
-        # https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
-        """
-        start = time.time()
-        process = psutil.Process(os.getpid())
-        init = process.memory_info()[0]
-        
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
-
-        try:
-            print('Encoding cyclical continuous features - 24-hour time')
-            if label_datetime in self._data:
-                hours = data_[label_datetime].dt.hour
-                data_[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
-                data_[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
-                print('...hour_sin and  hour_cos features were created...\n')
-            
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_datetime_in_format_cyclical'
-            self._last_operation_mem_usage = finish - init
-
-            if inplace:
-                return None
-            return PandasMoveDataFrame(data=data_)
-        except Exception as e:
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_datetime_in_format_cyclical'
-            self._last_operation_mem_usage = finish - init
-            raise e
-
-    def generate_weekend_features(self, create_day_of_week=False, inplace=True):
-        """
-        Create or update the feature weekend to the dataframe, if this resource is set to 1 it indicates that the
-        given day is is the weekend, otherwise, it is a day of the week.
-
-        Parameters
-        ----------
-        create_day_of_week : bool, optional (False by default).
-            Indicates if the column day should be keeped in the dataframe. If set to False the column will be dropped.
-
-        inplace : bool, optional, default True.
-            Indicates whether the operation will be performed on the data provided or in a copy.
-
-        Returns
-        ----------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
-        """
-        start = time.time()
-        process = psutil.Process(os.getpid())
-        init = process.memory_info()[0]
-
-        try:
-            if inplace:
-                data_ = self._data
-            else:
-                data_ = self._data.copy()
-
-            self.generate_day_of_the_week_features()
-            print('Creating or updating a feature for weekend\n')
-            if 'day' in data_:
-                index_fds = data_[(data_[DAY] == 'Saturday') | (data_[DAY] == 'Sunday')].index
-                data_['weekend'] = 0
-                data_.at[index_fds, 'weekend'] = 1
-                print('...Weekend was set as 1 or 0...\n')
-                if ~create_day_of_week:
-                    print('...dropping colum day\n')
-                    del data_['day']
-
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_weekend_features'
-            self._last_operation_mem_usage = finish - init
-
-            if inplace:
-                return None
-            return PandasMoveDataFrame(data=data_)
-
-        except Exception as e:
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_weekend_features'
-            self._last_operation_mem_usage = finish - init
-            raise e
-
     def time_interval(self):
         """
         Get time difference between max and min datetime in trajectory data.
@@ -1266,6 +1202,42 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_name = 'time_interval'
         self._last_operation_mem_usage = 0
         return time_diff
+
+    def get_bbox(self):
+        """
+        A bounding box (usually shortened to bbox) is an area defined by two longitudes and two latitudes, where:
+            - Latitude is a decimal number between -90.0 and 90.0.
+            - Longitude is a decimal number between -180.0 and 180.0.
+        They usually follow the standard format of:
+        - bbox = left, bottom, right, top
+        - bbox = min Longitude , min Latitude , max Longitude , max Latitude
+        Parameters
+        ----------
+
+        Returns
+        -------
+        bbox_ : tuple
+            Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+
+        Examples
+        --------
+        (22.147577, 113.54884299999999, 41.132062, 121.156224)
+
+        """
+
+        try:
+            bbox_ = (self._data[LATITUDE].min(), self._data[LONGITUDE].min(), self._data[LATITUDE].max(),
+                     self._data[LONGITUDE].max())
+
+            self._last_operation_time_duration = 0
+            self._last_operation_name = 'get_bbox'
+            self._last_operation_mem_usage = 0
+            return bbox_
+        except Exception as e:
+            self._last_operation_time_duration = 0
+            self._last_operation_name = 'get_bbox'
+            self._last_operation_mem_usage = 0
+            raise e
 
     def plot_all_features(self, figsize=(21, 15), dtype=np.float64, return_fig=False, save_fig=False, name='features.png'):
         """
@@ -1390,7 +1362,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         move_data : pymove.core.MoveDataFrameAbstract subclass.
             Trajectory with the specified tid.
 
-        fig : matplotlib.pyplot.figure or None
+        fig : matplotlib.pyplot.figure or Nones
             The generated picture.
         """
 
@@ -1670,79 +1642,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = 0
         return _groupby
 
-    def drop_duplicates(self, subset=None, keep='first', inplace=False):
-        """Uses the pandas's function drop_duplicates, to remove duplicated rows from data.
-
-        Parameters
-        ----------
-        subset: int or str, optional (None by default)
-            Only consider certain columns for identifying duplicates, by default use all of the columns
-        keep: str, optional('first' by default)
-            - first : Drop duplicates except for the first occurrence.
-            - last : Drop duplicates except for the last occurrence.
-            - False : Drop all duplicates.
-        Inplace: bool, optional(False by default)
-            Whether to drop duplicates in place or to return a copy
-
-        Returns
-        --------
-        PandasMoveDataFrame or None
-            Object with duplicated rows or None if ``inplace=True``.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html
-        """
-
-        _drop_duplicates = self._data.drop_duplicates(subset, keep, inplace)
-
-        self._last_operation_time_duration = 0
-        self._last_operation_name = 'drop_duplicates'
-        self._last_operation_mem_usage = 0
-        
-        if inplace:
-            return None
-        return PandasMoveDataFrame(data=_drop_duplicates)
-
-    def reset_index(self, level=None, drop=False, inplace=False, col_level=0, col_fill=''):
-        """Resets the DataFrame's index, and use the default one.
-        One or more levels can be removed, if the DataFrame has a MultiIndex.
-
-        Parameters
-        ----------
-        level: int, str, tuple, or list. Optional (None by default)
-            Only the levels specify will be removed from the index. If set to None, all levels are removed.
-        drop: boolean, optional (False by default)
-            Do not try to insert index into dataframe columns. This resets the index to the default integer index.
-        inplace: bool, optional(False by default)
-            Modify the DataFrame in place (do not create a new object).
-        col_level: int or str, default 0
-            If the columns have multiple levels, determines which level the labels are inserted into.
-            By default it is inserted into the first level..
-        col_fill: object, default ‘’
-            If the columns have multiple levels, determines how the other levels are named.
-            If None then the index name is repeated.
-
-        Returns
-        -------
-        PandasMoveDataFrame or None
-            Object with a new index or None if ``inplace=True``.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html
-        """
-
-        _reset_index = self._data.reset_index(level, drop, inplace, col_level, col_fill)
-
-        self._last_operation_time_duration = 0
-        self._last_operation_name = 'reset_index'
-        self._last_operation_mem_usage = 0
-
-        if inplace:
-            return None
-        return PandasMoveDataFrame(data=_reset_index)
-
     def plot(self, *args, **kwargs):
         """Makes a plot of _data.
 
@@ -1808,6 +1707,43 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = 0
 
         return _select_dtypes
+    
+    def astype(self, dtype, copy=True, errors='raise', **kwargs):
+        """Cast a pandas object to a specified dtype.
+
+        Parameters
+        ----------
+        dtype: data type, or dict of column name -> data type
+            Use a numpy.dtype or Python type to cast entire pandas object to the same type. Alternatively,
+            use {col: dtype, …}, where col is a column label and dtype is a numpy.dtype or Python type to
+            cast one or more of the DataFrame’s columns to column-specific types.
+        copy: bool, optional(True by default)
+            Return a copy when copy=True (be very careful setting copy=False as changes to values then
+            may propagate to other pandas objects).
+        errors: str, optional('raise' by default), options: 'raise', 'ignore'
+            Control raising of exceptions on invalid data for provided dtype.
+            - raise : allow exceptions to be raised
+            - ignore : suppress exceptions. On error return original object
+        kwargs:
+             keyword arguments to pass on to the constructor
+
+        Returns
+        -------
+        DataFrame:
+            Casted _data to specified type.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html
+        """
+
+        _astype = self._data.astype(dtype, copy, errors, **kwargs)
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'astype'
+        self._last_operation_mem_usage = 0
+
+        return _astype
 
     def sort_values(self, by, axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last'):
         """Sorts the values of the _data, along an axis.
@@ -1852,42 +1788,44 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             return None
         return PandasMoveDataFrame(data=_sort_values)
 
-    def astype(self, dtype, copy=True, errors='raise', **kwargs):
-        """Cast a pandas object to a specified dtype.
+    def reset_index(self, level=None, drop=False, inplace=False, col_level=0, col_fill=''):
+        """Resets the DataFrame's index, and use the default one.
+        One or more levels can be removed, if the DataFrame has a MultiIndex.
 
         Parameters
         ----------
-        dtype: data type, or dict of column name -> data type
-            Use a numpy.dtype or Python type to cast entire pandas object to the same type. Alternatively,
-            use {col: dtype, …}, where col is a column label and dtype is a numpy.dtype or Python type to
-            cast one or more of the DataFrame’s columns to column-specific types.
-        copy: bool, optional(True by default)
-            Return a copy when copy=True (be very careful setting copy=False as changes to values then
-            may propagate to other pandas objects).
-        errors: str, optional('raise' by default), options: 'raise', 'ignore'
-            Control raising of exceptions on invalid data for provided dtype.
-            - raise : allow exceptions to be raised
-            - ignore : suppress exceptions. On error return original object
-        kwargs:
-             keyword arguments to pass on to the constructor
+        level: int, str, tuple, or list. Optional (None by default)
+            Only the levels specify will be removed from the index. If set to None, all levels are removed.
+        drop: boolean, optional (False by default)
+            Do not try to insert index into dataframe columns. This resets the index to the default integer index.
+        inplace: bool, optional(False by default)
+            Modify the DataFrame in place (do not create a new object).
+        col_level: int or str, default 0
+            If the columns have multiple levels, determines which level the labels are inserted into.
+            By default it is inserted into the first level..
+        col_fill: object, default ‘’
+            If the columns have multiple levels, determines how the other levels are named.
+            If None then the index name is repeated.
 
         Returns
         -------
-        DataFrame:
-            Casted _data to specified type.
+        PandasMoveDataFrame or None
+            Object with a new index or None if ``inplace=True``.
 
         References
         ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html
         """
 
-        _astype = self._data.astype(dtype, copy, errors, **kwargs)
+        _reset_index = self._data.reset_index(level, drop, inplace, col_level, col_fill)
 
         self._last_operation_time_duration = 0
-        self._last_operation_name = 'astype'
+        self._last_operation_name = 'reset_index'
         self._last_operation_mem_usage = 0
 
-        return _astype
+        if inplace:
+            return None
+        return PandasMoveDataFrame(data=_reset_index)
 
     def set_index(self, keys, drop=True, append=False, inplace=False, verify_integrity=False):
         """Set the DataFrame index (row labels) using one or more existing columns or arrays (of the correct length).
@@ -1998,6 +1936,40 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = 0
 
         return _duplicated
+
+    def drop_duplicates(self, subset=None, keep='first', inplace=False):
+        """Uses the pandas's function drop_duplicates, to remove duplicated rows from data.
+
+        Parameters
+        ----------
+        subset: int or str, optional (None by default)
+            Only consider certain columns for identifying duplicates, by default use all of the columns
+        keep: str, optional('first' by default)
+            - first : Drop duplicates except for the first occurrence.
+            - last : Drop duplicates except for the last occurrence.
+            - False : Drop all duplicates.
+        Inplace: bool, optional(False by default)
+            Whether to drop duplicates in place or to return a copy
+
+        Returns
+        --------
+        PandasMoveDataFrame or None
+            Object with duplicated rows or None if ``inplace=True``.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html
+        """
+
+        _drop_duplicates = self._data.drop_duplicates(subset, keep, inplace)
+
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'drop_duplicates'
+        self._last_operation_mem_usage = 0
+        
+        if inplace:
+            return None
+        return PandasMoveDataFrame(data=_drop_duplicates)
 
     def shift(self, periods=1, freq=None, axis=0, fill_value=None):
         """Shift index by desired number of periods with an optional time freq.
@@ -2444,6 +2416,34 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return _nunique
 
+    def write_file(self, file_name, separator=','):
+        """
+        Write trajectory data to a new file.
+
+        Parameters
+        ----------
+        file_name : String.
+            Represents the filename.
+
+        separator : String, optional, default ','.
+            Represents the informations separator in a new file.
+
+        Returns
+        -------
+
+        """
+        process = psutil.Process(os.getpid())
+        init = process.memory_info()[0]
+
+        start = time.time()
+
+        self._data.to_csv(file_name, sep=separator, encoding='utf-8', index=False)
+
+        finish = process.memory_info()[0]
+        self._last_operation_time_duration = time.time() - start
+        self._last_operation_name = 'write_file'
+        self._last_operation_mem_usage = finish - init
+
     def to_csv(self, file_name, sep=',', index=True, encoding=None):
         """Write object to a comma-separated values (csv) file.
 
@@ -2675,6 +2675,56 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             raise AttributeError("The MoveDataFrame does not contain the column '%s.'" % DATETIME)
         return self[DATETIME]
 
+    @property
+    def loc(self):
+        raise NotImplementedError("To be implemented")
+    
+    @property
+    def iloc(self):
+        raise NotImplementedError("To be implemented")
+    
+    @property
+    def at(self):
+        raise NotImplementedError("To be implemented")
+
+    @property
+    def values(self):
+        raise NotImplementedError("To be implemented")
+    
+    @property
+    def columns(self):
+        raise NotImplementedError("To be implemented")
+    
+    @property
+    def index(self):
+        raise NotImplementedError("To be implemented")
+    
+    @property
+    def dtypes(self):
+        raise NotImplementedError("To be implemented")
+    
+    @property
+    def shape(self):
+        raise NotImplementedError("To be implemented")
+
+    def len(self):
+        """
+        Returns the length/row numbers in trajectory data.
+
+        Parameters
+        ---------
+
+        Returns
+        -------
+        int
+            Represents the trajectory data length.
+
+        """
+        raise NotImplementedError("To be implemented")
+
+    def unique(self):
+        raise NotImplementedError("To be implemented")
+
     def head(self, n=5, npartitions=1, compute=True):
         """
         Return the first n rows.
@@ -2701,103 +2751,6 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
         return self._data.head(n, npartitions, compute)
 
-    def min(self, axis=None, skipna=True, split_every=False, out=None):
-        """Return the minimum of the values for the requested axis..
-
-        Parameters
-        ----------
-        axis: int, None by default, {index (0), columns (1)}.
-            Axis for the function to be applied on.
-        skipna: bool, optional, default None.
-            Exclude NA/null values when computing the result.
-        split_every:
-        out:
-
-        Returns
-        -------
-        max:Series or DataFrame (if level specified)
-            The minimum values for the request axis.
-
-        References
-        ----------
-        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.min
-        """
-        return self._data.min(axis, skipna, split_every, out)
-
-    def max(self, axis=None, skipna=True, split_every=False, out=None):
-        """Return the maximum of the values for the requested axis..
-
-        Parameters
-        ----------
-        axis: int, None by default, {index (0), columns (1)}.
-            Axis for the function to be applied on.
-        skipna: bool, optional, default None.
-            Exclude NA/null values when computing the result.
-        split_every:
-        out:
-
-        Returns
-        -------
-        max:Series or DataFrame (if level specified)
-            The maximum values for the request axis.
-
-        References
-        ----------
-        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.max
-        """
-        return self._data.max(axis, skipna, split_every, out)
-
-    def groupby(self, by=None, **kwargs):
-        """Groups dask DataFrame using a mapper or by a Series of columns.
-
-        Parameters
-        ----------
-        by : mapping, function, label, or list of labels, optional(None by default)
-            Used to determine the groups for the groupby.
-        **kwargs
-            Optional, only accepts keyword argument ‘mutated’ and is passed to groupby.
-
-        Returns
-        -------
-        DataFrameGroupBy:
-            Returns groupby object that contains information about the groups.
-
-        References
-        ----------
-        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.groupby
-        """
-
-        return self._data.groupby(by)
-
-    def convert_to(self, new_type):
-        """Convert an object from one type to another specified by the user.
-
-        Parameters
-        ----------
-        new_type: str
-            The type for which the object will be converted.
-
-        Returns
-        -------
-        A subclass of MoveDataFrameAbstractModel
-            The converted object.
-        """
-
-        if (new_type == "dask"):
-            return self
-        elif (new_type == "pandas"):
-            df_pandas = self._data.compute()
-            return PandasMoveDataFrame(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
-
-    def get_type(self):
-        """Returns the type of the object.
-
-        Returns
-        -------
-        A string representing the type of the object.
-        """
-        return self._type
-
     def get_users_number(self):
         """
         Check and return number of users in trajectory data.
@@ -2813,21 +2766,6 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
         raise NotImplementedError("To be implemented")
 
-    def time_interval(self):
-        """
-        Get time difference between max and min datetime in trajectory data.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        datetime64
-            Represents the time difference.
-
-        """
-        raise NotImplementedError("To be implemented")
-
     def to_numpy(self):
         """
         Converts trajectory data to numpy array format.
@@ -2839,34 +2777,6 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
         np.array
             Represents the trajectory in numpy array format.
-
-        """
-        raise NotImplementedError("To be implemented")
-
-    def write_file(self):
-        """
-        Write trajectory data to a new file.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        """
-        raise NotImplementedError("To be implemented")
-
-    def len(self):
-        """
-        Returns the length/row numbers in trajectory data.
-
-        Parameters
-        ---------
-
-        Returns
-        -------
-        int
-            Represents the trajectory data length.
 
         """
         raise NotImplementedError("To be implemented")
@@ -2899,6 +2809,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Represents the trajectory in grid format.
 
         """
+        raise NotImplementedError("To be implemented")
+
+    def to_DataFrame(self):
         raise NotImplementedError("To be implemented")
 
     def generate_tid_based_on_id_datatime(self):
@@ -2953,6 +2866,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
         raise NotImplementedError("To be implemented")
 
+    def generate_weekend_features(self):
+
+        raise NotImplementedError("To be implemented")
+
     def generate_time_of_day_features(self):
         """
         Create a feature time of day or period from datatime.
@@ -2971,6 +2888,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         - datetime4 = 2019-04-28 20:00:56 -> period = evening
 
         """
+        raise NotImplementedError("To be implemented")
+
+    def generate_datetime_in_format_cyclical(self):
+
         raise NotImplementedError("To be implemented")
 
     def generate_dist_features(self):
@@ -3008,14 +2929,6 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
 
         """
-        raise NotImplementedError("To be implemented")
-
-    def generate_datetime_in_format_cyclical(self):
-
-        raise NotImplementedError("To be implemented")
-
-    def generate_weekend_features(self):
-
         raise NotImplementedError("To be implemented")
 
     def time_interval(self):
@@ -3078,32 +2991,96 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         # Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box.
         raise NotImplementedError("To be implemented")
 
+    def min(self, axis=None, skipna=True, split_every=False, out=None):
+        """Return the minimum of the values for the requested axis..
+
+        Parameters
+        ----------
+        axis: int, None by default, {index (0), columns (1)}.
+            Axis for the function to be applied on.
+        skipna: bool, optional, default None.
+            Exclude NA/null values when computing the result.
+        split_every:
+        out:
+
+        Returns
+        -------
+        max:Series or DataFrame (if level specified)
+            The minimum values for the request axis.
+
+        References
+        ----------
+        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.min
+        """
+        return self._data.min(axis, skipna, split_every, out)
+
+    def max(self, axis=None, skipna=True, split_every=False, out=None):
+        """Return the maximum of the values for the requested axis..
+
+        Parameters
+        ----------
+        axis: int, None by default, {index (0), columns (1)}.
+            Axis for the function to be applied on.
+        skipna: bool, optional, default None.
+            Exclude NA/null values when computing the result.
+        split_every:
+        out:
+
+        Returns
+        -------
+        max:Series or DataFrame (if level specified)
+            The maximum values for the request axis.
+
+        References
+        ----------
+        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.max
+        """
+        return self._data.max(axis, skipna, split_every, out)
+
     def count(self):
         # CountS the non-NA cells for each column or row.
         raise NotImplementedError("To be implemented")
 
-    def reset_index(self):
-        # Resets the dask DataFrame's index, and use the default one.
-        raise NotImplementedError("To be implemented")
+    def groupby(self, by=None, **kwargs):
+        """Groups dask DataFrame using a mapper or by a Series of columns.
+
+        Parameters
+        ----------
+        by : mapping, function, label, or list of labels, optional(None by default)
+            Used to determine the groups for the groupby.
+        **kwargs
+            Optional, only accepts keyword argument ‘mutated’ and is passed to groupby.
+
+        Returns
+        -------
+        DataFrameGroupBy:
+            Returns groupby object that contains information about the groups.
+
+        References
+        ----------
+        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.groupby
+        """
+
+        return self._data.groupby(by)
 
     def plot(self):
         # Plot the data of the dask DataFrame.
-        raise NotImplementedError("To be implemented")
-
-    def drop_duplicates(self):
-        # Removes duplicated rows from the data.
         raise NotImplementedError("To be implemented")
 
     def select_dtypes(self):
         # Returns a subset of the dask DataFrame columns based on the column dtypes.
         raise NotImplementedError("To be implemented")
 
+    def astype(self):
+        # Casts a dask object to a specified dtype.
+        raise NotImplementedError("To be implemented")
+
     def sort_values(self):
         # Sorts the values of the dask DataFrame.
         raise NotImplementedError("To be implemented")
 
-    def astype(self):
-        # Casts a dask object to a specified dtype.
+    def reset_index(self):
+        # Resets the dask DataFrame's index, and use the default one.
         raise NotImplementedError("To be implemented")
 
     def set_index(self):
@@ -3116,6 +3093,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def duplicated(self):
         # Returns boolean Series denoting duplicate rows, optionally only considering certain columns.
+        raise NotImplementedError("To be implemented")
+
+    def drop_duplicates(self):
+        # Removes duplicated rows from the data.
         raise NotImplementedError("To be implemented")
 
     def shift(self):
@@ -3165,18 +3146,51 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         # Count distinct observations over requested axis.
         raise NotImplementedError("To be implemented")
 
+    def write_file(self):
+        """
+        Write trajectory data to a new file.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
+        raise NotImplementedError("To be implemented")
+
     def to_csv(self):
         # Write object to a comma-separated values (csv) file.
         raise NotImplementedError("To be implemented")
 
-    def at(self):
-        raise NotImplementedError("To be implemented")
+    def convert_to(self, new_type):
+        """Convert an object from one type to another specified by the user.
 
-    def to_DataFrame(self):
-        raise NotImplementedError("To be implemented")
+        Parameters
+        ----------
+        new_type: str
+            The type for which the object will be converted.
 
-    def unique(self, values):
-        raise NotImplementedError("To be implemented")
+        Returns
+        -------
+        A subclass of MoveDataFrameAbstractModel
+            The converted object.
+        """
+
+        if (new_type == "dask"):
+            return self
+        elif (new_type == "pandas"):
+            df_pandas = self._data.compute()
+            return PandasMoveDataFrame(df_pandas, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
+
+    def get_type(self):
+        """Returns the type of the object.
+
+        Returns
+        -------
+        A string representing the type of the object.
+        """
+        return self._type
 
     def last_operation_time(self):
         """Returns the execution time of the last function, called to the PandasMoveDataFrame object.
