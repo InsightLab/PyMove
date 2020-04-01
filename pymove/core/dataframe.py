@@ -752,18 +752,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         try:
             if inplace:
+                self.generate_day_of_the_week_features(inplace=inplace)
                 data_ = self._data
             else:
-                data_ = self._data.copy()
+                df = self.generate_day_of_the_week_features(inplace=inplace)
+                data_ = df._data
 
-            self.generate_day_of_the_week_features()
             print('Creating or updating a feature for weekend\n')
             if 'day' in data_:
                 index_fds = data_[(data_[DAY] == 'Saturday') | (data_[DAY] == 'Sunday')].index
                 data_['weekend'] = 0
                 data_.at[index_fds, 'weekend'] = 1
                 print('...Weekend was set as 1 or 0...\n')
-                if ~create_day_of_week:
+                if not create_day_of_week:
                     print('...dropping colum day\n')
                     del data_['day']
 
