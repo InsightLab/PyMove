@@ -88,6 +88,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
+        
+        Raises
+        ------
+            AttributeError if the data doesn't contains one of the columns LATITUDE, LONGITUDE, DATETIME
 
         """
         if isinstance(data, dict):
@@ -1373,6 +1377,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         fig : matplotlib.pyplot.figure or Nones
             The generated picture.
+
+        Raises
+        ------
+        KeyError if the dataframe does not contains the TID feature
+        IndexError if there is no trajectory with the tid passed
         """
 
         start = time.time()
@@ -1382,12 +1391,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         fig = plt.figure(figsize=figsize)
 
         if TID not in self._data:
-            raise KeyError('TID feature not in dataframe')
+            raise KeyError("TID feature not in dataframe")
 
         df_ = self._data[self._data[TID] == tid]
         
         if not len(df_):
-            raise IndexError('Trajectory id not in dataframe')
+            raise IndexError(f"No trajectory with tid {tid} in dataframe")
 
         plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)  # start point
         plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)  # end point
@@ -2599,6 +2608,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         # formatar os labels que foram return 0ados pro que usado no pymove -> format_labels
         # renomeia as colunas do dado return 0ado pelo novo dict
         # cria o dataframe
+        # AttributeError if the data doesn't contains one of the columns LATITUDE, LONGITUDE, DATETIME
         mapping_columns = format_labels(data, traj_id, latitude, longitude, datetime)
         dsk = data.rename(columns=mapping_columns)
 
