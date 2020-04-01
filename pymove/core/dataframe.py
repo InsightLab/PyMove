@@ -2677,34 +2677,42 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def loc(self):
+        # Access a group of rows and columns by label(s) or a boolean array.
         raise NotImplementedError("To be implemented")
     
     @property
     def iloc(self):
+        # Purely integer-location based indexing for selection by position.
         raise NotImplementedError("To be implemented")
     
     @property
     def at(self):
+        # Access a single value for a row/column label pair.
         raise NotImplementedError("To be implemented")
 
     @property
     def values(self):
+        # Return a Numpy representation of the DataFrame.
         raise NotImplementedError("To be implemented")
     
     @property
     def columns(self):
+        # The column labels of the DataFrame.
         raise NotImplementedError("To be implemented")
     
     @property
     def index(self):
+        # The index (row labels) of the DataFrame.
         raise NotImplementedError("To be implemented")
     
     @property
     def dtypes(self):
+        # Return the dtypes in the DataFrame.
         raise NotImplementedError("To be implemented")
     
     @property
     def shape(self):
+        # Return a tuple representing the dimensionality of the DataFrame.
         raise NotImplementedError("To be implemented")
 
     def len(self):
@@ -2723,6 +2731,13 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         raise NotImplementedError("To be implemented")
 
     def unique(self):
+        """
+        Return unique values of Series object. Uniques are returned in order of appearance. Hash table-based unique,
+        therefore does NOT sort.
+
+        Returns
+        -------
+        """
         raise NotImplementedError("To be implemented")
 
     def head(self, n=5, npartitions=1, compute=True):
@@ -2812,7 +2827,22 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         raise NotImplementedError("To be implemented")
 
     def to_DataFrame(self):
-        raise NotImplementedError("To be implemented")
+        """
+        Converts trajectory data to DataFrame format.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        dask.dataframe.DataFrame
+            Represents the trajectory in DataFrame format.
+
+        """
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'to_DataFrame'
+        self._last_operation_mem_usage = 0
+        return self._data
 
     def generate_tid_based_on_id_datatime(self):
         """
@@ -2867,7 +2897,16 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         raise NotImplementedError("To be implemented")
 
     def generate_weekend_features(self):
+        """
+        Create or update the feature weekend to the dataframe, if this resource is set to 1 it indicates that the
+        given day is is the weekend, otherwise, it is a day of the week.
 
+        Parameters
+        ----------
+        
+        Returns
+        ----------
+        """
         raise NotImplementedError("To be implemented")
 
     def generate_time_of_day_features(self):
@@ -2891,10 +2930,39 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         raise NotImplementedError("To be implemented")
 
     def generate_datetime_in_format_cyclical(self):
+        """
+        Create or update column with cyclical datetime feature.
 
+        Parameters
+        ----------
+        
+        Returns
+        -------
+        
+        References
+        ----------
+        # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+        # https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
+        """
         raise NotImplementedError("To be implemented")
 
     def generate_dist_features(self):
+        """
+        Create the three distance in meters to an GPS point P (lat, lon).
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        Examples
+        --------
+        Example:    P to P.next = 2 meters
+                    P to P.previous = 1 meter
+                    P.previous to P.next = 1 meters
+
+        """
         raise NotImplementedError("To be implemented")
 
     def generate_dist_time_speed_features(self):
