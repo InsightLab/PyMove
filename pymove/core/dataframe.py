@@ -1267,7 +1267,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = 0
         return time_diff
 
-    def plot_all_features(self, figsize=(21, 15), dtype=np.float64, save_fig=True, name='features.png'):
+    def plot_all_features(self, figsize=(21, 15), dtype=np.float64, return_fig=False, save_fig=False, name='features.png'):
         """
         Generate a visualization for each columns that type is equal dtype.
 
@@ -1279,7 +1279,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         dtype : type, optional, default np.float64.
             Represents column type.
 
-        save_fig : bool, optional, default True.
+        return_fig : bool, optional, default False.
+            Represents whether or not to save the generated picture.
+
+        save_fig : bool, optional, default False.
             Represents whether or not to save the generated picture.
 
         name : String, optional, default 'features.png'.
@@ -1287,7 +1290,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-
+        fig : matplotlib.pyplot.figure or None
+            The generated picture.
         """
         start = time.time()
         process = psutil.Process(os.getpid())
@@ -1311,6 +1315,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_time_duration = time.time() - start
             self._last_operation_name = 'plot_all_features'
             self._last_operation_mem_usage = finish - init
+            
+            if return_fig:
+                return fig
         except Exception as e:
             finish = process.memory_info()[0]
             self._last_operation_time_duration = time.time() - start
@@ -1318,23 +1325,32 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
-    def plot_trajs(self, figsize=(10, 10), return_fig=True, markers='o', markersize=20):
+    def plot_trajs(self, figsize=(10, 10), markers='o', markersize=20, return_fig=True, save_fig=False, name='trajectories.png'):
         """Generate a visualization that show trajectories.
 
         Parameters
         ----------
         figsize : tuple, optional, default (10, 10).
             Represents dimensions of figure.
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
+
         markers : String, optional, default 'o'.
             Represents visualization type marker.
+
         markersize : int, optional, default 20.
             Represents visualization size marker.
 
+        return_fig : bool, optional, default False.
+            Represents whether or not to save the generated picture.
+
+        save_fig : bool, optional, default False.
+            Represents whether or not to save the generated picture.
+
+        name : String, optional, default 'features.png'.
+            Represents name of a file.
+
         Returns
         -------
-        fig : matplotlib.pyplot.figure
+        fig : matplotlib.pyplot.figure or None
             The generated picture.
         """
 
@@ -1347,21 +1363,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ids = self._data["id"].unique()
         for id_ in ids:
             selfid = self._data[self._data["id"] == id_]
-
             plt.plot(selfid[LONGITUDE], selfid[LATITUDE], markers, markersize=markersize)
 
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'plot_trajs'
-            self._last_operation_mem_usage = finish - init
+        if save_fig:
+            plt.savefig(fname=name, fig=fig)
+
+        finish = process.memory_info()[0]
+        self._last_operation_time_duration = time.time() - start
+        self._last_operation_name = 'plot_trajs'
+        self._last_operation_mem_usage = finish - init
         if return_fig:
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'plot_trajs'
-            self._last_operation_mem_usage = finish - init
             return fig
 
-    def plot_traj_id(self, tid, figsize=(10, 10)):
+    def plot_traj_id(self, tid, figsize=(10, 10), return_fig=True, save_fig=False, name=None):
         """Generate a visualization that shows a trajectory with the specified tid.
 
         Parameters
@@ -1376,7 +1390,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         move_data : pymove.core.MoveDataFrameAbstract subclass.
             Trajectory with the specified tid.
 
-        fig : matplotlib.pyplot.figure
+        fig : matplotlib.pyplot.figure or None
             The generated picture.
         """
 
@@ -1387,9 +1401,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         fig = plt.figure(figsize=figsize)
 
         if TID not in self._data:
-            self.generate_tid_based_on_id_datatime()
+            raise KeyError('TID feature not in dataframe')
 
         df_ = self._data[self._data[TID] == tid]
+        
+        if not len(df_):
+            raise IndexError('Trajectory id not in dataframe')
 
         plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)  # start point
         plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)  # end point
@@ -1406,11 +1423,20 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], 'go', markersize=10)  # nodes
             plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE], 'r.', markersize=8)  # points
 
+        if save_fig:
+            if not name:
+                name = f'trajectory_{tid}.png'
+            plt.savefig(fname=name, fig=fig)
+
         finish = process.memory_info()[0]
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'plot_traj_id'
         self._last_operation_mem_usage = finish - init
-        return df_, fig
+        
+        df_ = PandasMoveDataFrame(df_)
+        if return_fig:
+            return df_, fig
+        return df_
 
     def show_trajectories_info(self):
         """
