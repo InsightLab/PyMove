@@ -815,14 +815,22 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_ = self._data.copy()
 
         try:
-            print('\nCreating or updating period feature\n...early morning from 0H to 6H\n... \
-            morning from 6H to 12H\n...afternoon from 12H to 18H\n...evening from 18H to 24H')
+            periods = [
+                '\n'
+                'Creating or updating period feature',
+                '...Early morning from 0H to 6H',
+                '...Morning from 6H to 12H',
+                '...Afternoon from 12H to 18H',
+                '...Evening from 18H to 24H'
+                '\n'
+            ]
+            print('\n'.join(periods))
 
             conditions = [(data_[DATETIME].dt.hour >= 0) & (data_[DATETIME].dt.hour < 6),
                           (data_[DATETIME].dt.hour >= 6) & (data_[DATETIME].dt.hour < 12),
                           (data_[DATETIME].dt.hour >= 12) & (data_[DATETIME].dt.hour < 18),
                           (data_[DATETIME].dt.hour >= 18) & (data_[DATETIME].dt.hour < 24)]
-            choices = ['early morning', 'morning', 'afternoon', 'evening']
+            choices = ['Early morning', 'Morning', 'Afternoon', 'Evening']
             data_[PERIOD] = np.select(conditions, choices, 'undefined')
             print('...the period of day feature was created')
 
@@ -1165,8 +1173,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             conditions = (data_[target_label] > radius), (data_[target_label] <= radius)
             choices = ['move', 'stop']
 
-            data_["situation"] = np.select(conditions, choices, np.nan)
-            print('\n....There are {} stops to this parameters\n'.format(data_[data_["situation"] == 'stop'].shape[0]))
+            data_['situation'] = np.select(conditions, choices, np.nan)
+            print('\n....There are {} stops to this parameters\n'.format(data_[data_['situation'] == 'stop'].shape[0]))
 
             finish = process.memory_info()[0]
             self._last_operation_time_duration = time.time() - start
@@ -1332,9 +1340,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         fig = plt.figure(figsize=figsize)
 
-        ids = self._data["id"].unique()
+        ids = self._data['id'].unique()
         for id_ in ids:
-            selfid = self._data[self._data["id"] == id_]
+            selfid = self._data[self._data['id'] == id_]
             plt.plot(selfid[LONGITUDE], selfid[LATITUDE], markers, markersize=markersize)
 
         if save_fig:
