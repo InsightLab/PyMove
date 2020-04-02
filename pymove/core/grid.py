@@ -49,7 +49,7 @@ class Grid():
 
         """
         
-        """bbox: a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude."""
+        # bbox: a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
         bbox = data.get_bbox()
         print('\nCreating a virtual grid without polygons')
     
