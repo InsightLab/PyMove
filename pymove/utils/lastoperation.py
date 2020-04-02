@@ -69,10 +69,10 @@ class LastOperation():
 
         switcher = {
             'B': self._last_operation_mem_usage,
-            'KB': self._last_operation_mem_usage / 1000,
-            'MB': self._last_operation_mem_usage / (1000 ** 2),
-            'GB': self._last_operation_mem_usage / (1000 ** 3),
-            'TB': self._last_operation_mem_usage / (1000 ** 4),
+            'KB': self._last_operation_mem_usage / 1024,
+            'MB': self._last_operation_mem_usage / (1024 ** 2),
+            'GB': self._last_operation_mem_usage / (1024 ** 3),
+            'TB': self._last_operation_mem_usage / (1024 ** 4),
         }
 
         if not format:
