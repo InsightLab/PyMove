@@ -1252,7 +1252,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = 0
             raise e
 
-    def plot_all_features(self, figsize=(21, 15), dtype=np.float64, return_fig=False, save_fig=False, name='features.png'):
+    def plot_all_features(self, dtype=np.float64, figsize=(21, 15), return_fig=True, save_fig=False, name='features.png'):
         """
         Generate a visualization for each columns that type is equal dtype.
 
@@ -1264,7 +1264,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         dtype : type, optional, default np.float64.
             Represents column type.
 
-        return_fig : bool, optional, default False.
+        return_fig : bool, optional, default True.
             Represents whether or not to save the generated picture.
 
         save_fig : bool, optional, default False.
@@ -1310,7 +1310,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._last_operation_mem_usage = finish - init
             raise e
 
-    def plot_trajs(self, figsize=(10, 10), markers='o', markersize=20, return_fig=True, save_fig=False, name='trajectories.png'):
+    def plot_trajs(self, markers='o', markersize=20, figsize=(10, 10), return_fig=True, save_fig=False, name='trajectories.png'):
         """Generate a visualization that show trajectories.
 
         Parameters
@@ -1324,13 +1324,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         markersize : int, optional, default 20.
             Represents visualization size marker.
 
-        return_fig : bool, optional, default False.
+        return_fig : bool, optional, default True.
             Represents whether or not to save the generated picture.
 
         save_fig : bool, optional, default False.
             Represents whether or not to save the generated picture.
 
-        name : String, optional, default 'features.png'.
+        name : String, optional, default 'trajectories.png'.
             Represents name of a file.
 
         Returns
@@ -1360,22 +1360,37 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if return_fig:
             return fig
 
-    def plot_traj_id(self, tid, figsize=(10, 10), return_fig=True, save_fig=False, name=None):
+    def plot_traj_id(self, tid, highlight=None, figsize=(10, 10), return_fig=True, save_fig=False, name=None):
         """Generate a visualization that shows a trajectory with the specified tid.
 
         Parameters
         ----------
         tid : String.
             Represents the trajectory tid.
+
+        highlight: String, optional, default None.
+            Name of the feature to highlight on plot. 
+            If value of feature is 1, it will be highlighted as green marker 
+
         figsize : tuple, optional, default (10,10).
             Represents dimensions of figure.
+
+        return_fig : bool, optional, default True.
+            Represents whether or not to save the generated picture.
+
+        save_fig : bool, optional, default False.
+            Represents whether or not to save the generated picture.
+
+        name : String, optional, default None.
+            Represents name of a file.
+
 
         Returns
         -------
         move_data : pymove.core.MoveDataFrameAbstract subclass.
             Trajectory with the specified tid.
 
-        fig : matplotlib.pyplot.figure or Nones
+        fig : matplotlib.pyplot.figure or None
             The generated picture.
 
         Raises
@@ -1388,8 +1403,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         process = psutil.Process(os.getpid())
         init = process.memory_info()[0]
 
-        fig = plt.figure(figsize=figsize)
-
         if TID not in self._data:
             raise KeyError("TID feature not in dataframe")
 
@@ -1397,15 +1410,17 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         
         if not len(df_):
             raise IndexError(f"No trajectory with tid {tid} in dataframe")
+        
+        fig = plt.figure(figsize=figsize)
 
         plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)  # start point
         plt.plot(df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=20)  # end point
 
-        if 'isNode' not in self:
+        if (not highlight) or (highlight not in df_):
             plt.plot(df_[LONGITUDE], df_[LATITUDE])
             plt.plot(df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], 'r.', markersize=8)  # points
         else:
-            filter_ = df_['isNode'] == 1
+            filter_ = df_[highlight] == 1
             selfnodes = df_.loc[filter_]
             selfpoints = df_.loc[~filter_]
             plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], linewidth=3)
@@ -1422,7 +1437,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_time_duration = time.time() - start
         self._last_operation_name = 'plot_traj_id'
         self._last_operation_mem_usage = finish - init
-        
+
         df_ = PandasMoveDataFrame(df_)
         if return_fig:
             return df_, fig

@@ -4,15 +4,24 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from shapely.geometry import Polygon
-from tqdm import tqdm_notebook as tqdm
+from tqdm import tqdm
 from pymove.utils.conversions import lat_meters
-from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, TID, INDEX_GRID_LON, INDEX_GRID_LAT, POLYGON
+from pymove.utils.constants import (
+    LATITUDE,
+    LONGITUDE,
+    DATETIME,
+    TRAJ_ID,
+    TID,
+    INDEX_GRID_LON,
+    INDEX_GRID_LAT,
+    POLYGON
+)
 
 
 class Grid():
     def __init__(self, data, cell_size, meters_by_degree = lat_meters(-3.8162973555)):
         self._create_virtual_grid(data, cell_size, meters_by_degree)
-       
+
     def get_grid(self):
         return {
             "lon_min_x": self.lon_min_x,
@@ -134,11 +143,12 @@ class Grid():
         
         lat_init = self.lat_min_y + self.cell_size_by_degree * index_grid_lat
         lon_init = self.lon_min_x + self.cell_size_by_degree * index_grid_lon
-        polygon = Polygon(((lat_init, lon_init),
+        polygon = Polygon((
+            (lat_init, lon_init),
             (lat_init + self.cell_size_by_degree, lon_init),
             (lat_init + self.cell_size_by_degree, lon_init + self.cell_size_by_degree),
             (lat_init, lon_init + self.cell_size_by_degree)
-            ))
+        ))
         return polygon
 
     def create_all_polygons_on_grid(self):
@@ -151,18 +161,19 @@ class Grid():
         """
         # Cria o vetor vazio de gometrias da grid
         try:
-            print('\nCreating all polygons on virtual grid')
+            print('\nCreating all polygons on virtual grid', flush=True)
             grid_polygon = np.array([[None for i in range(self.grid_size_lon_x)] for j in range(self.grid_size_lat_y)])
             lat_init = self.lat_min_y
             for i in tqdm(range(self.grid_size_lat_y)):
                 lon_init = self.lon_min_x
                 for j in range(self.grid_size_lon_x):
                     # Cria o polygon da célula
-                    grid_polygon[i][j] = Polygon(((lat_init, lon_init),
-                                                (lat_init + self.cell_size_by_degree, lon_init),
-                                                (lat_init + self.cell_size_by_degree, lon_init + self.cell_size_by_degree),
-                                                (lat_init, lon_init + self.cell_size_by_degree)
-                                                ))
+                    grid_polygon[i][j] = Polygon((
+                        (lat_init, lon_init),
+                        (lat_init + self.cell_size_by_degree, lon_init),
+                        (lat_init + self.cell_size_by_degree, lon_init + self.cell_size_by_degree),
+                        (lat_init, lon_init + self.cell_size_by_degree)
+                    ))
                     lon_init += self.cell_size_by_degree
                 lat_init += self.cell_size_by_degree
             self.grid_polygon = grid_polygon
@@ -265,13 +276,8 @@ class Grid():
 
         """
         try:
-            f = open(filename,"wb")
-            pickle.dump({'lon_min_x': self.lon_min_x, 
-                        'lat_min_y': self.lat_min_y,
-                        'grid_size_lat_y': self.grid_size_lat_y,
-                        'grid_size_lon_x': self.grid_size_lon_x,
-                        'cell_size_by_degree': self.cell_size_by_degree},f)
-            f.close()
+            with open(filename, 'wb') as f:
+                pickle.dump(self.get_grid(), f)
             print('\nA file was saved')
         except Exception as e:
             raise e
@@ -294,18 +300,15 @@ class Grid():
                 - grid_size_lat_y: tamanho da grid latitude. 
                 - grid_size_lon_x: tamanho da longitude da grid.
                 - cell_size_by_degree: tamanho da célula da Grid.
-
-       
         """
         try:
             with open(filename, 'rb') as f:
-                dic_grid = pickle.load(f)
-                f.close()
-                return dic_grid
+                dict_grid = pickle.load(f)
+            return dict_grid
         except Exception as e:
             raise e
 
-    def show_grid_polygons(self, data, id_, figsize=(10,10)):   
+    def show_grid_polygons(self, data, id_, figsize=(10,10), return_fig=True, save_fig=False, name='grid.png'):   
         """
         Generate a visualization with grid polygons. 
 
@@ -320,22 +323,48 @@ class Grid():
         figsize : tuple
             Represents the size (float: width, float: height) of a figure.
 
+        return_fig : bool, optional, default True.
+            Represents whether or not to save the generated picture.
+
+        save_fig : bool, optional, default False.
+            Represents whether or not to save the generated picture.
+
+        name : String, optional, default 'grid.png'.
+            Represents name of a file.
+
         Returns
         -------
-        fig : matplotlib.pyplot.figure
+        fig : matplotlib.pyplot.figure or None
             The generated picture.
 
-       """
+        Raises
+        ------
+        KeyError if the dataframe does not contains the POLYGON feature
+        IndexError if there is no user with the id passed
+        """
+
+        print(TRAJ_ID, TID)
+        if POLYGON not in data:
+            raise KeyError("POLYGON feature not in dataframe")
+        
+        df_ = data[data[TRAJ_ID] == id_]
+
+        if not len(df_):
+            raise IndexError(f"No user with id {id_} in dataframe")
+
         fig = plt.figure(figsize=figsize)
-        
-        data = data[data[TRAJ_ID] == id_]
-        
-        xs_start, ys_start = data.iloc[0][POLYGON].exterior.xy
+
+        xs_start, ys_start = df_.iloc[0][POLYGON].exterior.xy
         
         plt.plot(ys_start, xs_start, 'bo', markersize=20) # start point
 
-        for idx in range(data.shape[0]):
-            if type(data[POLYGON].iloc[idx]) != float:
-                xs, ys = data[POLYGON].iloc[idx].exterior.xy
+        for idx in range(df_.shape[0]):
+            if type(df_[POLYGON].iloc[idx]) != float:
+                xs, ys = df_[POLYGON].iloc[idx].exterior.xy
                 plt.plot(ys,xs, 'g', linewidth=2, markersize=5) 
-        return fig
+
+        if save_fig:
+            plt.savefig(fname=name, fig=fig)
+
+        if return_fig:
+            return fig
