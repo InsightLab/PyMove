@@ -28,11 +28,11 @@ class Grid():
 
         Parameters
         ----------
+        data : pandas.core.frame.DataFrame
+            Represents the dataset with contains lat, long and datetime.
+                
         cell_size : float
             Size of grid's cell.
-
-        bbox : tuple
-            Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
 
         meters_by_degree : float
             Represents the meters's degree of latitude. By default the latitude is set in Fortaleza.
@@ -48,6 +48,8 @@ class Grid():
                 - cell_size_by_degree: grid's cell size.
 
         """
+        
+        """bbox: a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude."""
         bbox = data.get_bbox()
         print('\nCreating a virtual grid without polygons')
     
@@ -178,14 +180,6 @@ class Grid():
         ----------
         data : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
-
-        dic_grid : dict
-            Contains informations about virtual grid, how
-                - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma. 
-                - grid_size_lat_y: tamanho da grid latitude. 
-                - grid_size_lon_x: tamanho da longitude da grid.
-                - cell_size_by_degree: tamanho da célula da Grid.
 
         Returns
         -------
