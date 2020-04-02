@@ -2560,27 +2560,34 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self._last_operation_mem_usage = 0
         return self._type
 
-    def last_operation_time(self):
-        """Returns the execution time of the last function, called to the PandasMoveDataFrame object.
+    def last_operation_name(self):
+        """Returns the name of the last function, called to the sMoveDataFrame object.
 
         Returns
         -------
-        A string of the execution time of the last function, called to the PandasMoveDataFrame object.
+        A string of the name of the last function, called to the MoveDataFrame object.
         """
-        start = time.time()
-        process = psutil.Process(os.getpid())
-        init = process.memory_info()[0]
+        return self._last_operation_name
+
+    def last_operation_time(self):
+        """Returns the execution time of the last function, called to the MoveDataFrame object.
+
+        Returns
+        -------
+        A string of the execution time of the last function, called to the MoveDataFrame object.
+        """
 
         return self._last_operation_time_duration
 
-    def last_operation_name(self):
-        """Returns the name of the last function, called to the PandasMoveDataFrame object.
+    def last_operation_mem(self):
+        """Returns the memory use of the last function, called to the MoveDataFrame object.
 
         Returns
         -------
-        A string of the name of the last function, called to the PandasMoveDataFrame object.
+        A string of the memory use of the last function, called to the MoveDataFrame object.
         """
-        return self._last_operation_name
+
+        return self._last_operation_mem_usage
 
     def last_operation(self):
         """Returns the name, memory and time usage calculation, of the last function.
@@ -2593,7 +2600,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return {'name': self._last_operation_name, 'time': self._last_operation_time_duration, 'mem': self._last_operation_mem_usage}
 
     def mem(self, format):
-        """Returns the memory usage calculation of the last function, called to the PandasMoveDataFrame object,
+        """Returns the memory usage calculation of the last function, called to the MoveDataFrame object,
         in the data format required by the user.
 
         Parameters
@@ -2603,15 +2610,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        A string of the memory usage calculation of the last function, called to the PandasMoveDataFrame object.
+        A string of the memory usage calculation of the last function, called to the MoveDataFrame object.
         """
 
         switcher = {
             "B": self._last_operation_mem_usage,
             "KB": self._last_operation_mem_usage / 1024,
-            "MB": self._last_operation_mem_usage / (1024 * 2),
-            "GB": self._last_operation_mem_usage / (1024 * 3),
-            "TB": self._last_operation_mem_usage / (1024 * 4),
+            "MB": self._last_operation_mem_usage / (1024 ** 2),
+            "GB": self._last_operation_mem_usage / (1024 ** 3),
+            "TB": self._last_operation_mem_usage / (1024 ** 4),
         }
 
         return switcher[format]
@@ -3294,40 +3301,48 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
         return self._type
 
-    def last_operation_time(self):
-        """Returns the execution time of the last function, called to the PandasMoveDataFrame object.
+    def last_operation_name(self):
+        """Returns the name of the last function, called to the MoveDataFrame object.
 
         Returns
         -------
-        A string of the execution time of the last function, called to the PandasMoveDataFrame object.
+        A string of the name of the last function, called to the MoveDataFrame object.
+        """
+        return self._last_operation_name
+
+    def last_operation_time(self):
+        """Returns the execution time of the last function, called to the MoveDataFrame object.
+
+        Returns
+        -------
+        A string of the execution time of the last function, called to the MoveDataFrame object.
         """
 
         return self._last_operation_time_duration
 
-    def last_operation_name(self):
-        """Returns the name of the last function, called to the PandasMoveDataFrame object.
+    def last_operation_mem(self):
+        """Returns the memory use of the last function, called to the MoveDataFrame object.
 
         Returns
         -------
-        A string of the name of the last function, called to the PandasMoveDataFrame object.
+        A string of the memory use of the last function, called to the MoveDataFrame object.
         """
 
-        return self._last_operation_name
+        return self._last_operation_mem_usage
+
 
     def last_operation(self):
-        """Returns the memory usage calculation, in bytes, of the last function,
-           called to the PandasMoveDataFrame object.
+        """Returns the name, memory and time usage calculation, of the last function.
 
         Returns
         -------
-        A string of the memory usage calculation, in bytes, of the last function,
+        A dict that contains the memory usage calculation, in bytes, of the last function,
         called to the PandasMoveDataFrame object.
         """
-
-        return self._last_operation_name
+        return {'name': self._last_operation_name, 'time': self._last_operation_time_duration, 'mem': self._last_operation_mem_usage}
 
     def mem(self, format):
-        """Returns the memory usage calculation of the last function, called to the PandasMoveDataFrame object,
+        """Returns the memory usage calculation of the last function, called to the MoveDataFrame object,
         in the data format required by the user.
 
         Parameters
@@ -3337,7 +3352,15 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        A string of the memory usage calculation of the last function, called to the PandasMoveDataFrame object.
+        A string of the memory usage calculation of the last function, called to the MoveDataFrame object.
         """
-        
-        return self._last_operation_mem_usage
+
+        switcher = {
+            "B": self._last_operation_mem_usage,
+            "KB": self._last_operation_mem_usage / 1024,
+            "MB": self._last_operation_mem_usage / (1024 ** 2),
+            "GB": self._last_operation_mem_usage / (1024 ** 3),
+            "TB": self._last_operation_mem_usage / (1024 ** 4),
+        }
+
+        return switcher[format]
