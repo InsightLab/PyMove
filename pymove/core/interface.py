@@ -257,19 +257,3 @@ class MoveDataFrameAbstractModel(abc.ABC):
     @abc.abstractmethod
     def get_type(self):
         pass
-
-    @abc.abstractmethod
-    def last_operation_time(self):
-        pass
-
-    @abc.abstractmethod
-    def last_operation_name(self):
-        pass
-
-    @abc.abstractmethod
-    def last_operation(self):
-        pass
-
-    @abc.abstractmethod
-    def mem(self):
-        pass
