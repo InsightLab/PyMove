@@ -297,10 +297,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.columns.html#pandas.DataFrame.columns
 
         """
-        operation = self.last_operation.begin_operation('columns')
-        columns_ = self._data.columns
-        self.last_operation.end_operation(operation)
-        return columns_
+        return self._data.columns
 
     @property
     def index(self):
