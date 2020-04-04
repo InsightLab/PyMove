@@ -1166,12 +1166,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         init = process.memory_info()[0]
 
         if inplace:
+            if DIST_TO_PREV not in self._data:
+                self.generate_dist_features(inplace=inplace)
             data_ = self._data
         else:
-            data_ = self._data.copy()
-
-        if DIST_TO_PREV not in self._data:
-            data_.generate_dist_features()
+            if DIST_TO_PREV not in self._data:
+                df = self.generate_dist_features(inplace=inplace)
+            data_ = df._data
 
         try:
             print('\nCreating or updating features MOVE and STOPS...\n')
