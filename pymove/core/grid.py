@@ -188,7 +188,7 @@ class Grid():
                     lon_init += self.cell_size_by_degree
                 lat_init += self.cell_size_by_degree
             self.grid_polygon = grid_polygon
-            print('...geometry was created in a object Grid') # TODO: vê se a frase desse print tá ok
+            print('...geometries saved on Grid grid_polygon property')
             self.last_operation.end_operation(operation)
         except Exception as e:
             self.last_operation.end_operation(operation)
