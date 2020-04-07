@@ -121,7 +121,7 @@ PyMove **proposes**:
 
 # Pip installation
 
-1. 'pip install pymove`
+1. `pip install pymove`
 
 ---
 
