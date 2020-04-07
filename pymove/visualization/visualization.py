@@ -101,6 +101,40 @@ def cmap_hex_color(cmap, i):
     """
     return matplotlib.colors.rgb2hex(cmap(i))
 
+def add_map_legend(m, title, items):
+    item = "<li class='legend'>%s <div class='square' style='background-color:%s;'></div></li>"
+    list_items = '\n'.join([item % (n, c) for (n, c) in items])
+    legend_html =   '''
+        <style>
+            .box {
+                position: fixed;
+                bottom: 50px; 
+                left: 50px; 
+                width: 250px; 
+                height: 90px; 
+                border:2px solid grey; 
+                z-index:9999; 
+                font-size:14px;
+                padding: 1px;
+            }
+            .legend {
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+            }
+            .square {
+                height:10px;
+                width: 50px;
+            }
+        </style>
+        <div class='box'>
+            %s <br>
+            <ul>
+                %s
+            </ul>
+        </div>
+    ''' % (title, list_items)
+    m.get_root().html.add_child(folium.Element(legend_html))
 
 def save_map(
     move_data,
@@ -1022,6 +1056,7 @@ def plot_trajectory_by_hour(
     move_data,
     start_hour,
     end_hour,
+    id_=None,
     n_rows=None,
     lat_origin=None,
     lon_origin=None,
@@ -1043,6 +1078,8 @@ def plot_trajectory_by_hour(
         Represents start hour of time period.
     end_hour : int
         Represents end hour of time period.
+     id_: int or None
+        If int, plots trajectory of the user, else plot for all users
     n_rows : int, optional, default None.
         Represents number of data rows that are will plot.
     lat_origin : float, optional, default None.
@@ -1054,15 +1091,16 @@ def plot_trajectory_by_hour(
     zoom_start : int, optional, default 12.
         Represents the trajectory id.
     base_map : folium.folium.Map, optional, default None.
-        Represents the folium map. If not informed, a new map is
-        generated using the function create_base_map(), with
-        the lat_origin, lon_origin and zoom_start.
+        Represents the folium map. If not informed, a new map is generated
+        using the function create_base_map(), with the lat_origin,
+        lon_origin and zoom_start.
     tile : String, optional, default 'OpenStreetMap'.
         Represents the map's tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
-    color : String, optional, default 'black'.
+    color : String or List, optional, default 'black'.
         Represents line's color of visualization.
+        Pass a list if ploting for many users. Else colors will be chosen at random
     filename : String, optional, default 'plot_trejectory_with_folium.html'.
         Represents the file name of new file .html.
 
@@ -1071,6 +1109,10 @@ def plot_trajectory_by_hour(
     base_map : folium.folium.Map.
         Represents a folium map with visualization.
 
+    Raises
+        ------
+        KeyError if start or end hour not found in dataframe
+        IndexError if there is no user with the id passed
     """
     if base_map is None:
         if lat_origin is None and lon_origin is None:
@@ -1079,24 +1121,48 @@ def plot_trajectory_by_hour(
         base_map = create_base_map(default_location=[lat_origin, lon_origin],
                                    tile=tile, default_zoom_start=zoom_start)
 
+    if id_ != None:
+        items = list(zip([id_], [color]))
+    else:
+        ids = move_data[TRAJ_ID].unique()
+        if type(color) == str:
+            colors = [generate_color() for i in ids]
+        else:
+            colors = color[:]
+        items = list(zip(ids, colors))
+
     if n_rows is None:
         n_rows = move_data.shape[0]
 
     if HOUR not in move_data:
         move_data.generate_hour_features()
 
-    mv_df = move_data[(move_data[HOUR] <= end_hour) & (move_data[HOUR] >= start_hour)] \
-            .reset_index().loc[:n_rows, [LATITUDE, LONGITUDE]]
+    if id_ != None:
+        df = move_data[move_data[TRAJ_ID] == id_]
+        if not len(df):
+            raise IndexError(f"No user with id {id_} in dataframe")
+    else:
+        df = move_data[:]
 
-    folium.Marker(location=[mv_df.iloc[0][LATITUDE], mv_df.iloc[0][LONGITUDE]],
-                  color="green", clustered_marker=True, popup="Início",
-                  icon=folium.Icon(color='green', icon='info-sign')).add_to(base_map)
+    mv_df = df[(df[HOUR] <= end_hour) & (df[HOUR] >= start_hour)].reset_index().loc[:n_rows, [LATITUDE, LONGITUDE, TRAJ_ID]]
 
-    folium.Marker(location=[mv_df.iloc[-1][LATITUDE], mv_df.iloc[-1][LONGITUDE]],
-                  color="red", clustered_marker=True, popup="Fim ",
-                  icon=folium.Icon(color='red', icon='info-sign')).add_to(base_map)
+    if not len(mv_df):
+        raise KeyError(f"No HOUR corresponding to range found in dataframe")
 
-    folium.PolyLine(mv_df, color=color, weight=2.5, opacity=1).add_to(base_map)
+    for _id, color in items:
+        mv = mv_df[mv_df[TRAJ_ID] == _id]
+        folium.Marker(location=[mv.iloc[0][LATITUDE], mv.iloc[0][LONGITUDE]],
+                    color="green", clustered_marker=True, popup="Início",
+                    icon=folium.Icon(color='green', icon='info-sign')).add_to(base_map)
+
+        folium.Marker(location=[mv.iloc[-1][LATITUDE], mv.iloc[-1][LONGITUDE]],
+                    color="red", clustered_marker=True, popup="Fim ",
+                    icon=folium.Icon(color='red', icon='info-sign')).add_to(base_map)
+
+        folium.PolyLine(mv[[LATITUDE, LONGITUDE]], color=color, weight=2.5, opacity=1).add_to(base_map)
+
+    if id_ == None:
+        add_map_legend(base_map, 'Color by user ID', items)
 
     if save_as_html:
         base_map.save(outfile=filename)
@@ -1108,6 +1174,7 @@ def plot_stops(
     move_data,
     radius=0,
     weight=3,
+    id_=None,
     n_rows=None,
     lat_origin=None,
     lon_origin=None,
@@ -1129,6 +1196,8 @@ def plot_stops(
         The radius value is used to determine if a segment is a stop.
         If the value of the point in target_label is greater than
         radius, the segment is a stop, otherwise it's a move.
+    id_: int or None
+        If int, plots trajectory of the user, else plot for all users
     n_rows : int, optional, default None.
         Represents number of data rows that are will plot.
     lat_origin : float, optional, default None.
@@ -1147,8 +1216,9 @@ def plot_stops(
         Represents the map's tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
-    color : String, optional, default 'black'.
+    color : String or List, optional, default 'black'.
         Represents line's color of visualization.
+        Pass a list if ploting for many users. Else colors will be chosen at random
     filename : String, optional, default 'plot_trejectory_with_folium.html'.
         Represents the file name of new file .html.
 
@@ -1157,6 +1227,10 @@ def plot_stops(
     base_map : folium.folium.Map.
         Represents a folium map with visualization.
 
+    Raises
+        ------
+        KeyError if no
+        IndexError if there is no user with the id passed
     """
     if base_map is None:
         if lat_origin is None and lon_origin is None:
@@ -1165,17 +1239,40 @@ def plot_stops(
         base_map = create_base_map(default_location=[lat_origin, lon_origin],
                                    tile=tile, default_zoom_start=zoom_start)
 
+    if id_ != None:
+        items = list(zip([id_], [color]))
+    else:
+        ids = move_data[TRAJ_ID].unique()
+        if type(color) == str:
+            colors = [generate_color() for i in ids]
+        else:
+            colors = color[:]
+        items = list(zip(ids, colors))
+
     if n_rows is None:
         n_rows = move_data.shape[0]
 
-    create_update_move_and_stop_by_radius(move_data, radius=radius)
-    stops = move_data[move_data[SITUATION] == STOP].loc[:n_rows, [LATITUDE, LONGITUDE, DATETIME]]
+    if SITUATION not in move_data:
+        move_data.generate_move_and_stop_by_radius(radius=radius)
+    if id_ != None:
+        df = move_data[move_data[TRAJ_ID] == id_]
+        if not len(df):
+            raise IndexError(f"No user with id {id_} in dataframe")
+    else:
+        df = move_data[:]
+    stops = df[df[SITUATION] == STOP].reset_index().loc[:n_rows, [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]]
 
-    for stop in stops.iterrows():
-        base_map.add_child(
-            folium.Circle([stop[1][LATITUDE], stop[1][LONGITUDE]],
-                          color=color, weight=weight, radius=20, opacity=0.5,
-                          popup=stop[1][DATETIME], fill_color=color, fill_opacity=0.5))
+    if not len(stops):
+        raise KeyError(f"No STOPS found in dataframe")
+
+    for _id, color in items:
+        for stop in stops[stops[TRAJ_ID] == _id].iterrows():
+            base_map.add_child(
+                folium.Circle([stop[1][LATITUDE], stop[1][LONGITUDE]],
+                            color=color, weight=weight, radius=30, opacity=0.5,
+                            popup=stop[1][DATETIME], fill_color=color, fill_opacity=0.5))
+    if id_ == None:
+        add_map_legend(base_map, 'Color by user ID', items)
 
     if save_as_html:
         base_map.save(outfile=filename)
