@@ -117,9 +117,11 @@ PyMove **proposes**:
 
 `pip install -e .`
 
-7. Now, use this command to use PyMove!
+---
 
-`import pymove`
+# Pip installation
+
+1. pip install pymove
 
 ---
 
@@ -129,24 +131,16 @@ Anaconda Python distribution installed and accessible
 
 1. In the terminal client enter the following where yourenvname is the name you want to call your environment, and replace x.x with the Python version you wish to use. (To see a list of available python versions first, type conda search "^python$" and press enter.)
 
-`conda create -n yourenvname python=x.x anaconda`
+`conda create -n <yourenvname> python=x.x`
 
 Press y to proceed. This will install the Python version and all the associated anaconda packaged libraries at “path_to_your_anaconda_location/anaconda/envs/yourenvname”
 
 2. Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environement at creation.
 
-`source activate yourenvname`
+`source activate <yourenvname>`
 
-3. Install PyMove package to the virtual environment.
+3. Now install the package from pip or github in the virtual environment
 
-`conda install -n yourenvname pymove`
-
-
----
-
-# Pip installation
-
-1. pip install pymove
 
 ---
 
