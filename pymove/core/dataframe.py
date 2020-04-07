@@ -2394,7 +2394,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             self._validate_move_data_frame(dsk)
             self._data = dask.dataframe.from_pandas(dsk, npartitions=n_partitions)
             self._type = TYPE_DASK
-            self.last_operation = LastOperation()
+            self.last_operation = None
         else:
             raise AttributeError("Could not instantiate new MoveDataFrame because data has missing columns")
 
