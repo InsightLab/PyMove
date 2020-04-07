@@ -6,7 +6,17 @@ from math import log10
 
 def begin_operation(name):
     """
-    Gets the current mem and time
+    Gets the stats for the current operation
+
+    Parameters
+    ----------
+    name: String
+        name of the operation
+
+    Returns
+    -------
+    dict:
+        dictionary with the operation stats
     """
     process = psutil.Process(os.getpid())
     init = process.memory_info()[0]
@@ -15,7 +25,17 @@ def begin_operation(name):
 
 def end_operation(operation):
     """
-    Calculares the mem and time used
+    Gets the time and memory usage of the operation
+
+    Parameters
+    ----------
+    operation: dict
+        dictionary with the begining stats of the operation
+
+    Returns
+    -------
+    dict:
+        dictionary with the operation execution stats
     """
     finish = operation['process'].memory_info()[0]
     last_operation_name = operation['name']
@@ -23,33 +43,32 @@ def end_operation(operation):
     last_operation_mem_usage = finish - operation['init']
     return {
         'name': last_operation_name,
-        'time': last_operation_time_duration,
-        'mem': mem(last_operation_mem_usage)
+        'time in seconds': last_operation_time_duration,
+        'memory': mem(last_operation_mem_usage)
     }
 
-def mem(last_operation_mem_usage):
+def mem(mem_usage):
     """Returns the memory usage calculation of the last function.
-    Automatically converting or in the data format required by the user.
 
     Parameters
     ----------
-    format : str
-    The data format to which the memory calculation must be converted to.
+    mem_usage : int
+        memory usage in bytes
 
     Returns
     -------
-    A string of the memory usage calculation of the last function
+    A string of the memory usage in a more readable format
     """
 
     switcher = {
-        'B': last_operation_mem_usage,
-        'KB': last_operation_mem_usage / 1024,
-        'MB': last_operation_mem_usage / (1024 ** 2),
-        'GB': last_operation_mem_usage / (1024 ** 3),
-        'TB': last_operation_mem_usage / (1024 ** 4),
+        'B': mem_usage,
+        'KB': mem_usage / 1024,
+        'MB': mem_usage / (1024 ** 2),
+        'GB': mem_usage / (1024 ** 3),
+        'TB': mem_usage / (1024 ** 4),
     }
 
-    size = int(log10(last_operation_mem_usage + 1)) + 1
+    size = int(log10(mem_usage + 1)) + 1
     if size <= 3:
         unit = 'B'
     elif size <= 6:
