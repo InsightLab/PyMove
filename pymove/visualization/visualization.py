@@ -19,7 +19,6 @@ from pymove.utils.constants import (
     DATETIME,
     TILES
 )
-
 from pymove.preprocessing.stay_point_detection import (
     create_update_move_and_stop_by_radius
 )
