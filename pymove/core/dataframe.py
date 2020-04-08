@@ -366,6 +366,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         operation = begin_operation('len')
         len_ = self._data.shape[0]
         self.last_operation = end_operation(operation)
+
         return len_
 
     def unique(self, values):
@@ -444,6 +445,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         operation = begin_operation('get_users_numbers')
+
         if UID in self._data:
             number_ = self._data[UID].nunique()
         else:
@@ -554,6 +556,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         operation = begin_operation('generate_tid_based_on_id_datatime')
+
         if inplace:
             data_ = self._data
         else:
@@ -567,6 +570,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
             data_[TID] = data_[TRAJ_ID].astype(str) + data_[DATETIME].dt.strftime(str_format)
             print('\n...tid feature was created...\n')
+
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_tid_based_on_id_datatime'
+            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -594,7 +602,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Object with new features or None if ``inplace=True``.
         """
         operation = begin_operation('generate_date_features')
-        
+
         if inplace:
             data_ = self._data
         else:
@@ -605,6 +613,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             if DATETIME in data_:
                 data_['date'] = data_[DATETIME].dt.date
                 print('..Date features was created...\n')
+
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_date_features'
+            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -644,6 +657,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 data_['hour'] = data_[DATETIME].dt.hour
                 print('...Hour feature was created...\n')
 
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_hour_features'
+            self._last_operation_mem_usage = finish - init
+
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
@@ -680,6 +698,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             print('\nCreating or updating day of the week feature...\n')
             data_[DAY] = data_[DATETIME].dt.day_name()
             print('...the day of the week feature was created...\n')
+
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_day_of_the_week_features'
+            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -838,6 +861,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 data_[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
                 print('...hour_sin and  hour_cos features were created...\n')
             
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_datetime_in_format_cyclical'
+            self._last_operation_mem_usage = finish - init
+
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
@@ -943,6 +971,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_.reset_index(inplace=True)
             print('...Reset index\n')
             print('..Total Time: {}'.format((time.time() - start_time)))
+
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_dist_features'
+            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -1058,6 +1091,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_.reset_index(inplace=True)
             print('..Total Time: {:.3f}'.format((time.time() - start_time)))
 
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_dist_time_speed_features'
+            self._last_operation_mem_usage = finish - init
+
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
@@ -1108,6 +1146,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
             data_['situation'] = np.select(conditions, choices, np.nan)
             print('\n....There are {} stops to this parameters\n'.format(data_[data_['situation'] == 'stop'].shape[0]))
+
+            finish = process.memory_info()[0]
+            self._last_operation_time_duration = time.time() - start
+            self._last_operation_name = 'generate_move_and_stop_by_radius'
+            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -1161,6 +1204,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         operation = begin_operation('get_bbox')
+
         try:
             bbox_ = (self._data[LATITUDE].min(), self._data[LONGITUDE].min(), self._data[LATITUDE].max(),
                      self._data[LONGITUDE].max())
@@ -1690,9 +1734,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             self.last_operation = end_operation(operation)
             return None
-        _sort_values = PandasMoveDataFrame(data=_sort_values)
         self.last_operation = end_operation(operation)
-        return _sort_values
+        return PandasMoveDataFrame(data=_sort_values)
 
     def reset_index(self, level=None, drop=False, inplace=False, col_level=0, col_fill=''):
         """Resets the DataFrame's index, and use the default one.
@@ -1728,9 +1771,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             self.last_operation = end_operation(operation)
             return None
-        _reset_index = PandasMoveDataFrame(data=_reset_index)
         self.last_operation = end_operation(operation)
-        return _reset_index
+        return PandasMoveDataFrame(data=_reset_index)
 
     def set_index(self, keys, drop=True, append=False, inplace=False, verify_integrity=False):
         """Set the DataFrame index (row labels) using one or more existing columns or arrays (of the correct length).
@@ -1862,10 +1904,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             self.last_operation = end_operation(operation)
             return None
-        
-        _drop_duplicates = PandasMoveDataFrame(data=_drop_duplicates)
+
         self.last_operation = end_operation(operation)
-        return _drop_duplicates
+        return PandasMoveDataFrame(data=_drop_duplicates)
 
     def shift(self, periods=1, freq=None, axis=0, fill_value=None):
         """Shift index by desired number of periods with an optional time freq.
@@ -1901,7 +1942,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         _shift = PandasMoveDataFrame(data=_shift)
         self.last_operation = end_operation(operation)
 
-        return _shift
+        return PandasMoveDataFrame(data=_shift)
 
     def all(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
         """Inidicates if all elements are True, potentially over an axis.
@@ -2048,10 +2089,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             self.last_operation = end_operation(operation)
             return None
-        
-        _fillna = PandasMoveDataFrame(data=_fillna)
+
         self.last_operation = end_operation(operation)
-        return _fillna
+        return PandasMoveDataFrame(data=_fillna)
 
     def dropna(self, axis=0, how='any', thresh=None, subset=None, inplace=False):
         """Removes missing data.
@@ -2147,7 +2187,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         _sample = PandasMoveDataFrame(data=_sample)
         self.last_operation = end_operation(operation)
 
-        return _sample
+        return PandasMoveDataFrame(data=_sample)
 
     def isin(self, values):
         """Determines whether each element in the DataFrame is contained in values.
@@ -2199,12 +2239,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.append.html
         """
         operation = begin_operation('append')
+
         if isinstance(other, PandasMoveDataFrame):
             other = other._data
-
+            
         _append = self._data.append(other, ignore_index, verify_integrity, sort)
         _append = PandasMoveDataFrame(data=_append)
-
         self.last_operation = end_operation(operation)
 
         return _append
@@ -2262,9 +2302,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.join.html
         """
         operation = begin_operation('join')
+
         if isinstance(other, PandasMoveDataFrame):
             other = other._data
-
+            
         _join = self._data.join(other, on, how, lsuffix, rsuffix, sort)
         _join = PandasMoveDataFrame(data=_join) 
         self.last_operation = end_operation(operation)
@@ -2362,12 +2403,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                                       traj_id=TRAJ_ID,
                                       n_partitions=1)
             self.last_operation = end_operation(operation)
-
             return _dask
-
         elif (new_type == "pandas"):
             self.last_operation = end_operation(operation)
-            
             return self
 
     def get_type(self):
@@ -2381,6 +2419,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         type_ = self._type
         self.last_operation = end_operation(operation)
         return type_
+
 
 class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def __init__(self, data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID,
@@ -2636,6 +2675,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Represents the trajectory in DataFrame format.
 
         """
+        self._last_operation_time_duration = 0
+        self._last_operation_name = 'to_DataFrame'
+        self._last_operation_mem_usage = 0
         return self._data
 
     def generate_tid_based_on_id_datatime(self):

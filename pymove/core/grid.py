@@ -61,6 +61,7 @@ class Grid():
         """
         
         operation = begin_operation('_create_virtual_grid')
+
         # bbox: a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
         bbox = data.get_bbox()
         print('\nCreating a virtual grid without polygons')
@@ -118,6 +119,7 @@ class Grid():
         
         """
         operation = begin_operation('create_update_index_grid_feature')
+
         print('\nCreating or updating index of the grid feature..\n')
         try:
             if sort:
@@ -150,6 +152,7 @@ class Grid():
 
         """
         operation = begin_operation('create_one_polygon_to_point_on_grid')
+
         lat_init = self.lat_min_y + self.cell_size_by_degree * index_grid_lat
         lon_init = self.lon_min_x + self.cell_size_by_degree * index_grid_lon
         polygon = Polygon((
@@ -159,6 +162,7 @@ class Grid():
             (lat_init, lon_init + self.cell_size_by_degree)
         ))
         self.last_operation = end_operation(operation)
+
         return polygon
 
     def create_all_polygons_on_grid(self):
@@ -171,6 +175,7 @@ class Grid():
         """
         # Cria o vetor vazio de gometrias da grid
         operation = begin_operation('create_all_polygons_on_grid')
+
         try:
             print('\nCreating all polygons on virtual grid', flush=True)
             grid_polygon = np.array([[None for i in range(self.grid_size_lon_x)] for j in range(self.grid_size_lat_y)])
@@ -211,6 +216,7 @@ class Grid():
        
         """
         operation = begin_operation('create_all_polygons_to_all_point_on_grid')
+
         try:
             self.create_update_index_grid_feature(data)
             datapolygons = data.loc[:,['id', 'index_grid_lat', 'index_grid_lon']].drop_duplicates()
@@ -258,10 +264,12 @@ class Grid():
         
         """
         operation = begin_operation('create_all_polygons_to_all_point_on_grid')
+
         indexes_lat_y = np.floor((np.float64(event_lat) - self.lat_min_y)/ self.cell_size_by_degree)
         indexes_lon_x = np.floor((np.float64(event_lon) - self.lon_min_x)/ self.cell_size_by_degree)
         print('...[{},{}] indexes were created to lat and lon'.format(indexes_lat_y.size, indexes_lon_x.size))
         self.last_operation = end_operation(operation)
+
         return indexes_lat_y, indexes_lon_x
 
     def save_grid_pkl(self, filename):
@@ -286,6 +294,7 @@ class Grid():
 
         """
         operation = begin_operation('save_grid_pkl')
+
         try:
             with open(filename, 'wb') as f:
                 pickle.dump(self.get_grid(), f)
@@ -385,5 +394,6 @@ class Grid():
             plt.savefig(fname=name, fig=fig)
 
         self.last_operation = end_operation(operation)
+
         if return_fig:
             return fig
