@@ -396,8 +396,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     def __getitem__(self, name):
         try:
             item = self.__dict__['_data'][name]
-            if (isinstance(item, pd.DataFrame) and 
-                all(elem in item.columns for elem in [LATITUDE, LONGITUDE, TRAJ_ID, DATETIME])):
+            if (isinstance(item, pd.DataFrame) and self._has_columns(item)):
                 return PandasMoveDataFrame(item)
             return item
         except Exception as e:
@@ -571,11 +570,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_[TID] = data_[TRAJ_ID].astype(str) + data_[DATETIME].dt.strftime(str_format)
             print('\n...tid feature was created...\n')
 
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_tid_based_on_id_datatime'
-            self._last_operation_mem_usage = finish - init
-
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
@@ -613,11 +607,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             if DATETIME in data_:
                 data_['date'] = data_[DATETIME].dt.date
                 print('..Date features was created...\n')
-
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_date_features'
-            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -657,11 +646,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 data_['hour'] = data_[DATETIME].dt.hour
                 print('...Hour feature was created...\n')
 
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_hour_features'
-            self._last_operation_mem_usage = finish - init
-
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
@@ -698,11 +682,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             print('\nCreating or updating day of the week feature...\n')
             data_[DAY] = data_[DATETIME].dt.day_name()
             print('...the day of the week feature was created...\n')
-
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_day_of_the_week_features'
-            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -860,11 +839,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 data_[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
                 data_[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
                 print('...hour_sin and  hour_cos features were created...\n')
-            
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_datetime_in_format_cyclical'
-            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -971,11 +945,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_.reset_index(inplace=True)
             print('...Reset index\n')
             print('..Total Time: {}'.format((time.time() - start_time)))
-
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_dist_features'
-            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -1091,11 +1060,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_.reset_index(inplace=True)
             print('..Total Time: {:.3f}'.format((time.time() - start_time)))
 
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_dist_time_speed_features'
-            self._last_operation_mem_usage = finish - init
-
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
@@ -1146,11 +1110,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
             data_['situation'] = np.select(conditions, choices, np.nan)
             print('\n....There are {} stops to this parameters\n'.format(data_[data_['situation'] == 'stop'].shape[0]))
-
-            finish = process.memory_info()[0]
-            self._last_operation_time_duration = time.time() - start
-            self._last_operation_name = 'generate_move_and_stop_by_radius'
-            self._last_operation_mem_usage = finish - init
 
             if inplace:
                 self.last_operation = end_operation(operation)
