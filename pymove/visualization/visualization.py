@@ -212,6 +212,7 @@ def show_object_id_by_date(
     create_features=True,
     kind=['bar', 'bar', 'line', 'line'],
     figsize=(21, 9),
+    return_fig=True,
     save_fig=True,
     name='shot_points_by_date.png',
 ):
@@ -230,6 +231,8 @@ def show_object_id_by_date(
         Represents whether or not to delete features created for viewing.
     figsize : tuple, optional, default (21,9).
         Represents dimensions of figure.
+    return_fig : bool, optional, default True.
+        Represents whether or not to save the generated picture.
     save_fig : bool, optional, default True.
         Represents whether or not to save the generated picture.
     name : String, optional, default 'shot_points_by_date.png'.
@@ -237,7 +240,8 @@ def show_object_id_by_date(
 
     Returns
     -------
-
+    fig : matplotlib.pyplot.figure or None
+        The generated picture.
     References
     ----------
     https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
@@ -264,13 +268,16 @@ def show_object_id_by_date(
     if save_fig:
         plt.savefig(fname=name, fig=fig)
 
+    if return_fig:
+        return fig
 
 def show_lat_lon_gps(
     move_data,
     kind='scatter',
     figsize=(21, 9),
-    save_fig=False,
     plot_start_and_end=True,
+    return_fig=True,
+    save_fig=False,
     name='show_gps_points.png'
 ):
     """
@@ -284,6 +291,8 @@ def show_lat_lon_gps(
         Represents chart type.
     figsize : tuple, optional, default (21,9).
         Represents dimensions of figure.
+    return_fig : bool, optional, default True.
+        Represents whether or not to save the generated picture.
     save_fig : bool, optional, default True.
         Represents whether or not to save the generated picture.
     name : String, optional, default 'show_gps_points.png'.
@@ -291,11 +300,12 @@ def show_lat_lon_gps(
 
     Returns
     -------
-
+    fig : matplotlib.pyplot.figure or None
+        The generated picture.
     """
     try:
         if LATITUDE in move_data and LONGITUDE in move_data:
-            move_data.drop_duplicates([LATITUDE, LONGITUDE])\
+            fig = move_data.drop_duplicates([LATITUDE, LONGITUDE])\
                 .plot(kind=kind, x=LONGITUDE, y=LATITUDE, figsize=figsize)
 
             if plot_start_and_end:
@@ -304,7 +314,10 @@ def show_lat_lon_gps(
                 plt.plot(move_data.iloc[-1][LONGITUDE], move_data.iloc[-1][LATITUDE], 'yX',
                          markersize=10)  # end point
             if save_fig:
-                plt.savefig(name)   
+                plt.savefig(name) 
+
+            if return_fig:
+                return fig  
     except Exception as exception:
         raise exception
 
