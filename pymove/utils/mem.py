@@ -296,7 +296,7 @@ def format_mem(mem_usage):
         'TB': mem_usage / (1024 ** 4),
     }
 
-    size = int(log10(mem_usage + 1)) + 1
+    size = int(log10(max(1, mem_usage))) + 1
     if size <= 3:
         unit = 'B'
     elif size <= 6:
