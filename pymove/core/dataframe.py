@@ -1649,6 +1649,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html
         """
+        
+        if not copy and type(dtype) == str:
+            raise AttributeError("Could not change lat, lon, and datetime type.")
+        elif not copy and type(dtype) == dict:
+            keys = set(list(dtype.keys()))
+            columns = set(['lat','lon','datetime'])
+            if keys & columns:
+                raise AttributeError("Could not change lat, lon, and datetime type.")
+                
         operation = begin_operation('astype')
         _astype = self._data.astype(dtype, copy, errors, **kwargs)
         self.last_operation = end_operation(operation)
@@ -1761,6 +1770,16 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.set_index.html
         """
+        
+        if inplace:
+            if type(keys) == str:
+                aux = set([keys])
+            else:
+                aux = set(keys)
+            columns = set(['lat','lon','datetime'])
+            if aux & columns:
+                raise AttributeError("Could not change lat, lon, and datetime type.")
+        
         operation = begin_operation('set_index')
         _set_index = self._data.set_index(keys, drop, append, inplace, verify_integrity)
         self.last_operation = end_operation(operation)
@@ -1802,6 +1821,16 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html
         """
+        
+        if type(labels) == str:
+            _labels = set([labels])
+        else:
+            _labels = set(labels)
+     
+        _columns = set(['lat', 'lon', 'datetime'])
+        if inplace and (axis==1 or axis=='columns') and (_labels & _columns):
+            raise AttributeError("Could not drop columns lat, lon, and datetime.")
+     
         operation = begin_operation('drop')
         _drop = self._data.drop(labels, axis, index, columns, level, inplace, errors)
         self.last_operation = end_operation(operation)
@@ -2082,6 +2111,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dropna.html
         """
+        
+        if inplace and (axis==1 or axis=='columns'):
+            columns = ['lat','lon', 'datetime']
+            data = self._data[columns]
+            if data.isnull().values.any():
+                raise AttributeError("Could not drop columns lat, lon, and datetime.")
+                
         operation = begin_operation('dropna')
         _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
         self.last_operation = end_operation(operation)
