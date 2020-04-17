@@ -1770,31 +1770,22 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.set_index.html
         """
-        if inplace:
-            if drop:
-                if type(keys) == str:
-                    aux = set([keys])
-                else:
-                    aux = set(keys)
-                columns = set(['lat','lon','datetime'])
-                if aux & columns:
-                    raise AttributeError("Could not change lat, lon, and datetime type.")
-            
-            operation = begin_operation('set_index')
-            _set_index = self._data.set_index(keys, drop, append, inplace, verify_integrity)
-            self.last_operation = end_operation(operation)
-            return _set_index
-        else:
-            operation = begin_operation('set_index')
-            _set_index = self._data.set_index(keys, drop, append, inplace, verify_integrity)
-            self.last_operation = end_operation(operation)
-            try:
-                if (isinstance(_set_index, pd.DataFrame) and self._has_columns(_set_index)):
-                    return PandasMoveDataFrame(_set_index)
-                return _set_index
-            except Exception as e:
-                raise e
-            
+        if inplace and drop:
+            if type(keys) == str:
+                aux = set([keys])
+            else:
+                aux = set(keys)
+            columns = set(['lat','lon','datetime'])
+            if aux & columns:
+                raise AttributeError("Could not change lat, lon, and datetime type.")
+
+        operation = begin_operation('set_index')
+        _set_index = self._data.set_index(keys, drop, append, inplace, verify_integrity)
+        self.last_operation = end_operation(operation)
+
+        if (isinstance(_set_index, pd.DataFrame) and self._has_columns(_set_index)):
+            return PandasMoveDataFrame(_set_index)
+        return _set_index
 
     def drop(self, labels=None, axis=0, index=None, columns=None, level=None, inplace=False, errors='raise'):
         """Remove rows or columns by specifying label names and corresponding axis, or by specifying directly index or
@@ -1849,21 +1840,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             if (axis==1 or axis=='columns' or columns) and (_labels1.union(_labels2) & _columns):
                 raise AttributeError("Could not drop columns lat, lon, and datetime.")
      
-            operation = begin_operation('drop')
-            _drop = self._data.drop(labels, axis, index, columns, level, inplace, errors)
-            self.last_operation = end_operation(operation)
+        operation = begin_operation('drop')
+        _drop = self._data.drop(labels, axis, index, columns, level, inplace, errors)
+        self.last_operation = end_operation(operation)
 
-            return _drop
-        else:
-            operation = begin_operation('drop')
-            _drop = self._data.drop(labels, axis, index, columns, level, inplace, errors)
-            self.last_operation = end_operation(operation)
-            try:
-                if (isinstance(_drop, pd.DataFrame)) and self._has_columns(_drop):
-                    return PandasMoveDataFrame(_drop)
-                return _drop
-            except Exception as e:
-                raise e
+        if (isinstance(_drop, pd.DataFrame)) and self._has_columns(_drop):
+            return PandasMoveDataFrame(_drop)
+        return _drop
+
     def duplicated(self, subset=None, keep='first'):
         """Returns boolean Series denoting duplicate rows, optionally only considering certain columns.
 
@@ -2141,27 +2125,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         
         if inplace:
             if (axis==1 or axis=='columns'):
-                columns = ['lat','lon', 'datetime']
+                columns = ['lat', 'lon', 'datetime']
                 data = self._data[columns]
                 if data.isnull().values.any():
                     raise AttributeError("Could not drop columns lat, lon, and datetime.")
-                
-            operation = begin_operation('dropna')
-            _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
-            self.last_operation = end_operation(operation)
 
-            return _dropna
-        else:
-            operation = begin_operation('dropna')
-            _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
-            self.last_operation = end_operation(operation)
-            
-            try:
-                if (isinstance(_dropna, pd.DataFrame) and self._has_columns(_dropna)):
-                    return PandasMoveDataFrame(_dropna)
-                return _dropna
-            except Exception as e:
-                raise e
+        operation = begin_operation('dropna')
+        _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
+        self.last_operation = end_operation(operation)
+
+        if (isinstance(_dropna, pd.DataFrame) and self._has_columns(_dropna)):
+            return PandasMoveDataFrame(_dropna)
+        return _dropna
+
     def sample(self, n=None, frac=None, replace=False, weights=None, random_state=None, axis=None):
         """Return a random sample of items from an axis of object.
 
