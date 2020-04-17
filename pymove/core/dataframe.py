@@ -1846,7 +1846,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 else:
                     _labels2 = set(columns)
             _columns = set(['lat', 'lon', 'datetime'])
-            if (axis==1 or axis=='columns') and (_labels1.union(_labels2) & _columns):
+            if (axis==1 or axis=='columns' or columns) and (_labels1.union(_labels2) & _columns):
                 raise AttributeError("Could not drop columns lat, lon, and datetime.")
      
             operation = begin_operation('drop')
