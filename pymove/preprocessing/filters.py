@@ -661,8 +661,7 @@ def clean_trajectories_short_and_few_points_(
 
 
 def clean_id_by_time_max(move_data, label_id=TRAJ_ID, time_max=3600, return_idx=True):
-    """
-    Clears GPS points with time by ID greater than a user-defined limit.
+    """ Clears GPS points with time by ID greater than a user-defined limit.
 
     Parameters
     ----------
