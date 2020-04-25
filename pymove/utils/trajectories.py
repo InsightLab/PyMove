@@ -1,12 +1,15 @@
 from __future__ import division
+
 import time
+
 import folium
 import numpy as np
 import pandas as pd
 from IPython.display import display
-from ipywidgets import IntProgress, HTML, VBox
+from ipywidgets import HTML, IntProgress, VBox
+
+from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
 from pymove.utils.datetime import deltatime_str
-from pymove.utils.constants import LATITUDE, LONGITUDE, DATETIME, TRAJ_ID
 
 
 def read_csv(
@@ -48,7 +51,7 @@ def read_csv(
         Represents the column name of feature id trajectory.
 
     type_ : String, optional, default 'pandas'.
-        Represents the type of                    \
+        Represents the type_ of                    \
 
     n_partitions : int, optional, default 1.
         Represents .
@@ -238,7 +241,7 @@ def shift(arr, num, fill_value=np.nan):
     Returns
     -------
     result : array.
-        A new array with the same shape and type as the initial given array, but with the indexes shifted.
+        A new array with the same shape and type_ as the initial given array, but with the indexes shifted.
 
     Notes
     -----
@@ -282,7 +285,7 @@ def shift(arr, num, fill_value=np.nan):
 #
 #     """
 #     for i in range(len(new_list_values)):
-#         type1 = type(original_list[i])
+#         type1 = type_(original_list[i])
 #         if type1 == int:
 #             original_list[i] = int(new_list_values[i])
 #         elif type1 == float:
@@ -298,13 +301,13 @@ def save_bbox(bbox_tuple, file, tiles='OpenStreetMap', color='red'):
     Parameters
     ----------
     bbox_tuple : tuple.
-        Represents a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+        Represents a bound box, that is a tuple of 4 values with the min_ and max limits of latitude e longitude.
 
     file : String.
         Represents filename.
 
     tiles : String, optional, default 'OpenStreetMap'.
-        Represents tyles's type.
+        Represents tyles's type_.
         Example: 'openstreetmap', 'cartodbpositron', 'stamentoner', 'stamenterrain', 'mapquestopen',
         'MapQuest Open Aerial', 'Mapbox Control Room' and 'Mapbox Bright'.
 

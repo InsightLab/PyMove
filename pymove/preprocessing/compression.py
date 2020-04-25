@@ -1,9 +1,11 @@
 import time
-from tqdm import tqdm_notebook as tqdm
+
 import numpy as np
-from pymove.utils.trajectories import progress_update
+from tqdm import tqdm_notebook as tqdm
+
 from pymove.preprocessing.stay_point_detection import create_or_update_move_stop_by_dist_time
 from pymove.utils.constants import TRAJ_ID
+from pymove.utils.trajectories import progress_update
 
 
 def compress_segment_stop_to_point(

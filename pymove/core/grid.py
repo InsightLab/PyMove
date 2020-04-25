@@ -1,21 +1,22 @@
 import math
 import pickle
-import numpy as np
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import numpy as np
 from shapely.geometry import Polygon
 from tqdm import tqdm
-from pymove.utils.conversions import lat_meters
+
 from pymove.utils.constants import (
+    DATETIME,
+    INDEX_GRID_LAT,
+    INDEX_GRID_LON,
     LATITUDE,
     LONGITUDE,
-    DATETIME,
-    TRAJ_ID,
+    POLYGON,
     TID,
-    INDEX_GRID_LON,
-    INDEX_GRID_LAT,
-    POLYGON
+    TRAJ_ID
 )
+from pymove.utils.conversions import lat_meters
 from pymove.utils.mem import begin_operation, end_operation
 
 
@@ -53,16 +54,16 @@ class Grid():
         virtual_grid : dict
             Contains informations about virtual grid, how
                 - lon_min_x: minimum longitude.
-                - lat_min_y: minimum latitude. 
-                - grid_size_lat_y: size of latitude grid. 
+                - lat_min_y: minimum latitude.
+                - grid_size_lat_y: size of latitude grid.
                 - grid_size_lon_x: size of longitude grid.
                 - cell_size_by_degree: grid's cell size.
 
         """
-        
+
         operation = begin_operation('_create_virtual_grid')
 
-        # bbox: a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+        # bbox: a bound box, that is a tuple of 4 values with the min_ and max limits of latitude e longitude.
         bbox = data.get_bbox()
         print('\nCreating a virtual grid without polygons')
     
@@ -109,7 +110,7 @@ class Grid():
             Represents the dataset with contains lat, long and datetime.
 
         label_dtype : String
-            Represents the type of a value of new column in dataframe.
+            Represents the type_ of a value of new column in dataframe.
 
         sort : boolean
             Represents the state of dataframe, if is sorted.
@@ -222,11 +223,11 @@ class Grid():
             datapolygons = data.loc[:,['id', 'index_grid_lat', 'index_grid_lon']].drop_duplicates()
             size = datapolygons.shape[0]
             
-            """transform series in numpyarray"""
+            # transform series in numpyarray
             index_grid_lat = np.array(data['index_grid_lat'])
             index_grid_lon = np.array(data['index_grid_lon'])
 
-            """transform series in numpyarray"""
+            # transform series in numpyarray
             polygons = np.array([])
 
             for i in tqdm(range(size)):
@@ -386,7 +387,7 @@ class Grid():
         plt.plot(ys_start, xs_start, 'bo', markersize=20) # start point
 
         for idx in range(df_.shape[0]):
-            if type(df_[POLYGON].iloc[idx]) != float:
+            if not isinstance(df_[POLYGON].iloc[idx], float):
                 xs, ys = df_[POLYGON].iloc[idx].exterior.xy
                 plt.plot(ys,xs, 'g', linewidth=2, markersize=5) 
 
