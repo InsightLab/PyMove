@@ -113,12 +113,12 @@ def add_map_legend(m, title, items):
         <style>
             .box {
                 position: fixed;
-                bottom: 50px; 
-                left: 50px; 
-                width: 250px; 
-                height: 90px; 
-                border:2px solid grey; 
-                z-index:9999; 
+                bottom: 50px;
+                left: 50px;
+                width: 250px;
+                height: 90px;
+                border:2px solid grey;
+                z-index:9999;
                 font-size:14px;
                 padding: 1px;
             }

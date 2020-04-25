@@ -99,7 +99,7 @@ def format_labels(move_data, current_id, current_lat, current_lon, current_datet
     dic_labels : dict.
         Represents a dict with mapping current columns of data to format of PyMove column.
 
-    """ 
+    """
     dic_labels = {}
     dic_labels[current_id] = TRAJ_ID
     dic_labels[current_lon] = LONGITUDE

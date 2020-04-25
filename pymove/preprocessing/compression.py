@@ -9,13 +9,13 @@ from pymove.utils.trajectories import progress_update
 
 
 def compress_segment_stop_to_point(
-    move_data, 
-    label_segment='segment_stop', 
-    label_stop='stop', 
+    move_data,
+    label_segment='segment_stop',
+    label_stop='stop',
     point_mean='default',
-    drop_moves=True, 
-    label_id=TRAJ_ID, 
-    dist_radius=30, 
+    drop_moves=True,
+    label_id=TRAJ_ID,
+    dist_radius=30,
     time_radius=900
 ):
     """Compress the trajectories using the stay points in the dataframe.
@@ -138,9 +138,9 @@ def compress_segment_stop_to_point(
 
 
 def compress_segment_stop_to_point_optimizer(
-    move_data, 
-    label_segment='segment_stop', 
-    label_stop='stop', 
+    move_data,
+    label_segment='segment_stop',
+    label_stop='stop',
     point_mean='default',
     drop_moves=True
 ):

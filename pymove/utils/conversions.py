@@ -31,7 +31,7 @@ def lat_meters(lat):
     meters = (meters_lat + meters_lgn) / 2
     return meters
 
-    
+
 def list_to_str(input_list, delimiter=','):
     """
     Concatenates list elements, joining them by the separator specified by the parameter "delimiter".
@@ -405,7 +405,7 @@ def minute_to_seconds(
 
     Returns
     -------
- 
+
     """
     try:
         if label_time not in move_data:
@@ -493,7 +493,7 @@ def seconds_to_hours(
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass. 
+    move_data : pymove.core.MoveDataFrameAbstract subclass.
         The input trajectory data
 
     label_time : String, optional, default 'time_to_prev'.
@@ -504,7 +504,7 @@ def seconds_to_hours(
 
     Returns
     -------
-     
+
     """
     try:
         if label_time not in move_data:
@@ -537,7 +537,7 @@ def hours_to_seconds(
 
     Returns
     -------
-    
+
     """
     try:
         if label_time not in move_data:
