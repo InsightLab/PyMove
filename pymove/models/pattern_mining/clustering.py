@@ -4,7 +4,8 @@ from tqdm import tqdm_notebook as tqdm
 
 
 def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
-    """Determines the optimal number of clusters in the range set by the user using the elbow method.
+    """
+    Determines the optimal number of clusters in the range set by the user using the elbow method.
 
     Parameters
     ----------
@@ -44,7 +45,8 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
 
 
 def gap_statistic(move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=1):
-    """Calculates optimal clusters numbers using Gap Statistic from Tibshirani, Walther, Hastie
+    """
+    Calculates optimal clusters numbers using Gap Statistic from Tibshirani, Walther, Hastie.
 
     Parameters
     ----------
