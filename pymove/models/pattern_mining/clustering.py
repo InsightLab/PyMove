@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.cluster import KMeans
-from tqdm import tqdm_notebook as tqdm
+from tqdm import tqdm
 
 
 def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
@@ -35,7 +35,8 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
              16: 20.64369311973992}
     """
 
-    print('Executing Elbow Method to:\n...K of {} to {} from k_iteration:{}\n'.format(k_initial,max_clusters, k_iteration))
+    message = 'Executing Elbow Method to:\n...K of {} to {} from k_iteration:{}\n'.format(k_initial,max_clusters, k_iteration)
+    print(message, flush=True)
     inertia_dic = {}
     for k in tqdm(range(k_initial, max_clusters, k_iteration)):
         # validing K value in K-means
@@ -71,6 +72,7 @@ def gap_statistic(move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=
     https://anaconda.org/milesgranger/gap-statistic/notebook
 
     """
+
     gaps = {}
     for k in tqdm(range(k_initial, max_clusters, k_iteration)):
         # Holder for reference dispersion results
