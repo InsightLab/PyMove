@@ -2,7 +2,8 @@ import numpy as np
 
 
 def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
-    """Calculate the great circle distance between two points on the earth (specified in decimal degrees or in radians).
+    """
+    Calculate the great circle distance between two points on the earth (specified in decimal degrees or in radians).
     All (lat, lon) coordinates must have numeric dtypes and be of equal length.
     Result in meters. Use 3956 in earth radius for miles
 

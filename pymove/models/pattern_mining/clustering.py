@@ -1,10 +1,11 @@
 import numpy as np
 from sklearn.cluster import KMeans
-from tqdm import tqdm_notebook as tqdm
+from tqdm import tqdm
 
 
 def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
-    """Determines the optimal number of clusters in the range set by the user using the elbow method.
+    """
+    Determines the optimal number of clusters in the range set by the user using the elbow method.
 
     Parameters
     ----------
@@ -34,7 +35,8 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
              16: 20.64369311973992}
     """
 
-    print('Executing Elbow Method to:\n...K of {} to {} from k_iteration:{}\n'.format(k_initial,max_clusters, k_iteration))
+    message = 'Executing Elbow Method to:\n...K of {} to {} from k_iteration:{}\n'.format(k_initial,max_clusters, k_iteration)
+    print(message, flush=True)
     inertia_dic = {}
     for k in tqdm(range(k_initial, max_clusters, k_iteration)):
         # validing K value in K-means
@@ -44,7 +46,8 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
 
 
 def gap_statistic(move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=1):
-    """Calculates optimal clusters numbers using Gap Statistic from Tibshirani, Walther, Hastie
+    """
+    Calculates optimal clusters numbers using Gap Statistic from Tibshirani, Walther, Hastie.
 
     Parameters
     ----------
@@ -67,8 +70,8 @@ def gap_statistic(move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=
     Notes
     -----
     https://anaconda.org/milesgranger/gap-statistic/notebook
-
     """
+
     gaps = {}
     for k in tqdm(range(k_initial, max_clusters, k_iteration)):
         # Holder for reference dispersion results
