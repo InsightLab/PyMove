@@ -1,20 +1,19 @@
 from __future__ import print_function
 
-import re
+import json
 import os
 import pwd
-import json
-import psutil
-import time
+import re
 import resource
+import time
+from collections import deque
+from itertools import chain
+from math import log10
+from sys import getsizeof, stderr
 
 import numpy as np
 import pandas as pd
-from math import log10
-
-from sys import getsizeof, stderr
-from itertools import chain
-from collections import deque
+import psutil
 
 try:
     from reprlib import repr
@@ -173,7 +172,7 @@ def reduce_mem_usage_automatic(df):
     print("Decreased by {:.1f}%".format(100 * (start_mem - end_mem) / start_mem))
 
 
-def total_size(o, handlers={}, verbose=False):
+def total_size(o, handlers=None, verbose=False):
     """ Calculates the approximate memory footprint of an given object and all of its contents.
     Automatically finds the contents of the following builtin containers and
     their subclasses:  tuple, list, deque, dict, set and frozenset.
@@ -189,7 +188,7 @@ def total_size(o, handlers={}, verbose=False):
     verbose : boolean, optional(False by default)
         If set to True, the following information will be printed for each content of the object:
             - the size of the object in bytes.
-            - his type
+            - his type_
             - the object values
 
     Returns
@@ -197,6 +196,9 @@ def total_size(o, handlers={}, verbose=False):
     s : float
         The memory used by the given object
     """
+
+    if handlers is None:
+        handlers = {}
 
     dict_handler = lambda d: chain.from_iterable(d.items())
     all_handlers = {

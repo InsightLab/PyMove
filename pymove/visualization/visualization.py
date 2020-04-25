@@ -158,7 +158,7 @@ def save_map(
     filename : String
         Represents the filename.
     tiles : String
-        Represents the type of tile that will be used on the map.
+        Represents the type_ of tile that will be used on the map.
     label_id : String
         Represents column name of trajectory id.
     cmap: String
@@ -225,7 +225,7 @@ def save_wkt(move_data, filename, label_id=TRAJ_ID):
 def show_object_id_by_date(
     move_data,
     create_features=True,
-    kind=["bar", "bar", "line", "line"],
+    kind=None,
     figsize=(21, 9),
     return_fig=True,
     save_fig=True,
@@ -263,6 +263,9 @@ def show_object_id_by_date(
     ----------
     https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
     """
+    if kind is None:
+        kind = ["bar", "bar", "line", "line"]
+
     fig, ax = plt.subplots(2, 2, figsize=figsize)
 
     move_data.generate_date_features()
@@ -310,7 +313,7 @@ def show_lat_lon_gps(
     move_data : pymove.core.MoveDataFrameAbstract subclass.
         Input trajectory data.
     kind : String, optional, default 'scatter'.
-        Represents chart type.
+        Represents chart type_.
     figsize : tuple, optional, default (21,9).
         Represents dimensions of figure.
     plot_start_and_end: boolean
@@ -780,7 +783,7 @@ def plot_trajectories_with_folium(
     mv_df = move_data.loc[:n_rows, [LATITUDE, LONGITUDE, TRAJ_ID]].reset_index()
 
     ids = mv_df[TRAJ_ID].unique()
-    if type(color) == str:
+    if isinstance(color, str):
         colors = [generate_color() for _ in ids]
     else:
         colors = color[:]
@@ -1006,7 +1009,7 @@ def plot_trajectory_by_period(
         items = list(zip([id_], [color]))
     else:
         ids = mv_df[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]
@@ -1138,7 +1141,7 @@ def plot_trajectory_by_day_week(
         items = list(zip([id_], [color]))
     else:
         ids = mv_df[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]
@@ -1251,10 +1254,10 @@ def plot_trajectory_by_date(
             default_zoom_start=zoom_start,
         )
 
-    if type(start_date) == str:
+    if isinstance(start_date, str):
         start_date = str_to_datetime(start_date).date()
 
-    if type(end_date) == str:
+    if isinstance(end_date, str):
         end_date = str_to_datetime(end_date).date()
 
     if DATE not in move_data:
@@ -1282,7 +1285,7 @@ def plot_trajectory_by_date(
         items = list(zip([id_], [color]))
     else:
         ids = mv_df[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]
@@ -1419,7 +1422,7 @@ def plot_trajectory_by_hour(
         items = list(zip([id_], [color]))
     else:
         ids = mv_df[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]
@@ -1556,7 +1559,7 @@ def plot_stops(
         items = list(zip([id_], [color]))
     else:
         ids = stops[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]

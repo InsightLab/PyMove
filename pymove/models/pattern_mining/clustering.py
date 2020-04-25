@@ -1,8 +1,7 @@
-from tqdm import tqdm_notebook as tqdm
-import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
+from tqdm import tqdm_notebook as tqdm
+
 
 def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
     """Determines the optimal number of clusters in the range set by the user using the elbow method.
@@ -42,6 +41,7 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
         # print('...testing k: {}'.format(k))
         inertia_dic[k] = KMeans(n_clusters=k).fit(move_data).inertia_
     return inertia_dic
+
 
 def gap_statistic(move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=1):
     """Calculates optimal clusters numbers using Gap Statistic from Tibshirani, Walther, Hastie

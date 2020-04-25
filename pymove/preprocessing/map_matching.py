@@ -1,15 +1,14 @@
 import time
+
 import numpy as np
 from scipy.interpolate import interp1d
 
 from pymove.core.dataframe import PandasMoveDataFrame
-
-from pymove.utils.trajectories import shift, progress_update
-from pymove.utils.transformations import feature_values_using_filter_and_indexes, feature_values_using_filter
 from pymove.utils.constants import TID
+from pymove.utils.trajectories import progress_update, shift
+from pymove.utils.transformations import feature_values_using_filter
 
-
-""" Fuction to solve problems after Map-matching"""
+# Fuction to solve problems after Map-matching
 
 
 def check_time_dist(
@@ -335,7 +334,7 @@ def interpolate_add_deltatime_speed_features(
     try:
         for tid in tids:
             filter_nodes = (move_data.at[tid, "isNode"] == 1)
-            times = move_data.at[tid, "time"][filter_nodes]
+            move_data.at[tid, "time"][filter_nodes]
             size_id = 1 if filter_nodes.shape == () else filter_nodes.shape[0]
             count += size_id
 

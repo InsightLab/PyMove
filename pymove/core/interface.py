@@ -7,10 +7,6 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def lat(self):
-        pass
-
-    @abc.abstractmethod
     def lng(self):
         pass
 

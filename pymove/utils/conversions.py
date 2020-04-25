@@ -1,5 +1,7 @@
-import numpy as np
 import math
+
+import numpy as np
+
 from pymove.utils import constants
 
 
@@ -47,7 +49,7 @@ def list_to_str(input_list, delimiter=','):
     String
         Returns a string, resulting from concatenation of list's elements, separeted by the delimiter.
     """
-    return delimiter.join([x if type(x) == str else repr(x) for x in input_list])
+    return delimiter.join([x if isinstance(x, str) else repr(x) for x in input_list])
 
 
 def list_to_csv_str(input_list):
