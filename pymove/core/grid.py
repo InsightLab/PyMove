@@ -1,6 +1,6 @@
 import math
-import pickle
 
+import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 from shapely.geometry import Polygon
@@ -14,8 +14,7 @@ from pymove.utils.constants import (
     LONGITUDE,
     POLYGON,
     TID,
-    TRAJ_ID
-)
+    TRAJ_ID)
 from pymove.utils.conversions import lat_meters
 from pymove.utils.mem import begin_operation, end_operation
 
@@ -298,7 +297,7 @@ class Grid():
 
         try:
             with open(filename, 'wb') as f:
-                pickle.dump(self.get_grid(), f)
+                joblib.dump(self.get_grid(), f)
             print('\nA file was saved')
             self.last_operation = end_operation(operation)
         except Exception as e:
@@ -327,7 +326,7 @@ class Grid():
         operation = begin_operation('read_grid_pkl')
         try:
             with open(filename, 'rb') as f:
-                dict_grid = pickle.load(f)
+                dict_grid = joblib.load(f)
             self.last_operation = end_operation(operation)
             return dict_grid
         except Exception as e:
