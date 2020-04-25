@@ -1,21 +1,22 @@
 import math
 import pickle
-import numpy as np
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import numpy as np
 from shapely.geometry import Polygon
 from tqdm import tqdm
-from pymove.utils.conversions import lat_meters
+
 from pymove.utils.constants import (
+    DATETIME,
+    INDEX_GRID_LAT,
+    INDEX_GRID_LON,
     LATITUDE,
     LONGITUDE,
-    DATETIME,
-    TRAJ_ID,
+    POLYGON,
     TID,
-    INDEX_GRID_LON,
-    INDEX_GRID_LAT,
-    POLYGON
+    TRAJ_ID
 )
+from pymove.utils.conversions import lat_meters
 from pymove.utils.mem import begin_operation, end_operation
 
 
@@ -41,7 +42,7 @@ class Grid():
         ----------
         data : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
-                
+
         cell_size : float
             Size of grid's cell.
 
@@ -53,26 +54,26 @@ class Grid():
         virtual_grid : dict
             Contains informations about virtual grid, how
                 - lon_min_x: minimum longitude.
-                - lat_min_y: minimum latitude. 
-                - grid_size_lat_y: size of latitude grid. 
+                - lat_min_y: minimum latitude.
+                - grid_size_lat_y: size of latitude grid.
                 - grid_size_lon_x: size of longitude grid.
                 - cell_size_by_degree: grid's cell size.
 
         """
-        
+
         operation = begin_operation('_create_virtual_grid')
 
-        # bbox: a bound box, that is a tuple of 4 values with the min and max limits of latitude e longitude.
+        # bbox: a bound box, that is a tuple of 4 values with the min_ and max limits of latitude e longitude.
         bbox = data.get_bbox()
         print('\nCreating a virtual grid without polygons')
-    
+
         # Latitude in Fortaleza: -3.8162973555
         cell_size_by_degree = cell_size/meters_by_degree
         print('...cell size by degree: {}'.format(cell_size_by_degree))
 
         lat_min_y = bbox[0]
         lon_min_x = bbox[1]
-        lat_max_y = bbox[2] 
+        lat_max_y = bbox[2]
         lon_max_x = bbox[3]
 
         #If cell size does not fit in the grid area, an expansion is made
@@ -82,11 +83,11 @@ class Grid():
         if math.fmod((lon_max_x - lon_min_x), cell_size_by_degree) != 0:
             lon_max_x = lon_min_x + cell_size_by_degree * (math.floor((lon_max_x - lon_min_x) / cell_size_by_degree) + 1)
 
-        
+
         # adjust grid size to lat and lon
         grid_size_lat_y = int(round((lat_max_y - lat_min_y) / cell_size_by_degree))
         grid_size_lon_x = int(round((lon_max_x - lon_min_x) / cell_size_by_degree))
-        
+
         print('...grid_size_lat_y:{}\ngrid_size_lon_x:{}'.format(grid_size_lat_y, grid_size_lon_x))
 
         self.lon_min_x = lon_min_x
@@ -95,7 +96,7 @@ class Grid():
         self.grid_size_lon_x = grid_size_lon_x
         self.cell_size_by_degree = cell_size_by_degree
         print('\n..A virtual grid was created')
-        
+
         self.last_operation = end_operation(operation)
 
     def create_update_index_grid_feature(self, data, label_dtype=np.int64, sort=True):
@@ -109,14 +110,14 @@ class Grid():
             Represents the dataset with contains lat, long and datetime.
 
         label_dtype : String
-            Represents the type of a value of new column in dataframe.
+            Represents the type_ of a value of new column in dataframe.
 
         sort : boolean
             Represents the state of dataframe, if is sorted.
 
         Returns
         -------
-        
+
         """
         operation = begin_operation('create_update_index_grid_feature')
 
@@ -126,7 +127,7 @@ class Grid():
                 data.sort_values([TRAJ_ID, DATETIME], inplace=True)
             lat_, lon_ = self.point_to_index_grid(data[LATITUDE], data[LONGITUDE])
             data[INDEX_GRID_LAT] = label_dtype(lat_)
-            data[INDEX_GRID_LON] = label_dtype(lon_)   
+            data[INDEX_GRID_LON] = label_dtype(lon_)
             self.last_operation = end_operation(operation)
         except Exception as e:
             self.last_operation = end_operation(operation)
@@ -134,7 +135,7 @@ class Grid():
 
     def create_one_polygon_to_point_on_grid(self, index_grid_lat, index_grid_lon):
         """
-        Create one polygon to point on grid. 
+        Create one polygon to point on grid.
 
         Parameters
         ----------
@@ -167,7 +168,7 @@ class Grid():
 
     def create_all_polygons_on_grid(self):
         """
-        Create all polygons that are represented in a grid and store them in a new dic_grid key . 
+        Create all polygons that are represented in a grid and store them in a new dic_grid key .
 
         Parameters
         ----------
@@ -201,7 +202,7 @@ class Grid():
 
     def create_all_polygons_to_all_point_on_grid(self, data):
         """
-        Create all polygons to all points represented in a grid. 
+        Create all polygons to all points represented in a grid.
 
         Parameters
         ----------
@@ -211,9 +212,9 @@ class Grid():
         Returns
         -------
         datapolygons: pandas.core.frame.DataFrame
-            Represents the same dataset with new key 'polygon' where polygons were saved. 
+            Represents the same dataset with new key 'polygon' where polygons were saved.
 
-       
+
         """
         operation = begin_operation('create_all_polygons_to_all_point_on_grid')
 
@@ -221,12 +222,12 @@ class Grid():
             self.create_update_index_grid_feature(data)
             datapolygons = data.loc[:,['id', 'index_grid_lat', 'index_grid_lon']].drop_duplicates()
             size = datapolygons.shape[0]
-            
-            """transform series in numpyarray"""
+
+            # transform series in numpyarray
             index_grid_lat = np.array(data['index_grid_lat'])
             index_grid_lon = np.array(data['index_grid_lon'])
 
-            """transform series in numpyarray"""
+            # transform series in numpyarray
             polygons = np.array([])
 
             for i in tqdm(range(size)):
@@ -239,29 +240,29 @@ class Grid():
         except Exception as e:
             self.last_operation = end_operation(operation)
             print('size:{}, i:{}'.format(size, i))
-            raise e  
+            raise e
 
     def point_to_index_grid(self, event_lat, event_lon):
         """
-        Locate the coordinates x and y in a grid of point (lat, long). 
+        Locate the coordinates x and y in a grid of point (lat, long).
 
         Parameters
         ----------
         event_lat : float
             Represents the latitude of a point.
 
-        event_lon : float 
+        event_lon : float
             Represents the longitude of a point.
 
         Returns
         -------
         indexes_lat_y : int
-            Represents the index y in a grid of a point (lat, long). 
+            Represents the index y in a grid of a point (lat, long).
 
         indexes_lon_x : int
             Represents the index x in a grid of a point (lat, long).
 
-        
+
         """
         operation = begin_operation('create_all_polygons_to_all_point_on_grid')
 
@@ -274,7 +275,7 @@ class Grid():
 
     def save_grid_pkl(self, filename):
         """
-        Save a grid with new file .pkl. 
+        Save a grid with new file .pkl.
 
         Parameters
         ----------
@@ -284,8 +285,8 @@ class Grid():
         dic_grid : dict
             Contains informations about virtual grid, how
                 - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma. 
-                - grid_size_lat_y: tamanho da grid latitude. 
+                - lat_min_y: latitude miníma.
+                - grid_size_lat_y: tamanho da grid latitude.
                 - grid_size_lon_x: tamanho da longitude da grid.
                 - cell_size_by_degree: tamanho da célula da Grid.
 
@@ -306,7 +307,7 @@ class Grid():
 
     def read_grid_pkl(self, filename):
         """
-        Read grid dict from a file .pkl. 
+        Read grid dict from a file .pkl.
 
         Parameters
         ----------
@@ -318,8 +319,8 @@ class Grid():
         dic_grid : dict
             Contains informations about virtual grid, how
                 - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma. 
-                - grid_size_lat_y: tamanho da grid latitude. 
+                - lat_min_y: latitude miníma.
+                - grid_size_lat_y: tamanho da grid latitude.
                 - grid_size_lon_x: tamanho da longitude da grid.
                 - cell_size_by_degree: tamanho da célula da Grid.
         """
@@ -333,18 +334,18 @@ class Grid():
             self.last_operation = end_operation(operation)
             raise e
 
-    def show_grid_polygons(self, data, id_, figsize=(10,10), return_fig=True, save_fig=False, name='grid.png'):   
+    def show_grid_polygons(self, data, id_, figsize=(10,10), return_fig=True, save_fig=False, name='grid.png'):
         """
-        Generate a visualization with grid polygons. 
+        Generate a visualization with grid polygons.
 
         Parameters
         ----------
         data : pymove.core.MoveDataFrameAbstract subclass.
             Input trajectory data.
-        
+
         id_ : String
             Represents the id.
-        
+
         figsize : tuple
             Represents the size (float: width, float: height) of a figure.
 
@@ -371,7 +372,7 @@ class Grid():
         print(TRAJ_ID, TID)
         if POLYGON not in data:
             raise KeyError("POLYGON feature not in dataframe")
-        
+
         df_ = data[data[TRAJ_ID] == id_]
 
         if not len(df_):
@@ -382,13 +383,13 @@ class Grid():
         fig = plt.figure(figsize=figsize)
 
         xs_start, ys_start = df_.iloc[0][POLYGON].exterior.xy
-        
+
         plt.plot(ys_start, xs_start, 'bo', markersize=20) # start point
 
         for idx in range(df_.shape[0]):
-            if type(df_[POLYGON].iloc[idx]) != float:
+            if not isinstance(df_[POLYGON].iloc[idx], float):
                 xs, ys = df_[POLYGON].iloc[idx].exterior.xy
-                plt.plot(ys,xs, 'g', linewidth=2, markersize=5) 
+                plt.plot(ys,xs, 'g', linewidth=2, markersize=5)
 
         if save_fig:
             plt.savefig(fname=name, fig=fig)

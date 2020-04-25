@@ -1,15 +1,16 @@
+import time
+
+import numpy as np
+
+from pymove.preprocessing.segmentation import by_max_dist
 from pymove.utils.constants import (
-	DATETIME,
-    SITUATION,
-    TRAJ_ID,
+    DATETIME,
     DIST_TO_PREV,
     MOVE,
-    STOP)
-import time
-import numpy as np
-from pymove.preprocessing.segmentation import by_max_dist
-
-
+    SITUATION,
+    STOP,
+    TRAJ_ID
+)
 
 
 def create_update_datetime_in_format_cyclical(move_data, label_datetime=DATETIME):

@@ -1,4 +1,5 @@
 import datetime
+
 from pandas._libs.tslibs.timestamps import Timestamp
 
 
@@ -88,13 +89,13 @@ def to_min(datetime):
     return minutes
 
 
-def min_to_datetime(min):
+def min_to_datetime(min_):
     """Converts an int representation in minutes to a datetime.
     To do the reverse use: datetime_to_min.
 
     Parameters
     ----------
-    min : int
+    min_ : int
         Represents minutes.
 
     Returns
@@ -108,7 +109,7 @@ def min_to_datetime(min):
     """
     # get a datetime from an integer time slot
     # utcfromtimestamp (below) is much faster than the line above
-    min_datetime = datetime.datetime.utcfromtimestamp(min * 60)
+    min_datetime = datetime.datetime.utcfromtimestamp(min_ * 60)
     return min_datetime
 
 
@@ -226,10 +227,10 @@ def working_day(dt, holidays):
     """
     result = True
 
-    if type(dt) == str:
+    if isinstance(dt, str):
         dt = date_to_str(dt)
 
-    if type(dt) == datetime.datetime:
+    if isinstance(dt, datetime.datetime):
         dt = datetime.date(dt.year, dt.month, dt.day)
 
     if dt in holidays:

@@ -1,5 +1,7 @@
-import numpy as np
 import math
+
+import numpy as np
+
 from pymove.utils import constants
 
 
@@ -29,7 +31,7 @@ def lat_meters(lat):
     meters = (meters_lat + meters_lgn) / 2
     return meters
 
-    
+
 def list_to_str(input_list, delimiter=','):
     """
     Concatenates list elements, joining them by the separator specified by the parameter "delimiter".
@@ -47,7 +49,7 @@ def list_to_str(input_list, delimiter=','):
     String
         Returns a string, resulting from concatenation of list's elements, separeted by the delimiter.
     """
-    return delimiter.join([x if type(x) == str else repr(x) for x in input_list])
+    return delimiter.join([x if isinstance(x, str) else repr(x) for x in input_list])
 
 
 def list_to_csv_str(input_list):
@@ -403,7 +405,7 @@ def minute_to_seconds(
 
     Returns
     -------
- 
+
     """
     try:
         if label_time not in move_data:
@@ -491,7 +493,7 @@ def seconds_to_hours(
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass. 
+    move_data : pymove.core.MoveDataFrameAbstract subclass.
         The input trajectory data
 
     label_time : String, optional, default 'time_to_prev'.
@@ -502,7 +504,7 @@ def seconds_to_hours(
 
     Returns
     -------
-     
+
     """
     try:
         if label_time not in move_data:
@@ -535,7 +537,7 @@ def hours_to_seconds(
 
     Returns
     -------
-    
+
     """
     try:
         if label_time not in move_data:
