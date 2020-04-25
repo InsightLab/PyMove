@@ -46,7 +46,7 @@ def by_bbox(move_data, bbox, filter_out=False, inplace=False):
 
     try:
         filter_ = (move_data[LATITUDE] >= bbox[0]) & (move_data[LATITUDE] <= bbox[2]) \
-                   & (move_data[LONGITUDE] >= bbox[1]) & (move_data[LONGITUDE] <= bbox[3])
+                  & (move_data[LONGITUDE] >= bbox[1]) & (move_data[LONGITUDE] <= bbox[3])
 
         if filter_out:
             filter_ = ~filter_
@@ -222,8 +222,8 @@ def outliers(move_data, jump_coefficient=3.0, threshold=1, filter_out=False):
 
     if DIST_TO_PREV in move_data and DIST_TO_NEXT and DIST_PREV_TO_NEXT in move_data:
         filter_ = (move_data[DIST_TO_NEXT] > threshold) & (
-                    move_data[DIST_TO_PREV] > threshold) & (
-                              move_data[DIST_PREV_TO_NEXT] > threshold) & \
+                move_data[DIST_TO_PREV] > threshold) & (
+                          move_data[DIST_PREV_TO_NEXT] > threshold) & \
                   (jump_coefficient * move_data[DIST_PREV_TO_NEXT] < move_data[
                       DIST_TO_NEXT]) & \
                   (jump_coefficient * move_data[DIST_PREV_TO_NEXT] < move_data[
@@ -357,12 +357,12 @@ def clean_nan_values(move_data, axis=0, how="any", thresh=None, subset=None, inp
 
 
 def clean_gps_jumps_by_distance(
-    move_data,
-    label_id=TRAJ_ID,
-    jump_coefficient=3.0,
-    threshold=1,
-    label_dtype=np.float64,
-    sum_drop=0
+        move_data,
+        label_id=TRAJ_ID,
+        jump_coefficient=3.0,
+        threshold=1,
+        label_dtype=np.float64,
+        sum_drop=0
 ):
     """
     Removes the trajectories points that are outliers from the dataframe.
@@ -387,7 +387,7 @@ def clean_gps_jumps_by_distance(
     """
 
     if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features(label_id=label_id,  label_dtype=label_dtype)
+        move_data.generate_dist_features(label_id=label_id, label_dtype=label_dtype)
 
     try:
         print("\nCleaning gps jumps by distance to jump_coefficient {}...\n".format(jump_coefficient))
@@ -429,7 +429,7 @@ def clean_gps_nearby_points_by_distances(move_data, label_id=TRAJ_ID, radius_are
     """
 
     if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features(label_id=label_id,  label_dtype=label_dtype)
+        move_data.generate_dist_features(label_id=label_id, label_dtype=label_dtype)
 
     try:
         print("\nCleaning gps points from radius of {} meters\n".format(radius_area))
@@ -535,7 +535,7 @@ def clean_gps_speed_max_radius(move_data, label_id=TRAJ_ID, speed_max=50.0, labe
 
     if SPEED_TO_PREV in move_data:
         filter_ = (move_data[SPEED_TO_PREV] > speed_max) | (
-                    move_data[SPEED_TO_PREV] > speed_max)
+                move_data[SPEED_TO_PREV] > speed_max)
 
         idx = move_data[filter_].index
         print("...There {} gps points with speed_max > {}\n".format(idx.shape[0], speed_max))
@@ -549,10 +549,10 @@ def clean_gps_speed_max_radius(move_data, label_id=TRAJ_ID, speed_max=50.0, labe
 
 
 def clean_trajectories_with_few_points(
-    move_data,
-    label_tid=TID,
-    min_points_per_trajectory=2,
-    label_dtype=np.float64
+        move_data,
+        label_tid=TID,
+        min_points_per_trajectory=2,
+        label_dtype=np.float64
 ):
     """
     Removes from the given dataframe, trajectories with fewer points than was specified by the user
@@ -594,11 +594,11 @@ def clean_trajectories_with_few_points(
 
 
 def clean_trajectories_short_and_few_points_(
-    move_data,
-    label_id=TID,
-    min_trajectory_distance=100,
-    min_points_per_trajectory=2,
-    label_dtype=np.float64
+        move_data,
+        label_id=TID,
+        min_trajectory_distance=100,
+        min_points_per_trajectory=2,
+        label_dtype=np.float64
 ):
     """
     Eliminates from the given dataframe trajectories with fewer points and shorter length than specified values
@@ -629,7 +629,7 @@ def clean_trajectories_short_and_few_points_(
     clean_trajectories_with_few_points(move_data, label_id, min_points_per_trajectory, label_dtype)
 
     if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features(label_id=label_id,  label_dtype=label_dtype)
+        move_data.generate_dist_features(label_id=label_id, label_dtype=label_dtype)
 
     if move_data.index.name is not None:
         print("reseting index")
@@ -659,7 +659,8 @@ def clean_trajectories_short_and_few_points_(
                                                  min_points_per_trajectory,
                                                  label_dtype)
 
-def clean_id_by_time_max(move_data, label_id = TRAJ_ID, time_max = 3600, return_idx=True):
+
+def clean_id_by_time_max(move_data, label_id=TRAJ_ID, time_max=3600, return_idx=True):
     """
     Clears GPS points with time by ID greater than a user-defined limit.
 
