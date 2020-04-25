@@ -23,10 +23,10 @@ def bbox_split(bbox, number_grids):
         Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude of the bounding box.
     number_grids: Integer
         Determines the number of grids to split the bounding box.
-        
+
     Returns
     -------
-    move_data : dataframe 
+    move_data : dataframe
         Returns the latittude and longitude coordenates of the grids after the split.
     """
 

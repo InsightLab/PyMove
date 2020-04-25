@@ -82,7 +82,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        
+
         Raises
         ------
             AttributeError if the data doesn't contains one of the columns LATITUDE, LONGITUDE, DATETIME
@@ -708,7 +708,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Object with new features or None if ``inplace=True``.
         """
         operation = begin_operation('generate_weekend_features')
-        
+
         try:
             if inplace:
                 self.generate_day_of_the_week_features(inplace=inplace)
@@ -814,14 +814,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         -------
         PandasMoveDataFrame or None
             Object with new features or None if ``inplace=True``.
-        
+
         References
         ----------
         # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
         # https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
         """
         operation = begin_operation('generate_datetime_in_format_cyclical')
-        
+
         if inplace:
             data_ = self._data
         else:
@@ -1212,7 +1212,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     plt.savefig(fname=name, fig=fig)
 
             self.last_operation = end_operation(operation)
-            
+
             if return_fig:
                 return fig
         except Exception as e:
@@ -1261,7 +1261,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             plt.savefig(fname=name, fig=fig)
 
         self.last_operation = end_operation(operation)
-        
+
         if return_fig:
             return fig
 
@@ -1274,7 +1274,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Represents the trajectory tid.
 
         highlight: String, optional, default None.
-            Name of the feature to highlight on plot. 
+            Name of the feature to highlight on plot.
             If value of feature is 1, it will be highlighted as green marker
 
         figsize : tuple, optional, default (10,10).
@@ -1311,11 +1311,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise KeyError("TID feature not in dataframe")
 
         df_ = self._data[self._data[TID] == tid]
-        
+
         if not len(df_):
             self.last_operation = end_operation(operation)
             raise IndexError(f"No trajectory with tid {tid} in dataframe")
-        
+
         fig = plt.figure(figsize=figsize)
 
         plt.plot(df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=20)  # start point
@@ -1339,7 +1339,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             plt.savefig(fname=name, fig=fig)
 
         df_ = PandasMoveDataFrame(df_)
-        
+
         self.last_operation = end_operation(operation)
 
         if return_fig:
@@ -1354,7 +1354,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         self : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
-            
+
         Examples
         --------
         ======================= INFORMATION ABOUT DATASET =======================
@@ -1488,7 +1488,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         --------
-        A series or a DataFrame. 
+        A series or a DataFrame.
             The number of non-NA/null entries for each column/row. If level is specified returns a DataFrame.
 
         References
@@ -1614,7 +1614,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self.last_operation = end_operation(operation)
 
         return _select_dtypes
-    
+
     def astype(self, dtype, copy=True, errors='raise', **kwargs):
         """Cast a pandas object to a specified dtype.
 
@@ -1643,7 +1643,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html
         """
-        
+
         if not copy and isinstance(dtype, str):
             raise AttributeError("Could not change lat, lon, and datetime type_.")
         elif not copy and isinstance(dtype, dict):
@@ -1816,7 +1816,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html
         """
-        
+
         if inplace:
             _labels1 = set()
             _labels2 = set()
@@ -1833,7 +1833,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             _columns = set(['lat', 'lon', 'datetime'])
             if (axis==1 or axis=='columns' or columns) and (_labels1.union(_labels2) & _columns):
                 raise AttributeError("Could not drop columns lat, lon, and datetime.")
-     
+
         operation = begin_operation('drop')
         _drop = self._data.drop(labels, axis, index, columns, level, inplace, errors)
         self.last_operation = end_operation(operation)
@@ -2019,13 +2019,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Return a boolean same-sized object indicating if the values are NA.
         NA values, such as None or numpy.NaN, gets mapped to True values.
         Everything else gets mapped to False values.
-        Characters such as empty strings '' or numpy.inf are not considered NA values 
+        Characters such as empty strings '' or numpy.inf are not considered NA values
         (unless you set pandas.options.mode.use_inf_as_na = True).
 
         Returns
         -------
         DataFrame:
-            DataFrame of booleans showing for each element in DataFrame that indicates 
+            DataFrame of booleans showing for each element in DataFrame that indicates
             whether an element is not an NA value.
         """
         operation = begin_operation('isna')
@@ -2116,7 +2116,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dropna.html
         """
-        
+
         if inplace:
             if (axis==1 or axis=='columns'):
                 columns = ['lat', 'lon', 'datetime']
@@ -2245,7 +2245,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if isinstance(other, PandasMoveDataFrame):
             other = other._data
-            
+
         _append = self._data.append(other, ignore_index, verify_integrity, sort)
         _append = PandasMoveDataFrame(data=_append)
         self.last_operation = end_operation(operation)
@@ -2299,7 +2299,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         -----
         Parameters `on`, `lsuffix`, and `rsuffix` are not supported when
         passing a list of `DataFrame` objects.
-        
+
         References
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.join.html
@@ -2308,11 +2308,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if isinstance(other, PandasMoveDataFrame):
             other = other._data
-            
+
         _join = self._data.join(other, on, how, lsuffix, rsuffix, sort)
-        _join = PandasMoveDataFrame(data=_join) 
+        _join = PandasMoveDataFrame(data=_join)
         self.last_operation = end_operation(operation)
-        
+
         return _join
 
     def nunique(self, axis=0, dropna=True):
@@ -2518,12 +2518,12 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def loc(self):
         # Access a group of rows and columns by label(s) or a boolean array.
         raise NotImplementedError("To be implemented")
-    
+
     @property
     def iloc(self):
         # Purely integer-location based indexing for selection by position.
         raise NotImplementedError("To be implemented")
-    
+
     @property
     def at(self):
         # Access a single value for a row/column label pair.
@@ -2533,22 +2533,22 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def values(self):
         # Return a Numpy representation of the DataFrame.
         raise NotImplementedError("To be implemented")
-    
+
     @property
     def columns(self):
         # The column labels of the DataFrame.
         raise NotImplementedError("To be implemented")
-    
+
     @property
     def index(self):
         # The index (row labels) of the DataFrame.
         raise NotImplementedError("To be implemented")
-    
+
     @property
     def dtypes(self):
         # Return the dtypes in the DataFrame.
         raise NotImplementedError("To be implemented")
-    
+
     @property
     def shape(self):
         # Return a tuple representing the dimensionality of the DataFrame.
@@ -2742,7 +2742,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        
+
         Returns
         ----------
         """
@@ -2774,10 +2774,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        
+
         Returns
         -------
-        
+
         References
         ----------
         # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
