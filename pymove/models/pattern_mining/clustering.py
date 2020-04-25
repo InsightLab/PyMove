@@ -70,7 +70,6 @@ def gap_statistic(move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=
     Notes
     -----
     https://anaconda.org/milesgranger/gap-statistic/notebook
-
     """
 
     gaps = {}
