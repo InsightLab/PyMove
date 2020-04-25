@@ -1,19 +1,21 @@
 import time
-from tqdm import tqdm_notebook as tqdm
+
 import numpy as np
-from pymove.utils.trajectories import progress_update
+from tqdm import tqdm_notebook as tqdm
+
 from pymove.preprocessing.stay_point_detection import create_or_update_move_stop_by_dist_time
 from pymove.utils.constants import TRAJ_ID
+from pymove.utils.trajectories import progress_update
 
 
 def compress_segment_stop_to_point(
-    move_data, 
-    label_segment='segment_stop', 
-    label_stop='stop', 
+    move_data,
+    label_segment='segment_stop',
+    label_stop='stop',
     point_mean='default',
-    drop_moves=True, 
-    label_id=TRAJ_ID, 
-    dist_radius=30, 
+    drop_moves=True,
+    label_id=TRAJ_ID,
+    dist_radius=30,
     time_radius=900
 ):
     """Compress the trajectories using the stay points in the dataframe.
@@ -136,9 +138,9 @@ def compress_segment_stop_to_point(
 
 
 def compress_segment_stop_to_point_optimizer(
-    move_data, 
-    label_segment='segment_stop', 
-    label_stop='stop', 
+    move_data,
+    label_segment='segment_stop',
+    label_stop='stop',
     point_mean='default',
     drop_moves=True
 ):

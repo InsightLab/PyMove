@@ -1,16 +1,17 @@
 import numpy as np
-from pymove.utils.constants import (
-	LATITUDE,
-	LONGITUDE,
-	DATETIME,
-	TRAJ_ID,
-	TID,
-	SPEED_TO_PREV,
-	DIST_TO_PREV,
-	DIST_PREV_TO_NEXT,
-	DIST_TO_NEXT,
-    TIME_TO_PREV)
 
+from pymove.utils.constants import (
+    DATETIME,
+    DIST_PREV_TO_NEXT,
+    DIST_TO_NEXT,
+    DIST_TO_PREV,
+    LATITUDE,
+    LONGITUDE,
+    SPEED_TO_PREV,
+    TID,
+    TIME_TO_PREV,
+    TRAJ_ID
+)
 
 
 def by_bbox(move_data, bbox, filter_out=False, inplace=False):
@@ -105,7 +106,7 @@ def by_label(move_data, value, label_name, filter_out=False):
     ----------
     move_data : dataframe
         The input trajectory data
-    value : The type of the feature values to be use to filter the trajectories
+    value : The type_ of the feature values to be use to filter the trajectories
         Specifies the value used to filter the trajectories points
     label_name : String
         Specifes the label of the colum used in the filtering
@@ -369,8 +370,8 @@ def clean_gps_jumps_by_distance(
         in order to be considered outliers
     dic_labels : dict, optional(the classe"s dic_labels by default)
         Dictionary mapping the user"s dataframe labels to the pattern of the PyRoad"s lib
-    label_dtype : type, optional(np.float64 by default)
-        Represents column id type. By default it"s np.float64.
+    label_dtype : type_, optional(np.float64 by default)
+        Represents column id type_. By default it"s np.float64.
     sum_drop:Integer, optional(0 by default)
         Specifies the number of colums that have been droped.
     """
@@ -412,8 +413,8 @@ def clean_gps_nearby_points_by_distances(move_data, label_id=TRAJ_ID, radius_are
         Dictionary mapping the user"s dataframe labels to the pattern of the PyRoad"s lib
     radius_area : Float, optional(10.0 by default)
         Species the minimum distance a point must have to it"s previous point, in order not to be droped.
-    label_dtype : type, optional(np.float64 by default)
-        Represents column id type. By default it"s np.float64.
+    label_dtype : type_, optional(np.float64 by default)
+        Represents column id type_. By default it"s np.float64.
     """
 
     if DIST_TO_PREV not in move_data:
@@ -459,8 +460,8 @@ def clean_gps_nearby_points_by_speed(move_data, label_id=TRAJ_ID, speed_radius=0
         Dictionary mapping the user"s dataframe labels to the pattern of the PyRoad"s lib
     speed_radius : Float, optional(0.0 by default)
         Species the minimum speed a point must have from it"s previous point, in order not to be droped.
-    label_dtype : type, optional(np.float64 by default)
-        Represents column id type. By default it"s np.float64.
+    label_dtype : type_, optional(np.float64 by default)
+        Represents column id type_. By default it"s np.float64.
     """
 
     if SPEED_TO_PREV not in move_data:
@@ -511,8 +512,8 @@ def clean_gps_speed_max_radius(move_data, label_id=TRAJ_ID, speed_max=50.0, labe
         Dictionary mapping the user"s dataframe labels to the pattern of the PyRoad"s lib
     speed_max : Float. Optional(50.0 by default)
         Indicates the maximun value a point"s speed_to_prev and speed_to_next should have, in order not to be dropped.
-    label_dtype : type, optional(np.float64 by default)
-        Represents column id type. By default it"s np.float64.
+    label_dtype : type_, optional(np.float64 by default)
+        Represents column id type_. By default it"s np.float64.
     """
     if SPEED_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features(label_id=label_id, label_dtype=label_dtype)
@@ -552,8 +553,8 @@ def clean_trajectories_with_few_points(
         Dictionary mapping the user"s dataframe labels to the pattern of the PyRoad"s lib
     min_points_per_trajectory: Integer, optional(2 by default)
         Specifies the minimun number of points a trajectory must have in order not to be dropped
-    label_dtype : type, optional(np.float64 by default)
-        Represents column id type. By default it"s np.float64.
+    label_dtype : type_, optional(np.float64 by default)
+        Represents column id type_. By default it"s np.float64.
     """
     if TID not in move_data:
         move_data.generate_tid_based_on_id_datatime()
@@ -600,8 +601,8 @@ def clean_trajectories_short_and_few_points_(
         Specifies the minimun lenght a trajectory must have in order not to be dropped
     min_points_per_trajectory: Integer, optional(2 by default)
         Specifies the minimun number of points a trajectory must have in order not to be dropped
-    label_dtype : type, optional(np.float64 by default)
-        Represents column id type. By default it"s np.float64.
+    label_dtype : type_, optional(np.float64 by default)
+        Represents column id type_. By default it"s np.float64.
 
     Notes
     -----

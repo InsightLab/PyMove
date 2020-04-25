@@ -1,15 +1,14 @@
 import time
+
 import numpy as np
 from scipy.interpolate import interp1d
 
 from pymove.core.dataframe import PandasMoveDataFrame
-
-from pymove.utils.trajectories import shift, progress_update
-from pymove.utils.transformations import feature_values_using_filter_and_indexes, feature_values_using_filter
 from pymove.utils.constants import TID
+from pymove.utils.trajectories import progress_update, shift
+from pymove.utils.transformations import feature_values_using_filter
 
-
-""" Fuction to solve problems after Map-matching"""
+# Fuction to solve problems after Map-matching
 
 
 def check_time_dist(
@@ -143,14 +142,14 @@ def fix_time_not_in_ascending_order_id(move_data, tid, index_name="tid", inplace
         The name of the column to set as the new index during function execution. Indicates the tid column.
     inplace: boolean, optional(True by default)
         if set to true the original dataframe will be altered,
-        otherwise the alteration will be made in a copy, that will be returned.        
-    
+        otherwise the alteration will be made in a copy, that will be returned.
+
     Returns
     -------
         move_data : dataframe
             A copy of the original dataframe, with the alterations done by the function. (When inplace is False)
         size_id
-    
+
     Notes
     -----
     Do not use trajectories with only 1 point.
@@ -211,7 +210,7 @@ def fix_time_not_in_ascending_order_all(move_data, index_name="tid", drop_marked
         Indicates if rows marked as deleted should be dropped.
     inplace: boolean, optional(True by default)
         if set to true the original dataframe will be altered,
-        otherwise the alteration will be made in a copy, that will be returned.        
+        otherwise the alteration will be made in a copy, that will be returned.
 
     Returns
     -------
@@ -220,7 +219,7 @@ def fix_time_not_in_ascending_order_all(move_data, index_name="tid", drop_marked
         None
             When inplace is True
     """
-    
+
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
@@ -274,13 +273,13 @@ def fix_time_not_in_ascending_order_all(move_data, index_name="tid", drop_marked
 
 
 def interpolate_add_deltatime_speed_features(
-    move_data, 
-    label_id="tid", 
+    move_data,
+    label_id="tid",
     max_time_between_adj_points=900,
-    max_dist_between_adj_points=5000, 
-    max_speed=30, 
+    max_dist_between_adj_points=5000,
+    max_speed=30,
     inplace=True
-):    
+):
     """Use to interpolate distances (x) to find times (y).
      Parameters
     ----------
@@ -305,7 +304,7 @@ def interpolate_add_deltatime_speed_features(
         None
             When inplace is True
     """
-    
+
     if inplace == False:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 

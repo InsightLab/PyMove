@@ -1,15 +1,16 @@
-import numpy as np
-import pandas as pd
 import time
 
-from pymove.core.dataframe import PandasMoveDataFrame
+import numpy as np
+import pandas as pd
 
+from pymove.core.dataframe import PandasMoveDataFrame
 from pymove.utils.constants import (
-    TIME_TO_PREV,
     DIST_TO_PREV,
     SPEED_TO_PREV,
-    TRAJ_ID,
-    TID_DIST)
+    TID_DIST,
+    TIME_TO_PREV,
+    TRAJ_ID
+)
 from pymove.utils.trajectories import progress_update
 
 
@@ -22,10 +23,10 @@ def bbox_split(bbox, number_grids):
         Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude of the bounding box.
     number_grids: Integer
         Determines the number of grids to split the bounding box.
-        
+
     Returns
     -------
-    move_data : dataframe 
+    move_data : dataframe
         Returns the latittude and longitude coordenates of the grids after the split.
     """
 
@@ -223,13 +224,13 @@ def by_speed(
         start_time = time.time()
 
         for idx in ids:
-            """ increment index to trajectory"""
+            # increment index to trajectory
             curr_tid += 1
 
-            """ filter speed max"""
+            # filter speed max
             speed = (move_data.at[idx, SPEED_TO_PREV] > max_speed_between_adj_points)
 
-            """ check if object have only one point to be removed """
+            # check if object have only one point to be removed
             if speed.shape == ():
                 count += 1
                 # set object  = -1 to remove ahead
@@ -326,13 +327,13 @@ def by_time(
         start_time = time.time()
 
         for idx in ids:
-            """ increment index to trajectory"""
+            # increment index to trajectory
             curr_tid += 1
 
-            """ filter time max"""
+            # filter time max
             times = (move_data.at[idx, TIME_TO_PREV] > max_time_between_adj_points)
 
-            """ check if object have only one point to be removed """
+            # check if object have only one point to be removed
             if times.shape == ():
                 count += 1
                 # set object  = -1 to remove ahead
@@ -420,12 +421,12 @@ def by_max_dist(move_data, label_id=TRAJ_ID,  max_dist_between_adj_points=3000, 
 
 
         for idx in ids:
-            """ increment index to trajectory"""
+            # increment index to trajectory
             curr_tid += 1
 
-            """ filter dist max"""
+            # filter dist max
             dist = (move_data.at[idx, DIST_TO_PREV] > max_dist_between_adj_points)
-            """ check if object have more than one point to split"""
+            # check if object have more than one point to split
             if dist.shape == ():
                 print('id: {} has not point to split'.format(idx))
                 move_data.at[idx, label_segment] = curr_tid
@@ -493,13 +494,13 @@ def by_max_time(move_data, label_id=TRAJ_ID, max_time_between_adj_points=900.0, 
         start_time = time.time()
 
         for idx in ids:
-            """ increment index to trajectory"""
+            # increment index to trajectory
             curr_tid += 1
 
-            """ filter time max"""
+            # filter time max
             times = (move_data.at[idx, TIME_TO_PREV] > max_time_between_adj_points)
 
-            """ check if object have only one point to be removed """
+            # check if object have only one point to be removed
             if times.shape == ():
                 print('id: {} has not point to split'.format(id))
                 move_data.at[idx, label_segment] = curr_tid
@@ -579,12 +580,12 @@ def by_max_speed(move_data, label_id=TRAJ_ID, max_speed_between_adj_points=50.0,
         start_time = time.time()
 
         for idx in ids:
-            """ increment index to trajectory"""
+            # increment index to trajectory
             curr_tid += 1
 
-            """ filter speed max"""
+            # filter speed max
             speed = (move_data.at[idx, SPEED_TO_PREV] > max_speed_between_adj_points)
-            """ check if object have only one point to be removed """
+            # check if object have only one point to be removed
             if speed.shape == ():
                 print('id: {} has not point to split'.format(id))
                 move_data.at[idx, label_segment] = curr_tid

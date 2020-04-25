@@ -94,7 +94,7 @@ PyMove **proposes**:
 
 ## Github installation
 
-1. Clone this repository
+1.Clone this repository
 
 `git clone https://github.com/InsightLab/PyMove`
 
