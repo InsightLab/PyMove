@@ -27,10 +27,12 @@ def std(sum_sq, size, avg):
     http://stackoverflow.com/questions/29046346/comparison-of-power-to-multiplication-in-python
     """
     try:
-        result = math.sqrt(sum_sq/size - avg*avg)
+        result = math.sqrt(sum_sq / size - avg * avg)
     except ValueError:
-        e = '(size - avg^2) (size=%s, avg=%s, sum_sq=%s) should be non negative, but is %s' % \
-            (size, avg, sum_sq, size - avg*avg)
+        e = (
+            "(size - avg^2) (size=%s, avg=%s, sum_sq=%s) should be non negative, but is %s"
+            % (size, avg, sum_sq, size - avg * avg)
+        )
         raise ValueError(e)
     return result
 
@@ -57,9 +59,8 @@ def avg_std(sum_, sum_sq, size):
 
     float.
         Represents the value of standart deviation.
-
     """
-    avg = sum_/size
+    avg = sum_ / size
     return avg, std(sum_sq, size, avg)
 
 
@@ -82,9 +83,8 @@ def std_sample(sum_sq, size, avg):
     -------
     float.
         Represents the value of standard deviation of sample.
-
     """
-    return std(sum_sq, size, avg) * math.sqrt(size/(size-1))
+    return std(sum_sq, size, avg) * math.sqrt(size / (size - 1))
 
 
 def avg_std_sample(sum_, sum_sq, size):
@@ -107,7 +107,7 @@ def avg_std_sample(sum_, sum_sq, size):
     float.
         Represents the value of average of standard deviation of sample.
     """
-    avg = sum_/size
+    avg = sum_ / size
     return avg, std_sample(sum_sq, size, avg)
 
 
@@ -163,7 +163,6 @@ def array_sum(values_array):
     -------
     sum_ : float.
         The sum of the elements of the array.
-
     """
     sum_ = 0
     for item in values_array:
@@ -173,8 +172,8 @@ def array_sum(values_array):
 
 def array_stats(values_array):
     """
-    Computes the sum of all the elements in the array, the sum of the square of each element and the number of
-    elements of the array.
+    Computes the sum of all the elements in the array, the sum of the square of
+    each element and the number of elements of the array.
 
     Parameters
     ----------
@@ -191,7 +190,6 @@ def array_stats(values_array):
 
     n : int.
         The number of elements in the array.
-
     """
     sum_ = 0
     sum_sq = 0
@@ -205,7 +203,7 @@ def array_stats(values_array):
 
 def interpolation(x0, y0, x1, y1, x):
     """
-    Perfomers interpolation and extrapolation
+    Perfomers interpolation and extrapolation.
 
     Parameters
     ----------
@@ -235,7 +233,6 @@ def interpolation(x0, y0, x1, y1, x):
     interpolation 2: (30, 3, 40, 5, 35) -> 4.0
     extrapolation 1: (30, 3, 40, 5, 25) -> 2.0
     extrapolation 2: (30, 3, 40, 5, 45) -> 6.0
-
     """
-    y = y0 + (y1 - y0) * ((x - x0)/(x1 - x0))
+    y = y0 + (y1 - y0) * ((x - x0) / (x1 - x0))
     return y
