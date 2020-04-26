@@ -1,7 +1,7 @@
 import abc
 
-class MoveDataFrameAbstractModel(abc.ABC):
 
+class MoveDataFrameAbstractModel(abc.ABC):
     @abc.abstractmethod
     def lat(self):
         pass

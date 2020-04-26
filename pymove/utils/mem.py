@@ -22,7 +22,9 @@ except ImportError:
 
 
 def proc_info():
-    """This functions retrieves informations about each jupyter notebook running in the machine.
+    """
+    This functions retrieves informations about each jupyter notebook running in
+    the machine.
 
     Returns
     -------
@@ -60,10 +62,14 @@ def proc_info():
             continue
 
         # jupyter notebook processes
-        if len(ret_str) > 0 and ("jupyter" in ret_str or "ipython" in ret_str) and "kernel" in ret_str:
+        if (
+            len(ret_str) > 0
+            and ("jupyter" in ret_str or "ipython" in ret_str)
+            and "kernel" in ret_str
+        ):
             # kernel
             kernel_ID = re.sub(regex, r"\1", ret_str)[0:-1]
-            #kernel_ID = filter(lambda x: x in string.printable, kernel_ID)
+            # kernel_ID = filter(lambda x: x in string.printable, kernel_ID)
 
             # memory
             process = psutil.Process(int(pid))
@@ -106,13 +112,14 @@ def stats(sessions_str):
     # joining tables
     df = pd.merge(df_nb, df_mem, on=["kernel_ID"], how="right")
     df = df.sort_values("memory_GB", ascending=False)
-    del(df_mem)
-    del(df_nb)
+    del df_mem
+    del df_nb
     return df.reset_index(drop=True)
 
 
 def mem():
-    """Calculates the resource consumed the current process.
+    """
+    Calculates the resource consumed the current process.
 
     Returns
     -------
@@ -125,15 +132,15 @@ def mem():
 
 
 def reduce_mem_usage_automatic(df):
-    """Reduces the memory usage of the given dataframe.
+    """
+    Reduces the memory usage of the given dataframe.
 
     Parameter
     ---------
     df : dataframe
         The input data to which the operation of memory reduction will be performed.
-
     """
-    start_mem = df.memory_usage().sum() / 1024**2
+    start_mem = df.memory_usage().sum() / 1024 ** 2
     print("Memory usage of dataframe is {:.2f} MB".format(start_mem))
 
     for col in df.columns:
@@ -143,39 +150,70 @@ def reduce_mem_usage_automatic(df):
             c_max = df[col].max()
             if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
                 df[col] = df[col].astype(np.int8)
-            elif c_min > np.iinfo(np.uint8).min and c_max < np.iinfo(np.uint8).max:
+            elif (
+                c_min > np.iinfo(np.uint8).min
+                and c_max < np.iinfo(np.uint8).max
+            ):
                 df[col] = df[col].astype(np.uint8)
-            elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
+            elif (
+                c_min > np.iinfo(np.int16).min
+                and c_max < np.iinfo(np.int16).max
+            ):
                 df[col] = df[col].astype(np.int16)
-            elif c_min > np.iinfo(np.uint16).min and c_max < np.iinfo(np.uint16).max:
+            elif (
+                c_min > np.iinfo(np.uint16).min
+                and c_max < np.iinfo(np.uint16).max
+            ):
                 df[col] = df[col].astype(np.uint16)
-            elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+            elif (
+                c_min > np.iinfo(np.int32).min
+                and c_max < np.iinfo(np.int32).max
+            ):
                 df[col] = df[col].astype(np.int32)
-            elif c_min > np.iinfo(np.uint32).min and c_max < np.iinfo(np.uint32).max:
+            elif (
+                c_min > np.iinfo(np.uint32).min
+                and c_max < np.iinfo(np.uint32).max
+            ):
                 df[col] = df[col].astype(np.uint32)
-            elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
+            elif (
+                c_min > np.iinfo(np.int64).min
+                and c_max < np.iinfo(np.int64).max
+            ):
                 df[col] = df[col].astype(np.int64)
-            elif c_min > np.iinfo(np.uint64).min and c_max < np.iinfo(np.uint64).max:
+            elif (
+                c_min > np.iinfo(np.uint64).min
+                and c_max < np.iinfo(np.uint64).max
+            ):
                 df[col] = df[col].astype(np.uint64)
         elif col_type == np.float:
             c_min = df[col].min()
             c_max = df[col].max()
-            if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+            if (
+                c_min > np.finfo(np.float16).min
+                and c_max < np.finfo(np.float16).max
+            ):
                 df[col] = df[col].astype(np.float16)
-            elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
+            elif (
+                c_min > np.finfo(np.float32).min
+                and c_max < np.finfo(np.float32).max
+            ):
                 df[col] = df[col].astype(np.float32)
             else:
                 df[col] = df[col].astype(np.float64)
 
-    end_mem = df.memory_usage().sum() / 1024**2
+    end_mem = df.memory_usage().sum() / 1024 ** 2
     print("Memory usage after optimization is: {:.2f} MB".format(end_mem))
-    print("Decreased by {:.1f}%".format(100 * (start_mem - end_mem) / start_mem))
+    print(
+        "Decreased by {:.1f}%".format(100 * (start_mem - end_mem) / start_mem)
+    )
 
 
 def total_size(o, handlers=None, verbose=False):
-    """ Calculates the approximate memory footprint of an given object and all of its contents.
-    Automatically finds the contents of the following builtin containers and
-    their subclasses:  tuple, list, deque, dict, set and frozenset.
+    """
+    Calculates the approximate memory footprint of an given object and all of
+    its contents. Automatically finds the contents of the following builtin
+    containers and their subclasses:  tuple, list, deque, dict, set and
+    frozenset.
 
     Parameters
     ----------
@@ -202,13 +240,13 @@ def total_size(o, handlers=None, verbose=False):
 
     dict_handler = lambda d: chain.from_iterable(d.items())
     all_handlers = {
-                    tuple: iter,
-                    list: iter,
-                    deque: iter,
-                    dict: dict_handler,
-                    set: iter,
-                    frozenset: iter
-                    }
+        tuple: iter,
+        list: iter,
+        deque: iter,
+        dict: dict_handler,
+        set: iter,
+        frozenset: iter,
+    }
     # user handlers take precedence
     all_handlers.update(handlers)
     # track which object id"s have already been seen
@@ -234,9 +272,10 @@ def total_size(o, handlers=None, verbose=False):
 
     return sizeof(o)
 
+
 def begin_operation(name):
     """
-    Gets the stats for the current operation
+    Gets the stats for the current operation.
 
     Parameters
     ----------
@@ -251,11 +290,12 @@ def begin_operation(name):
     process = psutil.Process(os.getpid())
     init = process.memory_info()[0]
     start = time.time()
-    return { 'process': process, 'init': init, 'start': start, 'name': name }
+    return {"process": process, "init": init, "start": start, "name": name}
+
 
 def end_operation(operation):
     """
-    Gets the time and memory usage of the operation
+    Gets the time and memory usage of the operation.
 
     Parameters
     ----------
@@ -267,18 +307,20 @@ def end_operation(operation):
     dict:
         dictionary with the operation execution stats
     """
-    finish = operation['process'].memory_info()[0]
-    last_operation_name = operation['name']
-    last_operation_time_duration = time.time() - operation['start']
-    last_operation_mem_usage = finish - operation['init']
+    finish = operation["process"].memory_info()[0]
+    last_operation_name = operation["name"]
+    last_operation_time_duration = time.time() - operation["start"]
+    last_operation_mem_usage = finish - operation["init"]
     return {
-        'name': last_operation_name,
-        'time in seconds': last_operation_time_duration,
-        'memory': format_mem(last_operation_mem_usage)
+        "name": last_operation_name,
+        "time in seconds": last_operation_time_duration,
+        "memory": format_mem(last_operation_mem_usage),
     }
 
+
 def format_mem(mem_usage):
-    """Returns the memory usage calculation of the last function.
+    """
+    Returns the memory usage calculation of the last function.
 
     Parameters
     ----------
@@ -291,23 +333,23 @@ def format_mem(mem_usage):
     """
 
     switcher = {
-        'B': mem_usage,
-        'KB': mem_usage / 1024,
-        'MB': mem_usage / (1024 ** 2),
-        'GB': mem_usage / (1024 ** 3),
-        'TB': mem_usage / (1024 ** 4),
+        "B": mem_usage,
+        "KB": mem_usage / 1024,
+        "MB": mem_usage / (1024 ** 2),
+        "GB": mem_usage / (1024 ** 3),
+        "TB": mem_usage / (1024 ** 4),
     }
 
     size = int(log10(max(1, mem_usage))) + 1
     if size <= 3:
-        unit = 'B'
+        unit = "B"
     elif size <= 6:
-        unit = 'KB'
+        unit = "KB"
     elif size <= 9:
-        unit = 'MB'
+        unit = "MB"
     elif size <= 12:
-        unit = 'GB'
+        unit = "GB"
     else:
-        unit = 'TB'
+        unit = "TB"
 
-    return f'{switcher[unit]} {unit}'
+    return f"{switcher[unit]} {unit}"

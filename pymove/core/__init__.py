@@ -1,5 +1,3 @@
 from .interface import MoveDataFrameAbstractModel
 
-__all__ = [
-    'MoveDataFrameAbstractModel'
-]
+__all__ = ["MoveDataFrameAbstractModel"]
