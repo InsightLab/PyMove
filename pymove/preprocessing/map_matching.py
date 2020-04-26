@@ -378,7 +378,7 @@ def interpolate_add_deltatime_speed_features(
     try:
         for tid in tids:
             filter_nodes = move_data.at[tid, "isNode"] == 1
-            move_data.at[tid, "time"][filter_nodes]
+            times = move_data.at[tid, "time"][filter_nodes]
             size_id = 1 if filter_nodes.shape == () else filter_nodes.shape[0]
             count += size_id
 
