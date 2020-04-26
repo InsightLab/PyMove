@@ -9,13 +9,14 @@ from pymove.utils.constants import (
     SPEED_TO_PREV,
     TID_DIST,
     TIME_TO_PREV,
-    TRAJ_ID
+    TRAJ_ID,
 )
 from pymove.utils.trajectories import progress_update
 
 
 def bbox_split(bbox, number_grids):
-    """splits the bounding box in N grids of the same size.
+    """
+    splits the bounding box in N grids of the same size.
 
     Parameters
     ----------
@@ -39,28 +40,35 @@ def bbox_split(bbox, number_grids):
     const_lon = abs(abs(lon_max) - abs(lon_min)) / number_grids
     print("const_lat: {}\nconst_lon: {}".format(const_lat, const_lon))
 
-    move_data = pd.DataFrame(columns=["lat_min", "lon_min", "lat_max", "lon_max"])
+    move_data = pd.DataFrame(
+        columns=["lat_min", "lon_min", "lat_max", "lon_max"]
+    )
     for i in range(number_grids):
-        move_data = move_data.append({"lat_min": lat_min,
-                                      "lon_min": lon_min + (const_lon * i),
-                                      "lat_max": lat_max,
-                                      "lon_max": lon_min + (const_lon * (i + 1))},
-                                     ignore_index=True)
+        move_data = move_data.append(
+            {
+                "lat_min": lat_min,
+                "lon_min": lon_min + (const_lon * i),
+                "lat_max": lat_max,
+                "lon_max": lon_min + (const_lon * (i + 1)),
+            },
+            ignore_index=True,
+        )
 
     return move_data
 
 
 def by_dist_time_speed(
-        move_data,
-        label_id=TRAJ_ID,
-        max_dist_between_adj_points=3000,
-        max_time_between_adj_points=7200,
-        max_speed_between_adj_points=50.0,
-        drop_single_points=True,
-        label_new_tid="tid_part",
-        inplace=True
+    move_data,
+    label_id=TRAJ_ID,
+    max_dist_between_adj_points=3000,
+    max_time_between_adj_points=7200,
+    max_speed_between_adj_points=50.0,
+    drop_single_points=True,
+    label_new_tid="tid_part",
+    inplace=True,
 ):
-    """Splits the trajectories into segments based on distance, time and speed.
+    """
+    Splits the trajectories into segments based on distance, time and speed.
 
     Parameters
     ----------
@@ -119,9 +127,17 @@ def by_dist_time_speed(
         for idx in ids:
             curr_tid += 1
 
-            filter_ = (move_data.at[idx, TIME_TO_PREV] > max_time_between_adj_points) | \
-                      (move_data.at[idx, DIST_TO_PREV] > max_dist_between_adj_points) | \
-                      (move_data.at[idx, SPEED_TO_PREV] > max_speed_between_adj_points)
+            filter_ = (
+                (move_data.at[idx, TIME_TO_PREV] > max_time_between_adj_points)
+                | (
+                    move_data.at[idx, DIST_TO_PREV]
+                    > max_dist_between_adj_points
+                )
+                | (
+                    move_data.at[idx, SPEED_TO_PREV]
+                    > max_speed_between_adj_points
+                )
+            )
 
             # check if object have only one point to be removed
             if filter_.shape == ():
@@ -140,7 +156,9 @@ def by_dist_time_speed(
                 count += tids.shape[0]
                 move_data.at[idx, label_new_tid] = tids
 
-            curr_perc_int, est_time_str = progress_update(count, move_datasize, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(
+                count, move_datasize, start_time, curr_perc_int, step_perc=20
+            )
 
         if label_id == label_new_tid:
             move_data.reset_index(drop=True, inplace=True)
@@ -156,9 +174,16 @@ def by_dist_time_speed(
                 print("...Drop Trajectory with a unique GPS point\n")
                 ids_before_drop = move_data[label_id].unique().shape[0]
                 move_data.drop(index=idx, inplace=True)
-                print("...Object - before drop: {} - after drop: {}".format(ids_before_drop,
-                                                                            move_data[label_id].unique().shape[0]))
-                print("...Shape - before drop: {} - after drop: {}".format(shape_before_drop, move_data.shape))
+                print(
+                    "...Object - before drop: {} - after drop: {}".format(
+                        ids_before_drop, move_data[label_id].unique().shape[0]
+                    )
+                )
+                print(
+                    "...Shape - before drop: {} - after drop: {}".format(
+                        shape_before_drop, move_data.shape
+                    )
+                )
                 move_data.generate_dist_time_speed_features()
             else:
                 print("...No trajs with only one point.", move_data.shape)
@@ -170,14 +195,15 @@ def by_dist_time_speed(
 
 
 def by_speed(
-        move_data,
-        label_id=TRAJ_ID,
-        max_speed_between_adj_points=50.0,
-        drop_single_points=True,
-        label_new_tid="tid_speed",
-        inplace=True
+    move_data,
+    label_id=TRAJ_ID,
+    max_speed_between_adj_points=50.0,
+    drop_single_points=True,
+    label_new_tid="tid_speed",
+    inplace=True,
 ):
-    """Segments the trajectories based on speed.
+    """
+    Segments the trajectories based on speed.
 
     Parameters
     ----------
@@ -204,7 +230,10 @@ def by_speed(
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
-    print("\nSplit trajectories by max_speed_between_adj_points:", max_speed_between_adj_points)
+    print(
+        "\nSplit trajectories by max_speed_between_adj_points:",
+        max_speed_between_adj_points,
+    )
     try:
         if SPEED_TO_PREV not in move_data:
             move_data.generate_dist_time_speed_features()
@@ -228,7 +257,9 @@ def by_speed(
             curr_tid += 1
 
             # filter speed max
-            speed = (move_data.at[idx, SPEED_TO_PREV] > max_speed_between_adj_points)
+            speed = (
+                move_data.at[idx, SPEED_TO_PREV] > max_speed_between_adj_points
+            )
 
             # check if object have only one point to be removed
             if speed.shape == ():
@@ -246,7 +277,9 @@ def by_speed(
                 count += tids.shape[0]
                 move_data.at[idx, label_new_tid] = tids
 
-            curr_perc_int, est_time_str = progress_update(count, move_datasize, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(
+                count, move_datasize, start_time, curr_perc_int, step_perc=20
+            )
 
         if label_id == label_new_tid:
             move_data.reset_index(drop=True, inplace=True)
@@ -262,9 +295,16 @@ def by_speed(
                 print("...Drop Trajectory with a unique GPS point\n")
                 ids_before_drop = move_data[label_id].unique().shape[0]
                 move_data.drop(index=idx, inplace=True)
-                print("...Object - before drop: {} - after drop: {}".format(ids_before_drop,
-                                                                            move_data[label_id].unique().shape[0]))
-                print("...Shape - before drop: {} - after drop: {}".format(shape_before_drop, move_data.shape))
+                print(
+                    "...Object - before drop: {} - after drop: {}".format(
+                        ids_before_drop, move_data[label_id].unique().shape[0]
+                    )
+                )
+                print(
+                    "...Shape - before drop: {} - after drop: {}".format(
+                        shape_before_drop, move_data.shape
+                    )
+                )
                 move_data.generate_dist_time_speed_features()
             else:
                 print("...No trajs with only one point.", move_data.shape)
@@ -276,14 +316,15 @@ def by_speed(
 
 
 def by_time(
-        move_data,
-        label_id=TRAJ_ID,
-        max_time_between_adj_points=900.0,
-        drop_single_points=True,
-        label_new_tid="tid_time",
-        inplace=True
+    move_data,
+    label_id=TRAJ_ID,
+    max_time_between_adj_points=900.0,
+    drop_single_points=True,
+    label_new_tid="tid_time",
+    inplace=True,
 ):
-    """Segments the trajectories into segments based on time.
+    """
+    Segments the trajectories into segments based on time.
 
     Parameters
     ----------
@@ -306,7 +347,10 @@ def by_time(
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
-    print("\nSplit trajectories by max_time_between_adj_points:", max_time_between_adj_points)
+    print(
+        "\nSplit trajectories by max_time_between_adj_points:",
+        max_time_between_adj_points,
+    )
     try:
 
         if TIME_TO_PREV not in move_data:
@@ -331,7 +375,9 @@ def by_time(
             curr_tid += 1
 
             # filter time max
-            times = (move_data.at[idx, TIME_TO_PREV] > max_time_between_adj_points)
+            times = (
+                move_data.at[idx, TIME_TO_PREV] > max_time_between_adj_points
+            )
 
             # check if object have only one point to be removed
             if times.shape == ():
@@ -349,7 +395,9 @@ def by_time(
                 count += tids.shape[0]
                 move_data.at[idx, label_new_tid] = tids
 
-            curr_perc_int, est_time_str = progress_update(count, move_datasize, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(
+                count, move_datasize, start_time, curr_perc_int, step_perc=20
+            )
 
         if label_id == label_new_tid:
             move_data.reset_index(drop=True, inplace=True)
@@ -365,9 +413,16 @@ def by_time(
                 print("...Drop Trajectory with a unique GPS point\n")
                 ids_before_drop = move_data[label_id].unique().shape[0]
                 move_data.drop(index=idx, inplace=True)
-                print("...Object - before drop: {} - after drop: {}".format(ids_before_drop,
-                                                                            move_data[label_id].unique().shape[0]))
-                print("...Shape - before drop: {} - after drop: {}".format(shape_before_drop, move_data.shape))
+                print(
+                    "...Object - before drop: {} - after drop: {}".format(
+                        ids_before_drop, move_data[label_id].unique().shape[0]
+                    )
+                )
+                print(
+                    "...Shape - before drop: {} - after drop: {}".format(
+                        shape_before_drop, move_data.shape
+                    )
+                )
                 move_data.generate_dist_time_speed_features()
             else:
                 print("...No trajs with only one point.", move_data.shape)
@@ -377,7 +432,13 @@ def by_time(
     except Exception as e:
         raise e
 
-def by_max_dist(move_data, label_id=TRAJ_ID,  max_dist_between_adj_points=3000, label_segment=TID_DIST):
+
+def by_max_dist(
+    move_data,
+    label_id=TRAJ_ID,
+    max_dist_between_adj_points=3000,
+    label_segment=TID_DIST,
+):
     """ Segments the trajectories based on distance.
     Parameters
     ----------
@@ -399,14 +460,17 @@ def by_max_dist(move_data, label_id=TRAJ_ID,  max_dist_between_adj_points=3000, 
     -----
     Speed features must be updated after split.
     """
-    print('Split trajectories by max distance between adjacent points:', max_dist_between_adj_points)
+    print(
+        "Split trajectories by max distance between adjacent points:",
+        max_dist_between_adj_points,
+    )
     try:
 
         if DIST_TO_PREV not in move_data:
             move_data.generate_dist_features()
 
         if move_data.index.name is None:
-            print('...setting {} as index'.format(label_id))
+            print("...setting {} as index".format(label_id))
             move_data.set_index(label_id, inplace=True)
 
         curr_tid = 0
@@ -419,18 +483,19 @@ def by_max_dist(move_data, label_id=TRAJ_ID,  max_dist_between_adj_points=3000, 
         curr_perc_int = -1
         start_time = time.time()
 
-
         for idx in ids:
             # increment index to trajectory
             curr_tid += 1
 
             # filter dist max
-            dist = (move_data.at[idx, DIST_TO_PREV] > max_dist_between_adj_points)
+            dist = (
+                move_data.at[idx, DIST_TO_PREV] > max_dist_between_adj_points
+            )
             # check if object have more than one point to split
             if dist.shape == ():
-                print('id: {} has not point to split'.format(idx))
+                print("id: {} has not point to split".format(idx))
                 move_data.at[idx, label_segment] = curr_tid
-                count+=1
+                count += 1
             else:
                 tids = np.empty(dist.shape[0], dtype=np.int64)
                 tids.fill(curr_tid)
@@ -441,21 +506,31 @@ def by_max_dist(move_data, label_id=TRAJ_ID,  max_dist_between_adj_points=3000, 
                 count += tids.shape[0]
                 move_data.at[idx, label_segment] = tids
 
-            curr_perc_int, est_time_str = progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(
+                count, df_size, start_time, curr_perc_int, step_perc=20
+            )
 
         if label_id == label_segment:
             move_data.reset_index(drop=True, inplace=True)
-            print('... label_id = label_new_id, then reseting and drop index')
+            print("... label_id = label_new_id, then reseting and drop index")
         else:
             move_data.reset_index(inplace=True)
-            print('... Reseting index')
-        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-        print('------------------------------------------\n')
+            print("... Reseting index")
+        print(
+            "\nTotal Time: {:.2f} seconds".format((time.time() - start_time))
+        )
+        print("------------------------------------------\n")
     except Exception as e:
-        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
+        print("label_id:{}\nidx:{}\n".format(label_id, idx))
         raise e
 
-def by_max_time(move_data, label_id=TRAJ_ID, max_time_between_adj_points=900.0, label_segment='tid_time'):
+
+def by_max_time(
+    move_data,
+    label_id=TRAJ_ID,
+    max_time_between_adj_points=900.0,
+    label_segment="tid_time",
+):
     """ Splits the trajectories into segments based on a maximum time set by the user.
     Parameters
     ----------
@@ -477,10 +552,13 @@ def by_max_time(move_data, label_id=TRAJ_ID, max_time_between_adj_points=900.0, 
     Speed features must be updated after split.
     """
 
-    print('Split trajectories by max_time_between_adj_points:', max_time_between_adj_points)
+    print(
+        "Split trajectories by max_time_between_adj_points:",
+        max_time_between_adj_points,
+    )
     try:
         if move_data.index.name is None:
-            print('...setting {} as index'.format(label_id))
+            print("...setting {} as index".format(label_id))
             move_data.set_index(label_id, inplace=True)
 
         curr_tid = 0
@@ -498,13 +576,15 @@ def by_max_time(move_data, label_id=TRAJ_ID, max_time_between_adj_points=900.0, 
             curr_tid += 1
 
             # filter time max
-            times = (move_data.at[idx, TIME_TO_PREV] > max_time_between_adj_points)
+            times = (
+                move_data.at[idx, TIME_TO_PREV] > max_time_between_adj_points
+            )
 
             # check if object have only one point to be removed
             if times.shape == ():
-                print('id: {} has not point to split'.format(id))
+                print("id: {} has not point to split".format(id))
                 move_data.at[idx, label_segment] = curr_tid
-                count+=1
+                count += 1
             else:
                 tids = np.empty(times.shape[0], dtype=np.int64)
                 tids.fill(curr_tid)
@@ -515,33 +595,43 @@ def by_max_time(move_data, label_id=TRAJ_ID, max_time_between_adj_points=900.0, 
                 count += tids.shape[0]
                 move_data.at[idx, label_segment] = tids
 
-            curr_perc_int, est_time_str = progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(
+                count, df_size, start_time, curr_perc_int, step_perc=20
+            )
 
         if label_id == label_segment:
             move_data.reset_index(drop=True, inplace=True)
-            print('... label_id = label_new_id, then reseting and drop index')
+            print("... label_id = label_new_id, then reseting and drop index")
         else:
             move_data.reset_index(inplace=True)
-            print('... Reseting index')
-        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-        print('------------------------------------------\n')
-        #if drop_single_points:
-         #   shape_before_drop = move_data.shape
-          #  idx = move_data[ move_data[label_segment] == -1 ].index
-           # if idx.shape[0] > 0:
-            #    print('...Drop Trajectory with a unique GPS point\n')
-             #   ids_before_drop = move_data[label_id].unique().shape[0]
-              #  move_data.drop(index=idx, inplace=True)
-               # print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, move_data[label_id].unique().shape[0]))
-               # print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, move_data.shape))
-            #else:
-             #   print('...No trajs with only one point.', move_data.shape)
+            print("... Reseting index")
+        print(
+            "\nTotal Time: {:.2f} seconds".format((time.time() - start_time))
+        )
+        print("------------------------------------------\n")
+        # if drop_single_points:
+        #   shape_before_drop = move_data.shape
+        #  idx = move_data[ move_data[label_segment] == -1 ].index
+        # if idx.shape[0] > 0:
+        #    print('...Drop Trajectory with a unique GPS point\n')
+        #   ids_before_drop = move_data[label_id].unique().shape[0]
+        #  move_data.drop(index=idx, inplace=True)
+        # print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, move_data[label_id].unique().shape[0]))
+        # print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, move_data.shape))
+        # else:
+        #   print('...No trajs with only one point.', move_data.shape)
 
     except Exception as e:
-        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
+        print("label_id:{}\nidx:{}\n".format(label_id, idx))
         raise e
 
-def by_max_speed(move_data, label_id=TRAJ_ID, max_speed_between_adj_points=50.0, label_segment='tid_speed'):
+
+def by_max_speed(
+    move_data,
+    label_id=TRAJ_ID,
+    max_speed_between_adj_points=50.0,
+    label_segment="tid_speed",
+):
     """ Splits the trajectories into segments based on a maximum speed set by the user.
     Parameters
     ----------
@@ -563,10 +653,13 @@ def by_max_speed(move_data, label_id=TRAJ_ID, max_speed_between_adj_points=50.0,
     -----
     Speed features must be updated after split.
     """
-    print('Split trajectories by max_speed_between_adj_points:', max_speed_between_adj_points)
+    print(
+        "Split trajectories by max_speed_between_adj_points:",
+        max_speed_between_adj_points,
+    )
     try:
         if move_data.index.name is None:
-            print('...setting {} as index'.format(label_id))
+            print("...setting {} as index".format(label_id))
             move_data.set_index(label_id, inplace=True)
 
         curr_tid = 0
@@ -584,12 +677,14 @@ def by_max_speed(move_data, label_id=TRAJ_ID, max_speed_between_adj_points=50.0,
             curr_tid += 1
 
             # filter speed max
-            speed = (move_data.at[idx, SPEED_TO_PREV] > max_speed_between_adj_points)
+            speed = (
+                move_data.at[idx, SPEED_TO_PREV] > max_speed_between_adj_points
+            )
             # check if object have only one point to be removed
             if speed.shape == ():
-                print('id: {} has not point to split'.format(id))
+                print("id: {} has not point to split".format(id))
                 move_data.at[idx, label_segment] = curr_tid
-                count+=1
+                count += 1
             else:
                 tids = np.empty(speed.shape[0], dtype=np.int64)
                 tids.fill(curr_tid)
@@ -600,30 +695,34 @@ def by_max_speed(move_data, label_id=TRAJ_ID, max_speed_between_adj_points=50.0,
                 count += tids.shape[0]
                 move_data.at[idx, label_segment] = tids
 
-            curr_perc_int, est_time_str = progress_update(count, df_size, start_time, curr_perc_int, step_perc=20)
+            curr_perc_int, est_time_str = progress_update(
+                count, df_size, start_time, curr_perc_int, step_perc=20
+            )
 
         if label_id == label_segment:
             move_data.reset_index(drop=True, inplace=True)
-            print('... label_id = label_new_id, then reseting and drop index')
+            print("... label_id = label_new_id, then reseting and drop index")
         else:
             move_data.reset_index(inplace=True)
-            print('... Reseting index')
-        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-        print('------------------------------------------\n')
+            print("... Reseting index")
+        print(
+            "\nTotal Time: {:.2f} seconds".format((time.time() - start_time))
+        )
+        print("------------------------------------------\n")
 
-        #if drop_single_points:
-         #   shape_before_drop = move_data.shape
-          #  idx = move_data[move_data[label_segment] == -1].index
-           # if idx.shape[0] > 0:
-            #    print('...Drop Trajectory with a unique GPS point\n')
-             #   ids_before_drop = move_data[label_id].unique().shape[0]
-              #  move_data.drop(index=idx, inplace=True)
-               # print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, move_data[label_id].unique().shape[0]))
-               # print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, move_data.shape))
-                #create_update_dist_time_speed_features(move_data, label_segment, dic_labels)
-            #else:
-                #print('...No trajs with only one point.', move_data.shape)
+        # if drop_single_points:
+        #   shape_before_drop = move_data.shape
+        #  idx = move_data[move_data[label_segment] == -1].index
+        # if idx.shape[0] > 0:
+        #    print('...Drop Trajectory with a unique GPS point\n')
+        #   ids_before_drop = move_data[label_id].unique().shape[0]
+        #  move_data.drop(index=idx, inplace=True)
+        # print('...Object - before drop: {} - after drop: {}'.format(ids_before_drop, move_data[label_id].unique().shape[0]))
+        # print('...Shape - before drop: {} - after drop: {}'.format(shape_before_drop, move_data.shape))
+        # create_update_dist_time_speed_features(move_data, label_segment, dic_labels)
+        # else:
+        # print('...No trajs with only one point.', move_data.shape)
 
     except Exception as e:
-        print('label_id:{}\nidx:{}\n'.format(label_id, idx))
+        print("label_id:{}\nidx:{}\n".format(label_id, idx))
         raise e
