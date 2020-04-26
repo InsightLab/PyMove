@@ -10,7 +10,7 @@ from pymove.utils.constants import (
     SPEED_TO_PREV,
     TID,
     TIME_TO_PREV,
-    TRAJ_ID
+    TRAJ_ID,
 )
 
 
@@ -45,8 +45,12 @@ def by_bbox(move_data, bbox, filter_out=False, inplace=False):
     """
 
     try:
-        filter_ = (move_data[LATITUDE] >= bbox[0]) & (move_data[LATITUDE] <= bbox[2]) \
-                  & (move_data[LONGITUDE] >= bbox[1]) & (move_data[LONGITUDE] <= bbox[3])
+        filter_ = (
+            (move_data[LATITUDE] >= bbox[0])
+            & (move_data[LATITUDE] <= bbox[2])
+            & (move_data[LONGITUDE] >= bbox[1])
+            & (move_data[LONGITUDE] <= bbox[3])
+        )
 
         if filter_out:
             filter_ = ~filter_
@@ -60,9 +64,11 @@ def by_bbox(move_data, bbox, filter_out=False, inplace=False):
         raise e
 
 
-def by_datetime(move_data, start_datetime=None, end_datetime=None, filter_out=False):
+def by_datetime(
+    move_data, start_datetime=None, end_datetime=None, filter_out=False
+):
     """
-    Filters trajectories points according to specified time range
+    Filters trajectories points according to specified time range.
 
     Parameters
     ----------
@@ -86,11 +92,13 @@ def by_datetime(move_data, start_datetime=None, end_datetime=None, filter_out=Fa
 
     try:
         if start_datetime is not None and end_datetime is not None:
-            filter_ = (move_data[DATETIME] > start_datetime) & (move_data[DATETIME] <= end_datetime)
+            filter_ = (move_data[DATETIME] > start_datetime) & (
+                move_data[DATETIME] <= end_datetime
+            )
         elif end_datetime is not None:
-            filter_ = (move_data[DATETIME] <= end_datetime)
+            filter_ = move_data[DATETIME] <= end_datetime
         else:
-            filter_ = (move_data[DATETIME] > start_datetime)
+            filter_ = move_data[DATETIME] > start_datetime
 
         if filter_out:
             filter_ = ~filter_
@@ -103,7 +111,7 @@ def by_datetime(move_data, start_datetime=None, end_datetime=None, filter_out=Fa
 
 def by_label(move_data, value, label_name, filter_out=False):
     """
-    Filters trajectories points according to specified value and collum label
+    Filters trajectories points according to specified value and collum label.
 
     Parameters
     ----------
@@ -125,7 +133,7 @@ def by_label(move_data, value, label_name, filter_out=False):
     """
 
     try:
-        filter_ = (move_data[label_name] == value)
+        filter_ = move_data[label_name] == value
         if filter_out:
             filter_ = ~filter_
 
@@ -137,7 +145,7 @@ def by_label(move_data, value, label_name, filter_out=False):
 
 def by_id(move_data, id_=None, label_id=TRAJ_ID, filter_out=False):
     """
-    Filters trajectories points according to specified trajectory id
+    Filters trajectories points according to specified trajectory id.
 
     Parameters
     ----------
@@ -163,7 +171,7 @@ def by_id(move_data, id_=None, label_id=TRAJ_ID, filter_out=False):
 
 def by_tid(move_data, tid_=None, label_tid=TID, filter_out=False):
     """
-    Filters trajectories points according to a specified  trajectory tid
+    Filters trajectories points according to a specified  trajectory tid.
 
     Parameters
     ----------
@@ -220,14 +228,24 @@ def outliers(move_data, jump_coefficient=3.0, threshold=1, filter_out=False):
         print("...Reset index for filtering\n")
         move_data.reset_index(inplace=True)
 
-    if DIST_TO_PREV in move_data and DIST_TO_NEXT and DIST_PREV_TO_NEXT in move_data:
-        filter_ = (move_data[DIST_TO_NEXT] > threshold) & (
-                move_data[DIST_TO_PREV] > threshold) & (
-                          move_data[DIST_PREV_TO_NEXT] > threshold) & \
-                  (jump_coefficient * move_data[DIST_PREV_TO_NEXT] < move_data[
-                      DIST_TO_NEXT]) & \
-                  (jump_coefficient * move_data[DIST_PREV_TO_NEXT] < move_data[
-                      DIST_TO_PREV])
+    if (
+        DIST_TO_PREV in move_data
+        and DIST_TO_NEXT
+        and DIST_PREV_TO_NEXT in move_data
+    ):
+        filter_ = (
+            (move_data[DIST_TO_NEXT] > threshold)
+            & (move_data[DIST_TO_PREV] > threshold)
+            & (move_data[DIST_PREV_TO_NEXT] > threshold)
+            & (
+                jump_coefficient * move_data[DIST_PREV_TO_NEXT]
+                < move_data[DIST_TO_NEXT]
+            )
+            & (
+                jump_coefficient * move_data[DIST_PREV_TO_NEXT]
+                < move_data[DIST_TO_PREV]
+            )
+        )
 
         if filter_out:
             filter_ = ~filter_
@@ -240,9 +258,17 @@ def outliers(move_data, jump_coefficient=3.0, threshold=1, filter_out=False):
         return move_data
 
 
-def clean_duplicates(move_data, subset=None, keep="first", inplace=False, sort=True, return_idx=False):
+def clean_duplicates(
+    move_data,
+    subset=None,
+    keep="first",
+    inplace=False,
+    sort=True,
+    return_idx=False,
+):
     """
-    Removes the duplicate rows of the Dataframe, optionally only certaind columns can be consider.
+    Removes the duplicate rows of the Dataframe, optionally only certaind
+    columns can be consider.
 
     Parameters
     ----------
@@ -271,7 +297,11 @@ def clean_duplicates(move_data, subset=None, keep="first", inplace=False, sort=T
     print("\nRemove rows duplicates by subset")
 
     if sort is True:
-        print("...Sorting by {} and {} to increase performance\n".format(TRAJ_ID, DATETIME))
+        print(
+            "...Sorting by {} and {} to increase performance\n".format(
+                TRAJ_ID, DATETIME
+            )
+        )
         move_data.sort_values([TRAJ_ID, DATETIME], inplace=True)
 
     idx = move_data.duplicated(subset=subset)
@@ -288,9 +318,12 @@ def clean_duplicates(move_data, subset=None, keep="first", inplace=False, sort=T
         return None
 
 
-def clean_consecutive_duplicates(move_data, subset=None, keep="first", inplace=False):
+def clean_consecutive_duplicates(
+    move_data, subset=None, keep="first", inplace=False
+):
     """
-    Removes consecutives duplicate rows of the Dataframe, optionally only certaind columns can be consider.
+    Removes consecutives duplicate rows of the Dataframe, optionally only
+    certaind columns can be consider.
 
     Parameters
     ----------
@@ -330,7 +363,9 @@ def clean_consecutive_duplicates(move_data, subset=None, keep="first", inplace=F
         return move_data.loc[filter_]
 
 
-def clean_nan_values(move_data, axis=0, how="any", thresh=None, subset=None, inplace=True):
+def clean_nan_values(
+    move_data, axis=0, how="any", thresh=None, subset=None, inplace=True
+):
     """
     Removes missing values from the dataframe.
 
@@ -351,18 +386,19 @@ def clean_nan_values(move_data, axis=0, how="any", thresh=None, subset=None, inp
         subset would indicate a list of rows to be included.
     inplace : boolean, default(True by default)
         if set to true the operation is done in place, the original dataframe will be altered and None is returned.
-
     """
-    move_data.dropna(axis=axis, how=how, thresh=thresh, subset=None, inplace=inplace)
+    move_data.dropna(
+        axis=axis, how=how, thresh=thresh, subset=None, inplace=inplace
+    )
 
 
 def clean_gps_jumps_by_distance(
-        move_data,
-        label_id=TRAJ_ID,
-        jump_coefficient=3.0,
-        threshold=1,
-        label_dtype=np.float64,
-        sum_drop=0
+    move_data,
+    label_id=TRAJ_ID,
+    jump_coefficient=3.0,
+    threshold=1,
+    label_dtype=np.float64,
+    sum_drop=0,
 ):
     """
     Removes the trajectories points that are outliers from the dataframe.
@@ -387,10 +423,16 @@ def clean_gps_jumps_by_distance(
     """
 
     if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features(label_id=label_id, label_dtype=label_dtype)
+        move_data.generate_dist_features(
+            label_id=label_id, label_dtype=label_dtype
+        )
 
     try:
-        print("\nCleaning gps jumps by distance to jump_coefficient {}...\n".format(jump_coefficient))
+        print(
+            "\nCleaning gps jumps by distance to jump_coefficient {}...\n".format(
+                jump_coefficient
+            )
+        )
 
         move_datajumps = outliers(move_data, jump_coefficient, threshold)
         rows_to_drop = move_datajumps.shape[0]
@@ -399,9 +441,20 @@ def clean_gps_jumps_by_distance(
             shape_before = move_data.shape[0]
             move_data.drop(index=move_datajumps.index, inplace=True)
             sum_drop = sum_drop + rows_to_drop
-            print("...Rows before: {}, Rows after:{}, Sum drop:{}\n".format(shape_before, move_data.shape[0], sum_drop))
+            print(
+                "...Rows before: {}, Rows after:{}, Sum drop:{}\n".format(
+                    shape_before, move_data.shape[0], sum_drop
+                )
+            )
 
-            clean_gps_jumps_by_distance(move_data, label_id, jump_coefficient, threshold, label_dtype, sum_drop)
+            clean_gps_jumps_by_distance(
+                move_data,
+                label_id,
+                jump_coefficient,
+                threshold,
+                label_dtype,
+                sum_drop,
+            )
         else:
             print("{} GPS points were dropped".format(sum_drop))
 
@@ -409,10 +462,12 @@ def clean_gps_jumps_by_distance(
         raise e
 
 
-def clean_gps_nearby_points_by_distances(move_data, label_id=TRAJ_ID, radius_area=10.0, label_dtype=np.float64):
+def clean_gps_nearby_points_by_distances(
+    move_data, label_id=TRAJ_ID, radius_area=10.0, label_dtype=np.float64
+):
     """
-    Removes points from the trajectories when the distance between them and
-        the point before is smaller than the value set by the user.
+    Removes points from the trajectories when the distance between them and the
+    point before is smaller than the value set by the user.
 
     Parameters
     ----------
@@ -429,17 +484,23 @@ def clean_gps_nearby_points_by_distances(move_data, label_id=TRAJ_ID, radius_are
     """
 
     if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features(label_id=label_id, label_dtype=label_dtype)
+        move_data.generate_dist_features(
+            label_id=label_id, label_dtype=label_dtype
+        )
 
     try:
-        print("\nCleaning gps points from radius of {} meters\n".format(radius_area))
+        print(
+            "\nCleaning gps points from radius of {} meters\n".format(
+                radius_area
+            )
+        )
 
         if move_data.index.name is not None:
             print("...Reset index for filtering\n")
             move_data.reset_index(inplace=True)
 
         if DIST_TO_PREV in move_data:
-            filter_nearby_points = (move_data[DIST_TO_PREV] <= radius_area)
+            filter_nearby_points = move_data[DIST_TO_PREV] <= radius_area
             idx = move_data[filter_nearby_points].index
 
             print("...There are {} gps points to drop\n".format(idx.shape[0]))
@@ -448,19 +509,27 @@ def clean_gps_nearby_points_by_distances(move_data, label_id=TRAJ_ID, radius_are
                 print("...Dropping {} gps points\n".format(idx.shape[0]))
                 shape_before = move_data.shape[0]
                 move_data.drop(index=idx, inplace=True)
-                print("...Rows before: {}, Rows after:{}\n".format(shape_before, move_data.shape[0]))
+                print(
+                    "...Rows before: {}, Rows after:{}\n".format(
+                        shape_before, move_data.shape[0]
+                    )
+                )
 
-                clean_gps_nearby_points_by_distances(move_data, label_id, radius_area, label_dtype)
+                clean_gps_nearby_points_by_distances(
+                    move_data, label_id, radius_area, label_dtype
+                )
         else:
             print("...{} is not in the dataframe".format(DIST_TO_PREV))
     except Exception as e:
         raise e
 
 
-def clean_gps_nearby_points_by_speed(move_data, label_id=TRAJ_ID, speed_radius=0.0, label_dtype=np.float64):
+def clean_gps_nearby_points_by_speed(
+    move_data, label_id=TRAJ_ID, speed_radius=0.0, label_dtype=np.float64
+):
     """
     Removes points from the trajectories when the speed of travel between them
-        and the point before is smaller than the value set by the user.
+    and the point before is smaller than the value set by the user.
 
     Parameters
     ----------
@@ -477,17 +546,23 @@ def clean_gps_nearby_points_by_speed(move_data, label_id=TRAJ_ID, speed_radius=0
     """
 
     if SPEED_TO_PREV not in move_data:
-        move_data.generate_dist_time_speed_features(label_id=label_id, label_dtype=label_dtype)
+        move_data.generate_dist_time_speed_features(
+            label_id=label_id, label_dtype=label_dtype
+        )
 
     try:
-        print("\nCleaning gps points using {} speed radius\n".format(speed_radius))
+        print(
+            "\nCleaning gps points using {} speed radius\n".format(
+                speed_radius
+            )
+        )
 
         if move_data.index.name is not None:
             print("...Reset index for filtering\n")
             move_data.reset_index(inplace=True)
 
         if SPEED_TO_PREV in move_data:
-            filter_nearby_points = (move_data[SPEED_TO_PREV] <= speed_radius)
+            filter_nearby_points = move_data[SPEED_TO_PREV] <= speed_radius
             idx = move_data[filter_nearby_points].index
 
             print("...There are {} gps points to drop\n".format(idx.shape[0]))
@@ -496,24 +571,36 @@ def clean_gps_nearby_points_by_speed(move_data, label_id=TRAJ_ID, speed_radius=0
                 print("...Dropping {} gps points\n".format(idx.shape[0]))
                 shape_before = move_data.shape[0]
                 move_data.drop(index=idx, inplace=True)
-                print("...Rows before: {}, Rows after:{}\n".format(shape_before, move_data.shape[0]))
+                print(
+                    "...Rows before: {}, Rows after:{}\n".format(
+                        shape_before, move_data.shape[0]
+                    )
+                )
 
-                clean_gps_nearby_points_by_speed(move_data=move_data, label_id=label_id, label_dtype=label_dtype)
+                clean_gps_nearby_points_by_speed(
+                    move_data=move_data,
+                    label_id=label_id,
+                    label_dtype=label_dtype,
+                )
         else:
             print("...{} is not in the dataframe".format(DIST_TO_PREV))
     except Exception as e:
         raise e
 
 
-def clean_gps_speed_max_radius(move_data, label_id=TRAJ_ID, speed_max=50.0, label_dtype=np.float64):
+def clean_gps_speed_max_radius(
+    move_data, label_id=TRAJ_ID, speed_max=50.0, label_dtype=np.float64
+):
     """
-    Recursively removes trajectories points with speed higher than the value especifeid by the user.
-    Given any point p of the trajectory, the point will be removed if one of the following happens:
-    if the travel speed from the point before p to p is greater than the  max value of speed between adjacent
-    points set by the user. Or the travel speed between point p and the next point is greater than the value set by
-    the user. When the clening is done, the function will update the time and distance features in the dataframe and
-    will call itself again.
-    The function will finish processing when it can no longer find points disrespecting the limit of speed.
+    Recursively removes trajectories points with speed higher than the value
+    especifeid by the user. Given any point p of the trajectory, the point will
+    be removed if one of the following happens: if the travel speed from the
+    point before p to p is greater than the  max value of speed between adjacent
+    points set by the user. Or the travel speed between point p and the next
+    point is greater than the value set by the user. When the clening is done,
+    the function will update the time and distance features in the dataframe and
+    will call itself again. The function will finish processing when it can no
+    longer find points disrespecting the limit of speed.
 
     Parameters
     ----------
@@ -529,33 +616,55 @@ def clean_gps_speed_max_radius(move_data, label_id=TRAJ_ID, speed_max=50.0, labe
         Represents column id type_. By default it"s np.float64.
     """
     if SPEED_TO_PREV not in move_data:
-        move_data.generate_dist_time_speed_features(label_id=label_id, label_dtype=label_dtype)
+        move_data.generate_dist_time_speed_features(
+            label_id=label_id, label_dtype=label_dtype
+        )
 
-    print("\nClean gps points with speed max > {} meters by seconds".format(speed_max))
+    print(
+        "\nClean gps points with speed max > {} meters by seconds".format(
+            speed_max
+        )
+    )
 
     if SPEED_TO_PREV in move_data:
         filter_ = (move_data[SPEED_TO_PREV] > speed_max) | (
-                move_data[SPEED_TO_PREV] > speed_max)
+            move_data[SPEED_TO_PREV] > speed_max
+        )
 
         idx = move_data[filter_].index
-        print("...There {} gps points with speed_max > {}\n".format(idx.shape[0], speed_max))
+        print(
+            "...There {} gps points with speed_max > {}\n".format(
+                idx.shape[0], speed_max
+            )
+        )
         if idx.shape[0] > 0:
-            print("...Dropping {} rows of jumps by speed max\n".format(idx.shape[0]))
+            print(
+                "...Dropping {} rows of jumps by speed max\n".format(
+                    idx.shape[0]
+                )
+            )
             shape_before = move_data.shape[0]
             move_data.drop(index=idx, inplace=True)
-            print("...Rows before: {}, Rows after:{}\n".format(shape_before, move_data.shape[0]))
+            print(
+                "...Rows before: {}, Rows after:{}\n".format(
+                    shape_before, move_data.shape[0]
+                )
+            )
 
-            clean_gps_speed_max_radius(move_data, label_id, speed_max, label_dtype)
+            clean_gps_speed_max_radius(
+                move_data, label_id, speed_max, label_dtype
+            )
 
 
 def clean_trajectories_with_few_points(
-        move_data,
-        label_tid=TID,
-        min_points_per_trajectory=2,
-        label_dtype=np.float64
+    move_data,
+    label_tid=TID,
+    min_points_per_trajectory=2,
+    label_dtype=np.float64,
 ):
     """
-    Removes from the given dataframe, trajectories with fewer points than was specified by the user
+    Removes from the given dataframe, trajectories with fewer points than was
+    specified by the user.
 
     Parameters
     ----------
@@ -578,31 +687,51 @@ def clean_trajectories_with_few_points(
         move_data.reset_index(inplace=True)
 
     move_datacount_tid = move_data.groupby(by=label_tid).size()
-    tids_with_few_points = move_datacount_tid[move_datacount_tid < min_points_per_trajectory].index
+    tids_with_few_points = move_datacount_tid[
+        move_datacount_tid < min_points_per_trajectory
+    ].index
 
-    print("\n...There are {} ids with few points".format(tids_with_few_points.shape[0]))
+    print(
+        "\n...There are {} ids with few points".format(
+            tids_with_few_points.shape[0]
+        )
+    )
     shape_before_drop = move_data.shape
 
     idx = move_data[move_data[label_tid].isin(tids_with_few_points)].index
     if idx.shape[0] > 0:
-        print("\n...Tids before drop: {}".format(move_data[label_tid].unique().shape[0]))
+        print(
+            "\n...Tids before drop: {}".format(
+                move_data[label_tid].unique().shape[0]
+            )
+        )
         move_data.drop(index=idx, inplace=True)
-        print("\n...Tids after drop: {}".format(move_data[label_tid].unique().shape[0]))
-        print("\n...Shape - before drop: {} - after drop: {}".format(shape_before_drop, move_data.shape))
+        print(
+            "\n...Tids after drop: {}".format(
+                move_data[label_tid].unique().shape[0]
+            )
+        )
+        print(
+            "\n...Shape - before drop: {} - after drop: {}".format(
+                shape_before_drop, move_data.shape
+            )
+        )
 
-        move_data.generate_dist_time_speed_features(label_id=label_tid, label_dtype=label_dtype)
+        move_data.generate_dist_time_speed_features(
+            label_id=label_tid, label_dtype=label_dtype
+        )
 
 
 def clean_trajectories_short_and_few_points_(
-        move_data,
-        label_id=TID,
-        min_trajectory_distance=100,
-        min_points_per_trajectory=2,
-        label_dtype=np.float64
+    move_data,
+    label_id=TID,
+    min_trajectory_distance=100,
+    min_points_per_trajectory=2,
+    label_dtype=np.float64,
 ):
     """
-    Eliminates from the given dataframe trajectories with fewer points and shorter length than specified values
-       by the user.
+    Eliminates from the given dataframe trajectories with fewer points and
+    shorter length than specified values by the user.
 
     Parameters
     ----------
@@ -626,23 +755,32 @@ def clean_trajectories_short_and_few_points_(
     """
 
     print("\nRemove short trajectories...")
-    clean_trajectories_with_few_points(move_data, label_id, min_points_per_trajectory, label_dtype)
+    clean_trajectories_with_few_points(
+        move_data, label_id, min_points_per_trajectory, label_dtype
+    )
 
     if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features(label_id=label_id, label_dtype=label_dtype)
+        move_data.generate_dist_features(
+            label_id=label_id, label_dtype=label_dtype
+        )
 
     if move_data.index.name is not None:
         print("reseting index")
         move_data.reset_index(inplace=True)
 
     print("\n...Dropping unnecessary trajectories...")
-    move_dataagg_tid = move_data.groupby(by=label_id).agg({DIST_TO_PREV: "sum"})
+    move_dataagg_tid = move_data.groupby(by=label_id).agg(
+        {DIST_TO_PREV: "sum"}
+    )
 
-    filter_ = (move_dataagg_tid[DIST_TO_PREV] < min_trajectory_distance)
+    filter_ = move_dataagg_tid[DIST_TO_PREV] < min_trajectory_distance
     tid_selection = move_dataagg_tid[filter_].index
 
-    print("\n...short trajectories and trajectories with a minimum distance ({}): {}".format(move_dataagg_tid.shape[0],
-                                                                                             min_trajectory_distance))
+    print(
+        "\n...short trajectories and trajectories with a minimum distance ({}): {}".format(
+            move_dataagg_tid.shape[0], min_trajectory_distance
+        )
+    )
     print("\n...There are {} tid do drop".format(tid_selection.shape[0]))
     shape_before_drop = move_data.shape
 
@@ -650,17 +788,28 @@ def clean_trajectories_short_and_few_points_(
     if idx.shape[0] > 0:
         tids_before_drop = move_data[label_id].unique().shape[0]
         move_data.drop(index=idx, inplace=True)
-        print("\n...Tids - before drop: {} - after drop: {}".format(tids_before_drop,
-                                                                    move_data[label_id].unique().shape[0]))
-        print("\n...Shape - before drop: {} - after drop: {}".format(shape_before_drop, move_data.shape))
+        print(
+            "\n...Tids - before drop: {} - after drop: {}".format(
+                tids_before_drop, move_data[label_id].unique().shape[0]
+            )
+        )
+        print(
+            "\n...Shape - before drop: {} - after drop: {}".format(
+                shape_before_drop, move_data.shape
+            )
+        )
 
-        clean_trajectories_short_and_few_points_(move_data,
-                                                 min_trajectory_distance,
-                                                 min_points_per_trajectory,
-                                                 label_dtype)
+        clean_trajectories_short_and_few_points_(
+            move_data,
+            min_trajectory_distance,
+            min_points_per_trajectory,
+            label_dtype,
+        )
 
 
-def clean_id_by_time_max(move_data, label_id=TRAJ_ID, time_max=3600, return_idx=True):
+def clean_id_by_time_max(
+    move_data, label_id=TRAJ_ID, time_max=3600, return_idx=True
+):
     """
     Clears GPS points with time by ID greater than a user-defined limit.
 
@@ -681,16 +830,31 @@ def clean_id_by_time_max(move_data, label_id=TRAJ_ID, time_max=3600, return_idx=
             The index of the dropped ids.
     """
 
-    print('\nClean gps points with time max by id < {} seconds'.format(time_max))
+    print(
+        "\nClean gps points with time max by id < {} seconds".format(time_max)
+    )
     if TIME_TO_PREV in move_data:
-        move_dataid_drop = move_data.groupby([label_id], as_index=False).agg({'time_to_prev': 'sum'}).query(
-            'time_to_prev < {}'.format(time_max))
-        print("...Ids total: {}\nIds to drop:{}".format(move_data[label_id].nunique(),
-                                                        move_dataid_drop[label_id].nunique()))
+        move_dataid_drop = (
+            move_data.groupby([label_id], as_index=False)
+            .agg({"time_to_prev": "sum"})
+            .query("time_to_prev < {}".format(time_max))
+        )
+        print(
+            "...Ids total: {}\nIds to drop:{}".format(
+                move_data[label_id].nunique(),
+                move_dataid_drop[label_id].nunique(),
+            )
+        )
         if move_dataid_drop.shape[0] > 0:
             before_drop = move_data.shape[0]
-            idx = move_data[move_data[label_id].isin(move_dataid_drop[label_id])].index
+            idx = move_data[
+                move_data[label_id].isin(move_dataid_drop[label_id])
+            ].index
             move_data.drop(idx, inplace=True)
-            print("...Rows before drop: {}\n Rows after drop: {}".format(before_drop, move_data.shape[0]))
-            if (return_idx):
+            print(
+                "...Rows before drop: {}\n Rows after drop: {}".format(
+                    before_drop, move_data.shape[0]
+                )
+            )
+            if return_idx:
                 return idx
