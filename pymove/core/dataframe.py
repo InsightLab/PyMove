@@ -1289,14 +1289,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         operation = begin_operation("plot_all_features")
 
         try:
-            col_float = self._data.select_dtypes(include=[dtype]).columns
-            tam = col_float.size
+            col_dtype = self._data.select_dtypes(include=[dtype]).columns
+            tam = col_dtype.size
             if not tam:
                 raise AttributeError(f"No columns with dtype {dtype}.")
 
             fig, ax = plt.subplots(tam, 1, figsize=figsize)
             ax_count = 0
-            for col in col_float:
+            for col in col_dtype:
                 ax[ax_count].set_title(col)
                 self._data[col].plot(subplots=True, ax=ax[ax_count])
                 ax_count += 1
