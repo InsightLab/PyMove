@@ -163,11 +163,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
         try:
             if data.dtypes.lat != "float32":
-                data.lat.astype("float32")
+                data.lat = data.lat.astype("float32")
             if data.dtypes.lon != "float32":
-                data.lon.astype("float32")
+                data.lon = data.lon.astype("float32")
             if data.dtypes.datetime != "datetime64[ns]":
-                data.datetime.astype("datetime64[ns]")
+                data.datetime = data.datetime.astype("datetime64[ns]")
         except AttributeError:
             print(AttributeError)
 
@@ -1255,7 +1255,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def plot_all_features(
         self,
-        dtype=np.float64,
+        dtype=np.float32,
         figsize=(21, 15),
         return_fig=True,
         save_fig=False,
@@ -1269,7 +1269,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         figsize : tuple, optional, default (21, 15).
             Represents dimensions of figure.
 
-        dtype : type_, optional, default np.float64.
+        dtype : type_, optional, default np.float32.
             Represents column type_.
 
         return_fig : bool, optional, default True.
@@ -1289,18 +1289,20 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         operation = begin_operation("plot_all_features")
 
         try:
-            col_float = self._data.select_dtypes(include=[dtype]).columns
-            tam = col_float.size
-            if tam > 0:
-                fig, ax = plt.subplots(tam, 1, figsize=figsize)
-                ax_count = 0
-                for col in col_float:
-                    ax[ax_count].set_title(col)
-                    self._data[col].plot(subplots=True, ax=ax[ax_count])
-                    ax_count += 1
+            col_dtype = self._data.select_dtypes(include=[dtype]).columns
+            tam = col_dtype.size
+            if not tam:
+                raise AttributeError(f"No columns with dtype {dtype}.")
 
-                if save_fig:
-                    plt.savefig(fname=name, fig=fig)
+            fig, ax = plt.subplots(tam, 1, figsize=figsize)
+            ax_count = 0
+            for col in col_dtype:
+                ax[ax_count].set_title(col)
+                self._data[col].plot(subplots=True, ax=ax[ax_count])
+                ax_count += 1
+
+            if save_fig:
+                plt.savefig(fname=name, fig=fig)
 
             self.last_operation = end_operation(operation)
 
@@ -2769,11 +2771,11 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
         try:
             if data.dtypes.lat != "float32":
-                data.lat.astype("float32")
+                data.lat = data.lat.astype("float32")
             if data.dtypes.lon != "float32":
-                data.lon.astype("float32")
+                data.lon = data.lon.astype("float32")
             if data.dtypes.datetime != "datetime64[ns]":
-                data.lon.astype("datetime64[ns]")
+                data.datetime = data.datetime.astype("datetime64[ns]")
         except AttributeError as erro:
             print(erro)
 
