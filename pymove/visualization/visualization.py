@@ -3,6 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from folium.plugins import FastMarkerCluster, HeatMap, MarkerCluster
+from pymove.utils.mapfolium import add_map_legend
 
 from pymove.utils.constants import (
     COLORS,
@@ -103,43 +104,43 @@ def cmap_hex_color(cmap, i):
     return matplotlib.colors.rgb2hex(cmap(i))
 
 
-def add_map_legend(m, title, items):
-    item = "<li class='legend'>%s <div class='square' style='background-color:%s;'></div></li>"
-    list_items = "\n".join([item % (n, c) for (n, c) in items])
-    legend_html = """
-        <style>
-            .box {
-                position: fixed;
-                bottom: 50px;
-                left: 50px;
-                width: 250px;
-                height: 90px;
-                border:2px solid grey;
-                z-index:9999;
-                font-size:14px;
-                padding: 1px;
-            }
-            .legend {
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-            }
-            .square {
-                height:10px;
-                width: 50px;
-            }
-        </style>
-        <div class='box'>
-            %s <br>
-            <ul>
-                %s
-            </ul>
-        </div>
-    """ % (
-        title,
-        list_items,
-    )
-    m.get_root().html.add_child(folium.Element(legend_html))
+# def add_map_legend(m, title, items):
+#     item = "<li><span style='background:%s;'></span>%s</li>"
+#     list_items = "\n".join([item % (n, c) for (n, c) in items])
+#     legend_html = """
+#         <style>
+#             .box {
+#                 position: fixed;
+#                 bottom: 50px;
+#                 left: 50px;
+#                 width: 250px;
+#                 height: 90px;
+#                 border:2px solid grey;
+#                 z-index:9999;
+#                 font-size:14px;
+#                 padding: 1px;
+#             }
+#             .legend {
+#                 display:flex;
+#                 align-items:center;
+#                 justify-content:space-between;
+#             }
+#             .square {
+#                 height:10px;
+#                 width: 50px;
+#             }
+#         </style>
+#         <div class='box'>
+#             %s <br>
+#             <ul>
+#                 %s
+#             </ul>
+#         </div>
+#     """ % (
+#         title,
+#         list_items,
+#     )
+#     m.get_root().html.add_child(folium.Element(legend_html))
 
 
 def save_map(
@@ -728,6 +729,7 @@ def plot_trajectories_with_folium(
     lat_origin=None,
     lon_origin=None,
     zoom_start=12,
+    legend=False,
     base_map=None,
     tile=TILES[0],
     save_as_html=False,
@@ -751,6 +753,8 @@ def plot_trajectories_with_folium(
         If not entered, the first data from the dataset is used.
     zoom_start : int, optional, default 12.
         Initial zoom level for the map
+    legend: boolean
+        Whether to add a legend to the map
     base_map : folium.folium.Map, optional, default None.
         Represents the folium map. If not informed, a new map is generated
         using the function create_base_map(), with the lat_origin, lon_origin
@@ -815,6 +819,9 @@ def plot_trajectories_with_folium(
         folium.PolyLine(
             mv[[LATITUDE, LONGITUDE]], color=color, weight=2.5, opacity=1
         ).add_to(base_map)
+
+    if legend:
+        add_map_legend(base_map, "Color by user ID", items)
 
     if save_as_html:
         base_map.save(outfile=filename)
