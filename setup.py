@@ -21,6 +21,7 @@ DEPENDENCIES = [
     "geojson",
     "matplotlib",
     "shapely",
+    "branca",
     "folium",
     "mplleaflet",
     "matplotlib",
