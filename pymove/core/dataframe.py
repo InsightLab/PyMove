@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from dask.dataframe import DataFrame
+from tqdm import tqdm
 
 from pymove.core import MoveDataFrameAbstractModel
 from pymove.core.grid import Grid
@@ -31,7 +32,7 @@ from pymove.utils.constants import (
 from pymove.utils.conversions import lat_meters
 from pymove.utils.distances import haversine
 from pymove.utils.mem import begin_operation, end_operation
-from pymove.utils.trajectories import format_labels, progress_update, shift
+from pymove.utils.trajectories import format_labels, shift
 
 
 class MoveDataFrame:
@@ -915,7 +916,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print(
                     "...Sorting by {} and {} to increase performance\n".format(
                         label_id, DATETIME
-                    )
+                    ), flush=True
                 )
                 data_.sort_values([label_id, DATETIME], inplace=True)
 
@@ -923,7 +924,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print(
                     "...Set {} as index to increase attribution performance\n".format(
                         label_id
-                    )
+                    ), flush=True
                 )
                 data_.set_index(label_id, inplace=True)
 
@@ -933,12 +934,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
 
             ids = data_.index.unique()
-            selfsize = data_.shape[0]
-            curr_perc_int = -1
-            start_time = time.time()
             sum_size_id = 0
             size_id = 0
-            for idx in ids:
+            for idx in tqdm(ids, desc="Generating distance, time and speed features"):
                 curr_lat = data_.at[idx, LATITUDE]
                 curr_lon = data_.at[idx, LONGITUDE]
 
@@ -971,14 +969,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                         prev_lat, prev_lon, next_lat, next_lon
                     )
 
-                    sum_size_id += size_id
-                    curr_perc_int, est_time_str = progress_update(
-                        sum_size_id,
-                        selfsize,
-                        start_time,
-                        curr_perc_int,
-                        step_perc=20,
-                    )
             data_.reset_index(inplace=True)
             print("...Reset index\n")
             print("..Total Time: {}".format((time.time() - start_time)))
@@ -1049,7 +1039,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print(
                     "...Sorting by {} and {} to increase performance\n".format(
                         label_id, DATETIME
-                    )
+                    ), flush=True
                 )
                 data_.sort_values([label_id, DATETIME], inplace=True)
 
@@ -1057,7 +1047,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print(
                     "...Set {} as index to a higher peformance\n".format(
                         label_id
-                    )
+                    ), flush=True
                 )
                 data_.set_index(label_id, inplace=True)
 
@@ -1071,12 +1061,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_[SPEED_TO_PREV] = label_dtype(-1.0)
 
             ids = data_.index.unique()
-            selfsize = data_.shape[0]
-            curr_perc_int = -1
             sum_size_id = 0
             size_id = 0
 
-            for idx in ids:
+            for idx in tqdm(ids, desc=f"Generating distance features"):
                 curr_lat = data_.at[idx, LATITUDE]
                 curr_lon = data_.at[idx, LONGITUDE]
 
@@ -1109,14 +1097,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                         data_.at[idx, DIST_TO_PREV] / time_prev
                     )  # unit: m/s
 
-                    sum_size_id += size_id
-                    curr_perc_int, est_time_str = progress_update(
-                        sum_size_id,
-                        selfsize,
-                        start_time,
-                        curr_perc_int,
-                        step_perc=20,
-                    )
             print("...Reset index...\n")
             data_.reset_index(inplace=True)
             print("..Total Time: {:.3f}".format((time.time() - start_time)))

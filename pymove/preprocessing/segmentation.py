@@ -148,7 +148,7 @@ def by_dist_time_speed(
             move_data.generate_dist_time_speed_features()
 
         if move_data.index.name is None:
-            print("...setting {} as index".format(label_id))
+            print("...setting {} as index".format(label_id), flush=True)
             move_data.set_index(label_id, inplace=True)
 
         curr_tid = 0
@@ -256,7 +256,7 @@ def by_max_dist(
             move_data.generate_dist_features()
 
         if move_data.index.name is None:
-            print("...setting {} as index".format(label_id))
+            print("...setting {} as index".format(label_id), flush=True)
             move_data.set_index(label_id, inplace=True)
 
         curr_tid = 0
@@ -357,7 +357,7 @@ def by_max_time(
             move_data.generate_dist_time_speed_features()
 
         if move_data.index.name is None:
-            print("...setting {} as index".format(label_id))
+            print("...setting {} as index".format(label_id), flush=True)
             move_data.set_index(label_id, inplace=True)
 
         curr_tid = 0
@@ -458,7 +458,7 @@ def by_max_speed(
             move_data.generate_dist_time_speed_features()
 
         if move_data.index.name is None:
-            print("...setting {} as index".format(label_id))
+            print("...setting {} as index".format(label_id), flush=True)
             move_data.set_index(label_id, inplace=True)
 
         curr_tid = 0
