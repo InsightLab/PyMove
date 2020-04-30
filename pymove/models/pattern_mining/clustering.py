@@ -78,6 +78,10 @@ def gap_statistic(
     https://anaconda.org/milesgranger/gap-statistic/notebook
     """
 
+    message = "Executing Gap Statistic to:\n...K of {} to {} from k_iteration:{}\n".format(
+        k_initial, max_clusters, k_iteration
+    )
+    print(message, flush=True)
     gaps = {}
     for k in tqdm(range(k_initial, max_clusters, k_iteration)):
         # Holder for reference dispersion results
