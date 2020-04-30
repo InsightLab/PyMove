@@ -397,7 +397,7 @@ def by_max_time(
         else:
             move_data.reset_index(inplace=True)
             print("... Reseting index")
-        
+
         if drop_single_points:
             _drop_single_point(move_data, label_new_tid, label_id)
             move_data.generate_dist_time_speed_features()
