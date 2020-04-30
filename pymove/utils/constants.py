@@ -26,11 +26,13 @@ SPEED_TO_NEXT = "speed_to_next"
 INDEX_GRID_LAT = "index_grid_lat"
 INDEX_GRID_LON = "index_grid_lon"
 SITUATION = "situation"
+TID_PART = "tid_part"
+TID_SPEED = "tid_speed"
+TID_TIME = "tid_time"
 TID_DIST = "tid_dist"
-POLYGON = "polygon"
-
 STOP = "stop"
 MOVE = "move"
+POLYGON = "polygon"
 
 
 TB = "TB"
