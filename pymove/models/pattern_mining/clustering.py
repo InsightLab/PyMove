@@ -1,11 +1,12 @@
-from tqdm import tqdm_notebook as tqdm
-import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
+from tqdm import tqdm
+
 
 def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
-    """Determines the optimal number of clusters in the range set by the user using the elbow method.
+    """
+    Determines the optimal number of clusters in the range set by the user using
+    the elbow method.
 
     Parameters
     ----------
@@ -35,7 +36,10 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
              16: 20.64369311973992}
     """
 
-    print('Executing Elbow Method to:\n...K of {} to {} from k_iteration:{}\n'.format(k_initial,max_clusters, k_iteration))
+    message = "Executing Elbow Method to:\n...K of {} to {} from k_iteration:{}\n".format(
+        k_initial, max_clusters, k_iteration
+    )
+    print(message, flush=True)
     inertia_dic = {}
     for k in tqdm(range(k_initial, max_clusters, k_iteration)):
         # validing K value in K-means
@@ -43,8 +47,13 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
         inertia_dic[k] = KMeans(n_clusters=k).fit(move_data).inertia_
     return inertia_dic
 
-def gap_statistic(move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=1):
-    """Calculates optimal clusters numbers using Gap Statistic from Tibshirani, Walther, Hastie
+
+def gap_statistic(
+    move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=1
+):
+    """
+    Calculates optimal clusters numbers using Gap Statistic from Tibshirani,
+    Walther, Hastie.
 
     Parameters
     ----------
@@ -67,8 +76,12 @@ def gap_statistic(move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=
     Notes
     -----
     https://anaconda.org/milesgranger/gap-statistic/notebook
-
     """
+
+    message = "Executing Gap Statistic to:\n...K of {} to {} from k_iteration:{}\n".format(
+        k_initial, max_clusters, k_iteration
+    )
+    print(message, flush=True)
     gaps = {}
     for k in tqdm(range(k_initial, max_clusters, k_iteration)):
         # Holder for reference dispersion results

@@ -1,36 +1,38 @@
-LATITUDE = 'lat'
-LONGITUDE = 'lon'
-DATETIME = 'datetime'
-TRAJ_ID = 'id'
+LATITUDE = "lat"
+LONGITUDE = "lon"
+DATETIME = "datetime"
+TRAJ_ID = "id"
 TID = "tid"
 UID = "user_id"
 
-DATE = 'date'
-HOUR = 'hour'
+DATE = "date"
+HOUR = "hour"
 PERIOD = "period"
 DAY = "day"
 HOUR_SIN = "hour_sin"
 HOUR_COS = "hour_cos"
 
-SITUATION = 'situation'
+SITUATION = "situation"
 TYPE_DASK = "dask"
 TYPE_PANDAS = "pandas"
 
-DIST_TO_PREV = 'dist_to_prev'
-DIST_TO_NEXT = 'dist_to_next'
-DIST_PREV_TO_NEXT = 'dist_prev_to_next'
-TIME_TO_PREV = 'time_to_prev'
-TIME_TO_NEXT = 'time_to_next'
-SPEED_TO_PREV = 'speed_to_prev'
-SPEED_TO_NEXT = 'speed_to_next'
-INDEX_GRID_LAT = 'index_grid_lat'
-INDEX_GRID_LON = 'index_grid_lon'
-SITUATION = 'situation'
+DIST_TO_PREV = "dist_to_prev"
+DIST_TO_NEXT = "dist_to_next"
+DIST_PREV_TO_NEXT = "dist_prev_to_next"
+TIME_TO_PREV = "time_to_prev"
+TIME_TO_NEXT = "time_to_next"
+SPEED_TO_PREV = "speed_to_prev"
+SPEED_TO_NEXT = "speed_to_next"
+INDEX_GRID_LAT = "index_grid_lat"
+INDEX_GRID_LON = "index_grid_lon"
+SITUATION = "situation"
+TID_PART = "tid_part"
+TID_SPEED = "tid_speed"
+TID_TIME = "tid_time"
 TID_DIST = "tid_dist"
-POLYGON = "polygon"
-
 STOP = "stop"
 MOVE = "move"
+POLYGON = "polygon"
 
 
 TB = "TB"
@@ -38,7 +40,7 @@ GB = "GB"
 MB = "MG"
 KB = "KB"
 B = "bytes"
-COUNT = 'count'
+COUNT = "count"
 
 COLORS = {
     0: "#000000",  # black
@@ -76,7 +78,13 @@ COLORS = {
     32: "#FFB6C1",  # light pink
 }
 
-TILES = ["openstreetmap", "Mapbox Bright", "Mapbox Control Room", "Stamen Terrain", "Stamen Toner", "Stamen Watercolor",
-         "CartoDB positron", "CartoDB dark_matter"]
-
-
+TILES = [
+    "openstreetmap",
+    "Mapbox Bright",
+    "Mapbox Control Room",
+    "Stamen Terrain",
+    "Stamen Toner",
+    "Stamen Watercolor",
+    "CartoDB positron",
+    "CartoDB dark_matter",
+]
