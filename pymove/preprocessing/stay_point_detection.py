@@ -102,7 +102,7 @@ def create_or_update_move_stop_by_dist_time(
             move_df,
             label_id=label_id,
             max_dist_between_adj_points=dist_radius,
-            label_segment=label_segment_stop,
+            label_new_tid=label_segment_stop,
         )
 
         if label_segment_stop in move_df:
