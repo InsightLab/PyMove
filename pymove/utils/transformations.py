@@ -1,8 +1,11 @@
 from pymove.core.dataframe import PandasMoveDataFrame
 
 
-def feature_values_using_filter(move_data, id_, feature_name, filter_, values, inplace=True):
-    """Changes the values of the feature defined by the user.
+def feature_values_using_filter(
+    move_data, id_, feature_name, filter_, values, inplace=True
+):
+    """
+    Changes the values of the feature defined by the user.
 
     Parameters
     ----------
@@ -42,14 +45,16 @@ def feature_values_using_filter(move_data, id_, feature_name, filter_, values, i
     else:
         values_feature[filter_] = values
         move_data.at[id_, feature_name] = values_feature
-    
+
     if not inplace:
         return move_data
     else:
         return None
 
 
-def feature_values_using_filter_and_indexes(move_data, id_, feature_name, filter_, idxs, values, inplace=True):
+def feature_values_using_filter_and_indexes(
+    move_data, id_, feature_name, filter_, idxs, values, inplace=True
+):
     """
     Create or update move and stop by radius.
 
@@ -79,13 +84,13 @@ def feature_values_using_filter_and_indexes(move_data, id_, feature_name, filter
     """
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
-        
+
     values_feature = move_data.at[id_, feature_name]
     values_feature_filter = values_feature[filter_]
     values_feature_filter[idxs] = values
     values_feature[filter_] = values_feature_filter
     move_data.at[id_, feature_name] = values_feature
-    
+
     if not inplace:
         return move_data
     else:

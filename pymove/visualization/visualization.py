@@ -3,6 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from folium.plugins import FastMarkerCluster, HeatMap, MarkerCluster
+from pymove.utils.mapfolium import add_map_legend
 
 from pymove.utils.constants import (
     COLORS,
@@ -24,7 +25,7 @@ from pymove.utils.datetime import str_to_datetime
 
 def generate_color():
     """
-    Generates a random color
+    Generates a random color.
 
     Returns
     -------
@@ -53,7 +54,6 @@ def rgb(rgb_colors):
     >>> from pymove.visualization.visualization import rgb
     >>> rgb([0.6,0.2,0.2])
         (51, 51, 153)
-
     """
     blue = rgb_colors[0]
     red = rgb_colors[1]
@@ -81,7 +81,6 @@ def hex_rgb(rgb_colors):
     >>> from pymove.visualization.visualization import hex_rgb
     >>> hex_rgb([0.6,0.2,0.2])
     '#333399'
-
     """
     return "#%02X%02X%02X" % rgb(rgb_colors)
 
@@ -101,48 +100,47 @@ def cmap_hex_color(cmap, i):
     -------
     String
         Represents corresponding hex string.
-
     """
     return matplotlib.colors.rgb2hex(cmap(i))
 
 
-def add_map_legend(m, title, items):
-    item = "<li class='legend'>%s <div class='square' style='background-color:%s;'></div></li>"
-    list_items = "\n".join([item % (n, c) for (n, c) in items])
-    legend_html = """
-        <style>
-            .box {
-                position: fixed;
-                bottom: 50px; 
-                left: 50px; 
-                width: 250px; 
-                height: 90px; 
-                border:2px solid grey; 
-                z-index:9999; 
-                font-size:14px;
-                padding: 1px;
-            }
-            .legend {
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-            }
-            .square {
-                height:10px;
-                width: 50px;
-            }
-        </style>
-        <div class='box'>
-            %s <br>
-            <ul>
-                %s
-            </ul>
-        </div>
-    """ % (
-        title,
-        list_items,
-    )
-    m.get_root().html.add_child(folium.Element(legend_html))
+# def add_map_legend(m, title, items):
+#     item = "<li><span style='background:%s;'></span>%s</li>"
+#     list_items = "\n".join([item % (n, c) for (n, c) in items])
+#     legend_html = """
+#         <style>
+#             .box {
+#                 position: fixed;
+#                 bottom: 50px;
+#                 left: 50px;
+#                 width: 250px;
+#                 height: 90px;
+#                 border:2px solid grey;
+#                 z-index:9999;
+#                 font-size:14px;
+#                 padding: 1px;
+#             }
+#             .legend {
+#                 display:flex;
+#                 align-items:center;
+#                 justify-content:space-between;
+#             }
+#             .square {
+#                 height:10px;
+#                 width: 50px;
+#             }
+#         </style>
+#         <div class='box'>
+#             %s <br>
+#             <ul>
+#                 %s
+#             </ul>
+#         </div>
+#     """ % (
+#         title,
+#         list_items,
+#     )
+#     m.get_root().html.add_child(folium.Element(legend_html))
 
 
 def save_map(
@@ -158,7 +156,7 @@ def save_map(
     filename : String
         Represents the filename.
     tiles : String
-        Represents the type of tile that will be used on the map.
+        Represents the type_ of tile that will be used on the map.
     label_id : String
         Represents column name of trajectory id.
     cmap: String
@@ -166,7 +164,6 @@ def save_map(
 
     Returns
     -------
-
     """
     map_ = folium.Map(tiles=tiles)
     map_.fit_bounds(
@@ -184,7 +181,8 @@ def save_map(
         id_index = np.where(ids == id_)[0][0]
         move_df = move_data[move_data[label_id] == id_]
         points_ = [
-            (point[0], point[1]) for point in move_df[[LATITUDE, LONGITUDE]].values
+            (point[0], point[1])
+            for point in move_df[[LATITUDE, LONGITUDE]].values
         ]
         color_ = cmap_hex_color(cmap_, (id_index % num))
         folium.PolyLine(points_, weight=3, color=color_).add_to(map_)
@@ -206,7 +204,6 @@ def save_wkt(move_data, filename, label_id=TRAJ_ID):
 
     Returns
     -------
-
     """
     str_ = "{};linestring\n".format(label_id)
     ids = move_data[label_id].unique()
@@ -214,7 +211,8 @@ def save_wkt(move_data, filename, label_id=TRAJ_ID):
         move_df = move_data[move_data[label_id] == id_]
         curr_str = "{};LINESTRING(".format(id_)
         curr_str += ",".join(
-            "{} {}".format(x[0], x[1]) for x in move_df[[LONGITUDE, LATITUDE]].values
+            "{} {}".format(x[0], x[1])
+            for x in move_df[[LONGITUDE, LATITUDE]].values
         )
         curr_str += ")\n"
         str_ += curr_str
@@ -225,7 +223,7 @@ def save_wkt(move_data, filename, label_id=TRAJ_ID):
 def show_object_id_by_date(
     move_data,
     create_features=True,
-    kind=["bar", "bar", "line", "line"],
+    kind=None,
     figsize=(21, 9),
     return_fig=True,
     save_fig=True,
@@ -233,6 +231,7 @@ def show_object_id_by_date(
 ):
     """
     Generates four visualizations based on datetime feature:
+
         - Bar chart trajectories by day periods
         - Bar chart trajectories day of the week
         - Line chart trajectory by date
@@ -263,6 +262,9 @@ def show_object_id_by_date(
     ----------
     https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
     """
+    if kind is None:
+        kind = ["bar", "bar", "line", "line"]
+
     fig, ax = plt.subplots(2, 2, figsize=figsize)
 
     move_data.generate_date_features()
@@ -277,7 +279,12 @@ def show_object_id_by_date(
         subplots=True, kind=kind[1], ax=ax[0][1], rot=0, fontsize=12
     )
     move_data.groupby([DATE])[TRAJ_ID].nunique().plot(
-        subplots=True, kind=kind[2], grid=True, ax=ax[1][0], rot=90, fontsize=12
+        subplots=True,
+        kind=kind[2],
+        grid=True,
+        ax=ax[1][0],
+        rot=90,
+        fontsize=12,
     )
     move_data.groupby([HOUR])[TRAJ_ID].nunique().plot(
         subplots=True, kind=kind[3], grid=True, ax=ax[1][1], fontsize=12
@@ -310,7 +317,7 @@ def show_lat_lon_gps(
     move_data : pymove.core.MoveDataFrameAbstract subclass.
         Input trajectory data.
     kind : String, optional, default 'scatter'.
-        Represents chart type.
+        Represents chart type_.
     figsize : tuple, optional, default (21,9).
         Represents dimensions of figure.
     plot_start_and_end: boolean
@@ -371,7 +378,6 @@ def create_base_map(default_location, tile=TILES[0], default_zoom_start=12):
     -------
     base_map : folium.folium.Map.
         Represents a folium map.
-
     """
     base_map = folium.Map(
         location=default_location,
@@ -432,7 +438,6 @@ def heatmap(
     -------
     base_map : folium.folium.Map.
         Represents a folium map with visualization.
-
     """
     move_df = move_data.reset_index()
     if base_map is None:
@@ -508,7 +513,6 @@ def cluster(
     -------
     base_map : folium.folium.Map.
         Represents a folium map with visualization.
-
     """
     move_df = move_data.reset_index()
 
@@ -535,7 +539,9 @@ def cluster(
             + "\n<b>Datetime:</b> "
             + str(row[1].datetime)
         )
-        mc.add_child(folium.Marker(location=[row[1].lat, row[1].lon], popup=pop))
+        mc.add_child(
+            folium.Marker(location=[row[1].lat, row[1].lon], popup=pop)
+        )
     base_map.add_child(mc)
 
     if save_as_html:
@@ -587,7 +593,6 @@ def faster_cluster(
     -------
     base_map : folium.folium.Map.
         Represents a folium map with visualization.
-
     """
     move_df = move_data.reset_index()
 
@@ -612,7 +617,8 @@ def faster_cluster(
     };
     """
     FastMarkerCluster(
-        move_df.loc[:n_rows, [LATITUDE, LONGITUDE]].values.tolist(), callback=callback
+        move_df.loc[:n_rows, [LATITUDE, LONGITUDE]].values.tolist(),
+        callback=callback,
     ).add_to(base_map)
 
     if save_as_html:
@@ -664,7 +670,6 @@ def plot_markers(
     -------
     base_map : folium.folium.Map.
         Represents a folium map with visualization.
-
     """
     move_df = move_data.reset_index()
 
@@ -707,7 +712,9 @@ def plot_markers(
             + str(each[1].datetime)
         )
         folium.Marker(
-            location=[each[1]["lat"], each[1]["lon"]], clustered_marker=True, popup=pop
+            location=[each[1]["lat"], each[1]["lon"]],
+            clustered_marker=True,
+            popup=pop,
         ).add_to(base_map)
 
     if save_as_html:
@@ -722,6 +729,7 @@ def plot_trajectories_with_folium(
     lat_origin=None,
     lon_origin=None,
     zoom_start=12,
+    legend=False,
     base_map=None,
     tile=TILES[0],
     save_as_html=False,
@@ -745,6 +753,8 @@ def plot_trajectories_with_folium(
         If not entered, the first data from the dataset is used.
     zoom_start : int, optional, default 12.
         Initial zoom level for the map
+    legend: boolean
+        Whether to add a legend to the map
     base_map : folium.folium.Map, optional, default None.
         Represents the folium map. If not informed, a new map is generated
         using the function create_base_map(), with the lat_origin, lon_origin
@@ -777,10 +787,12 @@ def plot_trajectories_with_folium(
     if n_rows is None:
         n_rows = move_data.shape[0]
 
-    mv_df = move_data.loc[:n_rows, [LATITUDE, LONGITUDE, TRAJ_ID]].reset_index()
+    mv_df = move_data.loc[
+        :n_rows, [LATITUDE, LONGITUDE, TRAJ_ID]
+    ].reset_index()
 
     ids = mv_df[TRAJ_ID].unique()
-    if type(color) == str:
+    if isinstance(color, str):
         colors = [generate_color() for _ in ids]
     else:
         colors = color[:]
@@ -807,6 +819,9 @@ def plot_trajectories_with_folium(
         folium.PolyLine(
             mv[[LATITUDE, LONGITUDE]], color=color, weight=2.5, opacity=1
         ).add_to(base_map)
+
+    if legend:
+        add_map_legend(base_map, "Color by user ID", items)
 
     if save_as_html:
         base_map.save(outfile=filename)
@@ -1006,7 +1021,7 @@ def plot_trajectory_by_period(
         items = list(zip([id_], [color]))
     else:
         ids = mv_df[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]
@@ -1138,7 +1153,7 @@ def plot_trajectory_by_day_week(
         items = list(zip([id_], [color]))
     else:
         ids = mv_df[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]
@@ -1251,10 +1266,10 @@ def plot_trajectory_by_date(
             default_zoom_start=zoom_start,
         )
 
-    if type(start_date) == str:
+    if isinstance(start_date, str):
         start_date = str_to_datetime(start_date).date()
 
-    if type(end_date) == str:
+    if isinstance(end_date, str):
         end_date = str_to_datetime(end_date).date()
 
     if DATE not in move_data:
@@ -1282,7 +1297,7 @@ def plot_trajectory_by_date(
         items = list(zip([id_], [color]))
     else:
         ids = mv_df[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]
@@ -1419,7 +1434,7 @@ def plot_trajectory_by_hour(
         items = list(zip([id_], [color]))
     else:
         ids = mv_df[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]
@@ -1556,7 +1571,7 @@ def plot_stops(
         items = list(zip([id_], [color]))
     else:
         ids = stops[TRAJ_ID].unique()
-        if type(color) == str:
+        if isinstance(color, str):
             colors = [generate_color() for _ in ids]
         else:
             colors = color[:]

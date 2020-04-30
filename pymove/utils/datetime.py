@@ -1,9 +1,11 @@
 import datetime
+
 from pandas._libs.tslibs.timestamps import Timestamp
 
 
 def date_to_str(date):
-    """Get date, in string's format, from timestamp.
+    """
+    Get date, in string's format, from timestamp.
 
     Parameters
     ----------
@@ -17,14 +19,15 @@ def date_to_str(date):
 
     Examples
     --------
-
     """
     date_str = date.strftime("%Y-%m-%d")
     return date_str
 
 
 def str_to_datetime(dt_str):
-    """Converts a datetime in string"s format "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S" to datetime"s format.
+    """
+    Converts a datetime in string"s format "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S" to
+    datetime"s format.
 
     Parameters
     ----------
@@ -44,7 +47,8 @@ def str_to_datetime(dt_str):
 
 
 def to_str(data):
-    """Converts a date in datetime's format to string"s format.
+    """
+    Converts a date in datetime's format to string"s format.
 
     Parameters
     ----------
@@ -58,7 +62,6 @@ def to_str(data):
 
     Examples
     --------
-
     """
 
     datetime_str = data.strftime("%Y-%m-%d %H:%M:%S")
@@ -66,8 +69,9 @@ def to_str(data):
 
 
 def to_min(datetime):
-    """Converts a datetime to an int representation in minutes.
-    To do the reverse use: min_to_datetime.
+    """
+    Converts a datetime to an int representation in minutes. To do the reverse
+    use: min_to_datetime.
 
     Parameters
     ----------
@@ -81,20 +85,22 @@ def to_min(datetime):
 
     Examples
     --------
-
     """
     # get an integer time slot from a datetime
-    minutes = int((datetime - datetime.utcfromtimestamp(0)).total_seconds() / 60)
+    minutes = int(
+        (datetime - datetime.utcfromtimestamp(0)).total_seconds() / 60
+    )
     return minutes
 
 
-def min_to_datetime(min):
-    """Converts an int representation in minutes to a datetime.
-    To do the reverse use: datetime_to_min.
+def min_to_datetime(min_):
+    """
+    Converts an int representation in minutes to a datetime. To do the reverse
+    use: datetime_to_min.
 
     Parameters
     ----------
-    min : int
+    min_ : int
         Represents minutes.
 
     Returns
@@ -104,15 +110,14 @@ def min_to_datetime(min):
 
     Examples
     --------
-
     """
     # get a datetime from an integer time slot
     # utcfromtimestamp (below) is much faster than the line above
-    min_datetime = datetime.datetime.utcfromtimestamp(min * 60)
+    min_datetime = datetime.datetime.utcfromtimestamp(min_ * 60)
     return min_datetime
 
 
-#TODO: ve o que sao os parametros e tipo dos param
+# TODO: ve o que sao os parametros e tipo dos param
 # def slot_of_day_to_time(slot_of_day1, time_window_duration=5):
 #     """Converts a slot of day to a time (datetime)
 #
@@ -190,9 +195,10 @@ def min_to_datetime(min):
 #     return dt_slot
 #
 
+
 def to_day_of_week_int(date):
-    """Get day of week of a date.
-    Monday == 0...Sunday == 6
+    """
+    Get day of week of a date. Monday == 0...Sunday == 6.
 
     Parameters
     ----------
@@ -209,7 +215,8 @@ def to_day_of_week_int(date):
 
 
 def working_day(dt, holidays):
-    """Indices if a day specified by the user is a working day.
+    """
+    Indices if a day specified by the user is a working day.
 
     Parameters
     ----------
@@ -226,10 +233,10 @@ def working_day(dt, holidays):
     """
     result = True
 
-    if type(dt) == str:
+    if isinstance(dt, str):
         dt = date_to_str(dt)
 
-    if type(dt) == datetime.datetime:
+    if isinstance(dt, datetime.datetime):
         dt = datetime.date(dt.year, dt.month, dt.day)
 
     if dt in holidays:
@@ -244,7 +251,8 @@ def working_day(dt, holidays):
 
 
 def now_str():
-    """Get datetime of now.
+    """
+    Get datetime of now.
 
     Parameters
     ----------
@@ -259,14 +267,14 @@ def now_str():
     >>> from pymove import datetime
     >>> datetime.now_str()
     "2019-09-02 13:54:16"
-
     """
     date_time = to_str(datetime.datetime.now())
     return date_time
 
 
 def deltatime_str(deltatime_seconds):
-    """Convert time in a format appropriate of time.
+    """
+    Convert time in a format appropriate of time.
 
     Parameters
     ----------
@@ -291,12 +299,16 @@ def deltatime_str(deltatime_seconds):
     """
     time_int = int(deltatime_seconds)
     time_dec = int((deltatime_seconds - time_int) * 1000)
-    time_str = "{:02d}:{:02d}:{:02d}.{:03d}".format(time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec)
+    time_str = "{:02d}:{:02d}:{:02d}.{:03d}".format(
+        time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec
+    )
     return time_str
 
 
 def timestamp_to_millis(timestamp):
-    """Converts a local datetime to a POSIX timestamp in milliseconds (like in Java).
+    """
+    Converts a local datetime to a POSIX timestamp in milliseconds (like in
+    Java).
 
     Parameters
     ----------
@@ -313,14 +325,14 @@ def timestamp_to_millis(timestamp):
     >>> from pymove.utils.utils import datetime
     >>> datetime.timestamp_to_millis("2015-12-12 08:00:00.123000")
     1449907200123 (UTC)
-
     """
     millis = Timestamp(timestamp).value // 1000000
     return millis
 
 
 def millis_to_timestamp(milliseconds):
-    """Converts milliseconds to timestamp.
+    """
+    Converts milliseconds to timestamp.
 
     Parameters
     ----------
@@ -337,14 +349,14 @@ def millis_to_timestamp(milliseconds):
     >>> from pymove.utils.utils import datetime
     >>> datetime.millis_to_timestamp(1449907200123)
     "2015-12-12 08:00:00.123000"
-
     """
     timestamp = Timestamp(milliseconds, unit="ms")
     return timestamp
 
 
 def time_to_str(time):
-    """Get time, in string's format, from timestamp.
+    """
+    Get time, in string's format, from timestamp.
 
     Parameters
     ----------
@@ -361,14 +373,14 @@ def time_to_str(time):
     >>> from pymove.utils.utils import datetime
     >>> datetime.time_to_str("2015-12-12 08:00:00.123000")
     "08:00:00"
-
     """
     timestr = time.strftime("%H:%M:%S")
     return timestr
 
 
 def str_to_time(dt_str):
-    """Converts a time in string's format "%H:%M:%S" to datetime's format.
+    """
+    Converts a time in string's format "%H:%M:%S" to datetime's format.
 
     Parameters
     ----------
@@ -385,7 +397,6 @@ def str_to_time(dt_str):
     >>> from pymove.utils.utils import datetime
     >>> datetime.str_to_time("08:00:00")
     datetime.datetime(1900, 1, 1, 8, 0)
-
     """
 
     datetime_time = datetime.datetime.strptime(dt_str, "%H:%M:%S")
@@ -393,7 +404,9 @@ def str_to_time(dt_str):
 
 
 def elapsed_time_dt(start_time):
-    """Computes the elapsed time from a specific start time to the moment the function is called.
+    """
+    Computes the elapsed time from a specific start time to the moment the
+    function is called.
 
     Parameters
     ----------
@@ -404,14 +417,15 @@ def elapsed_time_dt(start_time):
     -------
         time_dif : Integer
             Represents the time elapsed from the start time to the current time (when the function was called).
-
     """
     time_dif = diff_time(start_time, datetime.datetime.now())
     return time_dif
 
 
 def diff_time(start_time, end_time):
-    """Computes the elapsed time from the start time to the end time specifed by the user.
+    """
+    Computes the elapsed time from the start time to the end time specifed by
+    the user.
 
     Parameters
     ----------
@@ -424,7 +438,6 @@ def diff_time(start_time, end_time):
     -------
         time_dif : Integer
             Represents the time elapsed from the start time to the current time (when the function was called).
-
     """
 
     time_dif = int((end_time - start_time).total_seconds() * 1000)

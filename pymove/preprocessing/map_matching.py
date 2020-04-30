@@ -1,27 +1,28 @@
 import time
+
 import numpy as np
 from scipy.interpolate import interp1d
+from tqdm import tqdm
 
 from pymove.core.dataframe import PandasMoveDataFrame
-
-from pymove.utils.trajectories import shift, progress_update
-from pymove.utils.transformations import feature_values_using_filter_and_indexes, feature_values_using_filter
 from pymove.utils.constants import TID
+from pymove.utils.trajectories import shift
+from pymove.utils.transformations import feature_values_using_filter
 
-
-""" Fuction to solve problems after Map-matching"""
+# Fuction to solve problems after Map-matching
 
 
 def check_time_dist(
-        move_data,
-        index_name="tid",
-        tids=None,
-        max_dist_between_adj_points=5000,
-        max_time_between_adj_points=900,
-        max_speed=30,
-        inplace=True
+    move_data,
+    index_name="tid",
+    tids=None,
+    max_dist_between_adj_points=5000,
+    max_time_between_adj_points=900,
+    max_speed=30,
+    inplace=True,
 ):
-    """Used to verify that the trajectories points are in the correct order after
+    """
+    Used to verify that the trajectories points are in the correct order after
     map matching, considering time and distance.
 
     Parameters
@@ -64,51 +65,47 @@ def check_time_dist(
         if tids is None:
             tids = move_data[index_name].unique()
 
-        size = move_data.shape[0]
         if move_data.index.name is None:
             print("creating index...")
             move_data.set_index(index_name, inplace=True)
 
-        count = 0
-        curr_perc_int = -1
-        start_time = time.time()
-        size_id = 0
-        print("checking ascending distance and time...")
-        for tid in tids:
-            filter_ = (move_data.at[tid, "isNode"] != 1)
+        for tid in tqdm(tids, desc="checking ascending distance and time"):
+            filter_ = move_data.at[tid, "isNode"] != 1
 
             # be sure that distances are in ascending order
             dists = move_data.at[tid, "distFromTrajStartToCurrPoint"][filter_]
-            assert np.all(dists[:-1] < dists[1:]), "distance feature is not in ascending order"
+            assert np.all(
+                dists[:-1] < dists[1:]
+            ), "distance feature is not in ascending order"
 
             # be sure that times are in ascending order
             times = move_data.at[tid, "time"][filter_].astype(np.float64)
-            assert np.all(times[:-1] < times[1:]), "time feature is not in ascending order"
-
-            size_id = 1 if filter_.shape == () else filter_.shape[0]
-            count += size_id
-            curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+            assert np.all(
+                times[:-1] < times[1:]
+            ), "time feature is not in ascending order"
 
         count = 0
-        curr_perc_int = -1
-        start_time = time.time()
-        size_id = 0
 
-        print("checking delta_times, delta_dists and speeds...")
-        for tid in tids:
-            filter_ = (move_data.at[tid, "isNode"] != 1)
+        for tid in tqdm(tids, desc="checking delta_times, delta_dists and speeds"):
+            filter_ = move_data.at[tid, "isNode"] != 1
 
             dists = move_data.at[tid, "distFromTrajStartToCurrPoint"][filter_]
-            delta_dists = (shift(dists, -1) - dists)[:-1]  # do not use last element (np.nan)
+            delta_dists = (shift(dists, -1) - dists)[
+                :-1
+            ]  # do not use last element (np.nan)
 
-            assert np.all(delta_dists <= max_dist_between_adj_points), \
-                "delta_dists must be <= {}".format(max_dist_between_adj_points)
+            assert np.all(
+                delta_dists <= max_dist_between_adj_points
+            ), "delta_dists must be <= {}".format(max_dist_between_adj_points)
 
             times = move_data.at[tid, "time"][filter_].astype(np.float64)
-            delta_times = ((shift(times, -1) - times) / 1000.0)[:-1]  # do not use last element (np.nan)
+            delta_times = ((shift(times, -1) - times) / 1000.0)[
+                :-1
+            ]  # do not use last element (np.nan)
 
-            assert np.all(delta_times <= max_time_between_adj_points), \
-                "delta_times must be <= {}".format(max_time_between_adj_points)
+            assert np.all(
+                delta_times <= max_time_between_adj_points
+            ), "delta_times must be <= {}".format(max_time_between_adj_points)
 
             assert np.all(delta_times > 0), "delta_times must be > 0"
 
@@ -119,19 +116,21 @@ def check_time_dist(
 
             size_id = 1 if filter_.shape == () else filter_.shape[0]
             count += size_id
-            curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
 
         move_data.reset_index(inplace=True)
         if not inplace:
             return move_data
 
     except Exception as e:
-        print("{}: {} - size: {}".format(index_name, tid, size_id))
         raise e
 
 
-def fix_time_not_in_ascending_order_id(move_data, tid, index_name="tid", inplace=True):
-    """Used to correct time order between points of a  trajectory, after map matching operations.
+def fix_time_not_in_ascending_order_id(
+    move_data, tid, index_name="tid", inplace=True
+):
+    """
+    Used to correct time order between points of a  trajectory, after map
+    matching operations.
 
     Parameters
     ----------
@@ -143,14 +142,14 @@ def fix_time_not_in_ascending_order_id(move_data, tid, index_name="tid", inplace
         The name of the column to set as the new index during function execution. Indicates the tid column.
     inplace: boolean, optional(True by default)
         if set to true the original dataframe will be altered,
-        otherwise the alteration will be made in a copy, that will be returned.        
-    
+        otherwise the alteration will be made in a copy, that will be returned.
+
     Returns
     -------
         move_data : dataframe
             A copy of the original dataframe, with the alterations done by the function. (When inplace is False)
         size_id
-    
+
     Notes
     -----
     Do not use trajectories with only 1 point.
@@ -169,11 +168,15 @@ def fix_time_not_in_ascending_order_id(move_data, tid, index_name="tid", inplace
         print("creating index...")
         move_data.set_index(index_name, inplace=True)
 
-    filter_ = (move_data.at[tid, "isNode"] != 1) & (~move_data.at[tid, "deleted"])
+    filter_ = (move_data.at[tid, "isNode"] != 1) & (
+        ~move_data.at[tid, "deleted"]
+    )
 
     # be sure that distances are in ascending order
     dists = move_data.at[tid, "distFromTrajStartToCurrPoint"][filter_]
-    assert np.all(dists[:-1] <= dists[1:]), "distance feature is not in ascending order"
+    assert np.all(
+        dists[:-1] <= dists[1:]
+    ), "distance feature is not in ascending order"
 
     if filter_.shape == ():
         size_id = 1
@@ -186,11 +189,19 @@ def fix_time_not_in_ascending_order_id(move_data, tid, index_name="tid", inplace
         if idx_not_in_ascending_order.shape[0] > 0:
             # print(tid, "idx_not_in_ascending_order:", idx_not_in_ascending_order, "times.shape", times.shape)
 
-            move_data.feature_values_using_filter_and_indexes(move_data, tid, "deleted", filter_,
-                                                              idx_not_in_ascending_order, True)
+            move_data.feature_values_using_filter_and_indexes(
+                move_data,
+                tid,
+                "deleted",
+                filter_,
+                idx_not_in_ascending_order,
+                True,
+            )
             # equivalent of: move_data.at[tid, "deleted"][filter_][idx_not_in_ascending_order] = True
 
-            fix_time_not_in_ascending_order_id(move_data, tid, index_name=index_name)
+            fix_time_not_in_ascending_order_id(
+                move_data, tid, index_name=index_name
+            )
 
     if inplace:
         return size_id
@@ -198,8 +209,12 @@ def fix_time_not_in_ascending_order_id(move_data, tid, index_name="tid", inplace
         return move_data, size_id
 
 
-def fix_time_not_in_ascending_order_all(move_data, index_name="tid", drop_marked_to_delete=False, inplace=True):
-    """Used to correct time order between points of the trajectories, after map matching operations.
+def fix_time_not_in_ascending_order_all(
+    move_data, index_name="tid", drop_marked_to_delete=False, inplace=True
+):
+    """
+    Used to correct time order between points of the trajectories, after map
+    matching operations.
 
     Parameters
     ----------
@@ -211,7 +226,7 @@ def fix_time_not_in_ascending_order_all(move_data, index_name="tid", drop_marked
         Indicates if rows marked as deleted should be dropped.
     inplace: boolean, optional(True by default)
         if set to true the original dataframe will be altered,
-        otherwise the alteration will be made in a copy, that will be returned.        
+        otherwise the alteration will be made in a copy, that will be returned.
 
     Returns
     -------
@@ -220,7 +235,7 @@ def fix_time_not_in_ascending_order_all(move_data, index_name="tid", drop_marked
         None
             When inplace is True
     """
-    
+
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
@@ -234,27 +249,28 @@ def fix_time_not_in_ascending_order_all(move_data, index_name="tid", drop_marked
             move_data.reset_index(inplace=True)
 
         print("dropping duplicate distances... shape before:", move_data.shape)
-        move_data.drop_duplicates(subset=[index_name, "isNode", "distFromTrajStartToCurrPoint"], keep="first",
-                                  inplace=True)
+        move_data.drop_duplicates(
+            subset=[index_name, "isNode", "distFromTrajStartToCurrPoint"],
+            keep="first",
+            inplace=True,
+        )
         print("shape after:", move_data.shape)
 
         print("sorting by id and distance...")
-        move_data.sort_values(by=[index_name, "distFromTrajStartToCurrPoint"], inplace=True)
+        move_data.sort_values(
+            by=[index_name, "distFromTrajStartToCurrPoint"], inplace=True
+        )
         print("sorting done")
 
         tids = move_data[index_name].unique()
         move_data["deleted"] = False
 
         print("starting fix...")
-        size = move_data.shape[0]
-        count = 0
-        curr_perc_int = -1
-        start_time = time.time()
-        for tid in tids:
-            size_id = fix_time_not_in_ascending_order_id(move_data, tid, index_name)
-
-            count += size_id
-            curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+        time.time()
+        for tid in tqdm(tids):
+            fix_time_not_in_ascending_order_id(
+                move_data, tid, index_name
+            )
 
         move_data.reset_index(inplace=True)
         idxs = move_data[move_data["deleted"]].index
@@ -266,21 +282,20 @@ def fix_time_not_in_ascending_order_all(move_data, index_name="tid", drop_marked
             move_data.drop(labels="deleted", axis=1, inplace=True)
             print("shape after dropping: {}".format(move_data.shape))
 
-        if inplace == False:
+        if not inplace:
             return move_data
     except Exception as e:
-        print("{}: {} - size: {}".format(index_name, tid, size_id))
         raise e
 
 
 def interpolate_add_deltatime_speed_features(
-    move_data, 
-    label_id="tid", 
+    move_data,
+    label_id="tid",
     max_time_between_adj_points=900,
-    max_dist_between_adj_points=5000, 
-    max_speed=30, 
-    inplace=True
-):    
+    max_dist_between_adj_points=5000,
+    max_speed=30,
+    inplace=True,
+):
     """Use to interpolate distances (x) to find times (y).
      Parameters
     ----------
@@ -305,8 +320,8 @@ def interpolate_add_deltatime_speed_features(
         None
             When inplace is True
     """
-    
-    if inplace == False:
+
+    if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
     if TID not in move_data:
@@ -326,16 +341,14 @@ def interpolate_add_deltatime_speed_features(
     drop_trajectories = []
     size = move_data.shape[0]
     count = 0
-    curr_perc_int = -1
-    start_time = time.time()
+    time.time()
 
     move_data["delta_time"] = np.nan
     move_data["speed"] = np.nan
 
     try:
-        for tid in tids:
-            filter_nodes = (move_data.at[tid, "isNode"] == 1)
-            times = move_data.at[tid, "time"][filter_nodes]
+        for tid in tqdm(tids):
+            filter_nodes = move_data.at[tid, "isNode"] == 1
             size_id = 1 if filter_nodes.shape == () else filter_nodes.shape[0]
             count += size_id
 
@@ -345,15 +358,20 @@ def interpolate_add_deltatime_speed_features(
                 # print("traj: {} - insuficient points ({}) for interpolation.
                 # adding to drop list...".format(tid,  y_.shape[0]))
                 drop_trajectories.append(tid)
-                curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
                 continue
 
-            assert np.all(y_[1:] >= y_[:-1]), "time feature is not in ascending order"
+            assert np.all(
+                y_[1:] >= y_[:-1]
+            ), "time feature is not in ascending order"
 
             # x - distance from traj start to snapped points
-            x_ = move_data.at[tid, "distFromTrajStartToCurrPoint"][~filter_nodes]
+            x_ = move_data.at[tid, "distFromTrajStartToCurrPoint"][
+                ~filter_nodes
+            ]
 
-            assert np.all(x_[1:] >= x_[:-1]), "distance feature is not in ascending order"
+            assert np.all(
+                x_[1:] >= x_[:-1]
+            ), "distance feature is not in ascending order"
 
             # remove duplicates in distances to avoid np.inf in future interpolation results
             idx_duplicates = np.where(x_[1:] == x_[:-1])[0]
@@ -365,62 +383,99 @@ def interpolate_add_deltatime_speed_features(
                 # print("traj: {} - insuficient points ({}) for interpolation.
                 # adding to drop list...".format(tid,  y_.shape[0]))
                 drop_trajectories.append(tid)
-                curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
                 continue
 
             # compute delta_time and distance between points
             # values = (ut.shift(move_data.at[tid, "time"][filter_nodes].astype(np.float64), -1)
             # - move_data.at[tid, "time"][filter_nodes]) / 1000
             # ut.change_move_datafeature_values_using_filter(move_data, tid, "delta_time", filter_nodes, values)
-            delta_time = ((shift(y_.astype(np.float64), -1) - y_) / 1000.0)[:-1]
+            delta_time = ((shift(y_.astype(np.float64), -1) - y_) / 1000.0)[
+                :-1
+            ]
             dist_curr_to_next = (shift(x_, -1) - x_)[:-1]
             speed = (dist_curr_to_next / delta_time)[:-1]
 
             assert np.all(
-                delta_time <= max_time_between_adj_points), "delta_time between points cannot be more than {}".format(
-                max_time_between_adj_points)
+                delta_time <= max_time_between_adj_points
+            ), "delta_time between points cannot be more than {}".format(
+                max_time_between_adj_points
+            )
             assert np.all(
-                dist_curr_to_next <= max_dist_between_adj_points), "distance between points cannot be more than {}".\
-                format(max_dist_between_adj_points)
-            assert np.all(speed <= max_speed), "speed between points cannot be more than {}".format(max_speed)
+                dist_curr_to_next <= max_dist_between_adj_points
+            ), "distance between points cannot be more than {}".format(
+                max_dist_between_adj_points
+            )
+            assert np.all(
+                speed <= max_speed
+            ), "speed between points cannot be more than {}".format(max_speed)
 
-            assert np.all(x_[1:] >= x_[:-1]), "distance feature is not in ascending order"
+            assert np.all(
+                x_[1:] >= x_[:-1]
+            ), "distance feature is not in ascending order"
 
             f_intp = interp1d(x_, y_, fill_value="extrapolate")
 
-            x2_ = move_data.at[tid, "distFromTrajStartToCurrPoint"][filter_nodes]
-            assert np.all(x2_[1:] >= x2_[:-1]), "distances in nodes are not in ascending order"
+            x2_ = move_data.at[tid, "distFromTrajStartToCurrPoint"][
+                filter_nodes
+            ]
+            assert np.all(
+                x2_[1:] >= x2_[:-1]
+            ), "distances in nodes are not in ascending order"
 
             intp_result = f_intp(x2_)  # .astype(np.int64)
-            assert np.all(intp_result[1:] >= intp_result[:-1]), "resulting times are not in ascending order"
+            assert np.all(
+                intp_result[1:] >= intp_result[:-1]
+            ), "resulting times are not in ascending order"
 
-            assert ~np.isin(np.inf, intp_result), "interpolation results with np.inf value(s)"
+            assert ~np.isin(
+                np.inf, intp_result
+            ), "interpolation results with np.inf value(s)"
 
             # update time features for nodes. initially they are empty.
             values = intp_result.astype(np.int64)
-            feature_values_using_filter(move_data, tid, "time", filter_nodes, values)
+            feature_values_using_filter(
+                move_data, tid, "time", filter_nodes, values
+            )
 
             # create delta_time feature
-            values = (shift(move_data.at[tid, "time"][filter_nodes].astype(np.float64), -1)
-                      - move_data.at[tid, "time"][filter_nodes]) / 1000
-            feature_values_using_filter(move_data, tid, "delta_time", filter_nodes, values)
+            values = (
+                shift(
+                    move_data.at[tid, "time"][filter_nodes].astype(np.float64),
+                    -1,
+                )
+                - move_data.at[tid, "time"][filter_nodes]
+            ) / 1000
+            feature_values_using_filter(
+                move_data, tid, "delta_time", filter_nodes, values
+            )
 
             # create speed feature
-            values = move_data.at[tid, "edgeDistance"][filter_nodes] / move_data.at[tid, "delta_time"][filter_nodes]
-            feature_values_using_filter(move_data, tid, "speed", filter_nodes, values)
-
-            curr_perc_int, est_time_str = progress_update(count, size, start_time, curr_perc_int, step_perc=20)
+            values = (
+                move_data.at[tid, "edgeDistance"][filter_nodes]
+                / move_data.at[tid, "delta_time"][filter_nodes]
+            )
+            feature_values_using_filter(
+                move_data, tid, "speed", filter_nodes, values
+            )
 
     except Exception as e:
-        print("{}: {} - size: {} - count: {}".format(label_id, tid, size_id, count))
         raise e
 
     print(count, size)
-    print("we still need to drop {} trajectories with only 1 gps point".format(len(drop_trajectories)))
+    print(
+        "we still need to drop {} trajectories with only 1 gps point".format(
+            len(drop_trajectories)
+        )
+    )
     move_data.reset_index(inplace=True)
-    idxs_drop = move_data[move_data[label_id].isin(drop_trajectories)].index.values
-    print("dropping {} rows in {} trajectories with only 1 gps point".format(idxs_drop.shape[0],
-                                                                             len(drop_trajectories)))
+    idxs_drop = move_data[
+        move_data[label_id].isin(drop_trajectories)
+    ].index.values
+    print(
+        "dropping {} rows in {} trajectories with only 1 gps point".format(
+            idxs_drop.shape[0], len(drop_trajectories)
+        )
+    )
     if idxs_drop.shape[0] > 0:
         print("shape before dropping: {}".format(move_data.shape))
         move_data.drop(index=idxs_drop, inplace=True)

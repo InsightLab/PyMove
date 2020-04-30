@@ -1,5 +1,7 @@
-import numpy as np
 import math
+
+import numpy as np
+
 from pymove.utils import constants
 
 
@@ -23,16 +25,19 @@ def lat_meters(lat):
     """
     rlat = float(lat) * math.pi / 180
     # meter per degree Latitude
-    meters_lat = 111132.92 - 559.82 * math.cos(2 * rlat) + 1.175 * math.cos(4 * rlat)
+    meters_lat = (
+        111132.92 - 559.82 * math.cos(2 * rlat) + 1.175 * math.cos(4 * rlat)
+    )
     # meter per degree Longitude
     meters_lgn = 111412.84 * math.cos(rlat) - 93.5 * math.cos(3 * rlat)
     meters = (meters_lat + meters_lgn) / 2
     return meters
 
-    
-def list_to_str(input_list, delimiter=','):
+
+def list_to_str(input_list, delimiter=","):
     """
-    Concatenates list elements, joining them by the separator specified by the parameter "delimiter".
+    Concatenates list elements, joining them by the separator specified by the
+    parameter "delimiter".
 
     Parameters
     ----------
@@ -47,7 +52,9 @@ def list_to_str(input_list, delimiter=','):
     String
         Returns a string, resulting from concatenation of list's elements, separeted by the delimiter.
     """
-    return delimiter.join([x if type(x) == str else repr(x) for x in input_list])
+    return delimiter.join(
+        [x if isinstance(x, str) else repr(x) for x in input_list]
+    )
 
 
 def list_to_csv_str(input_list):
@@ -70,8 +77,6 @@ def list_to_csv_str(input_list):
     >>> a = [1, 2, 3, 4, 5]
     >>> conversions.list_to_csv_str(a)
     '1 1:2 2:3 3:4 4:5'
-
-
     """
     return list_to_str(input_list)
 
@@ -96,18 +101,17 @@ def list_to_svm_line(original_list):
     >>> a = [1, 2, 3, 4, 5]
     >>> conversions.list_to_svm_line(a)
     '1 1:2 2:3 3:4 4:5'
-
     """
     list_size = len(original_list)
-    svm_line = '%s ' % original_list[0]
+    svm_line = "%s " % original_list[0]
     for i in range(1, list_size):
-        svm_line += '{}:{} '.format(i, original_list[i])
+        svm_line += "{}:{} ".format(i, original_list[i])
     return svm_line.rstrip()
 
 
 def lon_to_x_spherical(lon):
     """
-    Convert longitude to X EPSG:3857 WGS 84/Pseudo-Mercator
+    Convert longitude to X EPSG:3857 WGS 84/Pseudo-Mercator.
 
     Parameters
     ----------
@@ -128,14 +132,13 @@ def lon_to_x_spherical(lon):
     References
     ----------
     https://epsg.io/transform
-
     """
     return 6378137 * np.radians(lon)
 
 
 def lat_to_y_spherical(lat):
     """
-    Convert latitude to Y EPSG:3857 WGS 84/Pseudo-Mercator
+    Convert latitude to Y EPSG:3857 WGS 84/Pseudo-Mercator.
 
     Parameters
     ----------
@@ -156,7 +159,6 @@ def lat_to_y_spherical(lat):
     References
     ----------
     https://epsg.io/transform
-
     """
     return 6378137 * np.log(np.tan(np.pi / 4 + np.radians(lat) / 2.0))
 
@@ -184,7 +186,6 @@ def x_to_lon_spherical(x):
     References
     ----------
     https://epsg.io/transform
-
     """
     return np.degrees(x / 6378137.0)
 
@@ -212,16 +213,11 @@ def y_to_lat_spherical(y):
     References
     ----------
     https://epsg.io/transform
-
     """
     return np.degrees(np.arctan(np.sinh(y / 6378137.0)))
 
 
-def ms_to_kmh(
-    move_data,
-    label_speed=constants.SPEED_TO_PREV,
-    new_label=None
-):
+def ms_to_kmh(move_data, label_speed=constants.SPEED_TO_PREV, new_label=None):
     """
     Convert values, in ms, in label_speed column to kmh.
 
@@ -238,23 +234,20 @@ def ms_to_kmh(
 
     Returns
     -------
-
     """
     try:
         if label_speed not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_speed] = move_data[label_speed].transform(lambda row: row*3.6)
+        move_data[label_speed] = move_data[label_speed].transform(
+            lambda row: row * 3.6
+        )
         if new_label is not None:
             move_data.rename(columns={label_speed: new_label}, inplace=True)
     except Exception as e:
         raise e
 
 
-def kmh_to_ms(
-    move_data,
-    label_speed=constants.SPEED_TO_PREV,
-    new_label=None
-):
+def kmh_to_ms(move_data, label_speed=constants.SPEED_TO_PREV, new_label=None):
     """
     Convert values, in kmh, in label_speed column to ms.
 
@@ -271,12 +264,13 @@ def kmh_to_ms(
 
     Returns
     -------
-
     """
     try:
         if label_speed not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_speed] = move_data[label_speed].transform(lambda row: row/3.6)
+        move_data[label_speed] = move_data[label_speed].transform(
+            lambda row: row / 3.6
+        )
         if new_label is not None:
             move_data.rename(columns={label_speed: new_label}, inplace=True)
     except Exception as e:
@@ -284,9 +278,7 @@ def kmh_to_ms(
 
 
 def meters_to_kilometers(
-    move_data,
-    label_distance=constants.DIST_TO_PREV,
-    new_label=None
+    move_data, label_distance=constants.DIST_TO_PREV, new_label=None
 ):
     """
     Convert values, in meters, in label_distance column to kilometers.
@@ -304,12 +296,13 @@ def meters_to_kilometers(
 
     Returns
     -------
-
     """
     try:
         if label_distance not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_distance] = move_data[label_distance].transform(lambda row: row/1000)
+        move_data[label_distance] = move_data[label_distance].transform(
+            lambda row: row / 1000
+        )
         if new_label is not None:
             move_data.rename(columns={label_distance: new_label}, inplace=True)
     except Exception as e:
@@ -317,9 +310,7 @@ def meters_to_kilometers(
 
 
 def kilometers_to_meters(
-    move_data,
-    label_distance=constants.DIST_TO_PREV,
-    new_label=None
+    move_data, label_distance=constants.DIST_TO_PREV, new_label=None
 ):
     """
     Convert values, in kilometers, in label_distance column to meters.
@@ -337,12 +328,13 @@ def kilometers_to_meters(
 
     Returns
     -------
-
     """
     try:
         if label_distance not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_distance] = move_data[label_distance].transform(lambda row: row*1000)
+        move_data[label_distance] = move_data[label_distance].transform(
+            lambda row: row * 1000
+        )
         if new_label is not None:
             move_data.rename(columns={label_distance: new_label}, inplace=True)
     except Exception as e:
@@ -350,9 +342,7 @@ def kilometers_to_meters(
 
 
 def seconds_to_minutes(
-    move_data,
-    label_time=constants.TIME_TO_PREV,
-    new_label=None
+    move_data, label_time=constants.TIME_TO_PREV, new_label=None
 ):
     """
     Convert values, in seconds, in label_distance column to minutes.
@@ -370,12 +360,13 @@ def seconds_to_minutes(
 
     Returns
     -------
-
     """
     try:
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_time] = move_data[label_time].transform(lambda row: row/60.0)
+        move_data[label_time] = move_data[label_time].transform(
+            lambda row: row / 60.0
+        )
         if new_label is not None:
             move_data.rename(columns={label_time: new_label}, inplace=True)
     except Exception as e:
@@ -383,9 +374,7 @@ def seconds_to_minutes(
 
 
 def minute_to_seconds(
-    move_data,
-    label_time=constants.TIME_TO_PREV,
-    new_label=None
+    move_data, label_time=constants.TIME_TO_PREV, new_label=None
 ):
     """
     Convert values, in minutes, in label_distance column to seconds.
@@ -403,12 +392,13 @@ def minute_to_seconds(
 
     Returns
     -------
- 
     """
     try:
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_time] = move_data[label_time].apply(lambda row: row*60.0)
+        move_data[label_time] = move_data[label_time].apply(
+            lambda row: row * 60.0
+        )
         if new_label is not None:
             move_data.rename(columns={label_time: new_label}, inplace=True)
     except Exception as e:
@@ -416,9 +406,7 @@ def minute_to_seconds(
 
 
 def minute_to_hours(
-    move_data,
-    label_time=constants.TIME_TO_PREV,
-    new_label=None
+    move_data, label_time=constants.TIME_TO_PREV, new_label=None
 ):
     """
     Convert values, in minutes, in label_distance column to hours.
@@ -436,12 +424,13 @@ def minute_to_hours(
 
     Returns
     -------
-
     """
     try:
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_time] = move_data[label_time].apply(lambda row: row/60.0)
+        move_data[label_time] = move_data[label_time].apply(
+            lambda row: row / 60.0
+        )
         if new_label is not None:
             move_data.rename(columns={label_time: new_label}, inplace=True)
     except Exception as e:
@@ -449,9 +438,7 @@ def minute_to_hours(
 
 
 def hours_to_minute(
-    move_data,
-    label_time=constants.TIME_TO_PREV,
-    new_label=None
+    move_data, label_time=constants.TIME_TO_PREV, new_label=None
 ):
     """
     Convert values, in hours, in label_distance column to minute.
@@ -469,12 +456,13 @@ def hours_to_minute(
 
     Returns
     -------
-
     """
     try:
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_time] = move_data[label_time].apply(lambda row: row*60.0)
+        move_data[label_time] = move_data[label_time].apply(
+            lambda row: row * 60.0
+        )
         if new_label is not None:
             move_data.rename(columns={label_time: new_label}, inplace=True)
     except Exception as e:
@@ -482,16 +470,14 @@ def hours_to_minute(
 
 
 def seconds_to_hours(
-    move_data,
-    label_time=constants.TIME_TO_PREV,
-    new_label=None
+    move_data, label_time=constants.TIME_TO_PREV, new_label=None
 ):
     """
     Convert values, in seconds, in label_distance column to hours.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass. 
+    move_data : pymove.core.MoveDataFrameAbstract subclass.
         The input trajectory data
 
     label_time : String, optional, default 'time_to_prev'.
@@ -502,12 +488,13 @@ def seconds_to_hours(
 
     Returns
     -------
-     
     """
     try:
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_time] = move_data[label_time].apply(lambda row: row/3600.0)
+        move_data[label_time] = move_data[label_time].apply(
+            lambda row: row / 3600.0
+        )
         if new_label is not None:
             move_data.rename(columns={label_time: new_label}, inplace=True)
     except Exception as e:
@@ -515,9 +502,7 @@ def seconds_to_hours(
 
 
 def hours_to_seconds(
-    move_data,
-    label_time=constants.TIME_TO_PREV,
-    new_label=None
+    move_data, label_time=constants.TIME_TO_PREV, new_label=None
 ):
     """
     Convert values, in hours, in label_distance column to seconds.
@@ -535,12 +520,13 @@ def hours_to_seconds(
 
     Returns
     -------
-    
     """
     try:
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_time] = move_data[label_time].apply(lambda row: row*3600.0)
+        move_data[label_time] = move_data[label_time].apply(
+            lambda row: row * 3600.0
+        )
         if new_label is not None:
             move_data.rename(columns={label_time: new_label}, inplace=True)
     except Exception as e:
