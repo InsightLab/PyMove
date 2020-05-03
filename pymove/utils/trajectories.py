@@ -63,7 +63,7 @@ def read_csv(
         Trajectory data.
     """
     df = pd.read_csv(
-        filename, sep=sep, encoding=encoding, parse_dates=["datetime"]
+        filename, sep=sep, encoding=encoding, parse_dates=[datetime]
     )
 
     from pymove import PandasMoveDataFrame as pm
