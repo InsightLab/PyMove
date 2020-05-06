@@ -76,16 +76,13 @@ def read_csv(
 
 
 def format_labels(
-    move_data, current_id, current_lat, current_lon, current_datetime
+    current_id, current_lat, current_lon, current_datetime
 ):
     """
     Format the labels for the PyMove lib pattern labels output = lat, lon and datatime.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-
     current_id : String.
         Represents the column name of feature id.
 
