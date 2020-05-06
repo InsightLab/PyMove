@@ -115,7 +115,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data = pd.DataFrame(data, columns=zip_list)
 
         mapping_columns = format_labels(
-            data, traj_id, latitude, longitude, datetime
+            traj_id, latitude, longitude, datetime
         )
         tdf = data.rename(columns=mapping_columns)
 
@@ -2701,7 +2701,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         # cria o dataframe
         # AttributeError if the data doesn't contains one of the columns LATITUDE, LONGITUDE, DATETIME
         mapping_columns = format_labels(
-            data, traj_id, latitude, longitude, datetime
+            traj_id, latitude, longitude, datetime
         )
         dsk = data.rename(columns=mapping_columns)
 
