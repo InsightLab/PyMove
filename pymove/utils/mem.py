@@ -2,7 +2,10 @@ from __future__ import print_function
 
 import json
 import os
-import pwd
+try:
+    import pwd
+except (ModuleNotFoundError, ImportError)  as e:
+    import _winpwd as pwd
 import re
 import resource
 import time
