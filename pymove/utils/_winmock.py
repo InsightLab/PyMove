@@ -1,7 +1,7 @@
 class WindowsUser:
   """Mock class for module errors on windows."""
   def __init__(self):
-    """Instantiates mock class"""
+    """Instantiates mock class."""
     self.pw_name = "windows"
     self.ru_maxrss = 0
 
