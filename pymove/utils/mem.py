@@ -2,9 +2,13 @@ from __future__ import print_function
 
 import json
 import os
-import pwd
+try:
+    import pwd
+    import resource
+except (ModuleNotFoundError, ImportError):
+    import _winmock as pwd
+    import _winmock as resource
 import re
-import resource
 import time
 from collections import deque
 from itertools import chain
