@@ -5,7 +5,7 @@ import os
 try:
     import pwd
     import resource
-except (ModuleNotFoundError, ImportError)  as e:
+except (ModuleNotFoundError, ImportError):
     import _winmock as pwd
     import _winmock as resource
 import re
