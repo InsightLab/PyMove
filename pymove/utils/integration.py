@@ -41,7 +41,7 @@ def join_coletives_areas(gdf_, gdf_rules_, label_geometry='geometry'):
         #print('attributing violations to polygon - {}'.format(i))
         gdf_.at[index, 'violation'] = True
 
-def join_with_POIs(df_, df_POIs, label_id='name', label_POI='POI', reset_index=True):    
+def join_with_POIs(df_, df_POIs, label_id='id', label_POI='POI', reset_index=True):    
     try:
         print('Integration with POIs...')
         start_time = time.time()
@@ -91,7 +91,7 @@ def join_with_POIs(df_, df_POIs, label_id='name', label_POI='POI', reset_index=T
         print('id: {}\n'.format(idx))
         raise e
 
-def join_with_POIs_optimizer(df_, df_POIs, label_id='name', label_POI='POI', dist_poi=[10], reset_index=True):    
+def join_with_POIs_optimizer(df_, df_POIs, label_id='id', label_POI='POI', dist_poi=[10], reset_index=True):    
     try:
         print('Integration with POIs...')
         start_time = time.time()
@@ -148,7 +148,7 @@ def join_with_POIs_optimizer(df_, df_POIs, label_id='name', label_POI='POI', dis
         print('id: {}\n'.format(idx))
         raise e
 
-def join_with_POIs_by_category(df_, df_POIs, label_category='POI', label_id='name', label_POI='PO+I'):    
+def join_with_POIs_by_category(df_, df_POIs, label_category='POI', label_id='id', label_POI='PO+I'):    
     """ Do integration between POIs and TNZ from """
     try:
         print('Integration with POIs...')
