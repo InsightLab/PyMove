@@ -4,10 +4,11 @@ import json
 import os
 try:
     import pwd
+    import resource
 except (ModuleNotFoundError, ImportError)  as e:
-    import _winpwd as pwd
+    import _winmock as pwd
+    import _winmock as resource
 import re
-import resource
 import time
 from collections import deque
 from itertools import chain
