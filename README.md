@@ -1,4 +1,4 @@
-# Use PyMove and go much further...
+# Use PyMove and go much further
 
 ---
 
@@ -72,7 +72,7 @@
 
 ---
 
-## What is PyMove?
+## What is PyMove
 
 PyMove is a Python library for processing and visualization of trajectories and other spatial-temporal data.
 
@@ -137,7 +137,7 @@ Anaconda Python distribution installed and accessible
 
 Press y to proceed. This will install the Python version and all the associated anaconda packaged libraries at "path_to_your_anaconda_location/anaconda/envs/yourenvname"
 
-2.Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environement at creation.
+2.Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environment at creation.
 
 `conda activate activate <yourenvname>`
 
