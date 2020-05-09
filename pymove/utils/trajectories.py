@@ -16,6 +16,8 @@ def read_csv(
     filename,
     sep=",",
     encoding="utf-8",
+    header='infer',
+    names=None,
     latitude=LATITUDE,
     longitude=LONGITUDE,
     datetime=DATETIME,
@@ -34,10 +36,22 @@ def read_csv(
         Represents coordinates lat, lon which will be the center of the map.
 
     sep : String, optional, default ','.
-        Represents .
+        Delimiter to use.
 
     encoding : String, optional, default 'utf-8'.
-        Represents .
+        Encoding to use for UTF when reading/writing
+
+    header: int, list of int, default ‘infer’
+        Row number(s) to use as the column names, and the start of the data.
+        Default behavior is to infer the column names: if no names are passed the
+        behavior is identical to header=0 and column names are inferred from the
+        first line of the file, if column names are passed explicitly then the behavior
+        is identical to header=None
+
+    names: array-like, optional
+        List of column names to use. If the file contains a header row,
+        then you should explicitly pass header=0 to override the column names.
+        Duplicates in this list are not allowed.
 
     latitude : String, optional, default 'lat'.
         Represents the column name of feature latitude.
@@ -63,7 +77,7 @@ def read_csv(
         Trajectory data.
     """
     df = pd.read_csv(
-        filename, sep=sep, encoding=encoding, parse_dates=["datetime"]
+        filename, sep=sep, encoding=encoding, header=header, names=names, parse_dates=[datetime]
     )
 
     from pymove import PandasMoveDataFrame as pm
@@ -76,16 +90,13 @@ def read_csv(
 
 
 def format_labels(
-    move_data, current_id, current_lat, current_lon, current_datetime
+    current_id, current_lat, current_lon, current_datetime
 ):
     """
     Format the labels for the PyMove lib pattern labels output = lat, lon and datatime.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-
     current_id : String.
         Represents the column name of feature id.
 

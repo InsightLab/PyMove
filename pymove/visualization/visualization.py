@@ -104,45 +104,6 @@ def cmap_hex_color(cmap, i):
     return matplotlib.colors.rgb2hex(cmap(i))
 
 
-# def add_map_legend(m, title, items):
-#     item = "<li><span style='background:%s;'></span>%s</li>"
-#     list_items = "\n".join([item % (n, c) for (n, c) in items])
-#     legend_html = """
-#         <style>
-#             .box {
-#                 position: fixed;
-#                 bottom: 50px;
-#                 left: 50px;
-#                 width: 250px;
-#                 height: 90px;
-#                 border:2px solid grey;
-#                 z-index:9999;
-#                 font-size:14px;
-#                 padding: 1px;
-#             }
-#             .legend {
-#                 display:flex;
-#                 align-items:center;
-#                 justify-content:space-between;
-#             }
-#             .square {
-#                 height:10px;
-#                 width: 50px;
-#             }
-#         </style>
-#         <div class='box'>
-#             %s <br>
-#             <ul>
-#                 %s
-#             </ul>
-#         </div>
-#     """ % (
-#         title,
-#         list_items,
-#     )
-#     m.get_root().html.add_child(folium.Element(legend_html))
-
-
 def save_map(
     move_data, filename, tiles="OpenStreetMap", label_id=TRAJ_ID, cmap="tab20"
 ):
