@@ -14,6 +14,7 @@ import versioneer
 cmdclass = versioneer.get_cmdclass()
 
 DEPENDENCIES = [
+    "pytz==2019.3",
     "tqdm",
     "numpy",
     "pandas",
@@ -30,6 +31,7 @@ DEPENDENCIES = [
     "dask[dataframe]",
     "sklearn",
     "joblib",
+    "holidays"
 ]
 
 setup(

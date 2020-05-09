@@ -1,4 +1,6 @@
 import datetime
+import holidays
+
 
 from pandas._libs.tslibs.timestamps import Timestamp
 
@@ -214,7 +216,7 @@ def to_day_of_week_int(date):
     return day_week
 
 
-def working_day(dt, holidays):
+def working_day(dt, country='BR', state=None):
     """
     Indices if a day specified by the user is a working day.
 
@@ -222,14 +224,20 @@ def working_day(dt, holidays):
     ----------
     dt : Datetime
         Specifies the day the user wants to know if it is a business day.
-    holidays : Datetime
-        Indicates the days that are vacation days and therefore not working days.
+    country : String
+        Indicates country the days that are vacation days and therefore not working days.
+    state: String
+        Indicates country the days that are vacation days and therefore not working days.
 
     Returns
     -------
     result : boolean
         if true, means that the day informed by the user is a working day.
         if false, means that the day is not a working day.
+
+    References
+    ----------
+    Countries and States names available in https://pypi.org/project/holidays/
     """
     result = True
 
@@ -239,7 +247,7 @@ def working_day(dt, holidays):
     if isinstance(dt, datetime.datetime):
         dt = datetime.date(dt.year, dt.month, dt.day)
 
-    if dt in holidays:
+    if dt in holidays.CountryHoliday(country=country, prov=None, state=state):
         result = False
     else:
         dow = to_day_of_week_int(dt)
