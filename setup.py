@@ -9,10 +9,6 @@ try:
 except Exception as e:
     raise e
 
-import versioneer
-
-cmdclass = versioneer.get_cmdclass()
-
 DEPENDENCIES = [
     "pytz==2019.3",
     "tqdm",
@@ -36,7 +32,7 @@ DEPENDENCIES = [
 
 setup(
     name="pymove",
-    version=versioneer.get_version(),
+    version="1.1.5",
     author="Insight Data Science Lab",
     author_email="insightlab@dc.ufc.br",
     license="MIT",
