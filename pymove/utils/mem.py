@@ -6,8 +6,8 @@ try:
     import pwd
     import resource
 except (ModuleNotFoundError, ImportError):
-    import _winmock as pwd
-    import _winmock as resource
+    from pymove.utils import _winmock as pwd
+    from pymove.utils import _winmock as  resource
 import re
 import time
 from collections import deque
