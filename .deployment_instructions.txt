@@ -60,16 +60,17 @@ For more information on how to use and configure the deployment see these links:
 
 How to deploy PyMove to Pypi using Travis CI
 
+We are using the bumper2version lib to control the versioning.
+# https://github.com/c4urself/bump2version
 
-To deploy pymove to Pypi using you must be in the developer branch, Travis was configured to only allow deployments from the developer branch. Travis was also set to only deploy on tagged commit, the tag must start with "version-" followed by the version number of the package you want to upload. To better understand the versioner lib read the header of the file versioneer.py. 
+Run the command bumperversion [major|minor|patch] to increase the version number. This will create a new tag and commit the changes. Then push the changes to the developer branch and create a pull request.
 
-First, commit your changes, then create a tag with the version number to be uploaded:
+$ git push
 
-$ git tag version-"version number"
+To deploy pymove to Pypi using you must be in the master branch, Travis was configured to only allow deployments from the master branch. Travis was also set to only deploy on tagged commit, the tag must start with "version-" followed by the version number of the package you want to upload.
 
-Push your changes and the created tag:
+Then push the new tag:
 
-$ git push && git push --tags
+$ git push --tags
 
-Travis CI and the versioneer lib will do the rest for you. 
-
+Travis CI will do the rest for you. 
