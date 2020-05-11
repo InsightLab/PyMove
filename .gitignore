@@ -241,3 +241,6 @@ modules.xml
 .idea
 .vscode
 .DS_Store
+
+
+.pymove/utils/Testing Integrations.ipynb
