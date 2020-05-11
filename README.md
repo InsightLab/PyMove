@@ -2,7 +2,7 @@
 
 ---
 
-## Informations
+## Information
 
 <table>
 <tr>
@@ -92,31 +92,34 @@ PyMove **proposes**:
 
 ---
 
+## Creating Virtual Environment
+
+It is recommended to create a virtual environment to use pymove. Requirements: Anaconda Python distribution installed and accessible
+
+1. In the terminal client enter the following where `yourenvname` is the name you want to call your environment, and replace `x.x` with the Python version you wish to use. (To see a list of available python versions first, type conda search "^python$" and press enter.)
+    - `conda create -n <yourenvname> python=x.x`
+    - Press y to proceed. This will install the Python version and all the associated anaconda packaged libraries at `path_to_your_anaconda_location/anaconda/envs/yourenvname`
+2. Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environment at creation.
+    - `conda activate <yourenvname>`
+3. Now install the package from pip or github in the virtual environment
+4. If using Windows, you must install `shapely` apart using the command `conda install shapely`. This is due to some dll dependencies
+
+---
+
 ## Github installation
 
-1.Clone this repository
-
-`git clone https://github.com/InsightLab/PyMove`
-
-2.Make a branch developer
-
-`git branch developer`
-
-3.Switch to a new branch 
-
-`git checkout developer`
-
-4.Make a pull of branch
-
-`git pull origin developer`
-
-5.Switch to folder PyMove
-
-`cd PyMove`
-
-6.Install pymove in developer mode
-
-`pip install -e .`
+1. Clone this repository
+    - `git clone https://github.com/InsightLab/PyMove`
+2. Make a branch developer
+    - `git branch developer`
+3. Switch to a new branch
+    - `git checkout developer`
+4. Make a pull of branch
+    - `git pull origin developer`
+5. Switch to folder PyMove
+    - `cd PyMove`
+6. Install pymove in developer mode
+    - `pip install -e .`
 
 ---
 
@@ -126,28 +129,9 @@ PyMove **proposes**:
 
 ---
 
-## Creating Virtual Environment
-
-In case of an error when running the library, it is recommended to create a virtual environment to use pymove. Requirements:
-Anaconda Python distribution installed and accessible
-
-1.In the terminal client enter the following where yourenvname is the name you want to call your environment, and replace x.x with the Python version you wish to use. (To see a list of available python versions first, type conda search "^python$" and press enter.)
-
-`conda create -n <yourenvname> python=x.x`
-
-Press y to proceed. This will install the Python version and all the associated anaconda packaged libraries at "path_to_your_anaconda_location/anaconda/envs/yourenvname"
-
-2.Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environment at creation.
-
-`conda activate <yourenvname>`
-
-3.Now install the package from pip or github in the virtual environment
-
----
-
 ## Examples
 
-You can access examples of how to use PyMove [here](https://github.com/InsightLab/PyMove/tree/developer/examples)
+You can access examples of how to use PyMove [here](examples)
 
 ---
 
