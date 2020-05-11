@@ -139,7 +139,7 @@ Press y to proceed. This will install the Python version and all the associated 
 
 2.Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environment at creation.
 
-`conda activate activate <yourenvname>`
+`conda activate <yourenvname>`
 
 3.Now install the package from pip or github in the virtual environment
 
