@@ -32,7 +32,7 @@ DEPENDENCIES = [
 
 setup(
     name="pymove",
-    version="1.1.6",
+    version="1.1.7",
     author="Insight Data Science Lab",
     author_email="insightlab@dc.ufc.br",
     license="MIT",
@@ -53,7 +53,7 @@ setup(
         "pymove.visualization",
     ],
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
