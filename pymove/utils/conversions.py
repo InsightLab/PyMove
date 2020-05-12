@@ -217,7 +217,12 @@ def y_to_lat_spherical(y):
     return np.degrees(np.arctan(np.sinh(y / 6378137.0)))
 
 
-def ms_to_kmh(move_data, label_speed=constants.SPEED_TO_PREV, new_label=None, inplace=True):
+def ms_to_kmh(
+    move_data,
+    label_speed=constants.SPEED_TO_PREV,
+    new_label=None,
+    inplace=True,
+):
     """
     Convert values, in ms, in label_speed column to kmh.
 
@@ -257,7 +262,12 @@ def ms_to_kmh(move_data, label_speed=constants.SPEED_TO_PREV, new_label=None, in
         raise e
 
 
-def kmh_to_ms(move_data, label_speed=constants.SPEED_TO_PREV, new_label=None, inplace=True):
+def kmh_to_ms(
+    move_data,
+    label_speed=constants.SPEED_TO_PREV,
+    new_label=None,
+    inplace=True,
+):
     """
     Convert values, in kmh, in label_speed column to ms.
 
@@ -299,7 +309,10 @@ def kmh_to_ms(move_data, label_speed=constants.SPEED_TO_PREV, new_label=None, in
 
 
 def meters_to_kilometers(
-    move_data, label_distance=constants.DIST_TO_PREV, new_label=None, inplace=True
+    move_data,
+    label_distance=constants.DIST_TO_PREV,
+    new_label=None,
+    inplace=True,
 ):
     """
     Convert values, in meters, in label_distance column to kilometers.
@@ -341,7 +354,10 @@ def meters_to_kilometers(
 
 
 def kilometers_to_meters(
-    move_data, label_distance=constants.DIST_TO_PREV, new_label=None, inplace=True
+    move_data,
+    label_distance=constants.DIST_TO_PREV,
+    new_label=None,
+    inplace=True,
 ):
     """
     Convert values, in kilometers, in label_distance column to meters.

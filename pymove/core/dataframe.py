@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from dask.dataframe import DataFrame
-from tqdm import tqdm
 
 from pymove.core import MoveDataFrameAbstractModel
 from pymove.core.grid import Grid
@@ -31,6 +30,7 @@ from pymove.utils.constants import (
 )
 from pymove.utils.conversions import lat_meters
 from pymove.utils.distances import haversine
+from pymove.utils.log import progress_bar
 from pymove.utils.mem import begin_operation, end_operation
 from pymove.utils.trajectories import format_labels, shift
 
@@ -114,9 +114,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     zip_list.append(i)
             data = pd.DataFrame(data, columns=zip_list)
 
-        mapping_columns = format_labels(
-            traj_id, latitude, longitude, datetime
-        )
+        mapping_columns = format_labels(traj_id, latitude, longitude, datetime)
         tdf = data.rename(columns=mapping_columns)
 
         if self._has_columns(tdf):
@@ -916,7 +914,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print(
                     "...Sorting by {} and {} to increase performance\n".format(
                         label_id, DATETIME
-                    ), flush=True
+                    ),
+                    flush=True,
                 )
                 data_.sort_values([label_id, DATETIME], inplace=True)
 
@@ -924,7 +923,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print(
                     "...Set {} as index to increase attribution performance\n".format(
                         label_id
-                    ), flush=True
+                    ),
+                    flush=True,
                 )
                 data_.set_index(label_id, inplace=True)
 
@@ -936,7 +936,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             ids = data_.index.unique()
             sum_size_id = 0
             size_id = 0
-            for idx in tqdm(ids, desc="Generating distance, time and speed features"):
+            for idx in progress_bar(ids, desc="Generating distance features"):
                 curr_lat = data_.at[idx, LATITUDE]
                 curr_lon = data_.at[idx, LONGITUDE]
 
@@ -1039,7 +1039,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print(
                     "...Sorting by {} and {} to increase performance\n".format(
                         label_id, DATETIME
-                    ), flush=True
+                    ),
+                    flush=True,
                 )
                 data_.sort_values([label_id, DATETIME], inplace=True)
 
@@ -1047,7 +1048,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 print(
                     "...Set {} as index to a higher peformance\n".format(
                         label_id
-                    ), flush=True
+                    ),
+                    flush=True,
                 )
                 data_.set_index(label_id, inplace=True)
 
@@ -1064,7 +1066,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             sum_size_id = 0
             size_id = 0
 
-            for idx in tqdm(ids, desc=f"Generating distance features"):
+            for idx in progress_bar(
+                ids, desc=f"Generating distance, time and speed features"
+            ):
                 curr_lat = data_.at[idx, LATITUDE]
                 curr_lon = data_.at[idx, LONGITUDE]
 
@@ -2700,9 +2704,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         # renomeia as colunas do dado return 0ado pelo novo dict
         # cria o dataframe
         # AttributeError if the data doesn't contains one of the columns LATITUDE, LONGITUDE, DATETIME
-        mapping_columns = format_labels(
-            traj_id, latitude, longitude, datetime
-        )
+        mapping_columns = format_labels(traj_id, latitude, longitude, datetime)
         dsk = data.rename(columns=mapping_columns)
 
         if self._has_columns(dsk):

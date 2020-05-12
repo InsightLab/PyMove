@@ -1,10 +1,10 @@
 import numpy as np
-from tqdm import tqdm
 
 from pymove.preprocessing.stay_point_detection import (
     create_or_update_move_stop_by_dist_time,
 )
 from pymove.utils.constants import TRAJ_ID
+from pymove.utils.log import progress_bar
 
 
 def compress_segment_stop_to_point(
@@ -16,11 +16,11 @@ def compress_segment_stop_to_point(
     label_id=TRAJ_ID,
     dist_radius=30,
     time_radius=900,
-    inplace=False
+    inplace=False,
 ):
     """
-    Compress the trajectories using the stay points in the dataframe. Compress
-    a segment to point setting lat_mean e lon_mean to each segment.
+    Compress the trajectories using the stay points in the dataframe. Compress a
+    segment to point setting lat_mean e lon_mean to each segment.
 
     Parameters
     ----------
@@ -87,11 +87,11 @@ def compress_segment_stop_to_point(
             print("...move segments will be dropped...")
 
         print("...get only segments stop...", flush=True)
-        segments = move_data[move_data[label_stop]][
-            label_segment
-        ].unique()
+        segments = move_data[move_data[label_stop]][label_segment].unique()
 
-        for idx in tqdm(segments, desc=f"Generating {label_segment} and {label_stop}"):
+        for idx in progress_bar(
+            segments, desc=f"Generating {label_segment} and {label_stop}"
+        ):
             filter_ = move_data[label_segment] == idx
 
             size_id = move_data[filter_].shape[0]
@@ -168,11 +168,11 @@ def compress_segment_stop_to_point_optimizer(
     label_id=TRAJ_ID,
     dist_radius=30,
     time_radius=900,
-    inplace=False
+    inplace=False,
 ):
     """
-    Compress the trajectories using the stop points in the dataframe. Compress
-    a segment to point setting lat_mean e lon_mean to each segment.
+    Compress the trajectories using the stop points in the dataframe. Compress a
+    segment to point setting lat_mean e lon_mean to each segment.
 
     Parameters
     ----------
@@ -227,21 +227,17 @@ def compress_segment_stop_to_point_optimizer(
         lon_mean = np.full(move_data.shape[0], -1.0, dtype=np.float32)
 
         if drop_moves is False:
-            lat_mean[
-                move_data[~move_data[label_stop]].index
-            ] = np.NaN
-            lon_mean[
-                move_data[~move_data[label_stop]].index
-            ] = np.NaN
+            lat_mean[move_data[~move_data[label_stop]].index] = np.NaN
+            lon_mean[move_data[~move_data[label_stop]].index] = np.NaN
         else:
             print("...move segments will be dropped...")
 
         print("...get only segments stop...", flush=True)
-        segments = move_data[move_data[label_stop]][
-            label_segment
-        ].unique()
+        segments = move_data[move_data[label_stop]][label_segment].unique()
 
-        for idx in tqdm(segments, desc=f"Generating {label_segment} and {label_stop}"):
+        for idx in progress_bar(
+            segments, desc=f"Generating {label_segment} and {label_stop}"
+        ):
             filter_ = move_data[label_segment] == idx
 
             size_id = move_data[filter_].shape[0]
@@ -268,24 +264,12 @@ def compress_segment_stop_to_point_optimizer(
                 elif point_mean == "centroid":
                     # print('...Lat and lon are defined by centroid of the all points into segment')
                     # set lat and lon mean to first_point and last points to each segment
-                    lat_mean[ind_start] = move_data.loc[filter_][
-                        "lat"
-                    ].mean()
-                    lon_mean[ind_start] = move_data.loc[filter_][
-                        "lon"
-                    ].mean()
-                    lat_mean[ind_end] = move_data.loc[filter_][
-                        "lat"
-                    ].mean()
-                    lon_mean[ind_end] = move_data.loc[filter_][
-                        "lon"
-                    ].mean()
+                    lat_mean[ind_start] = move_data.loc[filter_]["lat"].mean()
+                    lon_mean[ind_start] = move_data.loc[filter_]["lon"].mean()
+                    lat_mean[ind_end] = move_data.loc[filter_]["lat"].mean()
+                    lon_mean[ind_end] = move_data.loc[filter_]["lon"].mean()
             else:
-                print(
-                    "There are segments with only one point: {}".format(
-                        idx
-                    )
-                )
+                print("There are segments with only one point: {}".format(idx))
 
         move_data["lat_mean"] = lat_mean
         move_data["lon_mean"] = lon_mean
