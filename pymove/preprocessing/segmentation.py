@@ -1,18 +1,18 @@
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 from pymove.core.dataframe import PandasMoveDataFrame
 from pymove.utils.constants import (
     DIST_TO_PREV,
     SPEED_TO_PREV,
+    TID_DIST,
+    TID_PART,
+    TID_SPEED,
+    TID_TIME,
     TIME_TO_PREV,
     TRAJ_ID,
-    TID_PART,
-    TID_DIST,
-    TID_TIME,
-    TID_SPEED
 )
+from pymove.utils.log import progress_bar
 
 
 def bbox_split(bbox, number_grids):
@@ -60,7 +60,7 @@ def bbox_split(bbox, number_grids):
 
 def _drop_single_point(move_data, label_new_tid, label_id):
     """
-    Removes trajectory with single point
+    Removes trajectory with single point.
 
     Parameters
     ----------
@@ -158,19 +158,22 @@ def by_dist_time_speed(
         ids = move_data.index.unique()
         count = 0
 
-        for idx in tqdm(ids, desc=f"Generating {label_new_tid}"):
+        for idx in progress_bar(ids, desc=f"Generating {label_new_tid}"):
             curr_tid += 1
 
             filter_ = (
-                    (np.nan_to_num(move_data.at[idx, TIME_TO_PREV]) > max_time_between_adj_points)
-                    | (
-                            np.nan_to_num(move_data.at[idx, DIST_TO_PREV])
-                            > max_dist_between_adj_points
-                    )
-                    | (
-                            np.nan_to_num(move_data.at[idx, SPEED_TO_PREV])
-                            > max_speed_between_adj_points
-                    )
+                (
+                    np.nan_to_num(move_data.at[idx, TIME_TO_PREV])
+                    > max_time_between_adj_points
+                )
+                | (
+                    np.nan_to_num(move_data.at[idx, DIST_TO_PREV])
+                    > max_dist_between_adj_points
+                )
+                | (
+                    np.nan_to_num(move_data.at[idx, SPEED_TO_PREV])
+                    > max_speed_between_adj_points
+                )
             )
 
             # check if object have only one point to be removed
@@ -266,13 +269,14 @@ def by_max_dist(
         ids = move_data.index.unique()
         count = 0
 
-        for idx in tqdm(ids, desc=f"Generating {label_new_tid}"):
+        for idx in progress_bar(ids, desc=f"Generating {label_new_tid}"):
             # increment index to trajectory
             curr_tid += 1
 
             # filter dist max
             dist = (
-                np.nan_to_num(move_data.at[idx, DIST_TO_PREV]) > max_dist_between_adj_points
+                np.nan_to_num(move_data.at[idx, DIST_TO_PREV])
+                > max_dist_between_adj_points
             )
             # check if object have more than one point to split
             if dist.shape == ():
@@ -346,7 +350,6 @@ def by_max_time(
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
-
     print(
         "Split trajectories by max_time_between_adj_points:",
         max_time_between_adj_points,
@@ -367,13 +370,14 @@ def by_max_time(
         ids = move_data.index.unique()
         count = 0
 
-        for idx in tqdm(ids, desc=f"Generating {label_new_tid}"):
+        for idx in progress_bar(ids, desc=f"Generating {label_new_tid}"):
             # increment index to trajectory
             curr_tid += 1
 
             # filter time max
             times = (
-                np.nan_to_num(move_data.at[idx, TIME_TO_PREV]) > max_time_between_adj_points
+                np.nan_to_num(move_data.at[idx, TIME_TO_PREV])
+                > max_time_between_adj_points
             )
 
             # check if object have only one point to be removed
@@ -468,13 +472,14 @@ def by_max_speed(
         ids = move_data.index.unique()
         count = 0
 
-        for idx in tqdm(ids, desc=f"Generating {label_new_tid}"):
+        for idx in progress_bar(ids, desc=f"Generating {label_new_tid}"):
             # increment index to trajectory
             curr_tid += 1
 
             # filter speed max
             speed = (
-                np.nan_to_num(move_data.at[idx, SPEED_TO_PREV]) > max_speed_between_adj_points
+                np.nan_to_num(move_data.at[idx, SPEED_TO_PREV])
+                > max_speed_between_adj_points
             )
             # check if object have only one point to be removed
             if speed.shape == ():

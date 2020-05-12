@@ -1,7 +1,6 @@
 import datetime
+
 import holidays
-
-
 from pandas._libs.tslibs.timestamps import Timestamp
 
 
@@ -216,7 +215,7 @@ def to_day_of_week_int(date):
     return day_week
 
 
-def working_day(dt, country='BR', state=None):
+def working_day(dt, country="BR", state=None):
     """
     Indices if a day specified by the user is a working day.
 

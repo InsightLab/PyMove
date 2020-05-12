@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.cluster import KMeans
-from tqdm import tqdm
+
+from pymove.utils.log import progress_bar
 
 
 def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
@@ -41,7 +42,7 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
     )
     print(message, flush=True)
     inertia_dic = {}
-    for k in tqdm(range(k_initial, max_clusters, k_iteration)):
+    for k in progress_bar(range(k_initial, max_clusters, k_iteration)):
         # validing K value in K-means
         # print('...testing k: {}'.format(k))
         inertia_dic[k] = KMeans(n_clusters=k).fit(move_data).inertia_
@@ -83,7 +84,7 @@ def gap_statistic(
     )
     print(message, flush=True)
     gaps = {}
-    for k in tqdm(range(k_initial, max_clusters, k_iteration)):
+    for k in progress_bar(range(k_initial, max_clusters, k_iteration)):
         # Holder for reference dispersion results
         refDisps = np.zeros(nrefs)
         # For n references, generate random sample and perform kmeans getting resulting dispersion of each loop

@@ -1,8 +1,29 @@
-from branca.element import Template, MacroElement
+from branca.element import MacroElement, Template
 
 
 def add_map_legend(m, title, items):
-    # reference: https://github.com/python-visualization/folium/issues/528#issuecomment-421445303
+    """
+    Adds a legend for a folium map.
+
+    Parameters
+    ----------
+    m : folium.map.
+        Represents a folium map.
+
+    title : string.
+        Represents the title of the legend.
+
+    items : list of tuple.
+        Represents the color and name of the legend items.
+
+    Returns
+    -------
+
+    References
+    ----------
+    https://github.com/python-visualization/folium/issues/528#issuecomment-421445303
+    """
+
     item = "<li><span style='background:%s;'></span>%s</li>"
     list_items = "\n".join([item % (c, n) for (n, c) in items])
     template = """
@@ -36,7 +57,7 @@ def add_map_legend(m, title, items):
     <body>
 
 
-    <div id='maplegend' class='maplegend' 
+    <div id='maplegend' class='maplegend'
         style='position: absolute; z-index:9999; border:2px solid grey; background-color:rgba(255, 255, 255, 0.8);
          border-radius:6px; padding: 10px; font-size:14px; right: 20px; bottom: 20px;'>
 
@@ -90,7 +111,9 @@ def add_map_legend(m, title, items):
         color: #777;
         }}
     </style>
-    {{% endmacro %}}""".format(title, list_items)
+    {{% endmacro %}}""".format(
+        title, list_items
+    )
 
     macro = MacroElement()
     macro._template = Template(template)
