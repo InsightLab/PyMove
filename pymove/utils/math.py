@@ -1,5 +1,6 @@
 import math
 
+
 def std(sum_sq, size, avg):
     """
     Compute standard deviation.
@@ -126,14 +127,15 @@ def arrays_avg(values_array, weights_array=None):
     -------
     result : float.
         The mean of the array elements.
-
     """
     n = len(values_array)
 
     if weights_array is None:
         weights_array = [1] * n
     elif len(weights_array) != n:
-        raise ValueError('values_array and qt_array must have the same number of rows')
+        raise ValueError(
+            "values_array and qt_array must have the same number of rows"
+        )
 
     result = 0
 

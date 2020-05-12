@@ -2,10 +2,10 @@ import time
 
 import numpy as np
 from scipy.interpolate import interp1d
-from tqdm import tqdm
 
 from pymove.core.dataframe import PandasMoveDataFrame
 from pymove.utils.constants import TID
+from pymove.utils.log import progress_bar
 from pymove.utils.trajectories import shift
 from pymove.utils.transformations import feature_values_using_filter
 
@@ -69,7 +69,9 @@ def check_time_dist(
             print("creating index...")
             move_data.set_index(index_name, inplace=True)
 
-        for tid in tqdm(tids, desc="checking ascending distance and time"):
+        for tid in progress_bar(
+            tids, desc="checking ascending distance and time"
+        ):
             filter_ = move_data.at[tid, "isNode"] != 1
 
             # be sure that distances are in ascending order
@@ -86,7 +88,9 @@ def check_time_dist(
 
         count = 0
 
-        for tid in tqdm(tids, desc="checking delta_times, delta_dists and speeds"):
+        for tid in progress_bar(
+            tids, desc="checking delta_times, delta_dists and speeds"
+        ):
             filter_ = move_data.at[tid, "isNode"] != 1
 
             dists = move_data.at[tid, "distFromTrajStartToCurrPoint"][filter_]
@@ -267,10 +271,8 @@ def fix_time_not_in_ascending_order_all(
 
         print("starting fix...")
         time.time()
-        for tid in tqdm(tids):
-            fix_time_not_in_ascending_order_id(
-                move_data, tid, index_name
-            )
+        for tid in progress_bar(tids):
+            fix_time_not_in_ascending_order_id(move_data, tid, index_name)
 
         move_data.reset_index(inplace=True)
         idxs = move_data[move_data["deleted"]].index
@@ -347,7 +349,7 @@ def interpolate_add_deltatime_speed_features(
     move_data["speed"] = np.nan
 
     try:
-        for tid in tqdm(tids):
+        for tid in progress_bar(tids):
             filter_nodes = move_data.at[tid, "isNode"] == 1
             size_id = 1 if filter_nodes.shape == () else filter_nodes.shape[0]
             count += size_id

@@ -27,7 +27,7 @@ DEPENDENCIES = [
     "dask[dataframe]",
     "sklearn",
     "joblib",
-    "holidays"
+    "holidays",
 ]
 
 setup(

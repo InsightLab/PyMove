@@ -144,7 +144,11 @@ def create_or_update_move_stop_by_dist_time(
 
 
 def create_update_move_and_stop_by_radius(
-    move_data, radius=0, target_label=DIST_TO_PREV, new_label=SITUATION, inplace=True
+    move_data,
+    radius=0,
+    target_label=DIST_TO_PREV,
+    new_label=SITUATION,
+    inplace=True,
 ):
     """
     Finds the stops and moves points of the dataframe, if these points already

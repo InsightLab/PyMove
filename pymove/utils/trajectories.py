@@ -1,22 +1,17 @@
 from __future__ import division
 
-# import time
-
 import folium
 import numpy as np
 import pandas as pd
-# from IPython.display import display
-# from ipywidgets import HTML, IntProgress, VBox
 
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
-# from pymove.utils.datetime import deltatime_str
 
 
 def read_csv(
     filename,
     sep=",",
     encoding="utf-8",
-    header='infer',
+    header="infer",
     names=None,
     latitude=LATITUDE,
     longitude=LONGITUDE,
@@ -77,7 +72,12 @@ def read_csv(
         Trajectory data.
     """
     df = pd.read_csv(
-        filename, sep=sep, encoding=encoding, header=header, names=names, parse_dates=[datetime]
+        filename,
+        sep=sep,
+        encoding=encoding,
+        header=header,
+        names=names,
+        parse_dates=[datetime],
     )
 
     from pymove import PandasMoveDataFrame as pm
@@ -89,9 +89,7 @@ def read_csv(
         return dm(df, latitude, longitude, datetime, traj_id, n_partitions)
 
 
-def format_labels(
-    current_id, current_lat, current_lon, current_datetime
-):
+def format_labels(current_id, current_lat, current_lon, current_datetime):
     """
     Format the labels for the PyMove lib pattern labels output = lat, lon and datatime.
 
@@ -121,133 +119,6 @@ def format_labels(
     dic_labels[current_lat] = LATITUDE
     dic_labels[current_datetime] = DATETIME
     return dic_labels
-
-
-# TODO: COmpletar as infos
-# def log_progress(sequence, every=None, size=None, name="Items"):
-#     """
-#     Make and display a progress bar.
-#
-#     Parameters
-#     ----------
-#     sequence : list.
-#         Represents a elements sequence.
-#
-#     every : ?, optional, default None.
-#         Represents the column name of feature id.
-#
-#     size : int, optional, default None.
-#         Represents the size/number elements in sequence.
-#
-#     name : String, optional, default 'Items'.
-#         Represents the name of ?.
-#
-#     Returns
-#     -------
-#     """
-#     is_iterator = False
-#     if size is None:
-#         try:
-#             size = len(sequence)
-#         except TypeError:
-#             is_iterator = True
-#     if size is not None:
-#         if every is None:
-#             if size <= 200:
-#                 every = 1
-#             else:
-#                 every = int(size / 200)
-#     else:
-#         assert every is not None, "sequence is iterator, set every"
-#
-#     if is_iterator:
-#         progress = IntProgress(min=0, max=1, value=1)
-#         progress.bar_style = "info"
-#     else:
-#         progress = IntProgress(min=0, max=size, value=0)
-#     label = HTML()
-#     box = VBox(children=[label, progress])
-#     display(box)
-#
-#     index = 0
-#     try:
-#         for index, record in enumerate(sequence, 1):
-#             if index == 1 or index % every == 0:
-#                 if is_iterator:
-#                     label.value = "{name}: {index} / ?".format(
-#                         name=name, index=index
-#                     )
-#                 else:
-#                     progress.value = index
-#                     label.value = u"{name}: {index} / {size}".format(
-#                         name=name, index=index, size=size
-#                     )
-#             yield record
-#     except Exception:
-#         progress.bar_style = "danger"
-#         raise
-#     else:
-#         progress.bar_style = "success"
-#         progress.value = index
-#         label.value = "{name}: {index}".format(
-#             name=name, index=str(index or "?")
-#         )
-
-
-# TODO: COmpletar as infos
-# def progress_update(
-#     size_processed, size_all, start_time, curr_perc_int, step_perc=1
-# ):
-#     """
-#     Update and print current progress.
-#
-#     Parameters
-#     ----------
-#     size_processed : int.
-#         Represents a number of elements already processed.
-#
-#     size_all : int.
-#         Represents the number of elements.
-#
-#     start_time : int, optional, default None.
-#         Represents the size/number elements in sequence.
-#
-#     curr_perc_int : ?
-#         Represents the name of ?.
-#
-#     step_perc : int, optional, default 1.
-#         Represents the name of ?.
-#
-#     Returns
-#     -------
-#     curr_perc_int_new : ?
-#         Represents ?.
-#
-#     deltatime_str : ?
-#         Represents ?.
-#     """
-#     curr_perc_new = size_processed * 100.0 / size_all
-#     curr_perc_int_new = int(curr_perc_new)
-#     if (
-#         curr_perc_int_new != curr_perc_int
-#         and curr_perc_int_new % step_perc == 0
-#     ):
-#         deltatime = time.time() - start_time
-#         deltatime_str_ = deltatime_str(deltatime)
-#         est_end = deltatime / curr_perc_new * 100
-#         est_time_str = deltatime_str(est_end - deltatime)
-#         print(
-#             "({}/{}) {}% in {} - estimated end in {}".format(
-#                 size_processed,
-#                 size_all,
-#                 curr_perc_int_new,
-#                 deltatime_str_,
-#                 est_time_str,
-#             )
-#         )
-#         return curr_perc_int_new, deltatime_str
-#     else:
-#         return curr_perc_int_new, None
 
 
 def shift(arr, num, fill_value=np.nan):
@@ -295,8 +166,8 @@ def shift(arr, num, fill_value=np.nan):
 
 def fill_list_with_new_values(original_list, new_list_values):
     """
-    Copies elements from one list to another. The elements will be positioned in the same position in the new list as
-    they were in their original list.
+    Copies elements from one list to another. The elements will be positioned in
+    the same position in the new list as they were in their original list.
 
     Parameters
     ----------
@@ -308,7 +179,6 @@ def fill_list_with_new_values(original_list, new_list_values):
 
     Returns
     -------
-
     """
     n = len(new_list_values)
     original_list[:n] = new_list_values
