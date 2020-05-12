@@ -1,6 +1,5 @@
 import math
 
-
 def std(sum_sq, size, avg):
     """
     Compute standard deviation.
@@ -111,43 +110,37 @@ def avg_std_sample(sum_, sum_sq, size):
     return avg, std_sample(sum_sq, size, avg)
 
 
-# # TODO: função está dando erro ao rodar
-# def arrays_avg(values_array, weights_array=None):
-#     """
-#     Computes the mean of the elements of the array.
-#
-#     Parameters
-#     ----------
-#     values_array : array.
-#         The numbers used to calculate the mean.
-#
-#     weights_array : array, optional, default None.
-#         Used to calculate the weighted average, indicates the weight of each element in the array (values_array).
-#
-#     Returns
-#     -------
-#     result : float.
-#         The mean of the array elements.
-#
-#     """
-#     n = len(values_array)
-#
-#     if weights_array is None:
-#         weights_array = np.full(n, 1)
-#     elif len(weights_array) != n:
-#         raise ValueError('values_array and qt_array must have the same number of rows')
-#
-#     n_row = len(values_array[0])
-#     result = np.full(n_row, 0)
-#     for i, item in enumerate(values_array):
-#         for j in range(n_row):
-#             result[j] += item[j] * weights_array[i]
-#
-#     sum_qt = array_sum(weights_array)
-#     for i in range(n_row):
-#         result[i] /= sum_qt
-#
-#     return result
+def arrays_avg(values_array, weights_array=None):
+    """
+    Computes the mean of the elements of the array.
+
+    Parameters
+    ----------
+    values_array : array.
+        The numbers used to calculate the mean.
+
+    weights_array : array, optional, default None.
+        Used to calculate the weighted average, indicates the weight of each element in the array (values_array).
+
+    Returns
+    -------
+    result : float.
+        The mean of the array elements.
+
+    """
+    n = len(values_array)
+
+    if weights_array is None:
+        weights_array = [1] * n
+    elif len(weights_array) != n:
+        raise ValueError('values_array and qt_array must have the same number of rows')
+
+    result = 0
+
+    for i, j in zip(values_array, weights_array):
+        result += i * j
+
+    return result / n
 
 
 def array_sum(values_array):
