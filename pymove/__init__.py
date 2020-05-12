@@ -15,8 +15,13 @@ from .core.dataframe import MoveDataFrame
 from .core.dataframe import PandasMoveDataFrame
 from .core.dataframe import DaskMoveDataFrame
 from .core import grid
-from .models.pattern_mining import clustering
+#from .models.pattern_mining import clustersing
 from .visualization import visualization
+from .tests import teste_DataFrame
+from .tests import test_filters
+from .tests import test_segmentation
+from .tests import test_stay_point_detection
+from .tests import test_compression
 
 # use the closest tagged version if possible
 from ._version import get_versions
