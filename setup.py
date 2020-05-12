@@ -28,6 +28,7 @@ DEPENDENCIES = [
     "sklearn",
     "joblib",
     "holidays",
+    "ipywidgets"
 ]
 
 setup(
