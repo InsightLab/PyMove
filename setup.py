@@ -23,9 +23,8 @@ DEPENDENCIES = [
     "mplleaflet",
     "matplotlib",
     "psutil",
-    "resource",
     "dask[dataframe]",
-    "sklearn",
+    "scikit-learn",
     "joblib",
     "holidays",
     "ipywidgets"
