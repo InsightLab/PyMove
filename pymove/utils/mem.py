@@ -15,10 +15,8 @@ import psutil
 
 try:
     import pwd
-    import resource
 except (ModuleNotFoundError, ImportError):
     from pymove.utils import _winmock as pwd
-    from pymove.utils import _winmock as resource
 
 
 try:
@@ -121,20 +119,6 @@ def stats(sessions_str):
     del df_mem
     del df_nb
     return df.reset_index(drop=True)
-
-
-def mem():
-    """
-    Calculates the resource consumed the current process.
-
-    Returns
-    -------
-    mem : float
-        The used memory by the process in MB.
-    """
-
-    mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
-    return mem
 
 
 def reduce_mem_usage_automatic(df):
