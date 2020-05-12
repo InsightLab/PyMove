@@ -293,32 +293,25 @@ def shift(arr, num, fill_value=np.nan):
     return result
 
 
-# TODO: erro se tentar converter int para str e funcao n verifica isso
-# def fill_list_with_new_values(original_list, new_list_values):
-#     """
-#     Copies elements from one list to another. The elements will be positioned in the same position in the new list as
-#     they were in their original list.
-#
-#     Parameters
-#     ----------
-#     original_list : list.
-#         The list to which the elements will be copied.
-#
-#     new_list_values : list.
-#         The list from which elements will be copied.
-#
-#     Returns
-#     -------
-#
-#     """
-#     for i in range(len(new_list_values)):
-#         type1 = type_(original_list[i])
-#         if type1 == int:
-#             original_list[i] = int(new_list_values[i])
-#         elif type1 == float:
-#             original_list[i] = float(new_list_values[i])
-#         else:
-#             original_list[i] = new_list_values[i]
+def fill_list_with_new_values(original_list, new_list_values):
+    """
+    Copies elements from one list to another. The elements will be positioned in the same position in the new list as
+    they were in their original list.
+
+    Parameters
+    ----------
+    original_list : list.
+        The list to which the elements will be copied.
+
+    new_list_values : list.
+        The list from which elements will be copied.
+
+    Returns
+    -------
+
+    """
+    n = len(new_list_values)
+    original_list[:n] = new_list_values
 
 
 def save_bbox(bbox_tuple, file, tiles="OpenStreetMap", color="red"):
