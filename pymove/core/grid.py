@@ -4,7 +4,6 @@ import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 from shapely.geometry import Polygon
-from tqdm import tqdm
 
 from pymove.utils.constants import (
     DATETIME,
@@ -17,6 +16,7 @@ from pymove.utils.constants import (
     TRAJ_ID,
 )
 from pymove.utils.conversions import lat_meters
+from pymove.utils.log import progress_bar
 from pymove.utils.mem import begin_operation, end_operation
 
 
@@ -206,7 +206,7 @@ class Grid:
                 ]
             )
             lat_init = self.lat_min_y
-            for i in tqdm(range(self.grid_size_lat_y)):
+            for i in progress_bar(range(self.grid_size_lat_y)):
                 lon_init = self.lon_min_x
                 for j in range(self.grid_size_lon_x):
                     # Cria o polygon da célula
@@ -260,7 +260,7 @@ class Grid:
             # transform series in numpyarray
             polygons = np.array([])
 
-            for i in tqdm(range(size)):
+            for i in progress_bar(range(size)):
                 p = self.create_one_polygon_to_point_on_grid(
                     index_grid_lat[i], index_grid_lon[i]
                 )

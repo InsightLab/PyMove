@@ -2,12 +2,6 @@ from __future__ import print_function
 
 import json
 import os
-try:
-    import pwd
-    import resource
-except (ModuleNotFoundError, ImportError):
-    from pymove.utils import _winmock as pwd
-    from pymove.utils import _winmock as  resource
 import re
 import time
 from collections import deque
@@ -18,6 +12,14 @@ from sys import getsizeof, stderr
 import numpy as np
 import pandas as pd
 import psutil
+
+try:
+    import pwd
+    import resource
+except (ModuleNotFoundError, ImportError):
+    from pymove.utils import _winmock as pwd
+    from pymove.utils import _winmock as resource
+
 
 try:
     from reprlib import repr

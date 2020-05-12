@@ -3,7 +3,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from folium.plugins import FastMarkerCluster, HeatMap, MarkerCluster
-from pymove.utils.mapfolium import add_map_legend
 
 from pymove.utils.constants import (
     COLORS,
@@ -21,6 +20,7 @@ from pymove.utils.constants import (
     TRAJ_ID,
 )
 from pymove.utils.datetime import str_to_datetime
+from pymove.utils.mapfolium import add_map_legend
 
 
 def generate_color():
