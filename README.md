@@ -134,17 +134,17 @@ It is recommended to create a virtual environment to use pymove. Requirements: A
 
 ---
 
-## Conda instalation
+## [Conda](https://anaconda.org/conda-forge/pymove) instalation
 
 1. `conda install -c conda-forge pymove`
 
-## Pip installation
+## [Pip](https://pypi.org/project/pymovie/) installation
 
 1. `pip install pymove`
 
 ---
 
-## Github installation
+## [Github](https://github.com/InsightLab/PyMove) installation
 
 1. Clone this repository
     - `git clone https://github.com/InsightLab/PyMove`
