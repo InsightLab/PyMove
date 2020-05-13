@@ -40,7 +40,7 @@
 <tr>
   <td>Platforms</td>
   <td>
-    <a href="https://img.shields.io/conda/pn/conda-forge/pymove.svg">
+    <a href="https://anaconda.org/conda-forge/pymove">
       <img src="https://img.shields.io/conda/pn/conda-forge/pymove.svg" alt="Platforms" />
     </a>
   </td>
@@ -72,7 +72,7 @@
 <tr>
   <td>Conda Downloads</td>
   <td>
-    <a href="https://img.shields.io/conda/dn/conda-forge/pymove.svg">
+    <a href="https://anaconda.org/conda-forge/pymove">
       <img src="https://img.shields.io/conda/dn/conda-forge/pymove.svg" alt="Conda downloads" />
     </a>
   </td>
@@ -80,7 +80,7 @@
 <tr>
   <td>Conda version</td>
   <td>
-    <a href="https://img.shields.io/conda/vn/conda-forge/pymove.svg">
+    <a href="https://anaconda.org/conda-forge/pymove">
       <img src="https://img.shields.io/conda/vn/conda-forge/pymove.svg" alt="Conda version" />
     </a>
   </td>
