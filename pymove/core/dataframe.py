@@ -2154,7 +2154,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         _shift = PandasMoveDataFrame(data=_shift)
         self.last_operation = end_operation(operation)
 
-        return PandasMoveDataFrame(data=_shift)
+        return _shift
 
     def all(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
         """
