@@ -332,7 +332,7 @@ def clean_consecutive_duplicates(
     move_data, subset=None, keep="first", inplace=False
 ):
     """
-    Removes consecutives duplicate rows of the Dataframe, optionally only
+    Removes consecutive duplicate rows of the Dataframe, optionally only
     certaind columns can be consider.
 
     Parameters
@@ -343,11 +343,11 @@ def clean_consecutive_duplicates(
         Specifies  Column label or sequence of labels, considered for identifying duplicates.
         By default all columns are used.
     keep : String. Optional(first by default)
-        Determine wich duplicate will be removed.
-        if keep is set as first, all the duplicates except for the first occurrence will be droped. Otherwise,
-        all duplicates except for the last occurrence will be droped.
+        Determine which duplicate will be removed.
+        if keep is set as first, all the duplicates except for the first occurrence will be dropped. Otherwise,
+        all duplicates except for the last occurrence will be dropped.
     inplace : boolean, optional(False by default)
-        if set to true the original dataframe will be altered, the duplicates will be droped in place,
+        if set to true the original dataframe will be altered, the duplicates will be dropped in place,
         otherwise a copy will be returned.
 
     Returns
@@ -360,7 +360,6 @@ def clean_consecutive_duplicates(
         n = 1
     else:
         n = -1
-
     if subset is None:
         filter_ = (move_data.shift(n) != move_data).any(axis=1)
     else:
@@ -384,9 +383,9 @@ def clean_nan_values(
         the function drops the rows containing the missing value.
         If set to 1 or "columns", drops the columns containing the missing value.
     how : String, optional (default "any")
-        Determines if a row or column is droped for having at least one NA value or all value NA.
-        If set to "any", the rows or columns will be droped, if it has any NA values.
-        If set to "all", the rows or columns will be droped, if all of it"s values are NA.
+        Determines if a row or column is dropped for having at least one NA value or all value NA.
+        If set to "any", the rows or columns will be dropped, if it has any NA values.
+        If set to "all", the rows or columns will be dropped, if all of it"s values are NA.
     thresh : Integer, optional (None by default)
         Minimum non-NA required value to avoid dropping
     subset : array of String
@@ -506,7 +505,7 @@ def clean_gps_nearby_points_by_distances(
     label_id : String, optional(the class dic_labels["id"] by default)
          Indicates the label of the id column in the user"s dataframe.
     radius_area : Float, optional(10.0 by default)
-        Species the minimum distance a point must have to it"s previous point, in order not to be droped.
+        Species the minimum distance a point must have to it"s previous point, in order not to be dropped.
     label_dtype : type_, optional(np.float64 by default)
         Represents column id type_. By default it"s np.float64.
     inplace : boolean, default(False by default)
@@ -585,7 +584,7 @@ def clean_gps_nearby_points_by_speed(
     label_id : String, optional(the class dic_labels["id"] by default)
          Indicates the label of the id column in the user"s dataframe.
     speed_radius : Float, optional(0.0 by default)
-        Species the minimum speed a point must have from it"s previous point, in order not to be droped.
+        Species the minimum speed a point must have from it"s previous point, in order not to be dropped.
     label_dtype : type_, optional(np.float64 by default)
         Represents column id type_. By default it"s np.float64.
     inplace : boolean, default(False by default)
@@ -863,7 +862,7 @@ def clean_trajectories_short_and_few_points(
 
     print("\nRemove short trajectories...")
     clean_trajectories_with_few_points(
-        move_df, label_id, min_points_per_trajectory, label_dtype, inplace=True
+        move_df, label_id, min_points_per_trajectory, inplace=True
     )
 
     if DIST_TO_PREV not in move_df:

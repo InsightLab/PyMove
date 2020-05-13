@@ -79,12 +79,10 @@ COLORS = {
 }
 
 TILES = [
-    "openstreetmap",
-    "Mapbox Bright",
-    "Mapbox Control Room",
+    "CartoDB positron",
+    "CartoDB dark_matter",
     "Stamen Terrain",
     "Stamen Toner",
     "Stamen Watercolor",
-    "CartoDB positron",
-    "CartoDB dark_matter",
+    "OpenStreetMap"
 ]
