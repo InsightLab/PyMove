@@ -38,12 +38,44 @@
   </td>
 </tr>
 <tr>
-  <td>Downloads</td>
+  <td>PIP Downloads</td>
   <td>
     <img src="https://img.shields.io/pypi/dd/pymove" alt="PyPi downloads" />
     </a>
   </td>
 </tr>
+<tr>
+  <td>PIP version</td>
+  <td>
+    <img src="https://img.shields.io/pypi/v/pymove" alt="PyPi version" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Conda Downloads</td>
+  <td>
+    <img src="https://anaconda.org/conda-forge/pymove/badges/downloads.svg
+" alt="Conda downloads" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Conda version</td>
+  <td>
+    <img src="https://anaconda.org/conda-forge/pymove/badges/version.svg
+" alt="Conda version" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Platforms</td>
+  <td>
+    <img src="https://anaconda.org/conda-forge/pymove/badges/platforms.svg
+  " alt="Platforms" />
+    </a>
+  </td>
+</tr>
+
 <tr>
   <td>Stars</td>
   <td>
@@ -64,7 +96,7 @@
   <td>Issues</td>
   <td>
     <a href="https://github.com/InsightLab/PyMove/issues">
-    <img src="https://img.shields.io/github/issues/InsightLab/PyMove"/>
+    <img src="https://img.shields.io/github/issues/InsightLab/PyMove?style=social"/>
     </a>
   </td>
 </tr>
@@ -101,8 +133,17 @@ It is recommended to create a virtual environment to use pymove. Requirements: A
     - Press y to proceed. This will install the Python version and all the associated anaconda packaged libraries at `path_to_your_anaconda_location/anaconda/envs/yourenvname`
 2. Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environment at creation.
     - `conda activate <yourenvname>`
-3. Now install the package from pip or github in the virtual environment
-4. If using Windows, you must install `shapely` apart using the command `conda install shapely`. This is due to some dll dependencies
+3. Now install the package from either `conda`, `pip` or `github`
+
+---
+
+## Conda instalation
+
+1. `conda install -c conda-forge pymove`
+
+## Pip installation
+
+1. `pip install pymove`
 
 ---
 
@@ -123,9 +164,9 @@ It is recommended to create a virtual environment to use pymove. Requirements: A
 
 ---
 
-## Pip installation
+### For windows users
 
-1. `pip install pymove`
+If you installed from `pip` or `github`, you may encounter an error related to `shapely` due to some dll dependencies. To fix this, run `conda install shapely`.
 
 ---
 
