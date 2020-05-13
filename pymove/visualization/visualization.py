@@ -105,7 +105,7 @@ def cmap_hex_color(cmap, i):
 
 
 def save_map(
-    move_data, filename, tiles="OpenStreetMap", label_id=TRAJ_ID, cmap="tab20"
+    move_data, filename, tiles=TILES[0], label_id=TRAJ_ID, cmap="tab20"
 ):
     """
     Save a visualization in a map in a new file.
