@@ -9,15 +9,15 @@
   <td>Package Status</td>
   <td>
     <a href="https://pypi.org/project/pymove/">
-    <img src="https://img.shields.io/pypi/status/pymove.svg" alt="status" />
+      <img src="https://img.shields.io/pypi/status/pymove.svg" alt="Package status" />
     </a>
   </td>
 </tr>
 <tr>
   <td>License</td>
   <td>
-    <a href="https://github.com/InsightLab/PyMove/blob/developer/LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="license" />
+    <a href="https://github.com/InsightLab/PyMove/blob/master/LICENSE">
+      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="Package license" />
     </a>
 </td>
 </tr>
@@ -25,7 +25,7 @@
   <td>Python Version</td>
   <td>
     <a href="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue">
-    <img src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue" alt="license" />
+      <img src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue" alt="Python compatible versions" />
     </a>
 </td>
 </tr>
@@ -33,59 +33,71 @@
   <td>Build Status</td>
   <td>
     <a href="https://travis-ci.org/InsightLab/PyMove/">
-    <img src="https://api.travis-ci.org/InsightLab/PyMove.svg?branch=developer" alt="travis build status" />
-    </a>
-  </td>
-</tr>
-<tr>
-  <td>PIP Downloads</td>
-  <td>
-    <img src="https://img.shields.io/pypi/dd/pymove" alt="PyPi downloads" />
-    </a>
-  </td>
-</tr>
-<tr>
-  <td>PIP version</td>
-  <td>
-    <img src="https://img.shields.io/pypi/v/pymove" alt="PyPi version" />
-    </a>
-  </td>
-</tr>
-<tr>
-  <td>Conda Downloads</td>
-  <td>
-    <img src="https://anaconda.org/conda-forge/pymove/badges/downloads.svg" alt="Conda downloads" />
-    </a>
-  </td>
-</tr>
-<tr>
-  <td>Conda version</td>
-  <td>
-    <img src="https://anaconda.org/conda-forge/pymove/badges/version.svg" alt="Conda version" />
+      <img src="https://api.travis-ci.org/InsightLab/PyMove.svg?branch=master" alt="Travis build status" />
     </a>
   </td>
 </tr>
 <tr>
   <td>Platforms</td>
   <td>
-    <img src="https://anaconda.org/conda-forge/pymove/badges/platforms.svg" alt="Platforms" />
+    <a href="https://img.shields.io/conda/pn/conda-forge/pymove.svg">
+      <img src="https://img.shields.io/conda/pn/conda-forge/pymove.svg" alt="Platforms" />
     </a>
   </td>
 </tr>
-
+<tr>
+  <td>All Platforms</td>
+  <td>
+    <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=9753&branchName=master">
+      <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/pymove-feedstock?branchName=master" alt="conda-forge build status" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>PyPi Downloads</td>
+  <td>
+    <a href="https://img.shields.io/pypi/dd/pymove" alt="PyPi downloads">
+      <img src="https://img.shields.io/pypi/dd/pymove" alt="PyPi downloads" alt="PyPi downloads" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>PyPi version</td>
+  <td>
+    <a href="https://img.shields.io/pypi/v/pymove" alt="PyPi version">
+      <img src="https://img.shields.io/pypi/v/pymove" alt="PyPi version" alt="PyPi version" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Conda Downloads</td>
+  <td>
+    <a href="https://img.shields.io/conda/dn/conda-forge/pymove.svg">
+      <img src="https://img.shields.io/conda/dn/conda-forge/pymove.svg" alt="Conda downloads" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Conda version</td>
+  <td>
+    <a href="https://img.shields.io/conda/vn/conda-forge/pymove.svg">
+      <img src="https://img.shields.io/conda/vn/conda-forge/pymove.svg" alt="Conda version" />
+    </a>
+  </td>
+</tr>
 <tr>
   <td>Stars</td>
   <td>
     <a href="https://github.com/InsightLab/PyMove/stargazers">
-    <img src="https://img.shields.io/github/stars/InsightLab/PyMove?style=social"/>
+      <img src="https://img.shields.io/github/stars/InsightLab/PyMove?style=social" alt="Github stars" />
     </a>
   </td>
 </tr>
 <tr>
   <td>Forks</td>
   <td>
-      <a href="https://github.com/InsightLab/PyMove/network/members">
-    <img src="https://img.shields.io/github/forks/InsightLab/PyMove?style=social"/>
+    <a href="https://github.com/InsightLab/PyMove/network/members">
+      <img src="https://img.shields.io/github/forks/InsightLab/PyMove?style=social" alt="Github forks" />
     </a>
   </td>
 </tr>
@@ -93,7 +105,15 @@
   <td>Issues</td>
   <td>
     <a href="https://github.com/InsightLab/PyMove/issues">
-    <img src="https://img.shields.io/github/issues/InsightLab/PyMove?style=social"/>
+      <img src="https://img.shields.io/github/issues/InsightLab/PyMove" alt="Github issues" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Codacy Badge</td>
+  <td>
+    <a href="https://www.codacy.com/gh/InsightLab/PyMove?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=InsightLab/PyMove&amp;utm_campaign=Badge_Grade">
+      <img src="https://api.codacy.com/project/badge/Grade/26c581fbe1ee42e78a9adc50b7372ceb" alt="Codacy badge" />
     </a>
   </td>
 </tr>
@@ -121,7 +141,7 @@ PyMove **proposes**:
 
 ---
 
-## Creating Virtual Environment
+## Creating a Virtual Environment
 
 It is recommended to create a virtual environment to use pymove. Requirements: Anaconda Python distribution installed and accessible
 
