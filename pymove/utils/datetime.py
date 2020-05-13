@@ -194,7 +194,6 @@ def min_to_datetime(min_):
 #     dt = to_str(dt_str)
 #     dt_slot = slot(dt, time_window_duration)
 #     return dt_slot
-#
 
 
 def to_day_of_week_int(date):
