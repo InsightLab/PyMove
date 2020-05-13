@@ -1,2 +1,3 @@
 include versioneer.py
 include pymove/_version.py
+include LICENSE
