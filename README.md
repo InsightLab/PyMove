@@ -54,24 +54,21 @@
 <tr>
   <td>Conda Downloads</td>
   <td>
-    <img src="https://anaconda.org/conda-forge/pymove/badges/downloads.svg
-" alt="Conda downloads" />
+    <img src="https://anaconda.org/conda-forge/pymove/badges/downloads.svg" alt="Conda downloads" />
     </a>
   </td>
 </tr>
 <tr>
   <td>Conda version</td>
   <td>
-    <img src="https://anaconda.org/conda-forge/pymove/badges/version.svg
-" alt="Conda version" />
+    <img src="https://anaconda.org/conda-forge/pymove/badges/version.svg" alt="Conda version" />
     </a>
   </td>
 </tr>
 <tr>
   <td>Platforms</td>
   <td>
-    <img src="https://anaconda.org/conda-forge/pymove/badges/platforms.svg
-  " alt="Platforms" />
+    <img src="https://anaconda.org/conda-forge/pymove/badges/platforms.svg" alt="Platforms" />
     </a>
   </td>
 </tr>
