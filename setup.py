@@ -27,7 +27,7 @@ setup(
       long_description=long_description,
       long_description_content_type="text/markdown",
       url="https://github.com/InsightLab/PyMove",
-      packages=['pymove', 'pymove.core', 'pymove.models', 'pymove.models.pattern_mining', 'pymove.osm_module', 'pymove.preprocessing', 'pymove.uncertainty', 'pymove.utils', 'pymove.visualization'],
+      packages=['pymove', 'pymove.core', 'pymove.models', 'pymove.models.pattern_mining', 'pymove.osm_module', 'pymove.preprocessing', 'pymove.uncertainty', 'pymove.utils', 'pymove.visualization', 'pymove.semantic],
       classifiers=[
             'Development Status :: 4 - Beta',
             "Programming Language :: Python :: 3",
