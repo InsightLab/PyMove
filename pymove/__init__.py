@@ -17,7 +17,7 @@ from .core.dataframe import DaskMoveDataFrame
 from .core import grid
 from .models.pattern_mining import clustering
 from .visualization import visualization
-
+from .semantic import algorithms
 
 from ._version import get_versions
 __version__ = get_versions()['version']
