@@ -27,7 +27,9 @@ DEPENDENCIES = [
     "scikit-learn",
     "joblib",
     "holidays",
-    "ipywidgets"
+    "ipywidgets",
+    "psycopg2",
+    "pymongo"
 ]
 
 setup(
