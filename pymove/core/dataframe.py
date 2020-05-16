@@ -82,16 +82,16 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         data : dict, list, numpy array or pandas.core.DataFrame.
             Input trajectory data.
 
-        latitude : String, optional, default 'lat'.
+        latitude : str, optional, default 'lat'.
             Represents column name latitude.
 
-        longitude : String, optional, default 'lon'.
+        longitude : str, optional, default 'lon'.
             Represents column name longitude.
 
-        datetime : String, optional, default 'datetime'.
+        datetime : str, optional, default 'datetime'.
             Represents column name datetime.
 
-        traj_id : String, optional, default 'id'.
+        traj_id : str, optional, default 'id'.
             Represents column name trajectory id.
 
         Raises
@@ -579,7 +579,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        str_format : String, optional, default "%Y%m%d%H".
+        str_format : str, optional, default "%Y%m%d%H".
 
         sort : bool, optional, default True.
             If sort == True the dataframe will be sorted.
@@ -875,7 +875,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_datetime : String, optional, default 'datetime.
+        label_datetime : str, optional, default 'datetime.
             Represents column id type_.
 
         inplace : bool, optional, default True.
@@ -927,7 +927,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_id : String, optional, default 'id'.
+        label_id : str, optional, default 'id'.
             Represents name of column of trajectore's id.
 
         label_dtype : type_, optional, default np.float64.
@@ -1052,7 +1052,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_id : String, optional, default 'id'.
+        label_id : str, optional, default 'id'.
             Represents name of column of trajectore's id.
 
         label_dtype : type_, optional, default np.float64.
@@ -1187,7 +1187,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         radius : int, optional, default 0.
             Represents radius.
 
-        target_label : String, optional, default 'dist_to_prev.
+        target_label : str, optional, default 'dist_to_prev.
             Represents column id type_.
 
         inplace : bool, optional, default True.
@@ -1318,7 +1318,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         save_fig : bool, optional, default False.
             Represents whether or not to save the generated picture.
 
-        name : String, optional, default 'features.png'.
+        name : str, optional, default 'features.png'.
             Represents name of a file.
 
         Returns
@@ -1371,7 +1371,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         figsize : tuple, optional, default (10, 10).
             Represents dimensions of figure.
 
-        markers : String, optional, default 'o'.
+        markers : str, optional, default 'o'.
             Represents visualization type_ marker.
 
         markersize : int, optional, default 20.
@@ -1383,7 +1383,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         save_fig : bool, optional, default False.
             Represents whether or not to save the generated picture.
 
-        name : String, optional, default 'trajectories.png'.
+        name : str, optional, default 'trajectories.png'.
             Represents name of a file.
 
         Returns
@@ -1429,10 +1429,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        tid : String.
+        tid : str.
             Represents the trajectory tid.
 
-        highlight: String, optional, default None.
+        highlight: str, optional, default None.
             Name of the feature to highlight on plot.
             If value of feature is 1, it will be highlighted as green marker
 
@@ -1445,7 +1445,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         save_fig : bool, optional, default False.
             Represents whether or not to save the generated picture.
 
-        name : String, optional, default None.
+        name : str, optional, default None.
             Represents name of a file.
 
 
@@ -1917,10 +1917,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         inplace: Boolean, optional(False by default)
             if set to true the original dataframe will be altered, the duplicates will be dropped in place,
             otherwise the operation will be made in a copy, that will be returned.
-        kind: String, optional ('quicksort' by default), options: ‘quicksort’, ‘mergesort’, ‘heapsort’.
+        kind: str, optional ('quicksort' by default), options: ‘quicksort’, ‘mergesort’, ‘heapsort’.
             Choice of sorting algorithm.
             For DataFrames, this option is only applied when sorting on a single column or label.
-        na_position: String, optional('last' by default), options: ‘first’, ‘last’.
+        na_position: str, optional('last' by default), options: ‘first’, ‘last’.
             If 'first' puts NaNs at the beginning;
             If last puts NaNs at the end.
 
@@ -2004,7 +2004,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        keys: str or array of String.
+        keys: str or array of str.
             label or array-like or list of labels/arrays. This parameter can be either a single column key, a single
             array of the same length as the calling DataFrame, or a list containing an arbitrary combination of
             column keys and arrays.
@@ -2070,13 +2070,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        labels: str or array of String
+        labels: str or array of str
             Index or column labels to drop.
         axis: str or int, optional (0 by default)
             Whether to drop labels from the index (0 or ‘index’) or columns (1 or ‘columns’).
-        index: str or array of string, optional (None by defautl)
+        index: str or array of str, optional (None by defautl)
             Alternative to specifying axis (labels, axis=0 is equivalent to index=labels).
-        columns: str or array of string, optional (None by defautl)
+        columns: str or array of str, optional (None by defautl)
             Alternative to specifying axis (labels, axis=1 is equivalent to columns=labels).
         level: int or str, optional (None by defautl)
             For MultiIndex, level from which the labels will be removed.
@@ -2208,7 +2208,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         periods: int, optional (1 by default)
             Number of periods to shift. Can be positive or negative.
-        freq: pandas.DateOffset, pandas.Timedelta or string, optional(None by default).
+        freq: pandas.DateOffset, pandas.Timedelta or str, optional(None by default).
             Offset to use from the tseries module or time rule (e.g. ‘EOM’). If freq is specified then the index values
             are shifted but the data is not realigned. That is, use freq if you would like to extend the index when
             shifting and preserve the original data. When freq is not passed, shift the index without realigning the
@@ -2259,7 +2259,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Exclude NA/null values. If the entire row/column is NA and skipna is True, then the result will be True,
             as for an empty row/column. If skipna is False, then NA are treated as True,
             because these are not equal to zero.
-        level: int or String(level name), optional (default None)
+        level: int or str(level name), optional (default None)
             If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series.
         kwargs: any, default None
             Additional keywords have no effect but might be accepted for compatibility with NumPy.
@@ -2301,7 +2301,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Exclude NA/null values. If the entire row/column is NA and skipna is True, then the result will be False,
             as for an empty row/column. If skipna is False, then NA are treated as True,
             because these are not equal to zero.
-        level: int or String(level name), optional (default None)
+        level: int or str(level name), optional (default None)
             If the axis is a MultiIndex (hierarchical), count along a particular level, collapsing into a Series.
         kwargs: any, default None
             Additional keywords have no effect but might be accepted for compatibility with NumPy.
@@ -2390,7 +2390,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             filled. Must be greater than 0 if not None.
         downcast : dict, default is None
             A dict of item->dtype of what to downcast if possible,
-            or the string 'infer' which will try to downcast to an appropriate
+            or the str 'infer' which will try to downcast to an appropriate
             equal type_ (e.g. float64 to int64 if possible).
 
         Returns
@@ -2712,10 +2712,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        file_name : String.
+        file_name : str.
             Represents the filename.
 
-        separator : String, optional, default ','.
+        separator : str, optional, default ','.
             Represents the information separator in a new file.
 
         """
@@ -2735,11 +2735,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         file_name: str
             File path or object
         sep: str
-            String of length 1. Field delimiter for the output file.
+            str of length 1. Field delimiter for the output file.
         index: bool
             Boolean indicating whether to save row indexes
         encoding: str, optional (None default)
-            A string representing the encoding to use in the output file, defaults to ‘utf-8’
+            A str representing the encoding to use in the output file, defaults to ‘utf-8’
 
         References
         ----------
@@ -2790,7 +2790,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        string
+        str
             A string representing the type of the object.
         """
         operation = begin_operation("get_type")
@@ -2823,24 +2823,22 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         data : dict, list, numpy array or pandas.core.DataFrame
             Input trajectory data.
 
-        latitude : String, optional, default 'lat'.
+        latitude : str, optional, default 'lat'.
             Represents column name latitude.
 
-        longitude : String, optional, default 'lon'.
+        longitude : str, optional, default 'lon'.
             Represents column name longitude.
 
-        datetime : String, optional, default 'datetime'.
+        datetime : str, optional, default 'datetime'.
             Represents column name datetime.
 
-        traj_id : String, optional, default 'id'.
+        traj_id : str, optional, default 'id'.
             Represents column name trajectory id.
-
-        Returns
-        -------
 
         Raises
         ------
-            AttributeError if the data doesn't contains one of the columns LATITUDE, LONGITUDE, DATETIME
+        AttributeError if the data doesn't contains one of the columns LATITUDE, LONGITUDE, DATETIME
+
         """
 
         mapping_columns = format_labels(traj_id, latitude, longitude, datetime)
@@ -2872,7 +2870,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
         bool
             Represents whether or not you have the required columns.
+
         """
+
         if LATITUDE in data and LONGITUDE in data and DATETIME in data:
             return True
         return False
@@ -2880,16 +2880,19 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     @staticmethod
     def _validate_move_data_frame(data):
         """
-        Converts the column type_ to the default PyMove lib used.
+        Converts the column type_ to the default type_ used by PyMove lib.
 
         Parameters
         ----------
         data : dict, list, numpy array or pandas.core.DataFrame.
             Input trajectory data.
 
-        Returns
-        -------
+        Raises
+        ------
+        AttributeError if the data types can't be converted.
+
         """
+
         try:
             if data.dtypes.lat != "float32":
                 data.lat = data.lat.astype("float32")
@@ -2897,12 +2900,13 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
                 data.lon = data.lon.astype("float32")
             if data.dtypes.datetime != "datetime64[ns]":
                 data.datetime = data.datetime.astype("datetime64[ns]")
-        except AttributeError as erro:
-            print(erro)
+        except AttributeError as e:
+            print(e)
 
     @property
     def lat(self):
-        """Checks for the 'lat' column and returns its value."""
+        """ Checks for the 'lat' column and returns its value. """
+
         if LATITUDE not in self:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
@@ -2912,7 +2916,8 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def lng(self):
-        """Checks for the 'lon' column and returns its value."""
+        """ Checks for the 'lon' column and returns its value. """
+
         if LONGITUDE not in self:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
@@ -2922,7 +2927,8 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def datetime(self):
-        """Checks for the 'datetime' column and returns its value."""
+        """ Checks for the 'datetime' column and returns its value. """
+
         if DATETIME not in self:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
@@ -2932,66 +2938,60 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def loc(self):
-        # Access a group of rows and columns by label(s) or a boolean array.
+        """ Access a group of rows and columns by label(s) or a boolean array. """
+
         raise NotImplementedError("To be implemented")
 
     @property
     def iloc(self):
-        # Purely integer-location based indexing for selection by position.
+        """ Purely integer-location based indexing for selection by position. """
+
         raise NotImplementedError("To be implemented")
 
     @property
     def at(self):
-        # Access a single value for a row/column label pair.
+        """ Access a single value for a row/column label pair. """
+
         raise NotImplementedError("To be implemented")
 
     @property
     def values(self):
-        # Return a Numpy representation of the DataFrame.
+        """ Return a Numpy representation of the DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     @property
     def columns(self):
-        # The column labels of the DataFrame.
+        """ The column labels of the DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     @property
     def index(self):
-        # The index (row labels) of the DataFrame.
+        """ The index (row labels) of the DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     @property
     def dtypes(self):
-        # Return the dtypes in the DataFrame.
+        """ Return the dtypes in the DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     @property
     def shape(self):
-        # Return a tuple representing the dimensionality of the DataFrame.
+        """ Return a tuple representing the dimensionality of the DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     def len(self):
-        """
-        Returns the length/row numbers in trajectory data.
+        """ Returns the length/row numbers in trajectory data. """
 
-        Parameters
-        ---------
-
-        Returns
-        -------
-        int
-            Represents the trajectory data length.
-        """
         raise NotImplementedError("To be implemented")
 
     def unique(self):
-        """
-        Return unique values of Series object. Uniques are returned in order of
-        appearance. Hash table-based unique, therefore does NOT sort.
+        """ Return unique values of Series object. """
 
-        Returns
-        -------
-        """
         raise NotImplementedError("To be implemented")
 
     def head(self, n=5, npartitions=1, compute=True):
@@ -3016,294 +3016,126 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         -------
         same type_ as caller
             The first n rows of the caller object.
+
         """
         return self._data.head(n, npartitions, compute)
 
     def get_users_number(self):
-        """
-        Check and return number of users in trajectory data.
+        """ Check and return number of users in trajectory data. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        int
-            Represents the number of users in trajectory data.
-        """
         raise NotImplementedError("To be implemented")
 
     def to_numpy(self):
-        """
-        Converts trajectory data to numpy array format.
+        """ Converts trajectory data to numpy array format. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        np.array
-            Represents the trajectory in numpy array format.
-        """
         raise NotImplementedError("To be implemented")
 
     def to_dict(self):
-        """
-        Converts trajectory data to dict format.
+        """ Converts trajectory data to dict format. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        dict
-            Represents the trajectory in dict format.
-        """
         raise NotImplementedError("To be implemented")
 
     def to_grid(self):
-        """
-        Converts trajectory data to grid format.
+        """ Converts trajectory data to grid format. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        pymove.core.grid
-            Represents the trajectory in grid format.
-        """
         raise NotImplementedError("To be implemented")
 
     def to_DataFrame(self):
         """
         Converts trajectory data to DataFrame format.
 
-        Parameters
-        ----------
-
         Returns
         -------
         dask.dataframe.DataFrame
             Represents the trajectory in DataFrame format.
+
         """
-        self._last_operation_time_duration = 0
-        self._last_operation_name = "to_DataFrame"
-        self._last_operation_mem_usage = 0
+
         return self._data
 
     def generate_tid_based_on_id_datatime(self):
-        """
-        Create or update trajectory id based on id e datetime.
+        """ Create or update trajectory id based on id e datetime. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
         raise NotImplementedError("To be implemented")
 
     def generate_date_features(self):
-        """
-        Create or update date feature.
+        """ Create or update date feature. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
         raise NotImplementedError("To be implemented")
 
     def generate_hour_features(self):
-        """
-        Create or update hour feature.
+        """ Create or update hour feature. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
         raise NotImplementedError("To be implemented")
 
     def generate_day_of_the_week_features(self):
-        """
-        Create or update a feature day of the week from datatime.
+        """ Create or update a feature day of the week from datatime. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
         raise NotImplementedError("To be implemented")
 
     def generate_weekend_features(self):
-        """
-        Create or update the feature weekend to the dataframe, if this resource
-        is set to 1 it indicates that the given day is is the weekend,
-        otherwise, it is a day of the week.
+        """ Create or update the feature weekend to the dataframe. """
 
-        Parameters
-        ----------
-
-        Returns
-        ----------
-        """
         raise NotImplementedError("To be implemented")
 
     def generate_time_of_day_features(self):
-        """
-        Create a feature time of day or period from datatime.
+        """ Create a feature time of day or period from datatime. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        Examples
-        --------
-        - datetime1 = 2019-04-28 02:00:56 -> period = early morning
-        - datetime2 = 2019-04-28 08:00:56 -> period = morning
-        - datetime3 = 2019-04-28 14:00:56 -> period = afternoon
-        - datetime4 = 2019-04-28 20:00:56 -> period = evening
-        """
         raise NotImplementedError("To be implemented")
 
     def generate_datetime_in_format_cyclical(self):
-        """
-        Create or update column with cyclical datetime feature.
+        """ Create or update column with cyclical datetime feature. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        References
-        ----------
-        # https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
-        # https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
-        """
         raise NotImplementedError("To be implemented")
 
     def generate_dist_features(self):
-        """
-        Create the three distance in meters to an GPS point P (lat, lon).
+        """ Create the three distance in meters to an GPS point P (lat, lon). """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        Examples
-        --------
-        Example:    P to P.next = 2 meters
-                    P to P.previous = 1 meter
-                    P.previous to P.next = 1 meters
-        """
         raise NotImplementedError("To be implemented")
 
     def generate_dist_time_speed_features(self):
-        """
-        Firstly, create three distance to an GPS point P (lat, lon). After,
-        create two feature to time between two P: time to previous and time to
-        next. Lastly, create two feature to speed using time and distance
-        features.
+        """ Creates features of distance, time and speed between points features. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        Examples
-        --------
-        Example:    dist_to_prev =  248.33 meters, dist_to_prev 536.57 meters
-                    time_to_prev = 60 seconds, time_prev = 60.0 seconds
-                    speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
-        """
         raise NotImplementedError("To be implemented")
 
     def generate_move_and_stop_by_radius(self):
-        """
-        Create or update column with move and stop points by radius.
+        """ Create or update column with move and stop points by radius. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
         raise NotImplementedError("To be implemented")
 
     def time_interval(self):
-        """
-        Get time difference between max and min_ datetime in trajectory data.
+        """ Get time difference between max and min datetime in trajectory data. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
         raise NotImplementedError("To be implemented")
 
     def get_bbox(self):
-        """
-        A bounding box (usually shortened to bbox) is an area defined by two
-        longitudes and two latitudes, where:
+        """ Creates the bounding box of the trajectories. """
 
-            - Latitude is a decimal number between -90.0 and 90.0.
-            - Longitude is a decimal number between -180.0 and 180.0.
-        They usually follow the standard format of:
-        - bbox = left, bottom, right, top
-        - bbox = min_ Longitude , min_ Latitude , max Longitude , max Latitude
-        Parameters
-        ----------
-
-        Returns
-        -------
-        tuple
-            Represents a bound box, that is a tuple of 4 values with the min_ and max limits of latitude e longitude.
-
-        Examples
-        --------
-        (22.147577, 113.54884299999999, 41.132062, 121.156224)
-        """
         raise NotImplementedError("To be implemented")
 
     def plot_all_features(self):
-        """
-        Generate a visualization for each columns that type_ is equal dtype.
+        """ Generate a visualization for each columns that type is equal dtype. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
         raise NotImplementedError("To be implemented")
 
     def plot_trajs(self):
-        # Generate a visualization that show trajectories.
+        """ Generate a visualization that show trajectories. """
+
         raise NotImplementedError("To be implemented")
 
     def plot_traj_id(self):
-        # Generate a visualization that shows a trajectory with the specified tid.
+        """ Generate a visualization that shows a trajectory with the specified tid. """
+
         raise NotImplementedError("To be implemented")
 
     def show_trajectories_info(self):
-        # Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box.
+        """ Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box. """
+
         raise NotImplementedError("To be implemented")
 
     def min(self, axis=None, skipna=True, split_every=False, out=None):
         """
-        Return the minimum of the values for the requested axis..
+        Return the minimum of the values for the requested axis.
 
         Parameters
         ----------
@@ -3312,7 +3144,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         skipna: bool, optional, default None.
             Exclude NA/null values when computing the result.
         split_every:
+            ?
         out:
+            ?
 
         Returns
         -------
@@ -3322,7 +3156,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         References
         ----------
         https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.min
+
         """
+
         return self._data.min(axis, skipna, split_every, out)
 
     def max(self, axis=None, skipna=True, split_every=False, out=None):
@@ -3336,7 +3172,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         skipna: bool, optional, default None.
             Exclude NA/null values when computing the result.
         split_every:
+            ?
         out:
+            ?
 
         Returns
         -------
@@ -3346,11 +3184,14 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         References
         ----------
         https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.max
+
         """
+
         return self._data.max(axis, skipna, split_every, out)
 
     def count(self):
-        # CountS the non-NA cells for each column or row.
+        """ Counts the non-NA cells for each column or row. """
+
         raise NotImplementedError("To be implemented")
 
     def groupby(self, by=None, **kwargs):
@@ -3372,107 +3213,119 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         References
         ----------
         https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.groupby
+
         """
 
         return self._data.groupby(by)
 
     def plot(self):
-        # Plot the data of the dask DataFrame.
+        """ Plot the data of the dask DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     def select_dtypes(self):
-        # Returns a subset of the dask DataFrame columns based on the column dtypes.
+        """ Returns a subset of the dask DataFrame columns based on the column dtypes. """
+
         raise NotImplementedError("To be implemented")
 
     def astype(self):
-        # Casts a dask object to a specified dtype.
+        """ Casts a dask object to a specified dtype. """
+
         raise NotImplementedError("To be implemented")
 
     def sort_values(self):
-        # Sorts the values of the dask DataFrame.
+        """ Sorts the values of the dask DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     def reset_index(self):
-        # Resets the dask DataFrame's index, and use the default one.
+        """ Resets the dask DataFrame's index, and use the default one. """
+
         raise NotImplementedError("To be implemented")
 
     def set_index(self):
-        # Set the dask DataFrame index (row labels) using one or more existing columns or arrays (of the correct length).
+        """ Set the dask DataFrame index (row labels) using one or more existing columns or arrays (of the correct length). """
+
         raise NotImplementedError("To be implemented")
 
     def drop(self):
-        # Drops specified rows or columns of the dask Dataframe.
+        """ Drops specified rows or columns of the dask Dataframe. """
+
         raise NotImplementedError("To be implemented")
 
     def duplicated(self):
-        # Returns boolean Series denoting duplicate rows, optionally only considering certain columns.
+        """ Returns boolean Series denoting duplicate rows, optionally only considering certain columns. """
+
         raise NotImplementedError("To be implemented")
 
     def drop_duplicates(self):
-        # Removes duplicated rows from the data.
+        """ Removes duplicated rows from the data. """
+
         raise NotImplementedError("To be implemented")
 
     def shift(self):
-        # Shifts dask dataFrame index by desired number of periods with an optional time freq.
+        """ Shifts dask dataFrame index by desired number of periods with an optional time freq. """
+
         raise NotImplementedError("To be implemented")
 
     def all(self):
-        # Indicates if all elements are True, potentially over an axis.
-        # Returns True unless there at least one element within the Dataframe axis that is False or equivalent.
+        """ Indicates if all elements are True, potentially over an axis. """
+
         raise NotImplementedError("To be implemented")
 
     def any(self):
-        # Indicates if any element is True, potentially over an axis.
-        # Returns False unless there at least one element within the dask Dataframe axis that is True or equivalent.
+        """ Indicates if any element is True, potentially over an axis. """
+
         raise NotImplementedError("To be implemented")
 
     def isna(self):
-        # Detect missing values
+        """ Detect missing values """
+
         raise NotImplementedError("To be implemented")
 
     def fillna(self):
-        # Fills missing data in the dask DataFrame
+        """ Fills missing data in the dask DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     def dropna(self):
-        # Removes missing data from dask DataFrame.
+        """ Removes missing data from dask DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     def sample(self):
-        # Samples data from the dask DataFrame
+        """ Samples data from the dask DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     def isin(self):
-        # Determines whether each element in the dask DataFrame is contained in values.
+        """ Determines whether each element in the dask DataFrame is contained in values. """
+
         raise NotImplementedError("To be implemented")
 
     def append(self):
-        # Append rows of other to the end of caller, returning a new object.
-        # Columns in other that are not in the caller are added as new columns
+        """ Append rows of other to the end of caller, returning a new object. """
+
         raise NotImplementedError("To be implemented")
 
     def join(self):
-        # Join columns of another DataFrame.
+        """ Join columns of another DataFrame. """
+
         raise NotImplementedError("To be implemented")
 
     def nunique(self):
-        # Count distinct observations over requested axis.
+        """ Count distinct observations over requested axis. """
+
         raise NotImplementedError("To be implemented")
 
     def write_file(self):
-        """
-        Write trajectory data to a new file.
+        """ Write trajectory data to a new file. """
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
         raise NotImplementedError("To be implemented")
 
     def to_csv(self):
-        # Write object to a comma-separated values (csv) file.
+        """ Write object to a comma-separated values (csv) file. """
+
         raise NotImplementedError("To be implemented")
 
     def convert_to(self, new_type):
@@ -3481,13 +3334,14 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        new_type: str
+        new_type: 'pandas' or 'dask'
             The type_ for which the object will be converted.
 
         Returns
         -------
         A subclass of MoveDataFrameAbstractModel
             The converted object.
+
         """
 
         if new_type == "dask":
@@ -3508,6 +3362,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        A string representing the type_ of the object.
+        str
+            A string representing the type_ of the object.
+
         """
+
         return self._type
