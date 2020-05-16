@@ -333,7 +333,7 @@ def sizeof_fmt(mem_usage, suffix='B'):
 def print_top_mem_vars(variables=locals()):
     """
     Shows the sizes of the active variables
-    
+
     Parameters
     ----------
     variables: locals() or globals(), default locals()

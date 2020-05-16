@@ -10,7 +10,7 @@ from pymove import MoveDataFrame
 def connect_postgres(
     dbname="postgres",
     user="postgres",
-    password="",
+    psswrd="",
     host="localhost",
     port=5432,
 ):
@@ -25,7 +25,7 @@ def connect_postgres(
     user : string, default 'postgres'
         The user connecting to the database
 
-    password : string, default ''
+    psswrd : string, default ''
         The password of the database
 
     host : string, default 'localhost'
@@ -42,7 +42,7 @@ def connect_postgres(
     try:
         psql_params = (
             "dbname='%s' user='%s' password='%s' host='%s' port='%s'"
-            % (dbname, user, password, host, port)
+            % (dbname, user, psswrd, host, port)
         )
         conn = psycopg2.connect(psql_params)
         return conn
@@ -55,7 +55,7 @@ def write_postgres(
     dataframe,
     dbname="postgres",
     user="postgres",
-    password="",
+    psswrd="",
     host="localhost",
     port=5432,
 ):
@@ -76,7 +76,7 @@ def write_postgres(
     user : string, default 'postgres'
         The user connecting to the database
 
-    password : string, default ''
+    psswrd : string, default ''
         The password of the database
 
     host : string, default 'localhost'
@@ -92,7 +92,7 @@ def write_postgres(
     conn = None
     sql = "INSERT INTO %s(%s) VALUES(%s)" % (table, columns, values)
     try:
-        conn = connect_postgres(dbname, user, password, host, port)
+        conn = connect_postgres(dbname, user, psswrd, host, port)
         cur = conn.cursor()
         cur.execute("DELETE FROM %s" % (table))
         cur.executemany(sql, dataframe.values)
@@ -113,7 +113,7 @@ def read_postgres(
     type_="pandas",
     dbname="postgres",
     user="postgres",
-    password="",
+    psswrd="",
     host="localhost",
     port=5432,
 ):
@@ -137,7 +137,7 @@ def read_postgres(
     user : string, default 'postgres'
         The user connecting to the database
 
-    password : string, default ''
+    psswrd : string, default ''
         The password of the database
 
     host : string, default 'localhost'
@@ -152,9 +152,8 @@ def read_postgres(
         a dataframe object
     """
     conn = None
-    dataframe = None
     try:
-        conn = connect_postgres(dbname, user, password, host, port)
+        conn = connect_postgres(dbname, user, psswrd, host, port)
         if in_memory:
             dataframe = read_sql_inmem_uncompressed(query, conn)
         else:
@@ -166,10 +165,10 @@ def read_postgres(
     finally:
         if conn is not None:
             conn.close()
-        try:
-            return MoveDataFrame(dataframe, type_=type_)
-        except Exception:
-            return dataframe
+    try:
+        return MoveDataFrame(dataframe, type_=type_)
+    except Exception:
+        return dataframe
 
 
 def read_sql_inmem_uncompressed(query, conn):
@@ -234,7 +233,7 @@ def read_sql_tmpfile(query, conn):
 
 
 def connect_mongo(
-    dbname="test", user=None, password=None, host="localhost", port=27017
+    dbname="test", user=None, psswrd=None, host="localhost", port=27017
 ):
     """
     Connects to a mongo database.
@@ -247,7 +246,7 @@ def connect_mongo(
     user : string, default None
         The user connecting to the database
 
-    password : string, default None
+    psswrd : string, default None
         The password of the database
 
     host : string, default 'localhost'
@@ -262,11 +261,11 @@ def connect_mongo(
         Connection to the desired database
     """
     try:
-        if user and password:
-            mongo_uri = "mongodb://%s:%s@%s:%s/" % (user, password, host, port)
+        if user and psswrd:
+            mongo_uri = "mongodb://%s:%s@%s:%s/" % (user, psswrd, host, port)
             conn = MongoClient(mongo_uri)[dbname]
         else:
-            conn = MongoClient(host, password)[dbname]
+            conn = MongoClient(host, psswrd)[dbname]
         return conn
     except Exception as e:
         raise e
@@ -276,7 +275,7 @@ def get_mongo_collection(
     collection,
     dbname="test",
     user=None,
-    password=None,
+    psswrd=None,
     host="localhost",
     port=27017,
 ):
@@ -294,7 +293,7 @@ def get_mongo_collection(
     user : string, default None
         The user connecting to the database
 
-    password : string, default None
+    psswrd : string, default None
         The password of the database
 
     host : string, default 'localhost'
@@ -309,7 +308,7 @@ def get_mongo_collection(
         The desired mongo collection
     """
     try:
-        coll = connect_mongo(dbname, user, password, host, port)[collection]
+        coll = connect_mongo(dbname, user, psswrd, host, port)[collection]
         return coll
     except Exception as e:
         raise e
@@ -320,7 +319,7 @@ def write_mongo(
     dataframe,
     dbname="test",
     user=None,
-    password=None,
+    psswrd=None,
     host="localhost",
     port=27017,
 ):
@@ -341,7 +340,7 @@ def write_mongo(
     user : string, default 'postgres'
         The user connecting to the database
 
-    password : string, default ''
+    psswrd : string, default ''
         The password of the database
 
     host : string, default 'localhost'
@@ -352,7 +351,7 @@ def write_mongo(
     """
     try:
         my_collection = get_mongo_collection(
-            collection, dbname, user, password, host, port
+            collection, dbname, user, psswrd, host, port
         )
         my_collection.delete_many({})
 
@@ -372,7 +371,7 @@ def read_mongo(
     no_id=True,
     dbname="test",
     user=None,
-    password=None,
+    psswrd=None,
     host="localhost",
     port=27017,
 ):
@@ -402,7 +401,7 @@ def read_mongo(
     user : string, default 'postgres'
         The user connecting to the database
 
-    password : string, default ''
+    psswrd : string, default ''
         The password of the database
 
     host : string, default 'localhost'
@@ -418,7 +417,7 @@ def read_mongo(
     """
     try:
         my_collection = get_mongo_collection(
-            collection, dbname, user, password, host, port
+            collection, dbname, user, psswrd, host, port
         )
 
         cursor = my_collection.find(filter_, projection)
