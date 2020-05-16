@@ -50,7 +50,6 @@ def proc_info():
     UID = 1
 
     regex = re.compile(r".+kernel-(.+)\.json")
-    port_regex = re.compile(r"port=(\d+)")
 
     pids = [pid for pid in os.listdir("/proc") if pid.isdigit()]
 
@@ -72,7 +71,6 @@ def proc_info():
         ):
             # kernel
             kernel_ID = re.sub(regex, r"\1", ret_str)[0:-1]
-            # kernel_ID = filter(lambda x: x in string.printable, kernel_ID)
 
             # memory
             process = psutil.Process(int(pid))
