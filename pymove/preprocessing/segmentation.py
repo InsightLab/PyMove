@@ -22,14 +22,15 @@ def bbox_split(bbox, number_grids):
     Parameters
     ----------
     bbox: tuple
-        Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude of the bounding box.
+        Tuple of 4 elements, containing the minimum and maximum values of latitude and longitude of the bounding box.
     number_grids: Integer
         Determines the number of grids to split the bounding box.
 
     Returns
     -------
-    move_data : dataframe
-        Returns the latittude and longitude coordenates of the grids after the split.
+    dataframe
+        Returns the latitude and longitude coordinates of the grids after the split.
+
     """
 
     lat_min = bbox[0]
@@ -70,7 +71,9 @@ def _drop_single_point(move_data, label_new_tid, label_id):
         The label of the column containing the ids of the formed segments. Is the new splitted id.
     label_id : String
          Indicates the label of the id column in the user"s dataframe.
+
     """
+
     shape_before_drop = move_data.shape
     idx = move_data[move_data[label_new_tid] == -1].index
     if idx.shape[0] > 0:
@@ -126,12 +129,13 @@ def by_dist_time_speed(
 
     Returns
     ------
-    Returns the dataFrame with the aditional features: label_new_tid, that indicates the trajectory segment
+    DataFrame with the aditional features: label_new_tid, that indicates the trajectory segment
         to which the point belongs to.
 
     Note
     -----
     Time, distance and speeed features must be updated after split.
+
     """
 
     if not inplace:
@@ -219,7 +223,9 @@ def by_max_dist(
     label_new_tid=TID_DIST,
     inplace=True,
 ):
-    """ Segments the trajectories based on distance.
+    """
+    Segments the trajectories based on distance.
+
     Parameters
     ----------
     move_data : dataframe
@@ -237,13 +243,14 @@ def by_max_dist(
         otherwise a copy will be returned.
 
     Returns
-    ------
-    Returns the dataFrame with the aditional features: label_segment, that indicates the trajectory segment
+    -------
+    DataFrame with the aditional features: label_segment, that indicates the trajectory segment
         to which the point belongs to.
 
     Note
-    -----
+    ----
     Speed features must be updated after split.
+
     """
 
     if not inplace:
@@ -320,7 +327,9 @@ def by_max_time(
     label_new_tid=TID_TIME,
     inplace=True,
 ):
-    """ Splits the trajectories into segments based on a maximum time set by the user.
+    """
+    Splits the trajectories into segments based on a maximum time set by the user.
+
     Parameters
     ----------
     move_data : dataframe
@@ -338,13 +347,15 @@ def by_max_time(
         otherwise a copy will be returned.
 
 
-    ------
-    Returns the dataFrame with the aditional features: label_segment, that indicates the trajectory segment
+    Returns
+    -------
+    DataFrame with the additional features: label_segment, that indicates the trajectory segment
         to which the point belongs to.
 
     Note
-    -----
+    ----
     Speed features must be updated after split.
+
     """
 
     if not inplace:
@@ -422,7 +433,9 @@ def by_max_speed(
     label_new_tid=TID_SPEED,
     inplace=True,
 ):
-    """ Splits the trajectories into segments based on a maximum speed set by the user.
+    """
+    Splits the trajectories into segments based on a maximum speed set by the user.
+
     Parameters
     ----------
     move_data : dataframe.
@@ -439,16 +452,17 @@ def by_max_speed(
         if set to true the original dataframe will be altered to contain the result of the filtering,
         otherwise a copy will be returned.
 
-
     Returns
-    ------
-    Returns the dataFrame with the aditional features: label_segment, that indicates the trajectory segment
+    -------
+    DataFrame with the aditional features: label_segment, that indicates the trajectory segment
         to which the point belongs to.
 
     Note
-    -----
+    ----
     Speed features must be updated after split.
+
     """
+
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
