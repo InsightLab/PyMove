@@ -25,13 +25,14 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 
     Returns
     -------
-    lat : float
+    float
         Represents latitude.
 
     References
     ----------
     Vectorized haversine function: https://stackoverflow.com/questions/43577086/pandas-calculate-haversine-distance-within-each-group-of-rows
     About distance between two points: https://janakiev.com/blog/gps-points-distance-python/
+
     """
 
     try:

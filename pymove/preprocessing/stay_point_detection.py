@@ -29,16 +29,17 @@ def create_update_datetime_in_format_cyclical(
         if set to true the original dataframe will be altered to contain the result of the filtering,
         otherwise a copy will be returned.
 
-
     Returns
-    ------
-    Returns the dataFrame with 2 aditional features: hour_sin and hour_cos.
+    -------
+    DataFrame with 2 aditional features: hour_sin and hour_cos.
 
     Notes
     -----
-        https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
-        https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
+    https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+    https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
+
     """
+
     try:
         if not inplace:
             move_df = move_data[:]
@@ -82,13 +83,14 @@ def create_or_update_move_stop_by_dist_time(
         if set to true the original dataframe will be altered to contain the result of the filtering,
         otherwise a copy will be returned.
 
-
     Returns
     ------
-    Returns the dataFrame with 2 aditional features: segment_stop and stop.
+    DataFrame with 2 aditional features: segment_stop and stop.
         segment_stop indicates the trajectory segment to which the point belongs to.
         stop indicates if the point represents a stop.
+
     """
+
     try:
         start_time = time.time()
 
@@ -169,13 +171,14 @@ def create_update_move_and_stop_by_radius(
         if set to true the original dataframe will be altered to contain the result of the filtering,
         otherwise a copy will be returned.
 
-
     Returns
-    ------
-    Returns the dataFrame with 2 aditional features: segment_stop and new_label.
+    -------
+    DataFrame with 2 aditional features: segment_stop and new_label.
         segment_stop indicates the trajectory segment to which the point belongs to.
         new_label indicates if the point represents a stop point or a moving point.
+
     """
+
     try:
         print("\nCreating or updating features MOVE and STOPS...\n")
 

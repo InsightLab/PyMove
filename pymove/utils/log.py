@@ -11,19 +11,15 @@ def log_progress(sequence, every=None, size=None, desc="Items"):
     ----------
     sequence : list.
         Represents a elements sequence.
-
     every : int, optional, default None.
         Represents the steps in which the bar will be updated
-
     size : int, optional, default None.
         Represents the size/number elements in sequence.
-
     desc : String, optional, default 'Items'.
         Represents the description of the operation.
 
-    Returns
-    -------
     """
+
     is_iterator = False
     if size is None:
         try:
@@ -37,7 +33,8 @@ def log_progress(sequence, every=None, size=None, desc="Items"):
             else:
                 every = int(size / 200)
     else:
-        assert every is not None, "sequence is iterator, set every"
+        if every is None:
+            raise AssertionError("Sequence is iterator, set every")
 
     if is_iterator:
         progress = IntProgress(min=0, max=1, value=1)
