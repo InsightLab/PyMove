@@ -42,7 +42,7 @@ class Grid:
         self._create_virtual_grid(data, cell_size, meters_by_degree)
 
     def get_grid(self):
-        """ Returns the grid object in a dict format. """
+        """Returns the grid object in a dict format."""
 
         return {
             "lon_min_x": self.lon_min_x,

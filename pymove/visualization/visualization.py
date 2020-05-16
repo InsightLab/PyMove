@@ -917,12 +917,7 @@ def plot_trajectories_with_folium(
         move_data, n_rows=n_rows, color=color
     )
     _add_trajectories_to_folium_map(
-        mv_df,
-        items,
-        base_map,
-        legend=legend,
-        save_as_html=save_as_html,
-        filename=filename,
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -997,7 +992,7 @@ def plot_trajectory_by_id_with_folium(
 
     mv_df, items = _filter_and_generate_colors(move_data, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -1081,7 +1076,7 @@ def plot_trajectory_by_period(
     mv_df = _filter_generated_feature(move_data, PERIOD, [period])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -1165,7 +1160,7 @@ def plot_trajectory_by_day_week(
     mv_df = _filter_generated_feature(move_data, DAY, [day_week])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -1259,7 +1254,7 @@ def plot_trajectory_by_date(
     mv_df = _filter_generated_feature(move_data, DATE, [start_date, end_date])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -1346,7 +1341,7 @@ def plot_trajectory_by_hour(
     mv_df = _filter_generated_feature(move_data, HOUR, [start_hour, end_hour])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map

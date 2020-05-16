@@ -1,5 +1,5 @@
 class WindowsUser:
-    """ Mock class for module errors on windows. """
+    """Mock class for module errors on windows."""
 
     def __init__(self):
         """ Instantiates mock class. """
@@ -8,6 +8,6 @@ class WindowsUser:
 
 
 def getpwuid(uid):
-    """ Default value for pwd on windows. """
+    """Default value for pwd on windows."""
 
     return WindowsUser()

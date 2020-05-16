@@ -172,7 +172,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def lat(self):
-        """ Checks for the 'lat' column and returns its value. """
+        """Checks for the 'lat' column and returns its value."""
 
         if LATITUDE not in self:
             raise AttributeError(
@@ -183,7 +183,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def lng(self):
-        """ Checks for the 'lon' column and returns its value. """
+        """Checks for the 'lon' column and returns its value."""
 
         if LONGITUDE not in self:
             raise AttributeError(
@@ -194,7 +194,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def datetime(self):
-        """ Checks for the 'datetime' column and returns its value. """
+        """Checks for the 'datetime' column and returns its value."""
 
         if DATETIME not in self:
             raise AttributeError(
@@ -422,12 +422,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return unique_
 
     def __setitem__(self, attr, value):
-        """ Modifies and item in this object. """
+        """Modifies and item in this object."""
 
         self.__dict__["_data"][attr] = value
 
     def __getitem__(self, name):
-        """ Retrieves and item from this object. """
+        """Retrieves and item from this object."""
 
         try:
             item = self.__dict__["_data"][name]
@@ -2866,7 +2866,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def lat(self):
-        """ Checks for the 'lat' column and returns its value. """
+        """Checks for the 'lat' column and returns its value."""
 
         if LATITUDE not in self:
             raise AttributeError(
@@ -2877,7 +2877,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def lng(self):
-        """ Checks for the 'lon' column and returns its value. """
+        """Checks for the 'lon' column and returns its value."""
 
         if LONGITUDE not in self:
             raise AttributeError(
@@ -2888,7 +2888,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def datetime(self):
-        """ Checks for the 'datetime' column and returns its value. """
+        """Checks for the 'datetime' column and returns its value."""
 
         if DATETIME not in self:
             raise AttributeError(
@@ -2899,59 +2899,59 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def loc(self):
-        """ Access a group of rows and columns by label(s) or a boolean array. """
+        """Access a group of rows and columns by label(s) or a boolean array."""
 
         raise NotImplementedError("To be implemented")
 
     @property
     def iloc(self):
-        """ Purely integer-location based indexing for selection by position. """
+        """Purely integer-location based indexing for selection by position."""
 
         raise NotImplementedError("To be implemented")
 
     @property
     def at(self):
-        """ Access a single value for a row/column label pair. """
+        """Access a single value for a row/column label pair."""
 
         raise NotImplementedError("To be implemented")
 
     @property
     def values(self):
-        """ Return a Numpy representation of the DataFrame. """
+        """Return a Numpy representation of the DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     @property
     def columns(self):
-        """ The column labels of the DataFrame. """
+        """The column labels of the DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     @property
     def index(self):
-        """ The index (row labels) of the DataFrame. """
+        """The index (row labels) of the DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     @property
     def dtypes(self):
-        """ Return the dtypes in the DataFrame. """
+        """Return the dtypes in the DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     @property
     def shape(self):
-        """ Return a tuple representing the dimensionality of the DataFrame. """
+        """Return a tuple representing the dimensionality of the DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     def len(self):
-        """ Returns the length/row numbers in trajectory data. """
+        """Returns the length/row numbers in trajectory data."""
 
         raise NotImplementedError("To be implemented")
 
     def unique(self):
-        """ Return unique values of Series object. """
+        """Return unique values of Series object."""
 
         raise NotImplementedError("To be implemented")
 
@@ -2980,22 +2980,22 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return self._data.head(n, npartitions, compute)
 
     def get_users_number(self):
-        """ Check and return number of users in trajectory data. """
+        """Check and return number of users in trajectory data."""
 
         raise NotImplementedError("To be implemented")
 
     def to_numpy(self):
-        """ Converts trajectory data to numpy array format. """
+        """Converts trajectory data to numpy array format."""
 
         raise NotImplementedError("To be implemented")
 
     def to_dict(self):
-        """ Converts trajectory data to dict format. """
+        """Converts trajectory data to dict format."""
 
         raise NotImplementedError("To be implemented")
 
     def to_grid(self):
-        """ Converts trajectory data to grid format. """
+        """Converts trajectory data to grid format."""
 
         raise NotImplementedError("To be implemented")
 
@@ -3013,82 +3013,82 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return self._data
 
     def generate_tid_based_on_id_datatime(self):
-        """ Create or update trajectory id based on id e datetime. """
+        """Create or update trajectory id based on id e datetime."""
 
         raise NotImplementedError("To be implemented")
 
     def generate_date_features(self):
-        """ Create or update date feature. """
+        """Create or update date feature."""
 
         raise NotImplementedError("To be implemented")
 
     def generate_hour_features(self):
-        """ Create or update hour feature. """
+        """Create or update hour feature."""
 
         raise NotImplementedError("To be implemented")
 
     def generate_day_of_the_week_features(self):
-        """ Create or update a feature day of the week from datatime. """
+        """Create or update a feature day of the week from datatime."""
 
         raise NotImplementedError("To be implemented")
 
     def generate_weekend_features(self):
-        """ Create or update the feature weekend to the dataframe. """
+        """Create or update the feature weekend to the dataframe."""
 
         raise NotImplementedError("To be implemented")
 
     def generate_time_of_day_features(self):
-        """ Create a feature time of day or period from datatime. """
+        """Create a feature time of day or period from datatime."""
 
         raise NotImplementedError("To be implemented")
 
     def generate_datetime_in_format_cyclical(self):
-        """ Create or update column with cyclical datetime feature. """
+        """Create or update column with cyclical datetime feature."""
 
         raise NotImplementedError("To be implemented")
 
     def generate_dist_features(self):
-        """ Create the three distance in meters to an GPS point P (lat, lon). """
+        """Create the three distance in meters to an GPS point P (lat, lon)."""
 
         raise NotImplementedError("To be implemented")
 
     def generate_dist_time_speed_features(self):
-        """ Creates features of distance, time and speed between points features. """
+        """Creates features of distance, time and speed between points features."""
 
         raise NotImplementedError("To be implemented")
 
     def generate_move_and_stop_by_radius(self):
-        """ Create or update column with move and stop points by radius. """
+        """Create or update column with move and stop points by radius."""
 
         raise NotImplementedError("To be implemented")
 
     def time_interval(self):
-        """ Get time difference between max and min datetime in trajectory data. """
+        """Get time difference between max and min datetime in trajectory data."""
 
         raise NotImplementedError("To be implemented")
 
     def get_bbox(self):
-        """ Creates the bounding box of the trajectories. """
+        """Creates the bounding box of the trajectories."""
 
         raise NotImplementedError("To be implemented")
 
     def plot_all_features(self):
-        """ Generate a visualization for each columns that type is equal dtype. """
+        """Generate a visualization for each columns that type is equal dtype."""
 
         raise NotImplementedError("To be implemented")
 
     def plot_trajs(self):
-        """ Generate a visualization that show trajectories. """
+        """Generate a visualization that show trajectories."""
 
         raise NotImplementedError("To be implemented")
 
     def plot_traj_id(self):
-        """ Generate a visualization that shows a trajectory with the specified tid. """
+        """Generate a visualization that shows a trajectory with the specified tid."""
 
         raise NotImplementedError("To be implemented")
 
     def show_trajectories_info(self):
-        """ Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box. """
+        """Show dataset information from dataframe, this is number of rows, datetime interval, and bounding box."""
 
         raise NotImplementedError("To be implemented")
 
@@ -3149,7 +3149,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return self._data.max(axis, skipna, split_every, out)
 
     def count(self):
-        """ Counts the non-NA cells for each column or row. """
+        """Counts the non-NA cells for each column or row."""
 
         raise NotImplementedError("To be implemented")
 
@@ -3178,112 +3178,112 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return self._data.groupby(by)
 
     def plot(self):
-        """ Plot the data of the dask DataFrame. """
+        """Plot the data of the dask DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     def select_dtypes(self):
-        """ Returns a subset of the dask DataFrame columns based on the column dtypes. """
+        """Returns a subset of the dask DataFrame columns based on the column dtypes."""
 
         raise NotImplementedError("To be implemented")
 
     def astype(self):
-        """ Casts a dask object to a specified dtype. """
+        """Casts a dask object to a specified dtype."""
 
         raise NotImplementedError("To be implemented")
 
     def sort_values(self):
-        """ Sorts the values of the dask DataFrame. """
+        """Sorts the values of the dask DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     def reset_index(self):
-        """ Resets the dask DataFrame's index, and use the default one. """
+        """Resets the dask DataFrame's index, and use the default one."""
 
         raise NotImplementedError("To be implemented")
 
     def set_index(self):
-        """ Set the dask DataFrame index (row labels) using one or more existing columns or arrays (of the correct length). """
+        """Set the dask DataFrame index (row labels) using one or more existing columns or arrays (of the correct length)."""
 
         raise NotImplementedError("To be implemented")
 
     def drop(self):
-        """ Drops specified rows or columns of the dask Dataframe. """
+        """Drops specified rows or columns of the dask Dataframe."""
 
         raise NotImplementedError("To be implemented")
 
     def duplicated(self):
-        """ Returns boolean Series denoting duplicate rows, optionally only considering certain columns. """
+        """Returns boolean Series denoting duplicate rows, optionally only considering certain columns."""
 
         raise NotImplementedError("To be implemented")
 
     def drop_duplicates(self):
-        """ Removes duplicated rows from the data. """
+        """Removes duplicated rows from the data."""
 
         raise NotImplementedError("To be implemented")
 
     def shift(self):
-        """ Shifts dask dataFrame index by desired number of periods with an optional time freq. """
+        """Shifts dask dataFrame index by desired number of periods with an optional time freq."""
 
         raise NotImplementedError("To be implemented")
 
     def all(self):
-        """ Indicates if all elements are True, potentially over an axis. """
+        """Indicates if all elements are True, potentially over an axis."""
 
         raise NotImplementedError("To be implemented")
 
     def any(self):
-        """ Indicates if any element is True, potentially over an axis. """
+        """Indicates if any element is True, potentially over an axis."""
 
         raise NotImplementedError("To be implemented")
 
     def isna(self):
-        """ Detect missing values """
+        """Detect missing values."""
 
         raise NotImplementedError("To be implemented")
 
     def fillna(self):
-        """ Fills missing data in the dask DataFrame. """
+        """Fills missing data in the dask DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     def dropna(self):
-        """ Removes missing data from dask DataFrame. """
+        """Removes missing data from dask DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     def sample(self):
-        """ Samples data from the dask DataFrame. """
+        """Samples data from the dask DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     def isin(self):
-        """ Determines whether each element in the dask DataFrame is contained in values. """
+        """Determines whether each element in the dask DataFrame is contained in values."""
 
         raise NotImplementedError("To be implemented")
 
     def append(self):
-        """ Append rows of other to the end of caller, returning a new object. """
+        """Append rows of other to the end of caller, returning a new object."""
 
         raise NotImplementedError("To be implemented")
 
     def join(self):
-        """ Join columns of another DataFrame. """
+        """Join columns of another DataFrame."""
 
         raise NotImplementedError("To be implemented")
 
     def nunique(self):
-        """ Count distinct observations over requested axis. """
+        """Count distinct observations over requested axis."""
 
         raise NotImplementedError("To be implemented")
 
     def write_file(self):
-        """ Write trajectory data to a new file. """
+        """Write trajectory data to a new file."""
 
         raise NotImplementedError("To be implemented")
 
     def to_csv(self):
-        """ Write object to a comma-separated values (csv) file. """
+        """Write object to a comma-separated values (csv) file."""
 
         raise NotImplementedError("To be implemented")
 
