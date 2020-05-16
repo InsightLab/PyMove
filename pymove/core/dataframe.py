@@ -1515,7 +1515,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     def plot_traj_id(
         self,
         tid,
-        highlight=None,
+        feature=None,
+        value=None,
         figsize=(10, 10),
         return_fig=True,
         save_fig=False,
@@ -1528,9 +1529,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         tid : str.
             Represents the trajectory tid.
-        highlight: str, optional, default None.
+        feature : str, optional, default None.
             Name of the feature to highlight on plot.
-            If value of feature is 1, it will be highlighted as green marker
+        value : any, optional, defaut None.
+            Value of the feature to be highlighted as green marker
         figsize : tuple, optional, default (10,10).
             Represents dimensions of figure.
         return_fig : bool, optional, default True.
@@ -1570,32 +1572,28 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         fig = plt.figure(figsize=figsize)
 
         plt.plot(
-            df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], "yo", markersize=20
+            df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], "yo", markersize=23
         )  # start point
         plt.plot(
-            df_.iloc[-1][LONGITUDE],
-            df_.iloc[-1][LATITUDE],
-            "yX",
-            markersize=20,
+            df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], "yX", markersize=23
         )  # end point
 
-        if (not highlight) or (highlight not in df_):
+        if (not feature) or (not value) or (feature not in df_):
             plt.plot(df_[LONGITUDE], df_[LATITUDE])
             plt.plot(
                 df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], "r.", markersize=8
-            )  # points
+            )
         else:
-            filter_ = df_[highlight] == 1
-            selfnodes = df_.loc[filter_]
-            selfpoints = df_.loc[~filter_]
-            plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], linewidth=3)
-            plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE])
+            filter_ = df_[feature] == value
+            df_nodes = df_.loc[filter_]
+            df_points = df_.loc[~filter_]
+            plt.plot(df_[LONGITUDE], df_[LATITUDE], linewidth=3)
             plt.plot(
-                selfnodes[LONGITUDE], selfnodes[LATITUDE], "go", markersize=10
-            )  # nodes
+                df_nodes[LONGITUDE], df_nodes[LATITUDE], 'gs', markersize=13
+            )
             plt.plot(
-                selfpoints[LONGITUDE], selfpoints[LATITUDE], "r.", markersize=8
-            )  # points
+                df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=8
+            )
 
         if save_fig:
             if not name:

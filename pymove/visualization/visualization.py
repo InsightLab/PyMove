@@ -289,7 +289,7 @@ def show_lat_lon_gps(
     figsize : tuple, optional, default (21,9).
         Represents dimensions of figure.
     plot_start_and_end: boolean
-        Whether to highlight the start and end of the trajectory
+        Whether to feature the start and end of the trajectory
     return_fig : bool, optional, default True.
         Represents whether or not to save the generated picture.
     save_fig : bool, optional, default True.
