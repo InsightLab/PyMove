@@ -1,6 +1,6 @@
 """
-PyMove
-======
+PyMove.
+=======
 
 Provides  processing and visualization of trajectories and other spatial-temporal data
 
