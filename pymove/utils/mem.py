@@ -6,7 +6,6 @@ import re
 import time
 from collections import deque
 from itertools import chain
-from math import log10
 from sys import getsizeof, stderr
 
 import numpy as np
@@ -304,11 +303,11 @@ def end_operation(operation):
     return {
         "name": last_operation_name,
         "time in seconds": last_operation_time_duration,
-        "memory": format_mem(last_operation_mem_usage),
+        "memory": sizeof_fmt(last_operation_mem_usage),
     }
 
 
-def format_mem(mem_usage):
+def sizeof_fmt(mem_usage, suffix='B'):
     """
     Returns the memory usage calculation of the last function.
 
@@ -317,29 +316,28 @@ def format_mem(mem_usage):
     mem_usage : int
         memory usage in bytes
 
+    suffix: string, optional, default 'B'
+        suffix of the unit
+
     Returns
     -------
     A string of the memory usage in a more readable format
     """
+    for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+        if abs(mem_usage) < 1024.0:
+            return "%3.1f %s%s" % (mem_usage, unit, suffix)
+        mem_usage /= 1024.0
+    return "%.1f %s%s" % (mem_usage, 'Yi', suffix)
 
-    switcher = {
-        "B": mem_usage,
-        "KB": mem_usage / 1024,
-        "MB": mem_usage / (1024 ** 2),
-        "GB": mem_usage / (1024 ** 3),
-        "TB": mem_usage / (1024 ** 4),
-    }
 
-    size = int(log10(max(1, mem_usage))) + 1
-    if size <= 3:
-        unit = "B"
-    elif size <= 6:
-        unit = "KB"
-    elif size <= 9:
-        unit = "MB"
-    elif size <= 12:
-        unit = "GB"
-    else:
-        unit = "TB"
+def print_top_mem_vars(variables=locals()):
+    """
+    Shows the sizes of the active variables
 
-    return f"{switcher[unit]} {unit}"
+    Parameters
+    ----------
+    variables: locals() or globals(), default locals()
+        Whether to shows local or global variables
+    """
+    for name, size in sorted(((name, getsizeof(value)) for name, value in variables.items()), key= lambda x: -x[1])[:10]:
+        print("{:>30}: {:>8}".format(name, sizeof_fmt(size)))
