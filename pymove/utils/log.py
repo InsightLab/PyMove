@@ -11,19 +11,15 @@ def log_progress(sequence, every=None, size=None, desc="Items"):
     ----------
     sequence : list.
         Represents a elements sequence.
-
     every : int, optional, default None.
         Represents the steps in which the bar will be updated
-
     size : int, optional, default None.
         Represents the size/number elements in sequence.
-
     desc : String, optional, default 'Items'.
         Represents the description of the operation.
 
-    Returns
-    -------
     """
+
     is_iterator = False
     if size is None:
         try:

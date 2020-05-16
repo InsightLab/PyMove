@@ -31,7 +31,7 @@ def proc_info():
 
     Returns
     -------
-    df_mem : dataframe
+    dataframe
         A dataframe with the following informations about each jupyter notebook process:
             - user : username
             - pid : process identifier
@@ -40,11 +40,11 @@ def proc_info():
 
     Examples
     --------
-    Example :
-        >>> mem.get_proc_info()
-                user 	pid 	memory_GB 	kernel_ID
-            0 	999999 	11797 	0.239374 	74efe612-927f-4c1f-88a6-bb5fd32bc65c
-            1 	999999 	11818 	0.172012 	11c38dd6-8a65-4c45-90cf-0da5db65fa99
+    >>> mem.get_proc_info()
+            user 	pid 	memory_GB 	kernel_ID
+        0 	999999 	11797 	0.239374 	74efe612-927f-4c1f-88a6-bb5fd32bc65c
+        1 	999999 	11818 	0.172012 	11c38dd6-8a65-4c45-90cf-0da5db65fa99
+
     """
 
     UID = 1
@@ -91,6 +91,23 @@ def proc_info():
 
 
 def session_info(sessions_str):
+    """
+    This functions retrieve the path of each notebook running in the current session.
+
+    Parameters
+    ----------
+    sessions_str : str
+        Session
+
+    Returns
+    -------
+    dataframe
+        A dataframe with the following informations about each jupyter notebook process:
+            - kernel_ID : kernel id
+            - notebook_path: path to the notebook
+
+    """
+
     sessions = json.loads(sessions_str)
     df_nb = []
     kernels = []
@@ -107,6 +124,26 @@ def session_info(sessions_str):
 
 
 def stats(sessions_str):
+    """
+    This functions retrieve the path and information of each notebook running in the current session.
+
+    Parameters
+    ----------
+    sessions_str : str
+        Session
+
+    Returns
+    -------
+    dataframe
+        A dataframe with the following informations about each jupyter notebook process:
+            - user : username
+            - pid : process identifier
+            - memory_GB : memory usage
+            - kernel_ID : kernel id
+            - notebook_path: path to the notebook
+
+    """
+
     df_mem = proc_info()
     df_nb = session_info(sessions_str)
 
@@ -126,7 +163,9 @@ def reduce_mem_usage_automatic(df):
     ---------
     df : dataframe
         The input data to which the operation of memory reduction will be performed.
+
     """
+
     start_mem = df.memory_usage().sum() / 1024 ** 2
     print("Memory usage of dataframe is {:.2f} MB".format(start_mem))
 
@@ -218,8 +257,9 @@ def total_size(o, handlers=None, verbose=False):
 
     Returns
     -------
-    s : float
+    float
         The memory used by the given object
+
     """
 
     if handlers is None:
@@ -271,9 +311,11 @@ def begin_operation(name):
 
     Returns
     -------
-    dict:
+    dict
         dictionary with the operation stats
+
     """
+
     process = psutil.Process(os.getpid())
     init = process.memory_info()[0]
     start = time.time()
@@ -291,9 +333,11 @@ def end_operation(operation):
 
     Returns
     -------
-    dict:
+    dict
         dictionary with the operation execution stats
+
     """
+
     finish = operation["process"].memory_info()[0]
     last_operation_name = operation["name"]
     last_operation_time_duration = time.time() - operation["start"]
@@ -319,8 +363,11 @@ def sizeof_fmt(mem_usage, suffix='B'):
 
     Returns
     -------
-    A string of the memory usage in a more readable format
+    str
+        A string of the memory usage in a more readable format
+
     """
+
     for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
         if abs(mem_usage) < 1024.0:
             return "%3.1f %s%s" % (mem_usage, unit, suffix)
@@ -328,7 +375,7 @@ def sizeof_fmt(mem_usage, suffix='B'):
     return "%.1f %s%s" % (mem_usage, 'Yi', suffix)
 
 
-def print_top_mem_vars(variables=locals()):
+def print_top_mem_vars(variables=None):
     """
     Shows the sizes of the active variables
 
@@ -336,6 +383,9 @@ def print_top_mem_vars(variables=locals()):
     ----------
     variables: locals() or globals(), default locals()
         Whether to shows local or global variables
+
     """
+    if variables is None:
+        variables = locals()
     for name, size in sorted(((name, getsizeof(value)) for name, value in variables.items()), key= lambda x: -x[1])[:10]:
         print("{:>30}: {:>8}".format(name, sizeof_fmt(size)))
