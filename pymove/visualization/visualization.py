@@ -29,6 +29,7 @@ def generate_color():
     Returns
     -------
     Random HEX color
+
     """
     return COLORS[np.random.randint(0, len(COLORS))]
 
@@ -53,7 +54,9 @@ def rgb(rgb_colors):
     >>> from pymove.visualization.visualization import rgb
     >>> rgb([0.6,0.2,0.2])
         (51, 51, 153)
+
     """
+
     blue = rgb_colors[0]
     red = rgb_colors[1]
     green = rgb_colors[2]
@@ -72,7 +75,7 @@ def hex_rgb(rgb_colors):
 
     Returns
     -------
-    String
+    str
         Represents a color in hexadecimal format.
 
     Examples
@@ -80,7 +83,9 @@ def hex_rgb(rgb_colors):
     >>> from pymove.visualization.visualization import hex_rgb
     >>> hex_rgb([0.6,0.2,0.2])
     '#333399'
+
     """
+
     return "#%02X%02X%02X" % rgb(rgb_colors)
 
 
@@ -97,9 +102,11 @@ def cmap_hex_color(cmap, i):
 
     Returns
     -------
-    String
+    str
         Represents corresponding hex string.
+
     """
+
     return matplotlib.colors.rgb2hex(cmap(i))
 
 
@@ -122,9 +129,8 @@ def save_map(
     cmap: String
         Represents the Colormap.
 
-    Returns
-    -------
     """
+
     map_ = folium.Map(tiles=tiles)
     map_.fit_bounds(
         [
@@ -162,9 +168,8 @@ def save_wkt(move_data, filename, label_id=TRAJ_ID):
     label_id : String
         Represents column name of trajectory id.
 
-    Returns
-    -------
     """
+
     str_ = "{};linestring\n".format(label_id)
     ids = move_data[label_id].unique()
     for id_ in ids:
@@ -216,12 +221,15 @@ def show_object_id_by_date(
 
     Returns
     -------
-    fig : matplotlib.pyplot.figure or None
+    matplotlib.pyplot.figure or None
         The generated picture.
+
     References
     ----------
     https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
+
     """
+
     if kind is None:
         kind = ["bar", "bar", "line", "line"]
 
@@ -281,7 +289,7 @@ def show_lat_lon_gps(
     figsize : tuple, optional, default (21,9).
         Represents dimensions of figure.
     plot_start_and_end: boolean
-        Whether to highlight the start and end of the trajectory
+        Whether to feature the start and end of the trajectory
     return_fig : bool, optional, default True.
         Represents whether or not to save the generated picture.
     save_fig : bool, optional, default True.
@@ -291,9 +299,11 @@ def show_lat_lon_gps(
 
     Returns
     -------
-    fig : matplotlib.pyplot.figure or None
+    matplotlib.pyplot.figure or None
         The generated picture.
+
     """
+
     try:
         if LATITUDE in move_data and LONGITUDE in move_data:
             fig = move_data.drop_duplicates([LATITUDE, LONGITUDE]).plot(
@@ -346,11 +356,14 @@ def create_base_map(
         Represents the zoom which will be the center of the map.
     tile : String, optional, default 'CartoDB positron'.
         Represents the map's tiles.
+
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map.
+
     """
+
     if lat_origin is None and lon_origin is None:
         lat_origin = move_data.iloc[0][LATITUDE]
         lon_origin = move_data.iloc[0][LONGITUDE]
@@ -382,11 +395,13 @@ def _filter_and_generate_colors(
 
     Returns
     -------
-    move_df : pymove.core.MoveDataFrameAbstract subclass.
+    pymove.core.MoveDataFrameAbstract subclass.
         Filtered trajectories
-    items : list of tuples
+    list of tuples
         list containing a combination of id and color
+
     """
+
     if n_rows is None:
         n_rows = move_data.shape[0]
 
@@ -425,6 +440,12 @@ def _filter_generated_feature(move_data, feature, values):
         Name of the feature
     value:
         value of the feature
+
+    Returns
+    -------
+    dataframe
+        filtered dataframe
+
     """
     if len(values) == 1:
         mv_df = move_data[move_data[feature] == values[0]]
@@ -449,7 +470,9 @@ def _add_begin_end_markers_to_folium_map(move_data, base_map):
         Input trajectory data.
     base_map : folium.folium.Map, optional, default None.
         Represents the folium map. If not informed, a new map is generated.
+
     """
+
     folium.Marker(
         location=[move_data.iloc[0][LATITUDE], move_data.iloc[0][LONGITUDE]],
         color="green",
@@ -471,7 +494,6 @@ def _add_trajectories_to_folium_map(
     move_data,
     items,
     base_map,
-    id_=None,
     legend=True,
     save_as_html=True,
     filename="map.html",
@@ -483,8 +505,6 @@ def _add_trajectories_to_folium_map(
     ----------
     move_data : pymove.core.MoveDataFrameAbstract subclass.
         Input trajectory data.
-    id_: int or None
-        If int, plots trajectory of the user, else plot for all users
     legend: boolean, default True
         Whether to add a legend to the map
     base_map : folium.folium.Map, optional, default None.
@@ -493,7 +513,9 @@ def _add_trajectories_to_folium_map(
         Represents if want save this visualization in a new file .html.
     filename : String, optional, default 'plot_trajectory_by_period.html'.
         Represents the file name of new file .html.
+
     """
+
     for _id, color in items:
         mv = move_data[move_data[TRAJ_ID] == _id]
 
@@ -558,8 +580,9 @@ def heatmap(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
+
     """
     if base_map is None:
         base_map = create_base_map(
@@ -632,8 +655,9 @@ def cluster(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
+
     """
 
     if base_map is None:
@@ -712,8 +736,9 @@ def faster_cluster(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
+
     """
 
     if base_map is None:
@@ -787,8 +812,9 @@ def plot_markers(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
+
     """
 
     if base_map is None:
@@ -873,8 +899,9 @@ def plot_trajectories_with_folium(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
+
     """
 
     if base_map is None:
@@ -890,12 +917,7 @@ def plot_trajectories_with_folium(
         move_data, n_rows=n_rows, color=color
     )
     _add_trajectories_to_folium_map(
-        mv_df,
-        items,
-        base_map,
-        legend=legend,
-        save_as_html=save_as_html,
-        filename=filename,
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -951,12 +973,13 @@ def plot_trajectory_by_id_with_folium(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
 
     Raises
     ------
-        IndexError if there is no user with the id passed
+    IndexError if there is no user with the id passed
+
     """
     if base_map is None:
         base_map = create_base_map(
@@ -969,7 +992,7 @@ def plot_trajectory_by_id_with_folium(
 
     mv_df, items = _filter_and_generate_colors(move_data, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -1029,13 +1052,14 @@ def plot_trajectory_by_period(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
 
     Raises
     ------
-        KeyError period not found in dataframe
-        IndexError if there is no user with the id passed
+    KeyError period not found in dataframe
+    IndexError if there is no user with the id passed
+
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1052,7 +1076,7 @@ def plot_trajectory_by_period(
     mv_df = _filter_generated_feature(move_data, PERIOD, [period])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -1112,13 +1136,14 @@ def plot_trajectory_by_day_week(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
 
     Raises
     ------
-        KeyError day_week not found in dataframe
-        IndexError if there is no user with the id passed
+    KeyError day_week not found in dataframe
+    IndexError if there is no user with the id passed
+
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1135,7 +1160,7 @@ def plot_trajectory_by_day_week(
     mv_df = _filter_generated_feature(move_data, DAY, [day_week])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -1198,13 +1223,14 @@ def plot_trajectory_by_date(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
 
     Raises
     ------
-        KeyError start or end date range not found in dataframe
-        IndexError if there is no user with the id passed
+    KeyError start or end date range not found in dataframe
+    IndexError if there is no user with the id passed
+
     """
 
     if base_map is None:
@@ -1228,7 +1254,7 @@ def plot_trajectory_by_date(
     mv_df = _filter_generated_feature(move_data, DATE, [start_date, end_date])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -1291,13 +1317,14 @@ def plot_trajectory_by_hour(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
 
     Raises
     ------
-        KeyError if start to end hour range not found in dataframe
-        IndexError if there is no user with the id passed
+    KeyError if start to end hour range not found in dataframe
+    IndexError if there is no user with the id passed
+
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1314,7 +1341,7 @@ def plot_trajectory_by_hour(
     mv_df = _filter_generated_feature(move_data, HOUR, [start_hour, end_hour])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
     _add_trajectories_to_folium_map(
-        mv_df, items, base_map, id_, legend, save_as_html, filename
+        mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
@@ -1379,14 +1406,16 @@ def plot_stops(
 
     Returns
     -------
-    base_map : folium.folium.Map.
+    folium.folium.Map.
         Represents a folium map with visualization.
 
     Raises
-        ------
-        KeyError if no STOPs found
-        IndexError if there is no user with the id passed
+    ------
+    KeyError if no STOPs found
+    IndexError if there is no user with the id passed
+
     """
+
     if base_map is None:
         base_map = create_base_map(
             move_data,

@@ -107,11 +107,19 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def generate_dist_time_speed_features(self):
+        pass
+
+    @abc.abstractmethod
     def generate_dist_features(self):
         pass
 
     @abc.abstractmethod
-    def generate_dist_time_speed_features(self):
+    def generate_time_features(self):
+        pass
+
+    @abc.abstractmethod
+    def generate_speed_features(self):
         pass
 
     @abc.abstractmethod

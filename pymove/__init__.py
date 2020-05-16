@@ -1,3 +1,11 @@
+"""
+PyMove
+=======
+
+Provides  processing and visualization of trajectories and other spatial-temporal data
+
+"""
+
 from ._version import __version__
 from .core import grid
 from .core.dataframe import (
