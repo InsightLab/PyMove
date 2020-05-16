@@ -13,6 +13,7 @@ from .preprocessing import (
     segmentation,
     stay_point_detection,
 )
+from .semantic import algorithms
 from .utils import (
     constants,
     conversions,
