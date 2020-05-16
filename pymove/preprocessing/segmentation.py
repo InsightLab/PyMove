@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-from pymove.core.dataframe import PandasMoveDataFrame
 from pymove.utils.constants import (
     DIST_TO_PREV,
     SPEED_TO_PREV,
@@ -94,15 +93,236 @@ def _drop_single_point(move_data, label_new_tid, label_id):
         print("...No trajs with only one point.", move_data.shape)
 
 
+def _filter_and_dist_time_speed(move_data, idx, max_dist, max_time, max_speed):
+    """
+    Filters the dataframe considering thresholds for time, dist and speed
+
+    Parameters
+    ----------
+    move_data : dataframe
+        Dataframe to be filtered
+    idx : int
+        row to compare
+    max_dist : float
+        maximum dist diference
+    max_time : float
+        maximum time diference
+    max_speed : float
+        maximum speed diference
+
+    Returns
+    -------
+    numpy.ndarray of booleans
+        filtered indexes from the dataframe
+
+    """
+
+    return (
+        (
+                np.nan_to_num(move_data.at[idx, DIST_TO_PREV])
+                > max_dist
+        )
+        | (
+                np.nan_to_num(move_data.at[idx, TIME_TO_PREV])
+                > max_time
+        )
+        | (
+                np.nan_to_num(move_data.at[idx, SPEED_TO_PREV])
+                > max_speed
+        )
+    )
+
+
+def _filter_or_dist_time_speed(move_data, idx, feature, max_between_adj_points):
+    """
+    Filters the dataframe considering thresholds for time, dist and speed
+
+    Parameters
+    ----------
+    move_data : dataframe
+        Dataframe to be filtered
+    idx : int
+        row to compare
+    feature : str
+        feature to compare
+    max_between_adj_points : float
+        maximum points diference
+
+    Returns
+    -------
+    numpy.ndarray
+        filtered indexes from the dataframe
+
+    """
+
+    return (
+        np.nan_to_num(move_data.at[idx, feature])
+        > max_between_adj_points
+    )
+
+
+def prepare_segmentation(move_data, label_id, label_new_tid):
+    """
+    Resets the dataframe index, collects unique ids and initiates curr_id and count
+
+    Parameters
+    ----------
+    move_data : dataframe
+        Dataframe to be filtered
+    label_id : str
+        label of the feature
+    label_new_tid : str
+        label of the new feature
+
+    Returns
+    -------
+    int
+        initial curr_tid
+    numpy.ndarray
+        unique ids
+    int
+        initial count
+
+    """
+
+    if move_data.index.name is None:
+        print("...setting {} as index".format(label_id), flush=True)
+        move_data.set_index(label_id, inplace=True)
+
+    curr_tid = 0
+    if label_new_tid not in move_data:
+        move_data[label_new_tid] = curr_tid
+
+    ids = move_data.index.unique()
+    count = 0
+    return curr_tid, ids, count
+
+
+def _update_curr_tid_count(filter_, move_data, idx, label_new_tid, curr_tid, count):
+    """
+    Updates the tid
+
+    Parameters
+    ----------
+    filter_ : numpy.ndarray
+        Filtered indexes
+    move_data : dataframe
+        Dataframe to be filtered
+    idx : int
+        row to compare
+    label_new_tid : str
+        label of the new feature
+    curr_tid : int
+        current tid
+    count : int
+        count of
+
+    Returns
+    -------
+    int
+        updated current tid
+    int
+        updated count ids
+
+    """
+
+    curr_tid += 1
+    if filter_.shape == ():
+        print("id: {} has no point to split".format(idx))
+        move_data.at[idx, label_new_tid] = curr_tid
+        count += 1
+    else:
+        tids = np.empty(filter_.shape[0], dtype=np.int64)
+        tids.fill(curr_tid)
+        for i, has_problem in enumerate(filter_):
+            if has_problem:
+                curr_tid += 1
+                tids[i:] = curr_tid
+        count += tids.shape[0]
+        move_data.at[idx, label_new_tid] = tids
+    return curr_tid, count
+
+
+def _filter_by(move_data, label_id, label_new_tid, drop_single_points, **kwargs):
+    """
+    Splits the trajectories into segments.
+
+    Parameters
+    ----------
+    move_data : dataframe
+       The input trajectory data
+    label_id : String, optional(dic_labels["id"] by default)
+         Indicates the label of the id column in the user"s dataframe.
+    label_new_tid : String, optional(TID_PART by default)
+        The label of the column containing the ids of the formed segments. Is the new splitted id.
+    drop_single_points : boolean, optional(True by default)
+        If set to True, drops the trajectories with only one point.
+    **kwargs : arguments
+        depends on the type of segmentation
+        - all : if is a segmentation by all features
+        - max_dist : maximum dist between adjacent points
+        - max_time : maximum time between adjacent points
+        - max_speed : maximum speed between adjacent points
+        - feature : feature to use for segmentation
+        - max_between_adj_points : maximum value for feature
+
+    Returns
+    -------
+    DataFrame with the aditional features: label_new_tid, that indicates the trajectory segment
+        to which the point belongs to.
+
+    Note
+    ----
+    Time, distance and speeed features must be updated after split.
+
+    """
+
+    curr_tid, ids, count = prepare_segmentation(move_data, label_id, label_new_tid)
+
+    for idx in progress_bar(ids, desc=f"Generating {label_new_tid}"):
+        if kwargs["all"]:
+            filter_ = _filter_and_dist_time_speed(
+                move_data,
+                idx,
+                kwargs["max_dist"],
+                kwargs["max_time"],
+                kwargs["max_speed"]
+            )
+        else:
+            filter_ = _filter_or_dist_time_speed(
+                move_data,
+                idx,
+                kwargs["feature"],
+                kwargs["max_between_adj_points"]
+            )
+
+        curr_tid, count = _update_curr_tid_count(filter_, move_data, idx, label_new_tid, curr_tid, count)
+
+    if label_id == label_new_tid:
+        move_data.reset_index(drop=True, inplace=True)
+        print("... label_id = label_new_id, then reseting and drop index")
+    else:
+        move_data.reset_index(inplace=True)
+        print("... Reseting index\n")
+
+    if drop_single_points:
+        _drop_single_point(move_data, label_new_tid, label_id)
+        move_data.generate_dist_time_speed_features()
+
+    print("------------------------------------------\n")
+
+    return move_data
+
+
 def by_dist_time_speed(
-    move_data,
-    label_id=TRAJ_ID,
-    max_dist_between_adj_points=3000,
-    max_time_between_adj_points=7200,
-    max_speed_between_adj_points=50.0,
-    drop_single_points=True,
-    label_new_tid=TID_PART,
-    inplace=True,
+        move_data,
+        label_id=TRAJ_ID,
+        max_dist_between_adj_points=3000,
+        max_time_between_adj_points=7200,
+        max_speed_between_adj_points=50.0,
+        drop_single_points=True,
+        label_new_tid=TID_PART,
+        inplace=True,
 ):
     """
     Splits the trajectories into segments based on distance, time and speed.
@@ -128,100 +348,52 @@ def by_dist_time_speed(
         otherwise a copy will be returned.
 
     Returns
-    ------
+    -------
     DataFrame with the aditional features: label_new_tid, that indicates the trajectory segment
         to which the point belongs to.
 
     Note
-    -----
+    ----
     Time, distance and speeed features must be updated after split.
 
     """
 
     if not inplace:
-        move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+        move_data = move_data[:]
 
     print("\nSplit trajectories")
-    print("...max_time_between_adj_points:", max_time_between_adj_points)
     print("...max_dist_between_adj_points:", max_dist_between_adj_points)
-    print("...max_speed:", max_speed_between_adj_points)
+    print("...max_time_between_adj_points:", max_time_between_adj_points)
+    print("...max_speed_between_adj_points:", max_speed_between_adj_points)
+
+    if TIME_TO_PREV not in move_data:
+        move_data.generate_dist_time_speed_features()
 
     try:
-
-        if TIME_TO_PREV not in move_data:
-            move_data.generate_dist_time_speed_features()
-
-        if move_data.index.name is None:
-            print("...setting {} as index".format(label_id), flush=True)
-            move_data.set_index(label_id, inplace=True)
-
-        curr_tid = 0
-        if label_new_tid not in move_data:
-            move_data[label_new_tid] = curr_tid
-
-        ids = move_data.index.unique()
-        count = 0
-
-        for idx in progress_bar(ids, desc=f"Generating {label_new_tid}"):
-            curr_tid += 1
-
-            filter_ = (
-                (
-                    np.nan_to_num(move_data.at[idx, TIME_TO_PREV])
-                    > max_time_between_adj_points
-                )
-                | (
-                    np.nan_to_num(move_data.at[idx, DIST_TO_PREV])
-                    > max_dist_between_adj_points
-                )
-                | (
-                    np.nan_to_num(move_data.at[idx, SPEED_TO_PREV])
-                    > max_speed_between_adj_points
-                )
-            )
-
-            # check if object have only one point to be removed
-            if filter_.shape == ():
-                # trajectories with only one point is useless for interpolation and so they must be removed.
-                count += 1
-                move_data.at[idx, label_new_tid] = -1
-                curr_tid += -1
-            else:
-                tids = np.empty(filter_.shape[0], dtype=np.int64)
-                tids.fill(curr_tid)
-
-                for i, has_problem in enumerate(filter_):
-                    if has_problem:
-                        curr_tid += 1
-                        tids[i:] = curr_tid
-                count += tids.shape[0]
-                move_data.at[idx, label_new_tid] = tids
-
-        if label_id == label_new_tid:
-            move_data.reset_index(drop=True, inplace=True)
-            print("... label_id = label_new_id, then reseting and drop index")
-        else:
-            move_data.reset_index(inplace=True)
-            print("... Reseting index\n")
-
-        if drop_single_points:
-            _drop_single_point(move_data, label_new_tid, label_id)
-            move_data.generate_dist_time_speed_features()
-
-        print("------------------------------------------\n")
+        move_data = _filter_by(
+            move_data,
+            label_id,
+            label_new_tid,
+            drop_single_points,
+            max_dist=max_dist_between_adj_points,
+            max_time=max_time_between_adj_points,
+            max_speed=max_speed_between_adj_points,
+            all=True
+        )
         if not inplace:
             return move_data
+
     except Exception as e:
         raise e
 
 
 def by_max_dist(
-    move_data,
-    label_id=TRAJ_ID,
-    max_dist_between_adj_points=3000,
-    drop_single_points=True,
-    label_new_tid=TID_DIST,
-    inplace=True,
+        move_data,
+        label_id=TRAJ_ID,
+        max_dist_between_adj_points=3000,
+        drop_single_points=True,
+        label_new_tid=TID_DIST,
+        inplace=True,
 ):
     """
     Segments the trajectories based on distance.
@@ -254,78 +426,40 @@ def by_max_dist(
     """
 
     if not inplace:
-        move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+        move_data = move_data[:]
 
     print(
         "Split trajectories by max distance between adjacent points:",
         max_dist_between_adj_points,
     )
+
+    if DIST_TO_PREV not in move_data:
+        move_data.generate_dist_time_speed_features()
+
     try:
-
-        if DIST_TO_PREV not in move_data:
-            move_data.generate_dist_features()
-
-        if move_data.index.name is None:
-            print("...setting {} as index".format(label_id), flush=True)
-            move_data.set_index(label_id, inplace=True)
-
-        curr_tid = 0
-        if label_new_tid not in move_data:
-            move_data[label_new_tid] = curr_tid
-
-        ids = move_data.index.unique()
-        count = 0
-
-        for idx in progress_bar(ids, desc=f"Generating {label_new_tid}"):
-            # increment index to trajectory
-            curr_tid += 1
-
-            # filter dist max
-            dist = (
-                np.nan_to_num(move_data.at[idx, DIST_TO_PREV])
-                > max_dist_between_adj_points
-            )
-            # check if object have more than one point to split
-            if dist.shape == ():
-                print("id: {} has not point to split".format(idx))
-                move_data.at[idx, label_new_tid] = curr_tid
-                count += 1
-            else:
-                tids = np.empty(dist.shape[0], dtype=np.int64)
-                tids.fill(curr_tid)
-                for i, has_problem in enumerate(dist):
-                    if has_problem:
-                        curr_tid += 1
-                        tids[i:] = curr_tid
-                count += tids.shape[0]
-                move_data.at[idx, label_new_tid] = tids
-
-        if label_id == label_new_tid:
-            move_data.reset_index(drop=True, inplace=True)
-            print("... label_id = label_new_id, then reseting and drop index")
-        else:
-            move_data.reset_index(inplace=True)
-            print("... Reseting index")
-
-        if drop_single_points:
-            _drop_single_point(move_data, label_new_tid, label_id)
-            move_data.generate_dist_features()
-
-        print("------------------------------------------\n")
+        move_data = _filter_by(
+            move_data,
+            label_id,
+            label_new_tid,
+            drop_single_points,
+            feature=DIST_TO_PREV,
+            max_between_adj_points=max_dist_between_adj_points,
+            all=False
+        )
         if not inplace:
             return move_data
+
     except Exception as e:
-        print("label_id:{}\nidx:{}\n".format(label_id, idx))
         raise e
 
 
 def by_max_time(
-    move_data,
-    label_id=TRAJ_ID,
-    max_time_between_adj_points=900.0,
-    drop_single_points=True,
-    label_new_tid=TID_TIME,
-    inplace=True,
+        move_data,
+        label_id=TRAJ_ID,
+        max_time_between_adj_points=900.0,
+        drop_single_points=True,
+        label_new_tid=TID_TIME,
+        inplace=True,
 ):
     """
     Splits the trajectories into segments based on a maximum time set by the user.
@@ -359,79 +493,40 @@ def by_max_time(
     """
 
     if not inplace:
-        move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+        move_data = move_data[:]
 
     print(
         "Split trajectories by max_time_between_adj_points:",
         max_time_between_adj_points,
     )
+
+    if TIME_TO_PREV not in move_data:
+        move_data.generate_dist_time_speed_features()
+
     try:
-
-        if TIME_TO_PREV not in move_data:
-            move_data.generate_dist_time_speed_features()
-
-        if move_data.index.name is None:
-            print("...setting {} as index".format(label_id), flush=True)
-            move_data.set_index(label_id, inplace=True)
-
-        curr_tid = 0
-        if label_new_tid not in move_data:
-            move_data[label_new_tid] = curr_tid
-
-        ids = move_data.index.unique()
-        count = 0
-
-        for idx in progress_bar(ids, desc=f"Generating {label_new_tid}"):
-            # increment index to trajectory
-            curr_tid += 1
-
-            # filter time max
-            times = (
-                np.nan_to_num(move_data.at[idx, TIME_TO_PREV])
-                > max_time_between_adj_points
-            )
-
-            # check if object have only one point to be removed
-            if times.shape == ():
-                print("id: {} has not point to split".format(id))
-                move_data.at[idx, label_new_tid] = curr_tid
-                count += 1
-            else:
-                tids = np.empty(times.shape[0], dtype=np.int64)
-                tids.fill(curr_tid)
-                for i, has_problem in enumerate(times):
-                    if has_problem:
-                        curr_tid += 1
-                        tids[i:] = curr_tid
-                count += tids.shape[0]
-                move_data.at[idx, label_new_tid] = tids
-
-        if label_id == label_new_tid:
-            move_data.reset_index(drop=True, inplace=True)
-            print("... label_id = label_new_id, then reseting and drop index")
-        else:
-            move_data.reset_index(inplace=True)
-            print("... Reseting index")
-
-        if drop_single_points:
-            _drop_single_point(move_data, label_new_tid, label_id)
-            move_data.generate_dist_time_speed_features()
-
-        print("------------------------------------------\n")
+        move_data = _filter_by(
+            move_data,
+            label_id,
+            label_new_tid,
+            drop_single_points,
+            feature=TIME_TO_PREV,
+            max_between_adj_points=max_time_between_adj_points,
+            all=False
+        )
         if not inplace:
             return move_data
+
     except Exception as e:
-        print("label_id:{}\nidx:{}\n".format(label_id, idx))
         raise e
 
 
 def by_max_speed(
-    move_data,
-    label_id=TRAJ_ID,
-    max_speed_between_adj_points=50.0,
-    drop_single_points=True,
-    label_new_tid=TID_SPEED,
-    inplace=True,
+        move_data,
+        label_id=TRAJ_ID,
+        max_speed_between_adj_points=50.0,
+        drop_single_points=True,
+        label_new_tid=TID_SPEED,
+        inplace=True,
 ):
     """
     Splits the trajectories into segments based on a maximum speed set by the user.
@@ -464,66 +559,28 @@ def by_max_speed(
     """
 
     if not inplace:
-        move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+        move_data = move_data[:]
 
     print(
         "Split trajectories by max_speed_between_adj_points:",
         max_speed_between_adj_points,
     )
+
+    if SPEED_TO_PREV not in move_data:
+        move_data.generate_dist_time_speed_features()
+
     try:
-
-        if SPEED_TO_PREV not in move_data:
-            move_data.generate_dist_time_speed_features()
-
-        if move_data.index.name is None:
-            print("...setting {} as index".format(label_id), flush=True)
-            move_data.set_index(label_id, inplace=True)
-
-        curr_tid = 0
-        if label_new_tid not in move_data:
-            move_data[label_new_tid] = curr_tid
-
-        ids = move_data.index.unique()
-        count = 0
-
-        for idx in progress_bar(ids, desc=f"Generating {label_new_tid}"):
-            # increment index to trajectory
-            curr_tid += 1
-
-            # filter speed max
-            speed = (
-                np.nan_to_num(move_data.at[idx, SPEED_TO_PREV])
-                > max_speed_between_adj_points
-            )
-            # check if object have only one point to be removed
-            if speed.shape == ():
-                print("id: {} has not point to split".format(id))
-                move_data.at[idx, label_new_tid] = curr_tid
-                count += 1
-            else:
-                tids = np.empty(speed.shape[0], dtype=np.int64)
-                tids.fill(curr_tid)
-                for i, has_problem in enumerate(speed):
-                    if has_problem:
-                        curr_tid += 1
-                        tids[i:] = curr_tid
-                count += tids.shape[0]
-                move_data.at[idx, label_new_tid] = tids
-
-        if label_id == label_new_tid:
-            move_data.reset_index(drop=True, inplace=True)
-            print("... label_id = label_new_id, then reseting and drop index")
-        else:
-            move_data.reset_index(inplace=True)
-            print("... Reseting index")
-
-        if drop_single_points:
-            _drop_single_point(move_data, label_new_tid, label_id)
-            move_data.generate_dist_time_speed_features()
-
-        print("------------------------------------------\n")
+        move_data = _filter_by(
+            move_data,
+            label_id,
+            label_new_tid,
+            drop_single_points,
+            feature=SPEED_TO_PREV,
+            max_between_adj_points=max_speed_between_adj_points,
+            all=False
+        )
         if not inplace:
             return move_data
+
     except Exception as e:
-        print("label_id:{}\nidx:{}\n".format(label_id, idx))
         raise e

@@ -462,6 +462,42 @@ def _filter_speed_max_radius(move_data, **kwargs):
     return move_data[filter_]
 
 
+def _filter_data(move_data, f, kwargs):
+    """
+    Filter the dataframe using condition from given function
+
+    Parameters
+    ----------
+    move_data : dataframe
+        Dataframe to be filtered.
+    f : function
+        Filtering function
+    **kwargs : arguments
+        - arg1 : feature
+        - arg2 : value
+        - outliers : special behaviour if cleaning by outliers
+
+    Returns
+    -------
+    dataframe
+        Filtered dataframe.
+    int
+        Number of rows to be dropped
+
+    """
+
+    if kwargs['outliers']:
+        filter_data_points = f(
+            move_data, jump_coefficient=kwargs['arg1'], threshold=kwargs['arg2'], inplace=False
+        )
+    else:
+        filter_data_points = f(
+            move_data, arg1=kwargs['arg1'], arg2=kwargs['arg2'], inplace=False
+        )
+    rows_to_drop = filter_data_points.shape[0]
+    return filter_data_points, rows_to_drop
+
+
 def _clean_gps(move_data, f, **kwargs):
     """
     Cleans gps points from a dataframe using condition from given function
@@ -488,15 +524,7 @@ def _clean_gps(move_data, f, **kwargs):
         print("...Reset index for filtering\n")
         move_data.reset_index(inplace=True)
 
-    if kwargs['outliers']:
-        filter_data_points = f(
-            move_data, jump_coefficient=kwargs['arg1'], threshold=kwargs['arg2'], inplace=False
-        )
-    else:
-        filter_data_points = f(
-            move_data, arg1=kwargs['arg1'], arg2=kwargs['arg2'], inplace=False
-        )
-    rows_to_drop = filter_data_points.shape[0]
+    filter_data_points, rows_to_drop = _filter_data(move_data, f, kwargs)
 
     sum_drop = 0
     while rows_to_drop > 0:
@@ -510,15 +538,7 @@ def _clean_gps(move_data, f, **kwargs):
             )
         )
 
-        if kwargs['outliers']:
-            filter_data_points = f(
-                move_data, jump_coefficient=kwargs['arg1'], threshold=kwargs['arg2'], inplace=False
-            )
-        else:
-            filter_data_points = f(
-                move_data, arg1=kwargs['arg1'], arg2=kwargs['arg2'], inplace=False
-            )
-        rows_to_drop = filter_data_points.shape[0]
+        filter_data_points, rows_to_drop = _filter_data(move_data, f, kwargs)
 
     print("{} GPS points were dropped".format(sum_drop))
 
