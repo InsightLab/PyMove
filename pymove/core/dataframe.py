@@ -2913,7 +2913,6 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     @property
     def values(self):
         """Return a Numpy representation of the DataFrame."""
-
         raise NotImplementedError("To be implemented")
 
     @property
@@ -2923,7 +2922,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def index(self):
-        """The index (row labels) of the DataFrame."""
+        """The row labels of the DataFrame."""
         raise NotImplementedError("To be implemented")
 
     @property

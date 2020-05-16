@@ -1,5 +1,6 @@
 class WindowsUser:
     """Mock class for module errors on windows."""
+
     def __init__(self, uid):
         """Instantiates mock class."""
         self.pw_name = "windows"

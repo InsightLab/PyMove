@@ -43,7 +43,6 @@ class Grid:
 
     def get_grid(self):
         """Returns the grid object in a dict format."""
-
         return {
             "lon_min_x": self.lon_min_x,
             "lat_min_y": self.lat_min_y,

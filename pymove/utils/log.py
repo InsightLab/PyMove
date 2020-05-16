@@ -33,7 +33,8 @@ def log_progress(sequence, every=None, size=None, desc="Items"):
             else:
                 every = int(size / 200)
     else:
-        assert every is not None, "sequence is iterator, set every"
+        if every is None:
+            raise AssertionError("Sequence is iterator, set every")
 
     if is_iterator:
         progress = IntProgress(min=0, max=1, value=1)
