@@ -81,16 +81,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         data : dict, list, numpy array or pandas.core.DataFrame.
             Input trajectory data.
-
         latitude : str, optional, default 'lat'.
             Represents column name latitude.
-
         longitude : str, optional, default 'lon'.
             Represents column name longitude.
-
         datetime : str, optional, default 'datetime'.
             Represents column name datetime.
-
         traj_id : str, optional, default 'id'.
             Represents column name trajectory id.
 
@@ -386,9 +382,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
         Returns the length/row numbers in trajectory data.
 
-        Parameters
-        ---------
-
         Returns
         -------
         int
@@ -580,10 +573,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         str_format : str, optional, default "%Y%m%d%H".
-
+            Format to consider the datetime
         sort : bool, optional, default True.
             If sort == True the dataframe will be sorted.
-
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
 
@@ -635,7 +627,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
-
 
         Returns
         -------
@@ -759,7 +750,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         create_day_of_week : bool, optional (False by default).
             Indicates if the column day should be keeped in the dataframe. If set to False the column will be dropped.
-
         inplace : bool, optional, default True.
             Indicates whether the operation will be performed on the data provided or in a copy.
 
@@ -877,7 +867,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         label_datetime : str, optional, default 'datetime.
             Represents column id type_.
-
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
 
@@ -929,13 +918,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         label_id : str, optional, default 'id'.
             Represents name of column of trajectore's id.
-
         label_dtype : type_, optional, default np.float64.
             Represents column id type_.
-
         sort : bool, optional, default True.
             If sort == True the dataframe will be sorted.
-
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
 
@@ -1054,13 +1040,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         label_id : str, optional, default 'id'.
             Represents name of column of trajectore's id.
-
         label_dtype : type_, optional, default np.float64.
             Represents column id type_.
-
         sort : bool, optional, default True.
             If sort == True the dataframe will be sorted.
-
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
 
@@ -1186,10 +1169,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         radius : int, optional, default 0.
             Represents radius.
-
         target_label : str, optional, default 'dist_to_prev.
             Represents column id type_.
-
         inplace : bool, optional, default True.
             Represents whether the operation will be performed on the data provided or in a copy.
 
@@ -1308,16 +1289,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         figsize : tuple, optional, default (21, 15).
             Represents dimensions of figure.
-
         dtype : type_, optional, default np.float32.
             Represents column type_.
-
         return_fig : bool, optional, default True.
             Represents whether or not to save the generated picture.
-
         save_fig : bool, optional, default False.
             Represents whether or not to save the generated picture.
-
         name : str, optional, default 'features.png'.
             Represents name of a file.
 
@@ -1370,19 +1347,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         figsize : tuple, optional, default (10, 10).
             Represents dimensions of figure.
-
         markers : str, optional, default 'o'.
             Represents visualization type_ marker.
-
         markersize : int, optional, default 20.
             Represents visualization size marker.
-
         return_fig : bool, optional, default True.
             Represents whether or not to save the generated picture.
-
         save_fig : bool, optional, default False.
             Represents whether or not to save the generated picture.
-
         name : str, optional, default 'trajectories.png'.
             Represents name of a file.
 
@@ -1431,20 +1403,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         tid : str.
             Represents the trajectory tid.
-
         highlight: str, optional, default None.
             Name of the feature to highlight on plot.
             If value of feature is 1, it will be highlighted as green marker
-
         figsize : tuple, optional, default (10,10).
             Represents dimensions of figure.
-
         return_fig : bool, optional, default True.
             Represents whether or not to save the generated picture.
-
         save_fig : bool, optional, default False.
             Represents whether or not to save the generated picture.
-
         name : str, optional, default None.
             Represents name of a file.
 
@@ -1453,7 +1420,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         -------
         pymove.core.MoveDataFrameAbstract subclass
             Trajectory with the specified tid.
-
         matplotlib.pyplot.figure or None
             The generated picture.
 
@@ -2684,7 +2650,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-         axis : int or str, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
+        axis : int or str, optional (0 by default), options: 0 or ‘index’, 1 or ‘columns’, None
             The axis to use. 0 or ‘index’ for row-wise, 1 or ‘columns’ for column-wise.
         dropna : bool, optional (default True)
             Don’t include NaN in the counts.
@@ -2714,7 +2680,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         file_name : str.
             Represents the filename.
-
         separator : str, optional, default ','.
             Represents the information separator in a new file.
 
@@ -2822,16 +2787,12 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         ----------
         data : dict, list, numpy array or pandas.core.DataFrame
             Input trajectory data.
-
         latitude : str, optional, default 'lat'.
             Represents column name latitude.
-
         longitude : str, optional, default 'lon'.
             Represents column name longitude.
-
         datetime : str, optional, default 'datetime'.
             Represents column name datetime.
-
         traj_id : str, optional, default 'id'.
             Represents column name trajectory id.
 
@@ -3005,12 +2966,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         ----------
         n : int, optional, default 5
             Number of rows to select.
-
         npartitions : int, optional, default 1.
             Represents the number partitions.
-
         compute : bool, optional, default True.
-            Represents ?
+            ?
 
         Returns
         -------
