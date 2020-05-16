@@ -9,19 +9,15 @@ def add_map_legend(m, title, items):
     ----------
     m : folium.map.
         Represents a folium map.
-
     title : string.
         Represents the title of the legend.
-
     items : list of tuple.
         Represents the color and name of the legend items.
-
-    Returns
-    -------
 
     References
     ----------
     https://github.com/python-visualization/folium/issues/528#issuecomment-421445303
+
     """
 
     item = "<li><span style='background:%s;'></span>%s</li>"

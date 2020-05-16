@@ -21,23 +21,20 @@ def connect_postgres(
     ----------
     dbname : string, default 'postgres'
         Name of the database
-
     user : string, default 'postgres'
         The user connecting to the database
-
     psswrd : string, default ''
         The password of the database
-
     host : string, default 'localhost'
         The address of the database
-
     port : int, default 5432
         The port of the database in the host
 
     Returns
     -------
-    conn : psycopg2.extensions.connection
+    psycopg2.extensions.connection
         Connection to the desired database
+
     """
     try:
         psql_params = (
@@ -66,25 +63,21 @@ def write_postgres(
     ----------
     table : string
         Name of the table
-
     dataframe : dataframe object
         The dataframe to be saved
-
     dbname : string, default 'postgres'
         Name of the database
-
     user : string, default 'postgres'
         The user connecting to the database
-
     psswrd : string, default ''
         The password of the database
-
     host : string, default 'localhost'
         The address of the database
-
     port : int, default 5432
         The port of the database in the host
+
     """
+
     cols = dataframe.columns
     columns = ",".join(cols)
     values = ",".join(["%s"] * len(cols))
@@ -94,7 +87,7 @@ def write_postgres(
     try:
         conn = connect_postgres(dbname, user, psswrd, host, port)
         cur = conn.cursor()
-        cur.execute("DELETE FROM %s" % (table))
+        cur.execute("DELETE FROM %s", (table,))
         cur.executemany(sql, dataframe.values)
         conn.commit()
         cur.close()
@@ -124,33 +117,28 @@ def read_postgres(
     ----------
     query : string
         Sql query
-
     in_memory : bool, default True
         Whether te operation will be executed in memory
-
     type_ : 'pandas', 'dask' or None, defaults 'pandas'
         It will try to convert the dataframe into a MoveDataFrame
-
     dbname : string, default 'postgres'
         Name of the database
-
     user : string, default 'postgres'
         The user connecting to the database
-
     psswrd : string, default ''
         The password of the database
-
     host : string, default 'localhost'
         The address of the database
-
     port : int, default 5432
         The port of the database in the host
 
     Returns
     -------
-    dataframe: PandasMoveDataFrame, DaskMoveDataFrame or PandasDataFrame
-        a dataframe object
+    PandasMoveDataFrame, DaskMoveDataFrame or PandasDataFrame
+        a dataframe object containing the result from the query
+
     """
+
     conn = None
     try:
         conn = connect_postgres(dbname, user, psswrd, host, port)
@@ -179,14 +167,14 @@ def read_sql_inmem_uncompressed(query, conn):
     ----------
     query : string
         Sql query
-
     conn : psycopg2.extensions.connection
         Postgres database connection
 
     Returns
     -------
-    df : PandasDataframe
+    PandasDataframe
         The query contents in a dataframe format
+
     """
     copy_sql = "COPY ({query}) TO STDOUT WITH CSV {head}".format(
         query=query, head="HEADER"
@@ -212,15 +200,16 @@ def read_sql_tmpfile(query, conn):
     ----------
     query : string
         Sql query
-
     conn : psycopg2.extensions.connection
         Postgres database connection
 
     Returns
     -------
-    df : PandasDataframe
+    PandasDataframe
         The query contents in a dataframe format
+
     """
+
     with tempfile.TemporaryFile() as tmpfile:
         copy_sql = "COPY ({query}) TO STDOUT WITH CSV {head}".format(
             query=query, head="HEADER"
@@ -242,31 +231,28 @@ def connect_mongo(
     ----------
     dbname : string, default 'test'
         Name of the database
-
     user : string, default None
         The user connecting to the database
-
     psswrd : string, default None
         The password of the database
-
     host : string, default 'localhost'
         The address of the database
-
     port : int, default 27017
         The port of the database in the host
 
     Returns
     -------
-    conn : pymongo.database.Database
+    pymongo.database.Database
         Connection to the desired database
+
     """
     try:
         if user and psswrd:
             mongo_uri = "mongodb://%s:%s@%s:%s/" % (user, psswrd, host, port)
-            conn = MongoClient(mongo_uri)[dbname]
+            conn = MongoClient(mongo_uri)
         else:
-            conn = MongoClient(host, psswrd)[dbname]
-        return conn
+            conn = MongoClient(host, psswrd)
+        return conn[dbname]
     except Exception as e:
         raise e
 
@@ -286,30 +272,25 @@ def get_mongo_collection(
     ----------
     collection : string
         Name of the collection
-
     dbname : string, default 'test'
         Name of the database
-
     user : string, default None
         The user connecting to the database
-
     psswrd : string, default None
         The password of the database
-
     host : string, default 'localhost'
         The address of the database
-
     port : int, default 27017
         The port of the database in the host
 
     Returns
     -------
-    coll : pymongo.collection.Collection
+    pymongo.collection.Collection
         The desired mongo collection
     """
     try:
-        coll = connect_mongo(dbname, user, psswrd, host, port)[collection]
-        return coll
+        conn = connect_mongo(dbname, user, psswrd, host, port)
+        return conn[collection]
     except Exception as e:
         raise e
 
@@ -330,24 +311,19 @@ def write_mongo(
     ----------
     collection : string
         Name of the collection
-
     dataframe : dataframe object
         The dataframe to be saved
-
     dbname : string, default 'postgres'
         Name of the database
-
     user : string, default 'postgres'
         The user connecting to the database
-
     psswrd : string, default ''
         The password of the database
-
     host : string, default 'localhost'
         The address of the database
-
     port : int, default 5432
         The port of the database in the host
+
     """
     try:
         my_collection = get_mongo_collection(
@@ -382,39 +358,32 @@ def read_mongo(
     ----------
     collection : string
         Name of the collection
-
     filter_ : map, default None
         The filtering to apply to the query
-
     projection : map, default None
         The fields to retrieve from the collection
-
     type_ : 'pandas', 'dask' or None, defaults 'pandas'
         It will try to convert the dataframe into a MoveDataFrame
-
     no_id: bool, default True
         Whether to drop the registers id's
-
     dbname : string, default 'postgres'
         Name of the database
-
     user : string, default 'postgres'
         The user connecting to the database
-
     psswrd : string, default ''
         The password of the database
-
     host : string, default 'localhost'
         The address of the database
-
     port : int, default 5432
         The port of the database in the host
 
     Returns
     -------
     dataframe: PandasMoveDataFrame, DaskMoveDataFrame or PandasDataFrame
-        a dataframe object
+        a dataframe object with the contents of the collection
+
     """
+
     try:
         my_collection = get_mongo_collection(
             collection, dbname, user, psswrd, host, port

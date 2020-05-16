@@ -24,17 +24,19 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
     -------
     inertia_dic : dictionary
         The inertia values ​​for the different numbers of clusters
+
     Example
     -------
-        clustering.elbow_method(move_data=move_df[['lat', 'lon']], k_initial = 2, max_clusters = 17, k_iteration = 2)
-            {2: 55084.15957839036,
-             4: 245.68365592382938,
-             6: 92.31472644640075,
-             8: 62.618599956870355,
-             10: 45.59653757292055,
-             12: 34.32238676029195,
-             14: 26.087387367439227,
-             16: 20.64369311973992}
+    clustering.elbow_method(move_data=move_df[['lat', 'lon']], k_initial = 2, max_clusters = 17, k_iteration = 2)
+        {2: 55084.15957839036,
+         4: 245.68365592382938,
+         6: 92.31472644640075,
+         8: 62.618599956870355,
+         10: 45.59653757292055,
+         12: 34.32238676029195,
+         14: 26.087387367439227,
+         16: 20.64369311973992}
+
     """
 
     message = "Executing Elbow Method to:\n...K of {} to {} from k_iteration:{}\n".format(
@@ -77,6 +79,7 @@ def gap_statistic(
     Notes
     -----
     https://anaconda.org/milesgranger/gap-statistic/notebook
+
     """
 
     message = "Executing Gap Statistic to:\n...K of {} to {} from k_iteration:{}\n".format(
