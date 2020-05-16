@@ -33,13 +33,14 @@ def by_bbox(move_data, bbox, filter_out=False, inplace=False):
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         Returns dataframe with trajectories points filtered by bounding box.
 
     Example
     -------
-        filter_bbox(move_data, [-3.90, -38.67, -3.68, -38.38]) -> Fortaleza
-            lat_down =  bbox[0], lon_left =  bbox[1], lat_up = bbox[2], lon_right = bbox[3]
+    filter_bbox(move_data, [-3.90, -38.67, -3.68, -38.38]) -> Fortaleza
+        lat_down =  bbox[0], lon_left =  bbox[1], lat_up = bbox[2], lon_right = bbox[3]
+
     """
 
     try:
@@ -85,8 +86,9 @@ def by_datetime(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         Returns dataframe with trajectories points filtered by specified time range.
+
     """
 
     try:
@@ -129,8 +131,9 @@ def by_label(move_data, value, label_name, filter_out=False, inplace=False):
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         Returns dataframe with trajectories points filtered by label.
+
     """
 
     try:
@@ -168,9 +171,11 @@ def by_id(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         Returns dataframe with trajectories points filtered by id.
+
     """
+
     return by_label(move_data, id_, label_id, filter_out, inplace)
 
 
@@ -199,8 +204,9 @@ def by_tid(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         Returns a dataframe with trajectories points filtered.
+
     """
 
     if TID not in move_data:
@@ -237,8 +243,9 @@ def outliers(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         Returns a dataframe with the trajectories outliers.
+
     """
 
     if DIST_TO_PREV not in move_data:
@@ -305,8 +312,9 @@ def clean_duplicates(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         Returns a dataframe without the trajectories duplicates.
+
     """
 
     print("\nRemove rows duplicates by subset")
@@ -352,8 +360,9 @@ def clean_consecutive_duplicates(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         The filtered trajectories points without consecutive duplicates.
+
     """
 
     if keep == "first":
@@ -396,12 +405,144 @@ def clean_nan_values(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         The filtered trajectories without nan values.
+
     """
+
     return move_data.dropna(
         axis=axis, how=how, thresh=thresh, subset=subset, inplace=inplace
     )
+
+
+def _filter_single_by_max(move_data, **kwargs):
+    """
+    Filters from a dataframe rows with features below value.
+
+    Parameters
+    ----------
+    move_data : dataframe
+        Dataframe to be filtered.
+    **kwargs : arguments
+        - arg1 : feature
+        - arg2 : value
+
+    Returns
+    -------
+    dataframe
+        Filtered dataframe.
+
+    """
+
+    return move_data[move_data[kwargs['arg1']] <= kwargs['arg2']]
+
+
+def _filter_speed_max_radius(move_data, **kwargs):
+    """
+    Filters from a dataframe rows with current or previous row features exceeding value.
+
+    Parameters
+    ----------
+    move_data : dataframe
+        Dataframe to be filtered.
+    **kwargs : arguments
+        - arg1 : feature
+        - arg2 : value
+
+    Returns
+    -------
+    dataframe
+        Filtered dataframe.
+
+    """
+    filter_ = (
+            (np.nan_to_num(move_data[kwargs['arg1']].shift(1)) > kwargs['arg2']) |
+            (move_data[kwargs['arg1']] > kwargs['arg2'])
+    )
+    return move_data[filter_]
+
+
+def _filter_data(move_data, f, kwargs):
+    """
+    Filter the dataframe using condition from given function
+
+    Parameters
+    ----------
+    move_data : dataframe
+        Dataframe to be filtered.
+    f : function
+        Filtering function
+    **kwargs : arguments
+        - arg1 : feature
+        - arg2 : value
+        - outliers : special behaviour if cleaning by outliers
+
+    Returns
+    -------
+    dataframe
+        Filtered dataframe.
+    int
+        Number of rows to be dropped
+
+    """
+
+    if kwargs['outliers']:
+        filter_data_points = f(
+            move_data, jump_coefficient=kwargs['arg1'], threshold=kwargs['arg2'], inplace=False
+        )
+    else:
+        filter_data_points = f(
+            move_data, arg1=kwargs['arg1'], arg2=kwargs['arg2'], inplace=False
+        )
+    rows_to_drop = filter_data_points.shape[0]
+    return filter_data_points, rows_to_drop
+
+
+def _clean_gps(move_data, f, **kwargs):
+    """
+    Cleans gps points from a dataframe using condition from given function
+
+    Parameters
+    ----------
+    move_data : dataframe
+        Dataframe to be filtered.
+    f : function
+        Filtering function
+    **kwargs : arguments
+        - arg1 : feature
+        - arg2 : value
+        - outliers : special behaviour if cleaning by outliers
+
+    Returns
+    -------
+    dataframe
+        Filtered dataframe.
+
+    """
+
+    if move_data.index.name is not None:
+        print("...Reset index for filtering\n")
+        move_data.reset_index(inplace=True)
+
+    filter_data_points, rows_to_drop = _filter_data(move_data, f, kwargs)
+
+    sum_drop = 0
+    while rows_to_drop > 0:
+        print("...Dropping {} rows of gps points\n".format(rows_to_drop))
+        shape_before = move_data.shape[0]
+        move_data.drop(index=filter_data_points.index, inplace=True)
+        sum_drop = sum_drop + rows_to_drop
+        print(
+            "...Rows before: {}, Rows after:{}, Sum drop:{}\n".format(
+                shape_before, move_data.shape[0], sum_drop
+            )
+        )
+
+        filter_data_points, rows_to_drop = _filter_data(move_data, f, kwargs)
+
+    print("{} GPS points were dropped".format(sum_drop))
+
+    return move_data
 
 
 def clean_gps_jumps_by_distance(
@@ -432,15 +573,16 @@ def clean_gps_jumps_by_distance(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         The filtered trajectories without the gps jumps.
+
     """
 
     if not inplace:
         move_df = move_data[:]
     else:
         move_df = move_data
-    sum_drop = 0
+    # sum_drop = 0
 
     if DIST_TO_PREV not in move_df:
         move_df.generate_dist_features(
@@ -454,34 +596,37 @@ def clean_gps_jumps_by_distance(
             )
         )
 
-        if move_df.index.name is not None:
-            print("...Reset index for filtering\n")
-            move_df.reset_index(inplace=True)
-
-        move_datajumps = outliers(
-            move_df, jump_coefficient, threshold, inplace=False
-        )
-        rows_to_drop = move_datajumps.shape[0]
-
-        while rows_to_drop > 0:
-            print("...Dropping {} rows of gps points\n".format(rows_to_drop))
-            shape_before = move_df.shape[0]
-            move_df.drop(index=move_datajumps.index, inplace=True)
-            sum_drop = sum_drop + rows_to_drop
-            print(
-                "...Rows before: {}, Rows after:{}, Sum drop:{}\n".format(
-                    shape_before, move_df.shape[0], sum_drop
-                )
-            )
-
-            move_datajumps = outliers(
-                move_df, jump_coefficient, threshold, inplace=False
-            )
-            rows_to_drop = move_datajumps.shape[0]
-
-        print("{} GPS points were dropped".format(sum_drop))
+        move_df = _clean_gps(move_df, outliers, arg1=jump_coefficient, arg2=threshold, outliers=True)
         if not inplace:
             return move_df
+        # if move_df.index.name is not None:
+        #     print("...Reset index for filtering\n")
+        #     move_df.reset_index(inplace=True)
+        #
+        # move_datajumps = outliers(
+        #     move_df, jump_coefficient, threshold, inplace=False
+        # )
+        # rows_to_drop = move_datajumps.shape[0]
+        #
+        # while rows_to_drop > 0:
+        #     print("...Dropping {} rows of gps points\n".format(rows_to_drop))
+        #     shape_before = move_df.shape[0]
+        #     move_df.drop(index=move_datajumps.index, inplace=True)
+        #     sum_drop = sum_drop + rows_to_drop
+        #     print(
+        #         "...Rows before: {}, Rows after:{}, Sum drop:{}\n".format(
+        #             shape_before, move_df.shape[0], sum_drop
+        #         )
+        #     )
+        #
+        #     move_datajumps = outliers(
+        #         move_df, jump_coefficient, threshold, inplace=False
+        #     )
+        #     rows_to_drop = move_datajumps.shape[0]
+        #
+        # print("{} GPS points were dropped".format(sum_drop))
+        # if not inplace:
+        #     return move_df
 
     except Exception as e:
         raise e
@@ -513,15 +658,15 @@ def clean_gps_nearby_points_by_distances(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         The filtered trajectories without the gps nearby points by distance.
-    """
 
+    """
     if not inplace:
         move_df = move_data[:]
     else:
         move_df = move_data
-    sum_drop = 0
+    # sum_drop = 0
 
     if DIST_TO_PREV not in move_df:
         move_df.generate_dist_features(
@@ -535,32 +680,35 @@ def clean_gps_nearby_points_by_distances(
             )
         )
 
-        if move_df.index.name is not None:
-            print("...Reset index for filtering\n")
-            move_df.reset_index(inplace=True)
-
-        filter_nearby_points = move_df[move_df[DIST_TO_PREV] <= radius_area]
-        rows_to_drop = filter_nearby_points.shape[0]
-
-        while rows_to_drop > 0:
-            print("...Dropping {} gps points\n".format(rows_to_drop))
-            shape_before = move_df.shape[0]
-            move_df.drop(index=filter_nearby_points.index, inplace=True)
-            sum_drop = sum_drop + rows_to_drop
-            print(
-                "...Rows before: {}, Rows after:{}\n".format(
-                    shape_before, move_df.shape[0]
-                )
-            )
-
-            filter_nearby_points = move_df[
-                move_df[DIST_TO_PREV] <= radius_area
-            ]
-            rows_to_drop = filter_nearby_points.shape[0]
-
-        print("{} GPS points were dropped".format(sum_drop))
+        move_df = _clean_gps(move_df, _filter_single_by_max, arg1=DIST_TO_PREV, arg2=radius_area, outliers=False)
         if not inplace:
             return move_df
+        # if move_df.index.name is not None:
+        #     print("...Reset index for filtering\n")
+        #     move_df.reset_index(inplace=True)
+        #
+        # filter_nearby_points = move_df[move_df[DIST_TO_PREV] <= radius_area]
+        # rows_to_drop = filter_nearby_points.shape[0]
+        #
+        # while rows_to_drop > 0:
+        #     print("...Dropping {} gps points\n".format(rows_to_drop))
+        #     shape_before = move_df.shape[0]
+        #     move_df.drop(index=filter_nearby_points.index, inplace=True)
+        #     sum_drop = sum_drop + rows_to_drop
+        #     print(
+        #         "...Rows before: {}, Rows after:{}\n".format(
+        #             shape_before, move_df.shape[0]
+        #         )
+        #     )
+        #
+        #     filter_nearby_points = move_df[
+        #         move_df[DIST_TO_PREV] <= radius_area
+        #         ]
+        #     rows_to_drop = filter_nearby_points.shape[0]
+        #
+        # print("{} GPS points were dropped".format(sum_drop))
+        # if not inplace:
+        #     return move_df
 
     except Exception as e:
         raise e
@@ -592,15 +740,16 @@ def clean_gps_nearby_points_by_speed(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         The filtered trajectories without the gps nearby points by speed.
+
     """
 
     if not inplace:
         move_df = move_data[:]
     else:
         move_df = move_data
-    sum_drop = 0
+    # sum_drop = 0
 
     if SPEED_TO_PREV not in move_df:
         move_df.generate_dist_time_speed_features(
@@ -615,32 +764,35 @@ def clean_gps_nearby_points_by_speed(
             )
         )
 
-        if move_df.index.name is not None:
-            print("...Reset index for filtering\n")
-            move_df.reset_index(inplace=True)
-
-        filter_nearby_points = move_df[move_df[SPEED_TO_PREV] <= speed_radius]
-        rows_to_drop = filter_nearby_points.shape[0]
-
-        while rows_to_drop > 0:
-            print("...Dropping {} gps points\n".format(rows_to_drop))
-            shape_before = move_df.shape[0]
-            move_df.drop(index=filter_nearby_points.index, inplace=True)
-            sum_drop = sum_drop + rows_to_drop
-            print(
-                "...Rows before: {}, Rows after:{}\n".format(
-                    shape_before, move_df.shape[0]
-                )
-            )
-
-            filter_nearby_points = move_df[
-                move_df[SPEED_TO_PREV] <= speed_radius
-            ]
-            rows_to_drop = filter_nearby_points.shape[0]
-
-        print("{} GPS points were dropped".format(sum_drop))
+        move_df = _clean_gps(move_df, _filter_single_by_max, arg1=SPEED_TO_PREV, arg2=speed_radius, outliers=False)
         if not inplace:
             return move_df
+        # if move_df.index.name is not None:
+        #     print("...Reset index for filtering\n")
+        #     move_df.reset_index(inplace=True)
+        #
+        # filter_nearby_points = move_df[move_df[SPEED_TO_PREV] <= speed_radius]
+        # rows_to_drop = filter_nearby_points.shape[0]
+        #
+        # while rows_to_drop > 0:
+        #     print("...Dropping {} gps points\n".format(rows_to_drop))
+        #     shape_before = move_df.shape[0]
+        #     move_df.drop(index=filter_nearby_points.index, inplace=True)
+        #     sum_drop = sum_drop + rows_to_drop
+        #     print(
+        #         "...Rows before: {}, Rows after:{}\n".format(
+        #             shape_before, move_df.shape[0]
+        #         )
+        #     )
+        #
+        #     filter_nearby_points = move_df[
+        #         move_df[SPEED_TO_PREV] <= speed_radius
+        #     ]
+        #     rows_to_drop = filter_nearby_points.shape[0]
+        #
+        # print("{} GPS points were dropped".format(sum_drop))
+        # if not inplace:
+        #     return move_df
 
     except Exception as e:
         raise e
@@ -655,11 +807,11 @@ def clean_gps_speed_max_radius(
 ):
     """
     Recursively removes trajectories points with speed higher than the value
-    especifeid by the user. Given any point p of the trajectory, the point will
+    specified by the user. Given any point p of the trajectory, the point will
     be removed if one of the following happens: if the travel speed from the
     point before p to p is greater than the  max value of speed between adjacent
     points set by the user. Or the travel speed between point p and the next
-    point is greater than the value set by the user. When the clening is done,
+    point is greater than the value set by the user. When the cleaning is done,
     the function will update the time and distance features in the dataframe and
     will call itself again. The function will finish processing when it can no
     longer find points disrespecting the limit of speed.
@@ -671,7 +823,7 @@ def clean_gps_speed_max_radius(
     label_id : String, optional(the class dic_labels["id"] by default)
         Indicates the label of the id column in the user"s dataframe.
     speed_max : Float. Optional(50.0 by default)
-        Indicates the maximun value a point"s speed_to_prev and speed_to_next should have, in order not to be dropped.
+        Indicates the maximum value a point"s speed_to_prev and speed_to_next should have, in order not to be dropped.
     label_dtype : type_, optional(np.float64 by default)
         Represents column id type_. By default it"s np.float64.
     inplace : boolean, default(False by default)
@@ -679,19 +831,22 @@ def clean_gps_speed_max_radius(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         The filtered trajectories without the gps nearby points by speed or radius.
+
     """
+
     if not inplace:
         move_df = move_data[:]
     else:
         move_df = move_data
-    sum_drop = 0
+    # sum_drop = 0
 
     if SPEED_TO_PREV not in move_df:
         move_df.generate_dist_time_speed_features(
             label_id=label_id, label_dtype=label_dtype
         )
+    print(move_df)
 
     try:
         print(
@@ -700,38 +855,13 @@ def clean_gps_speed_max_radius(
             )
         )
 
-        if move_df.index.name is not None:
-            print("...Reset index for filtering\n")
-            move_df.reset_index(inplace=True)
-
-        filter_ = (move_df[SPEED_TO_PREV] > speed_max) | (
-            move_df[SPEED_TO_PREV] > speed_max
+        move_df = _clean_gps(
+            move_df,
+            _filter_speed_max_radius,
+            arg1=SPEED_TO_PREV,
+            arg2=speed_max,
+            outliers=False
         )
-        filter_nearby_points = move_df[filter_]
-        rows_to_drop = filter_nearby_points.shape[0]
-
-        while rows_to_drop > 0:
-            print(
-                "...Dropping {} rows of jumps by speed max\n".format(
-                    rows_to_drop
-                )
-            )
-            shape_before = move_df.shape[0]
-            move_df.drop(index=filter_nearby_points.index, inplace=True)
-            sum_drop = sum_drop + rows_to_drop
-            print(
-                "...Rows before: {}, Rows after:{}\n".format(
-                    shape_before, move_df.shape[0]
-                )
-            )
-
-            filter_ = (move_df[SPEED_TO_PREV] > speed_max) | (
-                move_df[SPEED_TO_PREV] > speed_max
-            )
-            filter_nearby_points = move_df[filter_]
-            rows_to_drop = filter_nearby_points.shape[0]
-
-        print("{} GPS points were dropped".format(sum_drop))
         if not inplace:
             return move_df
 
@@ -753,15 +883,17 @@ def clean_trajectories_with_few_points(
     label_tid : String, optional(dic_features_label["tid"] by default)
         The label of the column which contains the tid of the trajectories
     min_points_per_trajectory: Integer, optional(2 by default)
-        Specifies the minimun number of points a trajectory must have in order not to be dropped
+        Specifies the minimum number of points a trajectory must have in order not to be dropped
     inplace : boolean, default(False by default)
         if set to true the operation is done in place, the original dataframe will be altered and None is returned.
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         The filtered trajectories without the minimum number of gps points.
+
     """
+
     if not inplace:
         move_df = move_data[:]
     else:
@@ -847,14 +979,16 @@ def clean_trajectories_short_and_few_points(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         The filtered trajectories without the minimum number of gps points and distance.
 
     Notes
     -----
         remove_tids_with_few_points must be performed before updating features, because
-        those features can only be computed with at least 2 points per trajactories.
+        those features can only be computed with at least 2 points per trajectories.
+
     """
+
     if not inplace:
         move_df = move_data[:]
     else:
@@ -938,9 +1072,11 @@ def clean_id_by_time_max(
 
     Returns
     -------
-    move_data : dataframe or None
+    dataframe or None
         The filtered trajectories without the minimum number of gps points and distance.
+
     """
+
     if not inplace:
         move_df = move_data[:]
     else:

@@ -24,10 +24,25 @@ class Grid:
     def __init__(
         self, data, cell_size, meters_by_degree=lat_meters(-3.8162973555)
     ):
+        """
+        Creates a virtual grid from the trajectories.
+
+        Parameters
+        ----------
+        data : dataframe like object.
+            Dataframe containing the trajectories.
+        cell_size : float.
+            Represents grid cell size.
+        meters_by_degree : float, optional, default lat_meters(-3.8162973555).
+            Represents the corresponding meters of lat by degree.
+
+        """
+
         self.last_operation = None
         self._create_virtual_grid(data, cell_size, meters_by_degree)
 
     def get_grid(self):
+        """Returns the grid object in a dict format."""
         return {
             "lon_min_x": self.lon_min_x,
             "lat_min_y": self.lat_min_y,
@@ -44,16 +59,14 @@ class Grid:
         ----------
         data : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
-
         cell_size : float
             Size of grid's cell.
-
         meters_by_degree : float
             Represents the meters's degree of latitude. By default the latitude is set in Fortaleza.
 
         Returns
         -------
-        virtual_grid : dict
+        dict
             Contains informations about virtual grid, how
                 - lon_min_x: minimum longitude.
                 - lat_min_y: minimum latitude.
@@ -122,16 +135,13 @@ class Grid:
         ----------
         data : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
-
         label_dtype : String
             Represents the type_ of a value of new column in dataframe.
-
         sort : boolean
             Represents the state of dataframe, if is sorted.
 
-        Returns
-        -------
         """
+
         operation = begin_operation("create_update_index_grid_feature")
 
         print("\nCreating or updating index of the grid feature..\n")
@@ -158,7 +168,6 @@ class Grid:
         ----------
         index_grid_lat : int
             Represents index of grid that reference latitude.
-
         index_grid_lon : int
             Represents index of grid that reference longitude.
 
@@ -166,7 +175,9 @@ class Grid:
         -------
         polygon: Polygon
             Represents a polygon of this cell in a grid.
+
         """
+
         operation = begin_operation("create_one_polygon_to_point_on_grid")
 
         lat_init = self.lat_min_y + self.cell_size_by_degree * index_grid_lat
@@ -191,10 +202,8 @@ class Grid:
         Create all polygons that are represented in a grid and store them in a
         new dic_grid key .
 
-        Parameters
-        ----------
         """
-        # Cria o vetor vazio de gometrias da grid
+
         operation = begin_operation("create_all_polygons_on_grid")
 
         try:
@@ -243,7 +252,9 @@ class Grid:
         -------
         datapolygons: pandas.core.frame.DataFrame
             Represents the same dataset with new key 'polygon' where polygons were saved.
+
         """
+
         operation = begin_operation("create_all_polygons_to_all_point_on_grid")
 
         try:
@@ -282,7 +293,6 @@ class Grid:
         ----------
         event_lat : float
             Represents the latitude of a point.
-
         event_lon : float
             Represents the longitude of a point.
 
@@ -290,10 +300,11 @@ class Grid:
         -------
         indexes_lat_y : int
             Represents the index y in a grid of a point (lat, long).
-
         indexes_lon_x : int
             Represents the index x in a grid of a point (lat, long).
+
         """
+
         operation = begin_operation("create_all_polygons_to_all_point_on_grid")
 
         indexes_lat_y = np.floor(
@@ -319,7 +330,6 @@ class Grid:
         ----------
         filename : String
             Represents the name of a file.
-
         dic_grid : dict
             Contains informations about virtual grid, how
                 - lon_min_x: longitude mínima.
@@ -328,9 +338,8 @@ class Grid:
                 - grid_size_lon_x: tamanho da longitude da grid.
                 - cell_size_by_degree: tamanho da célula da Grid.
 
-        Returns
-        -------
         """
+
         operation = begin_operation("save_grid_pkl")
 
         try:
@@ -353,13 +362,14 @@ class Grid:
 
         Returns
         -------
-        dic_grid : dict
+        dict
             Contains informations about virtual grid, how
                 - lon_min_x: longitude mínima.
                 - lat_min_y: latitude miníma.
                 - grid_size_lat_y: tamanho da grid latitude.
                 - grid_size_lon_x: tamanho da longitude da grid.
                 - cell_size_by_degree: tamanho da célula da Grid.
+
         """
         operation = begin_operation("read_grid_pkl")
         try:
@@ -387,19 +397,14 @@ class Grid:
         ----------
         data : pymove.core.MoveDataFrameAbstract subclass.
             Input trajectory data.
-
         id_ : String
             Represents the id.
-
         figsize : tuple
             Represents the size (float: width, float: height) of a figure.
-
         return_fig : bool, optional, default True.
             Represents whether or not to save the generated picture.
-
         save_fig : bool, optional, default False.
             Represents whether or not to save the generated picture.
-
         name : String, optional, default 'grid.png'.
             Represents name of a file.
 
@@ -412,6 +417,7 @@ class Grid:
         ------
         KeyError if the dataframe does not contains the POLYGON feature
         IndexError if there is no user with the id passed
+
         """
 
         print(TRAJ_ID, TID)
