@@ -25,17 +25,17 @@ def feature_values_using_filter(
 
     Returns
     -------
-    move_data : dataframe
+    dataframe or None
         A copy of the original dataframe, with the alterations done by the function. (When inplace is False)
-    None
-        When inplace is True
 
     Notes
     -----
     equivalent to: move_data.at[id_, feature_name][filter_] = values
     e.g. move_data.at[tid, "time"][filter_nodes] = intp_result.astype(np.int64)
     dataframe must be indexed by id_: move_data.set_index(index_name, inplace=True)
+
     """
+
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
@@ -62,26 +62,19 @@ def feature_values_using_filter_and_indexes(
     ----------
     move_data : pandas.core.frame.DataFrame
         Represents the dataset with contains lat, long and datetime.
-
     id_ : String
         ?
-
     feature_name : String
         ?.
-
     filter_ : ?
         ?.
-
     idxs: ?
         ?.
-
     values : ?
         ?.
 
-
-    Returns
-    -------
     """
+
     if not inplace:
         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
