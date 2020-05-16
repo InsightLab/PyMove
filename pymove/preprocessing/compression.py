@@ -53,8 +53,8 @@ def compress_segment_stop_to_point(
         otherwise a copy will be returned.
 
     Returns
-    ------
-    Returns the dataFrame with 2 aditional features: segment_stop, stop, lat_mean and lon_mean.
+    -------
+    DataFrame with 2 aditional features: segment_stop, stop, lat_mean and lon_mean
         segment_stop indicates the trajectory segment to which the point belongs to.
         stop indicates if the point represents a stop.
         lat_mean and lon_mean:
@@ -62,7 +62,9 @@ def compress_segment_stop_to_point(
             the segment
             On the other hand, if centroid option is used, lat_mean and lon_mean are defined by centroid of the
             all points into segment
+
     """
+
     try:
         if not inplace:
             move_data = move_data[:]
@@ -204,15 +206,18 @@ def compress_segment_stop_to_point_optimizer(
         if set to true the original dataframe will be altered to contain the result of the filtering,
         otherwise a copy will be returned.
 
-    ------
-    Returns the dataFrame with 2 aditional features: segment_stop, stop, lat_mean and lon_mean.
+    Returns
+    -------
+    DataFrame with 2 additional features: segment_stop, stop, lat_mean and lon_mean
         segment_stop indicates the trajectory segment to which the point belongs to.
         lat_mean and lon_mean:
             if the default option is used, lat_mean and lon_mean are defined based on point that repeats most within
             the segment
             On the other hand, if centroid option is used, lat_mean and lon_mean are defined by centroid of the
             all points into segment
+
     """
+
     try:
         if not inplace:
             move_data = move_data[:]
