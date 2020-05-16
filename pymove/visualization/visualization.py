@@ -3,7 +3,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from folium.plugins import FastMarkerCluster, HeatMap, MarkerCluster
-
 from pymove.utils.constants import (
     COLORS,
     COUNT,
@@ -323,7 +322,13 @@ def show_lat_lon_gps(
         raise exception
 
 
-def create_base_map(move_data, lat_origin=None, lon_origin=None, tile=TILES[0], default_zoom_start=12):
+def create_base_map(
+    move_data,
+    lat_origin=None,
+    lon_origin=None,
+    tile=TILES[0],
+    default_zoom_start=12,
+):
     """
     Generate a folium map.
 
@@ -358,9 +363,11 @@ def create_base_map(move_data, lat_origin=None, lon_origin=None, tile=TILES[0], 
     return base_map
 
 
-def _filter_and_generate_colors(move_data, id_=None, n_rows=None, color="black"):
+def _filter_and_generate_colors(
+    move_data, id_=None, n_rows=None, color="black"
+):
     """
-    Filters the dataframe and generate colors for folium map
+    Filters the dataframe and generate colors for folium map.
 
     Parameters
     ----------
@@ -384,11 +391,15 @@ def _filter_and_generate_colors(move_data, id_=None, n_rows=None, color="black")
         n_rows = move_data.shape[0]
 
     if id_ is not None:
-        mv_df = move_data[move_data[TRAJ_ID] == id_].iloc[:n_rows][[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]]
+        mv_df = move_data[move_data[TRAJ_ID] == id_].iloc[:n_rows][
+            [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
+        ]
         if not len(mv_df):
             raise IndexError(f"No user with id {id_} in dataframe")
     else:
-        mv_df = move_data.iloc[:n_rows][[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]]
+        mv_df = move_data.iloc[:n_rows][
+            [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
+        ]
 
     if id_ is not None:
         items = list(zip([id_], [color]))
@@ -404,7 +415,7 @@ def _filter_and_generate_colors(move_data, id_=None, n_rows=None, color="black")
 
 def _filter_generated_feature(move_data, feature, values):
     """
-    Filters the values from the dataframe
+    Filters the values from the dataframe.
 
     Parameters
     __________
@@ -418,7 +429,10 @@ def _filter_generated_feature(move_data, feature, values):
     if len(values) == 1:
         mv_df = move_data[move_data[feature] == values[0]]
     else:
-        mv_df = move_data[(move_data[feature] >= values[0]) & (move_data[feature] <= values[1])]
+        mv_df = move_data[
+            (move_data[feature] >= values[0])
+            & (move_data[feature] <= values[1])
+        ]
     if not len(mv_df):
         raise KeyError(f"No {feature} found in dataframe")
     return mv_df
@@ -426,7 +440,8 @@ def _filter_generated_feature(move_data, feature, values):
 
 def _add_begin_end_markers_to_folium_map(move_data, base_map):
     """
-    Adds a green marker to beginning of the trajectory and a red marker to the end of the trajectory
+    Adds a green marker to beginning of the trajectory and a red marker to the
+    end of the trajectory.
 
     Parameters
     ----------
@@ -452,9 +467,17 @@ def _add_begin_end_markers_to_folium_map(move_data, base_map):
     ).add_to(base_map)
 
 
-def _add_trajectories_to_folium_map(move_data, items, base_map, id_=None, legend=True, save_as_html=True, filename='map.html'):
+def _add_trajectories_to_folium_map(
+    move_data,
+    items,
+    base_map,
+    id_=None,
+    legend=True,
+    save_as_html=True,
+    filename="map.html",
+):
     """
-    Adds a trajectory to a folium map with begin and end markers
+    Adds a trajectory to a folium map with begin and end markers.
 
     Parameters
     ----------
@@ -636,7 +659,9 @@ def cluster(
             + str(row[1][DATETIME])
         )
         mc.add_child(
-            folium.Marker(location=[row[1][LATITUDE], row[1][LONGITUDE]], popup=pop)
+            folium.Marker(
+                location=[row[1][LATITUDE], row[1][LONGITUDE]], popup=pop
+            )
         )
     base_map.add_child(mc)
 
@@ -780,7 +805,7 @@ def plot_markers(
 
     _add_begin_end_markers_to_folium_map(move_data.iloc[:n_rows], base_map)
 
-    for row in move_data.iloc[1: n_rows - 1].iterrows():
+    for row in move_data.iloc[1 : n_rows - 1].iterrows():
         pop = (
             "<b>Latitude:</b> "
             + str(row[1][LATITUDE])
@@ -861,8 +886,17 @@ def plot_trajectories_with_folium(
             default_zoom_start=zoom_start,
         )
 
-    mv_df, items = _filter_and_generate_colors(move_data, n_rows=n_rows, color=color)
-    _add_trajectories_to_folium_map(mv_df, items, base_map, legend=legend, save_as_html=save_as_html, filename=filename)
+    mv_df, items = _filter_and_generate_colors(
+        move_data, n_rows=n_rows, color=color
+    )
+    _add_trajectories_to_folium_map(
+        mv_df,
+        items,
+        base_map,
+        legend=legend,
+        save_as_html=save_as_html,
+        filename=filename,
+    )
 
     return base_map
 
@@ -934,7 +968,9 @@ def plot_trajectory_by_id_with_folium(
         )
 
     mv_df, items = _filter_and_generate_colors(move_data, id_, n_rows, color)
-    _add_trajectories_to_folium_map(mv_df, items, base_map, id_, legend, save_as_html, filename)
+    _add_trajectories_to_folium_map(
+        mv_df, items, base_map, id_, legend, save_as_html, filename
+    )
 
     return base_map
 
@@ -1015,7 +1051,9 @@ def plot_trajectory_by_period(
 
     mv_df = _filter_generated_feature(move_data, PERIOD, [period])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
-    _add_trajectories_to_folium_map(mv_df, items, base_map, id_, legend, save_as_html, filename)
+    _add_trajectories_to_folium_map(
+        mv_df, items, base_map, id_, legend, save_as_html, filename
+    )
 
     return base_map
 
@@ -1096,7 +1134,9 @@ def plot_trajectory_by_day_week(
 
     mv_df = _filter_generated_feature(move_data, DAY, [day_week])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
-    _add_trajectories_to_folium_map(mv_df, items, base_map, id_, legend, save_as_html, filename)
+    _add_trajectories_to_folium_map(
+        mv_df, items, base_map, id_, legend, save_as_html, filename
+    )
 
     return base_map
 
@@ -1187,7 +1227,9 @@ def plot_trajectory_by_date(
 
     mv_df = _filter_generated_feature(move_data, DATE, [start_date, end_date])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
-    _add_trajectories_to_folium_map(mv_df, items, base_map, id_, legend, save_as_html, filename)
+    _add_trajectories_to_folium_map(
+        mv_df, items, base_map, id_, legend, save_as_html, filename
+    )
 
     return base_map
 
@@ -1271,7 +1313,9 @@ def plot_trajectory_by_hour(
 
     mv_df = _filter_generated_feature(move_data, HOUR, [start_hour, end_hour])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
-    _add_trajectories_to_folium_map(mv_df, items, base_map, id_, legend, save_as_html, filename)
+    _add_trajectories_to_folium_map(
+        mv_df, items, base_map, id_, legend, save_as_html, filename
+    )
 
     return base_map
 
