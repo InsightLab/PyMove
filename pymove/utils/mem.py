@@ -349,7 +349,7 @@ def end_operation(operation):
     }
 
 
-def sizeof_fmt(mem_usage, suffix='B'):
+def sizeof_fmt(mem_usage, suffix="B"):
     """
     Returns the memory usage calculation of the last function.
 
@@ -368,11 +368,11 @@ def sizeof_fmt(mem_usage, suffix='B'):
 
     """
 
-    for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
         if abs(mem_usage) < 1024.0:
             return "%3.1f %s%s" % (mem_usage, unit, suffix)
         mem_usage /= 1024.0
-    return "%.1f %s%s" % (mem_usage, 'Yi', suffix)
+    return "%.1f %s%s" % (mem_usage, "Yi", suffix)
 
 
 def print_top_mem_vars(variables=None):
