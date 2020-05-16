@@ -189,7 +189,7 @@ def array_stats(values_array):
 
 def interpolation(x0, y0, x1, y1, x):
     """
-    Performs interpolation and extrapolation.
+    Performs interpolation.
 
     Parameters
     ----------
@@ -213,8 +213,6 @@ def interpolation(x0, y0, x1, y1, x):
     --------
     - interpolation 1: (30, 3, 40, 5, 37) -> 4.4
     - interpolation 2: (30, 3, 40, 5, 35) -> 4.0
-    - extrapolation 1: (30, 3, 40, 5, 25) -> 2.0
-    - extrapolation 2: (30, 3, 40, 5, 45) -> 6.0
 
     """
 

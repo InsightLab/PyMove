@@ -73,6 +73,11 @@ def feature_values_using_filter_and_indexes(
     values : ?
         ?.
 
+    Returns
+    -------
+    dataframe or None
+        A copy of the original dataframe, with the alterations done by the function. (When inplace is False)
+
     """
 
     if not inplace:

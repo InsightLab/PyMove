@@ -1415,6 +1415,7 @@ def plot_stops(
     IndexError if there is no user with the id passed
 
     """
+
     if base_map is None:
         base_map = create_base_map(
             move_data,

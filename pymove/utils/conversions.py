@@ -671,9 +671,8 @@ def hours_to_seconds(
 
     Returns
     -------
-    Dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    dataframe or None
+        A copy of the original dataframe, with the converted features when not inplace.
 
     """
 

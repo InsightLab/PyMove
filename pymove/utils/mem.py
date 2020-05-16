@@ -385,6 +385,7 @@ def print_top_mem_vars(variables=None):
         Whether to shows local or global variables
 
     """
+
     if variables is None:
         variables = locals()
     for name, size in sorted(((name, getsizeof(value)) for name, value in variables.items()), key= lambda x: -x[1])[:10]:

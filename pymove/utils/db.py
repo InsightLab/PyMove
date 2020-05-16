@@ -87,7 +87,7 @@ def write_postgres(
     try:
         conn = connect_postgres(dbname, user, psswrd, host, port)
         cur = conn.cursor()
-        cur.execute("DELETE FROM %s" % (table))
+        cur.execute("DELETE FROM %s", (table,))
         cur.executemany(sql, dataframe.values)
         conn.commit()
         cur.close()
