@@ -1,4 +1,3 @@
-# coding=utf-8
 import time
 
 import dask
@@ -62,6 +61,54 @@ class MoveDataFrame:
                 data, latitude, longitude, datetime, traj_id, n_partitions
             )
 
+    @staticmethod
+    def has_columns(data):
+        """
+        Checks whether the received dataset has 'lat', 'lon', 'datetime'
+        columns.
+
+        Parameters
+        ----------
+        data : dict, list, numpy array or pandas.core.DataFrame.
+            Input trajectory data.
+
+        Returns
+        -------
+        bool
+            Represents whether or not you have the required columns.
+
+        """
+
+        if LATITUDE in data and LONGITUDE in data and DATETIME in data:
+            return True
+        return False
+
+    @staticmethod
+    def validate_move_data_frame(data):
+        """
+        Converts the column type to the default type used by PyMove lib.
+
+        Parameters
+        ----------
+        data : dict, list, numpy array or pandas.core.DataFrame.
+            Input trajectory data.
+
+        Raises
+        ------
+        AttributeError if the data types can't be converted.
+
+        """
+
+        try:
+            if data.dtypes.lat != "float32":
+                data.lat = data.lat.astype("float32")
+            if data.dtypes.lon != "float32":
+                data.lon = data.lon.astype("float32")
+            if data.dtypes.datetime != "datetime64[ns]":
+                data.datetime = data.datetime.astype("datetime64[ns]")
+        except AttributeError:
+            print(AttributeError)
+
 
 class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     def __init__(
@@ -116,8 +163,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         mapping_columns = format_labels(traj_id, latitude, longitude, datetime)
         tdf = data.rename(columns=mapping_columns)
 
-        if self._has_columns(tdf):
-            self._validate_move_data_frame(tdf)
+        if MoveDataFrame.has_columns(tdf):
+            MoveDataFrame.validate_move_data_frame(tdf)
             self._data = tdf
             self._type = TYPE_PANDAS
             self.last_operation = None
@@ -125,54 +172,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise AttributeError(
                 "Could not instantiate new MoveDataFrame because data has missing columns"
             )
-
-    @staticmethod
-    def _has_columns(data):
-        """
-        Checks whether the received dataset has 'lat', 'lon', 'datetime'
-        columns.
-
-        Parameters
-        ----------
-        data : dict, list, numpy array or pandas.core.DataFrame.
-            Input trajectory data.
-
-        Returns
-        -------
-        bool
-            Represents whether or not you have the required columns.
-
-        """
-
-        if LATITUDE in data and LONGITUDE in data and DATETIME in data:
-            return True
-        return False
-
-    @staticmethod
-    def _validate_move_data_frame(data):
-        """
-        Converts the column type to the default type used by PyMove lib.
-
-        Parameters
-        ----------
-        data : dict, list, numpy array or pandas.core.DataFrame.
-            Input trajectory data.
-
-        Raises
-        ------
-        AttributeError if the data types can't be converted.
-
-        """
-
-        try:
-            if data.dtypes.lat != "float32":
-                data.lat = data.lat.astype("float32")
-            if data.dtypes.lon != "float32":
-                data.lon = data.lon.astype("float32")
-            if data.dtypes.datetime != "datetime64[ns]":
-                data.datetime = data.datetime.astype("datetime64[ns]")
-        except AttributeError:
-            print(AttributeError)
 
     @property
     def lat(self):
@@ -430,7 +429,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """Retrieves and item from this object."""
         try:
             item = self.__dict__["_data"][name]
-            if isinstance(item, pd.DataFrame) and self._has_columns(item):
+            if isinstance(item, pd.DataFrame) and MoveDataFrame.has_columns(item):
                 return PandasMoveDataFrame(item)
             return item
         except Exception as e:
@@ -907,6 +906,47 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
+    @staticmethod
+    def _prepare_generate_data(data_, sort, label_id):
+        start_time = time.time()
+
+        if sort is True:
+            print(
+                "...Sorting by {} and {} to increase performance\n".format(
+                    label_id, DATETIME
+                ),
+                flush=True,
+            )
+            data_.sort_values([label_id, DATETIME], inplace=True)
+
+        if data_.index.name is None:
+            print(
+                "...Set {} as index to a higher peformance\n".format(
+                    label_id
+                ),
+                flush=True,
+            )
+            data_.set_index(label_id, inplace=True)
+
+        ids = data_.index.unique()
+        sum_size_id = 0
+        size_id = 0
+
+        return start_time, ids, sum_size_id, size_id
+
+    def _return_generated_data(self, data_, start_time, operation, inplace):
+        print("...Reset index...\n")
+        data_.reset_index(inplace=True)
+        print("..Total Time: {:.3f}".format((time.time() - start_time)))
+
+        if inplace:
+            self.last_operation = end_operation(operation)
+            return None
+
+        data_ = PandasMoveDataFrame(data=data_)
+        self.last_operation = end_operation(operation)
+        return data_
+
     def generate_dist_time_speed_features(
         self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True
     ):
@@ -950,25 +990,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             print(
                 "\nCreating or updating distance, time and speed features in meters by seconds\n"
             )
-            start_time = time.time()
 
-            if sort is True:
-                print(
-                    "...Sorting by {} and {} to increase performance\n".format(
-                        label_id, DATETIME
-                    ),
-                    flush=True,
-                )
-                data_.sort_values([label_id, DATETIME], inplace=True)
-
-            if data_.index.name is None:
-                print(
-                    "...Set {} as index to a higher peformance\n".format(
-                        label_id
-                    ),
-                    flush=True,
-                )
-                data_.set_index(label_id, inplace=True)
+            start_time, ids, sum_size_id, size_id = self._prepare_generate_data(data_, sort, label_id)
 
             # create new feature to distance
             data_[DIST_TO_PREV] = label_dtype(-1.0)
@@ -978,10 +1001,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
             # create new feature to speed
             data_[SPEED_TO_PREV] = label_dtype(-1.0)
-
-            ids = data_.index.unique()
-            sum_size_id = 0
-            size_id = 0
 
             for idx in progress_bar(
                 ids, desc=f"Generating distance, time and speed features"
@@ -1017,17 +1036,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                         data_.at[idx, DIST_TO_PREV] / time_prev
                     )  # unit: m/s
 
-            print("...Reset index...\n")
-            data_.reset_index(inplace=True)
-            print("..Total Time: {:.3f}".format((time.time() - start_time)))
+            return self._return_generated_data(data_, start_time, operation, inplace)
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
-
-            data_ = PandasMoveDataFrame(data=data_)
-            self.last_operation = end_operation(operation)
-            return data_
         except Exception as e:
             print(
                 "label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}".format(
@@ -1041,7 +1051,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True
     ):
         """
-        Create the three distance in meters to an GPS point P (lat, lon).
+        Create the three distance in meters to an GPS point P.
 
         Parameters
         ----------
@@ -1076,25 +1086,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         try:
             print("\nCreating or updating distance features in meters...\n")
-            start_time = time.time()
 
-            if sort is True:
-                print(
-                    "...Sorting by {} and {} to increase performance\n".format(
-                        label_id, DATETIME
-                    ),
-                    flush=True,
-                )
-                data_.sort_values([label_id, DATETIME], inplace=True)
-
-            if data_.index.name is None:
-                print(
-                    "...Set {} as index to increase attribution performance\n".format(
-                        label_id
-                    ),
-                    flush=True,
-                )
-                data_.set_index(label_id, inplace=True)
+            start_time, ids, sum_size_id, size_id = self._prepare_generate_data(data_, sort, label_id)
 
             # create ou update columns
             data_[DIST_TO_PREV] = label_dtype(-1.0)
@@ -1137,17 +1130,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                         prev_lat, prev_lon, next_lat, next_lon
                     )
 
-            data_.reset_index(inplace=True)
-            print("...Reset index\n")
-            print("..Total Time: {}".format((time.time() - start_time)))
+            return self._return_generated_data(data_, start_time, operation, inplace)
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
-
-            data_ = PandasMoveDataFrame(data=data_)
-            self.last_operation = end_operation(operation)
-            return data_
         except Exception as e:
             print(
                 "label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}".format(
@@ -1198,25 +1182,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             print(
                 "\nCreating or updating time features seconds\n"
             )
-            start_time = time.time()
 
-            if sort is True:
-                print(
-                    "...Sorting by {} and {} to increase performance\n".format(
-                        label_id, DATETIME
-                    ),
-                    flush=True,
-                )
-                data_.sort_values([label_id, DATETIME], inplace=True)
-
-            if data_.index.name is None:
-                print(
-                    "...Set {} as index to a higher peformance\n".format(
-                        label_id
-                    ),
-                    flush=True,
-                )
-                data_.set_index(label_id, inplace=True)
+            start_time, ids, sum_size_id, size_id = self._prepare_generate_data(data_, sort, label_id)
 
             # create new feature to time
             data_[TIME_TO_PREV] = label_dtype(-1.0)
@@ -1250,17 +1217,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     time_prev_to_next = (next_time - prev_time) * (10 ** -9)
                     data_.at[idx, TIME_PREV_TO_NEXT] = time_prev_to_next
 
-            print("...Reset index...\n")
-            data_.reset_index(inplace=True)
-            print("..Total Time: {:.3f}".format((time.time() - start_time)))
+            return self._return_generated_data(data_, start_time, operation, inplace)
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
-
-            data_ = PandasMoveDataFrame(data=data_)
-            self.last_operation = end_operation(operation)
-            return data_
         except Exception as e:
             print(
                 "label_id:{}\nidx:{}\nsize_id:{}\nsum_size_id:{}".format(
@@ -1273,6 +1231,33 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     def generate_speed_features(
             self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True
     ):
+        """
+        Create the three speed in meter by seconds to an GPS point P.
+
+        Parameters
+        ----------
+        label_id : str, optional, default 'id'.
+            Represents name of column of trajectore's id.
+        label_dtype : type, optional, default np.float64.
+            Represents column id type_.
+        sort : bool, optional, default True.
+            If sort == True the dataframe will be sorted.
+        inplace : bool, optional, default True.
+            Represents whether the operation will be performed on the data provided or in a copy.
+
+        Returns
+        -------
+        PandasMoveDataFrame or None
+            Object with new features or None if ``inplace=True``.
+
+        Examples
+        --------
+        - P to P.next = 1 meter/seconds
+        - P to P.previous = 3 meter/seconds
+        - P.previous to P.next = 2 meter/seconds
+
+        """
+
         operation = begin_operation("generate_speed_features")
         if inplace:
             data_ = self._data
@@ -1293,17 +1278,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_[SPEED_TO_NEXT] = dists[DIST_TO_NEXT] / times[TIME_TO_NEXT]
             data_[SPEED_PREV_TO_NEXT] = dists[DIST_PREV_TO_NEXT] / times[TIME_PREV_TO_NEXT]
 
-            print("...Reset index...\n")
-            data_.reset_index(inplace=True)
-            print("..Total Time: {:.3f}".format((time.time() - start_time)))
-
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
-
-            data_ = PandasMoveDataFrame(data=data_)
-            self.last_operation = end_operation(operation)
-            return data_
+            return self._return_generated_data(data_, start_time, operation, inplace)
 
         except Exception as e:
             self.last_operation = end_operation(operation)
@@ -2162,7 +2137,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         )
         self.last_operation = end_operation(operation)
 
-        if isinstance(_set_index, pd.DataFrame) and self._has_columns(
+        if isinstance(_set_index, pd.DataFrame) and MoveDataFrame.has_columns(
             _set_index
         ):
             return PandasMoveDataFrame(_set_index)
@@ -2244,7 +2219,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         )
         self.last_operation = end_operation(operation)
 
-        if (isinstance(_drop, pd.DataFrame)) and self._has_columns(_drop):
+        if (isinstance(_drop, pd.DataFrame)) and MoveDataFrame.has_columns(_drop):
             return PandasMoveDataFrame(_drop)
         return _drop
 
@@ -2580,7 +2555,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
         self.last_operation = end_operation(operation)
 
-        if isinstance(_dropna, pd.DataFrame) and self._has_columns(_dropna):
+        if isinstance(_dropna, pd.DataFrame) and MoveDataFrame.has_columns(_dropna):
             return PandasMoveDataFrame(_dropna)
         return _dropna
 
@@ -2955,8 +2930,8 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         mapping_columns = format_labels(traj_id, latitude, longitude, datetime)
         dsk = data.rename(columns=mapping_columns)
 
-        if self._has_columns(dsk):
-            self._validate_move_data_frame(dsk)
+        if MoveDataFrame.has_columns(dsk):
+            MoveDataFrame.validate_move_data_frame(dsk)
             self._data = dask.dataframe.from_pandas(
                 dsk, npartitions=n_partitions
             )
@@ -2966,53 +2941,6 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             raise AttributeError(
                 "Could not instantiate new MoveDataFrame because data has missing columns"
             )
-
-    @staticmethod
-    def _has_columns(data):
-        """
-        Checks whether past data has 'lat', 'lon', 'datetime' columns.
-
-        Parameters
-        ----------
-        data : dict, list, numpy array or pandas.core.DataFrame.
-            Input trajectory data.
-
-        Returns
-        -------
-        bool
-            Represents whether or not you have the required columns.
-
-        """
-
-        if LATITUDE in data and LONGITUDE in data and DATETIME in data:
-            return True
-        return False
-
-    @staticmethod
-    def _validate_move_data_frame(data):
-        """
-        Converts the column type to the default type used by PyMove lib.
-
-        Parameters
-        ----------
-        data : dict, list, numpy array or pandas.core.DataFrame.
-            Input trajectory data.
-
-        Raises
-        ------
-        AttributeError if the data types can't be converted.
-
-        """
-
-        try:
-            if data.dtypes.lat != "float32":
-                data.lat = data.lat.astype("float32")
-            if data.dtypes.lon != "float32":
-                data.lon = data.lon.astype("float32")
-            if data.dtypes.datetime != "datetime64[ns]":
-                data.datetime = data.datetime.astype("datetime64[ns]")
-        except AttributeError as e:
-            print(e)
 
     @property
     def lat(self):
@@ -3173,12 +3101,20 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """Create or update column with cyclical datetime feature."""
         raise NotImplementedError("To be implemented")
 
+    def generate_dist_time_speed_features(self):
+        """Creates features of distance, time and speed between points features."""
+        raise NotImplementedError("To be implemented")
+
     def generate_dist_features(self):
         """Create the three distance in meters to an GPS point P (lat, lon)."""
         raise NotImplementedError("To be implemented")
 
-    def generate_dist_time_speed_features(self):
-        """Creates features of distance, time and speed between points features."""
+    def generate_time_features(self):
+        """Create the three time in seconds to an GPS point P (lat, lon)."""
+        raise NotImplementedError("To be implemented")
+
+    def generate_speed_features(self):
+        """Create the three speed in meters by seconds to an GPS point P (lat, lon)."""
         raise NotImplementedError("To be implemented")
 
     def generate_move_and_stop_by_radius(self):
