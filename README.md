@@ -149,10 +149,10 @@ It is recommended to create a virtual environment to use pymove. Requirements: A
     -   `conda create -n <yourenvname> python=x.x`
     -   Press y to proceed. This will install the Python version and all the associated anaconda packaged libraries at `path_to_your_anaconda_location/anaconda/envs/yourenvname`
 
-1.  Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environment at creation.
+2.  Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environment at creation.
     -   `conda activate <yourenvname>`
 
-1.  Now install the package from either `conda`, `pip` or `github`
+3.  Now install the package from either `conda`, `pip` or `github`
 
 ---
 
@@ -171,19 +171,19 @@ It is recommended to create a virtual environment to use pymove. Requirements: A
 1.  Clone this repository
     -   `git clone https://github.com/InsightLab/PyMove`
 
-1.  Make a branch developer
+2.  Make a branch developer
     -   `git branch developer`
 
-1.  Switch to a new branch
+3.  Switch to a new branch
     -   `git checkout developer`
 
-1.  Make a pull of branch
+4.  Make a pull of branch
     -   `git pull origin developer`
 
-1.  Switch to folder PyMove
+5.  Switch to folder PyMove
     -   `cd PyMove`
 
-1.  Install pymove in developer mode
+6.  Install pymove in developer mode
     -   `pip install -e .`
 
 ---
