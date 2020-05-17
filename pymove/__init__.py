@@ -21,6 +21,7 @@ from .preprocessing import (
     segmentation,
     stay_point_detection,
 )
+from .semantic import semantic
 from .utils import (
     constants,
     conversions,
