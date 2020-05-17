@@ -30,7 +30,8 @@ def add_map_legend(m, title, items):
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+      <link rel="stylesheet"
+        href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
       <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
       <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -54,8 +55,9 @@ def add_map_legend(m, title, items):
 
 
     <div id='maplegend' class='maplegend'
-        style='position: absolute; z-index:9999; border:2px solid grey; background-color:rgba(255, 255, 255, 0.8);
-         border-radius:6px; padding: 10px; font-size:14px; right: 20px; bottom: 20px;'>
+        style='position: absolute; z-index:9999; border:2px solid grey;
+        background-color:rgba(255, 255, 255, 0.8); border-radius:6px;
+        padding: 10px; font-size:14px; right: 20px; bottom: 20px;'>
 
     <div class='legend-title'> {} </div>
     <div class='legend-scale'>

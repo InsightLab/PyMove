@@ -19,48 +19,56 @@ def compress_segment_stop_to_point(
     inplace=False,
 ):
     """
-    Compress the trajectories using the stop points in the dataframe. Compress a
-    segment to point setting lat_mean e lon_mean to each segment.
+    Compress the trajectories using the stop points in the dataframe.
+    Compress a segment to point setting lat_mean e lon_mean to each segment.
 
     Parameters
     ----------
     move_data : dataframe
        The input trajectory data
     label_segment : String, optional("segment_stop" by default)
-        The label of the column containing the ids of the formed segments. Is the new splitted id.
+        The label of the column containing the ids of the formed segments.
+        Is the new splitted id.
     label_stop : String, optional(stop by default)
         Is the name of the column that indicates if a point is a stop.
     point_mean : String, optional(default by default)
-        Indicates whether the mean points should be calculated using centroids or the point that repeat the most.
+        Indicates whether the mean points should be calculated using
+        centroids or the point that repeat the most.
     drop_moves : Boolean, optional(False by default)
         If set to true, the moving points will be dropped from the dataframe.
     label_id : String, optional(id by default)
-         Used to create the stay points used in the compression. If the dataset already has the stop move, this
+         Used to create the stay points used in the compression.
+         If the dataset already has the stop move, this
          parameter should be ignored.
          Indicates the label of the id column in the user"s dataframe.
     dist_radius : Double, optional(30 by default)
-        Used to create the stay points used in the compression. If the dataset already has the stop move, this
+        Used to create the stay points used in the compression.
+        If the dataset already has the stop move, this
         parameter should be ignored.
-        The first step in this function is segmenting the trajectory. The segments are used to find the stop points.
+        The first step in this function is segmenting the trajectory.
+        The segments are used to find the stop points.
         The dist_radius defines the distance used in the segmentation.
     time_radius :  Double, optional(900 by default)
-        Used to create the stay points used in the compression. If the dataset already has the stop move, this
+        Used to create the stay points used in the compression.
+        If the dataset already has the stop move, this
          parameter should be ignored.
-        The time_radius used to determine if a segment is a stop. If the user stayed in the segment for a time
+        The time_radius used to determine if a segment is a stop.
+        If the user stayed in the segment for a time
         greater than time_radius, than the segment is a stop.
     inplace : boolean, optional(True by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
-        otherwise a copy will be returned.
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
 
     Returns
     -------
-    DataFrame with 2 additional features: segment_stop, stop, lat_mean and lon_mean
-        segment_stop indicates the trajectory segment to which the point belongs to.
+    DataFrame with 3 additional features: segment_stop, lat_mean and lon_mean
+        segment_stop indicates the trajectory segment to which the point belongs
         lat_mean and lon_mean:
-            if the default option is used, lat_mean and lon_mean are defined based on point that repeats most within
-            the segment
-            On the other hand, if centroid option is used, lat_mean and lon_mean are defined by centroid of the
-            all points into segment
+            if the default option is used, lat_mean and lon_mean are defined
+            based on point that repeats most within the segment
+            On the other hand, if centroid option is used,
+            lat_mean and lon_mean are defined by centroid of
+            the all points into segment
 
     """
 
@@ -99,7 +107,8 @@ def compress_segment_stop_to_point(
                 ind_end = move_data[filter_].iloc[[-1]].index
 
                 if point_mean == "default":
-                    # print('...Lat and lon are defined based on point that repeats most within the segment')
+                    # print('...Lat and lon are defined based on point
+                    # that repeats most within the segment')
                     p = (
                         move_data[filter_]
                         .groupby(["lat", "lon"], as_index=False)
@@ -113,8 +122,8 @@ def compress_segment_stop_to_point(
                     lon_mean[ind_end] = p.iloc[0, 1]
 
                 elif point_mean == "centroid":
-                    # print('...Lat and lon are defined by centroid of the all points into segment')
-                    # set lat and lon mean to first_point and last points to each segment
+                    # set lat and lon mean to first_point
+                    # and last points to each segment
                     lat_mean[ind_start] = move_data.loc[filter_]["lat"].mean()
                     lon_mean[ind_start] = move_data.loc[filter_]["lon"].mean()
                     lat_mean[ind_end] = move_data.loc[filter_]["lat"].mean()
@@ -129,19 +138,19 @@ def compress_segment_stop_to_point(
 
         shape_before = move_data.shape[0]
         # filter points to drop
-        filter_drop = (move_data["lat_mean"] == -1.0) & (
-            move_data["lon_mean"] == -1.0
+        filter_drop = (
+            (move_data["lat_mean"] == -1.0)
+            & (move_data["lon_mean"] == -1.0)
         )
         shape_drop = move_data[filter_drop].shape[0]
 
         if shape_drop > 0:
-            print("...Dropping {} points...".format(shape_drop))
+            print("...Dropping %s points..." % shape_drop)
             move_data.drop(move_data[filter_drop].index, inplace=True)
 
         print(
-            "...Shape_before: {}\n...Current shape: {}".format(
-                shape_before, move_data.shape[0]
-            )
+            "...Shape_before: %s\n...Current shape: %s"
+            % (shape_before, move_data.shape[0])
         )
 
         print("-----------------------------------------------------\n")

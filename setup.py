@@ -28,6 +28,7 @@ DEPENDENCIES = [
     "joblib",
     "holidays",
     "ipywidgets",
+    "IPython",
     "psycopg2",
     "pymongo"
 ]

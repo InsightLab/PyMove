@@ -23,23 +23,19 @@ def by_bbox(move_data, bbox, filter_out=False, inplace=False):
     move_data : dataframe
        The input trajectories data
     bbox : tuple
-        Tuple of 4 elements, containing the minimum and maximum values of latitude and longitude of the bounding box.
+        Tuple of 4 elements, containing the minimum and maximum values
+        of latitude and longitude of the bounding box.
     filter_out : boolean, optional(false by default)
-        If set to false the function will return the trajectories points within the bounding box,
-        and the points outside otherwise
+        If set to false the function will return the trajectories points
+        within the bounding box, and the points outside otherwise
     inplace : boolean, optional(false by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
-        otherwise a copy will be returned.
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
 
     Returns
     -------
     dataframe or None
         Returns dataframe with trajectories points filtered by bounding box.
-
-    Example
-    -------
-    filter_bbox(move_data, [-3.90, -38.67, -3.68, -38.38]) -> Fortaleza
-        lat_down =  bbox[0], lon_left =  bbox[1], lat_up = bbox[2], lon_right = bbox[3]
 
     """
 
@@ -74,27 +70,29 @@ def by_datetime(
     move_data : dataframe
         The input trajectory data
     start_datetime : String
-        The start date and time (Datetime format) of the time range used in the filtering
+        The start date and time (Datetime format) of the time range
     end_datetime : String
-        The end date and time (Datetime format) of the time range used in the filtering
-    filter_out : boolean, optional(false by default) (CONFIRMAR )
-        If set to true, the function will return the points of the trajectories with timestamp outside the time range.
-        The points whitin the time range will be return if filter_out is set to false.
-    inplace : boolean, optional(false by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
-        otherwise a copy will be returned.
+        The end date and time (Datetime format) of the time range
+    filter_out : boolean, optional, default False
+        If set to true, the function will return the points of
+        the trajectories with timestamp outside the time range.
+        The points whithin the time range will be return if filter_out is False.
+    inplace : boolean, optional, default False
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
 
     Returns
     -------
     dataframe or None
-        Returns dataframe with trajectories points filtered by specified time range.
+        Returns dataframe with trajectories points filtered by time range.
 
     """
 
     try:
         if start_datetime is not None and end_datetime is not None:
-            filter_ = (move_data[DATETIME] >= start_datetime) & (
-                move_data[DATETIME] <= end_datetime
+            filter_ = (
+                (move_data[DATETIME] >= start_datetime)
+                & (move_data[DATETIME] <= end_datetime)
             )
         elif end_datetime is not None:
             filter_ = move_data[DATETIME] <= end_datetime
@@ -111,7 +109,7 @@ def by_datetime(
 
 def by_label(move_data, value, label_name, filter_out=False, inplace=False):
     """
-    Filters trajectories points according to specified value and collum label.
+    Filters trajectories points according to specified value and column label.
 
     Parameters
     ----------
@@ -120,14 +118,15 @@ def by_label(move_data, value, label_name, filter_out=False, inplace=False):
     value : The type_ of the feature values to be use to filter the trajectories
         Specifies the value used to filter the trajectories points
     label_name : String
-        Specifes the label of the column used in the filtering
+        Specifies the label of the column used in the filtering
     filter_out : boolean, optional(false by default)
-        If set to True, it will return trajectory points with feature value different from the value
-        specified in the parameters
-        The trajectories points with the same feature value as the one especifed in the parameters.
+        If set to True, it will return trajectory points with feature
+        value different from the value specified in the parameters
+        The trajectories points with the same feature value as
+        the one specifed in the parameters.
     inplace : boolean, optional(false by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
-        otherwise a copy will be returned.
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
 
     Returns
     -------
@@ -158,16 +157,16 @@ def by_id(
         The input trajectory data
     id_ : Integer
         Specifies the number of the id used to filter the trajectories points
-    label_id : String, optional(dic_labels["id"] by default)
+    label_id : String, optional, default 'id'
         The label of the column which contains the id of the trajectories
     filter_out : boolean, optional(false by default)
-        If set to true, the function will return the points of the trajectories with the same
-        id as the one specified by the parameter value.
-        If set to false it will return the points of the trajectories with a different id from
-        the one specified in the parameters.
+        If set to true, the function will return the points of the trajectories
+        with the same id as the one specified by the parameter value.
+        If set to false it will return the points of the trajectories
+        with a different id from the one specified in the parameters.
     inplace : boolean, optional(false by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
-        otherwise a copy will be returned.
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
 
     Returns
     -------
@@ -191,16 +190,17 @@ def by_tid(
         The input trajectory data
     tid_ : String
         Specifies the number of the tid used to filter the trajectories points
-    label_tid : String, optional(dic_features_label["tid"] by default)
-        The label of the column in the user"s dataframe which contains the tid of the trajectories
+    label_tid : String, optional, default 'tid'
+        The label of the column in the user"s dataframe which contains
+        the tid of the trajectories
     filter_out : boolean, optional(false by default)
-        If set to true, the function will return the points of the trajectories with the same
-        tid as the one specified by the parameter value.
-        If set to false it will return the points of the trajectories with a different tid from
-        the one specified in the parameters.
+        If set to true, the function will return the points of the
+        trajectories with the same tid as the one specified.
+        If set to false it will return the points of the trajectories
+        with a different tid from the one specified in the parameters.
     inplace : boolean, optional(false by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
-        otherwise a copy will be returned.
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
 
     Returns
     -------
@@ -210,7 +210,7 @@ def by_tid(
     """
 
     if TID not in move_data:
-        move_data.generate_tid_based_on_id_datatime()
+        move_data.generate_tid_based_on_id_datetime()
 
     return by_label(move_data, tid_, label_tid, filter_out, inplace)
 
@@ -231,14 +231,16 @@ def outliers(
         The input trajectory data
     jump_coefficient : Float, optional(3.0 by default)
     threshold : Float, optional(1 by default)
-        Minimum value that the distance features("dist_to_next", "dist_to_prev","dist_prev_to_next") must have
+        Minimum value that the distance features must have
         in order to be considered outliers
     filter_out : boolean, optional(false by default)
-        If set to true, the function will return the points of the trajectories that are not outiliers.
-        If set to false it will return the points of the trajectories are outiliers.
+        If set to true, the function will return the points of the
+        trajectories that are not outliers.
+        If set to false it will return the points of the
+        trajectories are outliers.
     inplace : boolean, optional(false by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
-        otherwise a copy will be returned.
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
 
 
     Returns
@@ -260,18 +262,13 @@ def outliers(
         and DIST_TO_NEXT
         and DIST_PREV_TO_NEXT in move_data
     ):
+        jump = jump_coefficient * move_data[DIST_PREV_TO_NEXT]
         filter_ = (
             (move_data[DIST_TO_NEXT] > threshold)
             & (move_data[DIST_TO_PREV] > threshold)
             & (move_data[DIST_PREV_TO_NEXT] > threshold)
-            & (
-                jump_coefficient * move_data[DIST_PREV_TO_NEXT]
-                < move_data[DIST_TO_NEXT]
-            )
-            & (
-                jump_coefficient * move_data[DIST_PREV_TO_NEXT]
-                < move_data[DIST_TO_PREV]
-            )
+            & (jump < move_data[DIST_TO_NEXT])
+            & (jump < move_data[DIST_TO_PREV])
         )
 
         if filter_out:
@@ -289,25 +286,28 @@ def clean_duplicates(
     move_data, subset=None, keep="first", inplace=False, sort=True
 ):
     """
-    Removes the duplicate rows of the Dataframe, optionally only certaind
+    Removes the duplicate rows of the Dataframe, optionally only certain
     columns can be consider.
 
     Parameters
     ----------
     move_data : dataframe
         The input trajectory data
-    subset : String or Array of Strings, optional(None by default)
-        Specify  Column label or sequence of labels, considered for identifying duplicates.
-        By default all columns are used.
-    keep : String if the option are "first" or "last" and False. Optional(first by default)
-        if keep is set as first, all the duplicates except for the first occurrence will be dropped.
-        On the other hand if set to last, all duplicates except for the last occurrence will be dropped.
+    subset : String or Array of Strings, optional, default None
+        Specify  Column label or sequence of labels, considered
+        for identifying duplicates. By default all columns are used.
+    keep : 'first', 'last', optional, default 'first'
+        If keep is set as first, all the duplicates except for
+        the first occurrence will be dropped.
+        On the other hand if set to last, all duplicates except for
+        the last occurrence will be dropped.
         If set to False, all duplicates are dropped.
-    inplace : boolean, optional(False by default)
-        if set to true the original dataframe will be altered, the duplicates will be dropped in place,
+    inplace : boolean, optional, default False
+        if set to true the original dataframe will be altered,
+        the duplicates will be dropped in place,
         otherwise a copy will be returned.
-    sort : boolean, optional(True by default)
-        If set to True the data will be sorted by id and datetime, to increase performace.
+    sort : boolean, optional, default True
+        If set to True the data will be sorted by id and datetime.
         If set to False the data won"t be sorted.
 
     Returns
@@ -321,16 +321,15 @@ def clean_duplicates(
 
     if sort is True:
         print(
-            "...Sorting by {} and {} to increase performance\n".format(
-                TRAJ_ID, DATETIME
-            )
+            "...Sorting by %s and %s to increase performance\n"
+            % (TRAJ_ID, DATETIME)
         )
         move_data.sort_values([TRAJ_ID, DATETIME], inplace=True)
 
     idx = move_data.duplicated(subset=subset)
     tam_drop = move_data[idx].shape[0]
     if tam_drop > 0:
-        print("...There are {} GPS points duplicated".format(tam_drop))
+        print("...There are %s GPS points duplicated" % tam_drop)
         return move_data.drop_duplicates(subset, keep, inplace)
     else:
         print("...There are no GPS points duplicated")
@@ -341,21 +340,24 @@ def clean_consecutive_duplicates(
 ):
     """
     Removes consecutive duplicate rows of the Dataframe, optionally only
-    certaind columns can be consider.
+    certain columns can be consider.
 
     Parameters
     ----------
     move_data : dataframe
         The input trajectory data
-    subset : Array of Strings, optional(None by default)
-        Specifies  Column label or sequence of labels, considered for identifying duplicates.
-        By default all columns are used.
-    keep : String. Optional(first by default)
-        Determine which duplicate will be removed.
-        if keep is set as first, all the duplicates except for the first occurrence will be dropped. Otherwise,
-        all duplicates except for the last occurrence will be dropped.
-    inplace : boolean, optional(False by default)
-        if set to true the original dataframe will be altered, the duplicates will be dropped in place,
+    subset : Array of Strings, optional, default None(None by default)
+        Specifies  Column label or sequence of labels, considered for
+        identifying duplicates. By default all columns are used.
+    keep : 'first', 'last', optional, default 'first'
+        If keep is set as first, all the duplicates except for
+        the first occurrence will be dropped.
+        On the other hand if set to last, all duplicates except for
+        the last occurrence will be dropped.
+        If set to False, all duplicates are dropped.
+    inplace : boolean, optional, default False
+        if set to true the original dataframe will be altered,
+        the duplicates will be dropped in place,
         otherwise a copy will be returned.
 
     Returns
@@ -388,20 +390,27 @@ def clean_nan_values(
     move_data : dataframe
         The input trajectory data
     axis : Integer or String (default 0)
-        Determines if rows or columns that contain missing values are removed. If set to 0 or "index",
-        the function drops the rows containing the missing value.
-        If set to 1 or "columns", drops the columns containing the missing value.
+        Determines if rows or columns that contain missing values are removed.
+        If set to 0 or "index", the function drops the rows
+        containing the missing value.
+        If set to 1 or "columns", drops the columns
+        containing the missing value.
     how : String, optional (default "any")
-        Determines if a row or column is dropped for having at least one NA value or all value NA.
-        If set to "any", the rows or columns will be dropped, if it has any NA values.
-        If set to "all", the rows or columns will be dropped, if all of it"s values are NA.
+        Determines if a row or column is dropped for having at least
+        one NA value or all value NA.
+        If set to "any", the rows or columns will be dropped,
+        if it has any NA values.
+        If set to "all", the rows or columns will be dropped,
+        if all of it"s values are NA.
     thresh : Integer, optional (None by default)
         Minimum non-NA required value to avoid dropping
     subset : array of String
-        Indicates the labels along the other axis to consider. E.g. if you want to drop columns,
+        Indicates the labels along the other axis to consider.
+        E.g. if you want to drop columns,
         subset would indicate a list of rows to be included.
     inplace : boolean, default(False by default)
-        if set to true the operation is done in place, the original dataframe will be altered and None is returned.
+        if set to true the operation is done in place, the original dataframe
+        will be altered and None is returned.
 
     Returns
     -------
@@ -456,8 +465,8 @@ def _filter_speed_max_radius(move_data, **kwargs):
 
     """
     filter_ = (
-            (np.nan_to_num(move_data[kwargs['arg1']].shift(1)) > kwargs['arg2']) |
-            (move_data[kwargs['arg1']] > kwargs['arg2'])
+        (np.nan_to_num(move_data[kwargs['arg1']].shift(1)) > kwargs['arg2'])
+        | (move_data[kwargs['arg1']] > kwargs['arg2'])
     )
     return move_data[filter_]
 
@@ -488,11 +497,17 @@ def _filter_data(move_data, f, kwargs):
 
     if kwargs['outliers']:
         filter_data_points = f(
-            move_data, jump_coefficient=kwargs['arg1'], threshold=kwargs['arg2'], inplace=False
+            move_data,
+            jump_coefficient=kwargs['arg1'],
+            threshold=kwargs['arg2'],
+            inplace=False
         )
     else:
         filter_data_points = f(
-            move_data, arg1=kwargs['arg1'], arg2=kwargs['arg2'], inplace=False
+            move_data,
+            arg1=kwargs['arg1'],
+            arg2=kwargs['arg2'],
+            inplace=False
         )
     rows_to_drop = filter_data_points.shape[0]
     return filter_data_points, rows_to_drop
@@ -528,19 +543,18 @@ def _clean_gps(move_data, f, **kwargs):
 
     sum_drop = 0
     while rows_to_drop > 0:
-        print("...Dropping {} rows of gps points\n".format(rows_to_drop))
+        print("...Dropping %s rows of gps points\n" % rows_to_drop)
         shape_before = move_data.shape[0]
         move_data.drop(index=filter_data_points.index, inplace=True)
         sum_drop = sum_drop + rows_to_drop
         print(
-            "...Rows before: {}, Rows after:{}, Sum drop:{}\n".format(
-                shape_before, move_data.shape[0], sum_drop
-            )
+            "...Rows before: %s, Rows after:%s, Sum drop:%s\n"
+            % (shape_before, move_data.shape[0], sum_drop)
         )
 
         filter_data_points, rows_to_drop = _filter_data(move_data, f, kwargs)
 
-    print("{} GPS points were dropped".format(sum_drop))
+    print("%s GPS points were dropped" % sum_drop)
 
     return move_data
 
@@ -564,12 +578,13 @@ def clean_gps_jumps_by_distance(
          Indicates the label of the id column in the user"s dataframe.
     jump_coefficient : Float, optional(3.0 by default)
     threshold : Float, optional(1 by default)
-        Minimum value that the distance features("dist_to_next", "dist_to_prev","dist_prev_to_next") must have
+        Minimum value that the distance features must have
         in order to be considered outliers
     label_dtype : type_, optional(np.float64 by default)
         Represents column id type_. By default it"s np.float64.
     inplace : boolean, default(False by default)
-        if set to true the operation is done in place, the original dataframe will be altered and None is returned.
+        if set to true the operation is done in place, the original
+        dataframe will be altered and None is returned.
 
     Returns
     -------
@@ -591,42 +606,19 @@ def clean_gps_jumps_by_distance(
 
     try:
         print(
-            "\nCleaning gps jumps by distance to jump_coefficient {}...\n".format(
-                jump_coefficient
-            )
+            "\nCleaning gps jumps by distance to jump_coefficient %s...\n"
+            % jump_coefficient
         )
 
-        move_df = _clean_gps(move_df, outliers, arg1=jump_coefficient, arg2=threshold, outliers=True)
+        move_df = _clean_gps(
+            move_df,
+            outliers,
+            arg1=jump_coefficient,
+            arg2=threshold,
+            outliers=True
+        )
         if not inplace:
             return move_df
-        # if move_df.index.name is not None:
-        #     print("...Reset index for filtering\n")
-        #     move_df.reset_index(inplace=True)
-        #
-        # move_datajumps = outliers(
-        #     move_df, jump_coefficient, threshold, inplace=False
-        # )
-        # rows_to_drop = move_datajumps.shape[0]
-        #
-        # while rows_to_drop > 0:
-        #     print("...Dropping {} rows of gps points\n".format(rows_to_drop))
-        #     shape_before = move_df.shape[0]
-        #     move_df.drop(index=move_datajumps.index, inplace=True)
-        #     sum_drop = sum_drop + rows_to_drop
-        #     print(
-        #         "...Rows before: {}, Rows after:{}, Sum drop:{}\n".format(
-        #             shape_before, move_df.shape[0], sum_drop
-        #         )
-        #     )
-        #
-        #     move_datajumps = outliers(
-        #         move_df, jump_coefficient, threshold, inplace=False
-        #     )
-        #     rows_to_drop = move_datajumps.shape[0]
-        #
-        # print("{} GPS points were dropped".format(sum_drop))
-        # if not inplace:
-        #     return move_df
 
     except Exception as e:
         raise e
@@ -650,11 +642,13 @@ def clean_gps_nearby_points_by_distances(
     label_id : String, optional(the class dic_labels["id"] by default)
          Indicates the label of the id column in the user"s dataframe.
     radius_area : Float, optional(10.0 by default)
-        Species the minimum distance a point must have to it"s previous point, in order not to be dropped.
+        Species the minimum distance a point must have to it"s previous point,
+        in order not to be dropped.
     label_dtype : type_, optional(np.float64 by default)
         Represents column id type_. By default it"s np.float64.
     inplace : boolean, default(False by default)
-        if set to true the operation is done in place, the original dataframe will be altered and None is returned.
+        if set to true the operation is done in place, the original
+        dataframe will be altered and None is returned.
 
     Returns
     -------
@@ -675,40 +669,19 @@ def clean_gps_nearby_points_by_distances(
 
     try:
         print(
-            "\nCleaning gps points from radius of {} meters\n".format(
-                radius_area
-            )
+            "\nCleaning gps points from radius of %s meters\n"
+            % radius_area
         )
 
-        move_df = _clean_gps(move_df, _filter_single_by_max, arg1=DIST_TO_PREV, arg2=radius_area, outliers=False)
+        move_df = _clean_gps(
+            move_df,
+            _filter_single_by_max,
+            arg1=DIST_TO_PREV,
+            arg2=radius_area,
+            outliers=False
+        )
         if not inplace:
             return move_df
-        # if move_df.index.name is not None:
-        #     print("...Reset index for filtering\n")
-        #     move_df.reset_index(inplace=True)
-        #
-        # filter_nearby_points = move_df[move_df[DIST_TO_PREV] <= radius_area]
-        # rows_to_drop = filter_nearby_points.shape[0]
-        #
-        # while rows_to_drop > 0:
-        #     print("...Dropping {} gps points\n".format(rows_to_drop))
-        #     shape_before = move_df.shape[0]
-        #     move_df.drop(index=filter_nearby_points.index, inplace=True)
-        #     sum_drop = sum_drop + rows_to_drop
-        #     print(
-        #         "...Rows before: {}, Rows after:{}\n".format(
-        #             shape_before, move_df.shape[0]
-        #         )
-        #     )
-        #
-        #     filter_nearby_points = move_df[
-        #         move_df[DIST_TO_PREV] <= radius_area
-        #         ]
-        #     rows_to_drop = filter_nearby_points.shape[0]
-        #
-        # print("{} GPS points were dropped".format(sum_drop))
-        # if not inplace:
-        #     return move_df
 
     except Exception as e:
         raise e
@@ -732,11 +705,13 @@ def clean_gps_nearby_points_by_speed(
     label_id : String, optional(the class dic_labels["id"] by default)
          Indicates the label of the id column in the user"s dataframe.
     speed_radius : Float, optional(0.0 by default)
-        Species the minimum speed a point must have from it"s previous point, in order not to be dropped.
+        Species the minimum speed a point must have from it"s previous point,
+        in order not to be dropped.
     label_dtype : type_, optional(np.float64 by default)
         Represents column id type_. By default it"s np.float64.
     inplace : boolean, default(False by default)
-        if set to true the operation is done in place, the original dataframe will be altered and None is returned.
+        if set to true the operation is done in place, the original
+        dataframe will be altered and None is returned.
 
     Returns
     -------
@@ -759,40 +734,19 @@ def clean_gps_nearby_points_by_speed(
     try:
 
         print(
-            "\nCleaning gps points using {} speed radius\n".format(
-                speed_radius
-            )
+            "\nCleaning gps points using %s speed radius\n"
+            % speed_radius
         )
 
-        move_df = _clean_gps(move_df, _filter_single_by_max, arg1=SPEED_TO_PREV, arg2=speed_radius, outliers=False)
+        move_df = _clean_gps(
+            move_df,
+            _filter_single_by_max,
+            arg1=SPEED_TO_PREV,
+            arg2=speed_radius,
+            outliers=False
+        )
         if not inplace:
             return move_df
-        # if move_df.index.name is not None:
-        #     print("...Reset index for filtering\n")
-        #     move_df.reset_index(inplace=True)
-        #
-        # filter_nearby_points = move_df[move_df[SPEED_TO_PREV] <= speed_radius]
-        # rows_to_drop = filter_nearby_points.shape[0]
-        #
-        # while rows_to_drop > 0:
-        #     print("...Dropping {} gps points\n".format(rows_to_drop))
-        #     shape_before = move_df.shape[0]
-        #     move_df.drop(index=filter_nearby_points.index, inplace=True)
-        #     sum_drop = sum_drop + rows_to_drop
-        #     print(
-        #         "...Rows before: {}, Rows after:{}\n".format(
-        #             shape_before, move_df.shape[0]
-        #         )
-        #     )
-        #
-        #     filter_nearby_points = move_df[
-        #         move_df[SPEED_TO_PREV] <= speed_radius
-        #     ]
-        #     rows_to_drop = filter_nearby_points.shape[0]
-        #
-        # print("{} GPS points were dropped".format(sum_drop))
-        # if not inplace:
-        #     return move_df
 
     except Exception as e:
         raise e
@@ -823,16 +777,18 @@ def clean_gps_speed_max_radius(
     label_id : String, optional(the class dic_labels["id"] by default)
         Indicates the label of the id column in the user"s dataframe.
     speed_max : Float. Optional(50.0 by default)
-        Indicates the maximum value a point"s speed_to_prev and speed_to_next should have, in order not to be dropped.
+        Indicates the maximum value a point"s speed_to_prev and speed_to_next
+        should have, in order not to be dropped.
     label_dtype : type_, optional(np.float64 by default)
         Represents column id type_. By default it"s np.float64.
     inplace : boolean, default(False by default)
-        if set to true the operation is done in place, the original dataframe will be altered and None is returned.
+        if set to true the operation is done in place, the original
+        dataframe will be altered and None is returned.
 
     Returns
     -------
     dataframe or None
-        The filtered trajectories without the gps nearby points by speed or radius.
+        The filtered trajectories without the gps nearby points.
 
     """
 
@@ -850,9 +806,8 @@ def clean_gps_speed_max_radius(
 
     try:
         print(
-            "\nClean gps points with speed max > {} meters by seconds".format(
-                speed_max
-            )
+            "\nClean gps points with speed max > %s meters by seconds"
+            % speed_max
         )
 
         move_df = _clean_gps(
@@ -883,9 +838,11 @@ def clean_trajectories_with_few_points(
     label_tid : String, optional(dic_features_label["tid"] by default)
         The label of the column which contains the tid of the trajectories
     min_points_per_trajectory: Integer, optional(2 by default)
-        Specifies the minimum number of points a trajectory must have in order not to be dropped
+        Specifies the minimum number of points a trajectory must have
+        in order not to be dropped
     inplace : boolean, default(False by default)
-        if set to true the operation is done in place, the original dataframe will be altered and None is returned.
+        if set to true the operation is done in place, the original
+        dataframe will be altered and None is returned.
 
     Returns
     -------
@@ -900,13 +857,12 @@ def clean_trajectories_with_few_points(
         move_df = move_data
 
     if TID not in move_df:
-        move_df.generate_tid_based_on_id_datatime()
+        move_df.generate_tid_based_on_id_datetime()
 
     try:
         print(
-            "\nCleaning gps points from trajectories of fewer than {} points\n".format(
-                min_points_per_trajectory
-            )
+            "\nCleaning gps points from trajectories of fewer than %s points\n"
+            % min_points_per_trajectory
         )
 
         if move_df.index.name is not None:
@@ -914,33 +870,28 @@ def clean_trajectories_with_few_points(
             move_df.reset_index(inplace=True)
 
         move_datacount_tid = move_df.groupby(by=label_tid).size()
-        tids_with_few_points = move_datacount_tid[
-            move_datacount_tid < min_points_per_trajectory
-        ].index
+        filter_ = move_datacount_tid < min_points_per_trajectory
+        tids_with_few_points = move_datacount_tid[filter_].index
         shape_before_drop = move_df.shape
         idx = move_df[move_df[label_tid].isin(tids_with_few_points)].index
 
         if idx.shape[0] > 0:
             print(
-                "\n...There are {} ids with few points".format(
-                    tids_with_few_points.shape[0]
-                )
+                "\n...There are %s ids with few points"
+                % tids_with_few_points.shape[0]
             )
             print(
-                "\n...Tids before drop: {}".format(
-                    move_df[label_tid].unique().shape[0]
-                )
+                "\n...Tids before drop: %s"
+                % move_df[label_tid].unique().shape[0]
             )
             move_df.drop(index=idx, inplace=True)
             print(
-                "\n...Tids after drop: {}".format(
-                    move_df[label_tid].unique().shape[0]
-                )
+                "\n...Tids after drop: %s"
+                % move_df[label_tid].unique().shape[0]
             )
             print(
-                "\n...Shape - before drop: {} - after drop: {}".format(
-                    shape_before_drop, move_df.shape
-                )
+                "\n...Shape - before drop: %s - after drop: %s"
+                % (shape_before_drop, move_df.shape)
             )
 
         if not inplace:
@@ -969,23 +920,25 @@ def clean_trajectories_short_and_few_points(
     label_id : String, optional( tid by default)
         The label of the column which contains the tid of the trajectories
     min_trajectory_distance: Integer, optional(100 by default)
-        Specifies the minimun lenght a trajectory must have in order not to be dropped
+        Specifies the minimun lenght a trajectory must have
+        in order not to be dropped
     min_points_per_trajectory: Integer, optional(2 by default)
-        Specifies the minimun number of points a trajectory must have in order not to be dropped
+        Specifies the minimun number of points a trajectory must have
+        in order not to be dropped
     label_dtype : type_, optional(np.float64 by default)
         Represents column id type_. By default it"s np.float64.
     inplace : boolean, default(False by default)
-        if set to true the operation is done in place, the original dataframe will be altered and None is returned.
+        if set to true the operation is done in place, the original
+        dataframe will be altered and None is returned.
 
     Returns
     -------
     dataframe or None
-        The filtered trajectories without the minimum number of gps points and distance.
+        The filtered trajectories with the minimum gps points and distance.
 
     Notes
     -----
-        remove_tids_with_few_points must be performed before updating features, because
-        those features can only be computed with at least 2 points per trajectories.
+        remove_tids_with_few_points must be performed before updating features.
 
     """
 
@@ -1018,26 +971,23 @@ def clean_trajectories_short_and_few_points(
         tid_selection = move_dataagg_tid[filter_].index
 
         print(
-            "\n...short trajectories and trajectories with a minimum distance ({}): {}".format(
-                move_dataagg_tid.shape[0], min_trajectory_distance
-            )
+            "\n...short trajectories and trajectories with a minimum distance (%s): %s"
+            % (move_dataagg_tid.shape[0], min_trajectory_distance)
         )
-        print("\n...There are {} tid do drop".format(tid_selection.shape[0]))
+        print("\n...There are %s tid do drop" % tid_selection.shape[0])
         shape_before_drop = move_df.shape
 
         idx = move_df[move_df[label_id].isin(tid_selection)].index
         if idx.shape[0] > 0:
             tids_before_drop = move_df[label_id].unique().shape[0]
             print(
-                "\n...Tids - before drop: {} - after drop: {}".format(
-                    tids_before_drop, move_df[label_id].unique().shape[0]
-                )
+                "\n...Tids - before drop: %s - after drop: %s"
+                % (tids_before_drop, move_df[label_id].unique().shape[0])
             )
             move_df.drop(index=idx, inplace=True)
             print(
-                "\n...Shape - before drop: {} - after drop: {}".format(
-                    shape_before_drop, move_df.shape
-                )
+                "\n...Shape - before drop: %s - after drop: %s"
+                % (shape_before_drop, move_df.shape)
             )
 
         if not inplace:
@@ -1066,14 +1016,16 @@ def clean_id_by_time_max(
     label_dtype : type_, optional(np.float64 by default)
         Represents column id type_. By default it"s np.float64.
     time_max: float. optional(3600 by default).
-        Indicates the maximum value time a set of points with the same id should have in order not to be dropped.
+        Indicates the maximum value time a set of points with the
+        same id should have in order not to be dropped.
     inplace : boolean, default(False by default)
-        if set to true the operation is done in place, the original dataframe will be altered and None is returned.
+        if set to true the operation is done in place, the original
+        dataframe will be altered and None is returned.
 
     Returns
     -------
     dataframe or None
-        The filtered trajectories without the minimum number of gps points and distance.
+        The filtered trajectories with the maximum time.
 
     """
 
@@ -1089,9 +1041,8 @@ def clean_id_by_time_max(
 
     try:
         print(
-            "\nClean gps points with time max by id < {} seconds".format(
-                time_max
-            )
+            "\nClean gps points with time max by id < %s seconds"
+            % time_max
         )
         move_dataid_drop = (
             move_df.groupby([label_id], as_index=False)
@@ -1099,21 +1050,20 @@ def clean_id_by_time_max(
             .query("time_to_prev < {}".format(time_max))
         )
         print(
-            "...Ids total: {}\nIds to drop:{}".format(
+            "...Ids total: %s\nIds to drop:%s"
+            % (
                 move_df[label_id].nunique(),
-                move_dataid_drop[label_id].nunique(),
+                move_dataid_drop[label_id].nunique()
             )
         )
         if move_dataid_drop.shape[0] > 0:
             before_drop = move_df.shape[0]
-            idx = move_df[
-                move_df[label_id].isin(move_dataid_drop[label_id])
-            ].index
+            filter_ = move_df[label_id].isin(move_dataid_drop[label_id])
+            idx = move_df[filter_].index
             move_df.drop(idx, inplace=True)
             print(
-                "...Rows before drop: {}\n Rows after drop: {}".format(
-                    before_drop, move_df.shape[0]
-                )
+                "...Rows before drop: %s\n Rows after drop: %s"
+                % (before_drop, move_df.shape[0])
             )
 
         if not inplace:

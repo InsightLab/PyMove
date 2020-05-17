@@ -20,8 +20,7 @@ def date_to_str(date):
 
     """
 
-    date_str = date.strftime("%Y-%m-%d")
-    return date_str
+    return date.strftime("%Y-%m-%d")
 
 
 def str_to_datetime(dt_str):
@@ -63,18 +62,17 @@ def to_str(data):
 
     """
 
-    datetime_str = data.strftime("%Y-%m-%d %H:%M:%S")
-    return datetime_str
+    return data.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def to_min(datetime):
+def to_min(dt):
     """
     Converts a datetime to an int representation in minutes. To do the reverse
     use: min_to_datetime.
 
     Parameters
     ----------
-    datetime : datetime.datetime
+    dt : datetime.datetime
         Represents a datetime in datetime"s format.
 
     Returns
@@ -85,10 +83,9 @@ def to_min(datetime):
     """
 
     # get an integer time slot from a datetime
-    minutes = int(
-        (datetime - datetime.utcfromtimestamp(0)).total_seconds() / 60
+    return int(
+        (dt - dt.utcfromtimestamp(0)).total_seconds() / 60
     )
-    return minutes
 
 
 def min_to_datetime(min_):
@@ -108,10 +105,7 @@ def min_to_datetime(min_):
 
     """
 
-    # get a datetime from an integer time slot
-    # utcfromtimestamp (below) is much faster than the line above
-    min_datetime = datetime.datetime.utcfromtimestamp(min_ * 60)
-    return min_datetime
+    return datetime.datetime.utcfromtimestamp(min_ * 60)
 
 
 # TODO: ve o que sao os parametros e tipo dos param
@@ -166,9 +160,11 @@ def min_to_datetime(min_):
 #
 # # TODO: Finalizar
 # def str_to_min_slot(dt_str, time_window_duration=5):
-#     """Converts a datetime string to an int minute time slot (approximated to the time slot).
+#     """Converts a datetime string to an int minute time slot
+#     (approximated to the time slot).
 #     Same as datetime_str_to_min_slot, but another implementation.
-#     To do almost the reverse (consider time slot approximation) use: min_to_datetime.
+#     To do almost the reverse (consider time slot approximation)
+#     use: min_to_datetime.
 #
 #     Parameters
 #     ----------
@@ -208,8 +204,7 @@ def to_day_of_week_int(date):
 
     """
 
-    day_week = date.weekday()
-    return day_week
+    return date.weekday()
 
 
 def working_day(dt, country="BR", state=None):
@@ -218,12 +213,12 @@ def working_day(dt, country="BR", state=None):
 
     Parameters
     ----------
-    dt : Datetime
+    dt : str or datetime
         Specifies the day the user wants to know if it is a business day.
     country : String
-        Indicates country the days that are vacation days and therefore not working days.
+        Indicates country to check for vacation days.
     state: String
-        Indicates country the days that are vacation days and therefore not working days.
+        Indicates state to check for vacation days.
 
     Returns
     -------
@@ -240,7 +235,7 @@ def working_day(dt, country="BR", state=None):
     result = True
 
     if isinstance(dt, str):
-        dt = date_to_str(dt)
+        dt = str_to_datetime(dt)
 
     if isinstance(dt, datetime.datetime):
         dt = datetime.date(dt.year, dt.month, dt.day)
@@ -249,7 +244,7 @@ def working_day(dt, country="BR", state=None):
         result = False
     else:
         dow = to_day_of_week_int(dt)
-        # 5 == saturday, 6 == sunday
+        # 5 == Saturday, 6 == Sunday
         if dow == 5 or dow == 6:
             result = False
 
@@ -276,8 +271,7 @@ def now_str():
 
     """
 
-    date_time = to_str(datetime.datetime.now())
-    return date_time
+    return to_str(datetime.datetime.now())
 
 
 def deltatime_str(deltatime_seconds):
@@ -309,9 +303,8 @@ def deltatime_str(deltatime_seconds):
 
     time_int = int(deltatime_seconds)
     time_dec = int((deltatime_seconds - time_int) * 1000)
-    time_str = "{:02d}:{:02d}:{:02d}.{:03d}".format(
-        time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec
-    )
+    times = (time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec)
+    time_str = "%02d:%02d:%02d.%03d" % times
     return time_str
 
 
@@ -338,8 +331,7 @@ def timestamp_to_millis(timestamp):
 
     """
 
-    millis = Timestamp(timestamp).value // 1000000
-    return millis
+    return Timestamp(timestamp).value // 1000000
 
 
 def millis_to_timestamp(milliseconds):
@@ -364,8 +356,7 @@ def millis_to_timestamp(milliseconds):
 
     """
 
-    timestamp = Timestamp(milliseconds, unit="ms")
-    return timestamp
+    return Timestamp(milliseconds, unit="ms")
 
 
 def time_to_str(time):
@@ -390,8 +381,7 @@ def time_to_str(time):
 
     """
 
-    timestr = time.strftime("%H:%M:%S")
-    return timestr
+    return time.strftime("%H:%M:%S")
 
 
 def str_to_time(dt_str):
@@ -416,8 +406,7 @@ def str_to_time(dt_str):
 
     """
 
-    datetime_time = datetime.datetime.strptime(dt_str, "%H:%M:%S")
-    return datetime_time
+    return datetime.datetime.strptime(dt_str, "%H:%M:%S")
 
 
 def elapsed_time_dt(start_time):
@@ -433,12 +422,12 @@ def elapsed_time_dt(start_time):
     Returns
     -------
     int
-        Represents the time elapsed from the start time to the current time (when the function was called).
+        Represents the time elapsed from the start time to the current time
+        (when the function was called).
 
     """
 
-    time_dif = diff_time(start_time, datetime.datetime.now())
-    return time_dif
+    return diff_time(start_time, datetime.datetime.now())
 
 
 def diff_time(start_time, end_time):
@@ -456,9 +445,9 @@ def diff_time(start_time, end_time):
     Returns
     -------
     int
-        Represents the time elapsed from the start time to the current time (when the function was called).
+        Represents the time elapsed from the start time to the current time
+        (when the function was called).
 
     """
 
-    time_dif = int((end_time - start_time).total_seconds() * 1000)
-    return time_dif
+    return int((end_time - start_time).total_seconds() * 1000)

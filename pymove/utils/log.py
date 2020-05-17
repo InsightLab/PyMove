@@ -1,3 +1,4 @@
+from IPython import get_ipython
 from IPython.display import display
 from ipywidgets import HTML, IntProgress, VBox
 from tqdm import tqdm
@@ -50,14 +51,10 @@ def log_progress(sequence, every=None, size=None, desc="Items"):
         for index, record in enumerate(sequence, 1):
             if index == 1 or index % every == 0:
                 if is_iterator:
-                    label.value = "{desc}: {index} / ?".format(
-                        desc=desc, index=index
-                    )
+                    label.value = "%s: %s / ?" % (desc, index)
                 else:
                     progress.value = index
-                    label.value = u"{desc}: {index} / {size}".format(
-                        desc=desc, index=index, size=size
-                    )
+                    label.value = u"%s: %s / %s" % (desc, index, size)
             yield record
     except Exception:
         progress.bar_style = "danger"
@@ -65,9 +62,7 @@ def log_progress(sequence, every=None, size=None, desc="Items"):
     else:
         progress.bar_style = "success"
         progress.value = index
-        label.value = "{desc}: {index}".format(
-            desc=desc, index=str(index or "?")
-        )
+        label.value = "%s: %s" % (desc, str(index or "?"))
 
 
 try:

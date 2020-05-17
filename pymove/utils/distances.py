@@ -30,23 +30,24 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 
     References
     ----------
-    Vectorized haversine function: https://stackoverflow.com/questions/43577086/pandas-calculate-haversine-distance-within-each-group-of-rows
-    About distance between two points: https://janakiev.com/blog/gps-points-distance-python/
+    Vectorized haversine function:
+        https://stackoverflow.com/questions/43577086/pandas-calculate-haversine-distance-within-each-group-of-rows
+    About distance between two points:
+        https://janakiev.com/blog/gps-points-distance-python/
 
     """
 
     try:
         if to_radians:
             lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
-            a = (
-                np.sin((lat2 - lat1) / 2.0) ** 2
-                + np.cos(lat1)
-                * np.cos(lat2)
-                * np.sin((lon2 - lon1) / 2.0) ** 2
-            )
-        # return earth_radius * 2 * np.arcsin(np.sqrt(a)) * 1000  # result in meters (* 1000)
-        # np.arctan2(np.sqrt(a), np.sqrt(1-a))
-        return 2 * 1000 * earth_radius * np.arctan2(a ** 0.5, (1 - a) ** 0.5)
+        a = (
+            np.sin((lat2 - lat1) / 2.0) ** 2
+            + np.cos(lat1)
+            * np.cos(lat2)
+            * np.sin((lon2 - lon1) / 2.0) ** 2
+        )
+        # return earth_radius * 2 * np.arcsin(np.sqrt(a)) * 1000
+        # result in meters (* 1000)
+        return (earth_radius * 2 * np.arctan2(a ** 0.5, (1 - a) ** 0.5)) * 1000
     except Exception as e:
-        print("\nError Haverside fuction")
         raise e

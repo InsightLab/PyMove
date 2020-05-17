@@ -40,6 +40,7 @@ class Grid:
 
         self.last_operation = None
         self._create_virtual_grid(data, cell_size, meters_by_degree)
+        self.grid_polygon = None
 
     def get_grid(self):
         """Returns the grid object in a dict format."""
@@ -62,7 +63,8 @@ class Grid:
         cell_size : float
             Size of grid's cell.
         meters_by_degree : float
-            Represents the meters's degree of latitude. By default the latitude is set in Fortaleza.
+            Represents the meters's degree of latitude.
+            By default the latitude is set in Fortaleza.
 
         Returns
         -------
@@ -77,13 +79,12 @@ class Grid:
 
         operation = begin_operation("_create_virtual_grid")
 
-        # bbox: a bound box, that is a tuple of 4 values with the min_ and max limits of latitude e longitude.
         bbox = data.get_bbox()
         print("\nCreating a virtual grid without polygons")
 
         # Latitude in Fortaleza: -3.8162973555
         cell_size_by_degree = cell_size / meters_by_degree
-        print("...cell size by degree: {}".format(cell_size_by_degree))
+        print("...cell size by degree: %s" % cell_size_by_degree)
 
         lat_min_y = bbox[0]
         lon_min_x = bbox[1]
@@ -110,9 +111,8 @@ class Grid:
         )
 
         print(
-            "...grid_size_lat_y:{}\ngrid_size_lon_x:{}".format(
-                grid_size_lat_y, grid_size_lon_x
-            )
+            "...grid_size_lat_y:%s\ngrid_size_lon_x:%s"
+            % (grid_size_lat_y, grid_size_lon_x)
         )
 
         self.lon_min_x = lon_min_x
@@ -173,26 +173,22 @@ class Grid:
 
         Returns
         -------
-        polygon: Polygon
+        shapely.geometry.Polygon
             Represents a polygon of this cell in a grid.
 
         """
 
         operation = begin_operation("create_one_polygon_to_point_on_grid")
 
-        lat_init = self.lat_min_y + self.cell_size_by_degree * index_grid_lat
-        lon_init = self.lon_min_x + self.cell_size_by_degree * index_grid_lon
-        polygon = Polygon(
-            (
-                (lat_init, lon_init),
-                (lat_init + self.cell_size_by_degree, lon_init),
-                (
-                    lat_init + self.cell_size_by_degree,
-                    lon_init + self.cell_size_by_degree,
-                ),
-                (lat_init, lon_init + self.cell_size_by_degree),
-            )
-        )
+        cell_size = self.cell_size_by_degree
+        lat_init = self.lat_min_y + cell_size * index_grid_lat
+        lon_init = self.lon_min_x + cell_size * index_grid_lon
+        polygon = Polygon((
+            (lat_init, lon_init),
+            (lat_init + cell_size, lon_init),
+            (lat_init + cell_size, lon_init + cell_size,),
+            (lat_init, lon_init + cell_size),
+        ))
         self.last_operation = end_operation(operation)
 
         return polygon
@@ -215,23 +211,19 @@ class Grid:
                 ]
             )
             lat_init = self.lat_min_y
+            cell_size = self.cell_size_by_degree
             for i in progress_bar(range(self.grid_size_lat_y)):
                 lon_init = self.lon_min_x
                 for j in range(self.grid_size_lon_x):
                     # Cria o polygon da célula
-                    grid_polygon[i][j] = Polygon(
-                        (
-                            (lat_init, lon_init),
-                            (lat_init + self.cell_size_by_degree, lon_init),
-                            (
-                                lat_init + self.cell_size_by_degree,
-                                lon_init + self.cell_size_by_degree,
-                            ),
-                            (lat_init, lon_init + self.cell_size_by_degree),
-                        )
-                    )
-                    lon_init += self.cell_size_by_degree
-                lat_init += self.cell_size_by_degree
+                    grid_polygon[i][j] = Polygon((
+                        (lat_init, lon_init),
+                        (lat_init + cell_size, lon_init),
+                        (lat_init + cell_size, lon_init + cell_size),
+                        (lat_init, lon_init + cell_size),
+                    ))
+                    lon_init += cell_size
+                lat_init += cell_size
             self.grid_polygon = grid_polygon
             print("...geometries saved on Grid grid_polygon property")
             self.last_operation = end_operation(operation)
@@ -250,8 +242,9 @@ class Grid:
 
         Returns
         -------
-        datapolygons: pandas.core.frame.DataFrame
-            Represents the same dataset with new key 'polygon' where polygons were saved.
+        pandas.core.frame.DataFrame
+            Represents the same dataset with new key 'polygon'
+            where polygons were saved.
 
         """
 
@@ -298,9 +291,9 @@ class Grid:
 
         Returns
         -------
-        indexes_lat_y : int
+        int
             Represents the index y in a grid of a point (lat, long).
-        indexes_lon_x : int
+        int
             Represents the index x in a grid of a point (lat, long).
 
         """
@@ -314,9 +307,8 @@ class Grid:
             (np.float64(event_lon) - self.lon_min_x) / self.cell_size_by_degree
         )
         print(
-            "...[{},{}] indexes were created to lat and lon".format(
-                indexes_lat_y.size, indexes_lon_x.size
-            )
+            "...[%s,%s] indexes were created to lat and lon"
+            % (indexes_lat_y.size, indexes_lon_x.size)
         )
         self.last_operation = end_operation(operation)
 
@@ -410,13 +402,15 @@ class Grid:
 
         Returns
         -------
-        fig : matplotlib.pyplot.figure or None
+        matplotlib.pyplot.figure or None
             The generated picture.
 
         Raises
         ------
-        KeyError if the dataframe does not contains the POLYGON feature
-        IndexError if there is no user with the id passed
+        KeyError
+            If the dataframe does not contains the POLYGON feature
+        IndexError
+            If there is no user with the id passed
 
         """
 
