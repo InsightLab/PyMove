@@ -79,7 +79,7 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def generate_tid_based_on_id_datatime(self):
+    def generate_tid_based_on_id_datetime(self):
         pass
 
     @abc.abstractmethod

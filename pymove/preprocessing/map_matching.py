@@ -56,7 +56,7 @@
 
 #     try:
 #         if TID not in move_data:
-#             move_data.generate_tid_based_on_id_datatime()
+#             move_data.generate_tid_based_on_id_datetime()
 
 #         if move_data.index.name is not None:
 #             print("reseting index...")
@@ -163,7 +163,7 @@
 #         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
 #     if TID not in move_data:
-#         move_data.generate_tid_based_on_id_datatime()
+#         move_data.generate_tid_based_on_id_datetime()
 
 #     if "deleted" not in move_data:
 #         move_data["deleted"] = False
@@ -246,7 +246,7 @@
 #     try:
 
 #         if TID not in move_data:
-#             move_data.generate_tid_based_on_id_datatime()
+#             move_data.generate_tid_based_on_id_datetime()
 
 #         if move_data.index.name is not None:
 #             print("reseting index...")
@@ -327,7 +327,7 @@
 #         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
 #     if TID not in move_data:
-#         move_data.generate_tid_based_on_id_datatime()
+#         move_data.generate_tid_based_on_id_datetime()
 
 #     if move_data.index.name is not None:
 #         print("reseting index...")

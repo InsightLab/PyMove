@@ -26,12 +26,14 @@ def create_update_datetime_in_format_cyclical(
     label_datetime : String, optional(datetime by default)
         Indicates the column with the data to be converted.
     inplace : boolean, optional(True by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
+        if set to true the original dataframe will be altered to
+        contain the result of the filtering,
         otherwise a copy will be returned.
 
     Returns
     -------
-    DataFrame with 2 aditional features: hour_sin and hour_cos.
+    dataframe
+        DataFrame with 2 aditional features: hour_sin and hour_cos.
 
     Notes
     -----
@@ -74,19 +76,22 @@ def create_or_update_move_stop_by_dist_time(
     label_id : String, optional(dic_labels["id"] by default)
          Indicates the label of the id column in the user"s dataframe.
     dist_radius : Double, optional(30 by default)
-        The first step in this function is segmenting the trajectory. The segments are used to find the stop points.
+        The first step in this function is segmenting the trajectory.
+        The segments are used to find the stop points.
         The dist_radius defines the distance used in the segmentation.
     time_radius :  Double, optional(900 by default)
-        The time_radius used to determine if a segment is a stop. If the user stayed in the segment for a time
+        The time_radius used to determine if a segment is a stop.
+        If the user stayed in the segment for a time
         greater than time_radius, than the segment is a stop.
     inplace : boolean, optional(True by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
-        otherwise a copy will be returned.
+        if set to true the original dataframe will be altered to
+        contain the result of the filtering, otherwise a copy will be returned.
 
     Returns
     ------
-    DataFrame with 2 aditional features: segment_stop and stop.
-        segment_stop indicates the trajectory segment to which the point belongs to.
+    dataframe
+        DataFrame with 2 aditional features: segment_stop and stop.
+        segment_stop indicates the trajectory segment to which the point belongs
         stop indicates if the point represents a stop.
 
     """
@@ -116,9 +121,8 @@ def create_or_update_move_stop_by_dist_time(
 
             print("Create or update stop as True or False")
             print(
-                "...Creating stop features as True or False using {} to time in seconds".format(
-                    time_radius
-                )
+                "...Creating stop features as True or False using %s to time in seconds"
+                % time_radius
             )
             move_df[STOP] = False
             move_dataagg_tid = (
@@ -133,9 +137,8 @@ def create_or_update_move_stop_by_dist_time(
             move_df.at[idx, STOP] = True
             print(move_df[STOP].value_counts())
             print(
-                "\nTotal Time: {:.2f} seconds".format(
-                    (time.time() - start_time)
-                )
+                "\nTotal Time: %.2f seconds"
+                % (time.time() - start_time)
             )
             print("-----------------------------------------------------\n")
 
@@ -161,21 +164,22 @@ def create_update_move_and_stop_by_radius(
     move_data : dataframe
        The input trajectory data
     radius :  Double, optional(900 by default)
-        The radius value is used to determine if a segment is a stop. If the value of the point in target_label is
+        The radius value is used to determine if a segment is a stop.
+        If the value of the point in target_label is
         greater than radius, the segment is a stop, otherwise it's a move.
     target_label : String, optional(dist_to_prev by default)
         The feature used to calculate the stay points.
     new_label : String, optional(situation by default)
-        Is the name of the column created to indicates if a point is a stop of a move.
+        Is the name of the column to indicates if a point is a stop of a move.
     inplace : boolean, optional(True by default)
-        if set to true the original dataframe will be altered to contain the result of the filtering,
-        otherwise a copy will be returned.
+        if set to true the original dataframe will be altered to
+        contain the result of the filtering, otherwise a copy will be returned.
 
     Returns
     -------
     DataFrame with 2 aditional features: segment_stop and new_label.
-        segment_stop indicates the trajectory segment to which the point belongs to.
-        new_label indicates if the point represents a stop point or a moving point.
+        segment_stop indicates the trajectory segment to which the point belongs
+        new_label indicates if the point represents a stop or moving point.
 
     """
 
@@ -198,9 +202,8 @@ def create_update_move_and_stop_by_radius(
 
         move_df[new_label] = np.select(conditions, choices, np.nan)
         print(
-            "\n....There are {} stops to this parameters\n".format(
-                move_df[move_df[new_label] == STOP].shape[0]
-            )
+            "\n....There are %s stops to this parameters\n"
+            % (move_df[move_df[new_label] == STOP].shape[0])
         )
 
         if not inplace:

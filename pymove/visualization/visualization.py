@@ -41,8 +41,8 @@ def rgb(rgb_colors):
     Parameters
     ----------
     rgb_colors : list
-        Represents a list with three positions that correspond to the percentage red, green and
-        blue colors.
+        Represents a list with three positions that correspond to the
+        percentage red, green and blue colors.
 
     Returns
     -------
@@ -70,8 +70,8 @@ def hex_rgb(rgb_colors):
     Parameters
     ----------
     rgb_colors : list
-        Represents a list with three positions that correspond to the percentage red, green and
-        blue colors.
+        Represents a list with three positions that correspond to the
+        percentage red, green and blue colors.
 
     Returns
     -------
@@ -170,13 +170,13 @@ def save_wkt(move_data, filename, label_id=TRAJ_ID):
 
     """
 
-    str_ = "{};linestring\n".format(label_id)
+    str_ = "%s;linestring\n" % label_id
     ids = move_data[label_id].unique()
     for id_ in ids:
         move_df = move_data[move_data[label_id] == id_]
-        curr_str = "{};LINESTRING(".format(id_)
+        curr_str = "%s;LINESTRING(" % id_
         curr_str += ",".join(
-            "{} {}".format(x[0], x[1])
+            "%s %s" % (x[0], x[1])
             for x in move_df[[LONGITUDE, LATITUDE]].values
         )
         curr_str += ")\n"
@@ -410,7 +410,7 @@ def _filter_and_generate_colors(
             [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
         ]
         if not len(mv_df):
-            raise IndexError(f"No user with id {id_} in dataframe")
+            raise IndexError("No user with id %s in dataframe" % id_)
     else:
         mv_df = move_data.iloc[:n_rows][
             [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
@@ -455,7 +455,7 @@ def _filter_generated_feature(move_data, feature, values):
             & (move_data[feature] <= values[1])
         ]
     if not len(mv_df):
-        raise KeyError(f"No {feature} found in dataframe")
+        raise KeyError("No %s found in dataframe" % feature)
     return mv_df
 
 
@@ -831,7 +831,7 @@ def plot_markers(
 
     _add_begin_end_markers_to_folium_map(move_data.iloc[:n_rows], base_map)
 
-    for row in move_data.iloc[1 : n_rows - 1].iterrows():
+    for row in move_data.iloc[1: n_rows - 1].iterrows():
         pop = (
             "<b>Latitude:</b> "
             + str(row[1][LATITUDE])
@@ -923,7 +923,7 @@ def plot_trajectories_with_folium(
     return base_map
 
 
-def plot_trajectory_by_id_with_folium(
+def plot_trajectory_by_id_folium(
     move_data,
     id_,
     n_rows=None,
@@ -935,7 +935,7 @@ def plot_trajectory_by_id_with_folium(
     tile=TILES[0],
     save_as_html=False,
     color="black",
-    filename="plot_trajectory_by_id_with_folium.html",
+    filename="plot_trajectory_by_id_folium.html",
 ):
     """
     Generate visualization of trajectory with the id provided by user.
@@ -968,7 +968,7 @@ def plot_trajectory_by_id_with_folium(
         Represents if want save this visualization in a new file .html.
     color : String, optional, default 'black'.
         Represents line's color of visualization.
-    filename : String, optional, default 'plot_trajectory_by_id_with_folium.html'.
+    filename : String, optional, default 'plot_trajectory_by_id_folium.html'.
         Represents the file name of new file .html.
 
     Returns
@@ -978,7 +978,8 @@ def plot_trajectory_by_id_with_folium(
 
     Raises
     ------
-    IndexError if there is no user with the id passed
+    IndexError
+        If there is no user with the id passed
 
     """
     if base_map is None:
@@ -1046,7 +1047,7 @@ def plot_trajectory_by_period(
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
         Represents line's color of visualization.
-        Pass a list if ploting for many users. Else colors will be chosen at random
+        Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_trajectory_by_period.html'.
         Represents the file name of new file .html.
 
@@ -1057,8 +1058,10 @@ def plot_trajectory_by_period(
 
     Raises
     ------
-    KeyError period not found in dataframe
-    IndexError if there is no user with the id passed
+    KeyError
+        If period value is not found in dataframe
+    IndexError
+        If there is no user with the id passed
 
     """
     if base_map is None:
@@ -1130,7 +1133,7 @@ def plot_trajectory_by_day_week(
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
         Represents line's color of visualization.
-        Pass a list if ploting for many users. Else colors will be chosen at random
+        Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_trajectory_by_day_week.html'.
         Represents the file name of new file .html.
 
@@ -1141,8 +1144,10 @@ def plot_trajectory_by_day_week(
 
     Raises
     ------
-    KeyError day_week not found in dataframe
-    IndexError if there is no user with the id passed
+    KeyError
+        If day_week value is not found in dataframe
+    IndexError
+        If there is no user with the id passed
 
     """
     if base_map is None:
@@ -1217,7 +1222,7 @@ def plot_trajectory_by_date(
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
         Represents line's color of visualization.
-        Pass a list if ploting for many users. Else colors will be chosen at random
+        Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_trejectory_with_folium.html'.
         Represents the file name of new file .html.
 
@@ -1228,8 +1233,10 @@ def plot_trajectory_by_date(
 
     Raises
     ------
-    KeyError start or end date range not found in dataframe
-    IndexError if there is no user with the id passed
+    KeyError
+        If start to end date range not found in dataframe
+    IndexError
+        If there is no user with the id passed
 
     """
 
@@ -1311,7 +1318,7 @@ def plot_trajectory_by_hour(
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
         Represents line's color of visualization.
-        Pass a list if ploting for many users. Else colors will be chosen at random
+        Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_trajectory_by_hour.html'.
         Represents the file name of new file .html.
 
@@ -1322,8 +1329,10 @@ def plot_trajectory_by_hour(
 
     Raises
     ------
-    KeyError if start to end hour range not found in dataframe
-    IndexError if there is no user with the id passed
+    KeyError
+        If start to end hour range not found in dataframe
+    IndexError
+        If there is no user with the id passed
 
     """
     if base_map is None:
@@ -1400,7 +1409,7 @@ def plot_stops(
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
         Represents line's color of visualization.
-        Pass a list if ploting for many users. Else colors will be chosen at random
+        Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_stops.html'.
         Represents the file name of new file .html.
 
@@ -1411,8 +1420,10 @@ def plot_stops(
 
     Raises
     ------
-    KeyError if no STOPs found
-    IndexError if there is no user with the id passed
+    KeyError
+        If no STOPs found
+    IndexError
+        If there is no user with the id passed
 
     """
 

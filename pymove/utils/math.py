@@ -108,7 +108,8 @@ def arrays_avg(values_array, weights_array=None):
     values_array : array like of numerical values.
         Represents the set of values to compute the operation.
     weights_array : array, optional, default None.
-        Used to calculate the weighted average, indicates the weight of each element in the array (values_array).
+        Used to calculate the weighted average, indicates the weight of
+        each element in the array (values_array).
 
     Returns
     -------
@@ -132,28 +133,6 @@ def arrays_avg(values_array, weights_array=None):
         result += i * j
 
     return result / n
-
-
-def array_sum(values_array):
-    """
-    Computes the sum of the elements of the array.
-
-    Parameters
-    ----------
-    values_array : array like of numerical values.
-        Represents the set of values to compute the operation.
-
-    Returns
-    -------
-    float.
-        The sum of the elements of the array.
-
-    """
-
-    sum_ = 0
-    for item in values_array:
-        sum_ += item
-    return sum_
 
 
 def array_stats(values_array):
@@ -216,5 +195,4 @@ def interpolation(x0, y0, x1, y1, x):
 
     """
 
-    y = y0 + (y1 - y0) * ((x - x0) / (x1 - x0))
-    return y
+    return y0 + (y1 - y0) * ((x - x0) / (x1 - x0))

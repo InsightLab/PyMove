@@ -17,7 +17,6 @@ try:
 except (ModuleNotFoundError, ImportError):
     from pymove.utils import _winmock as pwd
 
-
 try:
     from reprlib import repr
 except ImportError:
@@ -32,7 +31,8 @@ def proc_info():
     Returns
     -------
     dataframe
-        A dataframe with the following informations about each jupyter notebook process:
+        A dataframe with the following informations about
+        each jupyter notebook process:
             - user : username
             - pid : process identifier
             - memory_GB : memory usage
@@ -92,7 +92,8 @@ def proc_info():
 
 def session_info(sessions_str):
     """
-    This functions retrieve the path of each notebook running in the current session.
+    This functions retrieve the path of each notebook running
+    in the current session.
 
     Parameters
     ----------
@@ -102,7 +103,8 @@ def session_info(sessions_str):
     Returns
     -------
     dataframe
-        A dataframe with the following informations about each jupyter notebook process:
+        A dataframe with the following informations about
+        each jupyter notebook process:
             - kernel_ID : kernel id
             - notebook_path: path to the notebook
 
@@ -125,7 +127,8 @@ def session_info(sessions_str):
 
 def stats(sessions_str):
     """
-    This functions retrieve the path and information of each notebook running in the current session.
+    This functions retrieve the path and information of each notebook
+    running in the current session.
 
     Parameters
     ----------
@@ -135,7 +138,8 @@ def stats(sessions_str):
     Returns
     -------
     dataframe
-        A dataframe with the following informations about each jupyter notebook process:
+        A dataframe with the following informations about
+        each jupyter notebook process:
             - user : username
             - pid : process identifier
             - memory_GB : memory usage
@@ -162,7 +166,7 @@ def reduce_mem_usage_automatic(df):
     Parameter
     ---------
     df : dataframe
-        The input data to which the operation of memory reduction will be performed.
+        The input data to which the operation will be performed.
 
     """
 
@@ -230,7 +234,7 @@ def reduce_mem_usage_automatic(df):
     end_mem = df.memory_usage().sum() / 1024 ** 2
     print("Memory usage after optimization is: {:.2f} MB".format(end_mem))
     print(
-        "Decreased by {:.1f}%".format(100 * (start_mem - end_mem) / start_mem)
+        "Decreased by {:.1f} %".format(100 * (start_mem - end_mem) / start_mem)
     )
 
 
@@ -246,11 +250,12 @@ def total_size(o, handlers=None, verbose=False):
     o : object
         The object to calculate his memory footprint.
     handlers : dict, optional(empty by default)
-        To search other containers, add handlers to iterate over their contents, example:
+        To search other containers, add handlers to iterate over their contents
             handlers = {SomeContainerClass: iter,
                         OtherContainerClass: OtherContainerClass.get_elements}
     verbose : boolean, optional(False by default)
-        If set to True, the following information will be printed for each content of the object:
+        If set to True, the following information will be printed for
+        each content of the object:
             - the size of the object in bytes.
             - his type_
             - the object values
@@ -265,7 +270,9 @@ def total_size(o, handlers=None, verbose=False):
     if handlers is None:
         handlers = {}
 
-    dict_handler = lambda d: chain.from_iterable(d.items())
+    def dict_handler(d):
+        return chain.from_iterable(d.items())
+
     all_handlers = {
         tuple: iter,
         list: iter,
@@ -370,12 +377,12 @@ def sizeof_fmt(mem_usage, suffix="B"):
 
     for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
         if abs(mem_usage) < 1024.0:
-            return "%3.1f %s%s" % (mem_usage, unit, suffix)
+            return "{:3.1f} {}{}".format(mem_usage, unit, suffix)
         mem_usage /= 1024.0
-    return "%.1f %s%s" % (mem_usage, "Yi", suffix)
+    return "{:.1f} {}{}".format(mem_usage, "Yi", suffix)
 
 
-def print_top_mem_vars(variables=None):
+def print_top_mem_vars(variables=None, n=10):
     """
     Shows the sizes of the active variables
 
@@ -383,10 +390,13 @@ def print_top_mem_vars(variables=None):
     ----------
     variables: locals() or globals(), default locals()
         Whether to shows local or global variables
+    n: int
+        number of variables to print
 
     """
 
     if variables is None:
         variables = locals()
-    for name, size in sorted(((name, getsizeof(value)) for name, value in variables.items()), key= lambda x: -x[1])[:10]:
+    vars_ = ((name, getsizeof(value)) for name, value in variables.items())
+    for name, size in sorted(vars_, key=lambda x: -x[1])[:n]:
         print("{:>30}: {:>8}".format(name, sizeof_fmt(size)))

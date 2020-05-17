@@ -183,9 +183,7 @@ def read_sql_inmem_uncompressed(query, conn):
     cur = conn.cursor()
     store = io.StringIO()  # create object StringIO
     cur.copy_expert(copy_sql, store)
-    store.seek(
-        0
-    )  # move the cursor over it data like seek(0) for start of file
+    store.seek(0)  # move the cursor over it data like seek(0) for start of file
     df = pd.read_csv(store)
     cur.close()  # free memory in cursor
     store.close()  # free memory in StringIO
