@@ -21,7 +21,7 @@ def add_map_legend(m, title, items):
     """
 
     item = "<li><span style='background:%s;'></span>%s</li>"
-    list_items = "\n".join([item % (c, n) for (n, c) in items])
+    list_items = '\n'.join([item % (c, n) for (n, c) in items])
     template = """
     {{% macro html(this, kwargs) %}}
 

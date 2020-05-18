@@ -254,7 +254,7 @@ def outliers(
         move_data.generate_dist_features()
 
     if move_data.index.name is not None:
-        print("...Reset index for filtering\n")
+        print('...Reset index for filtering\n')
         move_data.reset_index(inplace=True)
 
     if (
@@ -274,16 +274,16 @@ def outliers(
         if filter_out:
             filter_ = ~filter_
 
-        print("...Filtering jumps \n")
+        print('...Filtering jumps \n')
         return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
 
     else:
-        print("...Distances features were not created")
+        print('...Distances features were not created')
         return move_data
 
 
 def clean_duplicates(
-    move_data, subset=None, keep="first", inplace=False, sort=True
+    move_data, subset=None, keep='first', inplace=False, sort=True
 ):
     """
     Removes the duplicate rows of the Dataframe, optionally only certain
@@ -317,11 +317,11 @@ def clean_duplicates(
 
     """
 
-    print("\nRemove rows duplicates by subset")
+    print('\nRemove rows duplicates by subset')
 
     if sort is True:
         print(
-            "...Sorting by %s and %s to increase performance\n"
+            '...Sorting by %s and %s to increase performance\n'
             % (TRAJ_ID, DATETIME)
         )
         move_data.sort_values([TRAJ_ID, DATETIME], inplace=True)
@@ -329,14 +329,14 @@ def clean_duplicates(
     idx = move_data.duplicated(subset=subset)
     tam_drop = move_data[idx].shape[0]
     if tam_drop > 0:
-        print("...There are %s GPS points duplicated" % tam_drop)
+        print('...There are %s GPS points duplicated' % tam_drop)
         return move_data.drop_duplicates(subset, keep, inplace)
     else:
-        print("...There are no GPS points duplicated")
+        print('...There are no GPS points duplicated')
 
 
 def clean_consecutive_duplicates(
-    move_data, subset=None, keep="first", inplace=False
+    move_data, subset=None, keep='first', inplace=False
 ):
     """
     Removes consecutive duplicate rows of the Dataframe, optionally only
@@ -367,7 +367,7 @@ def clean_consecutive_duplicates(
 
     """
 
-    if keep == "first":
+    if keep == 'first':
         n = 1
     else:
         n = -1
@@ -380,7 +380,7 @@ def clean_consecutive_duplicates(
 
 
 def clean_nan_values(
-    move_data, axis=0, how="any", thresh=None, subset=None, inplace=False
+    move_data, axis=0, how='any', thresh=None, subset=None, inplace=False
 ):
     """
     Removes missing values from the dataframe.
@@ -536,25 +536,25 @@ def _clean_gps(move_data, f, **kwargs):
     """
 
     if move_data.index.name is not None:
-        print("...Reset index for filtering\n")
+        print('...Reset index for filtering\n')
         move_data.reset_index(inplace=True)
 
     filter_data_points, rows_to_drop = _filter_data(move_data, f, kwargs)
 
     sum_drop = 0
     while rows_to_drop > 0:
-        print("...Dropping %s rows of gps points\n" % rows_to_drop)
+        print('...Dropping %s rows of gps points\n' % rows_to_drop)
         shape_before = move_data.shape[0]
         move_data.drop(index=filter_data_points.index, inplace=True)
         sum_drop = sum_drop + rows_to_drop
         print(
-            "...Rows before: %s, Rows after:%s, Sum drop:%s\n"
+            '...Rows before: %s, Rows after:%s, Sum drop:%s\n'
             % (shape_before, move_data.shape[0], sum_drop)
         )
 
         filter_data_points, rows_to_drop = _filter_data(move_data, f, kwargs)
 
-    print("%s GPS points were dropped" % sum_drop)
+    print('%s GPS points were dropped' % sum_drop)
 
     return move_data
 
@@ -606,7 +606,7 @@ def clean_gps_jumps_by_distance(
 
     try:
         print(
-            "\nCleaning gps jumps by distance to jump_coefficient %s...\n"
+            '\nCleaning gps jumps by distance to jump_coefficient %s...\n'
             % jump_coefficient
         )
 
@@ -669,7 +669,7 @@ def clean_gps_nearby_points_by_distances(
 
     try:
         print(
-            "\nCleaning gps points from radius of %s meters\n"
+            '\nCleaning gps points from radius of %s meters\n'
             % radius_area
         )
 
@@ -734,7 +734,7 @@ def clean_gps_nearby_points_by_speed(
     try:
 
         print(
-            "\nCleaning gps points using %s speed radius\n"
+            '\nCleaning gps points using %s speed radius\n'
             % speed_radius
         )
 
@@ -806,7 +806,7 @@ def clean_gps_speed_max_radius(
 
     try:
         print(
-            "\nClean gps points with speed max > %s meters by seconds"
+            '\nClean gps points with speed max > %s meters by seconds'
             % speed_max
         )
 
@@ -861,12 +861,12 @@ def clean_trajectories_with_few_points(
 
     try:
         print(
-            "\nCleaning gps points from trajectories of fewer than %s points\n"
+            '\nCleaning gps points from trajectories of fewer than %s points\n'
             % min_points_per_trajectory
         )
 
         if move_df.index.name is not None:
-            print("\n...Reset index for filtering\n")
+            print('\n...Reset index for filtering\n')
             move_df.reset_index(inplace=True)
 
         move_datacount_tid = move_df.groupby(by=label_tid).size()
@@ -877,20 +877,20 @@ def clean_trajectories_with_few_points(
 
         if idx.shape[0] > 0:
             print(
-                "\n...There are %s ids with few points"
+                '\n...There are %s ids with few points'
                 % tids_with_few_points.shape[0]
             )
             print(
-                "\n...Tids before drop: %s"
+                '\n...Tids before drop: %s'
                 % move_df[label_tid].unique().shape[0]
             )
             move_df.drop(index=idx, inplace=True)
             print(
-                "\n...Tids after drop: %s"
+                '\n...Tids after drop: %s'
                 % move_df[label_tid].unique().shape[0]
             )
             print(
-                "\n...Shape - before drop: %s - after drop: %s"
+                '\n...Shape - before drop: %s - after drop: %s'
                 % (shape_before_drop, move_df.shape)
             )
 
@@ -947,7 +947,7 @@ def clean_trajectories_short_and_few_points(
     else:
         move_df = move_data
 
-    print("\nRemove short trajectories...")
+    print('\nRemove short trajectories...')
     clean_trajectories_with_few_points(
         move_df, label_id, min_points_per_trajectory, inplace=True
     )
@@ -958,35 +958,35 @@ def clean_trajectories_short_and_few_points(
         )
 
     try:
-        print("\n...Dropping unnecessary trajectories...")
+        print('\n...Dropping unnecessary trajectories...')
 
         if move_df.index.name is not None:
-            print("reseting index")
+            print('reseting index')
             move_df.reset_index(inplace=True)
 
         move_dataagg_tid = move_df.groupby(by=label_id).agg(
-            {DIST_TO_PREV: "sum"}
+            {DIST_TO_PREV: 'sum'}
         )
         filter_ = move_dataagg_tid[DIST_TO_PREV] < min_trajectory_distance
         tid_selection = move_dataagg_tid[filter_].index
 
         print(
-            "\n...short trajectories and trajectories with a minimum distance (%s): %s"
+            '\n...short trajectories and trajectories with a minimum distance (%s): %s'
             % (move_dataagg_tid.shape[0], min_trajectory_distance)
         )
-        print("\n...There are %s tid do drop" % tid_selection.shape[0])
+        print('\n...There are %s tid do drop' % tid_selection.shape[0])
         shape_before_drop = move_df.shape
 
         idx = move_df[move_df[label_id].isin(tid_selection)].index
         if idx.shape[0] > 0:
             tids_before_drop = move_df[label_id].unique().shape[0]
             print(
-                "\n...Tids - before drop: %s - after drop: %s"
+                '\n...Tids - before drop: %s - after drop: %s'
                 % (tids_before_drop, move_df[label_id].unique().shape[0])
             )
             move_df.drop(index=idx, inplace=True)
             print(
-                "\n...Shape - before drop: %s - after drop: %s"
+                '\n...Shape - before drop: %s - after drop: %s'
                 % (shape_before_drop, move_df.shape)
             )
 
@@ -1041,16 +1041,16 @@ def clean_id_by_time_max(
 
     try:
         print(
-            "\nClean gps points with time max by id < %s seconds"
+            '\nClean gps points with time max by id < %s seconds'
             % time_max
         )
         move_dataid_drop = (
             move_df.groupby([label_id], as_index=False)
-            .agg({"time_to_prev": "sum"})
-            .query("time_to_prev < {}".format(time_max))
+            .agg({'time_to_prev': 'sum'})
+            .query('time_to_prev < {}'.format(time_max))
         )
         print(
-            "...Ids total: %s\nIds to drop:%s"
+            '...Ids total: %s\nIds to drop:%s'
             % (
                 move_df[label_id].nunique(),
                 move_dataid_drop[label_id].nunique()
@@ -1062,7 +1062,7 @@ def clean_id_by_time_max(
             idx = move_df[filter_].index
             move_df.drop(idx, inplace=True)
             print(
-                "...Rows before drop: %s\n Rows after drop: %s"
+                '...Rows before drop: %s\n Rows after drop: %s'
                 % (before_drop, move_df.shape[0])
             )
 

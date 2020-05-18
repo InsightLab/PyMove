@@ -20,7 +20,7 @@ def date_to_str(date):
 
     """
 
-    return date.strftime("%Y-%m-%d")
+    return date.strftime('%Y-%m-%d')
 
 
 def str_to_datetime(dt_str):
@@ -41,9 +41,9 @@ def str_to_datetime(dt_str):
     """
 
     if len(dt_str) == 10:
-        return datetime.datetime.strptime(dt_str, "%Y-%m-%d")
+        return datetime.datetime.strptime(dt_str, '%Y-%m-%d')
     else:
-        return datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
+        return datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
 
 def to_str(data):
@@ -62,7 +62,7 @@ def to_str(data):
 
     """
 
-    return data.strftime("%Y-%m-%d %H:%M:%S")
+    return data.strftime('%Y-%m-%d %H:%M:%S')
 
 
 def to_min(dt):
@@ -207,7 +207,7 @@ def to_day_of_week_int(date):
     return date.weekday()
 
 
-def working_day(dt, country="BR", state=None):
+def working_day(dt, country='BR', state=None):
     """
     Indices if a day specified by the user is a working day.
 
@@ -304,7 +304,7 @@ def deltatime_str(deltatime_seconds):
     time_int = int(deltatime_seconds)
     time_dec = int((deltatime_seconds - time_int) * 1000)
     times = (time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec)
-    time_str = "%02d:%02d:%02d.%03d" % times
+    time_str = '%02d:%02d:%02d.%03d' % times
     return time_str
 
 
@@ -356,7 +356,7 @@ def millis_to_timestamp(milliseconds):
 
     """
 
-    return Timestamp(milliseconds, unit="ms")
+    return Timestamp(milliseconds, unit='ms')
 
 
 def time_to_str(time):
@@ -381,7 +381,7 @@ def time_to_str(time):
 
     """
 
-    return time.strftime("%H:%M:%S")
+    return time.strftime('%H:%M:%S')
 
 
 def str_to_time(dt_str):
@@ -406,7 +406,7 @@ def str_to_time(dt_str):
 
     """
 
-    return datetime.datetime.strptime(dt_str, "%H:%M:%S")
+    return datetime.datetime.strptime(dt_str, '%H:%M:%S')
 
 
 def elapsed_time_dt(start_time):

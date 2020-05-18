@@ -1,276 +1,535 @@
-# # from pymove import trajutils
-# from pymove import segmentation
-#
-# from pymove.core import dataframe
-# from pymove import filters
-# from tqdm import tqdm_notebook as tqdm
-# from pymove import utils as ut
-# import time
-# import numpy as np
-# import pandas as pd
-#
-#
-# def create_or_update_out_of_the_bbox(df_, bbox, new_label='out_Bbox'):
-#     """
-#     Create or update a boolean feature to detect points out of the bbox.
-#
-#     Pareameters
-#     ___________
-#     move_data: dataframe
-#         The input trajectories data.
-#     bbox : tuple
-#         Tuple of 4 elements, containg the minimum and maximum values of latitude and longitude of the bounding box.
-#     new_label: string, optional('out_Bbox', by default)
-#         The name of the new boolean feature with detected points out of the bbox.
-#
-#     Returns
-#     _______
-#     df_: dataframe
-#         Returns dataframe with a boolean feature with detected points out of the bbox.
-#     """
-#     try:
-#         print('\nCreate or update a boolean feature to detect points out of the bbox')
-#         start_time = time.time()
-#         df_out_bbox = filters.by_bbox(df_, bbox, filter_out=True)
-#
-#         print('...Creating a new label named as {}'.format(new_label))
-#         df_[new_label] = False
-#         if df_out_bbox.shape[0] > 0:
-#             print('...Setting {} as True\n'.format(new_label))
-#             df_.at[df_out_bbox.index, new_label] = True
-#
-#         print(df_[new_label].value_counts())
-#         print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-#         print('-----------------------------------------------------\n')
-#     except Exception as e:
-#         raise e
-#
-#
-# def create_or_update_deactivate_signal(df_, max_time_between_adj_points=7200, label_time='time_to_prev'):
-#     """
-#     Create or update a feature deactivate_signal if the max time between  adjacent points is equal or less than max_time_between_adj_points.
-#
-#     Parameters
-#     __________
-#     df_: dataframe
-#         The input trajectories data.
-#     max_time_between_adj_points: float, int, optional, defualt 7200.
-#         The max time between adjacent points.
-#     label_time: string, optional, defualt 'time_to_prev'.
-#
-#     Returns
-#     _______
-#         Returns a dataframe with 4 new features, dist_to_prev, time_to_prev, speed_to_prev, and deactivate_signal.
-#     """
-#     try:
-#         print('Create or update deactivate signal if time max > {} seconds\n'.format(max_time_between_adj_points))
-#         start_time = time.time()
-#         if df_.index.name is not None:
-#             print('...reseting index')
-#             df_.reset_index(inplace=True)
-#
-#         # trajutils.create_update_dist_time_speed_features(df_)
-#         df_.generate_dist_time_speed_features()
-#         if label_time in df_:
-#             print('...creating or update columns deactivate_signal')
-#             df_['deactivate_signal'] = False
-#             idx_start = df_[df_[label_time] >= max_time_between_adj_points].index
-#             idx_end = idx_start - np.full(len(idx_start), 1, dtype=np.int32)
-#             idx = np.concatenate([idx_start, idx_end], axis=0)
-#             df_.at[idx, 'deactivate_signal'] = True
-#         else:
-#             print('{} not in Dataframe'.format(label_time))
-#
-#         print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-#         print('-----------------------------------------------------\n')
-#     except Exception as e:
-#         raise e
-#
-#
-# def create_or_update_jump_by_dist_max(df_, max_dist_between_adj_points=3000, label_dist='dist_to_prev'):
-#     """
-#     Create or update Jump if the maximum distance between adjacent points is greater than max_dist_between_adj_points.
-#
-#     Parameters
-#     __________
-#     df_: dataframe
-#         The input trajectories data.
-#     max_dist_between_adj_points: float, int, optional, defualt 3000.
-#         The maximum distance between adjacent points.
-#     label_dist: string, optional, defualt 'dist_to_prev'.
-#
-#     Returns
-#     _______
-#         The dataframe with 4 new features dist_to_prev, time_to_prev, speed_to_prev, and jump.
-#     """
-#     try:
-#         print('Create or update Jump if dist max > {} meters\n'.format(max_dist_between_adj_points))
-#         start_time = time.time()
-#
-#         if df_.index.name is not None:
-#             print('...reseting index')
-#             df_.reset_index(inplace=True)
-#
-#         # trajutils.create_update_dist_time_speed_features(df_)
-#         df_.generate_dist_time_speed_features()
-#
-#         if label_dist in df_:
-#             print('...creating or update columns Jump')
-#             df_['jump'] = False
-#             idx_start = df_[df_[label_dist] >= max_dist_between_adj_points].index
-#             idx_end = idx_start - np.full(len(idx_start), 1, dtype=np.int32)
-#             idx = np.concatenate([idx_start, idx_end], axis=0)
-#             df_.at[idx, 'jump'] = True
-#         else:
-#             print('{} not in Dataframe'.format(label_dist))
-#
-#         print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-#         print('-----------------------------------------------------\n')
-#     except Exception as e:
-#         raise e
-#
-#
-# def create_or_update_block_signal_by_time_max(df_, label_id='id', time_max_stop=7200.00):
-#     """
-#     Create a new feature that inform poits with speed = 0
-#
-#     Parameters
-#     __________
-#     df_: dataFrame
-#         The input trajectories data.
-#     label_id: string, optional, defualt 'id'.
-#
-#     time_max_stop: float, int, optional, defualt 7200.00.
-#
-#     Returns
-#     _______
-#
-#     """
-#     try:
-#         start_time = time.time()
-#         """ set information"""
-#         label_segment = 'segment_block'
-#
-#         # trajutils.create_update_dist_time_speed_features(df_)
-#         df_.generate_dist_time_speed_features()
-#
-#         """ Segment trajectory by 0.0 distance """
-#         # trajutils.segment_traj_by_max_speed(df_, label_id=label_id, max_speed_between_adj_points=0.0,
-#         # label_segment=label_segment)
-#
-#         # trajutils.segment_traj_by_max_dist(df_, label_id=label_id, max_dist_between_adj_points=0.0, label_segment=label_segment)
-#         segmentation.by_max_dist(df_, label_id=label_id, max_dist_between_adj_points=0.0, label_segment=label_segment)
-#
-#         if label_segment in df_:
-#
-#             # trajutils.create_update_dist_time_speed_features(df_, label_id=label_segment)
-#             df_.generate_dist_time_speed_features(label_id=label_segment)
-#
-#             print('Create or update block signal feature as True or False')
-#             label_block = 'block_signal'
-#
-#             # set label_block as False
-#             df_[label_block] = False
-#             print('... new label named as {} was created in Dataframe'.format(label_block))
-#
-#             # SUM the segment block to dectect the id that has or more time stopped
-#             df_agg_tid = df_.groupby(by=label_segment).agg({'time_to_prev': 'sum'})
-#
-#             # filter the ids by a time_max_to_stop
-#             idx = df_agg_tid[df_agg_tid['time_to_prev'] > time_max_stop].index
-#
-#             df_.loc[df_[label_segment].isin(idx), label_block] = True
-#             print('... block signal was set to true using {} seconds to time_max_stop'.format(time_max_stop))
-#
-#         else:
-#             print('{} is not in Dataframe'.format(label_segment))
-#         print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-#         print('-----------------------------------------------------\n')
-#     except Exception as e:
-#         raise e
-#
-#
-# def create_or_update_short_traj_detect(df_, label_tid='id', max_dist_between_adj_points=3000,
-#                                        max_time_between_adj_points=7200,
-#                                        max_speed_between_adj_points=50.0, k_segment_max=50):
-#     try:
-#         print('\nCreate or update short_traj as True or False')
-#         start_time = time.time()
-#         """ Create or update features"""
-#         # trajutils.create_update_dist_time_speed_features(df_, label_tid)
-#
-#         label_segment = 'segment_traj'
-#
-#         """ Segment trajectory by dist, time and speed"""
-#         # trajutils.segment_traj_by_max_dist_time_speed(df_, label_tid, max_dist_between_adj_points,
-#         # max_time_between_adj_points, max_speed_between_adj_points, label_segment=label_segment)
-#         segmentation.by_dist_time_speed(df_, label_tid, max_dist_between_adj_points, max_time_between_adj_points,
-#                                         max_speed_between_adj_points, label_segment=label_segment)
-#
-#         if label_segment in df_:
-#             label_short_traj = 'short_traj'
-#             df_[label_short_traj] = False
-#             print('... new lab named as {} was created in Dataframe'.format(label_short_traj))
-#
-#             df_count_tid = df_.groupby(by=label_segment).size()
-#             idx = df_count_tid[df_count_tid < k_segment_max].index
-#
-#             df_.loc[df_[label_segment].isin(idx), label_short_traj] = True
-#             print('... outlier was set to true in column {}'.format(label_short_traj))
-#         else:
-#             print('{} is not in Dataframe'.format(label_segment))
-#         print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-#         print('-----------------------------------------------------\n')
-#     except Exception as e:
-#         raise e
-#
-#
-# def filter_block_signal_by_repeated_amount_of_points(df_, amount_max_of_points_stop=30.0, filter_out=False):
-#     try:
-#         # time_max_stop = 30 points if gap between two points is 1 minute
-#         label_block = 'block_signal'
-#         if (label_block in df_):
-#             # get id amount of stop points
-#             df_count_tid = df_.groupby(by=[label_block]).size()
-#
-#             if filter_out:
-#                 idx = df_count_tid[df_count_tid > amount_max_of_points_stop].index
-#             else:
-#                 idx = df_count_tid[df_count_tid <= amount_max_of_points_stop].index
-#             return df_[df_[label_block].isin(idx)]
-#         else:
-#             print('\n...{} does not exist'.format(label_block))
-#     except Exception as e:
-#         raise e
-#
-#
-# def filter_block_signal_by_time(df_, time_max_stop=7200.00, filter_out=False):
-#     try:
-#         # time_max_stop = 1800s --> 30 minutos
-#         label_block = 'block_signal'
-#         if (label_block in df_):
-#             df_agg_tid = df_.groupby(by=label_block).agg({'time_to_prev': 'sum'})
-#             if filter_out:
-#                 idx = df_agg_tid[(df_agg_tid['time_to_prev'] > time_max_stop)].index
-#             else:
-#                 idx = df_agg_tid[(df_agg_tid['time_to_prev'] <= time_max_stop)].index
-#
-#             return df_[df_[label_block].isin(idx)]
-#         else:
-#             print('\n...{} does not exist'.format(label_block))
-#     except Exception as e:
-#         raise e
-#
-#
-# def filter_longer_time_to_stop_segment_by_id(df_, label_id='id', label_segment_stop='segment_stop'):
-#     try:
-#         if (label_id in df_) & (label_segment_stop in df_):
-#             # group segment by id and stop
-#             df_agg_id_stop = df_.groupby([label_id, label_segment_stop], as_index=False).agg({'time_to_prev': 'sum'})
-#             # get time max to each id
-#             segments = df_agg_id_stop.loc[df_agg_id_stop.groupby([label_id], as_index=False)["time_to_prev"].idxmax()][
-#                 label_segment_stop]
-#
-#             return df_[df_[label_segment_stop].isin(segments)]
-#     except Exception as e:
-#         raise e
+import time
+
+import numpy as np
+
+from pymove import filters, segmentation
+from pymove.core import dataframe
+from pymove.preprocessing import stay_point_detection
+from pymove.utils.constants import (
+    BLOCK,
+    DEACTIVATED,
+    DIST_TO_PREV,
+    JUMP,
+    OUT_BBOX,
+    SEGMENT_STOP,
+    SHORT,
+    TID_PART,
+    TIME_TO_PREV,
+    TRAJ_ID,
+)
+
+
+def _end_create_operation(move_data, new_label, start_time, inplace):
+    """
+    Returns the dataframe after create operation
+
+    move_data: dataframe
+        The input trajectories data.
+    new_label: string
+        The name of the new feature with detected deactivated signals.
+    start_time: float
+        Time when the operation started
+    inplace : boolean
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    _______
+    dataframe or None
+        DataFrame with the additional features
+
+    """
+
+    print(move_data[new_label].value_counts())
+    print('\nTotal Time: %.2f seconds' % (time.time() - start_time))
+    print('-----------------------------------------------------\n')
+
+    if not inplace:
+        return move_data
+
+
+def _process_simple_filter(
+        move_data, new_label, feature, value, start_time, inplace
+):
+    """
+    Processes create operation with simple filter
+
+    move_data: dataframe
+        The input trajectories data.
+    new_label: string
+        The name of the new feature with detected deactivated signals.
+    feature: string
+        Feature column to compare
+    value: float
+        Value to compare feature
+    start_time: float
+        Time when the operation started
+    inplace : boolean
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    _______
+    dataframe or None
+        DataFrame with the additional features
+
+    """
+
+    move_data[new_label] = False
+    filter_ = move_data[feature] >= value
+    idx_start = move_data[filter_].index
+    idx_end = idx_start - np.full(len(idx_start), 1, dtype=np.int32)
+    idx = np.concatenate([idx_start, idx_end], axis=0)
+    move_data.at[idx, new_label] = True
+
+    return _end_create_operation(
+        move_data, new_label, start_time, inplace
+    )
+
+
+def create_or_update_out_of_the_bbox(
+        move_data, bbox, new_label=OUT_BBOX, inplace=True
+):
+    """
+    Create or update a boolean feature to detect points out of the bbox.
+
+    Parameters
+    __________
+    move_data: dataframe
+        The input trajectories data.
+    bbox : tuple
+        Tuple of 4 elements, containing the minimum and maximum values
+        of latitude and longitude of the bounding box.
+    new_label: string, optional, default 'out_Bbox'
+        The name of the new feature with detected points out of the bbox.
+    inplace : boolean, optional, default True
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    _______
+    dataframe
+        Returns dataframe with a boolean feature with detected
+        points out of the bbox.
+
+    """
+
+    try:
+        if not inplace:
+            move_data = move_data[:]
+
+        print('\nCreate or update boolean feature to detect points out of the bbox')
+        start_time = time.time()
+        filtered_ = filters.by_bbox(move_data, bbox, filter_out=True)
+
+        print('...Creating a new label named as %s' % new_label)
+        move_data[new_label] = False
+        if filtered_.shape[0] > 0:
+            print('...Setting % as True\n' % new_label)
+            move_data.at[filtered_.index, new_label] = True
+
+        return _end_create_operation(
+            move_data, new_label, start_time, inplace
+        )
+    except Exception as e:
+        raise e
+
+
+def create_or_update_gps_deactivated_signal(
+        move_data,
+        max_time_between_adj_points=7200,
+        new_label=DEACTIVATED,
+        inplace=True
+):
+    """
+    Create or update a feature deactivate_signal if the max time between
+    adjacent points is equal or less than max_time_between_adj_points.
+
+    Parameters
+    __________
+    move_data: dataframe
+        The input trajectories data.
+    max_time_between_adj_points: float, int, optional, defualt 7200.
+        The max time between adjacent points.
+    new_label: string, optional, default 'deactivate_signal'.
+        The name of the new feature with detected deactivated signals.
+    inplace : boolean, optional, default True
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    _______
+    dataframe or None
+        DataFrame with the additional features
+        'time_to_prev', 'time_to_next', 'time_prev_to_next', 'deactivate_signal'
+
+    """
+
+    try:
+        if not inplace:
+            move_data = move_data[:]
+
+        start_time = time.time()
+        print('Create or update deactivated signal if time max > %s seconds\n' % max_time_between_adj_points)
+        move_data.generate_time_features()
+
+        return _process_simple_filter(
+            move_data,
+            new_label,
+            TIME_TO_PREV,
+            max_time_between_adj_points,
+            start_time,
+            inplace
+        )
+    except Exception as e:
+        raise e
+
+
+def create_or_update_gps_jump(
+        move_data,
+        max_dist_between_adj_points=3000,
+        new_label=JUMP,
+        inplace=True
+):
+    """
+    Create or update Jump if the maximum distance between adjacent
+    points is greater than max_dist_between_adj_points.
+
+    Parameters
+    __________
+    move_data: dataframe
+        The input trajectories data.
+    max_dist_between_adj_points: float, int, optional, default 3000.
+        The maximum distance between adjacent points.
+    new_label: string, optional, default 'gps_jump'.
+        The name of the new feature with detected deactivated signals.
+    inplace : boolean, optional, default True
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    _______
+    dataframe or None
+        DataFrame with the additional features:
+        'dist_to_prev', 'dist_to_next', 'dist_prev_to_next', 'jump'
+
+    """
+    try:
+        if not inplace:
+            move_data = move_data[:]
+
+        start_time = time.time()
+        print('Create or update jump if dist max > %s meters\n' % max_dist_between_adj_points)
+        move_data.generate_dist_features()
+
+        return _process_simple_filter(
+            move_data,
+            new_label,
+            DIST_TO_PREV,
+            max_dist_between_adj_points,
+            start_time,
+            inplace
+        )
+    except Exception as e:
+        raise e
+
+
+def create_or_update_short_trajectory(
+        move_data,
+        max_dist_between_adj_points=3000,
+        max_time_between_adj_points=7200,
+        max_speed_between_adj_points=50,
+        k_segment_max=50,
+        label_tid=TID_PART,
+        new_label=SHORT,
+        inplace=True
+):
+    """
+
+    Parameters
+    ----------
+    move_data : dataframe
+       The input trajectory data
+    max_dist_between_adj_points : float, optional, default 3000
+        Specify the maximum distance a point should have from
+        the previous point, in order not to be dropped
+    max_time_between_adj_points : float, optional, default 7200
+        Specify the maximum travel time between two adjacent points
+    max_speed_between_adj_points : float, optional, default 50
+        Specify the maximum speed of travel between two adjacent points
+    k_segment_max: int, optional
+        Specify the maximum number of segments in the trajectory
+    label_tid:  str, optional, default 'tid_part'
+        ?
+    new_label: str, optional, default 'short_traj'
+        The name of the new feature with short trajectories.
+    inplace : boolean, optional, default True
+        if set to true the original dataframe will be altered to
+        contain the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    -------
+    dataframe or None
+        DataFrame with the aditional features:
+       'dist_to_prev', 'time_to_prev', 'speed_to_prev', 'tid_part', 'short_traj'
+
+    """
+
+    try:
+        if not inplace:
+            move_data = move_data[:]
+
+        print('\nCreate or update short trajectories...')
+        start_time = time.time()
+
+        segmentation.by_dist_time_speed(
+            move_data,
+            max_dist_between_adj_points=max_dist_between_adj_points,
+            max_time_between_adj_points=max_time_between_adj_points,
+            max_speed_between_adj_points=max_speed_between_adj_points,
+            label_new_tid=label_tid
+        )
+        move_data[new_label] = False
+
+        df_count_tid = move_data.groupby(by=label_tid).size()
+        filter_ = df_count_tid <= k_segment_max
+        idx = df_count_tid[filter_].index
+        move_data.loc[move_data[label_tid].isin(idx), new_label] = True
+
+        return _end_create_operation(
+            move_data, new_label, start_time, inplace
+        )
+    except Exception as e:
+        raise e
+
+
+def create_or_update_gps_block_signal(
+        move_data,
+        max_time_stop=7200,
+        new_label=BLOCK,
+        label_tid=TRAJ_ID,
+        inplace=True
+):
+    """
+    Create a new feature that inform points with speed = 0
+
+    Parameters
+    __________
+    move_data: dataFrame
+        The input trajectories data.
+    max_time_stop: float, optional, default 7200
+        Maximum time allowed with speed 0
+    new_label: string, optional, default 'block_signal_time'.
+        The name of the new feature with detected deactivated signals.
+    label_tid : str, optional, default 'tid_dist'
+        The label of the column containing the ids of the formed segments.
+        Is the new slitted id.
+    inplace : boolean, optional, default True
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    _______
+    dataframe or None
+        DataFrame with the additional features:
+        'dist_to_prev', 'time_to_prev', 'speed_to_prev',
+        'tid_dist', 'block_signal'
+
+    """
+
+    try:
+        if not inplace:
+            move_data = move_data[:]
+
+        print('Create or update block_signal if max time stop > %s seconds\n' % max_time_stop)
+        start_time = time.time()
+        segmentation.by_max_dist(
+            move_data, max_dist_between_adj_points=0.0, label_new_tid=label_tid
+        )
+
+        print('Updating dist time speed values')
+        move_data.generate_dist_time_speed_features(label_id=label_tid)
+
+        move_data[new_label] = False
+
+        # SUM the segment block to dectect the id that has or more time stopped
+        df_agg_tid = move_data.groupby(by=label_tid).agg({TIME_TO_PREV: 'sum'})
+        filter_ = df_agg_tid[TIME_TO_PREV] >= max_time_stop
+        idx = df_agg_tid[filter_].index
+        move_data.loc[move_data[label_tid].isin(idx), new_label] = True
+
+        return _end_create_operation(
+            move_data, new_label, start_time, inplace
+        )
+    except Exception as e:
+        raise e
+
+
+def filter_block_signal_by_repeated_amount_of_points(
+        move_data,
+        amount_max_of_points_stop=30.0,
+        max_time_stop=7200,
+        filter_out=False,
+        inplace=False
+):
+    """
+    Filters from dataframe points with blocked signal by ammount of points.
+
+    Parameters
+    __________
+    move_data: dataFrame
+        The input trajectories data.
+    amount_max_of_points_stop: float, optional, default 30
+        Maximum number of stopped points
+    max_time_stop: float, optional, default 7200
+        Maximum time allowed with speed 0
+    filter_out: boolean, optional, default True
+        Whether to keep or discard points with blocked signal
+    inplace : boolean, optional, default True
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    _______
+    dataframe or None
+        Filtered DataFrame with the additional features
+        'dist_to_prev', 'time_to_prev', 'speed_to_prev',
+        'tid_dist', 'block_signal'
+
+    """
+
+    try:
+        if not inplace:
+            move_data = move_data[:]
+
+        if BLOCK not in move_data:
+            create_or_update_gps_block_signal(move_data, max_time_stop)
+
+        df_count_tid = move_data.groupby(by=[BLOCK]).count()
+        filter_ = df_count_tid > amount_max_of_points_stop
+        if filter_out:
+            idx = df_count_tid[filter_].index
+        else:
+            idx = df_count_tid[~filter_].index
+
+        move_data = move_data[move_data[BLOCK].isin(idx)]
+        if not inplace:
+            return move_data
+
+    except Exception as e:
+        raise e
+
+
+def filter_block_signal_by_time(
+        move_data,
+        max_time_stop=7200,
+        filter_out=False,
+        inplace=False
+):
+    """
+    Filters from dataframe points with blocked signal by time.
+
+    Parameters
+    __________
+    move_data: dataFrame
+        The input trajectories data.
+    max_time_stop: float, optional, default 7200
+        Maximum time allowed with speed 0
+    filter_out: boolean, optional, default True
+        Whether to keep or discard points with blocked signal
+    inplace : boolean, optional, default True
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    _______
+    dataframe or None
+        Filtered DataFrame with the additional features
+        'dist_to_prev', 'time_to_prev', 'speed_to_prev',
+        'tid_dist', 'block_signal'
+
+    """
+
+    try:
+        if not inplace:
+            move_data = move_data[:]
+
+        if BLOCK not in move_data:
+            create_or_update_gps_block_signal(move_data, max_time_stop)
+
+        df_agg_tid = move_data.groupby(by=BLOCK).agg({TIME_TO_PREV: 'sum'})
+        filter_ = df_agg_tid['time_to_prev'] > max_time_stop
+        if filter_out:
+            idx = df_agg_tid[filter_].index
+        else:
+            idx = df_agg_tid[filter_].index
+
+        move_data = move_data[move_data[BLOCK].isin(idx)]
+        if not inplace:
+            return move_data
+
+    except Exception as e:
+        raise e
+
+
+def filter_longer_time_to_stop_segment_by_id(
+        move_data,
+        label_id=TRAJ_ID,
+        label_segment_stop=SEGMENT_STOP,
+        filter_out=False,
+        inplace=False
+):
+    """
+    Filters from dataframe segment with longest stop time.
+
+    Parameters
+    __________
+    move_data: dataFrame
+        The input trajectories data.
+    label_tid : str, optional, default 'id'
+        The label of the column containing the ids of the formed segments.
+        Is the new slitted id.
+    label_segment_stop: str, optional, default 'segment_stop'
+    filter_out: boolean, optional, default True
+        Whether to keep or discard points with blocked signal
+    inplace : boolean, optional, default True
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned.
+
+    Returns
+    _______
+    dataframe or None
+        Filtered DataFrame with the additional features
+        'dist_to_prev', 'time_to_prev', 'speed_to_prev',
+        'tid_dist', 'block_signal'
+
+    """
+    try:
+        if not inplace:
+            move_data = move_data[:]
+
+        if label_segment_stop not in move_data:
+            stay_point_detection.create_or_update_move_stop_by_dist_time(
+                move_data
+            )
+
+        df_agg_id_stop = move_data.groupby(
+            [label_id, label_segment_stop], as_index=False
+        ).agg({TIME_TO_PREV: 'sum'})
+
+        filter_ = df_agg_id_stop.groupby(
+            [label_id], as_index=False
+        )[TIME_TO_PREV].idxmax()
+
+        if filter_out:
+            segments = df_agg_id_stop.loc[filter_]
+        else:
+            segments = df_agg_id_stop.loc[~df_agg_id_stop.index.isin(filter_)]
+        segments = segments[label_segment_stop]
+
+        move_data = move_data[move_data[label_segment_stop].isin(segments)]
+        if not inplace:
+            return move_data
+
+    except Exception as e:
+        raise e

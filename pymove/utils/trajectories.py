@@ -4,26 +4,20 @@ import folium
 import numpy as np
 import pandas as pd
 
-from pymove.utils.constants import (
-    DATETIME,
-    LATITUDE,
-    LONGITUDE,
-    TILES,
-    TRAJ_ID
-)
+from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TILES, TRAJ_ID
 
 
 def read_csv(
     filename,
-    sep=",",
-    encoding="utf-8",
-    header="infer",
+    sep=',',
+    encoding='utf-8',
+    header='infer',
     names=None,
     latitude=LATITUDE,
     longitude=LONGITUDE,
     datetime=DATETIME,
     traj_id=TRAJ_ID,
-    type_="pandas",
+    type_='pandas',
     n_partitions=1,
 ):
     """
@@ -81,9 +75,9 @@ def read_csv(
     from pymove import PandasMoveDataFrame as pm
     from pymove import DaskMoveDataFrame as dm
 
-    if type_ == "pandas":
+    if type_ == 'pandas':
         return pm(df, latitude, longitude, datetime, traj_id)
-    if type_ == "dask":
+    if type_ == 'dask':
         return dm(df, latitude, longitude, datetime, traj_id, n_partitions)
 
 
@@ -180,7 +174,7 @@ def fill_list_with_new_values(original_list, new_list_values):
     original_list[:n] = new_list_values
 
 
-def save_bbox(bbox_tuple, file, tiles=TILES[0], color="red"):
+def save_bbox(bbox_tuple, file, tiles=TILES[0], color='red'):
     """
     Save bbox as file .html using Folium.
 
