@@ -1,6 +1,6 @@
 """
 PyMove
-=======
+======
 
 Provides  processing and visualization of trajectories and other spatial-temporal data
 
@@ -17,7 +17,6 @@ from .models.pattern_mining import clustering
 from .preprocessing import (
     compression,
     filters,
-    map_matching,
     segmentation,
     stay_point_detection,
 )
@@ -26,8 +25,10 @@ from .utils import (
     constants,
     conversions,
     datetime,
+    db,
     distances,
     math,
+    mem,
     trajectories,
     transformations,
 )

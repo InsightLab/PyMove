@@ -39,7 +39,7 @@ def lat_meters(lat):
     return meters
 
 
-def list_to_str(input_list, delimiter=","):
+def list_to_str(input_list, delimiter=','):
     """
     Concatenates list elements, joining them by the separator specified by the
     parameter "delimiter".
@@ -55,7 +55,8 @@ def list_to_str(input_list, delimiter=","):
     Returns
     -------
     str
-        Returns a string, resulting from concatenation of list's elements, separeted by the delimiter.
+        Returns a string, resulting from concatenation of list's elements,
+        separeted by the delimiter.
 
     """
 
@@ -76,7 +77,8 @@ def list_to_csv_str(input_list):
     Returns
     -------
     str
-        Returns a string, resulting from concatenation of list's elements, separeted by ",".
+        Returns a string, resulting from concatenation of list's elements,
+        separeted by ",".
 
     Example
     -------
@@ -102,7 +104,8 @@ def list_to_svm_line(original_list):
     Returns
     -------
     str
-        Returns a string, resulting from concatenation of list elements in consecutive element pairs, separeted by " ".
+        Returns a string, resulting from concatenation of list elements
+        in consecutive element pairs, separeted by " ".
 
     Example
     -------
@@ -114,9 +117,9 @@ def list_to_svm_line(original_list):
     """
 
     list_size = len(original_list)
-    svm_line = "%s " % original_list[0]
+    svm_line = '%s ' % original_list[0]
     for i in range(1, list_size):
-        svm_line += "{}:{} ".format(i, original_list[i])
+        svm_line += '%s:%s ' % (i, original_list[i])
     return svm_line.rstrip()
 
 
@@ -272,7 +275,7 @@ def ms_to_kmh(
             move_data = move_data[:]
         if label_speed not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_speed] = move_data[label_speed].transform(
+        move_data[label_speed] = move_data[label_speed].apply(
             lambda row: row * 3.6
         )
         if new_label is not None:
@@ -308,7 +311,7 @@ def kmh_to_ms(
 
     Returns
     -------
-    Dataframe or None
+    dataframe or None
         A new dataframe with the converted feature if operation
         not done inplace
 
@@ -320,7 +323,7 @@ def kmh_to_ms(
         if label_speed not in move_data:
             move_data.generate_dist_time_speed_features()
             ms_to_kmh(move_data, label_speed, new_label)
-        move_data[label_speed] = move_data[label_speed].transform(
+        move_data[label_speed] = move_data[label_speed].apply(
             lambda row: row / 3.6
         )
         if new_label is not None:
@@ -356,7 +359,7 @@ def meters_to_kilometers(
 
     Returns
     -------
-    Dataframe or None
+    dataframe or None
         A new dataframe with the converted feature if operation
         not done inplace
 
@@ -367,7 +370,7 @@ def meters_to_kilometers(
             move_data = move_data[:]
         if label_distance not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_distance] = move_data[label_distance].transform(
+        move_data[label_distance] = move_data[label_distance].apply(
             lambda row: row / 1000
         )
         if new_label is not None:
@@ -403,7 +406,7 @@ def kilometers_to_meters(
 
     Returns
     -------
-    Dataframe or None
+    dataframe or None
         A new dataframe with the converted feature if operation
         not done inplace
 
@@ -415,7 +418,7 @@ def kilometers_to_meters(
         if label_distance not in move_data:
             move_data.generate_dist_time_speed_features()
             meters_to_kilometers(move_data, label_distance, new_label)
-        move_data[label_distance] = move_data[label_distance].transform(
+        move_data[label_distance] = move_data[label_distance].apply(
             lambda row: row * 1000
         )
         if new_label is not None:
@@ -448,7 +451,7 @@ def seconds_to_minutes(
 
     Returns
     -------
-    Dataframe or None
+    dataframe or None
         A new dataframe with the converted feature if operation
         not done inplace
 
@@ -459,7 +462,7 @@ def seconds_to_minutes(
             move_data = move_data[:]
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-        move_data[label_time] = move_data[label_time].transform(
+        move_data[label_time] = move_data[label_time].apply(
             lambda row: row / 60.0
         )
         if new_label is not None:
@@ -492,7 +495,7 @@ def minute_to_seconds(
 
     Returns
     -------
-    Dataframe or None
+    dataframe or None
         A new dataframe with the converted feature if operation
         not done inplace
 
@@ -537,7 +540,7 @@ def minute_to_hours(
 
     Returns
     -------
-    Dataframe or None
+    dataframe or None
         A new dataframe with the converted feature if operation
         not done inplace
 
@@ -582,7 +585,7 @@ def hours_to_minute(
 
     Returns
     -------
-    Dataframe or None
+    dataframe or None
         A new dataframe with the converted feature if operation
         not done inplace
 
@@ -627,7 +630,7 @@ def seconds_to_hours(
 
     Returns
     -------
-    Dataframe or None
+    dataframe or None
         A new dataframe with the converted feature if operation
         not done inplace
 
@@ -672,7 +675,8 @@ def hours_to_seconds(
     Returns
     -------
     dataframe or None
-        A copy of the original dataframe, with the converted features when not inplace.
+        A new dataframe with the converted feature if operation
+        not done inplace
 
     """
 
