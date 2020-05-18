@@ -56,7 +56,7 @@
 <tr>
   <td>PyPi Downloads</td>
   <td>
-    <a href="https://img.shields.io/pypi/dd/pymove" alt="PyPi downloads">
+    <a href="https://img.shields.io/pypi/dm/pymove" alt="PyPi downloads">
       <img src="https://img.shields.io/pypi/dd/pymove" alt="PyPi downloads" alt="PyPi downloads" />
     </a>
   </td>

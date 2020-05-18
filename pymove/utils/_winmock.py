@@ -3,7 +3,7 @@ class WindowsUser:
 
     def __init__(self, uid):
         """Instantiates mock class."""
-        self.pw_name = "windows"
+        self.pw_name = 'windows'
         self.uid = uid
 
 

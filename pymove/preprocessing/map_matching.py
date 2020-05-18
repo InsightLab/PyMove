@@ -56,7 +56,7 @@
 
 #     try:
 #         if TID not in move_data:
-#             move_data.generate_tid_based_on_id_datatime()
+#             move_data.generate_tid_based_on_id_datetime()
 
 #         if move_data.index.name is not None:
 #             print("reseting index...")
@@ -163,7 +163,7 @@
 #         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
 #     if TID not in move_data:
-#         move_data.generate_tid_based_on_id_datatime()
+#         move_data.generate_tid_based_on_id_datetime()
 
 #     if "deleted" not in move_data:
 #         move_data["deleted"] = False
@@ -246,7 +246,7 @@
 #     try:
 
 #         if TID not in move_data:
-#             move_data.generate_tid_based_on_id_datatime()
+#             move_data.generate_tid_based_on_id_datetime()
 
 #         if move_data.index.name is not None:
 #             print("reseting index...")
@@ -292,7 +292,7 @@
 
 # def interpolate_add_deltatime_speed_features(
 #     move_data,
-#     label_id="tid",
+#     label_tid="tid",
 #     max_time_between_adj_points=900,
 #     max_dist_between_adj_points=5000,
 #     max_speed=30,
@@ -303,7 +303,7 @@
 #     ----------
 #     move_data : dataframe
 #        The input trajectories data
-#     label_id: String, optional("tid" by default)
+#     label_tid: String, optional("tid" by default)
 #         The name of the column to set as the new index during function execution. Indicates the tid column.
 #     max_dist_between_adj_points: double, optional(5000 by default)
 #         The maximum distance between two adjacent points. Used only for verification.
@@ -327,18 +327,18 @@
 #         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
 
 #     if TID not in move_data:
-#         move_data.generate_tid_based_on_id_datatime()
+#         move_data.generate_tid_based_on_id_datetime()
 
 #     if move_data.index.name is not None:
 #         print("reseting index...")
 #         move_data.reset_index(inplace=True)
 
-#     tids = move_data[label_id].unique()
+#     tids = move_data[label_tid].unique()
 #     # tids = [2]
 
 #     if move_data.index.name is None:
 #         print("creating index...")
-#         move_data.set_index(label_id, inplace=True)
+#         move_data.set_index(label_tid, inplace=True)
 
 #     drop_trajectories = []
 #     size = move_data.shape[0]
@@ -471,7 +471,7 @@
 #     )
 #     move_data.reset_index(inplace=True)
 #     idxs_drop = move_data[
-#         move_data[label_id].isin(drop_trajectories)
+#         move_data[label_tid].isin(drop_trajectories)
 #     ].index.values
 #     print(
 #         "dropping {} rows in {} trajectories with only 1 gps point".format(

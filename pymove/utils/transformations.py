@@ -16,7 +16,8 @@ def feature_values_using_filter(
     feature_name : String
         The name of the column that the user wants to change values for.
     filter_ : Array
-        Indicates the rows with the index "id_" of the "feature_name" that must be changed.
+        Indicates the rows with the index "id_" of the "feature_name"
+        that must be changed.
     values : ?
         THe new values to be set to the selected feature.
     inplace: boolean, optional(True by default)
@@ -26,7 +27,8 @@ def feature_values_using_filter(
     Returns
     -------
     dataframe or None
-        A copy of the original dataframe, with the alterations done by the function. (When inplace is False)
+        A copy of the original dataframe, with the alterations done
+        by the function. (When inplace is False)
 
     Notes
     -----
@@ -72,11 +74,15 @@ def feature_values_using_filter_and_indexes(
         ?.
     values : ?
         ?.
+    inplace: boolean, optional(True by default)
+        if set to true the original dataframe will be altered,
+        otherwise the alteration will be made in a copy, that will be returned.
 
     Returns
     -------
     dataframe or None
-        A copy of the original dataframe, with the alterations done by the function. (When inplace is False)
+        A copy of the original dataframe, with the alterations
+        done by the function. (When inplace is False)
 
     """
 
