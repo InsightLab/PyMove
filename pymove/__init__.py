@@ -1,3 +1,11 @@
+"""
+PyMove
+======
+
+Provides  processing and visualization of trajectories and other spatial-temporal data
+
+"""
+
 from ._version import __version__
 from .core import grid
 from .core.dataframe import (
@@ -9,16 +17,18 @@ from .models.pattern_mining import clustering
 from .preprocessing import (
     compression,
     filters,
-    map_matching,
     segmentation,
     stay_point_detection,
 )
+from .semantic import semantic
 from .utils import (
     constants,
     conversions,
     datetime,
+    db,
     distances,
     math,
+    mem,
     trajectories,
     transformations,
 )

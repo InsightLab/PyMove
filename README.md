@@ -24,7 +24,7 @@
 <tr>
   <td>Python Version</td>
   <td>
-    <a href="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue">
+    <a href="https://www.python.org/doc/versions/">
       <img src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue" alt="Python compatible versions" />
     </a>
 </td>
@@ -56,15 +56,15 @@
 <tr>
   <td>PyPi Downloads</td>
   <td>
-    <a href="https://img.shields.io/pypi/dd/pymove" alt="PyPi downloads">
-      <img src="https://img.shields.io/pypi/dd/pymove" alt="PyPi downloads" alt="PyPi downloads" />
+    <a href="https://pypi.org/project/pymove/#files" alt="PyPi downloads">
+      <img src="https://img.shields.io/pypi/dm/pymove" alt="PyPi downloads" alt="PyPi downloads" />
     </a>
   </td>
 </tr>
 <tr>
   <td>PyPi version</td>
   <td>
-    <a href="https://img.shields.io/pypi/v/pymove" alt="PyPi version">
+    <a href="https://pypi.org/project/pymove/#history" alt="PyPi version">
       <img src="https://img.shields.io/pypi/v/pymove" alt="PyPi version" alt="PyPi version" />
     </a>
   </td>
