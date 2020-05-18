@@ -40,7 +40,7 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
 
     """
 
-    message = "Executing Elbow Method to:\n...K of %s to %s from k_iteration:%s\n" % (k_initial, max_clusters, k_iteration)
+    message = 'Executing Elbow Method to:\n...K of %s to %s from k_iteration:%s\n' % (k_initial, max_clusters, k_iteration)
     print(message, flush=True)
     inertia_dic = {}
     for k in progress_bar(range(k_initial, max_clusters + 1, k_iteration)):
@@ -80,7 +80,7 @@ def gap_statistic(
 
     """
 
-    message = "Executing Gap Statistic to:\n...K of %s to %s from k_iteration:%s\n" % (k_initial, max_clusters, k_iteration)
+    message = 'Executing Gap Statistic to:\n...K of %s to %s from k_iteration:%s\n' % (k_initial, max_clusters, k_iteration)
     print(message, flush=True)
     gaps = {}
     for k in progress_bar(range(k_initial, max_clusters + 1, k_iteration)):

@@ -39,7 +39,7 @@ def lat_meters(lat):
     return meters
 
 
-def list_to_str(input_list, delimiter=","):
+def list_to_str(input_list, delimiter=','):
     """
     Concatenates list elements, joining them by the separator specified by the
     parameter "delimiter".
@@ -117,9 +117,9 @@ def list_to_svm_line(original_list):
     """
 
     list_size = len(original_list)
-    svm_line = "%s " % original_list[0]
+    svm_line = '%s ' % original_list[0]
     for i in range(1, list_size):
-        svm_line += "%s:%s " % (i, original_list[i])
+        svm_line += '%s:%s ' % (i, original_list[i])
     return svm_line.rstrip()
 
 

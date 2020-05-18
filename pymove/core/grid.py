@@ -45,11 +45,11 @@ class Grid:
     def get_grid(self):
         """Returns the grid object in a dict format."""
         return {
-            "lon_min_x": self.lon_min_x,
-            "lat_min_y": self.lat_min_y,
-            "grid_size_lat_y": self.grid_size_lat_y,
-            "grid_size_lon_x": self.grid_size_lon_x,
-            "cell_size_by_degree": self.cell_size_by_degree,
+            'lon_min_x': self.lon_min_x,
+            'lat_min_y': self.lat_min_y,
+            'grid_size_lat_y': self.grid_size_lat_y,
+            'grid_size_lon_x': self.grid_size_lon_x,
+            'cell_size_by_degree': self.cell_size_by_degree,
         }
 
     def _create_virtual_grid(self, data, cell_size, meters_by_degree):
@@ -77,14 +77,14 @@ class Grid:
                 - cell_size_by_degree: grid's cell size.
         """
 
-        operation = begin_operation("_create_virtual_grid")
+        operation = begin_operation('_create_virtual_grid')
 
         bbox = data.get_bbox()
-        print("\nCreating a virtual grid without polygons")
+        print('\nCreating a virtual grid without polygons')
 
         # Latitude in Fortaleza: -3.8162973555
         cell_size_by_degree = cell_size / meters_by_degree
-        print("...cell size by degree: %s" % cell_size_by_degree)
+        print('...cell size by degree: %s' % cell_size_by_degree)
 
         lat_min_y = bbox[0]
         lon_min_x = bbox[1]
@@ -111,7 +111,7 @@ class Grid:
         )
 
         print(
-            "...grid_size_lat_y:%s\ngrid_size_lon_x:%s"
+            '...grid_size_lat_y:%s\ngrid_size_lon_x:%s'
             % (grid_size_lat_y, grid_size_lon_x)
         )
 
@@ -120,7 +120,7 @@ class Grid:
         self.grid_size_lat_y = grid_size_lat_y
         self.grid_size_lon_x = grid_size_lon_x
         self.cell_size_by_degree = cell_size_by_degree
-        print("\n..A virtual grid was created")
+        print('\n..A virtual grid was created')
 
         self.last_operation = end_operation(operation)
 
@@ -142,9 +142,9 @@ class Grid:
 
         """
 
-        operation = begin_operation("create_update_index_grid_feature")
+        operation = begin_operation('create_update_index_grid_feature')
 
-        print("\nCreating or updating index of the grid feature..\n")
+        print('\nCreating or updating index of the grid feature..\n')
         try:
             if sort:
                 data.sort_values([TRAJ_ID, DATETIME], inplace=True)
@@ -178,7 +178,7 @@ class Grid:
 
         """
 
-        operation = begin_operation("create_one_polygon_to_point_on_grid")
+        operation = begin_operation('create_one_polygon_to_point_on_grid')
 
         cell_size = self.cell_size_by_degree
         lat_init = self.lat_min_y + cell_size * index_grid_lat
@@ -200,10 +200,10 @@ class Grid:
 
         """
 
-        operation = begin_operation("create_all_polygons_on_grid")
+        operation = begin_operation('create_all_polygons_on_grid')
 
         try:
-            print("\nCreating all polygons on virtual grid", flush=True)
+            print('\nCreating all polygons on virtual grid', flush=True)
             grid_polygon = np.array(
                 [
                     [None for i in range(self.grid_size_lon_x)]
@@ -225,7 +225,7 @@ class Grid:
                     lon_init += cell_size
                 lat_init += cell_size
             self.grid_polygon = grid_polygon
-            print("...geometries saved on Grid grid_polygon property")
+            print('...geometries saved on Grid grid_polygon property')
             self.last_operation = end_operation(operation)
         except Exception as e:
             self.last_operation = end_operation(operation)
@@ -248,18 +248,18 @@ class Grid:
 
         """
 
-        operation = begin_operation("create_all_polygons_to_all_point_on_grid")
+        operation = begin_operation('create_all_polygons_to_all_point_on_grid')
 
         try:
             self.create_update_index_grid_feature(data)
             datapolygons = data.loc[
-                :, ["id", "index_grid_lat", "index_grid_lon"]
+                :, ['id', 'index_grid_lat', 'index_grid_lon']
             ].drop_duplicates()
             size = datapolygons.shape[0]
 
             # transform series in numpyarray
-            index_grid_lat = np.array(data["index_grid_lat"])
-            index_grid_lon = np.array(data["index_grid_lon"])
+            index_grid_lat = np.array(data['index_grid_lat'])
+            index_grid_lon = np.array(data['index_grid_lon'])
 
             # transform series in numpyarray
             polygons = np.array([])
@@ -269,13 +269,13 @@ class Grid:
                     index_grid_lat[i], index_grid_lon[i]
                 )
                 polygons = np.append(polygons, p)
-            print("...polygons were created")
-            datapolygons["polygon"] = polygons
+            print('...polygons were created')
+            datapolygons['polygon'] = polygons
             self.last_operation = end_operation(operation)
             return datapolygons
         except Exception as e:
             self.last_operation = end_operation(operation)
-            print("size:{}, i:{}".format(size, i))
+            print('size:{}, i:{}'.format(size, i))
             raise e
 
     def point_to_index_grid(self, event_lat, event_lon):
@@ -298,7 +298,7 @@ class Grid:
 
         """
 
-        operation = begin_operation("create_all_polygons_to_all_point_on_grid")
+        operation = begin_operation('create_all_polygons_to_all_point_on_grid')
 
         indexes_lat_y = np.floor(
             (np.float64(event_lat) - self.lat_min_y) / self.cell_size_by_degree
@@ -307,7 +307,7 @@ class Grid:
             (np.float64(event_lon) - self.lon_min_x) / self.cell_size_by_degree
         )
         print(
-            "...[%s,%s] indexes were created to lat and lon"
+            '...[%s,%s] indexes were created to lat and lon'
             % (indexes_lat_y.size, indexes_lon_x.size)
         )
         self.last_operation = end_operation(operation)
@@ -332,12 +332,12 @@ class Grid:
 
         """
 
-        operation = begin_operation("save_grid_pkl")
+        operation = begin_operation('save_grid_pkl')
 
         try:
-            with open(filename, "wb") as f:
+            with open(filename, 'wb') as f:
                 joblib.dump(self.get_grid(), f)
-            print("\nA file was saved")
+            print('\nA file was saved')
             self.last_operation = end_operation(operation)
         except Exception as e:
             self.last_operation = end_operation(operation)
@@ -363,9 +363,9 @@ class Grid:
                 - cell_size_by_degree: tamanho da célula da Grid.
 
         """
-        operation = begin_operation("read_grid_pkl")
+        operation = begin_operation('read_grid_pkl')
         try:
-            with open(filename, "rb") as f:
+            with open(filename, 'rb') as f:
                 dict_grid = joblib.load(f)
             self.last_operation = end_operation(operation)
             return dict_grid
@@ -380,7 +380,7 @@ class Grid:
         figsize=(10, 10),
         return_fig=True,
         save_fig=False,
-        name="grid.png",
+        name='grid.png',
     ):
         """
         Generate a visualization with grid polygons.
@@ -416,25 +416,25 @@ class Grid:
 
         print(TRAJ_ID, TID)
         if POLYGON not in data:
-            raise KeyError("POLYGON feature not in dataframe")
+            raise KeyError('POLYGON feature not in dataframe')
 
         df_ = data[data[TRAJ_ID] == id_]
 
         if not len(df_):
-            raise IndexError(f"No user with id {id_} in dataframe")
+            raise IndexError(f'No user with id {id_} in dataframe')
 
-        operation = begin_operation("show_grid_polygons")
+        operation = begin_operation('show_grid_polygons')
 
         fig = plt.figure(figsize=figsize)
 
         xs_start, ys_start = df_.iloc[0][POLYGON].exterior.xy
 
-        plt.plot(ys_start, xs_start, "bo", markersize=20)  # start point
+        plt.plot(ys_start, xs_start, 'bo', markersize=20)  # start point
 
         for idx in range(df_.shape[0]):
             if not isinstance(df_[POLYGON].iloc[idx], float):
                 xs, ys = df_[POLYGON].iloc[idx].exterior.xy
-                plt.plot(ys, xs, "g", linewidth=2, markersize=5)
+                plt.plot(ys, xs, 'g', linewidth=2, markersize=5)
 
         if save_fig:
             plt.savefig(fname=name, fig=fig)

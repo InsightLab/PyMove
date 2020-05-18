@@ -30,7 +30,7 @@ def std(values_array):
         result = math.sqrt(sum_sq / size)
     except ValueError:
         e = (
-            "(sum_sq / size) (size=%s, mean=%s, sum_sq=%s) should be non negative, but is %s"
+            '(sum_sq / size) (size=%s, mean=%s, sum_sq=%s) should be non negative, but is %s'
             % (size, mean, sum_sq, sum_sq / size)
         )
         raise ValueError(e)
@@ -124,7 +124,7 @@ def arrays_avg(values_array, weights_array=None):
         weights_array = [1] * n
     elif len(weights_array) != n:
         raise ValueError(
-            "values_array and qt_array must have the same number of rows"
+            'values_array and qt_array must have the same number of rows'
         )
 
     result = 0
