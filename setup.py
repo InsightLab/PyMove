@@ -2,7 +2,6 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-from pymove._version import __version__
 
 # Get the long description from the README file
 try:
@@ -36,7 +35,7 @@ DEPENDENCIES = [
 
 setup(
     name='pymove',
-    version=__version__,
+    version='1.3.0',
     author='Insight Data Science Lab',
     author_email='insightlab@dc.ufc.br',
     license='MIT',
