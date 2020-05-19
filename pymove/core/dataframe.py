@@ -588,6 +588,211 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return data_
 
+    def info(
+            self,
+            verbose=None,
+            buf=None,
+            max_cols=None,
+            memory_usage=None,
+            null_counts=None
+    ):
+        """
+        Print a concise summary of a DataFrame.
+
+        This method prints information about a DataFrame including the index
+        dtype and column dtypes, non-null values and memory usage.
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            Whether to print the full summary. By default, the setting
+            in pandas.options.display.max_info_columns is followed.
+        buf : writable buffer, defaults to sys.stdout
+            Where to send the output. By default, the output is printed
+            to sys.stdout. Pass a writable buffer if you need to
+            further process the output.
+        max_cols : int, optional
+            When to switch from the verbose to the truncated output.
+            If the DataFrame has more than max_cols columns, the truncated
+            output is used. By default, the setting in
+            andas.options.display.max_info_columns is used.
+        memory_usage : bool, str, optional
+            Specifies whether total memory usage of the DataFrame elements
+            (including the index) should be displayed. By default, this
+            follows the pandas.options.display.memory_usage setting.
+            True always show memory usage. False never shows memory usage.
+            A value of ‘deep’ is equivalent to “True with deep introspection”.
+            Memory usage is shown in human-readable units (base-2 representation).
+            Without deep introspection a memory estimation is made based
+            in column dtype and number of rows assuming values consume the
+            same memory amount for corresponding dtypes. With deep memory
+            introspection, a real memory usage calculation is
+            performed at the cost of computational resources.
+        null_counts : bool, optional
+            Whether to show the non-null counts. By default, this is
+            shown only if the frame is smaller than
+            pandas.options.display.max_info_rows and
+            pandas.options.display.max_info_columns. A value of True always
+            shows the counts, and False never shows the counts.
+
+        """
+
+        operation = begin_operation('info')
+        self._data.info(
+            verbose, buf, max_cols, memory_usage, null_counts
+        )
+        self.last_operation = end_operation(operation)
+
+    def describe(self, percentiles=None, include=None, exclude=None):
+        """
+        Generate descriptive statistics.
+
+        Descriptive statistics include those that summarize the central
+        tendency, dispersion and shape of a dataset’s distribution,
+        excluding NaN values. Analyzes both numeric and object series,
+        as well as DataFrame column sets of mixed data types. The output will
+        vary depending on what is provided. Refer to the notes
+        below for more detail.
+
+        Parameters
+        ----------
+        percentiles : list-like of numbers, optional
+            The percentiles to include in the output.
+            All should fall between 0 and 1. The default is [.25, .5, .75],
+            which returns the 25th, 50th, and 75th percentiles.
+        include : list-like of dtypes or None (default), optional
+            A white list of data types to include in the result.
+            Ignored for Series. Here are the options:
+                ‘all’ : All columns of the input will be included in the output.
+                A list-like of dtypes : Limits the results to the provided
+                data types. To limit the result to numeric types submit
+                numpy.number. To limit it instead to object columns submit
+                the numpy.object data type. Strings can also be used in the
+                style of select_dtypes (e.g. df.describe(include=['O'])).
+                To select pandas categorical columns, use 'category'
+                None (default) : The result will include all numeric columns.
+        exclude : list-like of dtypes or None (default), optional,
+                A black list of data types to omit from the result.
+                Ignored for Series. Here are the options:
+                A list-like of dtypes : Excludes the provided data types from
+                the result. To exclude numeric types submit numpy.number.
+                To exclude object columns submit the data type numpy.object.
+                Strings can also be used in the style of select_dtypes
+                (e.g. df.describe(include=['O'])).
+                To exclude pandas categorical columns, use 'category'
+                None (default) : The result will exclude nothing.
+
+        Returns
+        -------
+        Series or DataFrame
+            Summary statistics of the Series or Dataframe provided.
+
+        Notes
+        -----
+            For numeric data, the result’s index will include
+            count, mean, std, min, max as well as lower, 50 and upper percentiles.
+            By default the lower percentile is 25 and the upper percentile is 75.
+            The 50 percentile is the same as the median.
+            For object data (e.g. strings or timestamps), the result’s index
+            will include count, unique, top, and freq. The top is the most common
+            value. The freq is the most common value’s frequency.
+            Timestamps also include the first and last items.
+            If multiple object values have the highest count, then the
+            count and top results will be arbitrarily chosen from among those
+            with the highest count.
+            For mixed data types provided via a DataFrame, the default is to
+            return only an analysis of numeric columns. If the dataframe consists
+            only of object and categorical data without any numeric columns,
+            the default is to return an analysis of both the object and
+            categorical columns. If include='all' is provided as an option,
+            the result will include a union of attributes of each type.
+            The include and exclude parameters can be used to limit which
+            columns in a DataFrame are analyzed for the output.
+            The parameters are ignored when analyzing a Series.
+
+        """
+
+        operation = begin_operation('describe')
+        describe_ = self._data.describe(percentiles, include, exclude)
+        self.last_operation = end_operation(operation)
+        return describe_
+
+    def memory_usage(self, index=True, deep=False):
+        """
+        Return the memory usage of each column in bytes.
+
+        The memory usage can optionally include the contribution of the
+        index and elements of object dtype.
+        This value is displayed in DataFrame.info by default.
+        This can be suppressed by setting pandas.options.display.memory_usage
+        to False.
+
+        Parameters
+        ----------
+        index : bool, default True
+            Specifies whether to include the memory usage of the DataFrame’s
+            index in returned Series. If index=True, the memory usage of the
+            index is the first item in the output.
+        deep : bool, default False
+            If True, introspect the data deeply by interrogating object dtypes
+            for system-level memory consumption, and include it in the
+            returned values.
+
+        Returns
+        -------
+        Series
+            A Series whose index is the original column names and whose
+            values is the memory usage of each column in bytes.
+
+        """
+
+        operation = begin_operation('mem_usage')
+        mem_usage_ = self._data.memory_usage(index, deep)
+        self.last_operation = end_operation(operation)
+        return mem_usage_
+
+    def copy(self, deep=True):
+        """
+        Make a copy of this object’s indices and data.
+
+        When deep=True (default), a new object will be created with a copy
+        of the calling object’s data and indices. Modifications to the
+        data or indices of the copy will not be reflected in the original
+        object (see notes below).
+        When deep=False, a new object will be created without copying the calling
+        object’s data or index (only references to the data and index are copied).
+        Any changes to the data of the original will be reflected in the
+        shallow copy (and vice versa).
+
+        Parameters
+        ----------
+        deep : bool, default True
+            Make a deep copy, including a copy of the data and the indices.
+            With deep=False neither the indices nor the data are copied.
+
+        Returns
+        -------
+        Series or DataFrame
+            Object type matches caller.
+
+        Notes
+        -----
+        When deep=True, data is copied but actual Python objects will not be
+        copied recursively, only the reference to the object.
+        This is in contrast to copy.deepcopy in the Standard Library, which
+        recursively copies object data (see examples below).
+        While Index objects are copied when deep=True, the underlying
+        numpy array is not copied for performance reasons. Since Index is
+        immutable, the underlying data can be safely shared and a
+        copy is not needed.
+
+        """
+
+        operation = begin_operation('copy')
+        copy_ = self._data.copy(deep)
+        self.last_operation = end_operation(operation)
+        return copy_
+
     def generate_tid_based_on_id_datetime(
         self, str_format='%Y%m%d%H', sort=True, inplace=True
     ):
@@ -3250,6 +3455,22 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
 
         return self._data
+
+    def info(self):
+        """Print a concise summary of a DataFrame."""
+        raise NotImplementedError('To be implemented')
+
+    def describe(self):
+        """Generate descriptive statistics."""
+        raise NotImplementedError('To be implemented')
+
+    def memory_usage(self):
+        """Return the memory usage of each column in bytes."""
+        raise NotImplementedError('To be implemented')
+
+    def copy(self):
+        """Make a copy of this object’s indices and data."""
+        raise NotImplementedError('To be implemented')
 
     def generate_tid_based_on_id_datetime(self):
         """Create or update trajectory id based on id e datetime."""
