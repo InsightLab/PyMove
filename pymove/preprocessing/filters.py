@@ -448,7 +448,8 @@ def _filter_single_by_max(move_data, **kwargs):
 
 def _filter_speed_max_radius(move_data, **kwargs):
     """
-    Filters from a dataframe rows with current or previous row features exceeding value.
+    Filters from a dataframe rows with current or previous row features
+    exceeding value.
 
     Parameters
     ----------
@@ -1046,8 +1047,8 @@ def clean_id_by_time_max(
         )
         move_dataid_drop = (
             move_df.groupby([label_id], as_index=False)
-            .agg({'time_to_prev': 'sum'})
-            .query('time_to_prev < {}'.format(time_max))
+            .agg({TIME_TO_PREV: 'sum'})
+            .query('%s < %s' % (TIME_TO_PREV, time_max))
         )
         print(
             '...Ids total: %s\nIds to drop:%s'

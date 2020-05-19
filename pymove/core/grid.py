@@ -421,7 +421,7 @@ class Grid:
         df_ = data[data[TRAJ_ID] == id_]
 
         if not len(df_):
-            raise IndexError(f'No user with id {id_} in dataframe')
+            raise IndexError('No user with id %s in dataframe' % id_)
 
         operation = begin_operation('show_grid_polygons')
 
