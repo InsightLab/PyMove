@@ -3,7 +3,15 @@ import numpy as np
 from pymove.preprocessing.stay_point_detection import (
     create_or_update_move_stop_by_dist_time,
 )
-from pymove.utils.constants import SEGMENT_STOP, STOP, TRAJ_ID
+from pymove.utils.constants import (
+    LAT_MEAN,
+    LATITUDE,
+    LON_MEAN,
+    LONGITUDE,
+    SEGMENT_STOP,
+    STOP,
+    TRAJ_ID,
+)
 from pymove.utils.log import progress_bar
 
 
@@ -111,7 +119,7 @@ def compress_segment_stop_to_point(
                     # that repeats most within the segment')
                     p = (
                         move_data[filter_]
-                        .groupby(['lat', 'lon'], as_index=False)
+                        .groupby([LATITUDE, LONGITUDE], as_index=False)
                         .agg({'id': 'count'})
                         .sort_values(['id'])
                         .tail(1)
@@ -124,23 +132,23 @@ def compress_segment_stop_to_point(
                 elif point_mean == 'centroid':
                     # set lat and lon mean to first_point
                     # and last points to each segment
-                    lat_mean[ind_start] = move_data.loc[filter_]['lat'].mean()
-                    lon_mean[ind_start] = move_data.loc[filter_]['lon'].mean()
-                    lat_mean[ind_end] = move_data.loc[filter_]['lat'].mean()
-                    lon_mean[ind_end] = move_data.loc[filter_]['lon'].mean()
+                    lat_mean[ind_start] = move_data.loc[filter_][LATITUDE].mean()
+                    lon_mean[ind_start] = move_data.loc[filter_][LONGITUDE].mean()
+                    lat_mean[ind_end] = move_data.loc[filter_][LATITUDE].mean()
+                    lon_mean[ind_end] = move_data.loc[filter_][LONGITUDE].mean()
             else:
                 print('There are segments with only one point: {}'.format(idx))
 
-        move_data['lat_mean'] = lat_mean
-        move_data['lon_mean'] = lon_mean
+        move_data[LAT_MEAN] = lat_mean
+        move_data[LON_MEAN] = lon_mean
         del lat_mean
         del lon_mean
 
         shape_before = move_data.shape[0]
         # filter points to drop
         filter_drop = (
-            (move_data['lat_mean'] == -1.0)
-            & (move_data['lon_mean'] == -1.0)
+            (move_data[LAT_MEAN] == -1.0)
+            & (move_data[LON_MEAN] == -1.0)
         )
         shape_drop = move_data[filter_drop].shape[0]
 

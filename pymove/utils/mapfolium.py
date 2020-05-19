@@ -53,7 +53,6 @@ def add_map_legend(m, title, items):
     </head>
     <body>
 
-
     <div id='maplegend' class='maplegend'
         style='position: absolute; z-index:9999; border:2px solid grey;
         background-color:rgba(255, 255, 255, 0.8); border-radius:6px;
