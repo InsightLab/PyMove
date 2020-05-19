@@ -6,6 +6,7 @@ import psycopg2
 from pymongo import MongoClient
 
 from pymove import MoveDataFrame
+from pymove.utils.constants import TYPE_PANDAS
 
 
 def connect_postgres(
@@ -104,7 +105,7 @@ def write_postgres(
 def read_postgres(
     query,
     in_memory=True,
-    type_='pandas',
+    type_=TYPE_PANDAS,
     dbname='postgres',
     user='postgres',
     psswrd='',
@@ -342,7 +343,7 @@ def read_mongo(
     collection,
     filter_=None,
     projection=None,
-    type_='pandas',
+    type_=TYPE_PANDAS,
     no_id=True,
     dbname='test',
     user=None,

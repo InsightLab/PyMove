@@ -5,12 +5,28 @@ TRAJ_ID = 'id'
 TID = 'tid'
 UID = 'user_id'
 
-DATE = 'date'
 HOUR = 'hour'
-PERIOD = 'period'
-DAY = 'day'
 HOUR_SIN = 'hour_sin'
 HOUR_COS = 'hour_cos'
+DATE = 'date'
+DAY = 'day'
+WEEK_END = 'weekend'
+WEEK_DAYS = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday'
+]
+PERIOD = 'period'
+DAY_PERIODS = [
+    'Early morning',
+    'Morning',
+    'Afternoon',
+    'Evening'
+]
 
 TYPE_DASK = 'dask'
 TYPE_PANDAS = 'pandas'
@@ -35,6 +51,9 @@ SEGMENT_STOP = 'segment_stop'
 STOP = 'stop'
 MOVE = 'move'
 POLYGON = 'polygon'
+
+LAT_MEAN = 'lat_mean'
+LON_MEAN = 'lon_mean'
 
 OUT_BBOX = 'out_bbox'
 DEACTIVATED = 'deactivated_signal'
