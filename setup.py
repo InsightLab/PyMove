@@ -2,6 +2,7 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
+from pymove._version import __version__
 
 # Get the long description from the README file
 try:
@@ -35,12 +36,13 @@ DEPENDENCIES = [
 
 setup(
     name='pymove',
-    version='1.3.0',
+    version=__version__,
     author='Insight Data Science Lab',
     author_email='insightlab@dc.ufc.br',
     license='MIT',
     python_requires='>=3.6',
-    description='A lib python to processing and visualization of trajectories and other spatial-temporal data',
+    description='A lib python to processing and visualization '
+                'of trajectories and other spatial-temporal data',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/InsightLab/PyMove',

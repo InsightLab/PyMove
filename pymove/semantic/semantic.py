@@ -168,7 +168,8 @@ def create_or_update_gps_deactivated_signal(
             move_data = move_data[:]
 
         start_time = time.time()
-        print('Create or update deactivated signal if time max > %s seconds\n' % max_time_between_adj_points)
+        message = 'Create or update deactivated signal if time max > %s seconds\n'
+        print(message % max_time_between_adj_points)
         move_data.generate_time_features()
 
         return _process_simple_filter(
@@ -217,7 +218,8 @@ def create_or_update_gps_jump(
             move_data = move_data[:]
 
         start_time = time.time()
-        print('Create or update jump if dist max > %s meters\n' % max_dist_between_adj_points)
+        message = 'Create or update jump if dist max > %s meters\n'
+        print(message % max_dist_between_adj_points)
         move_data.generate_dist_features()
 
         return _process_simple_filter(
@@ -339,7 +341,8 @@ def create_or_update_gps_block_signal(
         if not inplace:
             move_data = move_data[:]
 
-        print('Create or update block_signal if max time stop > %s seconds\n' % max_time_stop)
+        message = 'Create or update block_signal if max time stop > %s seconds\n'
+        print(message % max_time_stop)
         start_time = time.time()
         segmentation.by_max_dist(
             move_data, max_dist_between_adj_points=0.0, label_new_tid=label_tid
@@ -456,7 +459,7 @@ def filter_block_signal_by_time(
             create_or_update_gps_block_signal(move_data, max_time_stop)
 
         df_agg_tid = move_data.groupby(by=BLOCK).agg({TIME_TO_PREV: 'sum'})
-        filter_ = df_agg_tid['time_to_prev'] > max_time_stop
+        filter_ = df_agg_tid[TIME_TO_PREV] > max_time_stop
         if filter_out:
             idx = df_agg_tid[filter_].index
         else:
