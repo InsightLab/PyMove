@@ -12,6 +12,7 @@ from pymove.utils.constants import (
     SEGMENT_STOP,
     SITUATION,
     STOP,
+    TIME_TO_PREV,
     TRAJ_ID,
 )
 
@@ -133,8 +134,8 @@ def create_or_update_move_stop_by_dist_time(
         move_df[STOP] = False
         move_dataagg_tid = (
             move_df.groupby(by=new_label)
-            .agg({'time_to_prev': 'sum'})
-            .query('time_to_prev > ' + str(time_radius))
+            .agg({TIME_TO_PREV: 'sum'})
+            .query('%s > %s' % (TIME_TO_PREV, time_radius))
             .index
         )
         idx = move_df[

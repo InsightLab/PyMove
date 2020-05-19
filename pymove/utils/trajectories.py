@@ -4,7 +4,15 @@ import folium
 import numpy as np
 import pandas as pd
 
-from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TILES, TRAJ_ID
+from pymove.utils.constants import (
+    DATETIME,
+    LATITUDE,
+    LONGITUDE,
+    TILES,
+    TRAJ_ID,
+    TYPE_DASK,
+    TYPE_PANDAS,
+)
 
 
 def read_csv(
@@ -17,7 +25,7 @@ def read_csv(
     longitude=LONGITUDE,
     datetime=DATETIME,
     traj_id=TRAJ_ID,
-    type_='pandas',
+    type_=TYPE_PANDAS,
     n_partitions=1,
 ):
     """
@@ -75,9 +83,9 @@ def read_csv(
     from pymove import PandasMoveDataFrame as pm
     from pymove import DaskMoveDataFrame as dm
 
-    if type_ == 'pandas':
+    if type_ == TYPE_PANDAS:
         return pm(df, latitude, longitude, datetime, traj_id)
-    if type_ == 'dask':
+    if type_ == TYPE_DASK:
         return dm(df, latitude, longitude, datetime, traj_id, n_partitions)
 
 

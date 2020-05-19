@@ -29,10 +29,8 @@ def std(values_array):
     try:
         result = math.sqrt(sum_sq / size)
     except ValueError:
-        e = (
-            '(sum_sq / size) (size=%s, mean=%s, sum_sq=%s) should be non negative, but is %s'
-            % (size, mean, sum_sq, sum_sq / size)
-        )
+        e = '(sum_sq/size)(size=%s, mean=%s, sum_sq=%s) should be non negative, is %s'
+        e = e % (size, mean, sum_sq, sum_sq / size)
         raise ValueError(e)
     return result
 

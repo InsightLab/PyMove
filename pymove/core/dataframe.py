@@ -9,11 +9,14 @@ from dask.dataframe import DataFrame
 from pymove.core import MoveDataFrameAbstractModel
 from pymove.core.grid import Grid
 from pymove.utils.constants import (
+    DATE,
     DATETIME,
     DAY,
+    DAY_PERIODS,
     DIST_PREV_TO_NEXT,
     DIST_TO_NEXT,
     DIST_TO_PREV,
+    HOUR,
     HOUR_COS,
     HOUR_SIN,
     LATITUDE,
@@ -33,6 +36,8 @@ from pymove.utils.constants import (
     TYPE_DASK,
     TYPE_PANDAS,
     UID,
+    WEEK_DAYS,
+    WEEK_END,
 )
 from pymove.utils.conversions import lat_meters
 from pymove.utils.distances import haversine
@@ -50,16 +55,16 @@ class MoveDataFrame:
         longitude=LONGITUDE,
         datetime=DATETIME,
         traj_id=TRAJ_ID,
-        type_='pandas',
+        type_=TYPE_PANDAS,
         n_partitions=1,
     ):
         self.type = type_
 
-        if type_ == 'pandas':
+        if type_ == TYPE_PANDAS:
             return PandasMoveDataFrame(
                 data, latitude, longitude, datetime, traj_id
             )
-        if type_ == 'dask':
+        if type_ == TYPE_DASK:
             return DaskMoveDataFrame(
                 data, latitude, longitude, datetime, traj_id, n_partitions
             )
@@ -176,8 +181,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self._type = TYPE_PANDAS
             self.last_operation = None
         else:
+
             raise AttributeError(
-                'Could not instantiate new MoveDataFrame because data has missing columns'
+                'Couldn\'t instantiate MoveDataFrame because data has missing columns.'
             )
 
     @property
@@ -665,7 +671,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         try:
             print('Creating date features...')
             if DATETIME in data_:
-                data_['date'] = data_[DATETIME].dt.date
+                data_[DATE] = data_[DATETIME].dt.date
                 print('..Date features was created...\n')
 
             if inplace:
@@ -706,7 +712,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         try:
             print('\nCreating or updating a feature for hour...\n')
             if DATETIME in data_:
-                data_['hour'] = data_[DATETIME].dt.hour
+                data_[HOUR] = data_[DATETIME].dt.hour
                 print('...Hour feature was created...\n')
 
             if inplace:
@@ -795,15 +801,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 data_ = df._data
 
             print('Creating or updating a feature for weekend\n')
-            if 'day' in data_:
-                fds = (data_[DAY] == 'Saturday') | (data_[DAY] == 'Sunday')
+            if DAY in data_:
+                fds = (data_[DAY] == WEEK_DAYS[5]) | (data_[DAY] == WEEK_DAYS[6])
                 index_fds = data_[fds].index
-                data_['weekend'] = 0
-                data_.at[index_fds, 'weekend'] = 1
+                data_[WEEK_END] = 0
+                data_.at[index_fds, WEEK_END] = 1
                 print('...Weekend was set as 1 or 0...\n')
                 if not create_day_of_week:
                     print('...dropping colum day\n')
-                    del data_['day']
+                    del data_[DAY]
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -864,8 +870,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 (hours >= 12) & (hours < 18),
                 (hours >= 18) & (hours < 24),
             ]
-            choices = ['Early morning', 'Morning', 'Afternoon', 'Evening']
-            data_[PERIOD] = np.select(conditions, choices, 'undefined')
+            data_[PERIOD] = np.select(conditions, DAY_PERIODS, 'undefined')
             print('...the period of day feature was created')
 
             if inplace:
@@ -1057,8 +1062,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_ = self._data.copy()
 
         try:
+            message = '\nCreating or updating distance, time and speed features'
+            message += ' in meters by seconds\n'
             print(
-                '\nCreating or updating distance, time and speed features in meters by seconds\n'
+                message
             )
 
             start_time, ids, sum_size_id, size_id = self._prepare_generate_data(
@@ -1433,7 +1440,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def time_interval(self):
         """
-        Get time difference between max and min_ datetime in trajectory data.
+        Get time difference between max and min datetime in trajectory data.
 
         Returns
         -------
@@ -1604,6 +1611,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     def plot_traj_id(
         self,
         tid,
+        label=TID,
         feature=None,
         value=None,
         figsize=(10, 10),
@@ -1616,8 +1624,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        tid : str.
+        tid : any.
             Represents the trajectory tid.
+        label : str, optional, default 'traj_id'.
+            Feature with trajectories tids.
         feature : str, optional, default None.
             Name of the feature to highlight on plot.
         value : any, optional, defaut None.
@@ -1650,11 +1660,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         operation = begin_operation('plot_traj_id')
 
-        if TID not in self._data:
+        if label not in self._data:
             self.last_operation = end_operation(operation)
-            raise KeyError('TID feature not in dataframe')
+            raise KeyError('%s feature not in dataframe' % label)
 
-        df_ = self._data[self._data[TID] == tid]
+        df_ = self._data[self._data[label] == tid]
 
         if not len(df_):
             self.last_operation = end_operation(operation)
@@ -1717,8 +1727,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         operation = begin_operation('show_trajectories_info')
 
         try:
+            message = ('=' * 22) + ' INFORMATION ABOUT DATASET ' + ('=' * 22)
             print(
-                '\n====================== INFORMATION ABOUT DATASET ======================\n'
+                '\n%s\n' % message
             )
             print('Number of Points: %s\n' % self._data.shape[0])
 
@@ -1772,7 +1783,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 )
 
             print(
-                '\n=======================================================================\n'
+                '\n%s\n' % ('=' * len(message))
             )
 
             self.last_operation = end_operation(operation)
@@ -1812,7 +1823,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
 
-        operation = begin_operation('min_')
+        operation = begin_operation('min')
         _min = self._data.min(axis, skipna, level, numeric_only, **kwargs)
         self.last_operation = end_operation(operation)
 
@@ -2390,7 +2401,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         subset: int or str, optional, default None
-            Only consider certain columns for identifying duplicates, by default use all of the columns
+            Only consider certain columns for identifying duplicates,
+            by default use all of the columns
         keep: 'first', 'lasts', False, optional, default 'first'
             - first : Drop duplicates except for the first occurrence.
             - last : Drop duplicates except for the last occurrence.
@@ -3022,7 +3034,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         operation = begin_operation('convet_to')
 
-        if new_type == 'dask':
+        if new_type == TYPE_DASK:
             _dask = DaskMoveDataFrame(
                 self._data,
                 latitude=LATITUDE,
@@ -3033,7 +3045,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             )
             self.last_operation = end_operation(operation)
             return _dask
-        elif new_type == 'pandas':
+        elif new_type == TYPE_PANDAS:
             self.last_operation = end_operation(operation)
             return self
 
@@ -3104,7 +3116,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = None
         else:
             raise AttributeError(
-                'Could not instantiate new MoveDataFrame because data has missing columns'
+                'Couldn\'t instantiate MoveDataFrame because data has missing columns.'
             )
 
     @property
@@ -3500,9 +3512,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         """
 
-        if new_type == 'dask':
+        if new_type == TYPE_DASK:
             return self
-        elif new_type == 'pandas':
+        elif new_type == TYPE_PANDAS:
             df_pandas = self._data.compute()
             return PandasMoveDataFrame(
                 df_pandas,
