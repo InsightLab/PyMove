@@ -9,7 +9,7 @@ run_tests() {
     cd $TEST_DIR
 
     set -x  # print executed commands to the terminal
-
+    python -c "import pymove"
     $TEST_CMD pymove.tests
 }
 
