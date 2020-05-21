@@ -1,7 +1,7 @@
 set -e
 
 run_tests() {
-    TEST_CMD="pytest --showlocals --pyargs pkg"
+    TEST_CMD="pytest --showlocals --pyargs"
 
     mkdir -p $TEST_DIR
 
