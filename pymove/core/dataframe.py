@@ -109,10 +109,10 @@ class MoveDataFrame:
         """
 
         try:
-            if data.dtypes.lat != 'float32':
-                data.lat = data.lat.astype('float32')
-            if data.dtypes.lon != 'float32':
-                data.lon = data.lon.astype('float32')
+            if data.dtypes.lat != 'float64':
+                data.lat = data.lat.astype('float64')
+            if data.dtypes.lon != 'float64':
+                data.lon = data.lon.astype('float64')
             if data.dtypes.datetime != 'datetime64[ns]':
                 data.datetime = data.datetime.astype('datetime64[ns]')
         except AttributeError:
@@ -1732,7 +1732,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def plot_all_features(
         self,
-        dtype=np.float32,
+        dtype=np.float64,
         figsize=(21, 15),
         return_fig=True,
         save_fig=False,
@@ -1745,7 +1745,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         figsize : tuple, optional, default (21, 15).
             Represents dimensions of figure.
-        dtype : type, optional, default np.float32.
+        dtype : type, optional, default np.float64.
             Represents column type.
         return_fig : bool, optional, default True.
             Represents whether or not to save the generated picture.
