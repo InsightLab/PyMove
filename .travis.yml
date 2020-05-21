@@ -5,6 +5,7 @@ env:
 script:
   - python setup.py sdist >/dev/null
   - python setup.py install
+  - pip install pytest
   - bash test.sh
 deploy:
   skip_existing: true
