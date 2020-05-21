@@ -2,9 +2,9 @@ from __future__ import print_function
 
 import json
 import os
-import pwd
+#import pwd
 import re
-import resource
+#import resource
 import time
 from collections import deque
 from itertools import chain

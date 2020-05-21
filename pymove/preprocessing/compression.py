@@ -17,7 +17,7 @@ def compress_segment_stop_to_point(
     dist_radius=30,
     time_radius=900,
     inplace=False
-):
+ ):
     """
     Compress the trajectories using the stay points in the dataframe. Compress
     a segment to point setting lat_mean e lon_mean to each segment.
