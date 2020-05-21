@@ -32,7 +32,6 @@ DEPENDENCIES = [
     'psycopg2',
     'pymongo'
 ]
-
 setup(
     name='pymove',
     version='1.3.1',
@@ -53,6 +52,7 @@ setup(
         'pymove.osm_module',
         'pymove.preprocessing',
         'pymove.semantic',
+        'pymove.tests',
         'pymove.uncertainty',
         'pymove.utils',
         'pymove.visualization',
