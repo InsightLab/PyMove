@@ -59,6 +59,10 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def tail(self):
+        pass
+
+    @abc.abstractmethod
     def get_users_number(self):
         pass
 

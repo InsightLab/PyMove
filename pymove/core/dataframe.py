@@ -485,10 +485,40 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('head')
-        head_ = self._data.head(n)
+        head_ = self.iloc[:n]
         self.last_operation = end_operation(operation)
 
         return head_
+
+    def tail(self, n=5):
+        """
+        Return the last n rows.
+
+        This function returns the last n rows for the object
+        based on position. It is useful for quickly testing if
+        your object has the right type of data in it.
+
+        Parameters
+        ----------
+        n : int, default 5.
+            Number of rows to select.
+
+        Returns
+        -------
+        same type as caller
+            The last n rows of the caller object.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.tail.html
+
+        """
+
+        operation = begin_operation('tail')
+        tail_ = self.iloc[-n:]
+        self.last_operation = end_operation(operation)
+
+        return tail_
 
     def get_users_number(self):
         """
@@ -3426,6 +3456,31 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         """
         return self._data.head(n, npartitions, compute)
+
+    def tail(self, n=5, npartitions=1, compute=True):
+        """
+        Return the last n rows.
+
+        This function returns the last n rows for the object based on position.
+        It is useful for quickly testing if
+        your object has the right type of data in it.
+
+        Parameters
+        ----------
+        n : int, optional, default 5
+            Number of rows to select.
+        npartitions : int, optional, default 1.
+            Represents the number partitions.
+        compute : bool, optional, default True.
+            ?
+
+        Returns
+        -------
+        same type as caller
+            The last n rows of the caller object.
+
+        """
+        return self._data.tail(n, npartitions, compute)
 
     def get_users_number(self):
         """Check and return number of users in trajectory data."""
