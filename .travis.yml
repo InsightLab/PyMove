@@ -1,8 +1,13 @@
 language: python
 python: '3.6'
+
+env:
+  global:
+    -TEST_DIR=/tmp/pymove
 script:
   - python setup.py sdist >/dev/null
   - python setup.py install
+  - bash build_tools/travis/test_script.sh
 deploy:
   skip_existing: true
   provider: pypi
