@@ -10,7 +10,7 @@ run_tests() {
 
     set -x  # print executed commands to the terminal
 
-    $TEST_CMD pymove
+    $TEST_CMD pymove/tests
 }
 
 run_tests
