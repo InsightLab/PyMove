@@ -942,7 +942,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = self._data
+            data_ = self._data.copy()
 
         try:
             print('\nCreating or updating a feature for hour...\n')
@@ -1032,8 +1032,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 self.generate_day_of_the_week_features(inplace=inplace)
                 data_ = self._data
             else:
-                df = self.generate_day_of_the_week_features(inplace=inplace)
-                data_ = df._data
+                data_ = self.generate_day_of_the_week_features(
+                    inplace=inplace
+                )._data
 
             print('Creating or updating a feature for weekend\n')
             if DAY in data_:
@@ -1644,9 +1645,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 self.generate_dist_features(inplace=inplace)
             data_ = self._data
         else:
-            if DIST_TO_PREV not in self._data:
-                df = self.generate_dist_features(inplace=inplace)
-            data_ = df._data
+            data_ = self.generate_dist_features(inplace=inplace)._data
 
         try:
             print('\nCreating or updating features MOVE and STOPS...\n')

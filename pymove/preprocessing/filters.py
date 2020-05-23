@@ -39,14 +39,13 @@ def by_bbox(move_data, bbox, filter_out=False, inplace=False):
 
     """
 
+    filter_ = (
+        (move_data[LATITUDE] >= bbox[0])
+        & (move_data[LONGITUDE] >= bbox[1])
+        & (move_data[LATITUDE] <= bbox[2])
+        & (move_data[LONGITUDE] <= bbox[3])
+    )
     try:
-        filter_ = (
-            (move_data[LATITUDE] >= bbox[0])
-            & (move_data[LATITUDE] <= bbox[2])
-            & (move_data[LONGITUDE] >= bbox[1])
-            & (move_data[LONGITUDE] <= bbox[3])
-        )
-
         if filter_out:
             filter_ = ~filter_
 
@@ -179,7 +178,7 @@ def by_id(
 
 
 def by_tid(
-    move_data, tid_=None, label_tid=TID, filter_out=False, inplace=False
+    move_data, tid_=None, filter_out=False, inplace=False
 ):
     """
     Filters trajectories points according to a specified  trajectory tid.
@@ -209,10 +208,7 @@ def by_tid(
 
     """
 
-    if TID not in move_data:
-        move_data.generate_tid_based_on_id_datetime()
-
-    return by_label(move_data, tid_, label_tid, filter_out, inplace)
+    return by_label(move_data, tid_, TID, filter_out, inplace)
 
 
 def outliers(
@@ -467,7 +463,7 @@ def _filter_speed_max_radius(move_data, **kwargs):
     """
     filter_ = (
         (np.nan_to_num(move_data[kwargs['arg1']].shift(1)) > kwargs['arg2'])
-        | (move_data[kwargs['arg1']] > kwargs['arg2'])
+        | (np.nan_to_num(move_data[kwargs['arg1']]) > kwargs['arg2'])
     )
     return move_data[filter_]
 
@@ -850,6 +846,11 @@ def clean_trajectories_with_few_points(
     dataframe or None
         The filtered trajectories without the minimum number of gps points.
 
+    Raises
+    ------
+    KeyError
+        If the label feature is not in the dataframe
+
     """
 
     if not inplace:
@@ -857,8 +858,8 @@ def clean_trajectories_with_few_points(
     else:
         move_df = move_data
 
-    if TID not in move_df:
-        move_df.generate_tid_based_on_id_datetime()
+    if label_tid not in move_df:
+        raise KeyError('%s not in dataframe' % label_tid)
 
     try:
         print(

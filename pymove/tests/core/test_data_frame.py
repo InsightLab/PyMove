@@ -1,21 +1,19 @@
-from pymove import read_csv
-import pandas as pd
 import numpy as np
-from pymove import MoveDataFrame
+import pandas as pd
 from numpy.testing import assert_array_equal
+
 import pymove
-
-
+from pymove import MoveDataFrame, read_csv
 from pymove.utils.constants import (
+    DATE,
+    DATETIME,
+    HOUR,
     LATITUDE,
     LONGITUDE,
-    DATETIME,
-    UID,
-    TRAJ_ID,
+    PERIOD,
     TID,
-    DATE,
-    HOUR,
-    PERIOD
+    TRAJ_ID,
+    UID,
 )
 
 list_data = [[39.984094, 116.319236, '2008-10-23 05:53:05', 1],
@@ -61,9 +59,9 @@ def _validate_move_data_frame_data(data):
 
         """
     try:
-        if data.dtypes.lat != 'float32':
+        if data.dtypes.lat != 'float64':
             return False
-        if data.dtypes.lon != 'float32':
+        if data.dtypes.lon != 'float64':
             return False
         if data.dtypes.datetime != 'datetime64[ns]':
             return False
@@ -122,7 +120,7 @@ def test_move_data_frame_from_data_frame():
         and converted to the default types used by PyMove lib.
     """
     df = pd.read_csv('examples/geolife_sample.csv', parse_dates=['datetime'])
-    move_df = MoveDataFrame(data=df, latitude="lat", longitude=LONGITUDE, datetime=DATETIME)
+    move_df = MoveDataFrame(data=df, latitude='lat', longitude=LONGITUDE, datetime=DATETIME)
     assert _has_columns(move_df)
     assert _validate_move_data_frame_data(move_df)
 
@@ -135,14 +133,14 @@ def test_attribute_error_from_data_frame():
     df = pd.read_csv('pymove/tests/geolife_sample_erro_lat.csv', parse_dates=['datetime'])
     try:
         MoveDataFrame(data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME)
-        raise AssertionError("AttributeError error not raised by MoveDataFrame")
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
     except AttributeError as e:
         pass
 
     df = pd.read_csv('pymove/tests/geolife_sample_erro_lon.csv', parse_dates=['datetime'])
     try:
         MoveDataFrame(data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME)
-        raise AssertionError("AttributeError error not raised by MoveDataFrame")
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
     except AttributeError as e:
         pass
 
@@ -150,7 +148,7 @@ def test_attribute_error_from_data_frame():
 
     try:
         MoveDataFrame(data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME)
-        raise AssertionError("AttributeError error not raised by MoveDataFrame")
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
     except AttributeError as e:
         pass
 
@@ -195,20 +193,20 @@ def test_to_data_frame():
     assert type(move_df.to_DataFrame()) is pandas.DataFrame
 
 
-def test_generate_tid_based_on_id_datatime():
-    #Test the function generate_tid_based_on_id_datatime is creating the tid feature.
+def test_generate_tid_based_on_id_datetime():
+    #Test the function generate_tid_based_on_id_datetime is creating the tid feature.
 
     #Check if the inplace option is working and the tid feature is created in a copy of PandasMoveDataFrame.
     #Check if the return object of the generate function is a PandasMoveDataFrame,
     #Test if the original PandasMoveDataFrame remains unchanged.
-    new_move_df = move_df.generate_tid_based_on_id_datatime(inplace=False)
+    new_move_df = move_df.generate_tid_based_on_id_datetime(inplace=False)
     assert_array_equal(new_move_df[TID], ['12008102305', '12008102305', '22008102305', '22008102305'])
     assert type(new_move_df) is pymove.core.dataframe.PandasMoveDataFrame
     assert TID not in move_df
 
     # Check if the tid feature is created in the original PandasMoveDataFrame when inplace = True.
     # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
-    move_df.generate_tid_based_on_id_datatime()
+    move_df.generate_tid_based_on_id_datetime()
     assert_array_equal(move_df[TID], ['12008102305', '12008102305', '22008102305', '22008102305'])
     assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
 
@@ -569,19 +567,19 @@ def test_drop():
     # longitude or datetime from the data.
     try:
         move_df.drop(columns=[LATITUDE], axis=1, inplace=True)
-        raise AssertionError("AttributeError error not raised by MoveDataFrame")
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
     except AttributeError as e:
         pass
 
     try:
         move_df.drop(columns=[LONGITUDE], axis=1, inplace=True)
-        raise AssertionError("AttributeError error not raised by MoveDataFrame")
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
     except AttributeError as e:
         pass
 
     try:
         move_df.drop(columns=['datetime'], axis=1, inplace=True)
-        raise AssertionError("AttributeError error not raised by MoveDataFrame")
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
     except AttributeError as e:
         pass
 
@@ -748,7 +746,7 @@ def test_set_index():
     # longitude or datetime from the data when setting a new index.
     try:
         move_df_nan.set_index(keys=LATITUDE, drop=True, inplace=True)
-        raise AssertionError("AttributeError error not raised by MoveDataFrame")
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
     except AttributeError as e:
         pass
 
@@ -787,14 +785,10 @@ def test_to_csv():
 
 
 def test_plot_traj_id():
-    move_df.generate_tid_based_on_id_datatime()
+    move_df.generate_tid_based_on_id_datetime()
     df, img = move_df.plot_traj_id(move_df[TID][0])
     assert_array_equal(df, [[39.984092712402344, 116.3192367553711,
                                     pd.Timestamp('2008-10-23 05:53:05'), 1, '12008102305'],
                                    [39.98419952392578, 116.31932067871094,
                                     pd.Timestamp('2008-10-23 05:53:06'), 1, '12008102305']])
     move_df.drop(TID, axis=1, inplace=True)
-
-
-
-
