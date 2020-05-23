@@ -1979,8 +1979,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 )
 
             if DATETIME in self._data:
-                dtmin = self._data[DATETIME].max()
-                dtmax = self._data[DATETIME].min()
+                dtmax = self._data[DATETIME].max()
+                dtmin = self._data[DATETIME].min()
                 print(
                     'Start Date:%s     End Date:%s\n'
                     % (dtmin, dtmax)
