@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from pymove.preprocessing import filters, segmentation, stay_point_detection
+from pymove.preprossessing import filters, segmentation, stay_point_detection
 from pymove.utils.constants import (
     BLOCK,
     DEACTIVATED,
