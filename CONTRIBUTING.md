@@ -29,7 +29,7 @@ We use GitHub issues to track public bugs. Report a bug by [opening a new issue]
 ## Write bug reports with detail, background, and sample code
 [This is an example](http://stackoverflow.com/q/12488905/180626) of a bug report.
 
-**Great Bug Reports*-   tend to have:
+**Great Bug Reports** tend to have:
 
 -   A quick summary and/or background
 
@@ -43,7 +43,7 @@ We use GitHub issues to track public bugs. Report a bug by [opening a new issue]
 
 -   Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
 
-People *love-   thorough bug reports. I'm not even kidding.
+People *love* thorough bug reports. I'm not even kidding.
 
 ## Use a Consistent Coding Style
 We use `flake8` and `codacy` to standardize our code. Some styles you shoud follow.
