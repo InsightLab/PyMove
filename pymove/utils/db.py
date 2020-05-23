@@ -82,14 +82,14 @@ def write_postgres(
 
     cols = dataframe.columns
     columns = ','.join(cols)
-    values = ','.join(['%s'] * len(cols))
+    values = ','.join(['%srs'] * len(cols))
 
     conn = None
     sql = 'INSERT INTO %s(%s) VALUES(%s)' % (table, columns, values)
     try:
         conn = connect_postgres(dbname, user, psswrd, host, port)
         cur = conn.cursor()
-        cur.execute('DELETE FROM %s', (table,))
+        cur.execute('DELETE FROM %srs', (table,))
         cur.executemany(sql, dataframe.values)
         conn.commit()
         cur.close()
@@ -365,7 +365,7 @@ def read_mongo(
     type_ : 'pandas', 'dask' or None, defaults 'pandas'
         It will try to convert the dataframe into a MoveDataFrame
     no_id: bool, default True
-        Whether to drop the registers id's
+        Whether to drop the registers id'srs
     dbname : string, default 'postgres'
         Name of the database
     user : string, default 'postgres'

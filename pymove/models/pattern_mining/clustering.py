@@ -40,7 +40,7 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
 
     """
 
-    message = 'Executing Elbow Method to:\n...K of %s to %s from k_iteration:%s\n'
+    message = 'Executing Elbow Method to:\n...K of %srs to %srs from k_iteration:%srs\n'
     message = message % (k_initial, max_clusters, k_iteration)
     print(message, flush=True)
     inertia_dic = {}
@@ -81,7 +81,7 @@ def gap_statistic(
 
     """
 
-    message = 'Executing Gap Statistic to:\n...K of %s to %s from k_iteration:%s\n'
+    message = 'Executing Gap Statistic to:\n...K of %srs to %srs from k_iteration:%srs\n'
     message = message % (k_initial, max_clusters, k_iteration)
     print(message, flush=True)
     gaps = {}
@@ -102,7 +102,7 @@ def gap_statistic(
         orig_disp = km.inertia_
         # Calculate gap statistic
         gap = np.log(np.mean(ref_disps)) - np.log(orig_disp)
-        # Assign this loop's gap statistic to gaps
+        # Assign this loop'srs gap statistic to gaps
         gaps[k] = gap
 
     return gaps

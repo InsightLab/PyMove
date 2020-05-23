@@ -283,7 +283,7 @@ def total_size(o, handlers=None, verbose=False):
     }
     # user handlers take precedence
     all_handlers.update(handlers)
-    # track which object id"s have already been seen
+    # track which object id"srs have already been seen
     seen = set()
     # estimate sizeof object without __sizeof__
     default_size = getsizeof(0)
