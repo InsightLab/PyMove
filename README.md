@@ -33,7 +33,7 @@
   <td>Build Status</td>
   <td>
     <a href="https://travis-ci.org/InsightLab/PyMove/">
-      <img src="https://api.travis-ci.org/InsightLab/PyMove.svg?branch=master" alt="Travis build status" />
+      <img src="https://img.shields.io/travis/InsightLab/pymove/master" alt="Travis build status" />
     </a>
   </td>
 </tr>
@@ -41,7 +41,7 @@
   <td>Platforms</td>
   <td>
     <a href="https://anaconda.org/conda-forge/pymove">
-      <img src="https://img.shields.io/conda/pn/conda-forge/pymove.svg" alt="Platforms" />
+      <img src="https://img.shields.io/conda/pn/conda-forge/pymove" alt="Platforms" />
     </a>
   </td>
 </tr>
@@ -110,10 +110,18 @@
   </td>
 </tr>
 <tr>
-  <td>Codacy Badge</td>
+  <td>Code Quality</td>
   <td>
     <a href="https://www.codacy.com/gh/InsightLab/PyMove?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=InsightLab/PyMove&amp;utm_campaign=Badge_Grade">
-      <img src="https://api.codacy.com/project/badge/Grade/26c581fbe1ee42e78a9adc50b7372ceb" alt="Codacy badge" />
+      <img src="https://img.shields.io/codacy/grade/26c581fbe1ee42e78a9adc50b7372ceb" alt="Code quality" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Code Coverage</td>
+  <td>
+    <a href="https://www.codacy.com/gh/InsightLab/PyMove?utm_source=github.com&utm_medium=referral&utm_content=InsightLab/PyMove&utm_campaign=Badge_Coverage">
+      <img src="https://img.shields.io/codacy/coverage/26c581fbe1ee42e78a9adc50b7372ceb" alt="Code coverage" />
     </a>
   </td>
 </tr>
