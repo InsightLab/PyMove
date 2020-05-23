@@ -122,8 +122,8 @@ def test_by_bbox():
 def test_by_datetime():
     move_df, cols = _prepare_df_default(list_data_1)
 
-    filter_values_start = filters.by_datetime(move_df,
-                                              start_datetime='2008-10-23 05:53:06')
+    filter_values_start = filters.by_datetime(
+        move_df, start_datetime='2008-10-23 05:53:06')
     expected = DataFrame(data=[
         [39.984199952392578, 116.31932067871094, Timestamp('2008-10-23 05:53:06'), 1],
         [39.984222412109375, 116.31940460205078, Timestamp('2008-10-23 05:53:11'), 2],

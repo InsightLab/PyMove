@@ -24,7 +24,6 @@ from pymove.utils.constants import (
     SPEED_PREV_TO_NEXT,
     TID,
     TIME_PREV_TO_NEXT,
-    TIME_TO_PREV,
     TRAJ_ID,
     TYPE_DASK,
     TYPE_PANDAS,
@@ -169,10 +168,6 @@ def test_move_data_frame_from_data_frame():
 
 
 def test_attribute_error_from_data_frame():
-    """
-        Checks if MoveDataFrame raises a error message when the columns latitude, longitude and datetime
-        are missing from the data.
-    """
     df = DataFrame(data=[
         [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
         [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
@@ -318,7 +313,7 @@ def test_dtypes():
 def test_shape():
     move_df = _default_move_df()
 
-    assert move_df.shape == (4,4)
+    assert move_df.shape == (4, 4)
 
 
 def test_len():
