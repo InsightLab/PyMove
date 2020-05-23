@@ -14,5 +14,6 @@
 
 -   What is the current behavior? (You can also link to an open issue here)
     <!--- Discuss the new functionality or bug --->
+
 -   What is the new behavior (if this is a feature change)?
     <!--- What your implementation does, what it adds. --->
