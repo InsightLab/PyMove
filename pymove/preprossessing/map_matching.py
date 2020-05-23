@@ -1,4 +1,3 @@
-# flake8: noqa
 # import time
 
 # import numpy as np
@@ -53,7 +52,7 @@
 #     """
 
 #     if not inplace:
-#         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+#         move_data = PandasMoveDataFrame(data=move_data.to_data_frame())
 
 #     try:
 #         if TID not in move_data:
@@ -161,7 +160,7 @@
 #     """
 
 #     if not inplace:
-#         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+#         move_data = PandasMoveDataFrame(data=move_data.to_data_frame())
 
 #     if TID not in move_data:
 #         move_data.generate_tid_based_on_id_datetime()
@@ -242,7 +241,7 @@
 #     """
 
 #     if not inplace:
-#         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+#         move_data = PandasMoveDataFrame(data=move_data.to_data_frame())
 
 #     try:
 
@@ -325,7 +324,7 @@
 #     """
 
 #     if not inplace:
-#         move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+#         move_data = PandasMoveDataFrame(data=move_data.to_data_frame())
 
 #     if TID not in move_data:
 #         move_data.generate_tid_based_on_id_datetime()
@@ -432,7 +431,7 @@
 
 #             assert ~np.isin(
 #                 np.inf, intp_result
-#             ), "interpolation results with np.inf value(s)"
+#             ), "interpolation results with np.inf value(srs)"
 
 #             # update time features for nodes. initially they are empty.
 #             values = intp_result.astype(np.int64)

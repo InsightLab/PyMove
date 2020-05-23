@@ -6,7 +6,7 @@ from pandas._libs.tslibs.timestamps import Timestamp
 
 def date_to_str(date):
     """
-    Get date, in string's format, from timestamp.
+    Get date, in string'srs format, from timestamp.
 
     Parameters
     ----------
@@ -16,7 +16,7 @@ def date_to_str(date):
     Returns
     -------
     str
-        Represents the date in string"s format.
+        Represents the date in string"srs format.
 
     """
 
@@ -25,18 +25,18 @@ def date_to_str(date):
 
 def str_to_datetime(dt_str):
     """
-    Converts a datetime in string"s format "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S" to
-    datetime"s format.
+    Converts a datetime in string"srs format "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S" to
+    datetime"srs format.
 
     Parameters
     ----------
     dt_str : String
-        Represents a datetime in string"s format.
+        Represents a datetime in string"srs format.
 
     Returns
     -------
     datetime.datetime
-        Represents a datetime in datetime"s format.
+        Represents a datetime in datetime"srs format.
 
     """
 
@@ -48,17 +48,17 @@ def str_to_datetime(dt_str):
 
 def to_str(data):
     """
-    Converts a date in datetime's format to string"s format.
+    Converts a date in datetime'srs format to string"srs format.
 
     Parameters
     ----------
     data : datetime.datetime
-        Represents a datetime in datetime"s format.
+        Represents a datetime in datetime"srs format.
 
     Returns
     -------
     str
-        Represents a datetime in string"s format "%Y-%m-%d %H:%M:%S".
+        Represents a datetime in string"srs format "%Y-%m-%d %H:%M:%S".
 
     """
 
@@ -73,7 +73,7 @@ def to_min(dt):
     Parameters
     ----------
     dt : datetime.datetime
-        Represents a datetime in datetime"s format.
+        Represents a datetime in datetime"srs format.
 
     Returns
     -------
@@ -101,7 +101,7 @@ def min_to_datetime(min_):
     Returns
     -------
     datetime.datetime
-        Represents minutes in datetime"s format.
+        Represents minutes in datetime"srs format.
 
     """
 
@@ -169,7 +169,7 @@ def min_to_datetime(min_):
 #     Parameters
 #     ----------
 #     dt_str : datetime.datetime
-#         Represents a datetime in datetime"s format.
+#         Represents a datetime in datetime"srs format.
 #     time_window_duration: int
 #
 #     Returns
@@ -195,7 +195,7 @@ def to_day_of_week_int(date):
     Parameters
     ----------
     date : datetime.datetime
-        Represents a datetime in datetime"s format.
+        Represents a datetime in datetime"srs format.
 
     Returns
     -------
@@ -361,7 +361,7 @@ def millis_to_timestamp(milliseconds):
 
 def time_to_str(time):
     """
-    Get time, in string's format, from timestamp.
+    Get time, in string'srs format, from timestamp.
 
     Parameters
     ----------
@@ -371,7 +371,7 @@ def time_to_str(time):
     Returns
     -------
     str
-        Represents the time in string"s format.
+        Represents the time in string"srs format.
 
     Examples
     --------
@@ -386,17 +386,17 @@ def time_to_str(time):
 
 def str_to_time(dt_str):
     """
-    Converts a time in string's format "%H:%M:%S" to datetime's format.
+    Converts a time in string'srs format "%H:%M:%S" to datetime'srs format.
 
     Parameters
     ----------
     dt_str : String
-        Represents a time in string"s format.
+        Represents a time in string"srs format.
 
     Returns
     -------
     datetime.datetime
-        Represents a time in datetime"s format.
+        Represents a time in datetime"srs format.
 
     Examples
     --------

@@ -42,7 +42,7 @@ def read_csv(
     encoding : String, optional, default 'utf-8'.
         Encoding to use for UTF when reading/writing
     header: int, list of int, default ‘infer’
-        Row number(s) to use as the column names, and the start of the data.
+        Row number(srs) to use as the column names, and the start of the data.
         Default behavior is to infer the column names: if no names are passed
         the behavior is identical to header=0 and column names are inferred from
         the first line of the file, if column names are passed explicitly then
@@ -194,7 +194,7 @@ def save_bbox(bbox_tuple, file, tiles=TILES[0], color='red'):
     file : String.
         Represents filename.
     tiles : String, optional, default 'OpenStreetMap'.
-        Represents tyles's type_.
+        Represents tyles'srs type_.
         Example: 'openstreetmap', 'cartodbpositron',
                 'stamentoner', 'stamenterrain',
                 'mapquestopen', 'MapQuest Open Aerial',

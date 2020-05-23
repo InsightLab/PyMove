@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from pymove.preprocessing.segmentation import by_max_dist
+from pymove.preprossessing.segmentation import by_max_dist
 from pymove.utils.constants import (
     DATETIME,
     DIST_TO_PREV,
@@ -91,7 +91,7 @@ def create_or_update_move_stop_by_dist_time(
         If the user stayed in the segment for a time
         greater than time_radius, than the segment is a stop.
     label_id : str, optional, default 'id'
-         Indicates the label of the id column in the user"s dataframe.
+         Indicates the label of the id column in the user"srs dataframe.
     new_label : float, optional, default 'segment_stop'
         Is the name of the column to indicates if a point is a stop of a move.
     inplace : boolean, optional, default True
@@ -173,7 +173,7 @@ def create_update_move_and_stop_by_radius(
     radius :  Double, optional(900 by default)
         The radius value is used to determine if a segment is a stop.
         If the value of the point in target_label is
-        greater than radius, the segment is a stop, otherwise it's a move.
+        greater than radius, the segment is a stop, otherwise it'srs a move.
     target_label : String, optional(dist_to_prev by default)
         The feature used to calculate the stay points.
     new_label : String, optional(situation by default)
