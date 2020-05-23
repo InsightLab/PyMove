@@ -54,16 +54,16 @@ class Grid:
 
     def _create_virtual_grid(self, data, cell_size, meters_by_degree):
         """
-        Create a virtual grid based in dataset's bound box.
+        Create a virtual grid based in dataset'srs bound box.
 
         Parameters
         ----------
         data : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
         cell_size : float
-            Size of grid's cell.
+            Size of grid'srs cell.
         meters_by_degree : float
-            Represents the meters's degree of latitude.
+            Represents the meters'srs degree of latitude.
             By default the latitude is set in Fortaleza.
 
         Returns
@@ -74,7 +74,7 @@ class Grid:
                 - lat_min_y: minimum latitude.
                 - grid_size_lat_y: size of latitude grid.
                 - grid_size_lon_x: size of longitude grid.
-                - cell_size_by_degree: grid's cell size.
+                - cell_size_by_degree: grid'srs cell size.
         """
 
         operation = begin_operation('_create_virtual_grid')
@@ -128,7 +128,7 @@ class Grid:
         self, data, label_dtype=np.int64, sort=True
     ):
         """
-        Create or update index grid feature. It's not necessary pass dic_grid,
+        Create or update index grid feature. It'srs not necessary pass dic_grid,
         because if don't pass, the function create a dic_grid.
 
         Parameters
