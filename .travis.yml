@@ -1,8 +1,12 @@
 language: python
 python: '3.6'
+
+env:
 script:
   - python setup.py sdist >/dev/null
   - python setup.py install
+  - pip install pytest
+  - bash test.sh
 deploy:
   skip_existing: true
   provider: pypi

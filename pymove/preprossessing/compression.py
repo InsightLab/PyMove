@@ -1,6 +1,6 @@
 import numpy as np
 
-from pymove.preprocessing.stay_point_detection import (
+from pymove.preprossessing.stay_point_detection import (
     create_or_update_move_stop_by_dist_time,
 )
 from pymove.utils.constants import (
@@ -48,7 +48,7 @@ def compress_segment_stop_to_point(
          Used to create the stay points used in the compression.
          If the dataset already has the stop move, this
          parameter should be ignored.
-         Indicates the label of the id column in the user"s dataframe.
+         Indicates the label of the id column in the user"srs dataframe.
     dist_radius : Double, optional(30 by default)
         Used to create the stay points used in the compression.
         If the dataset already has the stop move, this
@@ -90,8 +90,8 @@ def compress_segment_stop_to_point(
             )
 
         print('...setting mean to lat and lon...')
-        lat_mean = np.full(move_data.shape[0], -1.0, dtype=np.float32)
-        lon_mean = np.full(move_data.shape[0], -1.0, dtype=np.float32)
+        lat_mean = np.full(move_data.shape[0], -1.0, dtype=np.float64)
+        lon_mean = np.full(move_data.shape[0], -1.0, dtype=np.float64)
 
         if drop_moves is False:
             lat_mean[move_data[~move_data[label_stop]].index] = np.NaN

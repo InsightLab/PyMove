@@ -40,7 +40,7 @@ def feature_values_using_filter(
     """
 
     if not inplace:
-        move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+        move_data = PandasMoveDataFrame(data=move_data.to_data_frame())
 
     values_feature = move_data.at[id_, feature_name]
     if filter_.shape == ():
@@ -91,7 +91,7 @@ def feature_values_using_filter_and_indexes(
     """
 
     if not inplace:
-        move_data = PandasMoveDataFrame(data=move_data.to_DataFrame())
+        move_data = PandasMoveDataFrame(data=move_data.to_data_frame())
 
     values_feature = move_data.at[id_, feature_name]
     values_feature_filter = values_feature[filter_]
