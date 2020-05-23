@@ -168,7 +168,7 @@ def create_or_update_gps_deactivated_signal(
             move_data = move_data[:]
 
         start_time = time.time()
-        message = 'Create or update deactivated signal if time max > %s seconds\n'
+        message = 'Create or update deactivated signal if time max > %srs seconds\n'
         print(message % max_time_between_adj_points)
         move_data.generate_time_features()
 
@@ -218,7 +218,7 @@ def create_or_update_gps_jump(
             move_data = move_data[:]
 
         start_time = time.time()
-        message = 'Create or update jump if dist max > %s meters\n'
+        message = 'Create or update jump if dist max > %srs meters\n'
         print(message % max_dist_between_adj_points)
         move_data.generate_dist_features()
 
@@ -341,7 +341,7 @@ def create_or_update_gps_block_signal(
         if not inplace:
             move_data = move_data[:]
 
-        message = 'Create or update block_signal if max time stop > %s seconds\n'
+        message = 'Create or update block_signal if max time stop > %srs seconds\n'
         print(message % max_time_stop)
         start_time = time.time()
         segmentation.by_max_dist(

@@ -190,7 +190,7 @@ def by_tid(
     tid_ : String
         Specifies the number of the tid used to filter the trajectories points
     label_tid : String, optional, default 'tid'
-        The label of the column in the user"s dataframe which contains
+        The label of the column in the user"srs dataframe which contains
         the tid of the trajectories
     filter_out : boolean, optional(false by default)
         If set to true, the function will return the points of the
@@ -397,7 +397,7 @@ def clean_nan_values(
         If set to "any", the rows or columns will be dropped,
         if it has any NA values.
         If set to "all", the rows or columns will be dropped,
-        if all of it"s values are NA.
+        if all of it"srs values are NA.
     thresh : Integer, optional (None by default)
         Minimum non-NA required value to avoid dropping
     subset : array of String
@@ -572,13 +572,13 @@ def clean_gps_jumps_by_distance(
     move_data : dataframe
         The input trajectory data
     label_id : String, optional(the class dic_labels["id"] by default)
-         Indicates the label of the id column in the user"s dataframe.
+         Indicates the label of the id column in the user"srs dataframe.
     jump_coefficient : Float, optional(3.0 by default)
     threshold : Float, optional(1 by default)
         Minimum value that the distance features must have
         in order to be considered outliers
     label_dtype : type_, optional(np.float64 by default)
-        Represents column id type_. By default it"s np.float64.
+        Represents column id type_. By default it"srs np.float64.
     inplace : boolean, default(False by default)
         if set to true the operation is done in place, the original
         dataframe will be altered and None is returned.
@@ -637,12 +637,12 @@ def clean_gps_nearby_points_by_distances(
     move_data : dataframe
         The input trajectory data
     label_id : String, optional(the class dic_labels["id"] by default)
-         Indicates the label of the id column in the user"s dataframe.
+         Indicates the label of the id column in the user"srs dataframe.
     radius_area : Float, optional(10.0 by default)
-        Species the minimum distance a point must have to it"s previous point,
+        Species the minimum distance a point must have to it"srs previous point,
         in order not to be dropped.
     label_dtype : type_, optional(np.float64 by default)
-        Represents column id type_. By default it"s np.float64.
+        Represents column id type_. By default it"srs np.float64.
     inplace : boolean, default(False by default)
         if set to true the operation is done in place, the original
         dataframe will be altered and None is returned.
@@ -700,12 +700,12 @@ def clean_gps_nearby_points_by_speed(
     move_data : dataframe
         The input trajectory data
     label_id : String, optional(the class dic_labels["id"] by default)
-         Indicates the label of the id column in the user"s dataframe.
+         Indicates the label of the id column in the user"srs dataframe.
     speed_radius : Float, optional(0.0 by default)
-        Species the minimum speed a point must have from it"s previous point,
+        Species the minimum speed a point must have from it"srs previous point,
         in order not to be dropped.
     label_dtype : type_, optional(np.float64 by default)
-        Represents column id type_. By default it"s np.float64.
+        Represents column id type_. By default it"srs np.float64.
     inplace : boolean, default(False by default)
         if set to true the operation is done in place, the original
         dataframe will be altered and None is returned.
@@ -772,12 +772,12 @@ def clean_gps_speed_max_radius(
     move_data : dataframe
         The input trajectory data
     label_id : String, optional(the class dic_labels["id"] by default)
-        Indicates the label of the id column in the user"s dataframe.
+        Indicates the label of the id column in the user"srs dataframe.
     speed_max : Float. Optional(50.0 by default)
-        Indicates the maximum value a point"s speed_to_prev and speed_to_next
+        Indicates the maximum value a point"srs speed_to_prev and speed_to_next
         should have, in order not to be dropped.
     label_dtype : type_, optional(np.float64 by default)
-        Represents column id type_. By default it"s np.float64.
+        Represents column id type_. By default it"srs np.float64.
     inplace : boolean, default(False by default)
         if set to true the operation is done in place, the original
         dataframe will be altered and None is returned.
@@ -928,7 +928,7 @@ def clean_trajectories_short_and_few_points(
         Specifies the minimun number of points a trajectory must have
         in order not to be dropped
     label_dtype : type_, optional(np.float64 by default)
-        Represents column id type_. By default it"s np.float64.
+        Represents column id type_. By default it"srs np.float64.
     inplace : boolean, default(False by default)
         if set to true the operation is done in place, the original
         dataframe will be altered and None is returned.
@@ -1016,7 +1016,7 @@ def clean_id_by_time_max(
     label_id: string, optional( id by default).
         The label of the column which contains the id of the trajectories.
     label_dtype : type_, optional(np.float64 by default)
-        Represents column id type_. By default it"s np.float64.
+        Represents column id type_. By default it"srs np.float64.
     time_max: float. optional(3600 by default).
         Indicates the maximum value time a set of points with the
         same id should have in order not to be dropped.

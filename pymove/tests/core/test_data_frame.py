@@ -1,63 +1,92 @@
-import numpy as np
-import pandas as pd
-from numpy.testing import assert_array_equal
+import os
+from datetime import date
+
+from dask.dataframe import DataFrame as DaskDataFrame
+from numpy import nan, ndarray
+from numpy.testing import assert_allclose, assert_array_equal
+from pandas import DataFrame, Series, Timedelta, Timestamp
+from pandas.testing import assert_frame_equal, assert_series_equal
 
 import pymove
-from pymove import MoveDataFrame, read_csv
+from pymove import DaskMoveDataFrame, MoveDataFrame, PandasMoveDataFrame, read_csv
 from pymove.utils.constants import (
     DATE,
     DATETIME,
+    DAY,
+    DIST_PREV_TO_NEXT,
+    DIST_TO_PREV,
     HOUR,
+    HOUR_SIN,
     LATITUDE,
     LONGITUDE,
     PERIOD,
+    SITUATION,
+    SPEED_PREV_TO_NEXT,
     TID,
+    TIME_PREV_TO_NEXT,
+    TIME_TO_PREV,
     TRAJ_ID,
+    TYPE_DASK,
+    TYPE_PANDAS,
     UID,
+    WEEK_END,
 )
 
-list_data = [[39.984094, 116.319236, '2008-10-23 05:53:05', 1],
-             [39.984198, 116.319322, '2008-10-23 05:53:06', 1],
-             [39.984224, 116.319402, '2008-10-23 05:53:11', 2],
-             [39.984224, 116.319402, '2008-10-23 05:53:11', 2]]
+list_data = [
+    [39.984094, 116.319236, '2008-10-23 05:53:05', 1],
+    [39.984198, 116.319322, '2008-10-23 05:53:06', 1],
+    [39.984224, 116.319402, '2008-10-23 05:53:11', 2],
+    [39.984224, 116.319402, '2008-10-23 05:53:11', 2]
+]
 
-move_df = MoveDataFrame(data=list_data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
+str_data_default = """
+lat,lon,datetime,id
+39.984093,116.319236,2008-10-23 05:53:05,4
+39.9842,116.319322,2008-10-23 05:53:06,1
+39.984222,116.319402,2008-10-23 05:53:11,2
+39.984222,116.319402,2008-10-23 05:53:11,2
+"""
 
-move_df_nan = MoveDataFrame(data=list_data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
+str_data_different = """
+latitude,longitude,time,traj_id
+39.984093,116.319236,2008-10-23 05:53:05,4
+39.9842,116.319322,2008-10-23 05:53:06,1
+39.984222,116.319402,2008-10-23 05:53:11,2
+39.984222,116.319402,2008-10-23 05:53:11,2
+"""
+
+str_data_missing = """
+39.984093,116.319236,2008-10-23 05:53:05,4
+39.9842,116.319322,2008-10-23 05:53:06,1
+39.984222,116.319402,2008-10-23 05:53:11,2
+39.984222,116.319402,2008-10-23 05:53:11,2
+"""
+
+
+def _default_move_df():
+    return MoveDataFrame(
+        data=list_data, latitude=LATITUDE, longitude=LONGITUDE,
+        datetime=DATETIME, traj_id=TRAJ_ID
+    )
+
+
+def _default_pandas_df():
+    return DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[0, 1, 2, 3]
+    )
+
 
 def _has_columns(data):
-    """
-    Checks whether the received dataset has LATITUDE, LONGITUDE, 'datetime' columns.
-
-    Parameters
-    ----------
-    data : dict, list, numpy array or pandas.core.DataFrame.
-        Input trajectory data.
-
-    Returns
-    -------
-    bool
-        Represents whether or not you have the required columns.
-
-    """
     if LATITUDE in data and LONGITUDE in data and DATETIME in data:
         return True
     return False
 
 
 def _validate_move_data_frame_data(data):
-    """
-        Converts the columns type to the default type used by PyMove lib.
-
-        Parameters
-        ----------
-        data : dict, list, numpy array or pandas.core.DataFrame.
-            Input trajectory data.
-
-        Returns
-        -------
-
-        """
     try:
         if data.dtypes.lat != 'float64':
             return False
@@ -71,56 +100,70 @@ def _validate_move_data_frame_data(data):
 
 
 def test_move_data_frame_from_list():
-    """
-    Tests the creation of a MoveDataFrame from a list.
-    Checks if the collumns latitude, longitude and datetime are created
-    and converted to the default types used by PyMove lib.
-    """
-    list_data = [[39.984094, 116.319236, '2008-10-23 05:53:05', 1],
-             [39.984198, 116.319322, '2008-10-23 05:53:06', 1],
-             [39.984224, 116.319402, '2008-10-23 05:53:11', 1],
-             [39.984224, 116.319402, '2008-10-23 05:53:11', 1]]
-    move_df = MoveDataFrame(data=list_data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
+    move_df = _default_move_df()
     assert _has_columns(move_df)
     assert _validate_move_data_frame_data(move_df)
 
 
-def test_move_data_frame_from_file():
-    """
-        Tests the creation of a MoveDataFrame from a file.
-        Checks if the collumns latitude, longitude and datetime are created
-        and converted to the default types used by PyMove lib.
-    """
+def test_move_data_frame_from_file(tmpdir):
+    d = tmpdir.mkdir('prepossessing')
 
-    move_df = read_csv('examples/geolife_sample.csv')
+    file_default_columns = d.join('test_read_default.csv')
+    file_default_columns.write(str_data_default)
+    filename_default = os.path.join(
+        file_default_columns.dirname, file_default_columns.basename
+    )
+
+    move_df = read_csv(filename_default)
+    assert _has_columns(move_df)
+    assert _validate_move_data_frame_data(move_df)
+
+    file_different_columns = d.join('test_read_different.csv')
+    file_different_columns.write(str_data_different)
+    filename_diferent = os.path.join(
+        file_different_columns.dirname, file_different_columns.basename
+    )
+
+    move_df = read_csv(
+        filename_diferent, latitude='latitude', longitude='longitude',
+        datetime='time', traj_id='traj_id'
+    )
+    assert _has_columns(move_df)
+    assert _validate_move_data_frame_data(move_df)
+
+    file_missing_columns = d.join('test_read_missing.csv')
+    file_missing_columns.write(str_data_missing)
+    filename_missing = os.path.join(
+        file_missing_columns.dirname, file_missing_columns.basename
+    )
+
+    move_df = read_csv(
+        filename_missing, names=['lat', 'lon', 'datetime', 'id']
+    )
+    print(move_df)
     assert _has_columns(move_df)
     assert _validate_move_data_frame_data(move_df)
 
 
 def test_move_data_frame_from_dict():
-    """
-        Tests the creation of a MoveDataFrame from a dictionary.
-        Checks if the collumns latitude, longitude and datetime are created
-        and converted to the default types used by PyMove lib.
-    """
     dict_data = {
         LATITUDE: [39.984198, 39.984224, 39.984094],
         LONGITUDE: [116.319402, 116.319322, 116.319402],
-        'datetime': ['2008-10-23 05:53:11', '2008-10-23 05:53:06', '2008-10-23 05:53:06']
+        DATETIME: ['2008-10-23 05:53:11', '2008-10-23 05:53:06', '2008-10-23 05:53:06']
     }
-    move_df = MoveDataFrame(data=dict_data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
+    move_df = MoveDataFrame(
+        data=dict_data, latitude=LATITUDE, longitude=LONGITUDE,
+        datetime=DATETIME, traj_id=TRAJ_ID
+    )
     assert _has_columns(move_df)
     assert _validate_move_data_frame_data(move_df)
 
 
 def test_move_data_frame_from_data_frame():
-    """
-        Tests the creation of a MoveDataFrame from a pandas dataframe.
-        Checks if the collumns latitude, longitude and datetime are created
-        and converted to the default types used by PyMove lib.
-    """
-    df = pd.read_csv('examples/geolife_sample.csv', parse_dates=['datetime'])
-    move_df = MoveDataFrame(data=df, latitude='lat', longitude=LONGITUDE, datetime=DATETIME)
+    df = _default_pandas_df()
+    move_df = MoveDataFrame(
+        data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME
+    )
     assert _has_columns(move_df)
     assert _validate_move_data_frame_data(move_df)
 
@@ -130,665 +173,935 @@ def test_attribute_error_from_data_frame():
         Checks if MoveDataFrame raises a error message when the columns latitude, longitude and datetime
         are missing from the data.
     """
-    df = pd.read_csv('pymove/tests/geolife_sample_erro_lat.csv', parse_dates=['datetime'])
+    df = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['laterr', 'lon', 'datetime', 'id'], index=[0, 1, 2, 3]
+    )
+    try:
+        MoveDataFrame(
+            data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME
+        )
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
+    except AttributeError:
+        pass
+
+    df = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lat', 'lonerr', 'datetime', 'id'], index=[0, 1, 2, 3]
+    )
     try:
         MoveDataFrame(data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME)
         raise AssertionError('AttributeError error not raised by MoveDataFrame')
-    except AttributeError as e:
+    except AttributeError:
         pass
 
-    df = pd.read_csv('pymove/tests/geolife_sample_erro_lon.csv', parse_dates=['datetime'])
+    df = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lat', 'lon', 'datetimerr', 'id'], index=[0, 1, 2, 3]
+    )
     try:
         MoveDataFrame(data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME)
         raise AssertionError('AttributeError error not raised by MoveDataFrame')
-    except AttributeError as e:
+    except AttributeError:
         pass
 
-    df = pd.read_csv('pymove/tests/geolife_sample_erro_datetime.csv', parse_dates=['datetime_erro'])
 
-    try:
-        MoveDataFrame(data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME)
-        raise AssertionError('AttributeError error not raised by MoveDataFrame')
-    except AttributeError as e:
-        pass
+def test_lat():
+    move_df = _default_move_df()
+
+    lat = move_df.lat
+    srs = Series(
+        data=[39.984094, 39.984198, 39.984224, 39.984224],
+        index=[0, 1, 2, 3], dtype='float64', name='lat'
+    )
+    assert_series_equal(lat, srs)
+
+
+def test_lon():
+    move_df = _default_move_df()
+
+    lon = move_df.lon
+    srs = Series(
+        data=[116.319236, 116.319322, 116.319402, 116.319402],
+        index=[0, 1, 2, 3], dtype='float64', name='lon'
+    )
+    assert_series_equal(lon, srs)
+
+
+def test_datetime():
+    move_df = _default_move_df()
+
+    datetime = move_df.datetime
+    srs = Series(
+        data=['2008-10-23 05:53:05', '2008-10-23 05:53:06',
+              '2008-10-23 05:53:11', '2008-10-23 05:53:11'],
+        index=[0, 1, 2, 3], dtype='datetime64[ns]', name='datetime'
+    )
+    assert_series_equal(datetime, srs)
+
+
+def test_loc():
+    move_df = _default_move_df()
+
+    assert move_df.loc[0, TRAJ_ID] == 1
+
+    loc_ = move_df.loc[move_df[LONGITUDE] > 116.319321]
+    expected = DataFrame(data=[
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[1, 2, 3]
+    )
+    assert_frame_equal(loc_, expected)
+
+
+def test_iloc():
+    move_df = _default_move_df()
+
+    expected = Series(
+        data=[39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        index=['lat', 'lon', 'datetime', 'id'], dtype='object', name=0
+    )
+
+    assert_series_equal(move_df.iloc[0], expected)
+
+
+def test_at():
+    move_df = _default_move_df()
+
+    assert move_df.at[0, TRAJ_ID] == 1
+
+
+def test_values():
+    move_df = _default_move_df()
+
+    expected = [
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2]
+    ]
+    assert_array_equal(move_df.values, expected)
+
+
+def test_columns():
+    move_df = _default_move_df()
+
+    assert_array_equal(move_df.columns, [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID])
+
+
+def test_index():
+    move_df = _default_move_df()
+
+    assert_array_equal(move_df.index, [0, 1, 2, 3])
+
+
+def test_dtypes():
+    move_df = _default_move_df()
+
+    expected = Series(
+        data=['float64', 'float64', '<M8[ns]', 'int64'],
+        index=['lat', 'lon', 'datetime', 'id'], dtype='object', name=None
+    )
+    assert_series_equal(move_df.dtypes, expected)
+
+
+def test_shape():
+    move_df = _default_move_df()
+
+    assert move_df.shape == (4,4)
+
+
+def test_len():
+    move_df = _default_move_df()
+
+    assert move_df.len() == 4
+
+
+def test_unique():
+    move_df = _default_move_df()
+    assert_array_equal(move_df['id'].unique(), [1, 2])
+
+
+def test_head():
+    move_df = _default_move_df()
+
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[0, 1]
+    )
+    assert_frame_equal(move_df.head(2), expected)
+
+
+def test_tail():
+    move_df = _default_move_df()
+
+    expected = DataFrame(data=[
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[2, 3]
+    )
+    assert_frame_equal(move_df.tail(2), expected)
 
 
 def test_number_users():
-    #Test if the correct number of users is return when the MoveDataFrame has one or multiple users.
+    move_df = MoveDataFrame(
+        data=list_data, latitude=LATITUDE, longitude=LONGITUDE,
+        datetime=DATETIME, traj_id=TRAJ_ID
+    )
 
     assert move_df.get_users_number() == 1
 
     move_df[UID] = [1, 1, 2, 3]
     assert move_df.get_users_number() == 3
 
-    move_df.drop(UID, axis=1, inplace = True)
-
 
 def test_to_numpy():
-    # Test if the MoveDataFrame data is converted to numpy array format.
+    move_df = MoveDataFrame(
+        data=list_data, latitude=LATITUDE, longitude=LONGITUDE,
+        datetime=DATETIME, traj_id=TRAJ_ID
+    )
 
-    import numpy
-    move_numpy = move_df.to_numpy()
-    assert type(move_numpy) is numpy.ndarray
+    assert isinstance(move_df.to_numpy(), ndarray)
 
 
 def test_to_dict():
-    # Test if the MoveDataFrame data is converted to dict format.
+    move_df = MoveDataFrame(
+        data=list_data, latitude=LATITUDE, longitude=LONGITUDE,
+        datetime=DATETIME, traj_id=TRAJ_ID
+    )
 
-    move_dict = move_df.to_dict()
-    assert type(move_df.to_dict()) is dict
+    assert isinstance(move_df.to_dict(), dict)
 
 
 def test_to_grid():
-    # Test if the MoveDataFrame data is converted to grid format.
+    move_df = MoveDataFrame(
+        data=list_data, latitude=LATITUDE, longitude=LONGITUDE,
+        datetime=DATETIME, traj_id=TRAJ_ID
+    )
 
-    import pymove
-    assert type(move_df.to_grid(8)) is pymove.core.grid.Grid
+    assert isinstance(move_df.to_grid(8), pymove.core.grid.Grid)
 
 
 def test_to_data_frame():
-    # Test if the MoveDataFrame data is converted to pandas dataFrame format.
+    move_df = MoveDataFrame(
+        data=list_data, latitude=LATITUDE, longitude=LONGITUDE,
+        datetime=DATETIME, traj_id=TRAJ_ID
+    )
 
-    import pandas
-    assert type(move_df.to_DataFrame()) is pandas.DataFrame
+    assert isinstance(move_df.to_data_frame(), DataFrame)
+
+
+def test_describe():
+    move_df = _default_move_df()
+
+    expected = DataFrame(data=[
+        [4.0, 4.0, 4.0],
+        [39.984185, 116.31934049999998, 1.5],
+        [6.189237971348586e-05, 7.921910543639078e-05, 0.5773502691896257],
+        [39.984094, 116.319236, 1.0],
+        [39.984172, 116.3193005, 1.0],
+        [39.984211, 116.319362, 1.5],
+        [39.984224, 116.319402, 2.0],
+        [39.984224, 116.319402, 2.0],
+    ], columns=['lat', 'lon', 'id'],
+        index=['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
+    )
+    assert_frame_equal(move_df.describe(), expected)
+
+
+def test_memory_usage():
+    move_df = _default_move_df()
+
+    expected = Series(
+        data=[128, 32, 32, 32, 32],
+        index=['Index', 'lat', 'lon', 'datetime', 'id'], dtype='int64', name=None
+    )
+    assert_series_equal(move_df.memory_usage(), expected)
+
+
+def test_copy():
+    move_df = _default_move_df()
+
+    cp = move_df.copy()
+    assert_frame_equal(move_df, cp)
+    cp.at[0, TRAJ_ID] = 0
+    assert move_df.loc[0, TRAJ_ID] == 1
+    assert move_df.loc[0, TRAJ_ID] != cp.loc[0, TRAJ_ID]
 
 
 def test_generate_tid_based_on_id_datetime():
-    #Test the function generate_tid_based_on_id_datetime is creating the tid feature.
+    move_df = _default_move_df()
 
-    #Check if the inplace option is working and the tid feature is created in a copy of PandasMoveDataFrame.
-    #Check if the return object of the generate function is a PandasMoveDataFrame,
-    #Test if the original PandasMoveDataFrame remains unchanged.
     new_move_df = move_df.generate_tid_based_on_id_datetime(inplace=False)
-    assert_array_equal(new_move_df[TID], ['12008102305', '12008102305', '22008102305', '22008102305'])
-    assert type(new_move_df) is pymove.core.dataframe.PandasMoveDataFrame
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, '12008102305'],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1, '12008102305'],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, '22008102305'],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, '22008102305'],
+    ], columns=['lat', 'lon', 'datetime', 'id', 'tid'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
     assert TID not in move_df
 
-    # Check if the tid feature is created in the original PandasMoveDataFrame when inplace = True.
-    # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
     move_df.generate_tid_based_on_id_datetime()
-    assert_array_equal(move_df[TID], ['12008102305', '12008102305', '22008102305', '22008102305'])
-    assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
-
-    #Drops the created column
-    move_df.drop(TID, axis=1, inplace=True)
+    assert_frame_equal(move_df, expected)
 
 
 def test_generate_date_features():
-    # Test the function generate_date_features.
+    move_df = _default_move_df()
 
-    # Check if the inplace option is working and the date feature is created in a copy of PandasMoveDataFrame.
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
     new_move_df = move_df.generate_date_features(inplace=False)
-    assert_array_equal(new_move_df[DATE].astype(str), ['2008-10-23', '2008-10-23', '2008-10-23', '2008-10-23'])
-    assert type(new_move_df) is pymove.core.dataframe.PandasMoveDataFrame
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, date(2008, 10, 23)],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1, date(2008, 10, 23)],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, date(2008, 10, 23)],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, date(2008, 10, 23)],
+    ], columns=['lat', 'lon', 'datetime', 'id', 'date'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
     assert DATE not in move_df
 
-    # Check if the date feature is created in the original PandasMoveDataFrame when inplace = True.
-    # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
     move_df.generate_date_features()
-    assert_array_equal(move_df[DATE].astype(str), ['2008-10-23', '2008-10-23', '2008-10-23', '2008-10-23'])
-    assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
-
-    #Drops the created column
-    move_df.drop(DATE, axis=1, inplace=True)
+    assert_frame_equal(move_df, expected)
 
 
 def test_generate_hour_features():
-    # Test the function generate_hour_features.
+    move_df = _default_move_df()
 
-    # Check if the inplace option is working and the hour feature is created in a copy of the original
-    # PandasMoveDataFrame.
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
     new_move_df = move_df.generate_hour_features(inplace=False)
-    assert new_move_df[HOUR].tolist() == [5, 5, 5, 5]
-    assert type(new_move_df) is pymove.core.dataframe.PandasMoveDataFrame
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 5],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1, 5],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 5],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 5],
+    ], columns=['lat', 'lon', 'datetime', 'id', 'hour'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
     assert HOUR not in move_df
 
-    # Check if the hour feature is created in the original PandasMoveDataFrame when inplace = True.
-    # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
     move_df.generate_hour_features()
-    assert move_df[HOUR].tolist() == [5, 5, 5, 5]
-    assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
-
-    # Drops the created column
-    move_df.drop(HOUR, axis=1, inplace=True)
+    assert_frame_equal(move_df, expected)
 
 
 def test_generate_day_of_the_week_features():
-    # Test the function day_of_the_week_features.
+    move_df = _default_move_df()
 
-    # Check if the inplace option is working and the date of the week feature is created in a copy of the original
-    # PandasMoveDataFrame.
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
     new_move_df = move_df.generate_day_of_the_week_features(inplace=False)
-    assert_array_equal(new_move_df['day'], ['Thursday', 'Thursday', 'Thursday', 'Thursday'])
-    assert type(new_move_df) is pymove.core.dataframe.PandasMoveDataFrame
-    print(move_df)
-    assert 'day' not in move_df
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 'Thursday'],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1, 'Thursday'],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 'Thursday'],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 'Thursday'],
+    ], columns=['lat', 'lon', 'datetime', 'id', 'day'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+    assert DAY not in move_df
 
-    # Check if the date of the week feature is created in the original PandasMoveDataFrame
-    # PandasMoveDataFrame when inplace = True.
-    # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
     move_df.generate_day_of_the_week_features()
-    assert_array_equal(move_df['day'].tolist(), ['Thursday', 'Thursday', 'Thursday', 'Thursday'])
-    assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
-
-    # Drops the created column
-    move_df.drop('day', axis=1, inplace=True)
+    assert_frame_equal(move_df, expected)
 
 
 def test_generate_weekend_features():
-    # Test the function test_generate_weekend_features.
+    move_df = _default_move_df()
 
-    # Check if the inplace option is working and the weekend feature is created in a copy of the original
-    # PandasMoveDataFrame.
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
     new_move_df = move_df.generate_weekend_features(inplace=False)
-    assert_array_equal(new_move_df['weekend'], [0, 0, 0, 0])
-    assert type(new_move_df) is pymove.core.dataframe.PandasMoveDataFrame
-    assert 'weekend' not in move_df
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 0],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1, 0],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 0],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 0],
+    ], columns=['lat', 'lon', 'datetime', 'id', 'weekend'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+    assert WEEK_END not in move_df
 
-    # Check if the weekend feature is created in the original PandasMoveDataFrame
-    # when inplace = True.
-    # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
     move_df.generate_weekend_features()
-    assert_array_equal(move_df['weekend'], [0, 0, 0, 0])
-    assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
-
-    # Drops the created column
-    move_df.drop('weekend', axis=1, inplace=True)
+    assert_frame_equal(move_df, expected)
 
 
 def test_generate_time_of_day_features():
-    # Test the function generate_time_of_day_features.
+    move_df = _default_move_df()
 
-    # Check if the inplace option is working and the time of day feature is created in a copy of the original
-    # PandasMoveDataFrame.
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
-    new_move_df = move_df.generate_time_of_day_features(inplace = False)
-    assert_array_equal(new_move_df[PERIOD],['Early morning','Early morning','Early morning','Early morning'])
-    assert type(new_move_df) is pymove.core.dataframe.PandasMoveDataFrame
+    new_move_df = move_df.generate_time_of_day_features(inplace=False)
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 'Early morning'],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1, 'Early morning'],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 'Early morning'],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 'Early morning'],
+    ], columns=['lat', 'lon', 'datetime', 'id', 'period'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
     assert PERIOD not in move_df
 
-    # Check if the time of day feature is created in the original PandasMoveDataFrame
-    # when inplace = True.
-    # Check if the MoveDataFrame is a PandasMoveDataFrame.
     move_df.generate_time_of_day_features()
-    assert_array_equal(move_df[PERIOD], ['Early morning','Early morning','Early morning','Early morning'])
-    assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
-
-    # Drops the created column
-    move_df.drop(PERIOD, axis=1, inplace = True)
+    assert_frame_equal(move_df, expected)
 
 
 def test_generate_datetime_in_format_cyclical():
-    # Test the function generate_datetime_in_format_cyclical.
+    move_df = _default_move_df()
 
-    # Check if the inplace option is working and the hour_sin and hour_cos feature is begin created in a copy
-    # of the original PandasMoveDataFrame.
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
-    new_move_df = move_df.generate_datetime_in_format_cyclical(inplace = False)
-    assert_array_equal(new_move_df['hour_sin'],[0.9790840876823229, 0.9790840876823229,0.9790840876823229, 0.9790840876823229])
-    assert_array_equal(new_move_df['hour_cos'], [0.20345601305263375,0.20345601305263375,0.20345601305263375,0.20345601305263375])
-    assert type(new_move_df) is pymove.core.dataframe.PandasMoveDataFrame
-    assert 'hour_sin' not in move_df
-    assert 'hour_cos' not in move_df
+    new_move_df = move_df.generate_datetime_in_format_cyclical(inplace=False)
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 0.9790840876823229,
+         0.20345601305263375],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1, 0.9790840876823229,
+         0.20345601305263375],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 0.9790840876823229,
+         0.20345601305263375],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 0.9790840876823229,
+         0.20345601305263375],
+    ], columns=['lat', 'lon', 'datetime', 'id', 'hour_sin', 'hour_cos'],
+        index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+    assert HOUR_SIN not in move_df
 
-    # Check if the hour_sin and hour_cos feature are created in the original PandasMoveDataFrame
-    #when inplace = True.
-    # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
     move_df.generate_datetime_in_format_cyclical()
-    assert_array_equal(move_df['hour_sin'], [0.9790840876823229, 0.9790840876823229,0.9790840876823229, 0.9790840876823229])
-    assert_array_equal(move_df['hour_cos'], [0.20345601305263375,0.20345601305263375,0.20345601305263375,0.20345601305263375])
-    assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
-
-    # Drops the created column
-    move_df.drop('hour_sin', axis=1, inplace = True)
-    move_df.drop('hour_cos', axis=1, inplace = True)
-
-
-def test_generate_dist_features():
-    # Test the function generate_dist_features.
-
-    # Check if the inplace option is working and the dist features are created in a copy of the original
-    # PandasMoveDataFrame.
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
-    import pandas as pd
-    df = pd.read_csv('examples/geolife_sample.csv', parse_dates=['datetime'], nrows=5)
-    df_move = MoveDataFrame(data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME)
-    new_df_move = df_move.generate_dist_features(inplace=False)
-    assert_array_equal(new_df_move['dist_to_prev'].astype(str),
-                       ['nan', '14.015318782639952', '7.345483960534693', '1.6286216204832726', '2.4484945931533275'])
-    assert_array_equal(new_df_move['dist_to_next'].astype(str),
-                       ['14.015318782639952', '7.345483960534693', '1.6286216204832726', '2.4484945931533275', 'nan'])
-    assert_array_equal(new_df_move['dist_prev_to_next'].astype(str),
-                       ['nan', '20.082061827224607', '5.929779944096936', '1.2242472060393084', 'nan'])
-    assert type(new_df_move) is pymove.core.dataframe.PandasMoveDataFrame
-    assert 'dist_to_prev' not in df_move
-    assert 'dist_to_next' not in df_move
-    assert 'dist_prev_to_next' not in df_move
-
-    # Check if the dist features are created in the original PandasMoveDataFrame when inplace = True.
-    # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
-    df_move.generate_dist_features()
-    assert_array_equal(df_move['dist_to_prev'].astype(str),
-                       ['nan', '14.015318782639952', '7.345483960534693', '1.6286216204832726', '2.4484945931533275'])
-    assert_array_equal(df_move['dist_to_next'].astype(str),
-                       ['14.015318782639952', '7.345483960534693', '1.6286216204832726', '2.4484945931533275', 'nan'])
-    assert_array_equal(df_move['dist_prev_to_next'].astype(str),
-                       ['nan', '20.082061827224607', '5.929779944096936', '1.2242472060393084', 'nan'])
-    assert type(df_move) is pymove.core.dataframe.PandasMoveDataFrame
-
+    assert_frame_equal(move_df, expected)
 
 
 def test_generate_dist_time_speed_features():
-    # Test the function generate_dist_time_speed_features(.
+    move_df = _default_move_df()
 
-    # Check if the inplace option is working and the dist, time and speed features are created in a copy of the original
-    # PandasMoveDataFrame.
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
-    import pandas as pd
-    df = pd.read_csv('examples/geolife_sample.csv', parse_dates=['datetime'], nrows=5)
-    df_move = MoveDataFrame(data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME)
-    new_df_move = df_move.generate_dist_time_speed_features(inplace=False)
-    assert_array_equal(new_df_move['dist_to_prev'].astype(str),
-                       ['nan', '14.015318782639952', '7.345483960534693', '1.6286216204832726', '2.4484945931533275'])
-    assert_array_equal(new_df_move['time_to_prev'].astype(str), ['nan', '1.0', '5.0', '5.0', '5.0'])
-    assert_array_equal(new_df_move['speed_to_prev'].astype(str),
-                       ['nan', '14.015318782639952', '1.4690967921069387', '0.3257243240966545', '0.4896989186306655'])
-    assert type(new_df_move) is pymove.core.dataframe.PandasMoveDataFrame
-    assert 'dist_to_prev' not in df_move
-    assert 'time_to_prev' not in df_move
-    assert 'speed_to_prev' not in df_move
+    new_move_df = move_df.generate_dist_time_speed_features(inplace=False)
+    expected = DataFrame(data=[
+        [1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), nan, nan, nan],
+        [1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 13.690153134343689,
+         1.0, 13.690153134343689],
+        [2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), nan, nan, nan],
+        [2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 0.0, 0.0, nan],
+    ], columns=['id', 'lat', 'lon', 'datetime', 'dist_to_prev', 'time_to_prev',
+                'speed_to_prev'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+    assert DIST_TO_PREV not in move_df
 
-    # Check if the dist, time and speed features are created in the original PandasMoveDataFrame when inplace = True.
-    # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
-    df_move.generate_dist_time_speed_features()
-    assert_array_equal(df_move['dist_to_prev'].astype(str),
-                       ['nan', '14.015318782639952', '7.345483960534693', '1.6286216204832726', '2.4484945931533275'])
-    assert_array_equal(df_move['time_to_prev'].astype(str), ['nan', '1.0', '5.0', '5.0', '5.0'])
-    assert_array_equal(df_move['speed_to_prev'].astype(str),
-                       ['nan', '14.015318782639952', '1.4690967921069387', '0.3257243240966545', '0.4896989186306655'])
-    assert type(df_move) is pymove.core.dataframe.PandasMoveDataFrame
+    move_df.generate_dist_time_speed_features()
+    print(move_df)
+    assert_frame_equal(move_df, expected)
 
+
+def test_generate_dist_features():
+    move_df = _default_move_df()
+
+    new_move_df = move_df.generate_dist_features(inplace=False)
+    expected = DataFrame(data=[
+        [1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), nan,
+         13.690153134343689, nan],
+        [1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 13.690153134343689,
+         nan, nan],
+        [2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), nan, 0.0, nan],
+        [2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 0.0, nan, nan],
+    ], columns=['id', 'lat', 'lon', 'datetime', 'dist_to_prev', 'dist_to_next',
+                'dist_prev_to_next'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+    assert DIST_PREV_TO_NEXT not in move_df
+
+    move_df.generate_dist_features()
+    print(move_df)
+    assert_frame_equal(move_df, expected)
+
+
+def test_generate_time_features():
+    move_df = _default_move_df()
+
+    new_move_df = move_df.generate_time_features(inplace=False)
+    expected = DataFrame(data=[
+        [1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), nan, 1.0, nan],
+        [1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1.0, nan, nan],
+        [2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), nan, 0.0, nan],
+        [2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 0.0, nan, nan],
+    ], columns=['id', 'lat', 'lon', 'datetime', 'time_to_prev', 'time_to_next',
+                'time_prev_to_next'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+    assert TIME_PREV_TO_NEXT not in move_df
+
+    move_df.generate_time_features()
+    print(move_df)
+    assert_frame_equal(move_df, expected)
+
+
+def test_generate_speed_features():
+    move_df = _default_move_df()
+
+    new_move_df = move_df.generate_speed_features(inplace=False)
+    expected = DataFrame(data=[
+        [0, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, nan,
+         13.690153134343689, nan],
+        [1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1,
+         13.690153134343689, nan, nan],
+        [2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, nan, nan, nan],
+        [3, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, nan, nan, nan],
+    ], columns=['index', 'lat', 'lon', 'datetime', 'id', 'speed_to_prev', 'speed_to_next',
+                'speed_prev_to_next'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+    assert SPEED_PREV_TO_NEXT not in move_df
+
+    move_df.generate_speed_features()
+    print(move_df)
+    assert_frame_equal(move_df, expected)
 
 
 def test_generate_move_and_stop_by_radius():
-    # Test the function generate_move_and_stop_by_radius.
+    move_df = _default_move_df()
 
-    # Check if the inplace option is working and the stop feature is created in a copy of the original
-    # PandasMoveDataFrame.
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
-    df = pd.read_csv('examples/geolife_sample.csv', parse_dates=['datetime'], nrows=5)
-    df_move = MoveDataFrame(data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME)
-    new_df_move = df_move.generate_move_and_stop_by_radius(inplace =False)
-    assert_array_equal(new_df_move['situation'].astype(str),['nan', 'move', 'move', 'move', 'move'])
-    assert type(new_df_move) is pymove.core.dataframe.PandasMoveDataFrame
-    assert 'situation' not in df_move
+    new_move_df = move_df.generate_move_and_stop_by_radius(inplace=False)
+    expected = DataFrame(data=[
+        [1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), nan,
+         13.690153134343689, nan, 'nan'],
+        [1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 13.690153134343689,
+         nan, nan, 'move'],
+        [2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), nan, 0.0, nan,
+         'nan'],
+        [2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 0.0, nan, nan,
+         'stop'],
+    ], columns=['id', 'lat', 'lon', 'datetime', 'dist_to_prev', 'dist_to_next',
+                'dist_prev_to_next', 'situation'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+    assert SITUATION not in move_df
 
-    # Check if the stop feature is created in the original PandasMoveDataFrame when inplace = True.
-    # Check if the original MoveDataFrame is still a PandasMoveDataFrame.
-    df_move.generate_move_and_stop_by_radius()
-    assert_array_equal(df_move['situation'].astype(str),['nan', 'move', 'move', 'move', 'move'])
-    assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
-    assert 'situation' in df_move
-
-
-def test_loc():
-    assert move_df.loc[0,TRAJ_ID] == 1
-    assert_array_equal(move_df.loc[move_df[LONGITUDE] > 116.319321].astype(str), [['39.984222', '116.319405', '2008-10-23 05:53:11', '2'],
-                                                                              ['39.984222', '116.319405', '2008-10-23 05:53:11', '2']])
-
-
-def test_iloc():
-    assert move_df.iloc[0].all() == move_df.loc[0].all()
-    assert_array_equal(move_df.iloc[:3], move_df.loc[:2])
-
-
-def test_at():
-    assert move_df.at[0, TRAJ_ID] == 1
-
-
-def test_values():
-    assert_array_equal(move_df, [[39.984092712402344, 116.3192367553711,
-                                        pd.Timestamp('2008-10-23 05:53:05'), 1],
-                                       [39.98419952392578, 116.31932067871094,
-                                        pd.Timestamp('2008-10-23 05:53:06'), 1],
-                                       [39.984222412109375, 116.31940460205078,
-                                        pd.Timestamp('2008-10-23 05:53:11'), 2],
-                                       [39.984222412109375, 116.31940460205078,
-                                        pd.Timestamp('2008-10-23 05:53:11'), 2]])
-
-
-def test_columns():
-    assert_array_equal(move_df.columns, [LATITUDE, LONGITUDE, 'datetime', TRAJ_ID])
-
-
-def test_index():
-    assert_array_equal(move_df.index, [0, 1, 2, 3])
-
-
-def test_dtypes():
-    assert move_df.dtypes.astype(str).tolist() == ['float32', 'float32', 'datetime64[ns]', 'int64']
-
-
-def test_shape():
-    assert move_df.shape == (4,4)
-
-
-def test_len():
-    assert move_df.len() == 4
-
-
-def test_head():
-    assert_array_equal(move_df.head(2), [[39.984092712402344, 116.3192367553711,
-                                          pd.Timestamp('2008-10-23 05:53:05'), 1],
-                                          [39.98419952392578, 116.31932067871094,
-                                          pd.Timestamp('2008-10-23 05:53:06'), 1]])
-    assert_array_equal(move_df.head(-1), [[39.984092712402344, 116.3192367553711,
-                                                 pd.Timestamp('2008-10-23 05:53:05'), 1],
-                                                 [39.98419952392578, 116.31932067871094,
-                                                 pd.Timestamp('2008-10-23 05:53:06'), 1],
-                                                 [39.984222412109375, 116.31940460205078,
-                                                 pd.Timestamp('2008-10-23 05:53:11'), 2]])
+    move_df.generate_move_and_stop_by_radius()
+    print(move_df)
+    assert_frame_equal(move_df, expected)
 
 
 def test_time_interval():
-    assert move_df.time_interval() == pd.Timedelta('0 days 00:00:06')
+    move_df = _default_move_df()
+    assert move_df.time_interval() == Timedelta('0 days 00:00:06')
 
 
 def test_get_bbox():
-    assert_array_equal(str(move_df.get_bbox()), str((39.984093, 116.31924, 39.984222, 116.319405)))
+    move_df = _default_move_df()
 
-
-def test_min():
-    assert_array_equal(move_df.min(),[39.984092712402344, 116.3192367553711, pd.Timestamp('2008-10-23 05:53:05'), 1])
-
-
-def test_max():
-    assert_array_equal(move_df.max(), [39.984222412109375, 116.31940460205078, pd.Timestamp('2008-10-23 05:53:11'), 2])
-
-
-def test_count():
-    assert_array_equal(move_df.count(), [4,4,4,4])
-
-
-def test_group_by():
-    assert_array_equal(move_df.groupby(TRAJ_ID).mean().astype(str), [[ '39.984146', '116.319275'],
-                                                              [ '39.984222', '116.319405']])
-
-
-def test_select_dtypes():
-    assert_array_equal(move_df.select_dtypes(include='int64'), [[1],[1],[2],[2]])
-
-
-def test_sort_values():
-    move_df.loc[0,TRAJ_ID] = 4
-    sorted_move_df = move_df.sort_values(by=[TRAJ_ID])
-    assert_array_equal(sorted_move_df, [[39.98419952392578, 116.31932067871094,
-                                        pd.Timestamp('2008-10-23 05:53:06'), 1],
-                                       [39.984222412109375, 116.31940460205078,
-                                        pd.Timestamp('2008-10-23 05:53:11'), 2],
-                                       [39.984222412109375, 116.31940460205078,
-                                        pd.Timestamp('2008-10-23 05:53:11'), 2],
-                                       [39.984092712402344, 116.3192367553711,
-                                        pd.Timestamp('2008-10-23 05:53:05'), 4]])
-    move_df.loc[0, TRAJ_ID]=1
-
-
-def test_drop():
-    #Creating a new column to use in the drop tests
-    move_df[UID] = [1, 1, 2, 3]
-
-    # Check if the column 'uid' is dropped in a copy of the original PandasMoveDataFrame
-    # Test if the original PandasMoveDataFrame remains unchanged.
-    move_test = move_df.drop(UID, axis=1)
-    assert UID not in move_test
-    assert UID in move_df
-
-    move_test = move_df.drop([0, 1])
-    assert move_test.len() == 2
-
-    # Check if the column 'uid' is dropped from the original PandasMoveDataFrame when inplace = True
-    move_df.drop(columns=[UID], axis=1, inplace=True)
-    assert UID not in move_df
-
-    #Checks if MoveDataFrame raises an error message when the user tries to drop the columns latitude,
-    # longitude or datetime from the data.
-    try:
-        move_df.drop(columns=[LATITUDE], axis=1, inplace=True)
-        raise AssertionError('AttributeError error not raised by MoveDataFrame')
-    except AttributeError as e:
-        pass
-
-    try:
-        move_df.drop(columns=[LONGITUDE], axis=1, inplace=True)
-        raise AssertionError('AttributeError error not raised by MoveDataFrame')
-    except AttributeError as e:
-        pass
-
-    try:
-        move_df.drop(columns=['datetime'], axis=1, inplace=True)
-        raise AssertionError('AttributeError error not raised by MoveDataFrame')
-    except AttributeError as e:
-        pass
-
-    assert type(move_df) is pymove.core.dataframe.PandasMoveDataFrame
-
-
-def test_duplicated():
-    assert_array_equal(move_df.duplicated(TRAJ_ID), [False, True, False, True])
-    assert_array_equal(move_df.duplicated(subset=['datetime'], keep='last'), [False, False, True, False])
-
-
-def test_drop_duplicated():
-    list_data = [[39.984094, 116.319236, '2008-10-23 05:53:05', 1],
-                 [39.984198, 116.319322, '2008-10-23 05:53:06', 1],
-                 [39.984224, 116.319402, '2008-10-23 05:53:11', 2],
-                 [39.984224, 116.319402, '2008-10-23 05:53:11', 2]]
-    move_df_test = MoveDataFrame(data=list_data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
-
-    # Check if the duplicated values are dropped in a copy of the original PandasMoveDataFrame when inplace = False
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    move_test = move_df.drop_duplicates()
-    assert_array_equal(move_test, [[39.984092712402344, 116.3192367553711,
-                                    pd.Timestamp('2008-10-23 05:53:05'), 1],
-                                   [39.98419952392578, 116.31932067871094,
-                                    pd.Timestamp('2008-10-23 05:53:06'), 1],
-                                   [39.984222412109375, 116.31940460205078,
-                                    pd.Timestamp('2008-10-23 05:53:11'), 2]])
-    assert type(move_df_test) is pymove.core.dataframe.PandasMoveDataFrame
-
-    # Check if the duplicated values are dropped from the original PandasMoveDataFrame when inplace = True
-    move_df_test.drop_duplicates(inplace=True)
-    assert_array_equal(move_df_test, [[39.984092712402344, 116.3192367553711,
-                                       pd.Timestamp('2008-10-23 05:53:05'), 1],
-                                      [39.98419952392578, 116.31932067871094,
-                                       pd.Timestamp('2008-10-23 05:53:06'), 1],
-                                      [39.984222412109375, 116.31940460205078,
-                                       pd.Timestamp('2008-10-23 05:53:11'), 2]])
-
-
-def test_convert_to():
-
-    #Test converting a PandasMoveDataFrame to a DaskDataFame and vice versa
-    assert move_df.get_type() == 'pandas'
-    move_df_dask = move_df.convert_to('dask')
-    assert move_df_dask.get_type() == 'dask'
-    move_df_pandas = move_df_dask.convert_to('pandas')
-    assert move_df_pandas.get_type() == 'pandas'
-
-    #Test converting a MoveDataFrame to is current type.
-    move_df_pandas = move_df_dask.convert_to('pandas')
-    assert move_df_pandas.get_type() == 'pandas'
-
-
-def test_get_type():
-    assert move_df.get_type() == 'pandas'
-    move_df_dask = move_df.convert_to('dask')
-    assert move_df_dask.get_type() == 'dask'
-
-
-def test_all():
-    assert_array_equal(move_df.all(), [True, True, True, True])
-
-
-def test_any():
-    assert_array_equal(move_df.all(), [True, True, True, True])
-    move_df['teste'] = [False, True, True, True]
-    assert_array_equal(move_df.all(), [True, True, True, True, False])
-    move_df.drop('teste',axis=1, inplace=True)
-
-
-def test_isna():
-    test = move_df_nan.isna()
-    assert test.any(axis=None) == False
-    move_df_nan.loc[0,LATITUDE] = np.nan
-    test = move_df_nan.isna()
-    assert test.any(axis=None) == True
-
-
-def test_fillna():
-    #Test the function fillna
-    test = move_df_nan.fillna(0)
-    assert test.isna().any(axis=None) == False
-    #Check if the return object from the function fillna is a PandasMoveDataFrame
-    assert test.get_type() == 'pandas'
-    #Check is the original MoveDataFrame remains unchanged with the nan values.
-    assert move_df_nan.isna().any(axis=None) == True
-
-
-def test_dropna():
-    # Check if the nan values are dropped in a copy of the original PandasMoveDataFrame when inplace = False
-    # Check if the return object of the generate function is a PandasMoveDataFrame,
-    test =  move_df_nan.dropna()
-    assert test.len() == 3
-    assert test.get_type() == 'pandas'
-
-    # Check if the nan values are dropped in the original PandasMoveDataFrame when inplace = True
-    move_df_nan.dropna(inplace=True)
-    assert move_df_nan.len() == 3
-
-
-def test_sample():
-    sample_test = move_df[LATITUDE].sample(n=3, random_state=1)
-    assert_array_equal(sample_test.astype(str), ['39.984222', '39.984222', '39.984093'])
-
-
-def test_isin():
-    move_df_copy = move_df.copy()
-    assert move_df.isin(move_df_copy).all(axis=None) == True
-    move_df_copy.loc[0,LATITUDE] = 0
-    assert move_df.isin(move_df_copy).all(axis=None) == False
-
-
-def test_append():
-    assert_array_equal(move_df.append(move_df), [[39.984092712402344, 116.3192367553711,
-                                                         pd.Timestamp('2008-10-23 05:53:05'), 1],
-                                                        [39.98419952392578, 116.31932067871094,
-                                                         pd.Timestamp('2008-10-23 05:53:06'), 1],
-                                                        [39.984222412109375, 116.31940460205078,
-                                                         pd.Timestamp('2008-10-23 05:53:11'), 2],
-                                                        [39.984222412109375, 116.31940460205078,
-                                                         pd.Timestamp('2008-10-23 05:53:11'), 2],
-                                                        [39.984092712402344, 116.3192367553711,
-                                                         pd.Timestamp('2008-10-23 05:53:05'), 1],
-                                                        [39.98419952392578, 116.31932067871094,
-                                                         pd.Timestamp('2008-10-23 05:53:06'), 1],
-                                                        [39.984222412109375, 116.31940460205078,
-                                                         pd.Timestamp('2008-10-23 05:53:11'), 2],
-                                                        [39.984222412109375, 116.31940460205078,
-                                                         pd.Timestamp('2008-10-23 05:53:11'), 2]])
-
-
-def test_nunique():
-    assert_array_equal(move_df.nunique(), [3, 3, 3, 2])
-
-
-def test_join():
-    move_df_test = MoveDataFrame(data=list_data, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME, traj_id=TRAJ_ID)
-    other = pd.DataFrame({'key': ['K0', 'K1', 'K2']})
-    result = move_df_test.join(other)
-    assert_array_equal(result['key'].astype(str), ['K0', 'K1', 'K2', 'nan'])
-
-
-def test_astype():
-    move_df.lat = move_df.lat.astype('float64')
-    assert move_df.dtypes.lat == 'float64'
-    move_df.lat = move_df.lat.astype('float32')
-    assert move_df.dtypes.lat == 'float32'
-
-
-def test_set_index():
-    # Check if the index is set in a copy of the original PandasMoveDataFrame when the inplace option = false.
-    # Check if the return object of the function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
-    move_test = move_df_nan.set_index(TRAJ_ID)
-    assert move_test.index.name == TRAJ_ID
-    assert move_test.get_type() == 'pandas'
-    assert move_df_nan.index.name != TRAJ_ID
-
-    # Check if the index is set in the original PandasMoveDataFrame when the inplace option = true.
-    move_df_nan.set_index(keys=TRAJ_ID, inplace=True)
-    assert move_df_nan.index.name == TRAJ_ID
-
-    # Checks if MoveDataFrame raises an error message when the user tries to drop the columns latitude,
-    # longitude or datetime from the data when setting a new index.
-    try:
-        move_df_nan.set_index(keys=LATITUDE, drop=True, inplace=True)
-        raise AssertionError('AttributeError error not raised by MoveDataFrame')
-    except AttributeError as e:
-        pass
-
-
-def test_reset_index():
-
-    # Check if the index is reset in a copy of the original PandasMoveDataFrame when the inplace option = false.
-    # Check if the return object of the function is a PandasMoveDataFrame,
-    # Test if the original PandasMoveDataFrame remains unchanged.
-    move_test = move_df_nan.reset_index()
-    assert move_test.index.name != TRAJ_ID
-    assert move_test.get_type() == 'pandas'
-    assert move_df_nan.index.name == TRAJ_ID
-
-    # Check if the index is reset in the original PandasMoveDataFrame when the inplace option = true.
-    move_df_nan.reset_index(inplace=True)
-    assert move_df_nan.index.name != TRAJ_ID
-
-
-def test_unique():
-    assert_array_equal(move_df.id.unique(), [1,2])
-
-
-def test_write_file():
-    import pymove
-    move_df.write_file('pymove/tests/test_file.csv')
-    move_df_test = pymove.read_csv('pymove/tests/test_file.csv')
-    assert_array_equal(move_df, move_df_test)
-
-
-def test_to_csv():
-    import pymove
-    move_df.to_csv(file_name='pymove/tests/test_csv_file.csv', index = False)
-    move_df_test = pymove.read_csv('pymove/tests/test_csv_file.csv')
-    assert_array_equal(move_df, move_df_test)
+    assert_allclose(move_df.get_bbox(), (39.984093, 116.31924, 39.984222, 116.319405))
 
 
 def test_plot_traj_id():
-    move_df.generate_tid_based_on_id_datetime()
-    df, img = move_df.plot_traj_id(move_df[TID][0])
-    assert_array_equal(df, [[39.984092712402344, 116.3192367553711,
-                                    pd.Timestamp('2008-10-23 05:53:05'), 1, '12008102305'],
-                                   [39.98419952392578, 116.31932067871094,
-                                    pd.Timestamp('2008-10-23 05:53:06'), 1, '12008102305']])
-    move_df.drop(TID, axis=1, inplace=True)
+    move_df = _default_move_df()
+    move_df[TID] = ['1', '2', '3', '4']
+
+    df, img = move_df.plot_traj_id('1')
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, '1'],
+    ], columns=['lat', 'lon', 'datetime', 'id', 'tid'], index=[0]
+    )
+    assert_frame_equal(df, expected)
+    assert isinstance(df, PandasMoveDataFrame)
+
+
+def test_min():
+    move_df = _default_move_df()
+
+    expected = Series(
+        data=[39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        index=['lat', 'lon', 'datetime', 'id'], dtype='object', name=None
+    )
+    assert_series_equal(move_df.min(), expected)
+
+
+def test_max():
+    move_df = _default_move_df()
+
+    expected = Series(
+        data=[39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        index=['lat', 'lon', 'datetime', 'id'], dtype='object', name=None
+    )
+    assert_series_equal(move_df.max(), expected)
+
+
+def test_count():
+    move_df = _default_move_df()
+
+    expected = Series(
+        data=[4, 4, 4, 4],
+        index=['lat', 'lon', 'datetime', 'id'], dtype='int64', name=None
+    )
+    assert_series_equal(move_df.count(), expected)
+
+
+def test_group_by():
+    move_df = _default_move_df()
+
+    expected = _default_pandas_df()
+    expected = expected.groupby('id').mean()
+    assert_frame_equal(move_df.groupby(TRAJ_ID).mean(), expected)
+
+
+def test_select_dtypes():
+    move_df = _default_move_df()
+
+    expected = DataFrame(data=[
+        [39.984094, 116.319236],
+        [39.984198, 116.319322],
+        [39.984224, 116.319402],
+        [39.984224, 116.319402],
+    ], columns=['lat', 'lon'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(move_df.select_dtypes(include='float64'), expected)
+
+
+def test_astype():
+    move_df = _default_move_df()
+
+    expected = DataFrame(data=[
+        [39, 116, 1224741185000000000, 1],
+        [39, 116, 1224741186000000000, 1],
+        [39, 116, 1224741191000000000, 2],
+        [39, 116, 1224741191000000000, 2],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(move_df.astype('int'), expected)
+
+
+def test_sort_values():
+    move_df = _default_move_df()
+
+    expected = DataFrame(data=[
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[2, 3, 0, 1]
+    )
+
+    assert_frame_equal(move_df.sort_values(by=TRAJ_ID, ascending=False), expected)
+
+
+def test_reset_index():
+    move_df = _default_move_df()
+
+    move_df = move_df.loc[1:]
+    assert_array_equal(move_df.index, [1, 2, 3])
+    move_df.reset_index(inplace=True)
+    assert_array_equal(move_df.index, [0, 1, 2])
+
+
+def test_set_index():
+    move_df = _default_move_df()
+
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05')],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06')],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')],
+    ], columns=['lat', 'lon', 'datetime'], index=[1, 1, 2, 2]
+    )
+    expected.index.name = 'id'
+    assert_frame_equal(move_df.set_index('id'), expected)
+
+    try:
+        move_df.set_index('datetime', inplace=True)
+        assert False
+    except AttributeError:
+        assert True
+
+
+def test_drop():
+    move_df = _default_move_df()
+    move_df[UID] = [1, 1, 2, 3]
+
+    move_test = move_df.drop(columns=[UID])
+    assert UID not in move_test
+    assert UID in move_df
+    assert isinstance(move_test, PandasMoveDataFrame)
+
+    move_test = move_df.drop(index=[0, 1])
+    assert move_test.len() == 2
+    assert isinstance(move_test, PandasMoveDataFrame)
+
+    move_df.drop(columns=[UID], inplace=True)
+    assert UID not in move_df
+    assert isinstance(move_df, PandasMoveDataFrame)
+
+    try:
+        move_df.drop(columns=[LATITUDE], inplace=True)
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
+    except AttributeError:
+        pass
+
+    try:
+        move_df.drop(columns=[LONGITUDE], inplace=True)
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
+    except AttributeError:
+        pass
+
+    try:
+        move_df.drop(columns=[DATETIME], inplace=True)
+        raise AssertionError('AttributeError error not raised by MoveDataFrame')
+    except AttributeError:
+        pass
+
+
+def test_duplicated():
+    move_df = _default_move_df()
+
+    expected = [False, True, False, True]
+    assert_array_equal(move_df.duplicated(TRAJ_ID), expected)
+    expected = [False, False, True, False]
+    assert_array_equal(move_df.duplicated(subset=DATETIME, keep='last'), expected)
+
+
+def test_drop_duplicates():
+    move_df = _default_move_df()
+
+    move_test = move_df.drop_duplicates()
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[0, 1, 2]
+    )
+    assert_frame_equal(move_test, expected)
+    assert isinstance(move_test, PandasMoveDataFrame)
+    assert move_df.len() == 4
+
+    move_df.drop_duplicates(inplace=True)
+    assert_frame_equal(move_test, expected)
+    assert isinstance(move_df, PandasMoveDataFrame)
+    assert move_df.len() == 3
+
+
+def test_all():
+    move_df = _default_move_df()
+    move_df['teste'] = [False, False, True, True]
+
+    assert_array_equal(move_df.all(), [True, True, True, True, False])
+    assert_array_equal(move_df.all(axis=1), [False, False, True, True])
+
+
+def test_any():
+    move_df = _default_move_df()
+    move_df['teste'] = [False, False, False, False]
+
+    assert_array_equal(move_df.any(), [True, True, True, True, False])
+    assert_array_equal(move_df.any(axis=1), [True, True, True, True])
+
+
+def test_isna():
+    move_df = _default_move_df()
+    move_df.at[0, DATETIME] = nan
+
+    expected = DataFrame(data=[
+        [False, False, True, False],
+        [False, False, False, False],
+        [False, False, False, False],
+        [False, False, False, False],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(move_df.isna(), expected)
+
+
+def test_fillna():
+    move_df = _default_move_df()
+    move_df.at[0, LATITUDE] = nan
+
+    move_test = move_df.fillna(0)
+    expected = DataFrame(data=[
+        [0, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(move_test, expected)
+    assert isinstance(move_test, PandasMoveDataFrame)
+    assert move_df.isna().any(axis=None)
+
+    move_df.fillna(0, inplace=True)
+    assert_frame_equal(move_df, expected)
+
+
+def test_dropna():
+    move_df = _default_move_df()
+    move_df.at[0, LATITUDE] = nan
+
+    move_test = move_df.dropna(axis=1)
+    expected = DataFrame(data=[
+        [116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lon', 'datetime', 'id'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(move_test, expected)
+    assert move_test.shape == (4, 3)
+    assert isinstance(move_test, DataFrame)
+    assert move_df.shape == (4, 4)
+
+    move_test = move_df.dropna(axis=0)
+    expected = DataFrame(data=[
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[1, 2, 3]
+    )
+    assert_frame_equal(move_test, expected)
+    assert move_test.shape == (3, 4)
+    assert isinstance(move_test, PandasMoveDataFrame)
+    assert move_df.shape == (4, 4)
+
+    try:
+        move_df.dropna(axis=1, inplace=True)
+        assert False
+    except AttributeError:
+        assert True
+
+    move_df.dropna(axis=0, inplace=True)
+    assert_frame_equal(move_df, expected)
+
+
+def test_sample():
+    move_df = _default_move_df()
+
+    sample_test = move_df.sample(n=2, random_state=42)
+    expected = DataFrame(data=[
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[1, 3]
+    )
+    assert_frame_equal(sample_test, expected)
+    assert isinstance(sample_test, PandasMoveDataFrame)
+
+
+def test_isin():
+    move_df = _default_move_df()
+    move_df_copy = _default_move_df()
+
+    assert move_df.isin(move_df_copy).all(axis=None)
+
+    move_df_copy.at[0, LATITUDE] = 0
+    assert not move_df.isin(move_df_copy).all(axis=None)
+
+
+def test_append():
+    move_df = _default_move_df()
+    df = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1]
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[0]
+    )
+    mdf = MoveDataFrame(df)
+
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+    ], columns=['lat', 'lon', 'datetime', 'id'], index=[0, 1, 2, 3, 0]
+    )
+    assert_frame_equal(move_df.append(df), expected)
+    assert_frame_equal(move_df.append(mdf), expected)
+
+
+def test_join():
+    move_df = _default_move_df()
+    other = DataFrame({'id': [1, 1, 2, 2], 'key': ['a', 'b', 'c', 'd']})
+
+    result = move_df.join(other, on='id', lsuffix='_l', rsuffix='_r')
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 1, 'b'],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1, 1, 'b'],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 2, 'c'],
+        [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2, 2, 'c'],
+    ], columns=['lat', 'lon', 'datetime', 'id_l', 'id_r', 'key'], index=[0, 1, 2, 3]
+    )
+    assert_frame_equal(result, expected)
+
+
+def test_merge():
+    move_df = _default_move_df()
+    other = DataFrame({'key': [1], 'value': ['a']})
+
+    result = move_df.merge(other, left_on='id', right_on='key')
+    expected = DataFrame(data=[
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 1, 'a'],
+        [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1, 1, 'a'],
+    ], columns=['lat', 'lon', 'datetime', 'id', 'key', 'value'], index=[0, 1]
+    )
+    assert_frame_equal(result, expected)
+
+
+def test_nunique():
+    move_df = _default_move_df()
+    assert_array_equal(move_df.nunique(), [3, 3, 3, 2])
+
+
+def test_write_file(tmpdir):
+    d = tmpdir.mkdir('prepossessing')
+
+    file_write_default = d.join('test_write_default.csv')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+    move_df = _default_move_df()
+    move_df.write_file(filename_write_default)
+    move_df_test = read_csv(filename_write_default)
+    assert_frame_equal(move_df, move_df_test)
+
+    file_write_semi = d.join('test_write_semi.csv')
+    filename_write_semi = os.path.join(
+        file_write_semi.dirname, file_write_semi.basename
+    )
+    move_df = _default_move_df()
+    move_df.write_file(filename_write_semi, separator=';')
+    move_df_test = read_csv(filename_write_semi, sep=';')
+    assert_frame_equal(move_df, move_df_test)
+
+
+def test_to_csv(tmpdir):
+    d = tmpdir.mkdir('prepossessing')
+
+    file_csv = d.join('test_csv.csv')
+    filename_csv = os.path.join(
+        file_csv.dirname, file_csv.basename
+    )
+    move_df = _default_move_df()
+    move_df.to_csv(filename_csv, index=False)
+    move_df_test = read_csv(filename_csv)
+    assert_frame_equal(move_df, move_df_test)
+
+
+def test_convert_to():
+    move_df = _default_move_df()
+
+    assert move_df._type == TYPE_PANDAS
+    assert isinstance(move_df, PandasMoveDataFrame)
+    assert isinstance(move_df._data, DataFrame)
+
+    move_df_dask = move_df.convert_to('dask')
+    assert move_df_dask._type == TYPE_DASK
+    assert isinstance(move_df_dask, DaskMoveDataFrame)
+    assert isinstance(move_df_dask, DaskDataFrame)
+
+
+def test_get_type():
+    move_df = _default_move_df()
+
+    assert move_df.get_type() == TYPE_PANDAS

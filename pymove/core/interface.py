@@ -79,7 +79,7 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def to_DataFrame(self):
+    def to_data_frame(self):
         pass
 
     @abc.abstractmethod
@@ -260,6 +260,10 @@ class MoveDataFrameAbstractModel(abc.ABC):
 
     @abc.abstractmethod
     def join(self):
+        pass
+
+    @abc.abstractmethod
+    def merge(self):
         pass
 
     @abc.abstractmethod
