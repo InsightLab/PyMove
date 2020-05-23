@@ -356,7 +356,7 @@ def create_base_map(
     default_zoom_start : int, optional, default 12.
         Represents the zoom which will be the center of the map.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
 
     Returns
     -------
@@ -388,7 +388,7 @@ def _filter_and_generate_colors(
     move_data : pymove.core.MoveDataFrameAbstract subclass.
         Input trajectory data.
     id_: int or None.
-        The TRAJ_ID's to be plotted
+        The TRAJ_ID'srs to be plotted
     n_rows : int, optional, default None.
         Represents number of data rows that are will plot.
     color: string or None.
@@ -573,7 +573,7 @@ def heatmap(
         using the function create_base_map(), with the lat_origin, lon_origin
         and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     filename : String, optional, default 'heatmap.html'.
@@ -648,7 +648,7 @@ def cluster(
         using the function create_base_map(), with the lat_origin, lon_origin
         and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     filename : String, optional, default 'cluster.html'.
@@ -729,7 +729,7 @@ def faster_cluster(
         using the function create_base_map(), with the lat_origin, lon_origin
         and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     filename : String, optional, default 'faster_cluster.html'.
@@ -805,7 +805,7 @@ def plot_markers(
         using the function create_base_map(), with the lat_origin,
         lon_origin and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     filename : String, optional, default 'plot_trejectory_with_folium.html'.
@@ -890,11 +890,11 @@ def plot_trajectories_with_folium(
         using the function create_base_map(), with the lat_origin, lon_origin
          and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     color : String, optional, default 'black'.
-        Represents line's color of visualization.
+        Represents line'srs color of visualization.
     filename : String, optional, default 'plot_trajectory_with_folium.html'.
         Represents the file name of new file .html.
 
@@ -964,11 +964,11 @@ def plot_trajectory_by_id_folium(
         generated using the function create_base_map(), with the
         lat_origin, lon_origin and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     color : String, optional, default 'black'.
-        Represents line's color of visualization.
+        Represents line'srs color of visualization.
     filename : String, optional, default 'plot_trajectory_by_id_folium.html'.
         Represents the file name of new file .html.
 
@@ -1043,11 +1043,11 @@ def plot_trajectory_by_period(
         using the function create_base_map(), with the lat_origin,
         lon_origin and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
-        Represents line's color of visualization.
+        Represents line'srs color of visualization.
         Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_trajectory_by_period.html'.
         Represents the file name of new file .html.
@@ -1129,11 +1129,11 @@ def plot_trajectory_by_day_week(
         using the function create_base_map(), with the lat_origin,
         lon_origin and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
-        Represents line's color of visualization.
+        Represents line'srs color of visualization.
         Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_trajectory_by_day_week.html'.
         Represents the file name of new file .html.
@@ -1218,11 +1218,11 @@ def plot_trajectory_by_date(
         using the function create_base_map(), with the lat_origin,
         lon_origin and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
-        Represents line's color of visualization.
+        Represents line'srs color of visualization.
         Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_trejectory_with_folium.html'.
         Represents the file name of new file .html.
@@ -1314,11 +1314,11 @@ def plot_trajectory_by_hour(
         using the function create_base_map(), with the lat_origin,
         lon_origin and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
-        Represents line's color of visualization.
+        Represents line'srs color of visualization.
         Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_trajectory_by_hour.html'.
         Represents the file name of new file .html.
@@ -1383,7 +1383,7 @@ def plot_stops(
     radius :  Double, optional(900 by default)
         The radius value is used to determine if a segment is a stop.
         If the value of the point in target_label is greater than
-        radius, the segment is a stop, otherwise it's a move.
+        radius, the segment is a stop, otherwise it'srs a move.
     weight: int or None
         Stroke width in pixels
     id_: int or None
@@ -1405,11 +1405,11 @@ def plot_stops(
         using the function create_base_map(), with the lat_origin,
         lon_origin and zoom_start.
     tile : String, optional, default 'CartoDB positron'.
-        Represents the map's tiles.
+        Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     color : String or List, optional, default 'black'.
-        Represents line's color of visualization.
+        Represents line'srs color of visualization.
         Pass a list if plotting for many users. Else colors will be random
     filename : String, optional, default 'plot_stops.html'.
         Represents the file name of new file .html.

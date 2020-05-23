@@ -55,7 +55,7 @@ def list_to_str(input_list, delimiter=','):
     Returns
     -------
     str
-        Returns a string, resulting from concatenation of list's elements,
+        Returns a string, resulting from concatenation of list'srs elements,
         separeted by the delimiter.
 
     """
@@ -77,7 +77,7 @@ def list_to_csv_str(input_list):
     Returns
     -------
     str
-        Returns a string, resulting from concatenation of list's elements,
+        Returns a string, resulting from concatenation of list'srs elements,
         separeted by ",".
 
     Example

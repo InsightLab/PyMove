@@ -72,7 +72,7 @@ def _drop_single_point(move_data, label_new_tid, label_id):
         The label of the column containing the ids of the formed segments.
         Is the new splitted id.
     label_id : String
-         Indicates the label of the id column in the user"s dataframe.
+         Indicates the label of the id column in the user"srs dataframe.
 
     """
 
@@ -245,7 +245,7 @@ def _filter_by(
     move_data : dataframe
        The input trajectory data
     label_id : String, optional(dic_labels["id"] by default)
-         Indicates the label of the id column in the user"s dataframe.
+         Indicates the label of the id column in the user"srs dataframe.
     label_new_tid : String, optional(TID_PART by default)
         The label of the column containing the ids of the formed segments.
         Is the new splitted id.
@@ -331,7 +331,7 @@ def by_dist_time_speed(
     move_data : dataframe
        The input trajectory data
     label_id : String, optional(dic_labels["id"] by default)
-         Indicates the label of the id column in the user"s dataframe.
+         Indicates the label of the id column in the user"srs dataframe.
     max_dist_between_adj_points : Float, optional(3000 by default)
         Specify the maximum distance a point should have from
         the previous point, in order not to be dropped
@@ -405,7 +405,7 @@ def by_max_dist(
     move_data : dataframe
        The input trajectory data
     label_id : String, optional(dic_labels["id"] by default)
-         Indicates the label of the id column in the user"s dataframe.
+         Indicates the label of the id column in the user"srs dataframe.
     max_dist_between_adj_points : Float, optional(50.0 by default)
         Specify the maximum dist between two adjacent points
     drop_single_points : boolean, optional(True by default)

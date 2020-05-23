@@ -109,10 +109,10 @@ class MoveDataFrame:
         """
 
         try:
-            if data.dtypes.lat != 'float32':
-                data.lat = data.lat.astype('float32')
-            if data.dtypes.lon != 'float32':
-                data.lon = data.lon.astype('float32')
+            if data.dtypes.lat != 'float64':
+                data.lat = data.lat.astype('float64')
+            if data.dtypes.lon != 'float64':
+                data.lon = data.lon.astype('float64')
             if data.dtypes.datetime != 'datetime64[ns]':
                 data.datetime = data.datetime.astype('datetime64[ns]')
         except AttributeError:
@@ -219,7 +219,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     @property
     def loc(self):
         """
-        Access a group of rows and columns by label(s) or a boolean array.
+        Access a group of rows and columns by label(srs) or a boolean array.
 
         .loc[] is primarily label based, but may also be used with a boolean
         array.
@@ -363,8 +363,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
     def dtypes(self):
         """
         Return the dtypes in the DataFrame. This returns a Series with
-        the data type of each column. The result's index is the original
-        DataFrame's columns. Columns with mixed types are stored with the
+        the data type of each column. The result'srs index is the original
+        DataFrame'srs columns. Columns with mixed types are stored with the
         object dtype. See the User Guide for more.
 
         Returns
@@ -490,6 +490,36 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return head_
 
+    def tail(self, n=5):
+        """
+        Return the last n rows.
+
+        This function returns the last n rows for the object
+        based on position. It is useful for quickly testing if
+        your object has the right type of data in it.
+
+        Parameters
+        ----------
+        n : int, default 5.
+            Number of rows to select.
+
+        Returns
+        -------
+        same type as caller
+            The last n rows of the caller object.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.tail.html
+
+        """
+
+        operation = begin_operation('tail')
+        tail_ = self._data.tail(n)
+        self.last_operation = end_operation(operation)
+
+        return tail_
+
     def get_users_number(self):
         """
         Check and return number of users in trajectory data.
@@ -571,7 +601,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return grid_
 
-    def to_DataFrame(self):
+    def to_data_frame(self):
         """
         Converts trajectory data to DataFrame format.
 
@@ -582,7 +612,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
 
-        operation = begin_operation('to_DataFrame')
+        operation = begin_operation('to_data_frame')
         data_ = self._data
         self.last_operation = end_operation(operation)
 
@@ -621,7 +651,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             (including the index) should be displayed. By default, this
             follows the pandas.options.display.memory_usage setting.
             True always show memory usage. False never shows memory usage.
-            A value of ‘deep’ is equivalent to “True with deep introspection”.
+            A value of ‘deep’ is equivalent to 'True with deep introspection'.
             Memory usage is shown in human-readable units (base-2 representation).
             Without deep introspection a memory estimation is made based
             in column dtype and number of rows assuming values consume the
@@ -648,7 +678,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Generate descriptive statistics.
 
         Descriptive statistics include those that summarize the central
-        tendency, dispersion and shape of a dataset’s distribution,
+        tendency, dispersion and shape of a dataset’srs distribution,
         excluding NaN values. Analyzes both numeric and object series,
         as well as DataFrame column sets of mixed data types. The output will
         vary depending on what is provided. Refer to the notes
@@ -689,13 +719,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Notes
         -----
-            For numeric data, the result’s index will include
+            For numeric data, the result’srs index will include
             count, mean, std, min, max as well as lower, 50 and upper percentiles.
             By default the lower percentile is 25 and the upper percentile is 75.
             The 50 percentile is the same as the median.
-            For object data (e.g. strings or timestamps), the result’s index
+            For object data (e.g. strings or timestamps), the result’srs index
             will include count, unique, top, and freq. The top is the most common
-            value. The freq is the most common value’s frequency.
+            value. The freq is the most common value’srs frequency.
             Timestamps also include the first and last items.
             If multiple object values have the highest count, then the
             count and top results will be arbitrarily chosen from among those
@@ -730,7 +760,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         index : bool, default True
-            Specifies whether to include the memory usage of the DataFrame’s
+            Specifies whether to include the memory usage of the DataFrame’srs
             index in returned Series. If index=True, the memory usage of the
             index is the first item in the output.
         deep : bool, default False
@@ -753,14 +783,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def copy(self, deep=True):
         """
-        Make a copy of this object’s indices and data.
+        Make a copy of this object’srs indices and data.
 
         When deep=True (default), a new object will be created with a copy
-        of the calling object’s data and indices. Modifications to the
+        of the calling object’srs data and indices. Modifications to the
         data or indices of the copy will not be reflected in the original
         object (see notes below).
         When deep=False, a new object will be created without copying the calling
-        object’s data or index (only references to the data and index are copied).
+        object’srs data or index (only references to the data and index are copied).
         Any changes to the data of the original will be reflected in the
         shallow copy (and vice versa).
 
@@ -789,7 +819,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('copy')
-        copy_ = self._data.copy(deep)
+        copy_ = PandasMoveDataFrame(self._data.copy(deep))
         self.last_operation = end_operation(operation)
         return copy_
 
@@ -842,8 +872,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 self.last_operation = end_operation(operation)
                 return None
 
-            self.last_operation = end_operation(operation)
             data_ = PandasMoveDataFrame(data=data_)
+            self.last_operation = end_operation(operation)
             return data_
         except Exception as e:
             self.last_operation = end_operation(operation)
@@ -912,7 +942,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             data_ = self._data
         else:
-            data_ = self._data
+            data_ = self._data.copy()
 
         try:
             print('\nCreating or updating a feature for hour...\n')
@@ -1002,8 +1032,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 self.generate_day_of_the_week_features(inplace=inplace)
                 data_ = self._data
             else:
-                df = self.generate_day_of_the_week_features(inplace=inplace)
-                data_ = df._data
+                data_ = self.generate_day_of_the_week_features(
+                    inplace=inplace
+                )._data
 
             print('Creating or updating a feature for weekend\n')
             if DAY in data_:
@@ -1237,7 +1268,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         label_id : str, optional, default 'id'.
-            Represents name of column of trajectory's id.
+            Represents name of column of trajectory'srs id.
         label_dtype : type, optional, default np.float64.
             Represents column id type.
         sort : bool, optional, default True.
@@ -1255,7 +1286,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         --------
         - dist_to_prev =  248.33 meters, dist_to_prev 536.57 meters
         - time_to_prev = 60 seconds, time_prev = 60.0 seconds
-        - speed_to_prev = 4.13 m/s, speed_prev = 8.94 m/s.
+        - speed_to_prev = 4.13 m/srs, speed_prev = 8.94 m/srs.
 
         """
 
@@ -1313,7 +1344,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     # set speed features
                     data_.at[idx, SPEED_TO_PREV] = (
                         data_.at[idx, DIST_TO_PREV] / time_prev
-                    )  # unit: m/s
+                    )  # unit: m/srs
 
             return self._return_generated_data(
                 data_, start_time, operation, inplace
@@ -1336,7 +1367,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         label_id : str, optional, default 'id'.
-            Represents name of column of trajectory's id.
+            Represents name of column of trajectory'srs id.
         label_dtype : type, optional, default np.float64.
             Represents column id type.
         sort : bool, optional, default True.
@@ -1405,7 +1436,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     )
 
                     # using pandas shift in a large dataset: 7min 21s
-                    # using numpy shift above: 33.6 s
+                    # using numpy shift above: 33.6 srs
 
                     # use distance from previous to next
                     data_.at[idx, DIST_PREV_TO_NEXT] = haversine(
@@ -1433,7 +1464,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         label_id : str, optional, default 'id'.
-            Represents name of column of trajectory's id.
+            Represents name of column of trajectory'srs id.
         label_dtype : type, optional, default np.float64.
             Represents column id type_.
         sort : bool, optional, default True.
@@ -1526,7 +1557,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         label_id : str, optional, default 'id'.
-            Represents name of column of trajectory's id.
+            Represents name of column of trajectory'srs id.
         label_dtype : type, optional, default np.float64.
             Represents column id type_.
         sort : bool, optional, default True.
@@ -1614,9 +1645,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 self.generate_dist_features(inplace=inplace)
             data_ = self._data
         else:
-            if DIST_TO_PREV not in self._data:
-                df = self.generate_dist_features(inplace=inplace)
-            data_ = df._data
+            data_ = self.generate_dist_features(inplace=inplace)._data
 
         try:
             print('\nCreating or updating features MOVE and STOPS...\n')
@@ -1702,7 +1731,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def plot_all_features(
         self,
-        dtype=np.float32,
+        dtype=np.float64,
         figsize=(21, 15),
         return_fig=True,
         save_fig=False,
@@ -1715,7 +1744,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         figsize : tuple, optional, default (21, 15).
             Represents dimensions of figure.
-        dtype : type, optional, default np.float32.
+        dtype : type, optional, default np.float64.
             Represents column type.
         return_fig : bool, optional, default True.
             Represents whether or not to save the generated picture.
@@ -1907,7 +1936,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             plt.savefig(fname=name, fig=fig)
 
         df_ = PandasMoveDataFrame(df_)
-
         self.last_operation = end_operation(operation)
 
         if return_fig:
@@ -1951,8 +1979,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 )
 
             if DATETIME in self._data:
-                dtmin = self._data[DATETIME].max()
-                dtmax = self._data[DATETIME].min()
+                dtmax = self._data[DATETIME].max()
+                dtmin = self._data[DATETIME].min()
                 print(
                     'Start Date:%s     End Date:%s\n'
                     % (dtmin, dtmax)
@@ -2074,7 +2102,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def count(self, axis=0, level=None, numeric_only=False):
         """
-        Uses the pandas's function count, to count the number of non-NA cells
+        Uses the pandas'srs function count, to count the number of non-NA cells
         for each column or row.
 
         Parameters
@@ -2129,8 +2157,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         by : mapping, function, label, or list, optional, default None
             Used to determine the groups for the groupby.
-            If by is a function, it's called on each
-            value of the object's index.
+            If by is a function, it'srs called on each
+            value of the object'srs index.
             If a dict or Series is passed, the Series or dict VALUES will
             be used to determine the groups (the Series' values are first
             aligned; see .align() method).
@@ -2146,7 +2174,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         as_index : boolean, optional (default True)
             For aggregated output, return object with group labels as the index.
             Only relevant for DataFrame input. as_index=False
-            is effectively “SQL-style” grouped output.
+            is effectively 'SQL-style' grouped output.
         sort : boolean, optional (default True)
             Sort group keys. Get better performance by turning this off.
             Note this does not influence the order of observations
@@ -2223,7 +2251,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def select_dtypes(self, include=None, exclude=None):
         """
-        Returns a subset of the _data's columns based on the column dtypes.
+        Returns a subset of the _data'srs columns based on the column dtypes.
 
         Parameters
         ----------
@@ -2264,7 +2292,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Use a numpy.dtype or Python type to cast entire pandas object
             to the same type. Alternatively, use {col: dtype, …},
             where col is a column label and dtype is a numpy.dtype
-            or Python type to cast one or more of the DataFrame's
+            or Python type to cast one or more of the DataFrame'srs
             columns to column-specific types.
         copy: bool, optional, default None
             Return a copy when copy=True (be very careful setting
@@ -2361,14 +2389,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             self.last_operation = end_operation(operation)
             return None
+        _sort_values = PandasMoveDataFrame(data=_sort_values)
         self.last_operation = end_operation(operation)
-        return PandasMoveDataFrame(data=_sort_values)
+        return _sort_values
 
     def reset_index(
         self, level=None, drop=False, inplace=False, col_level=0, col_fill=''
     ):
         """
-        Resets the DataFrame's index, and use the default one. One or more
+        Resets the DataFrame'srs index, and use the default one. One or more
         levels can be removed, if the DataFrame has a MultiIndex.
 
         Parameters
@@ -2409,8 +2438,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             self.last_operation = end_operation(operation)
             return None
+
+        _reset_index = PandasMoveDataFrame(data=_reset_index)
         self.last_operation = end_operation(operation)
-        return PandasMoveDataFrame(data=_reset_index)
+        return _reset_index
 
     def set_index(
         self,
@@ -2456,10 +2487,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace and drop:
             if isinstance(keys, str):
-                aux = set(keys)
+                aux = {keys}
             else:
                 aux = set(keys)
             columns = {LATITUDE, LONGITUDE, DATETIME}
+            print(aux, columns)
             if aux & columns:
                 raise AttributeError(
                     'Could not change lat, lon, and datetime type.'
@@ -2469,13 +2501,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         _set_index = self._data.set_index(
             keys, drop, append, inplace, verify_integrity
         )
-        self.last_operation = end_operation(operation)
 
         if (
-            isinstance(_set_index, pd.DataFrame)
-            and MoveDataFrame.has_columns(_set_index)
+                isinstance(_set_index, pd.DataFrame)
+                and MoveDataFrame.has_columns(_set_index)
         ):
-            return PandasMoveDataFrame(_set_index)
+            _set_index = PandasMoveDataFrame(data=_set_index)
+
+        self.last_operation = end_operation(operation)
         return _set_index
 
     def drop(
@@ -2536,18 +2569,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             _labels2 = set()
             if labels is not None:
                 if isinstance(labels, str):
-                    _labels1 = set(labels)
+                    _labels1 = {labels}
                 else:
                     _labels1 = set(labels)
             elif columns is not None:
                 if isinstance(columns, str):
-                    _labels2 = set(columns)
+                    _labels2 = {columns}
                 else:
                     _labels2 = set(columns)
             _columns = {LATITUDE, LONGITUDE, DATETIME}
             if (
-                (axis == 1 or axis == 'columns' or columns)
-                and (_labels1.union(_labels2) & _columns)
+                    (axis == 1 or axis == 'columns' or columns)
+                    and (_labels1.union(_labels2) & _columns)
             ):
                 raise AttributeError(
                     'Could not drop columns lat, lon, and datetime.'
@@ -2557,13 +2590,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         _drop = self._data.drop(
             labels, axis, index, columns, level, inplace, errors
         )
-        self.last_operation = end_operation(operation)
 
         if (
-            (isinstance(_drop, pd.DataFrame))
-            and MoveDataFrame.has_columns(_drop)
+                (isinstance(_drop, pd.DataFrame))
+                and MoveDataFrame.has_columns(_drop)
         ):
-            return PandasMoveDataFrame(_drop)
+            _drop = PandasMoveDataFrame(data=_drop)
+
+        self.last_operation = end_operation(operation)
         return _drop
 
     def duplicated(self, subset=None, keep='first'):
@@ -2600,7 +2634,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def drop_duplicates(self, subset=None, keep='first', inplace=False):
         """
-        Uses the pandas's function drop_duplicates, to remove duplicated rows
+        Uses the pandas'srs function drop_duplicates, to remove duplicated rows
         from data.
 
         Parameters
@@ -2633,8 +2667,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             return None
 
+        _drop_duplicates = PandasMoveDataFrame(data=_drop_duplicates)
         self.last_operation = end_operation(operation)
-        return PandasMoveDataFrame(data=_drop_duplicates)
+        return _drop_duplicates
 
     def shift(self, periods=1, freq=None, axis=0, fill_value=None):
         """
@@ -2871,8 +2906,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             return None
 
+        _fillna = PandasMoveDataFrame(data=_fillna)
         self.last_operation = end_operation(operation)
-        return PandasMoveDataFrame(data=_fillna)
+        return _fillna
 
     def dropna(
         self, axis=0, how='any', thresh=None, subset=None, inplace=False
@@ -2922,13 +2958,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         operation = begin_operation('dropna')
         _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
-        self.last_operation = end_operation(operation)
 
         if (
-            isinstance(_dropna, pd.DataFrame)
-            and MoveDataFrame.has_columns(_dropna)
+                isinstance(_dropna, pd.DataFrame)
+                and MoveDataFrame.has_columns(_dropna)
         ):
-            return PandasMoveDataFrame(_dropna)
+            _dropna = PandasMoveDataFrame(data=_dropna)
+
+        self.last_operation = end_operation(operation)
         return _dropna
 
     def sample(
@@ -3001,7 +3038,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         _sample = PandasMoveDataFrame(data=_sample)
         self.last_operation = end_operation(operation)
 
-        return PandasMoveDataFrame(data=_sample)
+        return _sample
 
     def isin(self, values):
         """
@@ -3009,7 +3046,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         values : iterable, Series, DataFrame or dict
             The result will only be true at a location if all the labels match.
-            If values is a Series, that's the index.
+            If values is a Series, that'srs the index.
             If values is a dict, the keys must be the
             column names, which must match.
             If values is a DataFrame, then both the
@@ -3026,6 +3063,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.isin.html
 
         """
+
+        if isinstance(values, PandasMoveDataFrame):
+            values = values._data
 
         operation = begin_operation('isin')
         _isin = self._data.isin(values)
@@ -3096,7 +3136,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Series is passed, its name attribute must be set, and that will be
             used as the column name in the resulting joined DataFrame.
         on : str, list of str, or array-like, optional
-            Column or index level name(s) in the caller to join on the index
+            Column or index level name(srs) in the caller to join on the index
             in `other`, otherwise joins index-on-index. If multiple
             values given, the `other` DataFrame must have a MultiIndex. Can
             pass an array as the join key if it is not already contained in
@@ -3104,18 +3144,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         how : {'left', 'right', 'outer', 'inner'}, default 'left'
             How to handle the operation of the two objects.
 
-            * left: use calling frame's index (or column if on is specified)
-            * right: use `other`'s index.
-            * outer: form union of calling frame's index (or column if on is
-            specified) with `other`'s index, and sort it.
+            * left: use calling frame'srs index (or column if on is specified)
+            * right: use `other`'srs index.
+            * outer: form union of calling frame'srs index (or column if on is
+            specified) with `other`'srs index, and sort it.
             lexicographically.
-            * inner: form intersection of calling frame's index (or column if
-            on is specified) with `other`'s index, preserving the order
-            of the calling's one.
+            * inner: form intersection of calling frame'srs index (or column if
+            on is specified) with `other`'srs index, preserving the order
+            of the calling'srs one.
         lsuffix : str, default ''
-            Suffix to use from left frame's overlapping columns.
+            Suffix to use from left frame'srs overlapping columns.
         rsuffix : str, default ''
-            Suffix to use from right frame's overlapping columns.
+            Suffix to use from right frame'srs overlapping columns.
         sort : bool, default False
             Order result DataFrame lexicographically by the join key. If False,
             the order of the join key depends on the join type (how keyword).
@@ -3146,6 +3186,113 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self.last_operation = end_operation(operation)
 
         return _join
+
+    def merge(
+            self,
+            right,
+            how='inner',
+            on=None,
+            left_on=None,
+            right_on=None,
+            left_index=False,
+            right_index=False,
+            sort=False,
+            suffixes=('_x', '_y'),
+            copy=True,
+            indicator=False,
+            validate=None
+    ):
+        """
+        Merge DataFrame or named Series objects with a database-style join.
+
+        The join is done on columns or indexes. If joining columns on columns,
+        the DataFrame indexes will be ignored. Otherwise if joining indexes
+        on indexes or indexes on a column or columns, the index will be passed on.
+
+        Parameters
+        ----------
+        right: DataFrame or named Series
+            Object to merge with.
+        how: {‘left’, ‘right’, ‘outer’, ‘inner’}, default ‘inner’
+            Type of merge to be performed.
+            left: use only keys from left frame, similar to a SQL left outer join;
+                preserve key order.
+            right: use only keys from right frame, similar to a SQL right outer join;
+                preserve key order.
+            outer: use union of keys from both frames, similar to a SQL full outer join;
+                sort keys lexicographically.
+            inner: use intersection of keys from both frames, similar to a SQL inner join;
+                preserve the order of the left keys.
+        on: label or list
+            Column or index level names to join on. These must be found in both
+            DataFrames. If on is None and not merging on indexes then this defaults
+            to the intersection of the columns in both DataFrames.
+        left_on: label or list, or array-like
+            Column or index level names to join on in the left DataFrame. Can
+            also be an array or list of arrays of the length of the left DataFrame.
+            These arrays are treated as if they are columns.
+        right_on: label or list, or array-like
+            Column or index level names to join on in the right DataFrame.
+            Can also be an array or list of arrays of the length of the right DataFrame.
+            These arrays are treated as if they are columns.
+        left_index: bool, default False
+            Use the index from the left DataFrame as the join key(s).
+            If it is a MultiIndex, the number of keys in the other DataFrame
+            (either the index or a number of columns) must match the number of levels.
+        right_index: bool, default False
+            Use the index from the right DataFrame as the join key.
+            Same caveats as left_index.
+        sort: bool, default False
+            Sort the join keys lexicographically in the result DataFrame.
+            If False, the order of the join keys depends on the join type (how keyword).
+        suffixes: tuple of (str, str), default (‘_x’, ‘_y’)
+            Suffix to apply to overlapping column names in the left and right side,
+            respectively. To raise an exception on overlapping columns use (False, False)
+        copy: bool, default True
+            If False, avoid copy if possible.
+        indicator: bool or str, default False
+            If True, adds a column to output DataFrame called '_merge' with
+            information on the source of each row. If string, column with
+            information on source of each row will be added to output DataFrame,
+            and column will be named value of string. Information column is
+            Categorical-type and takes on a value of 'left_only' for observations
+            whose merge key only appears in ‘left’ DataFrame, 'right_only' for
+            observations whose merge key only appears in ‘right’ DataFrame,
+            and 'both' if the observation’s merge key is found in both.
+        validate: str, optional
+            If specified, checks if merge is of specified type.
+            'one_to_one' or '1:1': check if merge keys are unique in both
+                left and right datasets.
+            'one_to_many' or '1:m': check if merge keys are unique in left dataset.
+            'many_to_one' or 'm:1': check if merge keys are unique in right dataset.
+            'many_to_many' or 'm:m': allowed, but does not result in checks.
+
+        Returns
+        -------
+        PandasMoveDataFrame
+            A DataFrame of the two merged objects.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.merge.html?highlight=merge#pandas.DataFrame.merge
+
+        """
+
+        operation = begin_operation('merge')
+
+        if isinstance(right, PandasMoveDataFrame):
+            right = right._data
+
+        _merge = self._data.merge(
+            right, how, on, left_on, right_on, left_index, right_index, sort,
+            suffixes, copy, indicator, validate
+        )
+
+        if copy:
+            _merge = PandasMoveDataFrame(data=_merge)
+        self.last_operation = end_operation(operation)
+
+        return _merge
 
     def nunique(self, axis=0, dropna=True):
         """
@@ -3356,7 +3503,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def loc(self):
-        """Access a group of rows and columns by label(s) or a boolean array."""
+        """Access a group of rows and columns by label(srs) or a boolean array."""
         raise NotImplementedError('To be implemented')
 
     @property
@@ -3427,6 +3574,31 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
         return self._data.head(n, npartitions, compute)
 
+    def tail(self, n=5, npartitions=1, compute=True):
+        """
+        Return the last n rows.
+
+        This function returns the last n rows for the object based on position.
+        It is useful for quickly testing if
+        your object has the right type of data in it.
+
+        Parameters
+        ----------
+        n : int, optional, default 5
+            Number of rows to select.
+        npartitions : int, optional, default 1.
+            Represents the number partitions.
+        compute : bool, optional, default True.
+            ?
+
+        Returns
+        -------
+        same type as caller
+            The last n rows of the caller object.
+
+        """
+        return self._data.tail(n, npartitions, compute)
+
     def get_users_number(self):
         """Check and return number of users in trajectory data."""
         raise NotImplementedError('To be implemented')
@@ -3443,7 +3615,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """Converts trajectory data to grid format."""
         raise NotImplementedError('To be implemented')
 
-    def to_DataFrame(self):
+    def to_data_frame(self):
         """
         Converts trajectory data to DataFrame format.
 
@@ -3469,7 +3641,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         raise NotImplementedError('To be implemented')
 
     def copy(self):
-        """Make a copy of this object’s indices and data."""
+        """Make a copy of this object’srs indices and data."""
         raise NotImplementedError('To be implemented')
 
     def generate_tid_based_on_id_datetime(self):
@@ -3646,7 +3818,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         raise NotImplementedError('To be implemented')
 
     def reset_index(self):
-        """Resets the dask DataFrame's index, and use the default one."""
+        """Resets the dask DataFrame'srs index, and use the default one."""
         raise NotImplementedError('To be implemented')
 
     def set_index(self):
@@ -3703,6 +3875,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def join(self):
         """Join columns of another DataFrame."""
+        raise NotImplementedError('To be implemented')
+
+    def merge(self):
+        """Merge columns of another DataFrame."""
         raise NotImplementedError('To be implemented')
 
     def nunique(self):
