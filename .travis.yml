@@ -6,7 +6,14 @@ script:
   - python setup.py sdist >/dev/null
   - python setup.py install
   - pip install pytest
-  - bash test.sh
+  - pip install coverage
+  - coverage run -m pytest
+after_script:
+  - if [[ "$TRAVIS_BRANCH" = "master" || "$TRAVIS_BRANCH" = "developer" ]];
+        then
+            coverage xml -o "cobertura.xml";
+            bash <(curl -Ls https://coverage.codacy.com/get.sh);
+    fi;
 deploy:
   skip_existing: true
   provider: pypi
