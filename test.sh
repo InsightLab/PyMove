@@ -1,4 +1,4 @@
-# !bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -7,7 +7,7 @@ run_tests() {
 
     set -x  # print executed commands to the terminal
 
-    $TEST_CMD pymove/
+    $TEST_CMD pymove
 }
 
 run_tests
