@@ -87,7 +87,8 @@ class MoveDataFrame:
 
         """
 
-        if LATITUDE in data and LONGITUDE in data and DATETIME in data:
+        cols = data.columns
+        if LATITUDE in cols and LONGITUDE in cols and DATETIME in cols:
             return True
         return False
 
@@ -3456,6 +3457,20 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         """
 
+        if isinstance(data, dict):
+            data = pd.DataFrame.from_dict(data)
+        elif (
+            (isinstance(data, list) or isinstance(data, np.ndarray))
+            and len(data) >= 4
+        ):
+            zip_list = [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
+            for i in range(len(data[0])):
+                try:
+                    zip_list[i] = zip_list[i]
+                except KeyError:
+                    zip_list.append(i)
+            data = pd.DataFrame(data, columns=zip_list)
+
         mapping_columns = format_labels(traj_id, latitude, longitude, datetime)
         dsk = data.rename(columns=mapping_columns)
 
@@ -3474,32 +3489,32 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     @property
     def lat(self):
         """Checks for the 'lat' column and returns its value."""
-        if LATITUDE not in self:
+        if LATITUDE not in self.columns:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
                 % LATITUDE
             )
-        return self[LATITUDE]
+        return self._data[LATITUDE]
 
     @property
     def lng(self):
         """Checks for the 'lon' column and returns its value."""
-        if LONGITUDE not in self:
+        if LONGITUDE not in self.columns:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
                 % LONGITUDE
             )
-        return self[LONGITUDE]
+        return self._data[LONGITUDE]
 
     @property
     def datetime(self):
         """Checks for the 'datetime' column and returns its value."""
-        if DATETIME not in self:
+        if DATETIME not in self.columns:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
                 % DATETIME
             )
-        return self[DATETIME]
+        return self._data[DATETIME]
 
     @property
     def loc(self):
@@ -3524,7 +3539,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     @property
     def columns(self):
         """The column labels of the DataFrame."""
-        raise NotImplementedError('To be implemented')
+        return self._data.columns
 
     @property
     def index(self):
@@ -3534,7 +3549,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     @property
     def dtypes(self):
         """Return the dtypes in the DataFrame."""
-        raise NotImplementedError('To be implemented')
+        return self._data.dtypes
 
     @property
     def shape(self):
