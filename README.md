@@ -9,7 +9,7 @@
   <td>Package Status</td>
   <td>
     <a href="https://pypi.org/project/pymove/">
-      <img src="https://img.shields.io/pypi/status/pymove.svg" alt="Package status" />
+      <img src="https://img.shields.io/pypi/status/pymove?style=for-the-badge" alt="Package status" />
     </a>
   </td>
 </tr>
@@ -17,7 +17,7 @@
   <td>License</td>
   <td>
     <a href="https://github.com/InsightLab/PyMove/blob/master/LICENSE">
-      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="Package license" />
+      <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="Package license" />
     </a>
 </td>
 </tr>
@@ -25,7 +25,7 @@
   <td>Python Version</td>
   <td>
     <a href="https://www.python.org/doc/versions/">
-      <img src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue" alt="Python compatible versions" />
+      <img src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue?style=for-the-badge" alt="Python compatible versions" />
     </a>
 </td>
 </tr>
@@ -33,7 +33,7 @@
   <td>Build Status</td>
   <td>
     <a href="https://travis-ci.org/InsightLab/PyMove/">
-      <img src="https://api.travis-ci.org/InsightLab/PyMove.svg?branch=master" alt="Travis build status" />
+      <img src="https://img.shields.io/travis/InsightLab/pymove/master?style=for-the-badge" alt="Travis build status" />
     </a>
   </td>
 </tr>
@@ -41,7 +41,7 @@
   <td>Platforms</td>
   <td>
     <a href="https://anaconda.org/conda-forge/pymove">
-      <img src="https://img.shields.io/conda/pn/conda-forge/pymove.svg" alt="Platforms" />
+      <img src="https://img.shields.io/conda/pn/conda-forge/pymove?style=for-the-badge" alt="Platforms" />
     </a>
   </td>
 </tr>
@@ -49,7 +49,7 @@
   <td>All Platforms</td>
   <td>
     <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=9753&branchName=master">
-      <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/pymove-feedstock?branchName=master" alt="conda-forge build status" />
+      <img src="https://img.shields.io/azure-devops/build/conda-forge/84710dde-1620-425b-80d0-4cf5baca359d/9753/master?style=for-the-badge" alt="conda-forge build status" />
     </a>
   </td>
 </tr>
@@ -57,7 +57,7 @@
   <td>PyPi Downloads</td>
   <td>
     <a href="https://pypi.org/project/pymove/#files" alt="PyPi downloads">
-      <img src="https://img.shields.io/pypi/dm/pymove" alt="PyPi downloads" alt="PyPi downloads" />
+      <img src="https://img.shields.io/pypi/dm/pymove?style=for-the-badge" alt="PyPi downloads" alt="PyPi downloads" />
     </a>
   </td>
 </tr>
@@ -65,7 +65,7 @@
   <td>PyPi version</td>
   <td>
     <a href="https://pypi.org/project/pymove/#history" alt="PyPi version">
-      <img src="https://img.shields.io/pypi/v/pymove" alt="PyPi version" alt="PyPi version" />
+      <img src="https://img.shields.io/pypi/v/pymove?style=for-the-badge" alt="PyPi version" alt="PyPi version" />
     </a>
   </td>
 </tr>
@@ -73,7 +73,7 @@
   <td>Conda Downloads</td>
   <td>
     <a href="https://anaconda.org/conda-forge/pymove">
-      <img src="https://img.shields.io/conda/dn/conda-forge/pymove.svg" alt="Conda downloads" />
+      <img src="https://img.shields.io/conda/dn/conda-forge/pymove?style=for-the-badge" alt="Conda downloads" />
     </a>
   </td>
 </tr>
@@ -81,7 +81,7 @@
   <td>Conda version</td>
   <td>
     <a href="https://anaconda.org/conda-forge/pymove">
-      <img src="https://img.shields.io/conda/vn/conda-forge/pymove.svg" alt="Conda version" />
+      <img src="https://img.shields.io/conda/vn/conda-forge/pymove?style=for-the-badge" alt="Conda version" />
     </a>
   </td>
 </tr>
@@ -89,7 +89,7 @@
   <td>Stars</td>
   <td>
     <a href="https://github.com/InsightLab/PyMove/stargazers">
-      <img src="https://img.shields.io/github/stars/InsightLab/PyMove?style=social" alt="Github stars" />
+      <img src="https://img.shields.io/github/stars/InsightLab/PyMove?style=for-the-badge&color=blueviolet" alt="Github stars" />
     </a>
   </td>
 </tr>
@@ -97,7 +97,7 @@
   <td>Forks</td>
   <td>
     <a href="https://github.com/InsightLab/PyMove/network/members">
-      <img src="https://img.shields.io/github/forks/InsightLab/PyMove?style=social" alt="Github forks" />
+      <img src="https://img.shields.io/github/forks/InsightLab/PyMove?style=for-the-badge&color=blueviolet" alt="Github forks" />
     </a>
   </td>
 </tr>
@@ -105,15 +105,23 @@
   <td>Issues</td>
   <td>
     <a href="https://github.com/InsightLab/PyMove/issues">
-      <img src="https://img.shields.io/github/issues/InsightLab/PyMove" alt="Github issues" />
+      <img src="https://img.shields.io/github/issues/InsightLab/PyMove?style=for-the-badge" alt="Github issues" />
     </a>
   </td>
 </tr>
 <tr>
-  <td>Codacy Badge</td>
+  <td>Code Quality</td>
   <td>
     <a href="https://www.codacy.com/gh/InsightLab/PyMove?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=InsightLab/PyMove&amp;utm_campaign=Badge_Grade">
-      <img src="https://api.codacy.com/project/badge/Grade/26c581fbe1ee42e78a9adc50b7372ceb" alt="Codacy badge" />
+      <img src="https://img.shields.io/codacy/grade/26c581fbe1ee42e78a9adc50b7372ceb?style=for-the-badge" alt="Code quality" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Code Coverage</td>
+  <td>
+    <a href="https://www.codacy.com/gh/InsightLab/PyMove?utm_source=github.com&utm_medium=referral&utm_content=InsightLab/PyMove&utm_campaign=Badge_Coverage">
+      <img src="https://img.shields.io/codacy/coverage/26c581fbe1ee42e78a9adc50b7372ceb?style=for-the-badge" alt="Code coverage" />
     </a>
   </td>
 </tr>
