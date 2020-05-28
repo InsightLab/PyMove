@@ -464,7 +464,7 @@ def filter_block_signal_by_time(
         if filter_out:
             idx = df_agg_tid[filter_].index
         else:
-            idx = df_agg_tid[filter_].index
+            idx = df_agg_tid[-filter_].index
 
         filter_ = move_data[BLOCK].isin(idx).index
         move_data.drop(index=filter_, inplace=True)
