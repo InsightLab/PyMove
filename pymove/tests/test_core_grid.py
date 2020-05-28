@@ -1,7 +1,6 @@
 import os
 
 import joblib
-import pandas as pd
 from numpy import array
 from numpy.testing import assert_array_equal, assert_equal
 from pandas import DataFrame, Timestamp
@@ -40,9 +39,11 @@ unsorted_list_data = [
 ]
 
 
-def _default_move_df(list_data=list_data):
+def _default_move_df(data=None):
+    if data is None:
+        data = list_data
     return MoveDataFrame(
-        data=list_data,
+        data=data,
         latitude=LATITUDE,
         longitude=LONGITUDE,
         datetime=DATETIME,

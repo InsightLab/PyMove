@@ -353,7 +353,7 @@ def create_or_update_gps_block_signal(
 
         move_data[new_label] = False
 
-        # SUM the segment block to dectect the id that has or more time stopped
+        # SUM the segment block to detect the id that has or more time stopped
         df_agg_tid = move_data.groupby(by=label_tid).agg({TIME_TO_PREV: 'sum'})
         filter_ = df_agg_tid[TIME_TO_PREV] >= max_time_stop
         idx = df_agg_tid[filter_].index
