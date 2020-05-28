@@ -413,7 +413,8 @@ def filter_block_signal_by_repeated_amount_of_points(
         else:
             idx = df_count_tid[~filter_].index
 
-        move_data = move_data[move_data[BLOCK].isin(idx)]
+        filter_ = move_data[move_data[BLOCK].isin(idx)].index
+        move_data.drop(index=filter_, inplace=True)
         if not inplace:
             return move_data
 
@@ -465,7 +466,8 @@ def filter_block_signal_by_time(
         else:
             idx = df_agg_tid[filter_].index
 
-        move_data = move_data[move_data[BLOCK].isin(idx)]
+        filter_ = move_data[BLOCK].isin(idx).index
+        move_data.drop(index=filter_, inplace=True)
         if not inplace:
             return move_data
 
@@ -528,7 +530,8 @@ def filter_longer_time_to_stop_segment_by_id(
             segments = df_agg_id_stop.loc[~df_agg_id_stop.index.isin(filter_)]
         segments = segments[label_segment_stop]
 
-        move_data = move_data[move_data[label_segment_stop].isin(segments)]
+        filter_ = move_data[label_segment_stop].isin(segments).index
+        move_data.drop(index=filter_, inplace=True)
         if not inplace:
             return move_data
 
