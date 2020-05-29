@@ -1,4 +1,4 @@
-from pymove import preprocessing
+from pymove import preprossessing
 from pymove import utils as ut
 import time
 import numpy as np
@@ -6,32 +6,132 @@ import pandas as pd
 from tqdm import tqdm
 
 def union_poi_bank(df_, label_poi='type_poi'):
+    """
+    Performs the union between the different bank categories
+    for Points of Interest in a single category named 'banks'.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        Input points of interest data
+    
+    label_poi : String, optional("type_poi" by default)
+        Label referring to the Point of Interest category
+    
+    Returns
+    -------
+    """
+    
     print('union bank categories to one category')
     print('... There are {} -- {}'.format(df_[label_poi].nunique(), label_poi))
     filter_bank = (df_[label_poi].isin(['bancos_filiais', 'bancos_agencias', 'bancos_postos', 'bancos_PAE', 'bank']))
     df_.at[df_[filter_bank].index, label_poi] = 'banks'
 
 def union_poi_bus_station(df_, label_poi='type_poi'):
+    
+    """
+    Performs the union between the different bus station categories
+    for Points of Interest in a single category named 'bus_station'.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        Input points of interest data
+    
+    label_poi : String, optional("type_poi" by default)
+        Label referring to the Point of Interest category
+    
+    Returns
+    -------
+    """
+    
     print('union bus station categories to one category')
     filter_bus_station = (df_[label_poi].isin(['transit_station', 'pontos_de_onibus']))
     df_.at[df_[filter_bus_station].index, label_poi] = 'bus_station'
 
 def union_poi_bar_restaurant(df_,label_poi='type_poi'):
+    
+    """
+    Performs the union between bar and restaurant categories
+    for Points of Interest in a single category named 'bar-restaurant'.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        Input points of interest data
+    
+    label_poi : String, optional("type_poi" by default)
+        Label referring to the Point of Interest category
+    
+    Returns
+    -------
+    """
+    
     print('union restaurant and bar categories to one category')
     filter_bar_restaurant = (df_[label_poi].isin(['restaurant', 'bar']))
     df_.at[df_[filter_bar_restaurant].index, label_poi] = 'bar-restaurant'
 
 def union_poi_parks(df_, label_poi='type_poi'):
+    
+    """
+    Performs the union between park categories
+    for Points of Interest in a single category named 'parks'.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        Input points of interest data
+    
+    label_poi : String, optional("type_poi" by default)
+        Label referring to the Point of Interest category
+    
+    Returns
+    -------
+    """
+    
     print('union parks categories to one category')
     filter_parks = (df_[label_poi].isin(['pracas_e_parques', 'park']))
     df_.at[df_[filter_parks].index, label_poi] = 'parks'
 
 def union_poi_police(df_, label_poi='type_poi'):
+    
+    """
+    Performs the union between police categories
+    for Points of Interest in a single category named 'police'.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        Input points of interest data
+    
+    label_poi : String, optional("type_poi" by default)
+        Label referring to the Point of Interest category
+    
+    Returns
+    -------
+    """
+    
     print('union distritos policies and police categories')
     filter_police = (df_[label_poi] == 'distritos_policiais') 
     df_.at[df_[filter_police].index, label_poi] = 'police'
 
 def join_coletives_areas(gdf_, gdf_rules_, label_geometry='geometry'):
+    
+    """
+    Performs the integration between trajectories and coletives areas.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data
+    
+    gdf_rules_ : geopandas.GeoDataFrame
+        
+    
+    Returns
+    -------
+    """
+    
     print('Integration between trajectories and coletives areas')
     
     polygons = gdf_rules_['geometry'].unique()
@@ -42,6 +142,34 @@ def join_coletives_areas(gdf_, gdf_rules_, label_geometry='geometry'):
         gdf_.at[index, 'violation'] = True
 
 def join_with_POIs(df_, df_POIs, label_id='id', label_POI='POI', reset_index=True):    
+    
+    """
+    Performs the integration between trajectories and points
+    of interest, generating two new columns referring to the
+    name and the distance from the point of interest closest
+    to each point of the trajectory.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+    
+    df_POIs : dataframe
+        The input point of interest data.
+        
+    label_id : String, optional("id" by default)
+        Label of df_POIs referring to the Point of Interest id.
+    
+    label_poi : String, optional("POI" by default)
+        Label of df_POIs referring to the Point of Interest name.
+        
+    reset_index : Boolean, optional(True by default)
+        Flag for reset index of the df_POIs and df_ dataframes before the join. 
+    
+    Returns
+    -------
+    """
+    
     try:
         print('Integration with POIs...')
         start_time = time.time()
@@ -92,6 +220,38 @@ def join_with_POIs(df_, df_POIs, label_id='id', label_POI='POI', reset_index=Tru
         raise e
 
 def join_with_POIs_optimizer(df_, df_POIs, label_id='id', label_POI='POI', dist_poi=[10], reset_index=True):    
+    
+    """
+    Performs the integration between trajectories and points
+    of interest, generating two new columns referring to the
+    name and distance from the nearest point of interest, 
+    within the limit of distance determined by the parameter 'dist_poi', 
+    of each point in the trajectory.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+    
+    df_POIs : dataframe
+        The input point of interest data.
+        
+    label_id : String, optional("id" by default)
+        Label of df_POIs referring to the Point of Interest id.
+    
+    label_poi : String, optional("POI" by default)
+        Label of df_POIs referring to the Point of Interest name.
+        
+    dist_poi : List, optional("[10]" by default)
+        List containing the distance limit to classify the most nearest point of interest of each trajectory point. 
+        
+    reset_index : Boolean, optional(True by default)
+        Flag for reset index of the df_POIs and df_ dataframes before the join. 
+    
+    Returns
+    -------
+    """
+    
     try:
         print('Integration with POIs...')
         start_time = time.time()
@@ -148,8 +308,38 @@ def join_with_POIs_optimizer(df_, df_POIs, label_id='id', label_POI='POI', dist_
         print('id: {}\n'.format(idx))
         raise e
 
-def join_with_POIs_by_category(df_, df_POIs, label_category='POI', label_id='id', label_POI='PO+I'):    
-    """ Do integration between POIs and TNZ from """
+def join_with_POIs_by_category(df_, df_POIs, label_category='POI', label_id='id', label_POI='PO+I'):   
+    
+    """
+    It performs the integration between trajectories and points
+    of interest, generating new columns referring to the 
+    category and distance from the nearest point of interest
+    that has this category at each point of the trajectory.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+    
+    df_POIs : dataframe
+        The input point of interest data.
+        
+    label_category : String, optional("POI" by default)
+        Label of df_POIs referring to the point of interest category.
+        
+    label_id : String, optional("id" by default)
+        Label of df_POIs referring to the point of interest id.
+    
+    label_POI : String, optional("PO+I" by default)
+        Label of df_POIs referring to the point of interest name.
+        
+    dist_poi : List, optional("[10]" by default)
+        List containing the distance limit to classify the most nearest point of interest of each trajectory point. 
+        
+    Returns
+    -------
+    """
+    
     try:
         print('Integration with POIs...')
         start_time = time.time()
@@ -195,7 +385,36 @@ def join_with_POIs_by_category(df_, df_POIs, label_category='POI', label_id='id'
         print('id: {}\n'.format(idx))
         raise e
 
-def join_with_POI_datetime(df_, df_cvp, label_date='datetime', time_window=900, dist_to_poi=50):    
+def join_with_POI_datetime(df_, df_cvp, label_date='datetime', time_window=900, dist_to_poi=50):  
+    
+    """
+    It performs the integration between trajectories and points
+    of interest of events, generating new columns referring to
+    the category of the event, the distance from the nearest
+    event and the time when the event happened at each point of
+    the trajectories.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+    
+    df_cvp : dataframe
+        The input events points of interest data.
+        
+    label_date : String, optional("datetime" by default)
+        Label of df_cvp referring to the event point of interest datetime.
+        
+    time_window : Float, optional(900 by default)
+        tolerable length of time range for assigning the event's point of interest to the trajectory point.
+        
+    dist_to_poi : Float, optional(50 by default)
+        The distance limit to classify the most nearest event point of interest of each trajectory point. 
+        
+    Returns
+    -------
+    """
+    
     try:
         print('Integration with CVP...')
         start_time = time.time()
@@ -245,7 +464,33 @@ def join_with_POI_datetime(df_, df_cvp, label_date='datetime', time_window=900, 
         print('id: {}\n'.format(idx))
         raise e
 
-def join_with_POI_datetime_optimizer(df_, df_cvp, label_date='datetime', time_window=900):    
+def join_with_POI_datetime_optimizer(df_, df_cvp, label_date='datetime', time_window=900):   
+    
+    """
+    It performs a optimized integration between trajectories and points
+    of interest of events, generating new columns referring to
+    the category of the event, the distance from the nearest
+    event and the time when the event happened at each point of
+    the trajectories.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+    
+    df_cvp : dataframe
+        The input events points of interest data.
+        
+    label_date : String, optional("datetime" by default)
+        Label of df_cvp referring to the event point of interest datetime.
+        
+    time_window : Float, optional(900 by default)
+        tolerable length of time range for assigning the event's point of interest to the trajectory point.
+        
+    Returns
+    -------
+    """
+    
     try:
         print('Integration with CVP...')
         start_time = time.time()
@@ -304,6 +549,30 @@ def join_with_POI_datetime_optimizer(df_, df_cvp, label_date='datetime', time_wi
         raise e
 
 def join_with_HOME_by_id(df_, df_home, label_id='id', drop_id_without_home=False):
+    
+    """
+    It performs the integration between trajectories and home points,
+    generating new columns referring to the distance of the nearest
+    home point, address and city of each trajectory point.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+    
+    df_home : dataframe
+        The input home points data.
+        
+    label_id : String, optional("id" by default)
+        Label of df_home referring to the home point id.
+        
+    drop_id_without_home : Boolean, optional(False by default)
+        flag as an option to drop id's that don't have houses.
+        
+    Returns
+    -------
+    """
+    
     try:   
         print('Integration with Home...')
         ids_without_home = []
@@ -346,6 +615,35 @@ def join_with_HOME_by_id(df_, df_home, label_id='id', drop_id_without_home=False
         raise e
 
 def merge_HOME_with_POI(df_, label_dist_poi='dist_poi', label_type_poi='type_poi', label_id_poi = 'id_poi', drop_colums=True):
+    
+    """
+    Merge home points and points of interest, generating new
+    columns for the respective home point, the id
+    of the nearest point of interest, the distance from the
+    nearest point of interest and the type of the nearest point
+    of interest at each point of interest.
+    
+    Parameters
+    ----------
+    df_ : dataframe
+        The input points of interest  data.
+    
+    label_dist_poi : String, optional("dist_poi" by default)
+        Label of df_ referring to the distance from the nearest point of interest.
+        
+    label_type_poi : String, optional("type_poi" by default)
+        Label of df_ referring to the type from the nearest point of interest.
+    
+    label_id_poi : String, optional("type_poi" by default)
+        Label of df_ referring to the id from the nearest point of interest.
+    
+    drop_columns : Boolean, optional(True by default)
+        Flag that controls the deletion of the columns referring to the id and the distance from the home point
+        
+    Returns
+    -------
+    """
+    
     try:           
         print('merge home with POI using shortest distance')   
         idx = df_[df_['dist_home'] <= df_[label_dist_poi]].index
