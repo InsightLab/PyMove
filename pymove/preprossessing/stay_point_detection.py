@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from pymove.preprocessing.segmentation import by_max_dist
+from pymove.preprossessing.segmentation import by_max_dist
 from pymove.utils.constants import (
     DATETIME,
     DIST_TO_PREV,
