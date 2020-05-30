@@ -4,7 +4,9 @@ from sklearn.cluster import KMeans
 from pymove.utils.log import progress_bar
 
 
-def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
+def elbow_method(
+        move_data, k_initial=1, max_clusters=15, k_iteration=1, random_state=None
+):
     """
     Determines the optimal number of clusters in the range set by the user using
     the elbow method.
@@ -21,6 +23,9 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
         Maximum number of clusters to test for
     k_iteration: int, optional (1 by default).
         Increment value of the sequence used by the elbow method.
+    random_state: int, RandomState instance, default=None
+        Determines random number generation for centroid initialization.
+        Use an int to make the randomness deterministic
 
     Returns
     -------
@@ -45,12 +50,13 @@ def elbow_method(move_data, k_initial=1, max_clusters=15, k_iteration=1):
     print(message, flush=True)
     inertia_dic = {}
     for k in progress_bar(range(k_initial, max_clusters + 1, k_iteration)):
-        inertia_dic[k] = KMeans(n_clusters=k).fit(move_data).inertia_
+        km = KMeans(n_clusters=k, random_state=random_state)
+        inertia_dic[k] = km.fit(move_data).inertia_
     return inertia_dic
 
 
 def gap_statistic(
-    move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=1
+    move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=1, random_state=None
 ):
     """
     Calculates optimal clusters numbers using Gap Statistic from Tibshirani,
@@ -69,6 +75,9 @@ def gap_statistic(
         Maximum number of clusters to test for.
     k_iteration:int, optional (1 by default).
         Increment value of the sequence used by the elbow method.
+    random_state: int, RandomState instance, default=None
+        Determines random number generation for centroid initialization.
+        Use an int to make the randomness deterministic
 
     Returns
     -------
@@ -85,6 +94,7 @@ def gap_statistic(
     message = message % (k_initial, max_clusters, k_iteration)
     print(message, flush=True)
     gaps = {}
+    np.random.seed(random_state)
     for k in progress_bar(range(k_initial, max_clusters + 1, k_iteration)):
         # Holder for reference dispersion results
         ref_disps = np.zeros(nrefs)
@@ -94,9 +104,8 @@ def gap_statistic(
             # Create new random reference set
             random_reference = np.random.random_sample(size=move_data.shape)
             # Fit to it
-            km = KMeans(k)
-            km.fit(random_reference)
-            ref_disps[i] = km.inertia_
+            km = KMeans(n_clusters=k, random_state=random_state)
+            ref_disps[i] = km.fit(random_reference).inertia_
         # Fit cluster to original data and create dispersion
         km = KMeans(k).fit(move_data)
         orig_disp = km.inertia_
