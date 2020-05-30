@@ -94,6 +94,7 @@ def gap_statistic(
     message = message % (k_initial, max_clusters, k_iteration)
     print(message, flush=True)
     gaps = {}
+    np.random.seed(random_state)
     for k in progress_bar(range(k_initial, max_clusters + 1, k_iteration)):
         # Holder for reference dispersion results
         ref_disps = np.zeros(nrefs)
@@ -104,7 +105,7 @@ def gap_statistic(
             random_reference = np.random.random_sample(size=move_data.shape)
             # Fit to it
             km = KMeans(n_clusters=k, random_state=random_state)
-            ref_disps[i] = km.fit(move_data).inertia_
+            ref_disps[i] = km.fit(random_reference).inertia_
         # Fit cluster to original data and create dispersion
         km = KMeans(k).fit(move_data)
         orig_disp = km.inertia_
