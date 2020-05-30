@@ -50,7 +50,7 @@ setup(
         'pymove.models',
         'pymove.models.pattern_mining',
         'pymove.osm_module',
-        'pymove.preprocessing',
+        'pymove.preprossessing',
         'pymove.semantic',
         'pymove.tests',
         'pymove.uncertainty',
