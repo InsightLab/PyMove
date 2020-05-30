@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from pymove.preprocessing import filters, segmentation, stay_point_detection
+from pymove.preprossessing import filters, segmentation, stay_point_detection
 from pymove.utils.constants import (
     BLOCK,
     DEACTIVATED,
@@ -307,7 +307,7 @@ def create_or_update_gps_block_signal(
         move_data,
         max_time_stop=7200,
         new_label=BLOCK,
-        label_tid=TID_PART,
+        label_tid=TRAJ_ID,
         inplace=True
 ):
     """
@@ -353,7 +353,7 @@ def create_or_update_gps_block_signal(
 
         move_data[new_label] = False
 
-        # SUM the segment block to detect the id that has or more time stopped
+        # SUM the segment block to dectect the id that has or more time stopped
         df_agg_tid = move_data.groupby(by=label_tid).agg({TIME_TO_PREV: 'sum'})
         filter_ = df_agg_tid[TIME_TO_PREV] >= max_time_stop
         idx = df_agg_tid[filter_].index
@@ -371,7 +371,6 @@ def filter_block_signal_by_repeated_amount_of_points(
         amount_max_of_points_stop=30.0,
         max_time_stop=7200,
         filter_out=False,
-        label_tid=TID_PART,
         inplace=False
 ):
     """
@@ -385,11 +384,8 @@ def filter_block_signal_by_repeated_amount_of_points(
         Maximum number of stopped points
     max_time_stop: float, optional, default 7200
         Maximum time allowed with speed 0
-    filter_out: boolean, optional, default False
-        If set to True, it will return trajectory points with blocked signal.
-    label_tid : str, optional, default 'tid_dist'
-        The label of the column containing the ids of the formed segments.
-        Is the new slitted id.
+    filter_out: boolean, optional, default True
+        Whether to keep or discard points with blocked signal
     inplace : boolean, optional, default True
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned.
@@ -408,20 +404,16 @@ def filter_block_signal_by_repeated_amount_of_points(
             move_data = move_data[:]
 
         if BLOCK not in move_data:
-            create_or_update_gps_block_signal(
-                move_data, max_time_stop, label_tid=label_tid
-            )
+            create_or_update_gps_block_signal(move_data, max_time_stop)
 
-        df_count_tid = move_data.groupby(by=[label_tid]).sum()
-        filter_ = df_count_tid[BLOCK] > amount_max_of_points_stop
-
+        df_count_tid = move_data.groupby(by=[BLOCK]).count()
+        filter_ = df_count_tid > amount_max_of_points_stop
         if filter_out:
-            idx = df_count_tid[~filter_].index
-        else:
             idx = df_count_tid[filter_].index
+        else:
+            idx = df_count_tid[~filter_].index
 
-        filter_ = move_data[move_data[label_tid].isin(idx)].index
-        move_data.drop(index=filter_, inplace=True)
+        move_data = move_data[move_data[BLOCK].isin(idx)]
         if not inplace:
             return move_data
 
@@ -433,7 +425,6 @@ def filter_block_signal_by_time(
         move_data,
         max_time_stop=7200,
         filter_out=False,
-        label_tid=TID_PART,
         inplace=False
 ):
     """
@@ -445,11 +436,8 @@ def filter_block_signal_by_time(
         The input trajectories data.
     max_time_stop: float, optional, default 7200
         Maximum time allowed with speed 0
-    filter_out: boolean, optional, default False
-        If set to True, it will return trajectory points with blocked signal.
-    label_tid : str, optional, default 'tid_dist'
-        The label of the column containing the ids of the formed segments.
-        Is the new slitted id.
+    filter_out: boolean, optional, default True
+        Whether to keep or discard points with blocked signal
     inplace : boolean, optional, default True
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned.
@@ -468,22 +456,16 @@ def filter_block_signal_by_time(
             move_data = move_data[:]
 
         if BLOCK not in move_data:
-            create_or_update_gps_block_signal(
-                move_data, max_time_stop, label_tid=label_tid
-            )
+            create_or_update_gps_block_signal(move_data, max_time_stop)
 
-        df_agg_tid = move_data.groupby(by=label_tid).agg(
-            {TIME_TO_PREV: 'sum', BLOCK: 'sum'}
-        )
-        filter_ = (df_agg_tid[TIME_TO_PREV] > max_time_stop) & (df_agg_tid[BLOCK])
-
+        df_agg_tid = move_data.groupby(by=BLOCK).agg({TIME_TO_PREV: 'sum'})
+        filter_ = df_agg_tid[TIME_TO_PREV] > max_time_stop
         if filter_out:
-            idx = df_agg_tid[~filter_].index
+            idx = df_agg_tid[filter_].index
         else:
             idx = df_agg_tid[filter_].index
 
-        filter_ = move_data[move_data[label_tid].isin(idx)].index
-        move_data.drop(index=filter_, inplace=True)
+        move_data = move_data[move_data[BLOCK].isin(idx)]
         if not inplace:
             return move_data
 
@@ -493,8 +475,6 @@ def filter_block_signal_by_time(
 
 def filter_longer_time_to_stop_segment_by_id(
         move_data,
-        dist_radius=30,
-        time_radius=900,
         label_id=TRAJ_ID,
         label_segment_stop=SEGMENT_STOP,
         filter_out=False,
@@ -507,20 +487,12 @@ def filter_longer_time_to_stop_segment_by_id(
     __________
     move_data: dataFrame
         The input trajectories data.
-    dist_radius : float, optional, default 30
-        The first step in this function is segmenting the trajectory.
-        The segments are used to find the stop points.
-        The dist_radius defines the distance used in the segmentation.
-    time_radius :  float, optional, default 900
-        The time_radius used to determine if a segment is a stop.
-        If the user stayed in the segment for a time
-        greater than time_radius, than the segment is a stop.
     label_tid : str, optional, default 'id'
         The label of the column containing the ids of the formed segments.
         Is the new slitted id.
     label_segment_stop: str, optional, default 'segment_stop'
     filter_out: boolean, optional, default True
-        If set to True, it will return trajectory points with longer time.
+        Whether to keep or discard points with blocked signal
     inplace : boolean, optional, default True
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned.
@@ -539,7 +511,7 @@ def filter_longer_time_to_stop_segment_by_id(
 
         if label_segment_stop not in move_data:
             stay_point_detection.create_or_update_move_stop_by_dist_time(
-                move_data, dist_radius, time_radius
+                move_data
             )
 
         df_agg_id_stop = move_data.groupby(
@@ -551,13 +523,12 @@ def filter_longer_time_to_stop_segment_by_id(
         )[TIME_TO_PREV].idxmax()
 
         if filter_out:
-            segments = df_agg_id_stop.loc[~df_agg_id_stop.index.isin(filter_)]
+            segments = df_agg_id_stop.loc[filter_]
         else:
-            segments = df_agg_id_stop.loc[df_agg_id_stop.index.isin(filter_)]
+            segments = df_agg_id_stop.loc[~df_agg_id_stop.index.isin(filter_)]
         segments = segments[label_segment_stop]
 
-        filter_ = move_data[move_data[label_segment_stop].isin(segments)].index
-        move_data.drop(index=filter_, inplace=True)
+        move_data = move_data[move_data[label_segment_stop].isin(segments)]
         if not inplace:
             return move_data
 
