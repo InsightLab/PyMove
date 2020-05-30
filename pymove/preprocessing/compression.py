@@ -1,6 +1,6 @@
 import numpy as np
 
-from pymove.preprossessing.stay_point_detection import (
+from pymove.preprocessing.stay_point_detection import (
     create_or_update_move_stop_by_dist_time,
 )
 from pymove.utils.constants import (
@@ -108,7 +108,7 @@ def compress_segment_stop_to_point(
             filter_ = move_data[label_segment] == idx
 
             size_id = move_data[filter_].shape[0]
-            # veirify if filter is None
+            # verify if filter is None
             if size_id > 1:
                 # get first and last point of each stop segment
                 ind_start = move_data[filter_].iloc[[0]].index

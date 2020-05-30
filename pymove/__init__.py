@@ -11,7 +11,7 @@ from ._version import __version__
 from .core import grid
 from .core.dataframe import DaskMoveDataFrame, MoveDataFrame, PandasMoveDataFrame
 from .models.pattern_mining import clustering
-from .preprossessing import compression, filters, segmentation, stay_point_detection
+from .preprocessing import compression, filters, segmentation, stay_point_detection
 from .semantic import semantic
 from .utils import (
     constants,
