@@ -1,6 +1,6 @@
 import numpy as np
 
-from pymove.preprossessing.stay_point_detection import (
+from pymove.preprocessing.stay_point_detection import (
     create_or_update_move_stop_by_dist_time,
 )
 from pymove.utils.constants import (
