@@ -203,7 +203,9 @@ def test_kmh_to_ms():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.kmh_to_ms(move_df, inplace=True)
+    conversions.kmh_to_ms(move_df, new_label='converted_speed', inplace=True)
+
+    expected.rename(columns={SPEED_TO_PREV: 'converted_speed'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -263,7 +265,9 @@ def test_meters_to_kilometers():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.meters_to_kilometers(move_df, inplace=True)
+    conversions.meters_to_kilometers(move_df, new_label='converted_distance', inplace=True)
+
+    expected.rename(columns={DIST_TO_PREV: 'converted_distance'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -323,7 +327,9 @@ def test_kilometers_to_meters():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.kilometers_to_meters(move_df, inplace=True)
+    conversions.kilometers_to_meters(move_df, new_label='converted_distance', inplace=True)
+
+    expected.rename(columns={DIST_TO_PREV: 'converted_distance'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -383,7 +389,9 @@ def test_seconds_to_minutes():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.seconds_to_minutes(move_df, inplace=True)
+    conversions.seconds_to_minutes(move_df, new_label='converted_time', inplace=True)
+
+    expected.rename(columns={TIME_TO_PREV: 'converted_time'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -443,7 +451,9 @@ def test_minute_to_seconds():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.minute_to_seconds(move_df, inplace=True)
+    conversions.minute_to_seconds(move_df, new_label='converted_time', inplace=True)
+
+    expected.rename(columns={TIME_TO_PREV: 'converted_time'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -503,7 +513,9 @@ def test_minute_to_hours():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.minute_to_hours(move_df, inplace=True)
+    conversions.minute_to_hours(move_df, new_label='converted_time', inplace=True)
+
+    expected.rename(columns={TIME_TO_PREV: 'converted_time'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -563,7 +575,9 @@ def test_hours_to_minute():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.hours_to_minute(move_df, inplace=True)
+    conversions.hours_to_minute(move_df, new_label='converted_time', inplace=True)
+
+    expected.rename(columns={TIME_TO_PREV: 'converted_time'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -623,7 +637,9 @@ def test_seconds_to_hours():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.seconds_to_hours(move_df, inplace=True)
+    conversions.seconds_to_hours(move_df, new_label='converted_time', inplace=True)
+
+    expected.rename(columns={TIME_TO_PREV: 'converted_time'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -683,6 +699,8 @@ def test_hours_to_seconds():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.hours_to_seconds(move_df, inplace=True)
+    conversions.hours_to_seconds(move_df, new_label='converted_time', inplace=True)
+
+    expected.rename(columns={TIME_TO_PREV: 'converted_time'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
