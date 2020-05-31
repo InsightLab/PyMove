@@ -407,9 +407,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             columns=None,
             axis=None,
             copy=True,
-            inplace=False,
-            level=None,
-            errors='ignore'
+            inplace=False
     ):
         """
         Alter axes labels.
@@ -445,31 +443,27 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Whether to return a new DataFrame.
             If True then value of copy is ignored.
 
-        level: int or level name, default None
-            In case of a MultiIndex, only rename labels in the specified level.
-
-        errors: {‘ignore’, ‘raise’}, default ‘ignore’
-            If ‘raise’, raise a KeyError when a dict-like mapper, index, or columns
-            contains labels that are not present in the Index being transformed.
-            If ‘ignore’, existing keys will be renamed and extra keys will be ignored.
-
         Returns
         -------
         PandasMoveDataFrame or None
             DataFrame with the renamed axis labels.
 
-        Raises
-        ------
-        KeyError
-            If any of the labels is not found in the selected axis and “errors=’raise’”.
-
         """
 
         operation = begin_operation('rename')
-        print(type(self._data))
-        rename_ = self._data.rename(
-            mapper, index, columns, axis, copy, inplace, level, errors
-        )
+        if columns:
+            rename_ = self._data.rename(mapper=columns, axis=1, copy=copy)
+        elif index:
+            rename_ = self._data.rename(mapper=index, axis=0, copy=copy)
+        else:
+            rename_ = self._data.rename(mapper=mapper, axis=axis, copy=copy)
+
+        if inplace:
+            self._data = rename_
+            rename_ = None
+        else:
+            if MoveDataFrame.has_columns(rename_):
+                rename_ = PandasMoveDataFrame(data=rename_)
         self.last_operation = end_operation(operation)
         return rename_
 
