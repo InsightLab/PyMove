@@ -141,7 +141,9 @@ def test_ms_to_kmh():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.ms_to_kmh(move_df, inplace=True)
+    conversions.ms_to_kmh(move_df, new_label='converted_speed', inplace=True)
+
+    expected.rename(columns={SPEED_TO_PREV: 'converted_speed'}, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
