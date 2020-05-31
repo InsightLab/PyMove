@@ -102,7 +102,7 @@ def test_fill_list_with_new_values():
 
     new_list = []
 
-    trajectories.fill_list_with_new_values(original_list=original_list, 
+    trajectories.fill_list_with_new_values(original_list=original_list,
                                            new_list_values=new_list)
 
     assert_array_equal(original_list, exected)
@@ -113,7 +113,7 @@ def test_fill_list_with_new_values():
 
     new_list = [2, 6]
 
-    trajectories.fill_list_with_new_values(original_list=original_list, 
+    trajectories.fill_list_with_new_values(original_list=original_list,
                                            new_list_values=new_list)
 
     assert_array_equal(original_list, exected)
@@ -124,7 +124,7 @@ def test_fill_list_with_new_values():
 
     new_list = [5, 6, 7]
 
-    trajectories.fill_list_with_new_values(original_list=original_list, 
-                                           new_list_values=new_list)
+    trajectories.fill_list_with_new_values(original_list=original_list,
+                                               new_list_values=new_list)
 
     assert_array_equal(original_list, exected)
