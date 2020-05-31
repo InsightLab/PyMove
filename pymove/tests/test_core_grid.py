@@ -2,13 +2,12 @@ import os
 
 import joblib
 from numpy import array
-from numpy.testing import assert_array_equal, assert_equal
-from pandas import DataFrame, Timestamp
-from pandas.testing import assert_frame_equal
-from shapely.geometry import Polygon
-
 from pymove import MoveDataFrame
 from pymove.core.grid import Grid
+from shapely.geometry import Polygon
+from pandas import DataFrame, Timestamp
+from pandas.testing import assert_frame_equal
+from numpy.testing import assert_array_equal, assert_equal
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
 
 list_data = [
