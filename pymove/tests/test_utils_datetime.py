@@ -6,8 +6,7 @@ from pymove import datetime
 
 default_date = dt.datetime.strptime('2018-03-12', '%Y-%m-%d')
 
-default_date_time = dt.datetime.strptime('2018-03-12 12:08:07',
-                                         '%Y-%m-%d %H:%M:%S')
+default_date_time = dt.datetime.strptime('2018-03-12 12:08:07', '%Y-%m-%d %H:%M:%S')
 
 str_date_default = '2018-03-12'
 
