@@ -1,10 +1,8 @@
 import pandas as pd
-
 from numpy.testing import assert_equal
-
-from pymove import MoveDataFrame, clustering
 from pandas.testing import assert_series_equal
 
+from pymove import MoveDataFrame, clustering
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
 
 list_data = [
@@ -45,13 +43,11 @@ def test_elbow_method():
                           7: 1.622333333194155e-09,
                           8: 6.373333333646581e-10})
 
-    inertia_dic = clustering.elbow_method(move_data=move_df[[LATITUDE, LONGITUDE]],
+    inertia_dic = clustering.elbow_method(move_data=move_df[[LATITUDE, LONGITUDE]] ,
                                           max_clusters=8,
                                           random_state=1
                                           )
 
-    result = pd.Series(inertia_dic)                                           
+    result = pd.Series(inertia_dic)
 
     assert_series_equal(result, expected, check_less_precise=True)
-
-
