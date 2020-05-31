@@ -1,34 +1,17 @@
-import os
 import time
 
-import pandas as pd
-from numpy import array, nan
-from shapely.geometry import Polygon
+from numpy import nan
 from pandas import DataFrame, Timestamp
-from pymove import MoveDataFrame, semantic
 from pandas.testing import assert_frame_equal
-from numpy.testing import assert_array_equal
 
+from pymove import MoveDataFrame, semantic
 from pymove.utils.constants import (
-    DATE,
+    BLOCK,
     DATETIME,
-    DAY,
-    DIST_PREV_TO_NEXT,
-    DIST_TO_PREV,
-    HOUR,
-    HOUR_SIN,
     LATITUDE,
     LONGITUDE,
-    PERIOD,
-    SITUATION,
-    SPEED_PREV_TO_NEXT,
-    TID,
-    TIME_PREV_TO_NEXT,
+    SEGMENT_STOP,
     TRAJ_ID,
-    TYPE_DASK,
-    TYPE_PANDAS,
-    UID,
-    WEEK_END,
 )
 
 list_data = [
@@ -44,10 +27,25 @@ list_data = [
     [39.984555, 116.319728, '2008-10-23 05:53:43', 1]
 ]
 
+list_data_2 = [
+    [39.984094, 116.319236, '2008-10-23 05:53:03', 1],
+    [39.984710, 116.319865, '2008-10-23 05:53:13', 1],
+    [39.984710, 116.319865, '2008-10-23 05:53:23', 1],
+    [39.984710, 116.319865, '2008-10-23 05:53:33', 1],
+    [39.984710, 116.319865, '2008-10-23 05:53:43', 1],
+    [39.984674, 116.319810, '2008-10-23 05:53:53', 1],
+    [39.984710, 116.319865, '2008-10-23 05:54:03', 1],
+    [39.984710, 116.319865, '2008-10-23 05:54:13', 1],
+    [39.984710, 116.319865, '2008-10-23 05:54:23', 1],
+    [39.984555, 116.319728, '2008-10-23 05:54:33', 1]
+]
 
-def _default_move_df(list_data=list_data):
+
+def _default_move_df(data=None):
+    if data is None:
+        data = list_data
     return MoveDataFrame(
-        data=list_data,
+        data=data,
         latitude=LATITUDE,
         longitude=LONGITUDE,
         datetime=DATETIME,
@@ -84,7 +82,6 @@ def test_end_create_operation():
 
 
 def test_process_simple_filter():
-
     move_df = _default_move_df()
 
     expected = DataFrame(
@@ -187,9 +184,8 @@ def test_create_or_update_gps_deactivated_signal():
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     )
 
-    new_move_df = semantic.create_or_update_gps_deactivated_signal(move_df,
-                                                                   max_time_between_adj_points=5.0,
-                                                                   inplace=False)
+    new_move_df = semantic.create_or_update_gps_deactivated_signal(
+        move_df, max_time_between_adj_points=5.0, inplace=False)
 
     assert_frame_equal(new_move_df, expected)
 
@@ -292,7 +288,7 @@ def test_create_or_update_short_trajectory():
 
     assert_frame_equal(new_move_df, expected)
 
-    assert('short_traj' not in move_df)
+    assert ('short_traj' not in move_df)
 
     semantic.create_or_update_short_trajectory(move_df, k_segment_max=4)
 
@@ -300,153 +296,186 @@ def test_create_or_update_short_trajectory():
 
 
 def test_create_or_update_gps_block_signal():
-    move_df = _default_move_df()
+    move_df = _default_move_df(list_data_2)
 
-    expected = DataFrame(
-        data=[
-            [1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'),
-             nan, nan, nan, False],
-            [2, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'),
-             nan, nan, nan, False],
-            [3, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'),
-             nan, nan, nan, False],
-            [4, 39.984211, 116.319389, Timestamp('2008-10-23 05:53:16'),
-             nan, nan, nan, False],
-            [5, 39.984217, 116.319422, Timestamp('2008-10-23 05:53:21'),
-             nan, nan, nan, False],
-            [6, 39.984710, 116.319865, Timestamp('2008-10-23 05:53:23'),
-             nan, nan, nan, False],
-            [7, 39.984674, 116.319810, Timestamp('2008-10-23 05:53:28'),
-             nan, nan, nan, False],
-            [8, 39.984623, 116.319773, Timestamp('2008-10-23 05:53:33'),
-             nan, nan, nan, False],
-            [9, 39.984606, 116.319732, Timestamp('2008-10-23 05:53:38'),
-             nan, nan, nan, False],
-            [10, 39.984555, 116.319728, Timestamp('2008-10-23 05:53:43'),
-             nan, nan, nan, False]
-        ],
-        columns=['id',
-                 'lat',
-                 'lon',
-                 'datetime',
-                 'dist_to_prev',
-                 'time_to_prev',
-                 'speed_to_prev',
-                 'block_signal'],
-        index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    cols = [
+        'tid_part', 'id', 'lat', 'lon', 'datetime',
+        'dist_to_prev', 'time_to_prev', 'speed_to_prev', 'block_signal'
+    ]
+    expected = DataFrame(data=[
+        [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:03'),
+         nan, nan, nan, False],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:13'),
+         nan, nan, nan, True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:23'),
+         0.0, 10.0, 0.0, True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:33'),
+         0.0, 10.0, 0.0, True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:43'),
+         0.0, 10.0, 0.0, True],
+        [3, 1, 39.984674, 116.31981, Timestamp('2008-10-23 05:53:53'),
+         nan, nan, nan, False],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:03'),
+         nan, nan, nan, True],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:13'),
+         0.0, 10.0, 0.0, True],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:23'),
+         0.0, 10.0, 0.0, True],
+        [5, 1, 39.984555, 116.319728, Timestamp('2008-10-23 05:54:33'),
+         nan, nan, nan, False],
+    ], columns=cols, index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     )
 
-    new_move_df = semantic.create_or_update_gps_block_signal(move_df,
-                                                             inplace=False)
+    new_move_df = semantic.create_or_update_gps_block_signal(
+        move_df, max_time_stop=15, inplace=False
+    )
 
     assert_frame_equal(new_move_df, expected)
 
-    assert('block_signal' not in move_df)
+    assert BLOCK not in move_df
 
-    semantic.create_or_update_gps_block_signal(move_df)
+    semantic.create_or_update_gps_block_signal(move_df, max_time_stop=15)
 
     assert_frame_equal(move_df, expected)
 
 
 def test_filter_block_signal_by_repeated_amount_of_points():
-    move_df = _default_move_df()
+    move_df = _default_move_df(list_data_2)
 
-    expected = ['id',
-                'lat',
-                'lon',
-                'datetime',
-                'dist_to_prev',
-                'time_to_prev',
-                'speed_to_prev',
-                'block_signal']
+    cols = [
+        'tid_part', 'id', 'lat', 'lon', 'datetime',
+        'dist_to_prev', 'time_to_prev', 'speed_to_prev', 'block_signal'
+    ]
+    expected = DataFrame(data=[
+        [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:03'),
+         nan, nan, nan, False],
+        [3, 1, 39.984674, 116.31981, Timestamp('2008-10-23 05:53:53'),
+         nan, nan, nan, False],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:03'),
+         nan, nan, nan, True],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:13'),
+         0.0, 10.0, 0.0, True],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:23'),
+         0.0, 10.0, 0.0, True],
+        [5, 1, 39.984555, 116.319728, Timestamp('2008-10-23 05:54:33'),
+         nan, nan, nan, False],
+    ], columns=cols, index=[0, 5, 6, 7, 8, 9]
+    )
 
-    new_move_df = semantic.filter_block_signal_by_repeated_amount_of_points(move_df, 
-                                                       inplace=False)
-    
-    assert(new_move_df.empty)
-    
-    assert_array_equal(new_move_df.columns, expected)
+    new_move_df = semantic.filter_block_signal_by_repeated_amount_of_points(
+        move_df, max_time_stop=15, amount_max_of_points_stop=3, inplace=False
+    )
 
-    new_move_df = semantic.filter_block_signal_by_repeated_amount_of_points(move_df, 
-                                                                            filter_out=True,
-                                                                            inplace=False)
-    
-    assert(new_move_df.empty)
-    
-    assert_array_equal(new_move_df.columns, expected)
+    assert_frame_equal(new_move_df, expected)
 
-    semantic.filter_block_signal_by_repeated_amount_of_points(move_df, 
-                                                              inplace=True)
-    
-    assert(move_df.empty)
+    assert BLOCK not in move_df
+
+    semantic.filter_block_signal_by_repeated_amount_of_points(
+        move_df, max_time_stop=15, amount_max_of_points_stop=3,
+        filter_out=True, inplace=True
+    )
+    expected = DataFrame(data=[
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:13'),
+         nan, nan, nan, True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:23'),
+         0.0, 10.0, 0.0, True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:33'),
+         0.0, 10.0, 0.0, True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:43'),
+         0.0, 10.0, 0.0, True],
+    ], columns=cols, index=[1, 2, 3, 4]
+    )
+
+    assert_frame_equal(move_df, expected)
 
 
 def test_filter_block_signal_by_time():
-    move_df = _default_move_df()
+    move_df = _default_move_df(list_data_2)
+    cols = [
+        'tid_part', 'id', 'lat', 'lon', 'datetime',
+        'dist_to_prev', 'time_to_prev', 'speed_to_prev', 'block_signal'
+    ]
 
-    expected = ['id',
-                'lat',
-                'lon',
-                'datetime',
-                'dist_to_prev',
-                'time_to_prev',
-                'speed_to_prev',
-                'block_signal']  
+    expected = DataFrame(data=[
+        [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:03'), nan, nan, nan,
+         False],
+        [3, 1, 39.984674, 116.31981, Timestamp('2008-10-23 05:53:53'), nan, nan, nan,
+         False],
+        [5, 1, 39.984555, 116.319728, Timestamp('2008-10-23 05:54:33'), nan, nan, nan,
+         False],
+    ], columns=cols, index=[0, 5, 9]
+    )
 
-    new_move_df = semantic.filter_block_signal_by_time(move_df, 
-                                                       inplace=False)
-    
-    assert(new_move_df.empty)
-    
-    assert_array_equal(new_move_df.columns, expected)
+    new_move_df = semantic.filter_block_signal_by_time(
+        move_df, max_time_stop=15, inplace=False
+    )
+    assert_frame_equal(new_move_df, expected)
+    assert BLOCK not in move_df
 
-    new_move_df = semantic.filter_block_signal_by_time(move_df, 
-                                                       filter_out=True,
-                                                       inplace=False)
-    
-    assert(new_move_df.empty)
-    
-    assert_array_equal(new_move_df.columns, expected)
-
-    semantic.filter_block_signal_by_time(move_df, inplace=True)
-    
-    assert(move_df.empty)
-    
-    assert_array_equal(move_df.columns, expected)
+    semantic.filter_block_signal_by_time(
+        move_df, max_time_stop=15, filter_out=True, inplace=True
+    )
+    expected = DataFrame(data=[
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:13'), nan, nan, nan,
+         True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:23'), 0.0, 10.0, 0.0,
+         True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:33'), 0.0, 10.0, 0.0,
+         True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:43'), 0.0, 10.0, 0.0,
+         True],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:03'), nan, nan, nan,
+         True],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:13'), 0.0, 10.0, 0.0,
+         True],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:23'), 0.0, 10.0, 0.0,
+         True],
+    ], columns=cols, index=[1, 2, 3, 4, 6, 7, 8]
+    )
+    assert_frame_equal(move_df, expected)
 
 
 def test_filter_longer_time_to_stop_segment_by_id():
+    move_df = _default_move_df(list_data_2)
+    cols = [
+        'segment_stop', 'id', 'lat', 'lon', 'datetime',
+        'dist_to_prev', 'time_to_prev', 'speed_to_prev', 'stop'
+    ]
 
-    move_df = _default_move_df()   
-    
-    expected = ['segment_stop', 
-                'id', 
-                'lat', 
-                'lon', 
-                'datetime', 
-                'dist_to_prev',
-                'time_to_prev', 
-                'speed_to_prev', 
-                'stop']           
-    
-    new_move_df = semantic.filter_longer_time_to_stop_segment_by_id(move_df, 
-                                                                    inplace=False)
-    
-    assert(new_move_df.empty)
-    
-    assert_array_equal(new_move_df.columns, expected)
+    expected = DataFrame(data=[
+        [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:03'), nan, nan, nan,
+         False],
+        [3, 1, 39.984674, 116.31981, Timestamp('2008-10-23 05:53:53'), nan, nan, nan,
+         False],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:03'), nan, nan, nan,
+         True],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:13'), 0.0, 10.0, 0.0,
+         True],
+        [4, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:54:23'), 0.0, 10.0, 0.0,
+         True],
+        [5, 1, 39.984555, 116.319728, Timestamp('2008-10-23 05:54:33'), nan, nan, nan,
+         False],
+    ], columns=cols, index=[0, 5, 6, 7, 8, 9]
+    )
+    new_move_df = semantic.filter_longer_time_to_stop_segment_by_id(
+        move_df, dist_radius=5, time_radius=10, inplace=False
+    )
 
-    new_move_df = semantic.filter_longer_time_to_stop_segment_by_id(move_df, 
-                                                                    filter_out=True,
-                                                                    inplace=False)
-    
-    assert(new_move_df.empty)
-    
-    assert_array_equal(new_move_df.columns, expected)
+    assert_frame_equal(new_move_df, expected)
+    assert SEGMENT_STOP not in move_df
 
-    semantic.filter_longer_time_to_stop_segment_by_id(move_df, inplace=True)
-    
-    assert(move_df.empty)
-    
-    assert_array_equal(move_df.columns, expected)
-
+    expected = DataFrame(data=[
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:13'),
+         nan, nan, nan, True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:23'),
+         0.0, 10.0, 0.0, True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:33'),
+         0.0, 10.0, 0.0, True],
+        [2, 1, 39.98471, 116.319865, Timestamp('2008-10-23 05:53:43'),
+         0.0, 10.0, 0.0, True],
+    ], columns=cols, index=[1, 2, 3, 4]
+    )
+    semantic.filter_longer_time_to_stop_segment_by_id(
+        move_df, dist_radius=5, time_radius=10, filter_out=True, inplace=True
+    )
+    assert_frame_equal(move_df, expected)

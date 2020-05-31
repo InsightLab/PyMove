@@ -1224,7 +1224,7 @@ def test_astype():
         columns=['lat', 'lon', 'datetime', 'id'],
         index=[0, 1, 2, 3],
     )
-    assert_frame_equal(move_df.astype('int'), expected)
+    assert_frame_equal(move_df.astype('int64'), expected)
 
 
 def test_sort_values():
