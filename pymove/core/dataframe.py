@@ -448,6 +448,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         PandasMoveDataFrame or None
             DataFrame with the renamed axis labels.
 
+        Raises
+        ------
+        AttributeError
+            If trying to rename a required column inplace
+
         """
 
         operation = begin_operation('rename')
@@ -459,8 +464,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             rename_ = self._data.rename(mapper=mapper, axis=axis, copy=copy)
 
         if inplace:
-            self._data = rename_
-            rename_ = None
+            if MoveDataFrame.has_columns(rename_):
+                self._data = rename_
+                rename_ = None
+            else:
+                raise AttributeError(
+                    'Could not rename columns lat, lon, and datetime.'
+                )
         else:
             if MoveDataFrame.has_columns(rename_):
                 rename_ = PandasMoveDataFrame(data=rename_)
@@ -1826,6 +1836,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         matplotlib.pyplot.figure or None
             The generated picture.
 
+        Raises
+        ------
+        AttributeError
+            If there are no columns with the specified type
+
         """
 
         operation = begin_operation('plot_all_features')
@@ -2382,6 +2397,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html
 
+        Raises
+        ------
+        AttributeError
+            If trying to change required types inplace
+
         """
 
         if not copy and isinstance(dtype, str):
@@ -2551,6 +2571,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.set_index.html
 
+        Raises
+        ------
+        AttributeError
+            If trying to change required columns types
+
         """
 
         if inplace and drop:
@@ -2623,6 +2648,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Raises
         ------
+        AttributeError
+            If trying to drop a required column inplace
         KeyError
             If any of the labels is not found in the selected axis.
 
@@ -3012,6 +3039,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         References
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dropna.html
+
+        Raises
+        ------
+        AttributeError
+            If trying to drop required columns inplace
 
         """
 
