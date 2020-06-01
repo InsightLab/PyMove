@@ -1,10 +1,27 @@
-from branca.element import Template, MacroElement
+from branca.element import MacroElement, Template
 
 
 def add_map_legend(m, title, items):
-    # reference: https://github.com/python-visualization/folium/issues/528#issuecomment-421445303
-    item = "<li><span style='background:%s;'></span>%s</li>"
-    list_items = "\n".join([item % (c, n) for (n, c) in items])
+    """
+    Adds a legend for a folium map.
+
+    Parameters
+    ----------
+    m : folium.map.
+        Represents a folium map.
+    title : string.
+        Represents the title of the legend.
+    items : list of tuple.
+        Represents the color and name of the legend items.
+
+    References
+    ----------
+    https://github.com/python-visualization/folium/issues/528#issuecomment-421445303
+
+    """
+
+    item = "<li><span style='background:%srs;'></span>%srs</li>"
+    list_items = '\n'.join([item % (c, n) for (n, c) in items])
     template = """
     {{% macro html(this, kwargs) %}}
 
@@ -13,7 +30,8 @@ def add_map_legend(m, title, items):
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+      <link rel="stylesheet"
+        href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
       <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
       <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -35,10 +53,10 @@ def add_map_legend(m, title, items):
     </head>
     <body>
 
-
-    <div id='maplegend' class='maplegend' 
-        style='position: absolute; z-index:9999; border:2px solid grey; background-color:rgba(255, 255, 255, 0.8);
-         border-radius:6px; padding: 10px; font-size:14px; right: 20px; bottom: 20px;'>
+    <div id='maplegend' class='maplegend'
+        style='position: absolute; z-index:9999; border:2px solid grey;
+        background-color:rgba(255, 255, 255, 0.8); border-radius:6px;
+        padding: 10px; font-size:14px; right: 20px; bottom: 20px;'>
 
     <div class='legend-title'> {} </div>
     <div class='legend-scale'>
@@ -90,7 +108,9 @@ def add_map_legend(m, title, items):
         color: #777;
         }}
     </style>
-    {{% endmacro %}}""".format(title, list_items)
+    {{% endmacro %}}""".format(
+        title, list_items
+    )
 
     macro = MacroElement()
     macro._template = Template(template)

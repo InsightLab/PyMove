@@ -1,11 +1,12 @@
 import datetime
 
+import holidays
 from pandas._libs.tslibs.timestamps import Timestamp
 
 
 def date_to_str(date):
     """
-    Get date, in string's format, from timestamp.
+    Get date, in string'srs format, from timestamp.
 
     Parameters
     ----------
@@ -14,83 +15,77 @@ def date_to_str(date):
 
     Returns
     -------
-    datestr : String
-        Represents the date in string"s format.
+    str
+        Represents the date in string"srs format.
 
-    Examples
-    --------
     """
-    date_str = date.strftime("%Y-%m-%d")
-    return date_str
+
+    return date.strftime('%Y-%m-%d')
 
 
 def str_to_datetime(dt_str):
     """
-    Converts a datetime in string"s format "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S" to
-    datetime"s format.
+    Converts a datetime in string"srs format "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S" to
+    datetime"srs format.
 
     Parameters
     ----------
     dt_str : String
-        Represents a datetime in string"s format.
+        Represents a datetime in string"srs format.
 
     Returns
     -------
-    datetime : datetime.datetime
-        Represents a datetime in datetime"s format.
+    datetime.datetime
+        Represents a datetime in datetime"srs format.
+
     """
 
     if len(dt_str) == 10:
-        return datetime.datetime.strptime(dt_str, "%Y-%m-%d")
+        return datetime.datetime.strptime(dt_str, '%Y-%m-%d')
     else:
-        return datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
+        return datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
 
 def to_str(data):
     """
-    Converts a date in datetime's format to string"s format.
+    Converts a date in datetime'srs format to string"srs format.
 
     Parameters
     ----------
     data : datetime.datetime
-        Represents a datetime in datetime"s format.
+        Represents a datetime in datetime"srs format.
 
     Returns
     -------
-    datetime_str : String
-        Represents a datetime in string"s format "%Y-%m-%d %H:%M:%S".
+    str
+        Represents a datetime in string"srs format "%Y-%m-%d %H:%M:%S".
 
-    Examples
-    --------
     """
 
-    datetime_str = data.strftime("%Y-%m-%d %H:%M:%S")
-    return datetime_str
+    return data.strftime('%Y-%m-%d %H:%M:%S')
 
 
-def to_min(datetime):
+def to_min(dt):
     """
     Converts a datetime to an int representation in minutes. To do the reverse
     use: min_to_datetime.
 
     Parameters
     ----------
-    datetime : datetime.datetime
-        Represents a datetime in datetime"s format.
+    dt : datetime.datetime
+        Represents a datetime in datetime"srs format.
 
     Returns
     -------
-    minutes : int
+    int
         Represents minutes from.
 
-    Examples
-    --------
     """
+
     # get an integer time slot from a datetime
-    minutes = int(
-        (datetime - datetime.utcfromtimestamp(0)).total_seconds() / 60
+    return int(
+        (dt - dt.utcfromtimestamp(0)).total_seconds() / 60
     )
-    return minutes
 
 
 def min_to_datetime(min_):
@@ -105,16 +100,12 @@ def min_to_datetime(min_):
 
     Returns
     -------
-    min_datetime : datetime.datetime
-        Represents minutes in datetime"s format.
+    datetime.datetime
+        Represents minutes in datetime"srs format.
 
-    Examples
-    --------
     """
-    # get a datetime from an integer time slot
-    # utcfromtimestamp (below) is much faster than the line above
-    min_datetime = datetime.datetime.utcfromtimestamp(min_ * 60)
-    return min_datetime
+
+    return datetime.datetime.utcfromtimestamp(min_ * 60)
 
 
 # TODO: ve o que sao os parametros e tipo dos param
@@ -169,14 +160,16 @@ def min_to_datetime(min_):
 #
 # # TODO: Finalizar
 # def str_to_min_slot(dt_str, time_window_duration=5):
-#     """Converts a datetime string to an int minute time slot (approximated to the time slot).
+#     """Converts a datetime string to an int minute time slot
+#     (approximated to the time slot).
 #     Same as datetime_str_to_min_slot, but another implementation.
-#     To do almost the reverse (consider time slot approximation) use: min_to_datetime.
+#     To do almost the reverse (consider time slot approximation)
+#     use: min_to_datetime.
 #
 #     Parameters
 #     ----------
 #     dt_str : datetime.datetime
-#         Represents a datetime in datetime"s format.
+#         Represents a datetime in datetime"srs format.
 #     time_window_duration: int
 #
 #     Returns
@@ -193,7 +186,6 @@ def min_to_datetime(min_):
 #     dt = to_str(dt_str)
 #     dt_slot = slot(dt, time_window_duration)
 #     return dt_slot
-#
 
 
 def to_day_of_week_int(date):
@@ -203,47 +195,56 @@ def to_day_of_week_int(date):
     Parameters
     ----------
     date : datetime.datetime
-        Represents a datetime in datetime"s format.
+        Represents a datetime in datetime"srs format.
 
     Returns
     -------
-    day_week : int
+    int
         Represents day of week.
+
     """
-    day_week = date.weekday()
-    return day_week
+
+    return date.weekday()
 
 
-def working_day(dt, holidays):
+def working_day(dt, country='BR', state=None):
     """
     Indices if a day specified by the user is a working day.
 
     Parameters
     ----------
-    dt : Datetime
+    dt : str or datetime
         Specifies the day the user wants to know if it is a business day.
-    holidays : Datetime
-        Indicates the days that are vacation days and therefore not working days.
+    country : String
+        Indicates country to check for vacation days.
+    state: String
+        Indicates state to check for vacation days.
 
     Returns
     -------
-    result : boolean
+    boolean
         if true, means that the day informed by the user is a working day.
         if false, means that the day is not a working day.
+
+    References
+    ----------
+    Countries and States names available in https://pypi.org/project/holidays/
+
     """
+
     result = True
 
     if isinstance(dt, str):
-        dt = date_to_str(dt)
+        dt = str_to_datetime(dt)
 
     if isinstance(dt, datetime.datetime):
         dt = datetime.date(dt.year, dt.month, dt.day)
 
-    if dt in holidays:
+    if dt in holidays.CountryHoliday(country=country, prov=None, state=state):
         result = False
     else:
         dow = to_day_of_week_int(dt)
-        # 5 == saturday, 6 == sunday
+        # 5 == Saturday, 6 == Sunday
         if dow == 5 or dow == 6:
             result = False
 
@@ -259,7 +260,7 @@ def now_str():
 
     Returns
     -------
-    date_time : String
+    str
         Represents a data.
 
     Examples
@@ -267,9 +268,10 @@ def now_str():
     >>> from pymove import datetime
     >>> datetime.now_str()
     "2019-09-02 13:54:16"
+
     """
-    date_time = to_str(datetime.datetime.now())
-    return date_time
+
+    return to_str(datetime.datetime.now())
 
 
 def deltatime_str(deltatime_seconds):
@@ -296,12 +298,13 @@ def deltatime_str(deltatime_seconds):
     -----
     Output example if more than 24 hours: 25:33:57.123
     https://stackoverflow.com/questions/3620943/measuring-elapsed-time-with-the-time-module
+
     """
+
     time_int = int(deltatime_seconds)
     time_dec = int((deltatime_seconds - time_int) * 1000)
-    time_str = "{:02d}:{:02d}:{:02d}.{:03d}".format(
-        time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec
-    )
+    times = (time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec)
+    time_str = '%02d:%02d:%02d.%03d' % times
     return time_str
 
 
@@ -317,7 +320,7 @@ def timestamp_to_millis(timestamp):
 
     Returns
     -------
-    millis : int
+    int
         Represents millisecond results.
 
     Examples
@@ -325,9 +328,10 @@ def timestamp_to_millis(timestamp):
     >>> from pymove.utils.utils import datetime
     >>> datetime.timestamp_to_millis("2015-12-12 08:00:00.123000")
     1449907200123 (UTC)
+
     """
-    millis = Timestamp(timestamp).value // 1000000
-    return millis
+
+    return Timestamp(timestamp).value // 1000000
 
 
 def millis_to_timestamp(milliseconds):
@@ -341,7 +345,7 @@ def millis_to_timestamp(milliseconds):
 
     Returns
     -------
-    timestamp : pandas._libs.tslibs.timestamps.Timestamp
+    pandas._libs.tslibs.timestamps.Timestamp
         Represents the date corresponding.
 
     Examples
@@ -349,14 +353,15 @@ def millis_to_timestamp(milliseconds):
     >>> from pymove.utils.utils import datetime
     >>> datetime.millis_to_timestamp(1449907200123)
     "2015-12-12 08:00:00.123000"
+
     """
-    timestamp = Timestamp(milliseconds, unit="ms")
-    return timestamp
+
+    return Timestamp(milliseconds, unit='ms')
 
 
 def time_to_str(time):
     """
-    Get time, in string's format, from timestamp.
+    Get time, in string'srs format, from timestamp.
 
     Parameters
     ----------
@@ -365,42 +370,43 @@ def time_to_str(time):
 
     Returns
     -------
-    timestr : String
-        Represents the time in string"s format.
+    str
+        Represents the time in string"srs format.
 
     Examples
     --------
     >>> from pymove.utils.utils import datetime
     >>> datetime.time_to_str("2015-12-12 08:00:00.123000")
     "08:00:00"
+
     """
-    timestr = time.strftime("%H:%M:%S")
-    return timestr
+
+    return time.strftime('%H:%M:%S')
 
 
 def str_to_time(dt_str):
     """
-    Converts a time in string's format "%H:%M:%S" to datetime's format.
+    Converts a time in string'srs format "%H:%M:%S" to datetime'srs format.
 
     Parameters
     ----------
     dt_str : String
-        Represents a time in string"s format.
+        Represents a time in string"srs format.
 
     Returns
     -------
-    datetime_time : datetime.datetime
-        Represents a time in datetime"s format.
+    datetime.datetime
+        Represents a time in datetime"srs format.
 
     Examples
     --------
     >>> from pymove.utils.utils import datetime
     >>> datetime.str_to_time("08:00:00")
     datetime.datetime(1900, 1, 1, 8, 0)
+
     """
 
-    datetime_time = datetime.datetime.strptime(dt_str, "%H:%M:%S")
-    return datetime_time
+    return datetime.datetime.strptime(dt_str, '%H:%M:%S')
 
 
 def elapsed_time_dt(start_time):
@@ -415,11 +421,13 @@ def elapsed_time_dt(start_time):
 
     Returns
     -------
-        time_dif : Integer
-            Represents the time elapsed from the start time to the current time (when the function was called).
+    int
+        Represents the time elapsed from the start time to the current time
+        (when the function was called).
+
     """
-    time_dif = diff_time(start_time, datetime.datetime.now())
-    return time_dif
+
+    return diff_time(start_time, datetime.datetime.now())
 
 
 def diff_time(start_time, end_time):
@@ -436,9 +444,10 @@ def diff_time(start_time, end_time):
 
     Returns
     -------
-        time_dif : Integer
-            Represents the time elapsed from the start time to the current time (when the function was called).
+    int
+        Represents the time elapsed from the start time to the current time
+        (when the function was called).
+
     """
 
-    time_dif = int((end_time - start_time).total_seconds() * 1000)
-    return time_dif
+    return int((end_time - start_time).total_seconds() * 1000)

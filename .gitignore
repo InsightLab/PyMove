@@ -69,9 +69,6 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
 # pyenv
 .python-version
 
@@ -89,6 +86,10 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Development
+developing
+developing/
 
 # Spyder project settings
 .spyderproject
@@ -240,7 +241,3 @@ modules.xml
 # End of https://www.gitignore.io/api/macos,pycharm+all,jupyternotebooks
 .idea
 .vscode
-.DS_Store
-
-
-.pymove/utils/Testing Integrations.ipynb
