@@ -59,6 +59,10 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def tail(self):
+        pass
+
+    @abc.abstractmethod
     def get_users_number(self):
         pass
 
@@ -75,11 +79,27 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def to_DataFrame(self):
+    def to_data_frame(self):
         pass
 
     @abc.abstractmethod
-    def generate_tid_based_on_id_datatime(self):
+    def info(self):
+        pass
+
+    @abc.abstractmethod
+    def describe(self):
+        pass
+
+    @abc.abstractmethod
+    def memory_usage(self):
+        pass
+
+    @abc.abstractmethod
+    def copy(self):
+        pass
+
+    @abc.abstractmethod
+    def generate_tid_based_on_id_datetime(self):
         pass
 
     @abc.abstractmethod
@@ -107,11 +127,19 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def generate_dist_time_speed_features(self):
+        pass
+
+    @abc.abstractmethod
     def generate_dist_features(self):
         pass
 
     @abc.abstractmethod
-    def generate_dist_time_speed_features(self):
+    def generate_time_features(self):
+        pass
+
+    @abc.abstractmethod
+    def generate_speed_features(self):
         pass
 
     @abc.abstractmethod
@@ -232,6 +260,10 @@ class MoveDataFrameAbstractModel(abc.ABC):
 
     @abc.abstractmethod
     def join(self):
+        pass
+
+    @abc.abstractmethod
+    def merge(self):
         pass
 
     @abc.abstractmethod
