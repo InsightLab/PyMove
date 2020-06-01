@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 from numpy.testing import assert_array_equal, assert_equal
 from pandas import DataFrame
 from pandas.testing import assert_frame_equal
@@ -79,7 +80,7 @@ def test_format_labels():
 
 def test_shift():
 
-    expected = [-2147483648, -2147483648, -2147483648, 1, 2]
+    expected = [np.nan, np.nan, np.nan, 1, 2]
 
     array_ = [1, 2, 3, 4, 5]
 
@@ -125,6 +126,6 @@ def test_fill_list_with_new_values():
     new_list = [5, 6, 7]
 
     trajectories.fill_list_with_new_values(original_list=original_list,
-                                               new_list_values=new_list)
+                                           new_list_values=new_list)
 
     assert_array_equal(original_list, exected)
