@@ -4,8 +4,10 @@ import time
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from pymove.utils.log import log_progress
 
 def union_poi_bank(df_, label_poi='type_poi'):
+    
     """
     Performs the union between the different bank categories
     for Points of Interest in a single category named 'banks'.
@@ -115,18 +117,23 @@ def union_poi_police(df_, label_poi='type_poi'):
     filter_police = (df_[label_poi] == 'distritos_policiais') 
     df_.at[df_[filter_police].index, label_poi] = 'police'
 
-def join_coletives_areas(gdf_, gdf_rules_, label_geometry='geometry'):
+def join_coletive_areas(gdf_, gdf_rules_, label_geometry='geometry'):
     
     """
-    Performs the integration between trajectories and coletives areas.
+    It performs the integration between trajectories and collective
+    areas, generating a new column that informs if the point of the
+    trajectory is inserted in a collective area.
     
     Parameters
     ----------
-    df_ : dataframe
+    gdf_ : geopandas.GeoDataFrame
         The input trajectory data
     
     gdf_rules_ : geopandas.GeoDataFrame
+        The input coletive areas data
         
+    label_geometry: String, optional("geometry" by default)
+        Label of gdf_rules_ referring to the geometry of each feature 
     
     Returns
     -------
@@ -134,10 +141,10 @@ def join_coletives_areas(gdf_, gdf_rules_, label_geometry='geometry'):
     
     print('Integration between trajectories and coletives areas')
     
-    polygons = gdf_rules_['geometry'].unique()
+    polygons = gdf_rules_[label_geometry].unique()
     gdf_['violation'] = False
-    for p in tqdm(polygons, total=len(polygons)):
-        index = gdf_[gdf_['geometry'].intersects(p)].index
+    for p in log_progress(polygons):
+        index = gdf_[gdf_[label_geometry].intersects(p)].index
         #print('attributing violations to polygon - {}'.format(i))
         gdf_.at[index, 'violation'] = True
 
@@ -219,6 +226,7 @@ def join_with_POIs(df_, df_POIs, label_id='id', label_POI='POI', reset_index=Tru
         print('id: {}\n'.format(idx))
         raise e
 
+
 def join_with_POIs_optimizer(df_, df_POIs, label_id='id', label_POI='POI', dist_poi=[10], reset_index=True):    
     
     """
@@ -263,7 +271,7 @@ def join_with_POIs_optimizer(df_, df_POIs, label_id='id', label_POI='POI', dist_
                 df_.reset_index(drop=True, inplace=True)
                 df_POIs.reset_index(drop=True, inplace=True)
 
-            #create numpy array to store new colum to dataframe of movement objects
+            #create numpy array to store new column to dataframe of movement objects
             current_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float32)
             ids_POIs= np.full(df_.shape[0], np.NAN, dtype='object_')
             tag_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
@@ -275,7 +283,7 @@ def join_with_POIs_optimizer(df_, df_POIs, label_id='id', label_POI='POI', dist_
             lat_POI = np.full(df_.shape[0], np.NAN, dtype=np.float32)
             lon_POI = np.full(df_.shape[0], np.NAN, dtype=np.float32)
             
-            for row in tqdm(df_POIs.itertuples(), total=shape_POIs):   
+            for row in log_progress(df_POIs.itertuples()):   
                 idx = row.Index
                 #update lat and lot of current index
                 lat_POI.fill(row.lat)
@@ -348,7 +356,7 @@ def join_with_POIs_by_category(df_, df_POIs, label_category='POI', label_id='id'
         df_.reset_index(drop=True, inplace=True)
         df_POIs.reset_index(drop=True, inplace=True)
         
-        #create numpy array to store new colum to dataframe of movement objects
+        #create numpy array to store new column to dataframe of movement objects
         current_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float32)
         ids_POIs= np.full(df_.shape[0], np.NAN, dtype='object_')
         
@@ -361,7 +369,7 @@ def join_with_POIs_by_category(df_, df_POIs, label_category='POI', label_id='id'
             df_category = df_POIs[df_POIs[label_category] == c]       
             df_category.reset_index(drop=True, inplace=True)
 
-            for row in tqdm(df_[['lat','lon']].itertuples(), total=df_.shape[0]):
+            for row in log_progress(df_[['lat','lon']].itertuples()):
                 idx = row.Index
                 lat_tnz = np.full(df_category.shape[0], row.lat, dtype=np.float32)
                 lon_tnz = np.full(df_category.shape[0], row.lon, dtype=np.float32)
@@ -510,7 +518,7 @@ def join_with_POI_datetime_optimizer(df_, df_cvp, label_date='datetime', time_wi
         
         minimum_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float32)
         shape_cvp = df_cvp.shape[0]
-        for row in tqdm(df_cvp.itertuples(), total=shape_cvp):   
+        for row in log_progress(df_cvp.itertuples()):   
             idx = row.Index
             
             df_filted = preprocessing.filters.by_datetime(df_, window_starts[idx], window_ends[idx])   
@@ -655,8 +663,12 @@ def merge_HOME_with_POI(df_, label_dist_poi='dist_poi', label_type_poi='type_poi
             del df_['Home'], df_['dist_home']
     except Exception as e:
         raise e
+        
+        
 
-"""def integration_CVP_to_tnz(df_, df_cvp, label_date='datetime', time_window=900):    
+"""
+
+    def integration_CVP_to_tnz(df_, df_cvp, label_date='datetime', time_window=900):    
     try:
         print('Integration with CVP...')
         start_time = time.time()
@@ -754,5 +766,5 @@ def integration_with_cvp(df_, df_cvp, label_date='datetime', time_window=900, di
     except Exception as e:
         print('id: {}\n'.format(idx))
         raise e
-
 """
+
