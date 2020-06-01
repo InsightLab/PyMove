@@ -2,12 +2,13 @@ import os
 
 import joblib
 from numpy import array
-from pymove import MoveDataFrame
-from pymove.core.grid import Grid
-from shapely.geometry import Polygon
+from numpy.testing import assert_array_equal, assert_equal
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
-from numpy.testing import assert_array_equal, assert_equal
+from shapely.geometry import Polygon
+
+from pymove import MoveDataFrame
+from pymove.core.grid import Grid
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
 
 list_data = [
@@ -214,7 +215,8 @@ def read_grid_pkl(tmpdir):
 
     file_write_default = d.join('test_read_grid.pkl')
     filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename)
+        file_write_default.dirname, file_write_default.basename
+    )
 
     grid = _default_grid()
 
