@@ -215,7 +215,8 @@ def read_grid_pkl(tmpdir):
 
     file_write_default = d.join('test_read_grid.pkl')
     filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename)
+        file_write_default.dirname, file_write_default.basename
+    )
 
     grid = _default_grid()
 

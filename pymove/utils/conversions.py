@@ -322,7 +322,7 @@ def kmh_to_ms(
             move_data = move_data[:]
         if label_speed not in move_data:
             move_data.generate_dist_time_speed_features()
-            ms_to_kmh(move_data, label_speed, new_label)
+            ms_to_kmh(move_data, label_speed)
         move_data[label_speed] = move_data[label_speed].apply(
             lambda row: row / 3.6
         )
@@ -417,7 +417,7 @@ def kilometers_to_meters(
             move_data = move_data[:]
         if label_distance not in move_data:
             move_data.generate_dist_time_speed_features()
-            meters_to_kilometers(move_data, label_distance, new_label)
+            meters_to_kilometers(move_data, label_distance)
         move_data[label_distance] = move_data[label_distance].apply(
             lambda row: row * 1000
         )
@@ -506,8 +506,8 @@ def minute_to_seconds(
             move_data = move_data[:]
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-            seconds_to_minutes(move_data, label_time, new_label)
-        move_data[label_time] = move_data[label_time].apply(
+            seconds_to_minutes(move_data, label_time)
+        move_data['time_to_prev'] = move_data['time_to_prev'].apply(
             lambda row: row * 60.0
         )
         if new_label is not None:
@@ -551,7 +551,7 @@ def minute_to_hours(
             move_data = move_data[:]
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-            seconds_to_minutes(move_data, label_time, new_label)
+            seconds_to_minutes(move_data, label_time)
         move_data[label_time] = move_data[label_time].apply(
             lambda row: row / 60.0
         )
@@ -596,7 +596,7 @@ def hours_to_minute(
             move_data = move_data[:]
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-            seconds_to_hours(move_data, label_time, new_label)
+            seconds_to_hours(move_data, label_time)
         move_data[label_time] = move_data[label_time].apply(
             lambda row: row * 60.0
         )
@@ -685,7 +685,7 @@ def hours_to_seconds(
             move_data = move_data[:]
         if label_time not in move_data:
             move_data.generate_dist_time_speed_features()
-            seconds_to_hours(move_data, label_time, new_label)
+            seconds_to_hours(move_data, label_time)
         move_data[label_time] = move_data[label_time].apply(
             lambda row: row * 3600.0
         )
