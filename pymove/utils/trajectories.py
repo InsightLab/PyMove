@@ -182,7 +182,9 @@ def fill_list_with_new_values(original_list, new_list_values):
     original_list[:n] = new_list_values
 
 
-def save_bbox(bbox_tuple, file, tiles=TILES[0], color='red'):
+def save_bbox(
+        bbox_tuple, file='bbox.html', tiles=TILES[0], color='red', return_map=False
+):
     """
     Save bbox as file .html using Folium.
 
@@ -191,7 +193,7 @@ def save_bbox(bbox_tuple, file, tiles=TILES[0], color='red'):
     bbox_tuple : tuple.
         Represents a bound box, that is a tuple of 4 values with the
         min and max limits of latitude e longitude.
-    file : String.
+    file : String, optional, default 'bbox.html'.
         Represents filename.
     tiles : String, optional, default 'OpenStreetMap'.
         Represents tyles'srs type_.
@@ -201,6 +203,8 @@ def save_bbox(bbox_tuple, file, tiles=TILES[0], color='red'):
                 'Mapbox Control Room' and 'Mapbox Bright'.
     color : String, optional, default 'red'.
         Represents color of lines on map.
+    return_map: Boolean, optional, default False.
+        Wether to return the bbox folium map.
 
     Examples
     --------
@@ -223,3 +227,5 @@ def save_bbox(bbox_tuple, file, tiles=TILES[0], color='red'):
     ]
     folium.PolyLine(points_, weight=3, color=color).add_to(m)
     m.save(file)
+    if return_map:
+        return m

@@ -1224,7 +1224,7 @@ def test_astype():
         columns=['lat', 'lon', 'datetime', 'id'],
         index=[0, 1, 2, 3],
     )
-    assert_frame_equal(move_df.astype('int'), expected)
+    assert_frame_equal(move_df.astype('int64'), expected)
 
 
 def test_sort_values():
@@ -1640,3 +1640,159 @@ def test_get_type():
     move_df = _default_move_df()
 
     assert move_df.get_type() == TYPE_PANDAS
+
+
+def test_rename():
+
+    expected = _default_move_df()
+
+    expected_columns = DataFrame(
+        data=[
+            [
+                39.984094,
+                116.319236,
+                Timestamp('2008-10-23 05:53:05'),
+                1
+            ],
+            [
+                39.984198,
+                116.319322,
+                Timestamp('2008-10-23 05:53:06'),
+                1
+            ],
+            [
+                39.984224,
+                116.319402,
+                Timestamp('2008-10-23 05:53:11'),
+                2
+            ],
+            [
+                39.984224,
+                116.319402,
+                Timestamp('2008-10-23 05:53:11'),
+                2
+            ],
+        ],
+        columns=['lat', 'lon', 'datetime', 'ID'],
+        index=[0, 1, 2, 3],
+    )
+
+    expected_index = DataFrame(
+        data=[
+            [
+                39.984094,
+                116.319236,
+                Timestamp('2008-10-23 05:53:05'),
+                1
+            ],
+            [
+                39.984198,
+                116.319322,
+                Timestamp('2008-10-23 05:53:06'),
+                1
+            ],
+            [
+                39.984224,
+                116.319402,
+                Timestamp('2008-10-23 05:53:11'),
+                2
+            ],
+            [
+                39.984224,
+                116.319402,
+                Timestamp('2008-10-23 05:53:11'),
+                2
+            ],
+        ],
+        columns=['lat', 'lon', 'datetime', 'id'],
+        index=['a', 'b', 2, 3],
+    )
+
+    expected_lat = DataFrame(
+        data=[
+            [
+                39.984094,
+                116.319236,
+                Timestamp('2008-10-23 05:53:05'),
+                1
+            ],
+            [
+                39.984198,
+                116.319322,
+                Timestamp('2008-10-23 05:53:06'),
+                1
+            ],
+            [
+                39.984224,
+                116.319402,
+                Timestamp('2008-10-23 05:53:11'),
+                2
+            ],
+            [
+                39.984224,
+                116.319402,
+                Timestamp('2008-10-23 05:53:11'),
+                2
+            ],
+        ],
+        columns=['LAT', 'lon', 'datetime', 'id'],
+        index=[0, 1, 2, 3],
+    )
+
+    move_df = _default_move_df()
+
+    new_move_df = move_df.rename(columns={'id': 'ID'}, inplace=False)
+
+    assert_frame_equal(new_move_df, expected_columns)
+
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+
+    assert_frame_equal(move_df, expected)
+
+    new_move_df = move_df.rename(index={0: 'a', 1: 'b'}, inplace=False)
+
+    assert_frame_equal(new_move_df, expected_index)
+
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+
+    new_move = move_df.rename({0: 'a', 1: 'b'}, axis='index', inplace=False)
+
+    assert_frame_equal(new_move_df, expected_index)
+
+    assert isinstance(new_move_df, PandasMoveDataFrame)
+
+    new_move_df = move_df.rename(columns={'lat': 'LAT'}, inplace=False)
+
+    assert_frame_equal(new_move_df, expected_lat)
+
+    assert isinstance(new_move_df, DataFrame)
+
+    move_df.rename(columns={'id': 'ID'}, inplace=True)
+
+    assert_frame_equal(move_df, expected_columns)
+
+    assert isinstance(move_df, PandasMoveDataFrame)
+
+    try:
+        move_df.rename(columns={'lat': 'LAT'}, inplace=True)
+        raise AssertionError(
+            'AttributeError error not raised by MoveDataFrame'
+        )
+    except AttributeError:
+        pass
+
+    try:
+        move_df.rename(columns={'lon': 'LON'}, inplace=True)
+        raise AssertionError(
+            'AttributeError error not raised by MoveDataFrame'
+        )
+    except AttributeError:
+        pass
+
+    try:
+        move_df.rename(columns={'datetime': 'DATETIME'}, inplace=True)
+        raise AssertionError(
+            'AttributeError error not raised by MoveDataFrame'
+        )
+    except AttributeError:
+        pass
