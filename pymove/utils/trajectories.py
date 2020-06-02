@@ -194,7 +194,7 @@ def flatten_columns(df, columns):
 
     """
     for col in columns:
-        df[f'{col}_'] = df[f'{col}'].apply(lambda cell: flatten_dict(cell))
+        df[f'{col}_'] = df[f'{col}'].apply(flatten_dict)
         keys = set(chain(*df[f'{col}_'].apply(lambda column: column.keys())))
         for key in keys:
             column_name = f'{col}_{key}'.lower()
