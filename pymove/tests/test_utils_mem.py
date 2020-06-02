@@ -32,7 +32,7 @@ def test_reduce_mem_usage_automatic():
 
     expected_initial_size = 280
 
-    expected_final_size = 160
+    expected_final_size = 232
 
     assert_equal(mem.total_size(move_df), expected_initial_size)
 
@@ -63,8 +63,8 @@ def test_begin_operation():
 
     assert_equal(list(operation_info.keys()), list(expected.keys()))
     assert_equal(operation_info['process'], expected['process'])
-    assert_almost_equal(operation_info['init'], expected['init'])
-    assert_almost_equal(operation_info['start'], expected['start'])
+    assert_equal(int(operation_info['init']), int(expected['init']))
+    assert_equal(int(operation_info['start']), int(expected['start']))
     assert_equal(operation_info['name'], expected['name'])
 
 
@@ -73,19 +73,21 @@ def test_end_operation():
     operation = mem.begin_operation('operation')
 
     finish = operation['process'].memory_info()[0]
-    last_operation_time_duration = time.time() - operation['start']
+
     last_operation_mem_usage = finish - operation['init']
+
+    operation_info = mem.end_operation(operation)
+
+    last_operation_time_duration = time.time() - operation['start']
 
     expected = {'name': 'operation',
                 'time in seconds': last_operation_time_duration ,
                 'memory': mem.sizeof_fmt(last_operation_mem_usage)}
 
-    operation_info = mem.end_operation(operation)
-
     assert_equal(list(operation_info.keys()), list(expected.keys()))
     assert_equal(operation_info['name'], expected['name'])
-    assert_almost_equal(operation_info['time in seconds'],
-                        expected['time in seconds'])
+    assert_equal(int(operation_info['time in seconds']),
+                 int(expected['time in seconds']))
     assert_equal(operation_info['memory'], expected['memory'])
 
 
