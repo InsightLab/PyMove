@@ -1,9 +1,10 @@
 import numpy as np
 from sklearn.cluster import KMeans
 
-from pymove.utils.log import progress_bar
+from pymove.utils.log import progress_bar, timer_decorator
 
 
+@timer_decorator
 def elbow_method(
         move_data, k_initial=1, max_clusters=15, k_iteration=1, random_state=None
 ):
@@ -55,6 +56,7 @@ def elbow_method(
     return inertia_dic
 
 
+@timer_decorator
 def gap_statistic(
     move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=1, random_state=None
 ):
