@@ -1,4 +1,3 @@
-import time
 
 from numpy import nan
 from pandas import DataFrame, Timestamp
@@ -72,11 +71,11 @@ def test_end_create_operation():
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     )
 
-    new_move_df = semantic._end_create_operation(move_df, 'lat', time.time(), False)
+    new_move_df = semantic._end_create_operation(move_df, 'lat', False)
 
     assert_frame_equal(new_move_df, expected)
 
-    semantic._end_create_operation(move_df, 'lat', time.time(), True)
+    semantic._end_create_operation(move_df, 'lat', True)
 
     assert_frame_equal(move_df, expected)
 
@@ -105,7 +104,6 @@ def test_process_simple_filter():
                                                   'new_label',
                                                   'lat',
                                                   39.984217,
-                                                  time.time(),
                                                   False
                                                   )
 
@@ -115,7 +113,6 @@ def test_process_simple_filter():
                                     'new_label',
                                     'lat',
                                     39.984217,
-                                    time.time(),
                                     True)
 
     assert_frame_equal(move_df, expected)

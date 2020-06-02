@@ -1,5 +1,7 @@
 from __future__ import division
 
+from itertools import chain
+
 import folium
 import numpy as np
 import pandas as pd
@@ -119,6 +121,88 @@ def format_labels(current_id, current_lat, current_lon, current_datetime):
         current_lat: LATITUDE,
         current_datetime: DATETIME
     }
+
+
+def flatten_dict(d, parent_key='', sep='_'):
+    """
+    Flattens a nested dictionary.
+
+    Parameters
+    ----------
+    d: dict
+        Dictionary to be flattened.
+    parent_key: str, optional, default ''
+        Key of the parent dictionary.
+    sep: str, optional, default '_'
+        Separator for the parent and child keys
+
+    Returns
+    -------
+    dict
+        Flattened dictionary
+
+    References
+    ----------
+    https://stackoverflow.com/questions/6027558/flatten-nested-dictionaries-compressing-keys
+
+    Examples
+    --------
+    >>> d = { 'a': 1, 'b': { 'c': 2, 'd': 3}}
+    >>> flatten_dict(d)
+    { 'a': 1, 'b_c': 2, 'b_d': 3 }
+
+    """
+    if not isinstance(d, dict):
+        return {parent_key: d}
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
+
+def flatten_columns(df, columns):
+    """
+    Transforms columns containing dictionaries in individual columns
+
+    Parameters
+    ----------
+    df: dataframe
+        Dataframe with columns to be flattened
+    columns: list
+        List of columns from dataframe containing dictionaries
+
+    Returns
+    -------
+    dataframe
+        Dataframe with the new columns from the flattened dictionary columns
+
+    References
+    ----------
+    https://stackoverflow.com/questions/51698540/import-nested-mongodb-to-pandas
+
+    Examples
+    --------
+    >>> d = {'a': 1, 'b': {'c': 2, 'd': 3}}
+    >>>> df = pd.DataFrame({'col1': [1], 'col2': [d]})
+    >>>> flatten_columns(df, ['col2'])
+       col1  col2_b_d  col2_a  col2_b_c
+    0     1         3       1         2
+
+    """
+    for col in columns:
+        df[f'{col}_'] = df[f'{col}'].apply(lambda cell: flatten_dict(cell))
+        keys = set(chain(*df[f'{col}_'].apply(lambda column: column.keys())))
+        for key in keys:
+            column_name = f'{col}_{key}'.lower()
+            df[column_name] = df[f'{col}_'].apply(
+                lambda cell: cell[key] if key in cell.keys() else np.NaN
+            )
+    cols_to_drop = [(f'{col}', f'{col}_') for col in columns]
+    return df.drop(columns=list(chain(*cols_to_drop)))
 
 
 def shift(arr, num, fill_value=np.nan):
