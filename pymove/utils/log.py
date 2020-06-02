@@ -6,19 +6,23 @@ from IPython.display import display
 from ipywidgets import HTML, IntProgress, VBox
 from tqdm import tqdm
 
+from pymove.utils.datetime import deltatime_str
+
 
 def timer_decorator(func):
     """A decorator that prints how long a function took to run."""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         t_start = time.time()
         result = func(*args, **kwargs)
-        t_total = time.time() - t_start
-        message = '%s took %s seconds' % (func.__name__, t_total)
+        t_total = deltatime_str(time.time() - t_start)
+        message = '%s took %s' % (func.__name__, t_total)
         print('*' * len(message))
         print(message)
         print('*' * len(message))
         return result
+
     return wrapper
 
 
