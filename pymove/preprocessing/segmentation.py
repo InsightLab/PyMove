@@ -11,9 +11,10 @@ from pymove.utils.constants import (
     TIME_TO_PREV,
     TRAJ_ID,
 )
-from pymove.utils.log import progress_bar
+from pymove.utils.log import progress_bar, timer_decorator
 
 
+@timer_decorator
 def bbox_split(bbox, number_grids):
     """
     splits the bounding box in N grids of the same size.
@@ -150,7 +151,7 @@ def _filter_or_dist_time_speed(move_data, idx, feature, max_between_adj_points):
     return np.nan_to_num(move_data.at[idx, feature]) > max_between_adj_points
 
 
-def prepare_segmentation(move_data, label_id, label_new_tid):
+def _prepare_segmentation(move_data, label_id, label_new_tid):
     """
     Resets the dataframe index, collects unique ids and
     initiates curr_id and count
@@ -272,7 +273,7 @@ def _filter_by(
 
     """
 
-    curr_tid, ids, count = prepare_segmentation(
+    curr_tid, ids, count = _prepare_segmentation(
         move_data, label_id, label_new_tid
     )
 
@@ -308,11 +309,10 @@ def _filter_by(
         _drop_single_point(move_data, label_new_tid, label_id)
         move_data.generate_dist_time_speed_features()
 
-    print('------------------------------------------\n')
-
     return move_data
 
 
+@timer_decorator
 def by_dist_time_speed(
         move_data,
         label_id=TRAJ_ID,
@@ -389,6 +389,7 @@ def by_dist_time_speed(
         raise e
 
 
+@timer_decorator
 def by_max_dist(
         move_data,
         label_id=TRAJ_ID,
@@ -457,6 +458,7 @@ def by_max_dist(
         raise e
 
 
+@timer_decorator
 def by_max_time(
         move_data,
         label_id=TRAJ_ID,
@@ -526,6 +528,7 @@ def by_max_time(
         raise e
 
 
+@timer_decorator
 def by_max_speed(
         move_data,
         label_id=TRAJ_ID,

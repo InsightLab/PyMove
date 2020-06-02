@@ -1,5 +1,3 @@
-import time
-
 import dask
 import matplotlib.pyplot as plt
 import numpy as np
@@ -1266,8 +1264,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        float
-            current time.
         array
             data_ unique ids.
         int
@@ -1276,8 +1272,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             size of id.
 
         """
-
-        start_time = time.time()
 
         if sort is True:
             print(
@@ -1289,7 +1283,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if data_.index.name is None:
             print(
-                '...Set %s as index to a higher peformance\n'
+                '...Set %s as index to a higher performance\n'
                 % label_id,
                 flush=True,
             )
@@ -1299,9 +1293,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         sum_size_id = 0
         size_id = 0
 
-        return start_time, ids, sum_size_id, size_id
+        return ids, sum_size_id, size_id
 
-    def _return_generated_data(self, data_, start_time, operation, inplace):
+    def _return_generated_data(self, data_, operation, inplace):
         """
         Finishes the generate methods.
 
@@ -1309,8 +1303,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         data_ : dataframe
             Dataframe with the generated features.
-        start_time : float
-            time when the operation started.
         operation : dict
             initial stats of the operation.
         inplace : bool, optional, default True.
@@ -1325,7 +1317,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
         print('...Reset index...\n')
         data_.reset_index(inplace=True)
-        print('..Total Time: %.3f' % (time.time() - start_time))
 
         if inplace:
             self.last_operation = end_operation(operation)
@@ -1382,7 +1373,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 message
             )
 
-            start_time, ids, sum_size_id, size_id = self._prepare_generate_data(
+            ids, sum_size_id, size_id = self._prepare_generate_data(
                 data_, sort, label_id
             )
 
@@ -1425,7 +1416,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     )  # unit: m/srs
 
             return self._return_generated_data(
-                data_, start_time, operation, inplace
+                data_, operation, inplace
             )
 
         except Exception as e:
@@ -1477,7 +1468,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         try:
             print('\nCreating or updating distance features in meters...\n')
 
-            start_time, ids, sum_size_id, size_id = self._prepare_generate_data(
+            ids, sum_size_id, size_id = self._prepare_generate_data(
                 data_, sort, label_id
             )
 
@@ -1522,7 +1513,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     )
 
             return self._return_generated_data(
-                data_, start_time, operation, inplace
+                data_, operation, inplace
             )
 
         except Exception as e:
@@ -1576,7 +1567,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 '\nCreating or updating time features seconds\n'
             )
 
-            start_time, ids, sum_size_id, size_id = self._prepare_generate_data(
+            ids, sum_size_id, size_id = self._prepare_generate_data(
                 data_, sort, label_id
             )
 
@@ -1611,7 +1602,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     data_.at[idx, TIME_PREV_TO_NEXT] = time_prev_to_next
 
             return self._return_generated_data(
-                data_, start_time, operation, inplace
+                data_, operation, inplace
             )
 
         except Exception as e:
@@ -1667,7 +1658,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             print(
                 '\nCreating or updating speed features meters by seconds\n'
             )
-            start_time = time.time()
 
             dist_cols = [DIST_TO_PREV, DIST_TO_NEXT, DIST_PREV_TO_NEXT]
             time_cols = [TIME_TO_PREV, TIME_TO_NEXT, TIME_PREV_TO_NEXT]
@@ -1686,7 +1676,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_[SPEED_PREV_TO_NEXT] = d_prev_next / times[TIME_PREV_TO_NEXT]
 
             return self._return_generated_data(
-                data_, start_time, operation, inplace
+                data_, operation, inplace
             )
 
         except Exception as e:
