@@ -2,7 +2,7 @@ import os
 import time
 
 import psutil
-from numpy.testing import assert_equal
+from numpy.testing import assert_almost_equal, assert_equal
 
 import pymove
 from pymove import MoveDataFrame, mem
@@ -30,7 +30,7 @@ def test_reduce_mem_usage_automatic():
 
     move_df = _default_move_df()
 
-    expected_initial_size = 208
+    expected_initial_size = 280
 
     expected_final_size = 160
 
@@ -45,7 +45,7 @@ def test_total_size():
 
     move_df = _default_move_df()
 
-    expected_initial_size = 208
+    expected_initial_size = 280
 
     assert_equal(mem.total_size(move_df), expected_initial_size)
 
@@ -61,7 +61,11 @@ def test_begin_operation():
 
     operation_info = mem.begin_operation('operation')
 
-    assert_equal(operation_info, expected)
+    assert_equal(list(operation_info.keys()), list(expected.keys()))
+    assert_equal(operation_info['process'], expected['process'])
+    assert_almost_equal(operation_info['init'], expected['init'])
+    assert_almost_equal(operation_info['start'], expected['start'])
+    assert_equal(operation_info['name'], expected['name'])
 
 
 def test_end_operation():
@@ -76,7 +80,13 @@ def test_end_operation():
                 'time in seconds': last_operation_time_duration ,
                 'memory': mem.sizeof_fmt(last_operation_mem_usage)}
 
-    mem.end_operation(operation)
+    operation_info = mem.end_operation(operation)
+
+    assert_equal(list(operation_info.keys()), list(expected.keys()))
+    assert_equal(operation_info['name'], expected['name'])
+    assert_almost_equal(operation_info['time in seconds'],
+                        expected['time in seconds'])
+    assert_equal(operation_info['memory'], expected['memory'])
 
 
 def test_sizeof_fmt():
