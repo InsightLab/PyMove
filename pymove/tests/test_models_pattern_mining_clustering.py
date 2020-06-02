@@ -35,17 +35,12 @@ def test_elbow_method():
     expected = {
         1: 1.0136844999935954e-06,
         2: 6.238999999844088e-08,
-        3: 3.369214999908675e-08,
-        4: 1.1907583332727983e-08,
-        5: 6.543166665966019e-09,
-        6: 3.782833332644392e-09,
-        7: 1.622333333194155e-09,
-        8: 6.373333333646581e-10
+        3: 3.369214999908675e-08
     }
 
     inertia_dic = clustering.elbow_method(
         move_data=move_df[[LATITUDE, LONGITUDE]],
-        max_clusters=8,
+        max_clusters=3,
         random_state=42
     )
 
@@ -59,17 +54,12 @@ def test_gap_statistic():
     expected = {
         1: 14.337926129735244,
         2: 16.30937476102708,
-        3: 16.16313972395028,
-        4: 16.249093721757163,
-        5: 16.640441710184756,
-        6: 16.491353721841694,
-        7: 16.209353555462776,
-        8: 16.38330373030009
+        3: 16.16313972395028
     }
 
     inertia_dic = clustering.gap_statistic(
         move_data=move_df[[LATITUDE, LONGITUDE]],
-        max_clusters=8,
+        max_clusters=3,
         random_state=42
     )
 

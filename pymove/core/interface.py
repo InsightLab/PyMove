@@ -47,6 +47,10 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def rename(self):
+        pass
+
+    @abc.abstractmethod
     def len(self):
         pass
 
