@@ -1,11 +1,13 @@
-import folium
 import matplotlib
 import matplotlib.pyplot as plt
+import folium
 import numpy as np
+import pandas as pd
 from folium.plugins import FastMarkerCluster, HeatMap, MarkerCluster
 from pymove.utils.mapfolium import add_map_legend
 from pymove.utils import constants
-
+from pymove.preprocessing import filters
+from pymove.utils import distances
 from pymove.utils.constants import (
     COLORS,
     COUNT,
@@ -21,9 +23,8 @@ from pymove.utils.constants import (
     TILES,
     TRAJ_ID,
 )
-from pymove.utils.datetime import str_to_datetime
 
-trajutils_dic_labels = {"id":constants.TRAJ_ID, 'lat':constants.LATITUDE, 'lon':constants.LONGITUDE, 'datetime':constants.DATETIME}
+from pymove.utils.datetime import str_to_datetime
 
 def generate_color():
     """
@@ -34,7 +35,6 @@ def generate_color():
     Random HEX color
     """
     return COLORS[np.random.randint(0, len(COLORS))]
-
 
 def rgb(rgb_colors):
     """
@@ -86,7 +86,6 @@ def hex_rgb(rgb_colors):
     """
     return "#%02X%02X%02X" % rgb(rgb_colors)
 
-
 def cmap_hex_color(cmap, i):
     """
     Convert a Colormap to hex color.
@@ -103,14 +102,13 @@ def cmap_hex_color(cmap, i):
     String
         Represents corresponding hex string.
     """
-    return matplotlib.colors.rgb2hex(cmap(i))
-
+    return matplotlib.colors.rgb2hex(cmap(i))   
 
 def save_map(
     move_data, filename, tiles="OpenStreetMap", label_id=TRAJ_ID, cmap="tab20"
 ):
     """
-    Save a visualization in a map in a new file.
+    Save a visualization of a map in a new file.
 
     Parameters
     ----------
@@ -151,7 +149,6 @@ def save_map(
         folium.PolyLine(points_, weight=3, color=color_).add_to(map_)
     map_.save(filename)
 
-
 def save_wkt(move_data, filename, label_id=TRAJ_ID):
     """
     Save a visualization in a map in a new file .wkt.
@@ -182,149 +179,6 @@ def save_wkt(move_data, filename, label_id=TRAJ_ID):
     with open(filename, "w") as f:
         f.write(str_)
 
-
-def show_object_id_by_date(
-    move_data,
-    create_features=True,
-    kind=None,
-    figsize=(21, 9),
-    return_fig=True,
-    save_fig=True,
-    name="shot_points_by_date.png",
-):
-    """
-    Generates four visualizations based on datetime feature:
-
-        - Bar chart trajectories by day periods
-        - Bar chart trajectories day of the week
-        - Line chart trajectory by date
-        - Line chart of trajectory byhours of the day.
-
-    Parameters
-    ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    create_features : bool, optional, default True.
-        Represents whether or not to delete features created for viewing.
-    kind: list or None
-        Determines the kinds of each plot
-    figsize : tuple, optional, default (21,9).
-        Represents dimensions of figure.
-    return_fig : bool, optional, default True.
-        Represents whether or not to save the generated picture.
-    save_fig : bool, optional, default True.
-        Represents whether or not to save the generated picture.
-    name : String, optional, default 'shot_points_by_date.png'.
-        Represents name of a file.
-
-    Returns
-    -------
-    fig : matplotlib.pyplot.figure or None
-        The generated picture.
-    References
-    ----------
-    https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
-    """
-    if kind is None:
-        kind = ["bar", "bar", "line", "line"]
-
-    fig, ax = plt.subplots(2, 2, figsize=figsize)
-
-    move_data.generate_date_features()
-    move_data.generate_hour_features()
-    move_data.generate_time_of_day_features()
-    move_data.generate_day_of_the_week_features()
-
-    move_data.groupby([PERIOD])[TRAJ_ID].nunique().plot(
-        subplots=True, kind=kind[0], rot=0, ax=ax[0][0], fontsize=12
-    )
-    move_data.groupby([DAY])[TRAJ_ID].nunique().plot(
-        subplots=True, kind=kind[1], ax=ax[0][1], rot=0, fontsize=12
-    )
-    move_data.groupby([DATE])[TRAJ_ID].nunique().plot(
-        subplots=True,
-        kind=kind[2],
-        grid=True,
-        ax=ax[1][0],
-        rot=90,
-        fontsize=12,
-    )
-    move_data.groupby([HOUR])[TRAJ_ID].nunique().plot(
-        subplots=True, kind=kind[3], grid=True, ax=ax[1][1], fontsize=12
-    )
-
-    if not create_features:
-        move_data.drop(columns=[DATE, HOUR, PERIOD, DAY], inplace=True)
-
-    if save_fig:
-        plt.savefig(fname=name, fig=fig)
-
-    if return_fig:
-        return fig
-
-
-def show_lat_lon_gps(
-    move_data,
-    kind="scatter",
-    figsize=(21, 9),
-    plot_start_and_end=True,
-    return_fig=True,
-    save_fig=False,
-    name="show_gps_points.png",
-):
-    """
-    Generate a visualization with points [lat, lon] of dataset.
-
-    Parameters
-    ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    kind : String, optional, default 'scatter'.
-        Represents chart type_.
-    figsize : tuple, optional, default (21,9).
-        Represents dimensions of figure.
-    plot_start_and_end: boolean
-        Whether to highlight the start and end of the trajectory
-    return_fig : bool, optional, default True.
-        Represents whether or not to save the generated picture.
-    save_fig : bool, optional, default True.
-        Represents whether or not to save the generated picture.
-    name : String, optional, default 'show_gps_points.png'.
-        Represents name of a file.
-
-    Returns
-    -------
-    fig : matplotlib.pyplot.figure or None
-        The generated picture.
-    """
-    try:
-        if LATITUDE in move_data and LONGITUDE in move_data:
-            fig = move_data.drop_duplicates([LATITUDE, LONGITUDE]).plot(
-                kind=kind, x=LONGITUDE, y=LATITUDE, figsize=figsize
-            )
-
-            if plot_start_and_end:
-                plt.plot(
-                    move_data.iloc[0][LONGITUDE],
-                    move_data.iloc[0][LATITUDE],
-                    "yo",
-                    markersize=10,
-                )  # start point
-                plt.plot(
-                    move_data.iloc[-1][LONGITUDE],
-                    move_data.iloc[-1][LATITUDE],
-                    "yX",
-                    markersize=10,
-                )  # end point
-            if save_fig:
-                plt.savefig(name)
-
-            if return_fig:
-                return fig
-    except Exception as exception:
-        raise exception
-
-
 def create_base_map(default_location, tile=TILES[0], default_zoom_start=12):
     """
     Generate a folium map.
@@ -349,7 +203,6 @@ def create_base_map(default_location, tile=TILES[0], default_zoom_start=12):
         tiles=tile,
     )
     return base_map
-
 
 def heatmap(
     move_data,
@@ -431,8 +284,6 @@ def heatmap(
         base_map.save(outfile=filename)
     else:
         return base_map
-
-
 def cluster(
     move_data,
     n_rows=None,
@@ -512,7 +363,6 @@ def cluster(
     else:
         return base_map
 
-
 def faster_cluster(
     move_data,
     n_rows=None,
@@ -588,7 +438,6 @@ def faster_cluster(
         base_map.save(outfile=filename)
     else:
         return base_map
-
 
 def plot_markers(
     move_data,
@@ -684,7 +533,6 @@ def plot_markers(
         base_map.save(outfile=filename)
     else:
         return base_map
-
 
 def plot_trajectories_with_folium(
     move_data,
@@ -791,7 +639,6 @@ def plot_trajectories_with_folium(
     else:
         return base_map
 
-
 def plot_trajectory_by_id_with_folium(
     move_data,
     id_,
@@ -887,7 +734,6 @@ def plot_trajectory_by_id_with_folium(
         base_map.save(outfile=filename)
     else:
         return base_map
-
 
 def plot_trajectory_by_period(
     move_data,
@@ -1020,7 +866,6 @@ def plot_trajectory_by_period(
     else:
         return base_map
 
-
 def plot_trajectory_by_day_week(
     move_data,
     day_week,
@@ -1151,7 +996,6 @@ def plot_trajectory_by_day_week(
         base_map.save(outfile=filename)
     else:
         return base_map
-
 
 def plot_trajectory_by_date(
     move_data,
@@ -1296,7 +1140,6 @@ def plot_trajectory_by_date(
     else:
         return base_map
 
-
 def plot_trajectory_by_hour(
     move_data,
     start_hour,
@@ -1433,10 +1276,9 @@ def plot_trajectory_by_hour(
     else:
         return base_map
 
-
 def plot_stops(
     move_data,
-    radius=0,
+    radius=900,
     weight=3,
     id_=None,
     legend=True,
@@ -1597,7 +1439,7 @@ def add_traj_folium(df,
         sort:Boolean, optional, default False.
             If True the data will be sorted.
         folium_map: Folium map, optional, default None.
-            A folium map to plot the trajectories.
+            A folium map to plot the trajectories. If None a map will be created.
         slice_tags: optional, default None.
         tiles: string, optional, default 'OpenStreetMap'.
             The map type.
@@ -1697,7 +1539,6 @@ def add_traj_folium(df,
         plot_incial_end_points(list(df.iterrows()), folium_map)
 
         return folium_map
-
 def add_point_folium(df,
               dict_plot = constants.dict_plot,
               dict_labels = constants.dict_labels,
@@ -1717,7 +1558,7 @@ def add_point_folium(df,
         sort:Boolean, optional, default False.
             If True the data will be sorted.
         folium_map: Folium map, optional, default None.
-            A folium map to plot the trajectories.
+            A folium map to plot the trajectories. If None a map will be created.
         slice_tags: optional, default None.
         tiles: string, optional, default 'OpenStreetMap'.
             The map type.
@@ -1767,6 +1608,20 @@ def add_poi_folium(df,
               folium_map = None,
               slice_tags = None):
 
+        """
+        Receivies a MoveDataFrame and returns a folium map with poi points.
+
+        Parameters:
+        ----------
+        df: DataFrame
+            Trajectory input data
+        dict_plot: dictionary, optional, default pymove.utils.constants.dict_plot
+            folium plot paramenters.
+        dict_labels: dictionary, optional, default pymove.utils.constants.dict_labels
+        folium_map: Folium map, optional, default None.
+            A folium map to plot. If None a map. If None a map will be created.
+        """
+
         if not slice_tags:
             slice_tags = df.columns
     
@@ -1800,3 +1655,187 @@ def add_poi_folium(df,
         list(map(lambda x: circle_maker(x,folium_map), df.iterrows()))   
 
         return folium_map
+
+def add_event_folium(df,
+              dict_plot = constants.dict_plot,
+              dict_labels = constants.dict_labels,
+              folium_map = None,
+              slice_tags = None,
+              tiles='OpenStreetMap'):
+
+        """
+        Receivies a MoveDataFrame and returns a folium map with events.
+
+        Parameters:
+        ----------
+        df: DataFrame
+            Trajectory input data
+        dict_plot: dictionary, optional, default pymove.utils.constants.dict_plot
+            folium plot paramenters.
+        dict_labels: dictionary, optional, default pymove.utils.constants.dict_labels
+        folium_map: Folium map, optional, default None.
+            A folium map to plot. If None a map. If None a map will be created.
+        tiles: string, optional, default 'OpenStreetMap'
+
+        """
+        if not slice_tags:
+            slice_tags = df.columns
+    
+        # If not have a map a map is create with mean to lat and lon
+        if not folium_map:
+            initial_lat = df[ dict_labels['event_lat'] ].mean()
+            initial_lon = df[ dict_labels['event_lon'] ].mean()
+            folium_map = create_base_map([initial_lat, initial_lon], tile=tiles)
+        
+        def circle_maker(iter_tuple, map_):
+            
+            _,line = iter_tuple
+
+
+            x = line[dict_labels['event_lat']]
+            y = line[dict_labels['event_lon']]
+            
+            #tags_formated = str(line[slice_tags]).replace('\n','<br/>').replace('\s', ':\s')
+            tags_formated = formate_tags(line,slice_tags)
+            
+            folium.Circle(
+            radius=1,
+            location=[x, y],
+            tooltip=tags_formated,
+            color=dict_plot['event_point'],
+            fill=False
+            ).add_to(map_)
+
+            folium.Circle(
+            radius=dict_plot['radius'],
+            location=[x, y],
+            tooltip=tags_formated,
+            color=dict_plot['event_point'],
+            fill=False,
+            fill_color=dict_plot['event_point']
+            ).add_to(map_)
+
+
+        
+
+        list(map(lambda x: circle_maker(x,folium_map), df.iterrows()))   
+
+        return folium_map
+
+def show_trajs_with_event(df_tnz, 
+                        window_time_tnz,
+                        df_event,
+                       window_time_event,
+                       radius,
+                      dict_plot = constants.dict_plot,
+                      dict_labels = constants.dict_labels,
+                    slice_event_show = None, 
+                    slice_tnz_show = None):
+    """
+        Plot a trajectory, incluiding your tnz_points lat lon and your tags, and CVP
+    """
+        
+    #building structure for deltas
+    delta_event = pd.to_timedelta(window_time_event, unit='s')
+    delta_tnz = pd.to_timedelta(window_time_tnz, unit='s')
+    
+    #length of df_tnz
+    len_df_tnz = df_tnz.shape[0]
+        
+    #building structure for lat and lon array
+    lat_arr = np.zeros(len_df_tnz)
+    lon_arr = np.zeros(len_df_tnz)
+    
+    #folium map list
+    folium_maps = []
+    
+    #for each cvp in df_cvp
+    for _, line in df_event.iterrows():
+        
+        event_lat = line[dict_labels['event_lat']]
+        
+        event_lon = line[dict_labels['event_lon']]
+        
+        event_datetime = line[dict_labels['event_datetime']]
+        
+        event_id = line[dict_labels['event_id']]
+                
+        #building time window for cvp search
+        start_time = pd.to_datetime(event_datetime - delta_event)
+        end_time = pd.to_datetime(event_datetime + delta_event)
+        
+        #filtering df_tnz for time window
+        df_filted=pd.DataFrame(filters.by_datetime(df_tnz,
+                                     start_datetime = start_time,
+                                     end_datetime=end_time))
+        
+        #length of df_temp
+        len_df_temp = df_filted.shape[0]
+        
+        #using the util part of the array for haversine function
+        lat_arr[:len_df_temp] = event_lat
+        lon_arr[:len_df_temp] = event_lon
+        
+        #building distances to cvp column
+        df_filted['distances'] = distances.haversine(lat_arr[:len_df_temp],
+                                         lon_arr[:len_df_temp], 
+                                         df_filted[dict_labels['tnz_lat']],
+                                         df_filted[dict_labels['tnz_lon']])
+        
+        #building nearby column
+        df_filted['nearby'] = df_filted['distances'].map(lambda x: (x<=radius))
+        
+        #if any data for df_tnz in cvp time window is True
+        if df_filted['nearby'].any():
+            
+            #buildng the df for the first tnz_points of tnz in nearby cvp
+            df_begin = df_filted[df_filted['nearby'] == True].sort_values(dict_labels['tnz_datetime'])
+            
+            #making the folium map
+            #folium_map = create_folium_map([df_begin[dict_labels['tnz_lat']].mean(),
+            #                                   df_begin[dict_labels['tnz_lon']].mean()])
+            
+            #plot cvp in map
+
+            df_ = df_event[df_event[dict_labels['event_id']] == event_id]
+            
+            folium_map = add_event_folium(df_, 
+            dict_plot=dict_plot, 
+            dict_labels=dict_labels, 
+            slice_tags=slice_event_show)
+        
+            #keep only the first tnz_point nearby to cvp for each tnz
+            df_begin.drop_duplicates(subset=[dict_labels['tnz_id'],'nearby'], inplace=True)
+            
+            #for each tnz nearby to cvp
+            tnzs = []
+            for time_tnz, id_tnz in zip(df_begin[dict_labels['tnz_datetime']], 
+                                            df_begin[dict_labels['tnz_id']]):
+                
+                #making the time window for tnz
+                start_time = pd.to_datetime(time_tnz - delta_tnz)
+                end_time = pd.to_datetime(time_tnz + delta_tnz)
+
+                #building the df for one id
+                df_id = df_tnz[df_tnz[dict_labels['tnz_id']] == id_tnz]
+
+                #filtering df_id for time window
+                df_temp = pd.DataFrame(trajutils.filter_by_datetime(df_id,
+                                         dic_labels = dict_labels,
+                                         startDatetime = start_time,
+                                         endDatetime=end_time))
+                
+                tnzs.append(df_temp)
+                #add to folium map created
+                add_traj_folium(df_temp, 
+                          dict_labels=dict_labels, 
+                          dict_plot=dict_plot,
+                        folium_map=folium_map,
+                        slice_tags=slice_tnz_show, 
+                        sort=True)
+            
+            #add to folium maps list: (id cvp, folium map, quantity of tnz in map, df)  
+            folium_maps.append( (folium_map, pd.concat(tnzs)) )
+
+    return folium_maps
+

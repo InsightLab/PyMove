@@ -88,3 +88,30 @@ TILES = [
     "CartoDB positron",
     "CartoDB dark_matter",
 ]
+
+dict_labels = {'tnz_id':'id',
+             'tnz_lat':'lat',
+             'tnz_lon':'lon',
+             'tnz_datetime':'datetime',
+             
+             'event_id':'id',
+             'event_lat':'lat',
+             'event_lon':'lon',
+             'event_datetime':'datetime',
+
+             'poi_id':'Nome do Local',
+             'poi_lat':'lat',
+             'poi_lon':'lon',
+             
+             'lat': 'lat',
+             'lon': 'lon',
+             'datetime': 'datetime',
+             'id': 'id'}
+
+dict_plot = {'radius': 150, 
+            'event_point':'purple',
+            'tnz_point':'orange', 
+            'poi_point':'red',
+            'line':'blue', 
+            'start':'green', 
+            'end':'red'}
