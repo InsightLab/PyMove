@@ -17,5 +17,7 @@ from .core.dataframe import DaskMoveDataFrame
 from .core import grid
 from .models.pattern_mining import clustering
 from .visualization import visualization
+from .visualization import matplotlib
+from .visualization import folium
 
 from ._version import __version__
