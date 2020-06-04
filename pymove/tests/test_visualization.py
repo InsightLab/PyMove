@@ -133,8 +133,8 @@ def test_show_object_id_by_date(tmpdir):
                    0.0001,
                    in_decorator=False)
 
-    assert(DATE not in move_df)
     assert(HOUR not in move_df)
+    assert(DATE not in move_df)
     assert(PERIOD not in move_df)
     assert(DAY not in move_df)
 
