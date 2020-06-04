@@ -128,7 +128,7 @@ def test_show_object_id_by_date(tmpdir):
                                          create_features=False,
                                          name=filename_write_default)
 
-    compare_images('test_images/shot_points_by_date.png',
+    compare_images('shot_points_by_date.png',
                    filename_write_default,
                    0.0001,
                    in_decorator=False)
