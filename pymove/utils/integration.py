@@ -7,17 +7,14 @@ from pymove.utils.log import log_progress
 from pymove.utils.distances import haversine
 
 from pymove import preprocessing
-from pymove import utils as ut
 
-from constants import (
+from pymove.utils.constants import (
     LATITUDE,
     LONGITUDE,
     ID_POI,
     DIST_POI,
     TYPE_POI
 )
-
-
 
 def union_poi_bank(df_, label_poi='type_poi'):
     
@@ -299,10 +296,8 @@ def join_with_pois_optimizer(
         Label of df_pois referring to the Point of Interest type.
 
     dist_poi : List
-        List containing the minimum distance limit between each
-        type of point of interest and each point of the 
-        trajectory to classify the point of interest closest to 
-        each point of the trajectory.
+        List containing the minimum distance limit between each type of point of interest and each point of the 
+        trajectory to classify the point of interest closest to each point of the trajectory.
 
     reset_index : Boolean, optional(True by default)
         Flag for reset index of the df_pois and df_ dataframes before the join.
@@ -329,14 +324,14 @@ def join_with_pois_optimizer(
             minimum_distances = np.full(
                 df_.shape[0], np.Infinity, dtype=np.float64
             )
-            shape_POIs = df_pois.shape[0]
+            shape_pois = df_pois.shape[0]
 
             lat_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
             lon_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
             
             df_pois.rename(columns={label_poi_id:'id',label_poi_type:'type_poi'}, inplace=True)
             
-            for row in tqdm(df_pois.itertuples(), total=shape_POIs):   
+            for row in tqdm(df_pois.itertuples(), total=shape_pois):   
 
                 idx = row.Index
                 # update lat and lot of current index
@@ -415,10 +410,6 @@ def join_with_pois_by_category(
     label_id : String, optional("id" by default)
         Label of df_pois referring to the point of interest id.
 
-    dist_poi : List, optional("[10]" by default)
-        List containing the distance limit to classify the most nearest
-        point of interest of each trajectory point.
-
     Returns
     -------
     """
@@ -479,9 +470,7 @@ def join_with_pois_by_category(
             df_['id_' + c] = ids_POIs
             df_['dist_' + c] = current_distances
         print('Integration with POI was finalized')
-        print(
-            '\nTotal Time: {:.2f} seconds'.format((time.time() - start_time))
-        )
+        print('\nTotal Time: {:.2f} seconds'.format(time.time() - start_time))
 
     except Exception as e:
         print('id: {}\n'.format(idx))
@@ -765,7 +754,7 @@ def join_with_home_by_id(
                 lon_user = df_.at[idx, LONGITUDE]
 
                 # if user has a single tuple
-                if type(lat_user) is not np.ndarray:
+                if not isinstance(lat_user, np.ndarray):
                     df_.at[idx, 'dist_home'] = haversine(
                         lat_user, lon_user, home[LATITUDE], home[LONGITUDE]
                     )
@@ -838,7 +827,7 @@ def merge_home_with_poi(
         df_.loc[idx, label_type_poi] = 'home'
         df_.loc[idx, label_dist_poi] = df_.loc[idx, 'dist_home']
         df_.loc[idx, label_id_poi] = df_.loc[idx, 'Home']
-        if drop_colums:
+        if drop_columns:
             del df_['Home'], df_['dist_home']
     except Exception as e:
         raise e
