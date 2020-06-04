@@ -131,7 +131,7 @@ def test_show_object_id_by_date(tmpdir):
     # print(file_write_default)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(test_dir, 'baseline\shot_points_by_date.png')
+    data_dir = os.path.join(test_dir, 'baseline/shot_points_by_date.png')
 
     print(data_dir)
 
