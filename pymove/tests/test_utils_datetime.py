@@ -126,13 +126,17 @@ def test_now_str():
 
 def test_deltatime_str():
 
-    expected = '00:18:02.718'
+    expected = '05.03s'
+    actual = datetime.deltatime_str(5.03)
+    assert expected == actual
 
-    data = 1082.7180936336517
+    expected = '18m:35.00s'
+    actual = datetime.deltatime_str(1115)
+    assert expected == actual
 
-    converted_date = datetime.deltatime_str(data)
-
-    assert(converted_date == expected)
+    expected = '03h:05m:15.00s'
+    actual = datetime.deltatime_str(11115)
+    assert expected == actual
 
 
 def test_timestamp_to_millis():
@@ -161,8 +165,6 @@ def test_time_to_str():
 
     expected = '12:08:07'
 
-    data = default_date_time
-
     time = datetime.time_to_str(default_date_time)
 
     assert(time == expected)
@@ -170,14 +172,12 @@ def test_time_to_str():
 
 def test_elapsed_time_dt():
 
+    data = default_date_time
     expected = datetime.diff_time(default_date_time,
                                   dt.datetime.now())
-
-    data = default_date_time
-
     elapsed_time = datetime.elapsed_time_dt(data)
 
-    assert(elapsed_time == expected)
+    assert abs(elapsed_time - expected) <= 5
 
 
 def test_diff_time():

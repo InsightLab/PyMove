@@ -1,5 +1,3 @@
-import time
-
 import numpy as np
 
 from pymove.preprocessing import filters, segmentation, stay_point_detection
@@ -15,9 +13,10 @@ from pymove.utils.constants import (
     TIME_TO_PREV,
     TRAJ_ID,
 )
+from pymove.utils.log import timer_decorator
 
 
-def _end_create_operation(move_data, new_label, start_time, inplace):
+def _end_create_operation(move_data, new_label, inplace):
     """
     Returns the dataframe after create operation
 
@@ -25,8 +24,6 @@ def _end_create_operation(move_data, new_label, start_time, inplace):
         The input trajectories data.
     new_label: string
         The name of the new feature with detected deactivated signals.
-    start_time: float
-        Time when the operation started
     inplace : boolean
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned.
@@ -39,15 +36,12 @@ def _end_create_operation(move_data, new_label, start_time, inplace):
     """
 
     print(move_data[new_label].value_counts())
-    print('\nTotal Time: %.2f seconds' % (time.time() - start_time))
-    print('-----------------------------------------------------\n')
-
     if not inplace:
         return move_data
 
 
 def _process_simple_filter(
-        move_data, new_label, feature, value, start_time, inplace
+        move_data, new_label, feature, value, inplace
 ):
     """
     Processes create operation with simple filter
@@ -60,8 +54,6 @@ def _process_simple_filter(
         Feature column to compare
     value: float
         Value to compare feature
-    start_time: float
-        Time when the operation started
     inplace : boolean
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned.
@@ -81,10 +73,11 @@ def _process_simple_filter(
     move_data.at[idx, new_label] = True
 
     return _end_create_operation(
-        move_data, new_label, start_time, inplace
+        move_data, new_label, inplace
     )
 
 
+@timer_decorator
 def create_or_update_out_of_the_bbox(
         move_data, bbox, new_label=OUT_BBOX, inplace=True
 ):
@@ -117,7 +110,6 @@ def create_or_update_out_of_the_bbox(
             move_data = move_data[:]
 
         print('\nCreate or update boolean feature to detect points out of the bbox')
-        start_time = time.time()
         filtered_ = filters.by_bbox(move_data, bbox, filter_out=True)
 
         print('...Creating a new label named as %s' % new_label)
@@ -127,12 +119,13 @@ def create_or_update_out_of_the_bbox(
             move_data.at[filtered_.index, new_label] = True
 
         return _end_create_operation(
-            move_data, new_label, start_time, inplace
+            move_data, new_label, inplace
         )
     except Exception as e:
         raise e
 
 
+@timer_decorator
 def create_or_update_gps_deactivated_signal(
         move_data,
         max_time_between_adj_points=7200,
@@ -167,7 +160,6 @@ def create_or_update_gps_deactivated_signal(
         if not inplace:
             move_data = move_data[:]
 
-        start_time = time.time()
         message = 'Create or update deactivated signal if time max > %srs seconds\n'
         print(message % max_time_between_adj_points)
         move_data.generate_time_features()
@@ -177,13 +169,13 @@ def create_or_update_gps_deactivated_signal(
             new_label,
             TIME_TO_PREV,
             max_time_between_adj_points,
-            start_time,
             inplace
         )
     except Exception as e:
         raise e
 
 
+@timer_decorator
 def create_or_update_gps_jump(
         move_data,
         max_dist_between_adj_points=3000,
@@ -217,7 +209,6 @@ def create_or_update_gps_jump(
         if not inplace:
             move_data = move_data[:]
 
-        start_time = time.time()
         message = 'Create or update jump if dist max > %srs meters\n'
         print(message % max_dist_between_adj_points)
         move_data.generate_dist_features()
@@ -227,13 +218,13 @@ def create_or_update_gps_jump(
             new_label,
             DIST_TO_PREV,
             max_dist_between_adj_points,
-            start_time,
             inplace
         )
     except Exception as e:
         raise e
 
 
+@timer_decorator
 def create_or_update_short_trajectory(
         move_data,
         max_dist_between_adj_points=3000,
@@ -280,7 +271,6 @@ def create_or_update_short_trajectory(
             move_data = move_data[:]
 
         print('\nCreate or update short trajectories...')
-        start_time = time.time()
 
         segmentation.by_dist_time_speed(
             move_data,
@@ -297,12 +287,13 @@ def create_or_update_short_trajectory(
         move_data.loc[move_data[label_tid].isin(idx), new_label] = True
 
         return _end_create_operation(
-            move_data, new_label, start_time, inplace
+            move_data, new_label, inplace
         )
     except Exception as e:
         raise e
 
 
+@timer_decorator
 def create_or_update_gps_block_signal(
         move_data,
         max_time_stop=7200,
@@ -343,7 +334,6 @@ def create_or_update_gps_block_signal(
 
         message = 'Create or update block_signal if max time stop > %srs seconds\n'
         print(message % max_time_stop)
-        start_time = time.time()
         segmentation.by_max_dist(
             move_data, max_dist_between_adj_points=0.0, label_new_tid=label_tid
         )
@@ -360,12 +350,13 @@ def create_or_update_gps_block_signal(
         move_data.loc[move_data[label_tid].isin(idx), new_label] = True
 
         return _end_create_operation(
-            move_data, new_label, start_time, inplace
+            move_data, new_label, inplace
         )
     except Exception as e:
         raise e
 
 
+@timer_decorator
 def filter_block_signal_by_repeated_amount_of_points(
         move_data,
         amount_max_of_points_stop=30.0,
@@ -429,6 +420,7 @@ def filter_block_signal_by_repeated_amount_of_points(
         raise e
 
 
+@timer_decorator
 def filter_block_signal_by_time(
         move_data,
         max_time_stop=7200,
@@ -491,6 +483,7 @@ def filter_block_signal_by_time(
         raise e
 
 
+@timer_decorator
 def filter_longer_time_to_stop_segment_by_id(
         move_data,
         dist_radius=30,
