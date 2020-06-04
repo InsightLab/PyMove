@@ -128,7 +128,14 @@ def test_show_object_id_by_date(tmpdir):
                                          create_features=False,
                                          name=filename_write_default)
 
-    compare_images(filename_write_default,
+    # print(file_write_default)
+
+    test_dir = os.path.abspath(os.path.dirname(__file__))
+    data_dir = os.path.join(test_dir, 'baseline\shot_points_by_date.png')
+
+    print(data_dir)
+
+    compare_images(data_dir,
                    filename_write_default,
                    0.0001,
                    in_decorator=False)
