@@ -5,6 +5,10 @@ TRAJ_ID = 'id'
 TID = 'tid'
 UID = 'user_id'
 
+ID_POI = 'id_poi'
+DIST_POI = 'dist_poi'
+TYPE_POI = 'type_poi'
+
 HOUR = 'hour'
 HOUR_SIN = 'hour_sin'
 HOUR_COS = 'hour_cos'
