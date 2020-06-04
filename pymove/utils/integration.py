@@ -9,7 +9,7 @@ from pymove.utils.distances import haversine
 from pymove import preprocessing
 from pymove import utils as ut
 
-from pymove.utils.constants import (
+from constants import (
     LATITUDE,
     LONGITUDE,
     ID_POI,
@@ -271,8 +271,8 @@ def join_with_pois(
 def join_with_pois_optimizer(
     df_,
     df_pois,
-    label_poi='POI',
-    label_poi_name='name',
+    label_poi_id='id',
+    label_poi_type='type_poi',
     dist_poi=None,
     reset_index=True,
 ):
@@ -292,12 +292,17 @@ def join_with_pois_optimizer(
     df_pois : dataframe
         The input point of interest data.
 
-    label_poi : String, optional("POI" by default)
-        Label of df_pois referring to the Point of Interest name.
+    label_poi_id : String, optional("name" by default)
+        Label of df_pois referring to the Point of Interest id.
+    
+    label_poi_type : String, optional("POI" by default)
+        Label of df_pois referring to the Point of Interest type.
 
     dist_poi : List
-        List containing the distance limit to classify the most nearest point of
-        interest of each trajectory point.
+        List containing the minimum distance limit between each
+        type of point of interest and each point of the 
+        trajectory to classify the point of interest closest to 
+        each point of the trajectory.
 
     reset_index : Boolean, optional(True by default)
         Flag for reset index of the df_pois and df_ dataframes before the join.
@@ -306,13 +311,11 @@ def join_with_pois_optimizer(
     -------
     """
 
-    if dist_poi is None:
-        dist_poi = [10]
     try:
-        print('Integration with POIs...')
+        print('Integration with POIs optimized...')
         start_time = time.time()
 
-        if df_pois[label_poi].unique() == len(dist_poi):
+        if len(df_pois[label_poi_type].unique()) == len(dist_poi):
             # get a vector with windows time to each point
             if reset_index:
                 print('... reseting and dropping index')
@@ -331,9 +334,9 @@ def join_with_pois_optimizer(
             lat_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
             lon_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
             
-            df_pois.rename(columns={label_poi_name:'name',label_poi:'POI'}, inplace=True)
+            df_pois.rename(columns={label_poi_id:'id',label_poi_type:'type_poi'}, inplace=True)
             
-            for row in log_progress(df_pois.itertuples()):   
+            for row in tqdm(df_pois.itertuples(), total=shape_POIs):   
 
                 idx = row.Index
                 # update lat and lot of current index
@@ -350,8 +353,8 @@ def join_with_pois_optimizer(
                             df_[LONGITUDE].to_numpy(dtype=np.float64),
                         )
                     )
-                    ids_POIs.fill(row.name)
-                    tag_POIs.fill(row.POI)
+                    ids_POIs.fill(row.id)
+                    tag_POIs.fill(row.type_poi)
                 else:
                     # calcule dist between a POI and ALL tnz
                     current_distances = np.float64(
@@ -369,8 +372,8 @@ def join_with_pois_optimizer(
                     )
 
                     if index_True.shape[0] > 0:
-                        ids_POIs[index_True] = row.name
-                        tag_POIs[index_True] = row.POI
+                        ids_POIs[index_True] = row.id
+                        tag_POIs[index_True] = row.type_poi
 
             df_[ID_POI] = ids_POIs
             df_[DIST_POI] = minimum_distances
@@ -382,7 +385,7 @@ def join_with_pois_optimizer(
                 )
             )
         else:
-            print('the size of the  dist_poi is different from ')
+            print('the size of the dist_poi is different from ')
     except Exception as e:
         print('id: {}\n'.format(idx))
         raise e
