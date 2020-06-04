@@ -1,5 +1,3 @@
-import time
-
 import numpy as np
 
 from pymove.preprocessing.segmentation import by_max_dist
@@ -15,9 +13,10 @@ from pymove.utils.constants import (
     TIME_TO_PREV,
     TRAJ_ID,
 )
+from pymove.utils.log import timer_decorator
 
 
-def create_update_datetime_in_format_cyclical(
+def create_or_update_datetime_in_format_cyclical(
     move_data, label_datetime=DATETIME, inplace=True
 ):
     """
@@ -66,6 +65,7 @@ def create_update_datetime_in_format_cyclical(
         raise e
 
 
+@timer_decorator
 def create_or_update_move_stop_by_dist_time(
         move_data,
         dist_radius=30,
@@ -108,7 +108,6 @@ def create_or_update_move_stop_by_dist_time(
     """
 
     try:
-        start_time = time.time()
 
         if not inplace:
             move_df = move_data[:]
@@ -143,11 +142,6 @@ def create_or_update_move_stop_by_dist_time(
         ].index
         move_df.at[idx, STOP] = True
         print(move_df[STOP].value_counts())
-        print(
-            '\nTotal Time: %.2f seconds'
-            % (time.time() - start_time)
-        )
-        print('-----------------------------------------------------\n')
 
         if not inplace:
             return move_df
@@ -155,7 +149,8 @@ def create_or_update_move_stop_by_dist_time(
         raise e
 
 
-def create_update_move_and_stop_by_radius(
+@timer_decorator
+def create_or_update_move_and_stop_by_radius(
     move_data,
     radius=0,
     target_label=DIST_TO_PREV,

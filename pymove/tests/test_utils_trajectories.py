@@ -3,6 +3,7 @@ from collections import defaultdict
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_equal
+from pandas import DataFrame
 from pandas.testing import assert_frame_equal
 
 from pymove import DaskMoveDataFrame, MoveDataFrame, PandasMoveDataFrame, trajectories
@@ -68,13 +69,36 @@ def test_read_csv(tmpdir):
 
 def test_format_labels():
 
-    expected = {'col1': 'id',
-                'col3': 'lon',
-                'col2': 'lat',
-                'col4': 'datetime'}
+    expected = {
+        'col1': 'id',
+        'col3': 'lon',
+        'col2': 'lat',
+        'col4': 'datetime'
+    }
     labels = trajectories.format_labels('col1', 'col2', 'col3', 'col4')
 
     assert_equal(labels, expected)
+
+
+def test_flatten_dict():
+    d = {'a': 1, 'b': {'c': 2, 'd': 3}}
+    expected = {'a': 1, 'b_c': 2, 'b_d': 3}
+    actual = trajectories.flatten_dict(d)
+    assert_equal(actual, expected)
+
+
+def test_flatten_columns():
+    d = {'a': 1, 'b': {'c': 2, 'd': 3}}
+    df = DataFrame({'col1': [0], 'col2': [d]})
+    expected = DataFrame({
+        'col1': [0],
+        'col2_a': [1],
+        'col2_b_c': [2],
+        'col2_b_d': [3],
+    })
+    actual = trajectories.flatten_columns(df, ['col2'])
+    actual = actual[sorted(actual.columns)]
+    assert_frame_equal(actual, expected)
 
 
 def test_shift():
