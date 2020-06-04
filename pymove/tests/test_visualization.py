@@ -113,23 +113,23 @@ def test_save_wkt(tmpdir):
     assert_equal(map_info, expected)
 
 
-def test_show_object_id_by_date(tmpdir):
+def test_show_object_id_by_date():
 
     move_df = _default_move_df()
 
-    d = tmpdir.mkdir('prepossessing')
+    '''d = tmpdir.mkdir('prepossessing')
 
     file_write_default = d.join('shot_points_by_date.png')
     filename_write_default = os.path.join(
         file_write_default.dirname, file_write_default.basename
-    )
+    )'''
 
     visualization.show_object_id_by_date(move_data=move_df,
                                          create_features=False,
-                                         name=filename_write_default)
+                                         name='shot_points_by_date.png')
 
     compare_images('./baseline/shot_points_by_date.png',
-                   filename_write_default,
+                   'shot_points_by_date.png',
                    0.0001,
                    in_decorator=False)
 
@@ -140,7 +140,7 @@ def test_show_object_id_by_date(tmpdir):
 
     visualization.show_object_id_by_date(move_data=move_df,
                                          create_features=True,
-                                         name=filename_write_default)
+                                         name='shot_points_by_date.png')
 
     assert(DATE in move_df)
     assert(HOUR in move_df)
