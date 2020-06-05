@@ -1,16 +1,30 @@
-import time
-
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
-from pymove import preprocessing
-from pymove.utils.constants import DIST_POI, ID_POI, LATITUDE, LONGITUDE, TYPE_POI
+from pymove.preprocessing import filters
+from pymove.utils.constants import (
+    ADDRESS,
+    CITY,
+    DATETIME,
+    DIST_EVENT,
+    DIST_HOME,
+    DIST_POI,
+    EVENT_ID,
+    EVENT_TYPE,
+    GEOMETRY,
+    HOME,
+    ID_POI,
+    LATITUDE,
+    LONGITUDE,
+    POI,
+    TRAJ_ID,
+    TYPE_POI,
+)
 from pymove.utils.distances import haversine
-from pymove.utils.log import log_progress
+from pymove.utils.log import progress_bar
 
 
-def union_poi_bank(df_, label_poi='type_poi'):
+def union_poi_bank(df_, label_poi=TYPE_POI):
     """
     Performs the union between the different bank categories
     for Points of Interest in a single category named 'banks'.
@@ -38,7 +52,7 @@ def union_poi_bank(df_, label_poi='type_poi'):
     df_.at[df_[filter_bank].index, label_poi] = 'banks'
 
 
-def union_poi_bus_station(df_, label_poi='type_poi'):
+def union_poi_bus_station(df_, label_poi=TYPE_POI):
     """
     Performs the union between the different bus station categories
     for Points of Interest in a single category named 'bus_station'.
@@ -60,7 +74,7 @@ def union_poi_bus_station(df_, label_poi='type_poi'):
     df_.at[df_[filter_bus_station].index, label_poi] = 'bus_station'
 
 
-def union_poi_bar_restaurant(df_, label_poi='type_poi'):
+def union_poi_bar_restaurant(df_, label_poi=TYPE_POI):
     """
     Performs the union between bar and restaurant categories
     for Points of Interest in a single category named 'bar-restaurant'.
@@ -80,7 +94,7 @@ def union_poi_bar_restaurant(df_, label_poi='type_poi'):
     df_.at[df_[filter_bar_restaurant].index, label_poi] = 'bar-restaurant'
 
 
-def union_poi_parks(df_, label_poi='type_poi'):
+def union_poi_parks(df_, label_poi=TYPE_POI):
     """
     Performs the union between park categories
     for Points of Interest in a single category named 'parks'.
@@ -100,7 +114,7 @@ def union_poi_parks(df_, label_poi='type_poi'):
     df_.at[df_[filter_parks].index, label_poi] = 'parks'
 
 
-def union_poi_police(df_, label_poi='type_poi'):
+def union_poi_police(df_, label_poi=TYPE_POI):
     """
     Performs the union between police categories
     for Points of Interest in a single category named 'police'.
@@ -120,10 +134,10 @@ def union_poi_police(df_, label_poi='type_poi'):
     df_.at[df_[filter_police].index, label_poi] = 'police'
 
 
-def join_coletive_areas(gdf_, gdf_rules_, label_geometry='geometry'):
+def join_coletive_areas(gdf_, gdf_rules_, label_geometry=GEOMETRY):
     """
     It performs the integration between trajectories and collective
-    areas, generating a new column that informs if the point of the
+    areas, generating a new columnn that informs if the point of the
     trajectory is inserted in a collective area.
 
     Parameters
@@ -139,17 +153,17 @@ def join_coletive_areas(gdf_, gdf_rules_, label_geometry='geometry'):
 
     """
 
-    print('Integration between trajectories and coletives areas')
+    print('Integration between trajectories and collectives areas')
 
     polygons = gdf_rules_[label_geometry].unique()
     gdf_['violation'] = False
-    for p in log_progress(polygons):
+    for p in progress_bar(polygons):
         index = gdf_[gdf_[label_geometry].intersects(p)].index
         gdf_.at[index, 'violation'] = True
 
 
 def join_with_pois(
-    df_, df_pois, label_id='id', label_poi='POI', reset_index=True
+    df_, df_pois, label_id=TRAJ_ID, label_poi=POI, reset_index=True
 ):
     """
     Performs the integration between trajectories and points
@@ -178,15 +192,14 @@ def join_with_pois(
 
     try:
         print('Integration with POIs...')
-        start_time = time.time()
 
         # get a vector with windows time to each point
         if reset_index:
-            print('... Reseting index to operation...')
+            print('... Resetting index to operation...')
             df_.reset_index(drop=True, inplace=True)
             df_pois.reset_index(drop=True, inplace=True)
 
-        # create numpy array to store new colum to dataframe of movement objects
+        # create numpy array to store new column to dataframe of movement objects
         current_distances = np.full(
             df_.shape[0], np.Infinity, dtype=np.float32
         )
@@ -197,15 +210,15 @@ def join_with_pois(
         lat_user = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
         lon_user = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
 
-        for row in tqdm(df_[[LATITUDE, LONGITUDE]].itertuples(), total=df_.shape[0]):
+        for row in progress_bar(df_[[LATITUDE, LONGITUDE]].iterrows()):
             # get lat and lon to each id
-            idx = row.Index
+            idx = row.index
 
             # create a vector to each lat
-            lat_user.fill(row.lat)
-            lon_user.fill(row.lon)
+            lat_user.fill(row[LATITUDE])
+            lon_user.fill(row[LONGITUDE])
 
-            # calculing distances to idx
+            # computing distances to idx
             distances = np.float64(
                 haversine(
                     lat_user,
@@ -228,10 +241,6 @@ def join_with_pois(
         df_[TYPE_POI] = tag_POIs
 
         print('Integration with POI was finalized')
-        print(
-            '\nTotal Time: {:.2f} seconds'.format((time.time() - start_time))
-        )
-
     except Exception as e:
         print('id: {}\n'.format(idx))
         raise e
@@ -240,8 +249,8 @@ def join_with_pois(
 def join_with_pois_optimizer(
     df_,
     df_pois,
-    label_poi_id='id',
-    label_poi_type='type_poi',
+    label_poi_id=TRAJ_ID,
+    label_poi_type=TYPE_POI,
     dist_poi=None,
     reset_index=True,
 ):
@@ -278,37 +287,35 @@ def join_with_pois_optimizer(
 
     try:
         print('Integration with POIs optimized...')
-        start_time = time.time()
 
         if len(df_pois[label_poi_type].unique()) == len(dist_poi):
             # get a vector with windows time to each point
             if reset_index:
-                print('... reseting and dropping index')
+                print('... Resetting and dropping index')
                 df_.reset_index(drop=True, inplace=True)
                 df_pois.reset_index(drop=True, inplace=True)
 
-            # create numpy array to store new colum to dataframe of movement objects
+            # create numpy array to store new column to dataframe of movement objects
             ids_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
             tag_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
 
             minimum_distances = np.full(
                 df_.shape[0], np.Infinity, dtype=np.float64
             )
-            shape_pois = df_pois.shape[0]
-
             lat_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
             lon_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
 
             df_pois.rename(
-                columns={label_poi_id: 'id', label_poi_type: 'type_poi'}, inplace=True
+                columns={label_poi_id: TRAJ_ID, label_poi_type: TYPE_POI},
+                inplace=True
             )
 
-            for row in tqdm(df_pois.itertuples(), total=shape_pois):
+            for row in progress_bar(df_pois.iterrows()):
 
-                idx = row.Index
+                idx = row.index
                 # update lat and lot of current index
-                lat_POI.fill(row.lat)
-                lon_POI.fill(row.lon)
+                lat_POI.fill(row[LATITUDE])
+                lon_POI.fill(row[LONGITUDE])
 
                 # First iteration is minimum distances
                 if idx == 0:
@@ -346,11 +353,6 @@ def join_with_pois_optimizer(
             df_[DIST_POI] = minimum_distances
             df_[TYPE_POI] = tag_POIs
             print('Integration with POI was finalized')
-            print(
-                '\nTotal Time: {:.2f} seconds'.format(
-                    (time.time() - start_time)
-                )
-            )
         else:
             print('the size of the dist_poi is different from ')
     except Exception as e:
@@ -359,7 +361,7 @@ def join_with_pois_optimizer(
 
 
 def join_with_pois_by_category(
-    df_, df_pois, label_category='POI', label_id='id'
+    df_, df_pois, label_category=POI, label_id=TRAJ_ID
 ):
     """
     It performs the integration between trajectories and points
@@ -385,43 +387,39 @@ def join_with_pois_by_category(
 
     try:
         print('Integration with POIs...')
-        start_time = time.time()
 
         # get a vector with windows time to each point
         df_.reset_index(drop=True, inplace=True)
         df_pois.reset_index(drop=True, inplace=True)
 
-        # create numpy array to store new colum to dataframe of movement objects
+        # create numpy array to store new column to dataframe of movement objects
         current_distances = np.full(
             df_.shape[0], np.Infinity, dtype=np.float64
         )
         ids_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
 
         size_categories = df_pois[label_category].unique()
-        print(
-            'There are {} categories =============== '.format(
-                len(size_categories)
-            )
-        )
+        print('There are %s categories' % len(size_categories))
 
         for c in size_categories:
-            print('Calculating dist to category: {} =============== '.format(c))
+            print(
+                'Calculating dist to category: %s' % c,
+                flush=True
+            )
             # creating lat and lon array to operation
             df_category = df_pois[df_pois[label_category] == c]
             df_category.reset_index(drop=True, inplace=True)
 
-            for row in tqdm(
-                df_[[LATITUDE, LONGITUDE]].itertuples(), total=df_.shape[0]
-            ):
-                idx = row.Index
+            for row in progress_bar(df_[[LATITUDE, LONGITUDE]].iterrows()):
+                idx = row.index
                 lat_user = np.full(
-                    df_category.shape[0], row.lat, dtype=np.float64
+                    df_category.shape[0], row[LATITUDE], dtype=np.float64
                 )
                 lon_user = np.full(
-                    df_category.shape[0], row.lon, dtype=np.float64
+                    df_category.shape[0], row[LONGITUDE], dtype=np.float64
                 )
 
-                # calculing distances to
+                # computing distances to
                 distances = haversine(
                     lat_user,
                     lon_user,
@@ -436,10 +434,9 @@ def join_with_pois_by_category(
                 current_distances[idx] = np.min(distances)
                 ids_POIs[idx] = df_category.at[index_min, label_id]
 
-            df_['id_' + c] = ids_POIs
-            df_['dist_' + c] = current_distances
+            df_['id_%s' % c] = ids_POIs
+            df_['dist_%s' % c] = current_distances
         print('Integration with POI was finalized')
-        print('\nTotal Time: {:.2f} seconds'.format(time.time() - start_time))
 
     except Exception as e:
         print('id: {}\n'.format(idx))
@@ -449,10 +446,10 @@ def join_with_pois_by_category(
 def join_with_poi_datetime(
         df_,
         df_events,
-        label_date='datetime',
+        label_date=DATETIME,
         time_window=900,
-        label_event_id='event_id',
-        label_event_type='event_type'
+        label_event_id=EVENT_ID,
+        label_event_type=EVENT_TYPE
 ):
     """
     It performs the integration between trajectories and points
@@ -486,7 +483,6 @@ def join_with_poi_datetime(
 
     try:
         print('Integration with Events...')
-        start_time = time.time()
 
         # get a vector with windows time to each point
         df_.reset_index(drop=True, inplace=True)
@@ -503,15 +499,15 @@ def join_with_poi_datetime(
         event_type = np.full(df_.shape[0], np.NAN, dtype='object_')
         event_id = np.full(df_.shape[0], np.NAN, dtype=np.int32)
 
-        for idx in tqdm(df_.index):
+        for idx in progress_bar(df_.index):
             # filter event by datetime
-            df_filted = preprocessing.filters.by_datetime(
+            df_filtered = filters.by_datetime(
                 df_events, window_starts[idx], window_ends[idx]
             )
-            size_filter = df_filted.shape[0]
+            size_filter = df_filtered.shape[0]
 
             if size_filter > 0:
-                df_filted.reset_index(drop=True, inplace=True)
+                df_filtered.reset_index(drop=True, inplace=True)
                 lat_user = np.full(
                     size_filter, df_.at[idx, LATITUDE], dtype=np.float64
                 )
@@ -523,8 +519,8 @@ def join_with_poi_datetime(
                 distances = haversine(
                     lat_user,
                     lon_user,
-                    df_filted[LATITUDE].to_numpy(dtype=np.float64),
-                    df_filted[LONGITUDE].to_numpy(dtype=np.float64),
+                    df_filtered[LATITUDE].to_numpy(dtype=np.float64),
+                    df_filtered[LONGITUDE].to_numpy(dtype=np.float64),
                 )
                 # get index to arg_min
                 index_arg_min = np.argmin(distances)
@@ -532,17 +528,13 @@ def join_with_poi_datetime(
                 min_distance = np.min(distances)
                 # store data
                 current_distances[idx] = min_distance
-                event_type[idx] = df_filted.at[index_arg_min, label_event_type]
-                event_id[idx] = df_filted.at[index_arg_min, label_event_id]
+                event_type[idx] = df_filtered.at[index_arg_min, label_event_type]
+                event_id[idx] = df_filtered.at[index_arg_min, label_event_id]
 
-        df_['event_id'] = event_id
-        df_['dist_event'] = current_distances
-        df_['event_type'] = event_type
+        df_[label_event_id] = event_id
+        df_[DIST_EVENT] = current_distances
+        df_[label_event_type] = event_type
         print('Integration with event was completed')
-        print(
-            '\nTotal Time: {:.2f} seconds'.format((time.time() - start_time))
-        )
-        print('-----------------------------------------------------\n')
     except Exception as e:
         print('id: {}\n'.format(idx))
         raise e
@@ -551,10 +543,10 @@ def join_with_poi_datetime(
 def join_with_poi_datetime_optimizer(
         df_,
         df_events,
-        label_date='datetime',
+        label_date=DATETIME,
         time_window=900,
-        label_event_id='event_id',
-        label_event_type='event_type'
+        label_event_id=EVENT_ID,
+        label_event_type=EVENT_TYPE
 ):
     """
     It performs a optimized integration between trajectories and points
@@ -584,11 +576,11 @@ def join_with_poi_datetime_optimizer(
     label_event_type : String, optional("event_type" by default)
         Label of df_events referring to the type of the event.
 
+
     """
 
     try:
         print('Integration with Events...')
-        start_time = time.time()
 
         # get a vector with windows time to each point
         df_.reset_index(drop=True, inplace=True)
@@ -608,18 +600,17 @@ def join_with_poi_datetime_optimizer(
         minimum_distances = np.full(
             df_.shape[0], np.Infinity, dtype=np.float64
         )
-        shape_event = df_events.shape[0]
 
         # Rename for access columns of each row directly
         df_events.rename(
-            columns={label_event_id: 'event_id', label_event_type: 'event_type'},
+            columns={label_event_id: label_event_id, label_event_type: label_event_type},
             inplace=True
         )
 
-        for row in tqdm(df_events.itertuples(), total=shape_event):
-            idx = row.Index
+        for row in progress_bar(df_events.iterrows()):
+            idx = row.index
 
-            df_filtered = preprocessing.filters.by_datetime(
+            df_filtered = filters.by_datetime(
                 df_, window_starts[idx], window_ends[idx]
             )
 
@@ -628,10 +619,10 @@ def join_with_poi_datetime_optimizer(
             if size_filter > 0:
                 indexes = df_filtered.index
                 lat_event = np.full(
-                    df_filtered.shape[0], row.lat, dtype=np.float64
+                    df_filtered.shape[0], row[LATITUDE], dtype=np.float64
                 )
                 lon_event = np.full(
-                    df_filtered.shape[0], row.lon, dtype=np.float64
+                    df_filtered.shape[0], row[LONGITUDE], dtype=np.float64
                 )
 
                 # First iteration is minimum distances
@@ -661,14 +652,10 @@ def join_with_poi_datetime_optimizer(
                     event_type[index_True] = row.event_type
                     print(event_id, event_type)
 
-        df_['event_id'] = event_id
-        df_['dist_event'] = minimum_distances
-        df_['event_type'] = event_type
+        df_[label_event_id] = event_id
+        df_[DIST_EVENT] = minimum_distances
+        df_[label_event_type] = event_type
         print('Integration with events was completed')
-        print(
-            '\nTotal Time: {:.2f} seconds'.format((time.time() - start_time))
-        )
-        print('-----------------------------------------------------\n')
 
     except Exception as e:
         print('id: {}\n'.format(idx))
@@ -678,9 +665,11 @@ def join_with_poi_datetime_optimizer(
 def join_with_home_by_id(
         df_,
         df_home,
-        label_id='id',
-        label_address='formatted_address',
-        label_city='city',
+        label_id=TRAJ_ID,
+        label_address=ADDRESS,
+        label_city=CITY,
+        label_home=HOME,
+        label_dist_home=DIST_HOME,
         drop_id_without_home=False,
 ):
     """
@@ -699,14 +688,20 @@ def join_with_home_by_id(
     label_id : String, optional("id" by default)
         Label of df_home referring to the home point id.
 
-    drop_id_without_home : Boolean, optional(False by default)
-        flag as an option to drop id's that don't have houses.
-
     label_address : String, optional("formatted_address" by default)
         Label of df_home referring to the home point address.
 
     label_city : String, optional("city" by default)
-        Label of df_home referring to the home point city.
+        Label of df_home referring to the point city.
+
+    label_home : String, optional("home" by default)
+        Label of df_home referring to the home point.
+
+    label_dist_home: String, optional("dist_home" by default)
+        Label of df_home referring to the distance to the home point.
+
+    drop_id_without_home : Boolean, optional(False by default)
+        flag as an option to drop id's that don't have houses.
 
     """
 
@@ -718,7 +713,7 @@ def join_with_home_by_id(
             print('...setting {} as index'.format(label_id))
             df_.set_index(label_id, inplace=True)
 
-        for idx in df_.index.unique():
+        for idx in progress_bar(df_.index.unique()):
             filter_home = df_home[label_id] == idx
 
             if df_home[filter_home].shape[0] == 0:
@@ -731,11 +726,11 @@ def join_with_home_by_id(
 
                 # if user has a single tuple
                 if not isinstance(lat_user, np.ndarray):
-                    df_.at[idx, 'dist_home'] = haversine(
+                    df_.at[idx, label_dist_home] = haversine(
                         lat_user, lon_user, home[LATITUDE], home[LONGITUDE]
                     )
-                    df_.at[idx, 'home'] = home[label_address]
-                    df_.at[idx, 'city'] = home[label_city]
+                    df_.at[idx, label_home] = home[label_address]
+                    df_.at[idx, label_city] = home[label_city]
                 else:
                     lat_home = np.full(
                         df_.loc[idx].shape[0], home[LATITUDE], dtype=np.float64
@@ -743,17 +738,17 @@ def join_with_home_by_id(
                     lon_home = np.full(
                         df_.loc[idx].shape[0], home[LONGITUDE], dtype=np.float64
                     )
-                    df_.at[idx, 'dist_home'] = haversine(
+                    df_.at[idx, label_dist_home] = haversine(
                         lat_user, lon_user, lat_home, lon_home
                     )
-                    df_.at[idx, 'home'] = np.array(home[label_address])
-                    df_.at[idx, 'city'] = np.array(home[label_city])
+                    df_.at[idx, label_home] = np.array(home[label_address])
+                    df_.at[idx, label_city] = np.array(home[label_city])
 
         df_.reset_index(inplace=True)
-        print('... Reseting index')
+        print('... Resetting index')
 
         if drop_id_without_home:
-            preprocessing.filters.by_id(df_, label_id, ids_without_home)
+            filters.by_id(df_, label_id, ids_without_home)
     except Exception as e:
         print('Erro: idx: {}'.format(idx))
         raise e
@@ -761,9 +756,11 @@ def join_with_home_by_id(
 
 def merge_home_with_poi(
     df_,
-    label_dist_poi='dist_poi',
-    label_type_poi='type_poi',
-    label_id_poi='id_poi',
+    label_dist_poi=DIST_POI,
+    label_type_poi=TYPE_POI,
+    label_id_poi=ID_POI,
+    label_home=HOME,
+    label_dist_home=DIST_HOME,
     drop_columns=True,
 ):
     """
@@ -787,6 +784,12 @@ def merge_home_with_poi(
     label_id_poi : String, optional("type_poi" by default)
         Label of df_ referring to the id from the nearest point of interest.
 
+    label_home : String, optional("home" by default)
+        Label of df_home referring to the home point.
+
+    label_dist_home: String, optional("dist_home" by default)
+        Label of df_home referring to the distance to the home point.
+
     drop_columns : Boolean, optional(True by default)
         Flag that controls the deletion of the columns referring to the
         id and the distance from the home point
@@ -795,13 +798,13 @@ def merge_home_with_poi(
 
     try:
         print('merge home with POI using shortest distance')
-        idx = df_[df_['dist_home'] <= df_[label_dist_poi]].index
+        idx = df_[df_[label_dist_home] <= df_[label_dist_poi]].index
 
-        df_.loc[idx, label_type_poi] = 'home'
-        df_.loc[idx, label_dist_poi] = df_.loc[idx, 'dist_home']
-        df_.loc[idx, label_id_poi] = df_.loc[idx, 'Home']
+        df_.loc[idx, label_type_poi] = label_home
+        df_.loc[idx, label_dist_poi] = df_.loc[idx, label_dist_home]
+        df_.loc[idx, label_id_poi] = df_.loc[idx, label_home]
         if drop_columns:
-            del df_['Home'], df_['dist_home']
+            del df_[label_home], df_[label_dist_home]
     except Exception as e:
         raise e
 
@@ -825,22 +828,22 @@ def integration_EVENT_to_user(df_, df_event, label_date='datetime', time_window=
         current_ids = np.full(df_.shape[0], np.NAN, dtype=np.int64)
         current_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
 
-        for i, idx in enumerate(tqdm(df_event.index)):
+        for i, idx in enumerate(progress_bar(df_event.index)):
             #filter user by time windows
-            df_filted = preprocessing.filters.by_datetime(
+            df_filtered = filters.by_datetime(
                 df_, window_starts[i], window_ends[i]
             )
 
-            size_filter = df_filted.shape[0]
+            size_filter = df_filtered.shape[0]
 
             if(size_filter > 0):
-                indexs = df_filted.index
+                indexs = df_filtered.index
 
                 lat_event = np.full(
-                    df_filted.shape[0], df_event.loc[idx]['lat'], dtype=np.float64
+                    df_filtered.shape[0], df_event.loc[idx]['lat'], dtype=np.float64
                 )
                 lon_event = np.full(
-                    df_filted.shape[0], df_event.loc[idx]['lon'], dtype=np.float64
+                    df_filtered.shape[0], df_event.loc[idx]['lon'], dtype=np.float64
                 )
 
                 # First iteration is minimum distances
@@ -848,20 +851,20 @@ def integration_EVENT_to_user(df_, df_event, label_date='datetime', time_window=
                     minimum_distances[indexs] = haversine(
                         lat_event,
                         lon_event,
-                        df_filted['lat'].to_numpy(),
-                        df_filted['lon'].to_numpy()
+                        df_filtered['lat'].to_numpy(),
+                        df_filtered['lon'].to_numpy()
                     )
-                    ids_minimum[indexs] = df_filted['event_id']
+                    ids_minimum[indexs] = df_filtered['event_id']
                     print('Minimum distances were computed')
                     #dic[idx] = minimum_distances
                 else:
                     current_distances[indexs] = haversine(
                         lat_event,
                         lon_event,
-                        df_filted['lat'].to_numpy(),
-                        df_filted['lon'].to_numpy()
+                        df_filtered['lat'].to_numpy(),
+                        df_filtered['lon'].to_numpy()
                     )
-                    current_ids[indexs] = df_filted['event_id']
+                    current_ids[indexs] = df_filtered['event_id']
 
                     minimum_distances = np.minimum(current_distances, minimum_distances)
             else:
@@ -895,12 +898,12 @@ def integration_with_event(
         current_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
         event_type = np.full(df_.shape[0], np.NAN, dtype='object_')
         event_id = np.full(df_.shape[0], np.NAN, dtype=np.int32)
-        for idx in tqdm(df_.index):
+        for idx in progress_bar(df_.index):
             #filter event by datetime
-            df_filted = preprocessing.filters.by_datetime(
+            df_filtered = filters.by_datetime(
                 df_events, window_starts[idx], window_ends[idx]
                 )
-            size_filter = df_filted.shape[0]
+            size_filter = df_filtered.shape[0]
 
             if(size_filter > 0):
                 lat_user = np.full(size_filter, df_.loc[idx]['lat'], dtype=np.float64)
@@ -908,8 +911,8 @@ def integration_with_event(
                 distances = haversine(
                     lat_user,
                     lon_user,
-                    df_filted['lat'].to_numpy(),
-                    df_filted['lon'].to_numpy()
+                    df_filtered['lat'].to_numpy(),
+                    df_filtered['lon'].to_numpy()
                 )
                 # get index to arg_min
                 index_arg_min = np.argmin(distances)
@@ -917,7 +920,7 @@ def integration_with_event(
                 min_distance = min(distances)
                 #store data
                 current_distances[idx] = min_distance
-                event_index = df_filted.index[index_arg_min]
+                event_index = df_filtered.index[index_arg_min]
                 event_type[idx] = df_event.loc[event_index]['event_type']
                 event_id[idx] = df_event.loc[event_index]['event_id']
 
