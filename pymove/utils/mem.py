@@ -1,8 +1,6 @@
 from __future__ import print_function
 
-import json
 import os
-import re
 import time
 from collections import deque
 from itertools import chain
@@ -13,150 +11,9 @@ import pandas as pd
 import psutil
 
 try:
-    import pwd
-except (ModuleNotFoundError, ImportError):
-    from pymove.utils import _winmock as pwd
-
-try:
     from reprlib import repr
 except ImportError:
     pass
-
-
-def proc_info():
-    """
-    This functions retrieves informations about each jupyter notebook running in
-    the machine.
-
-    Returns
-    -------
-    dataframe
-        A dataframe with the following informations about
-        each jupyter notebook process:
-            - user : username
-            - pid : process identifier
-            - memory_GB : memory usage
-            - kernel_ID : kernel id
-
-    Examples
-    --------
-    >>> mem.get_proc_info()
-            user 	pid 	memory_GB 	kernel_ID
-        0 	999999 	11797 	0.239374 	74efe612-927f-4c1f-88a6-bb5fd32bc65c
-        1 	999999 	11818 	0.172012 	11c38dd6-8a65-4c45-90cf-0da5db65fa99
-
-    """
-
-    UID = 1
-
-    regex = re.compile(r'.+kernel-(.+)\.json')
-
-    pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-
-    # memory info from psutil.Process
-    df_mem = []
-
-    for pid in pids:
-        try:
-            ret = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
-            ret_str = ret.decode('utf-8')
-        except IOError:  # proc has already terminated
-            continue
-
-        # jupyter notebook processes
-        if (
-            len(ret_str) > 0
-            and ('jupyter' in ret_str or 'ipython' in ret_str)
-            and 'kernel' in ret_str
-        ):
-            # kernel
-            kernel_ID = re.sub(regex, r'\1', ret_str)[0:-1]
-
-            # memory
-            process = psutil.Process(int(pid))
-            mem = process.memory_info()[0] / float(1e9)
-
-            # user name for pid
-            for ln in open('/proc/{0}/status'.format(int(pid))):
-                if ln.startswith('Uid:'):
-                    uid = int(ln.split()[UID])
-                    uname = pwd.getpwuid(uid).pw_name
-
-            # user, pid, memory, kernel_ID
-            df_mem.append([uname, pid, mem, kernel_ID])
-
-    df_mem = pd.DataFrame(df_mem)
-    df_mem.columns = ['user', 'pid', 'memory_GB', 'kernel_ID']
-    return df_mem
-
-
-def session_info(sessions_str):
-    """
-    This functions retrieve the path of each notebook running
-    in the current session.
-
-    Parameters
-    ----------
-    sessions_str : str
-        Session
-
-    Returns
-    -------
-    dataframe
-        A dataframe with the following informations about
-        each jupyter notebook process:
-            - kernel_ID : kernel id
-            - notebook_path: path to the notebook
-
-    """
-
-    sessions = json.loads(sessions_str)
-    df_nb = []
-    kernels = []
-    for sess in sessions:
-        kernel_ID = sess['kernel']['id']
-        if kernel_ID not in kernels:
-            notebook_path = sess['notebook']['path']
-            df_nb.append([kernel_ID, notebook_path])
-            kernels.append(kernel_ID)
-
-    df_nb = pd.DataFrame(df_nb)
-    df_nb.columns = ['kernel_ID', 'notebook_path']
-    return df_nb
-
-
-def stats(sessions_str):
-    """
-    This functions retrieve the path and information of each notebook
-    running in the current session.
-
-    Parameters
-    ----------
-    sessions_str : str
-        Session
-
-    Returns
-    -------
-    dataframe
-        A dataframe with the following informations about
-        each jupyter notebook process:
-            - user : username
-            - pid : process identifier
-            - memory_GB : memory usage
-            - kernel_ID : kernel id
-            - notebook_path: path to the notebook
-
-    """
-
-    df_mem = proc_info()
-    df_nb = session_info(sessions_str)
-
-    # joining tables
-    df = pd.merge(df_nb, df_mem, on=['kernel_ID'], how='right')
-    df = df.sort_values('memory_GB', ascending=False)
-    del df_mem
-    del df_nb
-    return df.reset_index(drop=True)
 
 
 def reduce_mem_usage_automatic(df):
@@ -382,7 +239,7 @@ def sizeof_fmt(mem_usage, suffix='B'):
     return '{:.1f} {}{}'.format(mem_usage, 'Yi', suffix)
 
 
-def print_top_mem_vars(variables=None, n=10):
+def top_mem_vars(variables=locals(), n=10):
     """
     Shows the sizes of the active variables
 
@@ -395,8 +252,10 @@ def print_top_mem_vars(variables=None, n=10):
 
     """
 
-    if variables is None:
-        variables = locals()
     vars_ = ((name, getsizeof(value)) for name, value in variables.items())
-    for name, size in sorted(vars_, key=lambda x: -x[1])[:n]:
-        print('{:>30}: {:>8}'.format(name, sizeof_fmt(size)))
+    top_vars = pd.DataFrame(
+        sorted(vars_, key=lambda x: -x[1])[:n],
+        columns=['var', 'mem']
+    )
+    top_vars['mem'] = top_vars['mem'].apply(sizeof_fmt)
+    return top_vars
