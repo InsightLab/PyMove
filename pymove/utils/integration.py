@@ -297,15 +297,14 @@ def join_with_pois_optimizer(
                 df_pois.reset_index(drop=True, inplace=True)
 
             # create numpy array to store new column to dataframe of movement objects
+            minimum_distances = np.full(
+                df_.shape[0], np.Infinity, dtype=np.float64
+            )
             ids_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
             tag_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
 
             lat_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
             lon_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
-
-            minimum_distances = np.full(
-                df_.shape[0], np.Infinity, dtype=np.float64
-            )
 
             df_pois.rename(
                 columns={label_poi_id: TRAJ_ID, label_poi_type: TYPE_POI},
