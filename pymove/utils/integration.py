@@ -202,7 +202,7 @@ def join_with_pois(
 
         # create numpy array to store new column to dataframe of movement objects
         current_distances = np.full(
-            df_.shape[0], np.Infinity, dtype=np.float32
+            df_.shape[0], np.Infinity, dtype=np.float64
         )
         ids_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
         tag_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
@@ -224,8 +224,8 @@ def join_with_pois(
                 haversine(
                     lat_user,
                     lon_user,
-                    df_pois[LATITUDE].to_numpy(dtype=np.float64),
-                    df_pois[LONGITUDE].to_numpy(dtype=np.float64),
+                    df_pois[LATITUDE].values,
+                    df_pois[LONGITUDE].values,
                 )
             )
 
@@ -324,8 +324,8 @@ def join_with_pois_optimizer(
                         haversine(
                             lat_POI,
                             lon_POI,
-                            df_[LATITUDE].to_numpy(dtype=np.float64),
-                            df_[LONGITUDE].to_numpy(dtype=np.float64),
+                            df_[LATITUDE].values,
+                            df_[LONGITUDE].values,
                         )
                     )
                     ids_POIs.fill(row.id)
@@ -336,8 +336,8 @@ def join_with_pois_optimizer(
                         haversine(
                             lat_POI,
                             lon_POI,
-                            df_[LATITUDE].to_numpy(dtype=np.float64),
-                            df_[LONGITUDE].to_numpy(dtype=np.float64),
+                            df_[LATITUDE].values,
+                            df_[LONGITUDE].values,
                         )
                     )
                     compare = current_distances < minimum_distances
@@ -404,7 +404,7 @@ def join_with_pois_by_category(
 
         for c in size_categories:
             print(
-                'Calculating dist to category: %s' % c,
+                'computing dist to category: %s' % c,
                 flush=True
             )
             # creating lat and lon array to operation
@@ -424,8 +424,8 @@ def join_with_pois_by_category(
                 distances = haversine(
                     lat_user,
                     lon_user,
-                    df_category[LATITUDE].to_numpy(dtype=np.float64),
-                    df_category[LONGITUDE].to_numpy(dtype=np.float64),
+                    df_category[LATITUDE].values,
+                    df_category[LONGITUDE].values,
                 )
 
                 # get index to arg_min and min distance
@@ -520,8 +520,8 @@ def join_with_poi_datetime(
                 distances = haversine(
                     lat_user,
                     lon_user,
-                    df_filtered[LATITUDE].to_numpy(dtype=np.float64),
-                    df_filtered[LONGITUDE].to_numpy(dtype=np.float64),
+                    df_filtered[LATITUDE].values,
+                    df_filtered[LONGITUDE].values,
                 )
                 # get index to arg_min
                 index_arg_min = np.argmin(distances)
@@ -587,7 +587,7 @@ def join_with_poi_datetime_optimizer(
         df_.reset_index(drop=True, inplace=True)
         df_events.reset_index(drop=True, inplace=True)
 
-        # calc window time to each event
+        # compute window time to each event
         window_starts = df_events[label_date] - pd.Timedelta(seconds=time_window)
         window_ends = df_events[label_date] + pd.Timedelta(seconds=time_window)
 
@@ -631,8 +631,8 @@ def join_with_poi_datetime_optimizer(
                     minimum_distances[indexes] = haversine(
                         lat_event,
                         lon_event,
-                        df_filtered[LATITUDE].to_numpy(dtype=np.float64),
-                        df_filtered[LONGITUDE].to_numpy(dtype=np.float64),
+                        df_filtered[LATITUDE].values,
+                        df_filtered[LONGITUDE].values,
                     )
                     event_id[indexes] = row.event_id
                     event_type[indexes] = row.event_type
@@ -640,8 +640,8 @@ def join_with_poi_datetime_optimizer(
                     current_distances[indexes] = haversine(
                         lat_event,
                         lon_event,
-                        df_filtered[LATITUDE].to_numpy(dtype=np.float64),
-                        df_filtered[LONGITUDE].to_numpy(dtype=np.float64),
+                        df_filtered[LATITUDE].values,
+                        df_filtered[LONGITUDE].values,
                     )
                     compare = current_distances < minimum_distances
                     index_True = np.where(compare is True)[0]
@@ -818,7 +818,7 @@ def integration_EVENT_to_user(df_, df_event, label_date='datetime', time_window=
 
         df_['event'] = np.NAN
 
-        #calc window time to each event
+        #compute window time to each event
         window_starts = df_event[label_date] - pd.Timedelta(seconds=time_window)
         window_ends = df_event[label_date]  + pd.Timedelta(seconds=time_window)
 
