@@ -3,6 +3,8 @@ import os
 
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_equal
+from pandas import DataFrame, Timestamp
+from pandas.testing import assert_frame_equal
 
 from pymove import (
     DaskMoveDataFrame,
@@ -19,6 +21,7 @@ from pymove.utils.constants import (
     LATITUDE,
     LONGITUDE,
     PERIOD,
+    TILES,
     TRAJ_ID,
     TYPE_DASK,
     TYPE_PANDAS,
@@ -61,20 +64,20 @@ def _assert_plot(map_info):
 
     count_script = map_info.count('script')
 
-    assert(count_l_map == 1 and
-           count_l_tileLayer == 1 and
-           count_l_marker == 2 and
-           count_l_popup == 2 and
-           count_head == 4 and
-           count_body == 5 and
-           count_script == 18)
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 2
+           and count_l_popup == 2
+           and count_head == 4
+           and count_body == 5
+           and count_script == 18)
 
-    assert('L.marker(\n[39.984094,116.319236]' in map_info and
-           'L.marker(\n[39.984217,116.319422]' in map_info and
-           'center:[39.984094,116.319236]' in map_info and
-           ('L.polyline(\n[[39.984094,116.319236],'
-            '[39.984198,116.319322],[39.984224,116.319402],'
-            '[39.984211,116.319389],[39.984217,116.319422]]') in map_info)
+    assert('L.marker(\n[39.984094,116.319236]' in map_info
+           and 'L.marker(\n[39.984217,116.319422]' in map_info
+           and 'center:[39.984094,116.319236]' in map_info
+           and ('L.polyline(\n[[39.984094,116.319236],'
+                '[39.984198,116.319322],[39.984224,116.319402],'
+                '[39.984211,116.319389],[39.984217,116.319422]]') in map_info)
 
 
 def test_rgb():
@@ -285,19 +288,19 @@ def test_plot_markers(tmpdir):
 
     count_script = map_info.count('script')
 
-    assert(count_l_map == 1 and
-           count_l_tileLayer == 1 and
-           count_l_marker == 5 and
-           count_l_popup == 5 and
-           count_head == 2 and
-           count_body == 3 and
-           count_script == 12)
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 5
+           and count_l_popup == 5
+           and count_head == 2
+           and count_body == 3
+           and count_script == 12)
 
-    assert('L.marker(\n[39.984094,116.319236]' in map_info and
-           'L.marker(\n[39.984217,116.319422]' in map_info and
-           'L.marker(\n[39.984198,116.319322]' in map_info and
-           'L.marker(\n[39.984224,116.319402]' in map_info and
-           'L.marker(\n[39.984211,116.319389]' in map_info)
+    assert('L.marker(\n[39.984094,116.319236]' in map_info
+           and 'L.marker(\n[39.984217,116.319422]' in map_info
+           and 'L.marker(\n[39.984198,116.319322]' in map_info
+           and 'L.marker(\n[39.984224,116.319402]' in map_info
+           and 'L.marker(\n[39.984211,116.319389]' in map_info)
 
 
 def test_plot_trajectories_with_folium(tmpdir):
@@ -307,18 +310,18 @@ def test_plot_trajectories_with_folium(tmpdir):
     d = tmpdir.mkdir('prepossessing')
 
     file_write_default = d.join('plot_trajectories_with_folium.html')
-    filename_write_default = os.path.join(
+    filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
     base_map = visualization.plot_trajectories_with_folium(move_df,
                                                            n_rows=3,
                                                            save_as_html=True,
-                                                           filename=filename_write_default)
+                                                           filename=filename)
 
     assert_array_equal(base_map.location, [39.984094, 116.319236])
 
-    file = codecs.open(filename_write_default, 'r')
+    file = codecs.open(filename, 'r')
 
     map_info = file.read()
 
@@ -338,19 +341,19 @@ def test_plot_trajectories_with_folium(tmpdir):
 
     count_script = map_info.count('script')
 
-    assert(count_l_map == 1 and
-           count_l_tileLayer == 1 and
-           count_l_marker == 2 and
-           count_l_popup == 2 and
-           count_head == 4 and
-           count_body == 5 and
-           count_script == 18)
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 2
+           and count_l_popup == 2
+           and count_head == 4
+           and count_body == 5
+           and count_script == 18)
 
-    assert('L.marker(\n[39.984094,116.319236]' in map_info and
-           'L.marker(\n[39.984224,116.319402]' in map_info and
-           'center:[39.984094,116.319236]' in map_info and
-           ('L.polyline(\n[[39.984094,116.319236],'
-            '[39.984198,116.319322],[39.984224,116.319402]]') in map_info)
+    assert('L.marker(\n[39.984094,116.319236]' in map_info
+           and 'L.marker(\n[39.984224,116.319402]' in map_info
+           and 'center:[39.984094,116.319236]' in map_info
+           and ('L.polyline(\n[[39.984094,116.319236],'
+                '[39.984198,116.319322],[39.984224,116.319402]]') in map_info)
 
 
 def test_plot_trajectory_by_id_folium(tmpdir):
@@ -520,15 +523,263 @@ def test_plot_stops(tmpdir):
 
     count_script = map_info.count('script')
 
-    assert(count_l_map == 1 and
-           count_l_tileLayer == 1 and
-           count_l_marker == 3 and
-           count_l_popup == 3 and
-           count_head == 4 and
-           count_body == 5 and
-           count_script == 18)
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 3
+           and count_l_popup == 3
+           and count_head == 4
+           and count_body == 5
+           and count_script == 18)
 
-    assert('L.circle(\n[39.984224,116.319402]' in map_info and
-           'L.circle(\n[39.984211,116.319389]' in map_info and
-           'L.circle(\n[39.984217,116.319422]' in map_info and
-           'center:[39.984094,116.319236]' in map_info)
+    assert('L.circle(\n[39.984224,116.319402]' in map_info
+           and 'L.circle(\n[39.984211,116.319389]' in map_info
+           and 'L.circle(\n[39.984217,116.319422]' in map_info
+           and 'center:[39.984094,116.319236]' in map_info)
+
+
+def test_faster_cluster(tmpdir):
+
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('prepossessing')
+
+    file_write_default = d.join('faster_cluster.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map = visualization.faster_cluster(move_df)
+
+    assert_array_equal(base_map.location, [39.984094, 116.319236])
+
+    visualization.faster_cluster(move_df,
+                                 save_as_html=True,
+                                 filename=filename_write_default)
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.circle')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 1
+           and count_head == 2
+           and count_body == 3
+           and count_script == 14)
+
+    assert(('data=[[39.984094,116.319236],'
+            '[39.984198,116.319322],'
+            '[39.984224,116.319402],'
+            '[39.984211,116.319389],'
+            '[39.984217,116.319422]]') in map_info)
+
+
+def test_cluster(tmpdir):
+
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('prepossessing')
+
+    file_write_default = d.join('cluster.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map = visualization.cluster(move_df)
+
+    assert_array_equal(base_map.location, [39.984094, 116.319236])
+
+    visualization.cluster(move_df,
+                          save_as_html=True,
+                          filename=filename_write_default)
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.marker')
+
+    count_l_popup = map_info.count('L.popup')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 6
+           and count_l_popup == 5
+           and count_head == 2
+           and count_body == 3
+           and count_script == 14)
+
+    assert('L.marker(\n[39.984094,116.319236]' in map_info
+           and 'L.marker(\n[39.984198,116.319322]' in map_info
+           and 'L.marker(\n[39.984224,116.319402]' in map_info
+           and 'L.marker(\n[39.984211,116.319389]' in map_info
+           and 'L.marker(\n[39.984217,116.319422]' in map_info)
+
+
+def test_heatmap(tmpdir):
+
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('prepossessing')
+
+    file_write_default = d.join('heatmap.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map = visualization.heatmap(move_df)
+
+    assert_array_equal(base_map.location, [39.984094, 116.319236])
+
+    visualization.heatmap(move_df,
+                          save_as_html=True,
+                          filename=filename_write_default)
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.heatLayer')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 1
+           and count_head == 2
+           and count_body == 3
+           and count_script == 14)
+
+    assert(('L.heatLayer(\n[[39.984094,116.319236,1.0],'
+            '[39.984198,116.319322,1.0],'
+            '[39.984211,116.319389,1.0],'
+            '[39.984217,116.319422,1.0],'
+            '[39.984224,116.319402,1.0]]')in map_info)
+
+
+def test_add_trajectories_to_folium_map(tmpdir):
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('prepossessing')
+
+    file_write_default = d.join('map.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map = visualization.create_base_map(
+        move_data=move_df,
+        lat_origin=None,
+        lon_origin=None,
+        tile=TILES[0],
+        default_zoom_start=12)
+
+    visualization.heatmap(move_df,
+                          save_as_html=True,
+                          filename=filename_write_default)
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.heatLayer')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 1
+           and count_head == 2
+           and count_body == 3
+           and count_script == 14)
+
+    assert(('L.heatLayer(\n[[39.984094,116.319236,1.0],'
+            '[39.984198,116.319322,1.0],'
+            '[39.984211,116.319389,1.0],'
+            '[39.984217,116.319422,1.0],'
+            '[39.984224,116.319402,1.0]]')in map_info)
+
+
+def test_filter_generated_feature():
+
+    expected_one_value = DataFrame(
+        data=[
+            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        ],
+        columns=['lat', 'lon', 'datetime', 'id'],
+        index=[1],
+    )
+
+    expected_multiples_value = DataFrame(
+        data=[
+            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+            [39.984211, 116.319389, Timestamp('2008-10-23 05:53:16'), 1],
+        ],
+        columns=['lat', 'lon', 'datetime', 'id'],
+        index=[1, 3],
+    )
+
+    move_df = _default_move_df()
+
+    filtered_df = visualization._filter_generated_feature(move_df, 'lat', [39.984198])
+
+    assert_frame_equal(filtered_df, expected_one_value)
+
+    filtered_df = visualization._filter_generated_feature(move_df, 'lat',
+                                                          [39.984198, 39.984211])
+
+    assert_frame_equal(filtered_df, expected_multiples_value)
+
+    try:
+        visualization._filter_generated_feature(move_df, 'lat', [33.5659])
+        raise AssertionError(
+            'KeyError error not raised by MoveDataFrame'
+        )
+    except KeyError:
+        pass
