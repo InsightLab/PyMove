@@ -300,11 +300,12 @@ def join_with_pois_optimizer(
             ids_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
             tag_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
 
+            lat_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
+            lon_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
+
             minimum_distances = np.full(
                 df_.shape[0], np.Infinity, dtype=np.float64
             )
-            lat_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
-            lon_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
 
             df_pois.rename(
                 columns={label_poi_id: TRAJ_ID, label_poi_type: TYPE_POI},
@@ -493,7 +494,7 @@ def join_with_poi_datetime(
         window_starts = df_[label_date] - pd.Timedelta(seconds=time_window)
         window_ends = df_[label_date] + pd.Timedelta(seconds=time_window)
 
-        # create numpy aux t
+        # create vector to store distances
         current_distances = np.full(
             df_.shape[0], np.Infinity, dtype=np.float64
         )
@@ -587,11 +588,11 @@ def join_with_poi_datetime_optimizer(
         df_.reset_index(drop=True, inplace=True)
         df_events.reset_index(drop=True, inplace=True)
 
-        # compute window time to each event
+        # compute window time
         window_starts = df_events[label_date] - pd.Timedelta(seconds=time_window)
         window_ends = df_events[label_date] + pd.Timedelta(seconds=time_window)
 
-        # create vector to store distances to Event
+        # create vector to store distances
         current_distances = np.full(
             df_.shape[0], np.Infinity, dtype=np.float64
         )
