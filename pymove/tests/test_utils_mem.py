@@ -2,10 +2,8 @@ import os
 import time
 
 import psutil
-from numpy.testing import assert_almost_equal, assert_equal
-from pandas import DataFrame
+from numpy.testing import assert_array_equal, assert_equal
 
-import pymove
 from pymove import MoveDataFrame, mem
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
 
@@ -35,11 +33,11 @@ def test_reduce_mem_usage_automatic():
 
     expected_final_size = 232
 
-    assert_equal(mem.total_size(move_df), expected_initial_size)
+    assert abs(mem.total_size(move_df) - expected_initial_size) <= 20
 
     mem.reduce_mem_usage_automatic(move_df)
 
-    assert_equal(mem.total_size(move_df), expected_final_size)
+    assert abs(mem.total_size(move_df) - expected_final_size) <= 20
 
 
 def test_total_size():
@@ -48,7 +46,7 @@ def test_total_size():
 
     expected_initial_size = 280
 
-    assert_equal(mem.total_size(move_df), expected_initial_size)
+    assert abs(mem.total_size(move_df) - expected_initial_size) <= 20
 
 
 def test_begin_operation():
@@ -117,3 +115,23 @@ def test_sizeof_fmt():
     result = mem.sizeof_fmt(10, 'b')
 
     assert_equal(expected, result)
+
+
+def test_top_mem_vars():
+    move_df = _default_move_df()
+    list_data_ = list_data
+    local_vars = mem.top_mem_vars(locals())
+
+    assert_array_equal(local_vars.shape, (2, 2))
+    assert_array_equal(local_vars.columns, ['var', 'mem'])
+    assert_array_equal(local_vars['var'].values, ['move_df', 'list_data_'])
+
+    global_vars = mem.top_mem_vars(globals())
+    assert_array_equal(global_vars.shape, (10, 2))
+    assert_array_equal(global_vars.columns, ['var', 'mem'])
+    expected = [
+        '__builtins__', 'MoveDataFrame', 'assert_equal', 'assert_array_equal',
+        '_default_move_df', 'test_reduce_mem_usage_automatic', 'test_total_size',
+        'test_begin_operation', 'test_end_operation', 'test_sizeof_fmt'
+    ]
+    assert_array_equal(global_vars['var'].values, expected)
