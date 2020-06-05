@@ -19,6 +19,7 @@ from pymove.utils.constants import (
     POI,
     TRAJ_ID,
     TYPE_POI,
+    VIOLATING,
 )
 from pymove.utils.distances import haversine
 from pymove.utils.log import progress_bar
@@ -134,10 +135,10 @@ def union_poi_police(df_, label_poi=TYPE_POI):
     df_.at[df_[filter_police].index, label_poi] = 'police'
 
 
-def join_coletive_areas(gdf_, gdf_rules_, label_geometry=GEOMETRY):
+def join_collective_areas(gdf_, gdf_rules_, label_geometry=GEOMETRY):
     """
     It performs the integration between trajectories and collective
-    areas, generating a new columnn that informs if the point of the
+    areas, generating a new column that informs if the point of the
     trajectory is inserted in a collective area.
 
     Parameters
@@ -156,10 +157,10 @@ def join_coletive_areas(gdf_, gdf_rules_, label_geometry=GEOMETRY):
     print('Integration between trajectories and collectives areas')
 
     polygons = gdf_rules_[label_geometry].unique()
-    gdf_['violation'] = False
+    gdf_[VIOLATING] = False
     for p in progress_bar(polygons):
         index = gdf_[gdf_[label_geometry].intersects(p)].index
-        gdf_.at[index, 'violation'] = True
+        gdf_.at[index, VIOLATING] = True
 
 
 def join_with_pois(
@@ -330,7 +331,7 @@ def join_with_pois_optimizer(
                     ids_POIs.fill(row.id)
                     tag_POIs.fill(row.type_poi)
                 else:
-                    # compute dist between a POI and ALL tnz
+                    # compute dist between a POI and ALL
                     current_distances = np.float64(
                         haversine(
                             lat_POI,
