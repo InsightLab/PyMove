@@ -810,128 +810,126 @@ def merge_home_with_poi(
         raise e
 
 
-"""
-def integration_EVENT_to_user(df_, df_event, label_date='datetime', time_window=900):
-    try:
-        print('Integration with Events...')
-        start_time = time.time()
-
-        df_['event'] = np.NAN
-
-        #compute window time to each event
-        window_starts = df_event[label_date] - pd.Timedelta(seconds=time_window)
-        window_ends = df_event[label_date]  + pd.Timedelta(seconds=time_window)
-
-        #create vector to store distances to events
-        ids_minimum = np.full(df_.shape[0], np.NAN, dtype=np.int64)
-        minimum_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
-
-        current_ids = np.full(df_.shape[0], np.NAN, dtype=np.int64)
-        current_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
-
-        for i, idx in enumerate(progress_bar(df_event.index)):
-            #filter user by time windows
-            df_filtered = filters.by_datetime(
-                df_, window_starts[i], window_ends[i]
-            )
-
-            size_filter = df_filtered.shape[0]
-
-            if(size_filter > 0):
-                indexs = df_filtered.index
-
-                lat_event = np.full(
-                    df_filtered.shape[0], df_event.loc[idx]['lat'], dtype=np.float64
-                )
-                lon_event = np.full(
-                    df_filtered.shape[0], df_event.loc[idx]['lon'], dtype=np.float64
-                )
-
-                # First iteration is minimum distances
-                if i == 0:
-                    minimum_distances[indexs] = haversine(
-                        lat_event,
-                        lon_event,
-                        df_filtered['lat'].to_numpy(),
-                        df_filtered['lon'].to_numpy()
-                    )
-                    ids_minimum[indexs] = df_filtered['event_id']
-                    print('Minimum distances were computed')
-                    #dic[idx] = minimum_distances
-                else:
-                    current_distances[indexs] = haversine(
-                        lat_event,
-                        lon_event,
-                        df_filtered['lat'].to_numpy(),
-                        df_filtered['lon'].to_numpy()
-                    )
-                    current_ids[indexs] = df_filtered['event_id']
-
-                    minimum_distances = np.minimum(current_distances, minimum_distances)
-            else:
-                print(idx)
-
-
-        df_['event'] = minimum_distances
-        df_['id_event'] = current_ids
-        print('Integration with event was completed')
-        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-        print('-----------------------------------------------------\n')
-        #return dic
-    except Exception as e:
-        print('id: {}\n'.format(idx))
-        raise e
-
-def integration_with_event(
-    df_, df_event, label_date='datetime', time_window=900, dist_to_event=50
-):
-    try:
-        print('Integration with events...')
-        start_time = time.time()
-
-        ## get a vector with windows time to each point
-        df_.reset_index(drop=True, inplace=True)
-        df_event.reset_index(drop=True, inplace=True)
-
-        window_starts = df_[label_date] - pd.Timedelta(seconds=time_window)
-        window_ends = df_[label_date]  + pd.Timedelta(seconds=time_window)
-
-        current_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
-        event_type = np.full(df_.shape[0], np.NAN, dtype='object_')
-        event_id = np.full(df_.shape[0], np.NAN, dtype=np.int32)
-        for idx in progress_bar(df_.index):
-            #filter event by datetime
-            df_filtered = filters.by_datetime(
-                df_events, window_starts[idx], window_ends[idx]
-                )
-            size_filter = df_filtered.shape[0]
-
-            if(size_filter > 0):
-                lat_user = np.full(size_filter, df_.loc[idx]['lat'], dtype=np.float64)
-                lon_user = np.full(size_filter, df_.loc[idx]['lon'], dtype=np.float64)
-                distances = haversine(
-                    lat_user,
-                    lon_user,
-                    df_filtered['lat'].to_numpy(),
-                    df_filtered['lon'].to_numpy()
-                )
-                # get index to arg_min
-                index_arg_min = np.argmin(distances)
-                # get min distances
-                min_distance = min(distances)
-                #store data
-                current_distances[idx] = min_distance
-                event_index = df_filtered.index[index_arg_min]
-                event_type[idx] = df_event.loc[event_index]['event_type']
-                event_id[idx] = df_event.loc[event_index]['event_id']
-
-        df_['event_id'] = event_id
-        #df_['event_type'] = event_type
-        df_['dist_event'] = current_distances
-        print('Integration with Events was completed')
-        print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
-        print('-----------------------------------------------------\n')
-    except Exception as e:
-        print('id: {}\n'.format(idx))
-        raise e
-"""
+# def integration_EVENT_to_user(df_, df_event, label_date='datetime', time_window=900):
+#     try:
+#         print('Integration with Events...')
+#         start_time = time.time()
+#
+#         df_['event'] = np.NAN
+#
+#         #compute window time to each event
+#         window_starts = df_event[label_date] - pd.Timedelta(seconds=time_window)
+#         window_ends = df_event[label_date]  + pd.Timedelta(seconds=time_window)
+#
+#         #create vector to store distances to events
+#         ids_minimum = np.full(df_.shape[0], np.NAN, dtype=np.int64)
+#         minimum_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
+#
+#         current_ids = np.full(df_.shape[0], np.NAN, dtype=np.int64)
+#         current_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
+#
+#         for i, idx in enumerate(progress_bar(df_event.index)):
+#             #filter user by time windows
+#             df_filtered = filters.by_datetime(
+#                 df_, window_starts[i], window_ends[i]
+#             )
+#
+#             size_filter = df_filtered.shape[0]
+#
+#             if(size_filter > 0):
+#                 indexs = df_filtered.index
+#
+#                 lat_event = np.full(
+#                     df_filtered.shape[0], df_event.loc[idx]['lat'], dtype=np.float64
+#                 )
+#                 lon_event = np.full(
+#                     df_filtered.shape[0], df_event.loc[idx]['lon'], dtype=np.float64
+#                 )
+#
+#                 # First iteration is minimum distances
+#                 if i == 0:
+#                     minimum_distances[indexs] = haversine(
+#                         lat_event,
+#                         lon_event,
+#                         df_filtered['lat'].to_numpy(),
+#                         df_filtered['lon'].to_numpy()
+#                     )
+#                     ids_minimum[indexs] = df_filtered['event_id']
+#                     print('Minimum distances were computed')
+#                     #dic[idx] = minimum_distances
+#                 else:
+#                     current_distances[indexs] = haversine(
+#                         lat_event,
+#                         lon_event,
+#                         df_filtered['lat'].to_numpy(),
+#                         df_filtered['lon'].to_numpy()
+#                     )
+#                     current_ids[indexs] = df_filtered['event_id']
+#
+#                     minimum_distances = np.minimum(current_distances, minimum_distances)
+#             else:
+#                 print(idx)
+#
+#
+#         df_['event'] = minimum_distances
+#         df_['id_event'] = current_ids
+#         print('Integration with event was completed')
+#         print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+#         print('-----------------------------------------------------\n')
+#         #return dic
+#     except Exception as e:
+#         print('id: {}\n'.format(idx))
+#         raise e
+#
+# def integration_with_event(
+#     df_, df_event, label_date='datetime', time_window=900, dist_to_event=50
+# ):
+#     try:
+#         print('Integration with events...')
+#         start_time = time.time()
+#
+#         ## get a vector with windows time to each point
+#         df_.reset_index(drop=True, inplace=True)
+#         df_event.reset_index(drop=True, inplace=True)
+#
+#         window_starts = df_[label_date] - pd.Timedelta(seconds=time_window)
+#         window_ends = df_[label_date]  + pd.Timedelta(seconds=time_window)
+#
+#         current_distances = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
+#         event_type = np.full(df_.shape[0], np.NAN, dtype='object_')
+#         event_id = np.full(df_.shape[0], np.NAN, dtype=np.int32)
+#         for idx in progress_bar(df_.index):
+#             #filter event by datetime
+#             df_filtered = filters.by_datetime(
+#                 df_events, window_starts[idx], window_ends[idx]
+#                 )
+#             size_filter = df_filtered.shape[0]
+#
+#             if(size_filter > 0):
+#                 lat_user = np.full(size_filter, df_.loc[idx]['lat'], dtype=np.float64)
+#                 lon_user = np.full(size_filter, df_.loc[idx]['lon'], dtype=np.float64)
+#                 distances = haversine(
+#                     lat_user,
+#                     lon_user,
+#                     df_filtered['lat'].to_numpy(),
+#                     df_filtered['lon'].to_numpy()
+#                 )
+#                 # get index to arg_min
+#                 index_arg_min = np.argmin(distances)
+#                 # get min distances
+#                 min_distance = min(distances)
+#                 #store data
+#                 current_distances[idx] = min_distance
+#                 event_index = df_filtered.index[index_arg_min]
+#                 event_type[idx] = df_event.loc[event_index]['event_type']
+#                 event_id[idx] = df_event.loc[event_index]['event_id']
+#
+#         df_['event_id'] = event_id
+#         #df_['event_type'] = event_type
+#         df_['dist_event'] = current_distances
+#         print('Integration with Events was completed')
+#         print('\nTotal Time: {:.2f} seconds'.format((time.time() - start_time)))
+#         print('-----------------------------------------------------\n')
+#     except Exception as e:
+#         print('id: {}\n'.format(idx))
+#         raise e
