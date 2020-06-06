@@ -19,6 +19,7 @@ from .utils import (
     datetime,
     db,
     distances,
+    integration,
     math,
     mem,
     trajectories,

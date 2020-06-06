@@ -211,7 +211,7 @@ def join_with_pois(
         lat_user = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
         lon_user = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
 
-        for row in progress_bar(df_[[LATITUDE, LONGITUDE]].iterrows()):
+        for row in progress_bar(df_.iterrows(), total=len(df_)):
             # get lat and lon to each id
             idx = row.index
 
@@ -311,7 +311,7 @@ def join_with_pois_optimizer(
                 inplace=True
             )
 
-            for row in progress_bar(df_pois.iterrows()):
+            for row in progress_bar(df_pois.iterrows(), total=len(df_pois)):
 
                 idx = row.index
                 # update lat and lot of current index
@@ -411,7 +411,7 @@ def join_with_pois_by_category(
             df_category = df_pois[df_pois[label_category] == c]
             df_category.reset_index(drop=True, inplace=True)
 
-            for row in progress_bar(df_[[LATITUDE, LONGITUDE]].iterrows()):
+            for row in progress_bar(df_.iterrows(), total=len(df_)):
                 idx = row.index
                 lat_user = np.full(
                     df_category.shape[0], row[LATITUDE], dtype=np.float64
@@ -608,7 +608,7 @@ def join_with_poi_datetime_optimizer(
             inplace=True
         )
 
-        for row in progress_bar(df_events.iterrows()):
+        for row in progress_bar(df_events.iterrows(), total=len(df_events)):
             idx = row.index
 
             df_filtered = filters.by_datetime(
