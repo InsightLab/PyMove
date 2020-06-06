@@ -1,10 +1,10 @@
 from IPython import get_ipython
 from IPython.display import display
 from ipywidgets import HTML, IntProgress, VBox
-from tqdm import tqdm
+from tqdm import tqdm as _tqdm
 
 
-def log_progress(sequence, desc='Items', total=None, miniters=None):
+def _log_progress(sequence, desc='Items', total=None, miniters=None):
     """
     Make and display a progress bar.
 
@@ -67,8 +67,8 @@ def log_progress(sequence, desc='Items', total=None, miniters=None):
 
 try:
     if get_ipython().__class__.__name__ == 'ZMQInteractiveShell':
-        progress_bar = log_progress
+        progress_bar = _log_progress
     else:
         raise NameError
 except NameError:
-    progress_bar = tqdm
+    progress_bar = _tqdm
