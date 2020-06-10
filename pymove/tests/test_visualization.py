@@ -783,3 +783,82 @@ def test_filter_generated_feature():
         )
     except KeyError:
         pass
+
+
+def test_filter_and_generate_colors():
+
+    move_df = _default_move_df()
+
+    expected_df = DataFrame(
+        data=[
+            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+            [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 1]
+        ],
+        columns=['lat', 'lon', 'datetime', 'id'],
+        index=[0, 1, 2],
+    )
+
+    expected_items = [(1, 'black')]
+
+    mv_df, items = visualization._filter_and_generate_colors(move_df, 1, 3)
+
+    assert_frame_equal(mv_df, expected_df)
+
+    assert_array_equal(items, expected_items)
+
+
+def test_add_begin_end_markers_to_folium_map(tmpdir):
+
+    move_df = _default_move_df()
+
+    base_map = visualization.create_base_map(
+        move_data=move_df,
+        lat_origin=None,
+        lon_origin=None,
+        tile=TILES[0],
+        default_zoom_start=12)
+
+    visualization._add_begin_end_markers_to_folium_map(move_df, base_map)
+
+    d = tmpdir.mkdir('prepossessing')
+
+    file_write_default = d.join('base_map_color.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map.save(filename_write_default)
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.marker')
+
+    count_l_popup = map_info.count('L.popup')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 2
+           and count_l_popup == 2
+           and count_head == 2
+           and count_body == 3
+           and count_script == 12)
+
+    assert(('L.marker(\n[39.984094,116.319236],'
+            '\n{"clusteredMarker":true,"color":"green"}')in map_info
+           and ('L.marker(\n[39.984217,116.319422],'
+                '\n{"clusteredMarker":true,"color":"red"}')in map_info)
