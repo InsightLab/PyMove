@@ -163,7 +163,7 @@ def test_time_to_str():
 
     data = default_date_time
 
-    time = datetime.time_to_str(default_date_time)
+    time = datetime.time_to_str(data)
 
     assert(time == expected)
 
@@ -177,7 +177,7 @@ def test_elapsed_time_dt():
 
     elapsed_time = datetime.elapsed_time_dt(data)
 
-    assert(elapsed_time == expected)
+    assert abs(elapsed_time - expected) <= 5
 
 
 def test_diff_time():
@@ -188,6 +188,6 @@ def test_diff_time():
 
     end_date = dt.datetime.strptime('2018-03-17', '%Y-%m-%d')
 
-    elapsed_time = datetime.diff_time(start_date, end_date)
+    diff_time = datetime.diff_time(start_date, end_date)
 
-    assert(elapsed_time == expected)
+    assert(diff_time == expected)
