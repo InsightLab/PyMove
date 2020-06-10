@@ -64,4 +64,5 @@ setup(
         'Operating System :: OS Independent',
     ],
     install_requires=DEPENDENCIES,
+    include_package_data=True
 )
