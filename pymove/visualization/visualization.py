@@ -112,7 +112,7 @@ def cmap_hex_color(cmap, i):
 
 
 def save_map(
-    move_data, filename, tiles=TILES[0], label_id=TRAJ_ID, cmap='tab20'
+    move_data, filename, tiles=TILES[0], label_id=TRAJ_ID, cmap='tab20', return_map=False
 ):
     """
     Save a visualization in a map in a new file.
@@ -154,6 +154,9 @@ def save_map(
         color_ = cmap_hex_color(cmap_, (id_index % num))
         folium.PolyLine(points_, weight=3, color=color_).add_to(map_)
     map_.save(filename)
+
+    if return_map:
+        return map_
 
 
 def save_wkt(move_data, filename, label_id=TRAJ_ID):

@@ -265,7 +265,9 @@ def test_meters_to_kilometers():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.meters_to_kilometers(move_df, new_label='converted_distance', inplace=True)
+    conversions.meters_to_kilometers(
+        move_df, new_label='converted_distance', inplace=True
+    )
 
     expected.rename(columns={DIST_TO_PREV: 'converted_distance'}, inplace=True)
 
@@ -327,7 +329,9 @@ def test_kilometers_to_meters():
 
     assert_frame_equal(new_move_df, expected)
 
-    conversions.kilometers_to_meters(move_df, new_label='converted_distance', inplace=True)
+    conversions.kilometers_to_meters(
+        move_df, new_label='converted_distance', inplace=True
+    )
 
     expected.rename(columns={DIST_TO_PREV: 'converted_distance'}, inplace=True)
 
