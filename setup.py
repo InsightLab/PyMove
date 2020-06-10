@@ -34,7 +34,7 @@ DEPENDENCIES = [
 ]
 setup(
     name='pymove',
-    version='1.3.6',
+    version='1.3.7',
     author='Insight Data Science Lab',
     author_email='insightlab@dc.ufc.br',
     license='MIT',
@@ -64,4 +64,5 @@ setup(
         'Operating System :: OS Independent',
     ],
     install_requires=DEPENDENCIES,
+    include_package_data=True
 )
