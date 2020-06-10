@@ -33,10 +33,10 @@ def _prepare_default_df():
     return move_df, cols
 
 
-def test_create_update_datetime_in_format_cyclical():
+def test_create_or_update_datetime_in_format_cyclical():
     move_df, cols = _prepare_default_df()
 
-    stay_point_detection.create_update_datetime_in_format_cyclical(move_df)
+    stay_point_detection.create_or_update_datetime_in_format_cyclical(move_df)
     print(move_df)
     expected = DataFrame(
         data=[
@@ -156,7 +156,7 @@ def test_create_or_update_move_stop_by_dist_time():
     assert_frame_equal(move_df, expected)
 
 
-def test_create_update_move_and_stop_by_radius():
+def test_create_or_update_move_and_stop_by_radius():
     move_df = MoveDataFrame(
         data=list_data,
         latitude=LATITUDE,
@@ -175,7 +175,7 @@ def test_create_update_move_and_stop_by_radius():
         'situation',
     ]
 
-    stay_point_detection.create_update_move_and_stop_by_radius(
+    stay_point_detection.create_or_update_move_and_stop_by_radius(
         move_df, radius=4.0
     )
     expected = DataFrame(
