@@ -12,9 +12,10 @@ from pymove.utils.constants import (
     STOP,
     TRAJ_ID,
 )
-from pymove.utils.log import progress_bar
+from pymove.utils.log import progress_bar, timer_decorator
 
 
+@timer_decorator
 def compress_segment_stop_to_point(
     move_data,
     label_segment=SEGMENT_STOP,
@@ -161,7 +162,6 @@ def compress_segment_stop_to_point(
             % (shape_before, move_data.shape[0])
         )
 
-        print('-----------------------------------------------------\n')
         if not inplace:
             return move_data
     except Exception as e:

@@ -1,10 +1,8 @@
-import os
 
 import numpy as np
-from pandas import DataFrame, Series, Timestamp
+from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
 
-import pymove
 from pymove import MoveDataFrame, transformations
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
 
