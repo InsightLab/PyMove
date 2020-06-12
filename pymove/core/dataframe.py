@@ -1,5 +1,3 @@
-import time
-
 import dask
 import matplotlib.pyplot as plt
 import numpy as np
@@ -77,7 +75,7 @@ class MoveDataFrame:
 
         Parameters
         ----------
-        data : dict, list, numpy array or pandas.core.DataFrame.
+        data : DataFrame.
             Input trajectory data.
 
         Returns
@@ -99,7 +97,7 @@ class MoveDataFrame:
 
         Parameters
         ----------
-        data : dict, list, numpy array or pandas.core.DataFrame.
+        data : DataFrame.
             Input trajectory data.
 
         Raises
@@ -399,6 +397,83 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         shape_ = self._data.shape
         self.last_operation = end_operation(operation)
         return shape_
+
+    def rename(
+            self,
+            mapper=None,
+            index=None,
+            columns=None,
+            axis=None,
+            copy=True,
+            inplace=False
+    ):
+        """
+        Alter axes labels.
+
+        Function / dict values must be unique (1-to-1).
+        Labels not contained in a dict / Series will be left as-is.
+        Extra labels listed don’t throw an error.
+
+        Parameters
+        ----------
+        mapper: dict-like or function
+            Dict-like or functions transformations to apply to that axis’ values.
+            Use either mapper and axis to specify the axis to target
+            with mapper, or index and columns.
+
+        index: dict-like or function
+            Alternative to specifying axis
+            (mapper, axis=0 is equivalent to index=mapper).
+
+        columns: dict-like or function
+            Alternative to specifying axis
+            (mapper, axis=1 is equivalent to columns=mapper).
+
+        axis: int or str
+            Axis to target with mapper.
+            Can be either the axis name (‘index’, ‘columns’) or number (0, 1).
+            The default is ‘index’.
+
+        copy: bool, default True
+            Also copy underlying data.
+
+        inplace: bool, default False
+            Whether to return a new DataFrame.
+            If True then value of copy is ignored.
+
+        Returns
+        -------
+        PandasMoveDataFrame or None
+            DataFrame with the renamed axis labels.
+
+        Raises
+        ------
+        AttributeError
+            If trying to rename a required column inplace
+
+        """
+
+        operation = begin_operation('rename')
+        if columns:
+            rename_ = self._data.rename(mapper=columns, axis=1, copy=copy)
+        elif index:
+            rename_ = self._data.rename(mapper=index, axis=0, copy=copy)
+        else:
+            rename_ = self._data.rename(mapper=mapper, axis=axis, copy=copy)
+
+        if inplace:
+            if MoveDataFrame.has_columns(rename_):
+                self._data = rename_
+                rename_ = None
+            else:
+                raise AttributeError(
+                    'Could not rename columns lat, lon, and datetime.'
+                )
+        else:
+            if MoveDataFrame.has_columns(rename_):
+                rename_ = PandasMoveDataFrame(data=rename_)
+        self.last_operation = end_operation(operation)
+        return rename_
 
     def len(self):
         """
@@ -1189,8 +1264,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        float
-            current time.
         array
             data_ unique ids.
         int
@@ -1199,8 +1272,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             size of id.
 
         """
-
-        start_time = time.time()
 
         if sort is True:
             print(
@@ -1212,7 +1283,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if data_.index.name is None:
             print(
-                '...Set %s as index to a higher peformance\n'
+                '...Set %s as index to a higher performance\n'
                 % label_id,
                 flush=True,
             )
@@ -1222,9 +1293,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         sum_size_id = 0
         size_id = 0
 
-        return start_time, ids, sum_size_id, size_id
+        return ids, sum_size_id, size_id
 
-    def _return_generated_data(self, data_, start_time, operation, inplace):
+    def _return_generated_data(self, data_, operation, inplace):
         """
         Finishes the generate methods.
 
@@ -1232,8 +1303,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         data_ : dataframe
             Dataframe with the generated features.
-        start_time : float
-            time when the operation started.
         operation : dict
             initial stats of the operation.
         inplace : bool, optional, default True.
@@ -1248,7 +1317,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
         print('...Reset index...\n')
         data_.reset_index(inplace=True)
-        print('..Total Time: %.3f' % (time.time() - start_time))
 
         if inplace:
             self.last_operation = end_operation(operation)
@@ -1305,7 +1373,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 message
             )
 
-            start_time, ids, sum_size_id, size_id = self._prepare_generate_data(
+            ids, sum_size_id, size_id = self._prepare_generate_data(
                 data_, sort, label_id
             )
 
@@ -1348,7 +1416,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     )  # unit: m/srs
 
             return self._return_generated_data(
-                data_, start_time, operation, inplace
+                data_, operation, inplace
             )
 
         except Exception as e:
@@ -1400,7 +1468,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         try:
             print('\nCreating or updating distance features in meters...\n')
 
-            start_time, ids, sum_size_id, size_id = self._prepare_generate_data(
+            ids, sum_size_id, size_id = self._prepare_generate_data(
                 data_, sort, label_id
             )
 
@@ -1445,7 +1513,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     )
 
             return self._return_generated_data(
-                data_, start_time, operation, inplace
+                data_, operation, inplace
             )
 
         except Exception as e:
@@ -1499,7 +1567,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 '\nCreating or updating time features seconds\n'
             )
 
-            start_time, ids, sum_size_id, size_id = self._prepare_generate_data(
+            ids, sum_size_id, size_id = self._prepare_generate_data(
                 data_, sort, label_id
             )
 
@@ -1534,7 +1602,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     data_.at[idx, TIME_PREV_TO_NEXT] = time_prev_to_next
 
             return self._return_generated_data(
-                data_, start_time, operation, inplace
+                data_, operation, inplace
             )
 
         except Exception as e:
@@ -1590,7 +1658,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             print(
                 '\nCreating or updating speed features meters by seconds\n'
             )
-            start_time = time.time()
 
             dist_cols = [DIST_TO_PREV, DIST_TO_NEXT, DIST_PREV_TO_NEXT]
             time_cols = [TIME_TO_PREV, TIME_TO_NEXT, TIME_PREV_TO_NEXT]
@@ -1609,7 +1676,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             data_[SPEED_PREV_TO_NEXT] = d_prev_next / times[TIME_PREV_TO_NEXT]
 
             return self._return_generated_data(
-                data_, start_time, operation, inplace
+                data_, operation, inplace
             )
 
         except Exception as e:
@@ -1758,6 +1825,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         -------
         matplotlib.pyplot.figure or None
             The generated picture.
+
+        Raises
+        ------
+        AttributeError
+            If there are no columns with the specified type
 
         """
 
@@ -2315,6 +2387,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.astype.html
 
+        Raises
+        ------
+        AttributeError
+            If trying to change required types inplace
+
         """
 
         if not copy and isinstance(dtype, str):
@@ -2484,6 +2561,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.set_index.html
 
+        Raises
+        ------
+        AttributeError
+            If trying to change required columns types
+
         """
 
         if inplace and drop:
@@ -2556,6 +2638,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Raises
         ------
+        AttributeError
+            If trying to drop a required column inplace
         KeyError
             If any of the labels is not found in the selected axis.
 
@@ -2945,6 +3029,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         References
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dropna.html
+
+        Raises
+        ------
+        AttributeError
+            If trying to drop required columns inplace
 
         """
 
@@ -3554,6 +3643,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     @property
     def shape(self):
         """Return a tuple representing the dimensionality of the DataFrame."""
+        raise NotImplementedError('To be implemented')
+
+    def rename(self):
+        """Alter axes labels.."""
         raise NotImplementedError('To be implemented')
 
     def len(self):

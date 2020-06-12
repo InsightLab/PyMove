@@ -1,2 +1,4 @@
 include pymove/_version.py
 include LICENSE
+include README.md
+include pymove/tests/baseline/*.png
