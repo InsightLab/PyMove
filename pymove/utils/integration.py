@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
-from constants import (
+
+from pymove.preprocessing import filters
+from pymove.utils.constants import (
     ADDRESS,
     CITY,
     DATETIME,
@@ -19,8 +21,6 @@ from constants import (
     TYPE_POI,
     VIOLATING,
 )
-
-from pymove.preprocessing import filters
 from pymove.utils.distances import haversine
 from pymove.utils.log import progress_bar
 
