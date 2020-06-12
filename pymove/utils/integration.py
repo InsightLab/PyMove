@@ -252,7 +252,7 @@ def _reset_set_window__and_creates_event_id_type(
 
 
 def join_with_pois(
-    df_, df_pois, label_id=TRAJ_ID, label_poi=POI, reset_index=True
+    df_, df_pois, label_id=TRAJ_ID, label_poi_type=TYPE_POI, reset_index=True
 ):
     """
     Performs the integration between trajectories and points
@@ -271,8 +271,8 @@ def join_with_pois(
     label_id : String, optional("id" by default)
         Label of df_pois referring to the Point of Interest id.
 
-    label_poi : String, optional("POI" by default)
-        Label of df_pois referring to the Point of Interest name.
+    label_poi_type : String, optional("type_poi" by default)
+        Label of df_pois referring to the Point of Interest type.
 
     reset_index : Boolean, optional(True by default)
         Flag for reset index of the df_pois and df_ dataframes before the join.
@@ -285,10 +285,7 @@ def join_with_pois(
         values = _reset_and_creates_id_and_lat_lon(df_, df_pois, reset_index)
         current_distances, ids_POIs, tag_POIs, lat_user, lon_user = values
 
-        for row in progress_bar(df_[[LATITUDE, LONGITUDE]].iterrows()):
-            # get lat and lon to each id
-            idx = row.index
-
+        for idx, row in progress_bar(df_.iterrows(), total=len(df_)):
             # create a vector to each lat
             lat_user.fill(row[LATITUDE])
             lon_user.fill(row[LONGITUDE])
@@ -309,7 +306,7 @@ def join_with_pois(
 
             # setting data for a single object movement
             ids_POIs[idx] = df_pois.at[index_min, label_id]
-            tag_POIs[idx] = df_pois.at[index_min, label_poi]
+            tag_POIs[idx] = df_pois.at[index_min, label_poi_type]
 
         df_[ID_POI] = ids_POIs
         df_[DIST_POI] = current_distances
@@ -317,7 +314,6 @@ def join_with_pois(
 
         print('Integration with POI was finalized')
     except Exception as e:
-        print('id: {}\n'.format(idx))
         raise e
 
 
@@ -347,7 +343,7 @@ def join_with_pois_optimizer(
     label_poi_id : String, optional("name" by default)
         Label of df_pois referring to the Point of Interest id.
 
-    label_poi_type : String, optional("POI" by default)
+    label_poi_type : String, optional("type_poi" by default)
         Label of df_pois referring to the Point of Interest type.
 
     dist_poi : List
@@ -372,9 +368,7 @@ def join_with_pois_optimizer(
                 inplace=True
             )
 
-            for row in progress_bar(df_pois.iterrows()):
-
-                idx = row.index
+            for idx, row in progress_bar(df_pois.iterrows(), total=len(df_pois)):
                 # update lat and lot of current index
                 lat_POI.fill(row[LATITUDE])
                 lon_POI.fill(row[LONGITUDE])
@@ -418,7 +412,6 @@ def join_with_pois_optimizer(
         else:
             print('the size of the dist_poi is different from ')
     except Exception as e:
-        print('id: {}\n'.format(idx))
         raise e
 
 
@@ -472,8 +465,7 @@ def join_with_pois_by_category(
             df_category = df_pois[df_pois[label_category] == c]
             df_category.reset_index(drop=True, inplace=True)
 
-            for row in progress_bar(df_[[LATITUDE, LONGITUDE]].iterrows()):
-                idx = row.index
+            for idx, row in progress_bar(df_.iterrows(), total=len(df_)):
                 lat_user = np.full(
                     df_category.shape[0], row[LATITUDE], dtype=np.float64
                 )
@@ -501,7 +493,6 @@ def join_with_pois_by_category(
         print('Integration with POI was finalized')
 
     except Exception as e:
-        print('id: {}\n'.format(idx))
         raise e
 
 
@@ -588,7 +579,6 @@ def join_with_poi_datetime(
         df_[label_event_type] = event_type
         print('Integration with event was completed')
     except Exception as e:
-        print('id: {}\n'.format(idx))
         raise e
 
 
@@ -649,9 +639,7 @@ def join_with_poi_datetime_optimizer(
             inplace=True
         )
 
-        for row in progress_bar(df_events.iterrows()):
-            idx = row.index
-
+        for idx, row in progress_bar(df_events.iterrows(), total=len(df_events)):
             df_filtered = filters.by_datetime(
                 df_, window_starts[idx], window_ends[idx]
             )
@@ -700,7 +688,6 @@ def join_with_poi_datetime_optimizer(
         print('Integration with events was completed')
 
     except Exception as e:
-        print('id: {}\n'.format(idx))
         raise e
 
 
@@ -792,7 +779,6 @@ def join_with_home_by_id(
         if drop_id_without_home:
             filters.by_id(df_, label_id, ids_without_home)
     except Exception as e:
-        print('Erro: idx: {}'.format(idx))
         raise e
 
 
