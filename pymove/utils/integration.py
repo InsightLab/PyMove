@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
-
-from pymove.preprocessing import filters
-from pymove.utils.constants import (
+from constants import (
     ADDRESS,
     CITY,
     DATETIME,
@@ -21,6 +19,8 @@ from pymove.utils.constants import (
     TYPE_POI,
     VIOLATING,
 )
+
+from pymove.preprocessing import filters
 from pymove.utils.distances import haversine
 from pymove.utils.log import progress_bar
 
@@ -163,6 +163,94 @@ def join_collective_areas(gdf_, gdf_rules_, label_geometry=GEOMETRY):
         gdf_.at[index, VIOLATING] = True
 
 
+def _reset_and_creates_id_and_lat_lon(df_, df_pois, reset_index=True):
+    """
+    Resets the indexes of the dataframes, returns the minimum distance
+    between the two dataframes, and return their respective variables
+    (id, tags, latitude and longitude).
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+
+    df_pois : dataframe
+        The input point of interest data.
+
+    reset_index : Boolean, optional(True by default)
+        Flag for reset index of the df_pois and df_ dataframes before the join.
+
+    Returns
+    -------
+    distances, ids, tags, lat, lon: arrays with default values for join operation
+
+    """
+
+    if reset_index:
+        print('... Resetting index to operation...')
+        df_.reset_index(drop=True, inplace=True)
+        df_pois.reset_index(drop=True, inplace=True)
+
+    # create numpy array to store new column to dataframe of movement objects
+    distances = np.full(
+        df_.shape[0], np.Infinity, dtype=np.float64
+    )
+    ids = np.full(df_.shape[0], np.NAN, dtype='object_')
+    tags = np.full(df_.shape[0], np.NAN, dtype='object_')
+
+    # creating lat and lon array to operation
+    lat = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
+    lon = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
+
+    return distances, ids, tags, lat, lon
+
+
+def _reset_set_window__and_creates_event_id_type(
+    df_, df_events, label_date, time_window
+):
+    """
+    Resets the indexes of the dataframes, set time window, and returns
+    the current distance between the two dataframes, and return their
+    respective variables (event_id, event_type).
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+
+    df_events : dataframe
+        The input event point of interest data.
+
+    label_date : String
+        Label of df_ referring to the datetime.
+
+    time_window : Int
+        Number of seconds of the time window.
+
+    Returns
+    -------
+    window_starts, window_ends, current_distances, event_id, event_type
+
+    """
+
+    # get a vector with windows time to each point
+    df_.reset_index(drop=True, inplace=True)
+    df_events.reset_index(drop=True, inplace=True)
+
+    # compute windows time
+    window_starts = df_[label_date] - pd.Timedelta(seconds=time_window)
+    window_ends = df_[label_date] + pd.Timedelta(seconds=time_window)
+
+    # create vector to store distances
+    current_distances = np.full(
+        df_.shape[0], np.Infinity, dtype=np.float64
+    )
+    event_type = np.full(df_.shape[0], np.NAN, dtype='object_')
+    event_id = np.full(df_.shape[0], np.NAN, dtype=np.int32)
+
+    return window_starts, window_ends, current_distances, event_id, event_type
+
+
 def join_with_pois(
     df_, df_pois, label_id=TRAJ_ID, label_poi=POI, reset_index=True
 ):
@@ -194,22 +282,8 @@ def join_with_pois(
     try:
         print('Integration with POIs...')
 
-        # get a vector with windows time to each point
-        if reset_index:
-            print('... Resetting index to operation...')
-            df_.reset_index(drop=True, inplace=True)
-            df_pois.reset_index(drop=True, inplace=True)
-
-        # create numpy array to store new column to dataframe of movement objects
-        current_distances = np.full(
-            df_.shape[0], np.Infinity, dtype=np.float64
-        )
-        ids_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
-        tag_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
-
-        # creating lat and lon array to operation
-        lat_user = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
-        lon_user = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
+        values = _reset_and_creates_id_and_lat_lon(df_, df_pois, reset_index)
+        current_distances, ids_POIs, tag_POIs, lat_user, lon_user = values
 
         for row in progress_bar(df_[[LATITUDE, LONGITUDE]].iterrows()):
             # get lat and lon to each id
@@ -290,21 +364,8 @@ def join_with_pois_optimizer(
         print('Integration with POIs optimized...')
 
         if len(df_pois[label_poi_type].unique()) == len(dist_poi):
-            # get a vector with windows time to each point
-            if reset_index:
-                print('... Resetting and dropping index')
-                df_.reset_index(drop=True, inplace=True)
-                df_pois.reset_index(drop=True, inplace=True)
-
-            # create numpy array to store new column to dataframe of movement objects
-            minimum_distances = np.full(
-                df_.shape[0], np.Infinity, dtype=np.float64
-            )
-            ids_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
-            tag_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
-
-            lat_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
-            lon_POI = np.full(df_.shape[0], np.NAN, dtype=np.float64)
+            values = _reset_and_creates_id_and_lat_lon(df_, df_pois, reset_index)
+            minimum_distances, ids_POIs, tag_POIs, lat_POI, lon_POI = values
 
             df_pois.rename(
                 columns={label_poi_id: TRAJ_ID, label_poi_type: TYPE_POI},
@@ -485,20 +546,10 @@ def join_with_poi_datetime(
     try:
         print('Integration with Events...')
 
-        # get a vector with windows time to each point
-        df_.reset_index(drop=True, inplace=True)
-        df_events.reset_index(drop=True, inplace=True)
-
-        # compute windows time
-        window_starts = df_[label_date] - pd.Timedelta(seconds=time_window)
-        window_ends = df_[label_date] + pd.Timedelta(seconds=time_window)
-
-        # create vector to store distances
-        current_distances = np.full(
-            df_.shape[0], np.Infinity, dtype=np.float64
+        values = _reset_set_window__and_creates_event_id_type(
+            df_, df_events, label_date, time_window
         )
-        event_type = np.full(df_.shape[0], np.NAN, dtype='object_')
-        event_id = np.full(df_.shape[0], np.NAN, dtype=np.int32)
+        window_starts, window_ends, current_distances, event_id, event_type = values
 
         for idx in progress_bar(df_.index):
             # filter event by datetime
@@ -583,20 +634,10 @@ def join_with_poi_datetime_optimizer(
     try:
         print('Integration with Events...')
 
-        # get a vector with windows time to each point
-        df_.reset_index(drop=True, inplace=True)
-        df_events.reset_index(drop=True, inplace=True)
-
-        # compute window time
-        window_starts = df_events[label_date] - pd.Timedelta(seconds=time_window)
-        window_ends = df_events[label_date] + pd.Timedelta(seconds=time_window)
-
-        # create vector to store distances
-        current_distances = np.full(
-            df_.shape[0], np.Infinity, dtype=np.float64
+        values = _reset_set_window__and_creates_event_id_type(
+            df_, df_events, label_date, time_window
         )
-        event_type = np.full(df_.shape[0], np.NAN, dtype='object_')
-        event_id = np.full(df_.shape[0], np.NAN, dtype=np.int32)
+        window_starts, window_ends, current_distances, event_id, event_type = values
 
         minimum_distances = np.full(
             df_.shape[0], np.Infinity, dtype=np.float64
