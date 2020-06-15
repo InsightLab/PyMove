@@ -292,7 +292,7 @@ def deltatime_str(deltatime_seconds):
     --------
     >>> from pymove import datetime
     >>> datetime.deltatime_str(1082.7180936336517)
-    "00:18:02.718"
+    "18m:02.718s"
 
     Notes
     -----
@@ -301,11 +301,14 @@ def deltatime_str(deltatime_seconds):
 
     """
 
-    time_int = int(deltatime_seconds)
-    time_dec = int((deltatime_seconds - time_int) * 1000)
-    times = (time_int // 3600, time_int % 3600 // 60, time_int % 60, time_dec)
-    time_str = '%02d:%02d:%02d.%03d' % times
-    return time_str
+    hours, rem = divmod(deltatime_seconds, 3600)
+    minutes, seconds = divmod(rem, 60)
+    if hours:
+        return '{:0>2}h:{:0>2}m:{:05.2f}s'.format(int(hours), int(minutes), seconds)
+    elif minutes:
+        return '{:0>2}m:{:05.2f}s'.format(int(minutes), seconds)
+    else:
+        return '{:05.2f}s'.format(seconds)
 
 
 def timestamp_to_millis(timestamp):

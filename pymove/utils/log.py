@@ -1,10 +1,32 @@
+import time
+from functools import wraps
+
 from IPython import get_ipython
 from IPython.display import display
 from ipywidgets import HTML, IntProgress, VBox
 from tqdm import tqdm
 
+from pymove.utils.datetime import deltatime_str
 
-def log_progress(sequence, every=None, size=None, desc='Items'):
+
+def timer_decorator(func):
+    """A decorator that prints how long a function took to run."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        t_start = time.time()
+        result = func(*args, **kwargs)
+        t_total = deltatime_str(time.time() - t_start)
+        message = '%s took %s' % (func.__name__, t_total)
+        print('*' * len(message))
+        print(message)
+        print('*' * len(message))
+        return result
+
+    return wrapper
+
+
+def _log_progress(sequence, every=None, size=None, desc='Items'):
     """
     Make and display a progress bar.
 
@@ -67,7 +89,7 @@ def log_progress(sequence, every=None, size=None, desc='Items'):
 
 try:
     if get_ipython().__class__.__name__ == 'ZMQInteractiveShell':
-        progress_bar = log_progress
+        progress_bar = _log_progress
     else:
         raise NameError
 except NameError:
