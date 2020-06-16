@@ -1,4 +1,3 @@
-from sqlite3 import OperationalError
 
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
@@ -94,16 +93,6 @@ def test_read_postgres():
                                    in_memory=False)
 
     assert_frame_equal(new_move_df, expected)
-
-    try:
-        new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db',
-                                       psswrd='erro')
-
-        raise AssertionError(
-            'OperationalError error not raised by MoveDataFrame'
-        )
-    except OperationalError:
-        pass
 
 
 def test_read_sql_inmem_uncompressed():
