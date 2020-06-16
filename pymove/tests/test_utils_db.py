@@ -31,7 +31,7 @@ DB_NAME = 'travis_ci_test'
 
 df_move = _default_move_df()
 
-db.write_postgres(table='test_read_db', dataframe=df_move)
+db.write_postgres(table='test_read_db', dbname=DB_NAME, dataframe=df_move)
 
 
 def test_connect_postgres():
@@ -58,18 +58,18 @@ def test_write_postgres():
 
     move_df = _default_move_df()
 
-    db.write_postgres(table='test_table', dataframe=move_df)
+    db.write_postgres(table='test_table',dbname=DB_NAME, dataframe=move_df)
 
-    new_move_df = db.read_postgres(query='SELECT * FROM public.test_table')
+    new_move_df = db.read_postgres(dbname=DB_NAME, query='SELECT * FROM public.test_table')
 
     assert_frame_equal(new_move_df, expected)
 
-    db._create_table(table='test_new_table')
+    db._create_table(table='test_new_table', dbname=DB_NAME)
 
     '''Testing using an existing table'''
-    db.write_postgres(table='test_new_table', dataframe=move_df)
+    db.write_postgres(table='test_new_table', dbname=DB_NAME, dataframe=move_df)
 
-    new_move_df = db.read_postgres(query='SELECT * FROM public.test_new_table')
+    new_move_df = db.read_postgres(dbname=DB_NAME, query='SELECT * FROM public.test_new_table')
 
     assert_frame_equal(new_move_df, expected)
 
@@ -87,12 +87,12 @@ def test_read_postgres():
         index=[0, 1, 2, 3],
     )
 
-    new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db')
+    new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db', dbname=DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
 
     new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db',
-                                   in_memory=False)
+                                   in_memory=False, dbname=DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
 
@@ -113,7 +113,7 @@ def test_read_sql_inmem_uncompressed():
     conn = db.connect_postgres(DB_NAME)
 
     new_move_df = db.read_sql_inmem_uncompressed(query='SELECT * FROM public.test_read_db',
-                                                 conn=conn)
+                                                 conn=conn, dbname=DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
 
@@ -134,6 +134,6 @@ def test_read_sql_tmpfile():
     conn = db.connect_postgres(DB_NAME)
 
     new_move_df = db.read_sql_tmpfile(query='SELECT * FROM public.test_read_db',
-                                      conn=conn)
+                                      conn=conn, dbname=DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
