@@ -113,7 +113,7 @@ def test_read_sql_inmem_uncompressed():
     conn = db.connect_postgres(DB_NAME)
 
     new_move_df = db.read_sql_inmem_uncompressed(query='SELECT * FROM public.test_read_db',
-                                                 conn=conn, dbname=DB_NAME)
+                                                 conn=conn)
 
     assert_frame_equal(new_move_df, expected)
 
@@ -134,6 +134,6 @@ def test_read_sql_tmpfile():
     conn = db.connect_postgres(DB_NAME)
 
     new_move_df = db.read_sql_tmpfile(query='SELECT * FROM public.test_read_db',
-                                      conn=conn, dbname=DB_NAME)
+                                      conn=conn)
 
     assert_frame_equal(new_move_df, expected)
