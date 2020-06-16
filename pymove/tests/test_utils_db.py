@@ -108,9 +108,7 @@ def test_read_sql_inmem_uncompressed():
 
     conn = db.connect_postgres(DB_NAME)
 
-    new_move_df = db.read_sql_inmem_uncompressed(query=('SELECT * FROM '
-                                                        'public.test_read_db '
-                                                        'WHERE id = 1'),
+    new_move_df = db.read_sql_inmem_uncompressed(query='SELECT * FROM public.test_read_db WHERE id = 1',
                                                  conn=conn)
 
     assert_frame_equal(new_move_df, expected)
