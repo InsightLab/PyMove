@@ -1,3 +1,4 @@
+from MySQLdb import OperationalError
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
 from psycopg2.extensions import connection
@@ -10,7 +11,7 @@ from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
 list_data = [
     [39.984094, 116.319236, '2008-10-23 05:53:05', 1],
     [39.984198, 116.319322, '2008-10-23 05:53:06', 1],
-    [39.984224, 116.319402, '2008-10-23 05:53:11', 1],
+    [39.984224, 116.319402, '2008-10-23 05:53:11', 2],
     [39.984224, 116.319402, '2008-10-23 05:53:11', 2],
 ]
 
@@ -28,6 +29,8 @@ def _default_move_df():
 TABLE_NAME = 'test_table'
 DB_NAME = 'travis_ci_test'
 
+db.write_postgres(table='test_read_db', dataframe=_default_move_df())
+
 
 def test_connect_postgres():
     conn = db.connect_postgres(DB_NAME)
@@ -44,7 +47,7 @@ def test_write_postgres():
         data=[
             [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05')],
             [2, 1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06')],
-            [3, 1, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')],
+            [3, 2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')],
             [4, 2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')]
         ],
         columns=['_id', 'id', 'lat', 'lon', 'datetime'],
@@ -53,8 +56,92 @@ def test_write_postgres():
 
     move_df = _default_move_df()
 
-    db.write_postgres(table='testedb', dataframe=move_df)
+    db.write_postgres(table='test_table', dataframe=move_df)
 
-    new_move_df = db.read_postgres(query='SELECT * FROM public.testedb')
+    new_move_df = db.read_postgres(query='SELECT * FROM public.test_table')
+
+    assert_frame_equal(new_move_df, expected)
+
+    db._create_table(table='test_new_table')
+
+    '''Testing using an existing table'''
+    db.write_postgres(table='test_new_table', dataframe=move_df)
+
+    new_move_df = db.read_postgres(query='SELECT * FROM public.test_new_table')
+
+    assert_frame_equal(new_move_df, expected)
+
+
+def test_read_postgres():
+
+    expected = DataFrame(
+        data=[
+            [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05')],
+            [2, 1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06')],
+            [3, 2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')],
+            [4, 2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')]
+        ],
+        columns=['_id', 'id', 'lat', 'lon', 'datetime'],
+        index=[0, 1, 2, 3],
+    )
+
+    new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db')
+
+    assert_frame_equal(new_move_df, expected)
+
+    new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db',
+                                   in_memory=False)
+
+    assert_frame_equal(new_move_df, expected)
+
+    try:
+        new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db',
+                                       psswrd='erro')
+
+        raise AssertionError(
+            'OperationalError error not raised by MoveDataFrame'
+        )
+    except OperationalError:
+        pass
+
+
+def test_read_sql_inmem_uncompressed():
+
+    expected = DataFrame(
+        data=[
+            [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05')],
+            [2, 1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06')]
+        ],
+        columns=['_id', 'id', 'lat', 'lon', 'datetime'],
+        index=[0, 1],
+    )
+
+    conn = db.connect_postgres(DB_NAME)
+
+    new_move_df = db.read_sql_inmem_uncompressed(query=('SELECT * FROM '
+                                                        'public.test_read_db '
+                                                        'WHERE id = 1'),
+                                                 conn=conn)
+
+    assert_frame_equal(new_move_df, expected)
+
+
+def test_read_sql_tmpfile():
+
+    expected = DataFrame(
+        data=[
+            [3, 1, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')],
+            [4, 2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')]
+        ],
+        columns=['_id', 'id', 'lat', 'lon', 'datetime'],
+        index=[0, 1],
+    )
+
+    conn = db.connect_postgres(DB_NAME)
+
+    new_move_df = db.read_sql_tmpfile(query=('SELECT * FROM '
+                                             'public.test_read_db '
+                                             'WHERE id = 1'),
+                                      conn=conn)
 
     assert_frame_equal(new_move_df, expected)
