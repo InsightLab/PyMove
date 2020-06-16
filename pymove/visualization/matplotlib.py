@@ -1,8 +1,6 @@
-import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
-from pymove.utils import constants
 
+from pymove.utils import constants
 from pymove.utils.constants import (
     COLORS,
     COUNT,
@@ -27,7 +25,7 @@ def show_object_id_by_date(
     figsize=(21, 9),
     return_fig=True,
     save_fig=True,
-    name="shot_points_by_date.png",
+    name='shot_points_by_date.png',
 ):
     """
     Generates four visualizations based on datetime feature:
@@ -63,7 +61,7 @@ def show_object_id_by_date(
     https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
     """
     if kind is None:
-        kind = ["bar", "bar", "line", "line"]
+        kind = ['bar', 'bar', 'line', 'line']
 
     fig, ax = plt.subplots(2, 2, figsize=figsize)
 
@@ -99,14 +97,15 @@ def show_object_id_by_date(
     if return_fig:
         return fig
 
+
 def show_lat_lon_gps(
     move_data,
-    kind="scatter",
+    kind='scatter',
     figsize=(21, 9),
     plot_start_and_end=True,
     return_fig=True,
     save_fig=False,
-    name="show_gps_points.png",
+    name='show_gps_points.png',
 ):
     """
     Generate a visualization with points [lat, lon] of dataset.
@@ -143,13 +142,13 @@ def show_lat_lon_gps(
                 plt.plot(
                     move_data.iloc[0][LONGITUDE],
                     move_data.iloc[0][LATITUDE],
-                    "yo",
+                    'yo',
                     markersize=10,
                 )  # start point
                 plt.plot(
                     move_data.iloc[-1][LONGITUDE],
                     move_data.iloc[-1][LATITUDE],
-                    "yX",
+                    'yX',
                     markersize=10,
                 )  # end point
             if save_fig:
@@ -161,225 +160,42 @@ def show_lat_lon_gps(
         raise exception
 
 
-def plot_all_features(
-        self,
-        dtype=np.float32,
-        figsize=(21, 15),
-        return_fig=True,
-        save_fig=False,
-        name="features.png",
-    ):
-        """
-        Generate a visualization for each columns that type_ is equal dtype.
+def show_grid_polygons(
+    df_,
+    id_,
+    label_id=constants.TRAJ_ID,
+    label_polygon='polygon',
+    figsize=(10, 10)
+):
+    """
+    Plot polygons.
 
-        Parameters
-        ----------
-        figsize : tuple, optional, default (21, 15).
-            Represents dimensions of figure.
+    Parameters:
+    -----------
+    df_: DataFrame.
+        Input move data.
+    id_: int.
+        Trajectory id.
+    label_id: string, optional, default pymove.constants.TRAJ_ID.
 
-        dtype : type_, optional, default np.float32.
-            Represents column type_.
+    label_polygon: string, optional, default 'polygon'.
+        The column name with GeoPandas polygons.
+    figsize: 2-tuple, optional, default (10,10).
+        The figure size.
+    """
+    fig = plt.figure(figsize=figsize)
 
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
+    # filter dataframe by id
+    df_ = df_[df_[label_id] == id]
 
-        save_fig : bool, optional, default False.
-            Represents whether or not to save the generated picture.
+    xs_start, ys_start = df_.iloc[0][label_polygon].exterior.xy
+    # xs_end, ys_end = df_.iloc[1][label_polygon].exterior.xy
 
-        name : String, optional, default 'features.png'.
-            Represents name of a file.
+    plt.plot(ys_start, xs_start, 'bo', markersize=20)             # start tnz_point
+    # plt.plot(ys_end, xs_end, 'rX', markersize=20)           # end tnz_point
 
-        Returns
-        -------
-        fig : matplotlib.pyplot.figure or None
-            The generated picture.
-        """
-        operation = begin_operation("plot_all_features")
+    for idx in range(df_.shape[0]):
+        xs, ys = df_[label_polygon].iloc[idx].exterior.xy
+        plt.plot(ys, xs, 'g', linewidth=2, markersize=5)
 
-        try:
-            col_dtype = self._data.select_dtypes(include=[dtype]).columns
-            tam = col_dtype.size
-            if not tam:
-                raise AttributeError(f"No columns with dtype {dtype}.")
-
-            fig, ax = plt.subplots(tam, 1, figsize=figsize)
-            ax_count = 0
-            for col in col_dtype:
-                ax[ax_count].set_title(col)
-                self._data[col].plot(subplots=True, ax=ax[ax_count])
-                ax_count += 1
-
-            if save_fig:
-                plt.savefig(fname=name, fig=fig)
-
-            self.last_operation = end_operation(operation)
-
-            if return_fig:
-                return fig
-        except Exception as e:
-            self.last_operation = end_operation(operation)
-            raise e
-
-def plot_trajs(
-        self,
-        markers="o",
-        markersize=20,
-        figsize=(10, 10),
-        return_fig=True,
-        save_fig=False,
-        name="trajectories.png",
-    ):
-        """
-        Generate a visualization that show trajectories.
-
-        Parameters
-        ----------
-        figsize : tuple, optional, default (10, 10).
-            Represents dimensions of figure.
-
-        markers : String, optional, default 'o'.
-            Represents visualization type_ marker.
-
-        markersize : int, optional, default 20.
-            Represents visualization size marker.
-
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
-
-        save_fig : bool, optional, default False.
-            Represents whether or not to save the generated picture.
-
-        name : String, optional, default 'trajectories.png'.
-            Represents name of a file.
-
-        Returns
-        -------
-        fig : matplotlib.pyplot.figure or None
-            The generated picture.
-        """
-
-        operation = begin_operation("plot_trajs")
-
-        fig = plt.figure(figsize=figsize)
-
-        ids = self._data["id"].unique()
-        for id_ in ids:
-            selfid = self._data[self._data["id"] == id_]
-            plt.plot(
-                selfid[LONGITUDE],
-                selfid[LATITUDE],
-                markers,
-                markersize=markersize,
-            )
-
-        if save_fig:
-            plt.savefig(fname=name, fig=fig)
-
-        self.last_operation = end_operation(operation)
-
-        if return_fig:
-            return fig
-
-def plot_traj_id(
-        self,
-        tid,
-        highlight=None,
-        figsize=(10, 10),
-        return_fig=True,
-        save_fig=False,
-        name=None,
-    ):
-        """
-        Generate a visualization that shows a trajectory with the specified tid.
-
-        Parameters
-        ----------
-        tid : String.
-            Represents the trajectory tid.
-
-        highlight: String, optional, default None.
-            Name of the feature to highlight on plot.
-            If value of feature is 1, it will be highlighted as green marker
-
-        figsize : tuple, optional, default (10,10).
-            Represents dimensions of figure.
-
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
-
-        save_fig : bool, optional, default False.
-            Represents whether or not to save the generated picture.
-
-        name : String, optional, default None.
-            Represents name of a file.
-
-
-        Returns
-        -------
-        move_data : pymove.core.MoveDataFrameAbstract subclass.
-            Trajectory with the specified tid.
-
-        fig : matplotlib.pyplot.figure or None
-            The generated picture.
-
-        Raises
-        ------
-        KeyError if the dataframe does not contains the TID feature
-        IndexError if there is no trajectory with the tid passed
-        """
-
-        operation = begin_operation("plot_traj_id")
-
-        if TID not in self._data:
-            self.last_operation = end_operation(operation)
-            raise KeyError("TID feature not in dataframe")
-
-        df_ = self._data[self._data[TID] == tid]
-
-        if not len(df_):
-            self.last_operation = end_operation(operation)
-            raise IndexError(f"No trajectory with tid {tid} in dataframe")
-
-        fig = plt.figure(figsize=figsize)
-
-        plt.plot(
-            df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], "yo", markersize=20
-        )  # start point
-        plt.plot(
-            df_.iloc[-1][LONGITUDE],
-            df_.iloc[-1][LATITUDE],
-            "yX",
-            markersize=20,
-        )  # end point
-
-        if (not highlight) or (highlight not in df_):
-            plt.plot(df_[LONGITUDE], df_[LATITUDE])
-            plt.plot(
-                df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], "r.", markersize=8
-            )  # points
-        else:
-            filter_ = df_[highlight] == 1
-            selfnodes = df_.loc[filter_]
-            selfpoints = df_.loc[~filter_]
-            plt.plot(selfnodes[LONGITUDE], selfnodes[LATITUDE], linewidth=3)
-            plt.plot(selfpoints[LONGITUDE], selfpoints[LATITUDE])
-            plt.plot(
-                selfnodes[LONGITUDE], selfnodes[LATITUDE], "go", markersize=10
-            )  # nodes
-            plt.plot(
-                selfpoints[LONGITUDE], selfpoints[LATITUDE], "r.", markersize=8
-            )  # points
-
-        if save_fig:
-            if not name:
-                name = f"trajectory_{tid}.png"
-            plt.savefig(fname=name, fig=fig)
-
-        df_ = PandasMoveDataFrame(df_)
-
-        self.last_operation = end_operation(operation)
-
-        if return_fig:
-            return df_, fig
-        return df_
-
+    return df_, fig
