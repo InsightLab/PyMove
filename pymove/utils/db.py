@@ -156,7 +156,12 @@ def write_postgres(
     sql = 'INSERT INTO %s(%s) VALUES(%s)' % (table, columns, values)
     clear = 'DELETE FROM %s' % table
     try:
-        _create_table(table)
+        _create_table(table,
+                      dbname=dbname,
+                      user=user,
+                      psswrd=psswrd,
+                      host=host,
+                      port=port)
         conn = connect_postgres(dbname, user, psswrd, host, port)
         cur = conn.cursor()
         cur.execute(clear)
