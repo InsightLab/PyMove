@@ -1845,7 +1845,7 @@ def show_trajs_with_event(
         if df_filted['nearby'].any():
 
             # buildng the df for the first tnz_points of tnz in nearby cvp
-            df_begin = df_filted[df_filted['nearby'] is True].sort_values(
+            df_begin = df_filted[df_filted['nearby']].sort_values(
                 dict_labels['tnz_datetime']
             )
 
