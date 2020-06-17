@@ -44,7 +44,7 @@ def test_connect_mongo():
     assert isinstance(conn, Database)
 
 
-def test_write_postgres():
+def write_postgres():
     expected = DataFrame(
         data=[
             [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05')],
@@ -74,7 +74,7 @@ def test_write_postgres():
     assert_frame_equal(new_move_df, expected)
 
 
-def test_read_postgres():
+def read_postgres():
 
     expected = DataFrame(
         data=[
@@ -101,10 +101,10 @@ def test_read_sql_inmem_uncompressed():
 
     expected = DataFrame(
         data=[
-            [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05')],
-            [2, 1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06')],
-            [3, 2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')],
-            [4, 2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')]
+            [9, 1, 39.984094, 116.319236, ('2008-10-23 05:53:05')],
+            [10, 1, 39.984198, 116.319322, ('2008-10-23 05:53:06')],
+            [11, 2, 39.984224, 116.319402, ('2008-10-23 05:53:11')],
+            [12, 2, 39.984224, 116.319402, ('2008-10-23 05:53:11')]
         ],
         columns=['_id', 'id', 'lat', 'lon', 'datetime'],
         index=[0, 1, 2, 3],
@@ -122,10 +122,10 @@ def test_read_sql_tmpfile():
 
     expected = DataFrame(
         data=[
-            [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05')],
-            [2, 1, 39.984198, 116.319322, Timestamp('2008-10-23 05:53:06')],
-            [3, 2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')],
-            [4, 2, 39.984224, 116.319402, Timestamp('2008-10-23 05:53:11')]
+            [9, 1, 39.984094, 116.319236, ('2008-10-23 05:53:05')],
+            [10, 1, 39.984198, 116.319322, ('2008-10-23 05:53:06')],
+            [11, 2, 39.984224, 116.319402, ('2008-10-23 05:53:11')],
+            [12, 2, 39.984224, 116.319402, ('2008-10-23 05:53:11')]
         ],
         columns=['_id', 'id', 'lat', 'lon', 'datetime'],
         index=[0, 1, 2, 3],
@@ -135,5 +135,7 @@ def test_read_sql_tmpfile():
 
     new_move_df = db.read_sql_tmpfile(query='SELECT * FROM public.test_read_db',
                                       conn=conn)
+
+    print(new_move_df)
 
     assert_frame_equal(new_move_df, expected)
