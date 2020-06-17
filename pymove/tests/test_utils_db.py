@@ -31,6 +31,7 @@ DB_NAME = 'travis_ci_test'
 
 df_move = _default_move_df()
 
+
 db.write_postgres(table='test_read_db', dbname=DB_NAME, dataframe=df_move)
 
 
@@ -58,9 +59,10 @@ def test_write_postgres():
 
     move_df = _default_move_df()
 
-    db.write_postgres(table='test_table',dbname=DB_NAME, dataframe=move_df)
+    db.write_postgres(table='test_table', dbname=DB_NAME, dataframe=move_df)
 
-    new_move_df = db.read_postgres(dbname=DB_NAME, query='SELECT * FROM public.test_table')
+    new_move_df = db.read_postgres(dbname=DB_NAME,
+                                   query='SELECT * FROM public.test_table')
 
     assert_frame_equal(new_move_df, expected)
 
@@ -69,7 +71,8 @@ def test_write_postgres():
     '''Testing using an existing table'''
     db.write_postgres(table='test_new_table', dbname=DB_NAME, dataframe=move_df)
 
-    new_move_df = db.read_postgres(dbname=DB_NAME, query='SELECT * FROM public.test_new_table')
+    new_move_df = db.read_postgres(dbname=DB_NAME,
+                                   query='SELECT * FROM public.test_new_table')
 
     assert_frame_equal(new_move_df, expected)
 
@@ -87,7 +90,8 @@ def test_read_postgres():
         index=[0, 1, 2, 3],
     )
 
-    new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db', dbname=DB_NAME)
+    new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db',
+                                   dbname=DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
 
@@ -112,7 +116,8 @@ def test_read_sql_inmem_uncompressed():
 
     conn = db.connect_postgres(DB_NAME)
 
-    new_move_df = db.read_sql_inmem_uncompressed(query='SELECT * FROM public.test_read_db',
+    new_move_df = db.read_sql_inmem_uncompressed(query=('SELECT * FROM '
+                                                        'public.test_read_db'),
                                                  conn=conn)
 
     assert_frame_equal(new_move_df, expected)
@@ -139,3 +144,23 @@ def test_read_sql_tmpfile():
     print(new_move_df)
 
     assert_frame_equal(new_move_df, expected)
+
+
+def test_create_table():
+
+    conn = db.connect_postgres(DB_NAME)
+    cur = conn.cursor()
+    cur.execute(('select exists(select * FROM information_schema.tables'
+                 'WHERE table_name=%s);'), ('test_table_creation',))
+    table_exists = cur.fetchone()[0]
+
+    assert(table_exists is False)
+
+    db._create_table(table='test_table_creation', dbname=DB_NAME)
+
+    cur = conn.cursor()
+    cur.execute(('select exists(select * FROM information_schema.tables'
+                 'WHERE table_name=%s);'), ('test_table_creation',))
+    table_exists = cur.fetchone()[0]
+
+    assert(table_exists is True)
