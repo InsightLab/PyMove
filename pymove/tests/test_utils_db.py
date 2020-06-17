@@ -150,7 +150,7 @@ def test_create_table():
 
     conn = db.connect_postgres(DB_NAME)
     cur = conn.cursor()
-    cur.execute(('select exists(select * FROM information_schema.tables'
+    cur.execute(('select exists(select * FROM information_schema.tables '
                  'WHERE table_name=%s);'), ('test_table_creation',))
     table_exists = cur.fetchone()[0]
 
@@ -159,7 +159,7 @@ def test_create_table():
     db._create_table(table='test_table_creation', dbname=DB_NAME)
 
     cur = conn.cursor()
-    cur.execute(('select exists(select * FROM information_schema.tables'
+    cur.execute(('select exists(select * FROM information_schema.tables '
                  'WHERE table_name=%s);'), ('test_table_creation',))
     table_exists = cur.fetchone()[0]
 
