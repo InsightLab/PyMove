@@ -3,7 +3,6 @@ from numpy.testing import assert_equal
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
 from psycopg2.extensions import connection
-from pymongo import MongoClient, collection
 from pymongo.database import Database
 
 from pymove import MoveDataFrame
@@ -184,12 +183,12 @@ def test_write_mongo():
 
     expected = DataFrame(
         data=[
-            [Timestamp('2008-10-23 05:53:05'), 1, 39.984094, 116.319236],
-            [Timestamp('2008-10-23 05:53:06'), 1, 39.984198, 116.319322],
-            [Timestamp('2008-10-23 05:53:11'), 2, 39.984224, 116.319402],
-            [Timestamp('2008-10-23 05:53:11'), 2, 39.984224, 116.319402]
+            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+            [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+            [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2]
         ],
-        columns=['datetime', 'id', 'lat', 'lon'],
+        columns=['lat', 'lon', 'datetime', 'id'],
         index=[0, 1, 2, 3],
     )
 
@@ -210,12 +209,12 @@ def test_read_mongo():
 
     expected = DataFrame(
         data=[
-            [Timestamp('2008-10-23 05:53:05'), 1, 39.984094, 116.319236],
-            [Timestamp('2008-10-23 05:53:06'), 1, 39.984198, 116.319322],
-            [Timestamp('2008-10-23 05:53:11'), 2, 39.984224, 116.319402],
-            [Timestamp('2008-10-23 05:53:11'), 2, 39.984224, 116.319402]
+            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+            [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2],
+            [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 2]
         ],
-        columns=['datetime', 'id', 'lat', 'lon'],
+        columns=['lat', 'lon', 'datetime', 'id'],
         index=[0, 1, 2, 3],
     )
 
@@ -242,12 +241,11 @@ def test_read_mongo():
 
 def test_get_mongo_collection():
 
-    expected = collection(Database(MongoClient(host=['localhost:27017'],
-                                               document_class=dict,
-                                               tz_aware=False, connect=True),
-                                   'travis_ci_test'), 'test_db')
+    expected = ("Collection(Database(MongoClient(host=['localhost:27017'], "
+                'document_class=dict, tz_aware=False, connect=True), '
+                "'travis_ci_test'), 'test_db')")
 
     coll = db.get_mongo_collection(collection='test_read_db',
                                    dbname=DB_NAME)
 
-    assert_equal(coll, expected)
+    assert_equal(str(coll), expected)
