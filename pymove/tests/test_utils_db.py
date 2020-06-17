@@ -220,10 +220,10 @@ def test_read_mongo():
 
     expected_filtered = DataFrame(
         data=[
-            [Timestamp('2008-10-23 05:53:05'), 39.984094],
-            [Timestamp('2008-10-23 05:53:06'), 39.984198],
+            [39.984094, Timestamp('2008-10-23 05:53:05')],
+            [39.984198, Timestamp('2008-10-23 05:53:06')],
         ],
-        columns=['datetime', 'lat'],
+        columns=['lat', 'datetime'],
         index=[0, 1],
     )
 
@@ -243,7 +243,7 @@ def test_get_mongo_collection():
 
     expected = ("Collection(Database(MongoClient(host=['localhost:27017'], "
                 'document_class=dict, tz_aware=False, connect=True), '
-                "'travis_ci_test'), 'test_db')")
+                "'travis_ci_test'), 'test_read_db')")
 
     coll = db.get_mongo_collection(collection='test_read_db',
                                    dbname=DB_NAME)
