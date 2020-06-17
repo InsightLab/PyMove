@@ -464,6 +464,7 @@ def read_mongo(
             collection, dbname, user, psswrd, host, port
         )
 
+        print(type(my_collection))
         cursor = my_collection.find(filter_, projection)
 
         dataframe = pd.DataFrame(list(cursor))
