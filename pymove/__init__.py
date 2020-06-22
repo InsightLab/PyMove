@@ -25,4 +25,4 @@ from .utils import (
     transformations,
 )
 from .utils.trajectories import read_csv
-from .visualization import visualization
+from .visualization import folium, matplotlib
