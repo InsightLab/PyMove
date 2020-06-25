@@ -635,7 +635,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return numpy_
 
-    def to_dict(self):
+    def to_dict(self, orient='dict'):
         """
         Converts trajectory data to dict format.
 
@@ -647,7 +647,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('to_dict')
-        dict_ = self._data.to_dict()
+        dict_ = self._data.to_dict(orient)
         self.last_operation = end_operation(operation)
 
         return dict_
