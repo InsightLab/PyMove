@@ -1,11 +1,27 @@
 language: python
 python: '3.6'
+
+services:
+  - mongodb
+  - postgresql
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
 script:
   - python setup.py sdist >/dev/null
   - python setup.py install
+  - pip install pytest
+  - pip install coverage
+  - coverage run -m pytest
+after_script:
+  - if [[ "$TRAVIS_BRANCH" = "master" || "$TRAVIS_BRANCH" = "developer" ]];
+        then
+            coverage xml -o "cobertura.xml";
+            bash <(curl -Ls https://coverage.codacy.com/get.sh);
+    fi;
 deploy:
   skip_existing: true
   provider: pypi
+  distributions: "sdist bdist_wheel"
   user: "__token__"
   password:
     secure: Cln487UPJR+jFHSRYtZfr/JJucJUKMS7GNCbtORV5Bz1rV/DZg8RLf4Em47EIPzRIsbHw9fYdU4Fh+CCOAWtiVRF/SJDfQ18PFlt8986WH1IVh8S8VfGOIMBoOPech2eOT5CtKzzT06+H2S4/qje4E6JgLf2KkuRc9zCv3l/Vbia4k0t0yX1Jneo1dhF17WmOeuO/jtlD9r1czed/lErfA5KB5OthA9HTDf+ulKI+jzZtZSbboU7W6kIn0Z1haj34iuZeRH9bFcxYKN2NyOfXiS2uoHCCVk7Jivj2vzGYaOdIico/XOQB3VC4kEBUpHcRLnJsxOd222wMcuKYGsATxb/wib6VgKJWZ0bLuxjrnBD4job4Id8PNpOJi3+52OitKxjPMPfXx1TrT/K9b+aIp2VYheUG2TnV15w2aeel8ORnoPss6GliquE/jaGgDZ91DH5hHbPaSQItYnOnf2IXYOAlDfTLeg/KVWR/LZdWLReEONI+UrUC+QPJiV03lUzvChKjoB4xAeZ0lomLHuDbI4ZI5V1Dn2UfMTB5Ri3v/njbRqw9t25+ZI3RZ2IaFbpee8Tpwu3D37Bqs62gQf/jcQiFOqOOUjajsOHhZQsRF9KH2e6IM68frlfTr/dOpqn5ijmKf+Hjr26z+ILtQV0gSM6Yv3wgMgBhLLM4+8L/A4=
