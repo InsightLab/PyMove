@@ -12,26 +12,24 @@ def std(values_array):
 
     Returns
     -------
-    float.
-        Represents the value of standart deviation.
+    float
+        Represents the value of standard deviation.
 
     References
     ----------
     squaring with * is over 3 times as fast as with **2
     http://stackoverflow.com/questions/29046346/comparison-of-power-to-multiplication-in-python
+
     """
+
     size = len(values_array)
     mean = sum(values_array) / size
     sum_sq = sum([(i - mean) * (i - mean) for i in values_array])
 
     try:
         result = math.sqrt(sum_sq / size)
-    except ValueError:
-        e = (
-            "(sum_sq / size) (size=%s, mean=%s, sum_sq=%s) should be non negative, but is %s"
-            % (size, mean, sum_sq, sum_sq / size)
-        )
-        raise ValueError(e)
+    except ValueError as e:
+        raise e
     return result
 
 
@@ -46,12 +44,13 @@ def avg_std(values_array):
 
     Returns
     -------
-    float.
+    float
         Represents the value of average.
+    float
+        Represents the value of standard deviation.
 
-    float.
-        Represents the value of standart deviation.
     """
+
     avg = sum(values_array) / len(values_array)
     return avg, std(values_array)
 
@@ -65,12 +64,13 @@ def std_sample(values_array):
     values_array : array like of numerical values.
         Represents the set of values to compute the operation.
 
-
     Returns
     -------
-    float.
+    float
         Represents the value of standard deviation of sample.
+
     """
+
     size = len(values_array)
     return std(values_array) * math.sqrt(size / (size - 1))
 
@@ -86,9 +86,11 @@ def avg_std_sample(values_array):
 
     Returns
     -------
-    float.
+    float
         Represents the value of average of standard deviation of sample.
+
     """
+
     avg = sum(values_array) / len(values_array)
     return avg, std_sample(values_array)
 
@@ -101,22 +103,24 @@ def arrays_avg(values_array, weights_array=None):
     ----------
     values_array : array like of numerical values.
         Represents the set of values to compute the operation.
-
     weights_array : array, optional, default None.
-        Used to calculate the weighted average, indicates the weight of each element in the array (values_array).
+        Used to calculate the weighted average, indicates the weight of
+        each element in the array (values_array).
 
     Returns
     -------
-    result : float.
+    float
         The mean of the array elements.
+
     """
+
     n = len(values_array)
 
     if weights_array is None:
         weights_array = [1] * n
     elif len(weights_array) != n:
         raise ValueError(
-            "values_array and qt_array must have the same number of rows"
+            'values_array and qt_array must have the same number of rows'
         )
 
     result = 0
@@ -125,26 +129,6 @@ def arrays_avg(values_array, weights_array=None):
         result += i * j
 
     return result / n
-
-
-def array_sum(values_array):
-    """
-    Computes the sum of the elements of the array.
-
-    Parameters
-    ----------
-    values_array : array like of numerical values.
-        Represents the set of values to compute the operation.
-
-    Returns
-    -------
-    sum_ : float.
-        The sum of the elements of the array.
-    """
-    sum_ = 0
-    for item in values_array:
-        sum_ += item
-    return sum_
 
 
 def array_stats(values_array):
@@ -159,15 +143,15 @@ def array_stats(values_array):
 
     Returns
     -------
-    sum_ : float.
+    float.
         The sum of all the elements in the array.
-
-    sum_sq : float
+    float
         The sum of the square value of each element in the array.
-
-    n : int.
+    int.
         The number of elements in the array.
+
     """
+
     sum_ = 0
     sum_sq = 0
     n = 0
@@ -180,36 +164,31 @@ def array_stats(values_array):
 
 def interpolation(x0, y0, x1, y1, x):
     """
-    Performs interpolation and extrapolation.
+    Performs interpolation.
 
     Parameters
     ----------
     x0 : float.
         The coordinate of the first point on the x axis.
-
     y0 : float.
         The coordinate of the first point on the y axis.
-
     x1 : float.
         The coordinate of the second point on the x axis.
-
     y1 : float.
         The coordinate of the second point on the y axis.
-
     x : float.
         A value in the interval (x0, x1).
 
     Returns
     -------
-    y : float.
+    float.
         Is the interpolated  or extrapolated value.
 
     Examples
     --------
-    interpolation 1: (30, 3, 40, 5, 37) -> 4.4
-    interpolation 2: (30, 3, 40, 5, 35) -> 4.0
-    extrapolation 1: (30, 3, 40, 5, 25) -> 2.0
-    extrapolation 2: (30, 3, 40, 5, 45) -> 6.0
+    - interpolation 1: (30, 3, 40, 5, 37) -> 4.4
+    - interpolation 2: (30, 3, 40, 5, 35) -> 4.0
+
     """
-    y = y0 + (y1 - y0) * ((x - x0) / (x1 - x0))
-    return y
+
+    return y0 + (y1 - y0) * ((x - x0) / (x1 - x0))
