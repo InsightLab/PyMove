@@ -1,8 +1,10 @@
-
 from numpy.testing import assert_equal
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
+from psycopg2 import connect, sql
 from psycopg2.extensions import connection
+from pymongo import MongoClient
+from pymongo.collection import Collection
 from pymongo.database import Database
 
 from pymove import MoveDataFrame
@@ -16,6 +18,22 @@ list_data = [
     [39.984224, 116.319402, '2008-10-23 05:53:11', 2],
 ]
 
+PG_DB_NAME = 'postgres'
+
+TEST_TABLE = 'test_table'
+TEST_NEW_TABLE = 'test_new_table'
+TABLE_READ = 'test_read'
+TEST_CREATE = 'test_create'
+
+TABLES = [
+    TEST_TABLE,
+    TEST_NEW_TABLE,
+    TABLE_READ,
+    TEST_CREATE
+]
+
+MG_DB_NAME = 'test'
+
 
 def _default_move_df():
     return MoveDataFrame(
@@ -27,25 +45,51 @@ def _default_move_df():
     )
 
 
-TABLE_NAME = 'test_table'
-DB_NAME = 'travis_ci_test'
-
 df_move = _default_move_df()
 
 
-db.write_postgres(table='test_read_db', dbname=DB_NAME, dataframe=df_move)
+def setup_module(module):
+    db.write_postgres(table=TABLE_READ, dbname=PG_DB_NAME, dataframe=df_move)
+    db.write_mongo(collection=TABLE_READ, dataframe=df_move, dbname=MG_DB_NAME)
 
-db.write_mongo(collection='test_read_db', dataframe=df_move, dbname=DB_NAME)
+
+def teardown_module(module):
+    conn = None
+    try:
+        conn = connect(
+            dbname=PG_DB_NAME,
+            user='postgres',
+            host='localhost',
+            password=''
+        )
+
+        cursor = conn.cursor()
+        for table in TABLES:
+            cursor.execute(sql.SQL(
+                'DROP TABLE {}'
+            ).format(sql.Identifier(table)))
+        conn.commit()
+        cursor.close()
+    except Exception as e:
+        if conn is not None:
+            conn.close()
+        raise e
+    finally:
+        if conn is not None:
+            conn.close()
+
+    conn = None
+    try:
+        conn = MongoClient('localhost', None)[MG_DB_NAME]
+        for table in TABLES:
+            conn[table].drop()
+    except Exception as e:
+        pass
 
 
 def test_connect_postgres():
-    conn = db.connect_postgres(DB_NAME)
+    conn = db.connect_postgres(PG_DB_NAME)
     assert isinstance(conn, connection)
-
-
-def test_connect_mongo():
-    conn = db.connect_mongo(DB_NAME)
-    assert isinstance(conn, Database)
 
 
 def test_write_postgres():
@@ -62,19 +106,21 @@ def test_write_postgres():
 
     move_df = _default_move_df()
 
-    db.write_postgres(table='test_table', dbname=DB_NAME, dataframe=move_df)
+    db.write_postgres(table=TEST_TABLE, dbname=PG_DB_NAME, dataframe=move_df)
 
-    new_move_df = db.read_postgres(dbname=DB_NAME,
-                                   query='SELECT * FROM public.test_table')
+    sql = 'SELECT * FROM public.%s' % TEST_TABLE
+    new_move_df = db.read_postgres(dbname=PG_DB_NAME,
+                                   query=sql)
 
     assert_frame_equal(new_move_df, expected)
 
-    db._create_table(table='test_new_table', dbname=DB_NAME)
+    db._create_table(table=TEST_NEW_TABLE, dbname=PG_DB_NAME)
 
     '''Testing using an existing table'''
-    db.write_postgres(table='test_new_table', dbname=DB_NAME, dataframe=move_df)
+    db.write_postgres(table=TEST_NEW_TABLE, dbname=PG_DB_NAME, dataframe=move_df)
 
-    new_move_df = db.read_postgres(dbname=DB_NAME,
+    sql = 'SELECT * FROM public.%s' % TEST_NEW_TABLE
+    new_move_df = db.read_postgres(dbname=PG_DB_NAME,
                                    query='SELECT * FROM public.test_new_table')
 
     assert_frame_equal(new_move_df, expected)
@@ -93,13 +139,14 @@ def test_read_postgres():
         index=[0, 1, 2, 3],
     )
 
-    new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db',
-                                   dbname=DB_NAME)
+    sql = 'SELECT * FROM public.%s' % TABLE_READ
+    new_move_df = db.read_postgres(query=sql,
+                                   dbname=PG_DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
 
-    new_move_df = db.read_postgres(query='SELECT * FROM public.test_read_db',
-                                   in_memory=False, dbname=DB_NAME)
+    new_move_df = db.read_postgres(query=sql,
+                                   in_memory=False, dbname=PG_DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
 
@@ -117,10 +164,10 @@ def test_read_sql_inmem_uncompressed():
         index=[0, 1, 2, 3],
     )
 
-    conn = db.connect_postgres(DB_NAME)
+    conn = db.connect_postgres(PG_DB_NAME)
 
-    new_move_df = db.read_sql_inmem_uncompressed(query=('SELECT * FROM '
-                                                        'public.test_read_db'),
+    sql = 'SELECT * FROM public.%s' % TABLE_READ
+    new_move_df = db.read_sql_inmem_uncompressed(query=(sql),
                                                  conn=conn)
 
     assert_frame_equal(new_move_df, expected)
@@ -139,9 +186,10 @@ def test_read_sql_tmpfile():
         index=[0, 1, 2, 3],
     )
 
-    conn = db.connect_postgres(DB_NAME)
+    conn = db.connect_postgres(PG_DB_NAME)
 
-    new_move_df = db.read_sql_tmpfile(query='SELECT * FROM public.test_read_db',
+    sql = 'SELECT * FROM public.%s' % TABLE_READ
+    new_move_df = db.read_sql_tmpfile(query=sql,
                                       conn=conn)
 
     print(new_move_df)
@@ -151,32 +199,55 @@ def test_read_sql_tmpfile():
 
 def test_create_table():
 
-    conn = db.connect_postgres(DB_NAME)
+    conn = db.connect_postgres(PG_DB_NAME)
     cur = conn.cursor()
     cur.execute(('select exists(select * FROM information_schema.tables '
-                 'WHERE table_name=%s);'), ('test_table_creation',))
+                 'WHERE table_name=%s);'), (TEST_CREATE,))
     table_exists = cur.fetchone()[0]
 
     assert(table_exists is False)
 
-    db._create_table(table='test_table_creation', dbname=DB_NAME)
+    db._create_table(table=TEST_CREATE, dbname=PG_DB_NAME)
 
     cur = conn.cursor()
     cur.execute(('select exists(select * FROM information_schema.tables '
-                 'WHERE table_name=%s);'), ('test_table_creation',))
+                 'WHERE table_name=%s);'), (TEST_CREATE,))
     table_exists = cur.fetchone()[0]
 
     assert(table_exists is True)
 
     '''Testing function execution when the table already exists'''
-    db._create_table(table='test_table_creation', dbname=DB_NAME)
+    db._create_table(table=TEST_CREATE, dbname=PG_DB_NAME)
 
     cur = conn.cursor()
     cur.execute(('select exists(select * FROM information_schema.tables '
-                 'WHERE table_name=%s);'), ('test_table_creation',))
+                 'WHERE table_name=%s);'), (TEST_CREATE,))
     table_exists = cur.fetchone()[0]
 
     assert(table_exists is True)
+
+
+def test_connect_mongo():
+    conn = db.connect_mongo(MG_DB_NAME)
+    expected = ("Database(MongoClient(host=['localhost:27017'], "
+                'document_class=dict, tz_aware=False, connect=True), '
+                "'test')")
+
+    assert isinstance(conn, Database)
+    assert_equal(str(conn), expected)
+
+
+def test_get_mongo_collection():
+
+    coll = db.get_mongo_collection(collection=TABLE_READ,
+                                   dbname=MG_DB_NAME)
+
+    expected = ("Collection(Database(MongoClient(host=['localhost:27017'], "
+                'document_class=dict, tz_aware=False, connect=True), '
+                "'test'), 'test_read')")
+
+    assert isinstance(coll, Collection)
+    assert_equal(str(coll), expected)
 
 
 def test_write_mongo():
@@ -194,13 +265,13 @@ def test_write_mongo():
 
     move_df = _default_move_df()
 
-    inserted_ids = db.write_mongo(collection='test_db',
+    inserted_ids = db.write_mongo(collection=TEST_TABLE,
                                   dataframe=df_move,
-                                  dbname=DB_NAME)
+                                  dbname=MG_DB_NAME)
 
     assert(inserted_ids == 4)
 
-    new_move_df = db.read_mongo(collection='test_db', dbname=DB_NAME)
+    new_move_df = db.read_mongo(collection=TEST_TABLE, dbname=MG_DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
 
@@ -227,25 +298,13 @@ def test_read_mongo():
         index=[0, 1],
     )
 
-    new_move_df = db.read_mongo(collection='test_read_db', dbname=DB_NAME)
+    new_move_df = db.read_mongo(collection=TABLE_READ, dbname=MG_DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
 
-    new_move_df = db.read_mongo(collection='test_read_db',
-                                dbname=DB_NAME,
+    new_move_df = db.read_mongo(collection=TABLE_READ,
+                                dbname=MG_DB_NAME,
                                 filter_={'id': 1},
                                 projection={'datetime', 'lat'})
 
     assert_frame_equal(new_move_df, expected_filtered)
-
-
-def test_get_mongo_collection():
-
-    expected = ("Collection(Database(MongoClient(host=['localhost:27017'], "
-                'document_class=dict, tz_aware=False, connect=True), '
-                "'travis_ci_test'), 'test_read_db')")
-
-    coll = db.get_mongo_collection(collection='test_read_db',
-                                   dbname=DB_NAME)
-
-    assert_equal(str(coll), expected)
