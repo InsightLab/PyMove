@@ -17,7 +17,6 @@ from pymove.utils.constants import (
     LATITUDE,
     LONGITUDE,
     NAME_POI,
-    POI,
     TRAJ_ID,
     TYPE_POI,
     VIOLATING,
