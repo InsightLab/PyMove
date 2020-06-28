@@ -8,8 +8,8 @@ from numpy.testing import assert_allclose, assert_array_equal
 from pandas import DataFrame, Series, Timedelta, Timestamp
 from pandas.testing import assert_frame_equal, assert_series_equal
 
-import pymove
 from pymove import DaskMoveDataFrame, MoveDataFrame, PandasMoveDataFrame, read_csv
+from pymove.core.grid import Grid
 from pymove.utils.constants import (
     DATE,
     DATETIME,
@@ -86,34 +86,18 @@ def _default_pandas_df():
     )
 
 
-def _has_columns(data):
-    if LATITUDE in data and LONGITUDE in data and DATETIME in data:
-        return True
-    return False
-
-
-def _validate_move_data_frame_data(data):
-    try:
-        if data.dtypes.lat != 'float64':
-            return False
-        if data.dtypes.lon != 'float64':
-            return False
-        if data.dtypes.datetime != 'datetime64[ns]':
-            return False
-        return True
-    except AttributeError:
-        print(AttributeError)
-
-
 def test_move_data_frame_from_list():
     move_df = _default_move_df()
-    assert _has_columns(move_df)
-    assert _validate_move_data_frame_data(move_df)
+    assert MoveDataFrame.has_columns(move_df)
+    try:
+        MoveDataFrame.validate_move_data_frame(move_df)
+    except Exception:
+        assert False
     assert isinstance(move_df, PandasMoveDataFrame)
 
 
 def test_move_data_frame_from_file(tmpdir):
-    d = tmpdir.mkdir('prepossessing')
+    d = tmpdir.mkdir('core')
 
     file_default_columns = d.join('test_read_default.csv')
     file_default_columns.write(str_data_default)
@@ -122,8 +106,11 @@ def test_move_data_frame_from_file(tmpdir):
     )
 
     move_df = read_csv(filename_default)
-    assert _has_columns(move_df)
-    assert _validate_move_data_frame_data(move_df)
+    assert MoveDataFrame.has_columns(move_df)
+    try:
+        MoveDataFrame.validate_move_data_frame(move_df)
+    except Exception:
+        assert False
     assert isinstance(move_df, PandasMoveDataFrame)
 
     file_different_columns = d.join('test_read_different.csv')
@@ -139,8 +126,11 @@ def test_move_data_frame_from_file(tmpdir):
         datetime='time',
         traj_id='traj_id',
     )
-    assert _has_columns(move_df)
-    assert _validate_move_data_frame_data(move_df)
+    assert MoveDataFrame.has_columns(move_df)
+    try:
+        MoveDataFrame.validate_move_data_frame(move_df)
+    except Exception:
+        assert False
     assert isinstance(move_df, PandasMoveDataFrame)
 
     file_missing_columns = d.join('test_read_missing.csv')
@@ -152,8 +142,11 @@ def test_move_data_frame_from_file(tmpdir):
     move_df = read_csv(
         filename_missing, names=[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
     )
-    assert _has_columns(move_df)
-    assert _validate_move_data_frame_data(move_df)
+    assert MoveDataFrame.has_columns(move_df)
+    try:
+        MoveDataFrame.validate_move_data_frame(move_df)
+    except Exception:
+        assert False
     assert isinstance(move_df, PandasMoveDataFrame)
 
 
@@ -174,8 +167,11 @@ def test_move_data_frame_from_dict():
         datetime=DATETIME,
         traj_id=TRAJ_ID,
     )
-    assert _has_columns(move_df)
-    assert _validate_move_data_frame_data(move_df)
+    assert MoveDataFrame.has_columns(move_df)
+    try:
+        MoveDataFrame.validate_move_data_frame(move_df)
+    except Exception:
+        assert False
     assert isinstance(move_df, PandasMoveDataFrame)
 
 
@@ -184,8 +180,11 @@ def test_move_data_frame_from_data_frame():
     move_df = MoveDataFrame(
         data=df, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME
     )
-    assert _has_columns(move_df)
-    assert _validate_move_data_frame_data(move_df)
+    assert MoveDataFrame.has_columns(move_df)
+    try:
+        MoveDataFrame.validate_move_data_frame(move_df)
+    except Exception:
+        assert False
     assert isinstance(move_df, PandasMoveDataFrame)
 
 
@@ -463,7 +462,7 @@ def test_to_grid():
         traj_id=TRAJ_ID,
     )
 
-    assert isinstance(move_df.to_grid(8), pymove.core.grid.Grid)
+    assert isinstance(move_df.to_grid(8), Grid)
 
 
 def test_to_data_frame():
@@ -1588,7 +1587,7 @@ def test_nunique():
 
 
 def test_write_file(tmpdir):
-    d = tmpdir.mkdir('prepossessing')
+    d = tmpdir.mkdir('core')
 
     file_write_default = d.join('test_write_default.csv')
     filename_write_default = os.path.join(
@@ -1610,7 +1609,7 @@ def test_write_file(tmpdir):
 
 
 def test_to_csv(tmpdir):
-    d = tmpdir.mkdir('prepossessing')
+    d = tmpdir.mkdir('core')
 
     file_csv = d.join('test_csv.csv')
     filename_csv = os.path.join(file_csv.dirname, file_csv.basename)
@@ -1803,7 +1802,7 @@ def test_plot_all_features(tmpdir):
 
     move_df = _default_move_df()
 
-    d = tmpdir.mkdir('prepossessing')
+    d = tmpdir.mkdir('core')
 
     file_write_default = d.join('features.png')
     filename_write_default = os.path.join(
@@ -1836,7 +1835,7 @@ def test_plot_trajs(tmpdir):
 
     move_df = _default_move_df()
 
-    d = tmpdir.mkdir('prepossessing')
+    d = tmpdir.mkdir('core')
 
     file_write_default = d.join('trajectories.png')
     filename_write_default = os.path.join(

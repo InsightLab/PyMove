@@ -2,7 +2,7 @@ import io
 import tempfile
 
 import pandas as pd
-import psycopg2
+from psycopg2 import connect
 from pymongo import MongoClient
 
 from pymove import MoveDataFrame
@@ -43,10 +43,78 @@ def connect_postgres(
             "dbname='%s' user='%s' password='%s' host='%s' port='%s'"
             % (dbname, user, psswrd, host, port)
         )
-        conn = psycopg2.connect(psql_params)
+        conn = connect(psql_params)
         return conn
     except Exception as e:
         raise e
+
+
+def _create_table(
+    table,
+    keys=None,
+    dbname='postgres',
+    user='postgres',
+    psswrd='',
+    host='localhost',
+    port=5432,
+):
+    """
+    Creates a SQL table if one doesn't exists.
+
+    Parameters
+    ----------
+    table: str
+        Name of the table
+    keys: dict, optional, default {
+            '_id': 'serial primary key',
+            'id': 'integer',
+            'lat': 'double precision',
+            'lon': 'double precision',
+            'datetime': 'timestamp'
+        }
+        Columns names and types
+    dbname : string, default 'postgres'
+        Name of the database
+    user : string, default 'postgres'
+        The user connecting to the database
+    psswrd : string, default ''
+        The password of the database
+    host : string, default 'localhost'
+        The address of the database
+    port : int, default 5432
+        The port of the database in the host
+
+    Returns
+    -------
+
+    """
+    if keys is None:
+        keys = {
+            '_id': 'serial primary key',
+            'id': 'integer',
+            'lat': 'double precision',
+            'lon': 'double precision',
+            'datetime': 'timestamp'
+        }
+    conn = None
+    try:
+        conn = connect_postgres(dbname, user, psswrd, host, port)
+        cur = conn.cursor()
+        columns = ''
+        for i in keys.items():
+            columns += '%s %s,' % i
+        columns = columns[:-1]
+        query = 'CREATE TABLE IF NOT EXISTS %s (%s)' % (table, columns)
+        cur.execute(query)
+        conn.commit()
+        cur.close()
+    except Exception as e:
+        if conn is not None:
+            conn.close()
+        raise e
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 def write_postgres(
@@ -82,15 +150,22 @@ def write_postgres(
 
     cols = dataframe.columns
     columns = ','.join(cols)
-    values = ','.join(['%srs'] * len(cols))
+    values = ','.join(['%s'] * len(cols))
 
     conn = None
-    sql = 'INSERT INTO %s(%s) VALUES(%s)' % (table, columns, values)
+    query = 'INSERT INTO %s(%s) VALUES(%s)' % (table, columns, values)
+    clear = 'DELETE FROM %s' % (table)
     try:
+        _create_table(table,
+                      dbname=dbname,
+                      user=user,
+                      psswrd=psswrd,
+                      host=host,
+                      port=port)
         conn = connect_postgres(dbname, user, psswrd, host, port)
         cur = conn.cursor()
-        cur.execute('DELETE FROM %srs', (table,))
-        cur.executemany(sql, dataframe.values)
+        cur.execute(clear)
+        cur.executemany(query, dataframe.values)
         conn.commit()
         cur.close()
     except Exception as e:
@@ -365,7 +440,7 @@ def read_mongo(
     type_ : 'pandas', 'dask' or None, defaults 'pandas'
         It will try to convert the dataframe into a MoveDataFrame
     no_id: bool, default True
-        Whether to drop the registers id'srs
+        Whether to drop the registers id's
     dbname : string, default 'postgres'
         Name of the database
     user : string, default 'postgres'
