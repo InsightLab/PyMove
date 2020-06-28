@@ -16,6 +16,7 @@ from pymove.utils.constants import (
     ID_POI,
     LATITUDE,
     LONGITUDE,
+    NAME_POI,
     POI,
     TRAJ_ID,
     TYPE_POI,
@@ -163,7 +164,7 @@ def join_collective_areas(gdf_, gdf_rules_, label_geometry=GEOMETRY):
         gdf_.at[index, VIOLATING] = True
 
 
-def _reset_and_creates_id_and_lat_lon(df_, df_pois, reset_index=True):
+def _reset_and_creates_id_and_lat_lon(df_, df_pois, lat_lon_poi=True, reset_index=True):
     """
     Resets the indexes of the dataframes, returns the minimum distance
     between the two dataframes, and return their respective variables
@@ -176,6 +177,9 @@ def _reset_and_creates_id_and_lat_lon(df_, df_pois, reset_index=True):
 
     df_pois : dataframe
         The input point of interest data.
+
+    lat_lon_poi : boolean (True by default)
+        Flag to detemine if the ids and tags is of size equivalent to df_pois
 
     reset_index : Boolean, optional(True by default)
         Flag for reset index of the df_pois and df_ dataframes before the join.
@@ -195,12 +199,17 @@ def _reset_and_creates_id_and_lat_lon(df_, df_pois, reset_index=True):
     distances = np.full(
         df_.shape[0], np.Infinity, dtype=np.float64
     )
-    ids = np.full(df_.shape[0], np.NAN, dtype='object_')
-    tags = np.full(df_.shape[0], np.NAN, dtype='object_')
+
+    ids = np.full(df_.shape[0], '', dtype='object_')
+    tags = np.full(df_.shape[0], '', dtype='object_')
 
     # creating lat and lon array to operation
-    lat = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
-    lon = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
+    if lat_lon_poi:
+        lat = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
+        lon = np.full(df_pois.shape[0], np.Infinity, dtype=np.float64)
+    else:
+        lat = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
+        lon = np.full(df_.shape[0], np.Infinity, dtype=np.float64)
 
     return distances, ids, tags, lat, lon
 
@@ -245,14 +254,14 @@ def _reset_set_window__and_creates_event_id_type(
     current_distances = np.full(
         df_.shape[0], np.Infinity, dtype=np.float64
     )
-    event_type = np.full(df_.shape[0], np.NAN, dtype='object_')
-    event_id = np.full(df_.shape[0], np.NAN, dtype=np.int32)
+    event_type = np.full(df_.shape[0], '', dtype='object_')
+    event_id = np.full(df_.shape[0], '', dtype='object_')
 
     return window_starts, window_ends, current_distances, event_id, event_type
 
 
 def join_with_pois(
-    df_, df_pois, label_id=TRAJ_ID, label_poi_type=TYPE_POI, reset_index=True
+    df_, df_pois, label_id=TRAJ_ID, label_poi_name=NAME_POI, reset_index=True
 ):
     """
     Performs the integration between trajectories and points
@@ -271,8 +280,8 @@ def join_with_pois(
     label_id : String, optional("id" by default)
         Label of df_pois referring to the Point of Interest id.
 
-    label_poi_type : String, optional("type_poi" by default)
-        Label of df_pois referring to the Point of Interest type.
+    label_poi_name : String, optional("type_poi" by default)
+        Label of df_pois referring to the Point of Interest name.
 
     reset_index : Boolean, optional(True by default)
         Flag for reset index of the df_pois and df_ dataframes before the join.
@@ -282,7 +291,7 @@ def join_with_pois(
     try:
         print('Integration with POIs...')
 
-        values = _reset_and_creates_id_and_lat_lon(df_, df_pois, reset_index)
+        values = _reset_and_creates_id_and_lat_lon(df_, df_pois, True, reset_index)
         current_distances, ids_POIs, tag_POIs, lat_user, lon_user = values
 
         for idx, row in progress_bar(df_.iterrows(), total=len(df_)):
@@ -306,11 +315,11 @@ def join_with_pois(
 
             # setting data for a single object movement
             ids_POIs[idx] = df_pois.at[index_min, label_id]
-            tag_POIs[idx] = df_pois.at[index_min, label_poi_type]
+            tag_POIs[idx] = df_pois.at[index_min, label_poi_name]
 
         df_[ID_POI] = ids_POIs
         df_[DIST_POI] = current_distances
-        df_[TYPE_POI] = tag_POIs
+        df_[NAME_POI] = tag_POIs
 
         print('Integration with POI was finalized')
     except Exception as e:
@@ -321,7 +330,7 @@ def join_with_pois_optimizer(
     df_,
     df_pois,
     label_poi_id=TRAJ_ID,
-    label_poi_type=TYPE_POI,
+    label_poi_name=NAME_POI,
     dist_poi=None,
     reset_index=True,
 ):
@@ -340,11 +349,11 @@ def join_with_pois_optimizer(
     df_pois : dataframe
         The input point of interest data.
 
-    label_poi_id : String, optional("name" by default)
+    label_poi_id : String, optional("id" by default)
         Label of df_pois referring to the Point of Interest id.
 
-    label_poi_type : String, optional("type_poi" by default)
-        Label of df_pois referring to the Point of Interest type.
+    label_poi_name : String, optional("type_poi" by default)
+        Label of df_pois referring to the Point of Interest name.
 
     dist_poi : List
         List containing the minimum distance limit between each type of
@@ -359,17 +368,17 @@ def join_with_pois_optimizer(
     try:
         print('Integration with POIs optimized...')
 
-        if len(df_pois[label_poi_type].unique()) == len(dist_poi):
-            values = _reset_and_creates_id_and_lat_lon(df_, df_pois, reset_index)
+        if len(df_pois[label_poi_name].unique()) == len(dist_poi):
+            values = _reset_and_creates_id_and_lat_lon(df_, df_pois, False, reset_index)
             minimum_distances, ids_POIs, tag_POIs, lat_POI, lon_POI = values
 
             df_pois.rename(
-                columns={label_poi_id: TRAJ_ID, label_poi_type: TYPE_POI},
+                columns={label_poi_id: TRAJ_ID, label_poi_name: NAME_POI},
                 inplace=True
             )
 
             for idx, row in progress_bar(df_pois.iterrows(), total=len(df_pois)):
-                # update lat and lot of current index
+                # update lat and lon of current index
                 lat_POI.fill(row[LATITUDE])
                 lon_POI.fill(row[LONGITUDE])
 
@@ -380,19 +389,20 @@ def join_with_pois_optimizer(
                             lat_POI,
                             lon_POI,
                             df_[LATITUDE].values,
-                            df_[LONGITUDE].values,
+                            df_[LONGITUDE].values
                         )
                     )
                     ids_POIs.fill(row.id)
                     tag_POIs.fill(row.type_poi)
                 else:
                     # compute dist between a POI and ALL
+                    print(df_[LONGITUDE].values)
                     current_distances = np.float64(
                         haversine(
                             lat_POI,
                             lon_POI,
                             df_[LATITUDE].values,
-                            df_[LONGITUDE].values,
+                            df_[LONGITUDE].values
                         )
                     )
                     compare = current_distances < minimum_distances
@@ -407,16 +417,16 @@ def join_with_pois_optimizer(
 
             df_[ID_POI] = ids_POIs
             df_[DIST_POI] = minimum_distances
-            df_[TYPE_POI] = tag_POIs
+            df_[NAME_POI] = tag_POIs
             print('Integration with POI was finalized')
         else:
-            print('the size of the dist_poi is different from ')
+            print('the size of the dist_poi is different from the size of pois')
     except Exception as e:
         raise e
 
 
 def join_with_pois_by_category(
-    df_, df_pois, label_category=POI, label_id=TRAJ_ID
+    df_, df_pois, label_category=TYPE_POI, label_id=TRAJ_ID
 ):
     """
     It performs the integration between trajectories and points
@@ -432,7 +442,7 @@ def join_with_pois_by_category(
     df_pois : dataframe
         The input point of interest data.
 
-    label_category : String, optional("POI" by default)
+    label_category : String, optional("type_poi" by default)
         Label of df_pois referring to the point of interest category.
 
     label_id : String, optional("id" by default)
@@ -680,7 +690,6 @@ def join_with_poi_datetime_optimizer(
                     )
                     event_id[index_True] = row.event_id
                     event_type[index_True] = row.event_type
-                    print(event_id, event_type)
 
         df_[label_event_id] = event_id
         df_[DIST_EVENT] = minimum_distances
@@ -697,8 +706,6 @@ def join_with_home_by_id(
         label_id=TRAJ_ID,
         label_address=ADDRESS,
         label_city=CITY,
-        label_home=HOME,
-        label_dist_home=DIST_HOME,
         drop_id_without_home=False,
 ):
     """
@@ -722,12 +729,6 @@ def join_with_home_by_id(
 
     label_city : String, optional("city" by default)
         Label of df_home referring to the point city.
-
-    label_home : String, optional("home" by default)
-        Label of df_home referring to the home point.
-
-    label_dist_home: String, optional("dist_home" by default)
-        Label of df_home referring to the distance to the home point.
 
     drop_id_without_home : Boolean, optional(False by default)
         flag as an option to drop id's that don't have houses.
@@ -755,10 +756,10 @@ def join_with_home_by_id(
 
                 # if user has a single tuple
                 if not isinstance(lat_user, np.ndarray):
-                    df_.at[idx, label_dist_home] = haversine(
+                    df_.at[idx, DIST_HOME] = haversine(
                         lat_user, lon_user, home[LATITUDE], home[LONGITUDE]
                     )
-                    df_.at[idx, label_home] = home[label_address]
+                    df_.at[idx, HOME] = home[label_address]
                     df_.at[idx, label_city] = home[label_city]
                 else:
                     lat_home = np.full(
@@ -767,17 +768,18 @@ def join_with_home_by_id(
                     lon_home = np.full(
                         df_.loc[idx].shape[0], home[LONGITUDE], dtype=np.float64
                     )
-                    df_.at[idx, label_dist_home] = haversine(
+                    df_.at[idx, DIST_HOME] = haversine(
                         lat_user, lon_user, lat_home, lon_home
                     )
-                    df_.at[idx, label_home] = np.array(home[label_address])
+                    df_.at[idx, HOME] = np.array(home[label_address])
                     df_.at[idx, label_city] = np.array(home[label_city])
 
         df_.reset_index(inplace=True)
         print('... Resetting index')
 
         if drop_id_without_home:
-            filters.by_id(df_, label_id, ids_without_home)
+            for tid in ids_without_home:
+                df_.drop(df_.loc[df_[TRAJ_ID] == tid].index, inplace=True)
     except Exception as e:
         raise e
 
@@ -785,31 +787,30 @@ def join_with_home_by_id(
 def merge_home_with_poi(
     df_,
     label_dist_poi=DIST_POI,
-    label_type_poi=TYPE_POI,
+    label_name_poi=NAME_POI,
     label_id_poi=ID_POI,
     label_home=HOME,
     label_dist_home=DIST_HOME,
     drop_columns=True,
 ):
     """
-    Merge home points and points of interest, generating new
-    columns for the respective home point, the id
-    of the nearest point of interest, the distance from the
-    nearest point of interest and the type of the nearest point
-    of interest at each point of interest.
+    Perform or merge the points of interest and the starting
+    points assigned as trajectories, considering the starting
+    points as other points of interest, generating a new
+    dataframe.
 
     Parameters
     ----------
     df_ : dataframe
-        The input points of interest  data.
+        The input trajectory data, with join_with_pois and join_with_home_by_id applied.
 
     label_dist_poi : String, optional("dist_poi" by default)
         Label of df_ referring to the distance from the nearest point of interest.
 
-    label_type_poi : String, optional("type_poi" by default)
-        Label of df_ referring to the type from the nearest point of interest.
+    label_name_poi : String, optional("name_poi" by default)
+        Label of df_ referring to the name from the nearest point of interest.
 
-    label_id_poi : String, optional("type_poi" by default)
+    label_id_poi : String, optional("id_poi" by default)
         Label of df_ referring to the id from the nearest point of interest.
 
     label_home : String, optional("home" by default)
@@ -828,10 +829,11 @@ def merge_home_with_poi(
         print('merge home with POI using shortest distance')
         idx = df_[df_[label_dist_home] <= df_[label_dist_poi]].index
 
-        df_.loc[idx, label_type_poi] = label_home
+        df_.loc[idx, label_name_poi] = label_home
         df_.loc[idx, label_dist_poi] = df_.loc[idx, label_dist_home]
         df_.loc[idx, label_id_poi] = df_.loc[idx, label_home]
-        if drop_columns:
-            del df_[label_home], df_[label_dist_home]
+
+        if(drop_columns):
+            df_.drop(columns=[label_dist_home, label_home], inplace=True)
     except Exception as e:
         raise e
