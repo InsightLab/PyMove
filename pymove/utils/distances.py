@@ -10,13 +10,13 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
 
     Parameters
     ----------
-    lat1 : float
+    lat1 : float or array
         Y offset from your original position in meters.
-    lon1 : float
+    lon1 : float or array
         Y offset from your original position in meters.
-    lat2 : float
+    lat2 : float or array
         Y offset from your original position in meters.
-    lon2 : float
+    lon2 : float or array
         Y offset from your original position in meters.
     to_radians : boolean
         Y offset from your original position in meters.

@@ -5,6 +5,24 @@ TRAJ_ID = 'id'
 TID = 'tid'
 UID = 'user_id'
 
+POI = 'poi'
+ID_POI = 'id_poi'
+DIST_POI = 'dist_poi'
+TYPE_POI = 'type_poi'
+NAME_POI = 'name_poi'
+
+EVENT_ID = 'event_id'
+EVENT_TYPE = 'event_type'
+DIST_EVENT = 'dist_event'
+
+CITY = 'city'
+HOME = 'home'
+ADDRESS = 'formatted_address'
+DIST_HOME = 'dist_home'
+
+GEOMETRY = 'geometry'
+VIOLATING = 'violating'
+
 HOUR = 'hour'
 HOUR_SIN = 'hour_sin'
 HOUR_COS = 'hour_cos'
