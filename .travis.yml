@@ -5,7 +5,7 @@ services:
   - mongodb
   - postgresql
 before_script:
-  - psql -c 'create database travis_ci_test;' -U postgres
+  - psql -c 'create database postgres;' -U postgres
 script:
   - python setup.py sdist >/dev/null
   - python setup.py install
