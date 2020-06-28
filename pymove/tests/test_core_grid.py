@@ -188,7 +188,7 @@ def test_save_grid_pkl(tmpdir):
                 'grid_size_lon_x': 5,
                 'cell_size_by_degree': 0.0001353464801860623
                 }
-    d = tmpdir.mkdir('prepossessing')
+    d = tmpdir.mkdir('core')
 
     file_write_default = d.join('test_save_grid.pkl')
     filename_write_default = os.path.join(
@@ -211,7 +211,7 @@ def read_grid_pkl(tmpdir):
                 'grid_size_lon_x': 5,
                 'cell_size_by_degree': 0.0001353464801860623
                 }
-    d = tmpdir.mkdir('prepossessing')
+    d = tmpdir.mkdir('core')
 
     file_write_default = d.join('test_read_grid.pkl')
     filename_write_default = os.path.join(
