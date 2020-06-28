@@ -1,4 +1,4 @@
-from pymove.core.dataframe import PandasMoveDataFrame
+from pymove.core.pandas import PandasMoveDataFrame
 
 
 def feature_values_using_filter(
