@@ -1,7 +1,7 @@
 from numpy.testing import assert_equal
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
-from psycopg2 import connect, sql
+from psycopg2 import connect
 from psycopg2.extensions import connection
 from pymongo import MongoClient
 from pymongo.collection import Collection
@@ -54,37 +54,27 @@ def setup_module(module):
 
 
 def teardown_module(module):
-    conn = None
-    try:
-        conn = connect(
-            dbname=PG_DB_NAME,
-            user='postgres',
-            host='localhost',
-            password=''
-        )
+    conn = connect(
+        dbname=PG_DB_NAME,
+        user='postgres',
+        host='localhost',
+        password=''
+    )
 
-        cursor = conn.cursor()
-        for table in TABLES:
-            cursor.execute(sql.SQL(
-                'DROP TABLE {}'
-            ).format(sql.Identifier(table)))
-        conn.commit()
-        cursor.close()
-    except Exception as e:
-        if conn is not None:
-            conn.close()
-        raise e
-    finally:
-        if conn is not None:
-            conn.close()
+    cursor = conn.cursor()
+    for table in TABLES:
+        cursor.execute('DROP TABLE IF EXISTS %s' % (table))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
     conn = None
-    try:
-        conn = MongoClient('localhost', None)[MG_DB_NAME]
-        for table in TABLES:
+    conn = MongoClient('localhost', None)[MG_DB_NAME]
+    for table in TABLES:
+        try:
             conn[table].drop()
-    except Exception as e:
-        pass
+        except Exception as e:
+            pass
 
 
 def test_connect_postgres():
@@ -108,9 +98,9 @@ def test_write_postgres():
 
     db.write_postgres(table=TEST_TABLE, dbname=PG_DB_NAME, dataframe=move_df)
 
-    sql = 'SELECT * FROM public.%s' % TEST_TABLE
+    query = 'SELECT * FROM public.%s' % TEST_TABLE
     new_move_df = db.read_postgres(dbname=PG_DB_NAME,
-                                   query=sql)
+                                   query=query)
 
     assert_frame_equal(new_move_df, expected)
 
@@ -119,7 +109,7 @@ def test_write_postgres():
     '''Testing using an existing table'''
     db.write_postgres(table=TEST_NEW_TABLE, dbname=PG_DB_NAME, dataframe=move_df)
 
-    sql = 'SELECT * FROM public.%s' % TEST_NEW_TABLE
+    query = 'SELECT * FROM public.%s' % TEST_NEW_TABLE
     new_move_df = db.read_postgres(dbname=PG_DB_NAME,
                                    query='SELECT * FROM public.test_new_table')
 
@@ -139,13 +129,13 @@ def test_read_postgres():
         index=[0, 1, 2, 3],
     )
 
-    sql = 'SELECT * FROM public.%s' % TABLE_READ
-    new_move_df = db.read_postgres(query=sql,
+    query = 'SELECT * FROM public.%s' % TABLE_READ
+    new_move_df = db.read_postgres(query=query,
                                    dbname=PG_DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
 
-    new_move_df = db.read_postgres(query=sql,
+    new_move_df = db.read_postgres(query=query,
                                    in_memory=False, dbname=PG_DB_NAME)
 
     assert_frame_equal(new_move_df, expected)
@@ -166,8 +156,8 @@ def test_read_sql_inmem_uncompressed():
 
     conn = db.connect_postgres(PG_DB_NAME)
 
-    sql = 'SELECT * FROM public.%s' % TABLE_READ
-    new_move_df = db.read_sql_inmem_uncompressed(query=(sql),
+    query = 'SELECT * FROM public.%s' % TABLE_READ
+    new_move_df = db.read_sql_inmem_uncompressed(query=(query),
                                                  conn=conn)
 
     assert_frame_equal(new_move_df, expected)
@@ -188,8 +178,8 @@ def test_read_sql_tmpfile():
 
     conn = db.connect_postgres(PG_DB_NAME)
 
-    sql = 'SELECT * FROM public.%s' % TABLE_READ
-    new_move_df = db.read_sql_tmpfile(query=sql,
+    query = 'SELECT * FROM public.%s' % TABLE_READ
+    new_move_df = db.read_sql_tmpfile(query=query,
                                       conn=conn)
 
     print(new_move_df)

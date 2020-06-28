@@ -2,7 +2,7 @@ import io
 import tempfile
 
 import pandas as pd
-import psycopg2
+from psycopg2 import connect
 from pymongo import MongoClient
 
 from pymove import MoveDataFrame
@@ -43,7 +43,7 @@ def connect_postgres(
             "dbname='%s' user='%s' password='%s' host='%s' port='%s'"
             % (dbname, user, psswrd, host, port)
         )
-        conn = psycopg2.connect(psql_params)
+        conn = connect(psql_params)
         return conn
     except Exception as e:
         raise e
@@ -104,8 +104,8 @@ def _create_table(
         for i in keys.items():
             columns += '%s %s,' % i
         columns = columns[:-1]
-        sql = 'CREATE TABLE IF NOT EXISTS %s (%s)' % (table, columns)
-        cur.execute(sql)
+        query = 'CREATE TABLE IF NOT EXISTS %s (%s)' % (table, columns)
+        cur.execute(query)
         conn.commit()
         cur.close()
     except Exception as e:
@@ -153,8 +153,8 @@ def write_postgres(
     values = ','.join(['%s'] * len(cols))
 
     conn = None
-    sql = 'INSERT INTO %s(%s) VALUES(%s)' % (table, columns, values)
-    clear = 'DELETE FROM %s' % table
+    query = 'INSERT INTO %s(%s) VALUES(%s)' % (table, columns, values)
+    clear = 'DELETE FROM %s' % (table)
     try:
         _create_table(table,
                       dbname=dbname,
@@ -165,7 +165,7 @@ def write_postgres(
         conn = connect_postgres(dbname, user, psswrd, host, port)
         cur = conn.cursor()
         cur.execute(clear)
-        cur.executemany(sql, dataframe.values)
+        cur.executemany(query, dataframe.values)
         conn.commit()
         cur.close()
     except Exception as e:
@@ -464,7 +464,6 @@ def read_mongo(
             collection, dbname, user, psswrd, host, port
         )
 
-        print(type(my_collection))
         cursor = my_collection.find(filter_, projection)
 
         dataframe = pd.DataFrame(list(cursor))
