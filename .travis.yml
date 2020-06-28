@@ -4,8 +4,6 @@ python: '3.6'
 services:
   - mongodb
   - postgresql
-# before_script:
-#   - psql -c 'create database postgres;' -U postgres
 script:
   - python setup.py sdist >/dev/null
   - python setup.py install
