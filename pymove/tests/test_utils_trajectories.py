@@ -67,19 +67,6 @@ def test_read_csv(tmpdir):
     assert isinstance(dask_move_df, DaskMoveDataFrame)
 
 
-def test_format_labels():
-
-    expected = {
-        'col1': 'id',
-        'col3': 'lon',
-        'col2': 'lat',
-        'col4': 'datetime'
-    }
-    labels = trajectories.format_labels('col1', 'col2', 'col3', 'col4')
-
-    assert_equal(labels, expected)
-
-
 def test_flatten_dict():
     d = {'a': 1, 'b': {'c': 2, 'd': 3}}
     expected = {'a': 1, 'b_c': 2, 'b_d': 3}

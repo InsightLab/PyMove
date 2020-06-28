@@ -6,6 +6,7 @@ import folium
 import numpy as np
 import pandas as pd
 
+from pymove.core.dataframe import MoveDataFrame
 from pymove.utils.constants import (
     DATETIME,
     LATITUDE,
@@ -19,16 +20,20 @@ from pymove.utils.constants import (
 
 def read_csv(
     filename,
-    sep=',',
-    encoding='utf-8',
-    header='infer',
-    names=None,
     latitude=LATITUDE,
     longitude=LONGITUDE,
     datetime=DATETIME,
     traj_id=TRAJ_ID,
     type_=TYPE_PANDAS,
     n_partitions=1,
+    sep=',',
+    encoding='utf-8',
+    header='infer',
+    names=None,
+    index_col=None,
+    usecols=None,
+    dtype=None,
+    nrows=None,
 ):
     """
     Reads a .csv file and structures the data into the desired structure
@@ -39,20 +44,6 @@ def read_csv(
     ----------
     filename : String.
         Represents coordinates lat, lon which will be the center of the map.
-    sep : String, optional, default ','.
-        Delimiter to use.
-    encoding : String, optional, default 'utf-8'.
-        Encoding to use for UTF when reading/writing
-    header: int, list of int, default ‘infer’
-        Row number(srs) to use as the column names, and the start of the data.
-        Default behavior is to infer the column names: if no names are passed
-        the behavior is identical to header=0 and column names are inferred from
-        the first line of the file, if column names are passed explicitly then
-        the behavior is identical to header=None
-    names: array-like, optional
-        List of column names to use. If the file contains a header row,
-        then you should explicitly pass header=0 to override the column names.
-        Duplicates in this list are not allowed.
     latitude : String, optional, default 'lat'.
         Represents the column name of feature latitude.
     longitude : String, optional, default 'lon'.
@@ -65,6 +56,36 @@ def read_csv(
         Represents the type of the MoveDataFrame
     n_partitions : int, optional, default 1.
         Represents number of partitions for DaskMoveDataFrame
+    sep : String, optional, default ','.
+        Delimiter to use.
+    encoding : String, optional, default 'utf-8'.
+        Encoding to use for UTF when reading/writing
+    header : int, list of int, default ‘infer’
+        Row number(srs) to use as the column names, and the start of the data.
+        Default behavior is to infer the column names: if no names are passed
+        the behavior is identical to header=0 and column names are inferred from
+        the first line of the file, if column names are passed explicitly then
+        the behavior is identical to header=None
+    names : array-like, optional
+        List of column names to use. If the file contains a header row,
+        then you should explicitly pass header=0 to override the column names.
+        Duplicates in this list are not allowed.
+    index_col : int, str, sequence of int / str, or False, default None
+        Column(s) to use as the row labels of the DataFrame, either given as
+        string name or column index.
+        If a sequence of int / str is given, a MultiIndex is used.
+    usecols : list-like or callable, optional, default None
+        Return a subset of the columns. If list-like, all elements must either
+        be positional (i.e. integer indices into the document columns) or strings
+        that correspond to column names provided either by the user in names or
+        inferred from the document header row(s).
+    dtype : Type name or dict of column -> type, optional, default None
+        Data type for data or columns.
+        E.g. {‘a’: np.float64, ‘b’: np.int32, ‘c’: ‘Int64’}
+        Use str or object together with suitable na_values settings to
+        preserve and not interpret dtype.
+    nrows : int, optional, default None
+        Number of rows of file to read. Useful for reading pieces of large files.
 
     Returns
     -------
@@ -80,47 +101,15 @@ def read_csv(
         header=header,
         names=names,
         parse_dates=[datetime],
+        index_col=index_col,
+        usecols=usecols,
+        dtype=dtype,
+        nrows=nrows
     )
 
-    from pymove import PandasMoveDataFrame as pm
-    from pymove import DaskMoveDataFrame as dm
-
-    if type_ == TYPE_PANDAS:
-        return pm(df, latitude, longitude, datetime, traj_id)
-    if type_ == TYPE_DASK:
-        return dm(df, latitude, longitude, datetime, traj_id, n_partitions)
-
-
-def format_labels(current_id, current_lat, current_lon, current_datetime):
-    """
-    Format the labels for the PyMove lib pattern labels output
-    lat, lon and datatime.
-
-    Parameters
-    ----------
-    current_id : String.
-        Represents the column name of feature id.
-    current_lat : String.
-        Represents the column name of feature latitude.
-    current_lon : String.
-        Represents the column name of feature longitude.
-    current_datetime : String.
-         Represents the column name of feature datetime.
-
-    Returns
-    -------
-    dict
-        Represents a dict with mapping current columns of data
-        to format of PyMove column.
-
-    """
-
-    return {
-        current_id: TRAJ_ID,
-        current_lon: LONGITUDE,
-        current_lat: LATITUDE,
-        current_datetime: DATETIME
-    }
+    return MoveDataFrame(
+        df, latitude, longitude, datetime, traj_id, type_, n_partitions
+    )
 
 
 def flatten_dict(d, parent_key='', sep='_'):
