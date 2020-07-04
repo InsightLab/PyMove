@@ -1,11 +1,10 @@
-.. PyMove documentation master file, created by
-   sphinx-quickstart on Wed May 13 20:19:32 2020.
+.. pymove documentation master file, created by
+   sphinx-quickstart on Sat Jul  4 11:07:39 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-PyMove
+Welcome to pymove's documentation!
 ==================================
-
 
 ===================
 What's PyMove?
@@ -29,9 +28,19 @@ PyMove **proposes**:
 Installation
 ------------
 
+`Conda <https://anaconda.org/conda-forge/pymove>`__ instalation
+---------------------------------------------------------------
 
-Indices
---------
+1. ``conda install -c conda-forge pymove``
+
+`Pip <https://pypi.org/project/pymove>`__ installation
+------------------------------------------------------
+
+1. ``pip install pymove``
+
+
+Indices and tables
+==================
 
 * :ref:`genindex`
 * :ref:`modindex`
@@ -48,12 +57,7 @@ License
 -------
 
 .. toctree::
-   :caption: API Reference
-   :maxdepth: 2
+   :maxdepth: 4
+   :caption: Contents:
 
-   references/core
-   references/models
-   references/preprocessing
-   references/semantic
-   references/utils
-   references/visualization
+   references/pymove
