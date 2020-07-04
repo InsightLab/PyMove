@@ -5,16 +5,16 @@ Semantic
 .. currentmodule:: pymove.semantic
 
 .. autosummary::
-	semantic._end_create_operation
-    semantic._process_simple_filter
-    semantic.create_or_update_out_of_the_bbox
-    semantic.create_or_update_gps_deactivated_signal
-    semantic.create_or_update_gps_jump
-    semantic.create_or_update_short_trajectory
-    semantic.create_or_update_gps_block_signal
-    semantic.filter_block_signal_by_repeated_amount_of_points
-    semantic.filter_block_signal_by_time
-    semantic.filter_longer_time_to_stop_segment_by_id
+	_end_create_operation
+    _process_simple_filter
+    create_or_update_out_of_the_bbox
+    create_or_update_gps_deactivated_signal
+    create_or_update_gps_jump
+    create_or_update_short_trajectory
+    create_or_update_gps_block_signal
+    filter_block_signal_by_repeated_amount_of_points
+    filter_block_signal_by_time
+    filter_longer_time_to_stop_segment_by_id
 
 
 	.. autofunction:: pymove.semantic.semantic._end_create_operation

@@ -48,7 +48,7 @@ License
 -------
 
 .. toctree::
-   :caption: PyMove
+   :caption: API Reference
    :maxdepth: 2
 
    references/core
