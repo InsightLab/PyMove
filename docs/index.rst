@@ -46,6 +46,5 @@ Indices and tables
 .. toctree::
    :maxdepth: 4
    :caption: References
-   :hidden:
 
    references/pymove
