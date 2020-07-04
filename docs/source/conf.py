@@ -10,19 +10,19 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('../..'))
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('.'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'PyMove'
-copyright = '2020, Insight Lab'
-author = 'Insight Lab'
+copyright = '2020, Insight DataScience Lab'
+author = 'Insight DataScience Lab'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '2019'
 
 
 # -- General configuration ---------------------------------------------------
@@ -38,7 +38,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = []
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -47,29 +47,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'alabaster'
-# html_logo = '../logo_skmob.png'
-# html_theme_options = {
-#     'canonical_url': '',
-#     'analytics_id': 'UA-XXXXXXX-1',  #  Provided by Google in your dashboard
-#     'logo_only': False,
-#     'display_version': True,
-#     'prev_next_buttons_location': 'bottom',
-#     'style_external_links': False,
-#     'vcs_pageview_mode': '',
-#     'style_nav_header_background': 'white',
-#     # Toc options
-#     'collapse_navigation': True,
-#     'sticky_navigation': True,
-#     'navigation_depth': 4,
-#     'includehidden': True,
-#     'titles_only': False
-# }
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-
-numpydoc_show_class_members = False
-
-def setup(app):
-    app.add_javascript('copybutton.js')

@@ -7,11 +7,45 @@ Utils
 .. autosummary::
 	conversions.
 
+    .. autofunction:: pymove.utils.conversions.lat_meters
+    .. autofunction:: pymove.utils.conversions.list_to_str
+    .. autofunction:: pymove.utils.conversions.list_to_csv_str
+    .. autofunction:: pymove.utils.conversions.list_to_svm_line
+    .. autofunction:: pymove.utils.conversions.lon_to_x_spherical
+    .. autofunction:: pymove.utils.conversions.lat_to_y_spherical
+    .. autofunction:: pymove.utils.conversions.x_to_lon_spherical
+    .. autofunction:: pymove.utils.conversions.y_to_lat_spherical
+    .. autofunction:: pymove.utils.conversions.ms_to_kmh
+    .. autofunction:: pymove.utils.conversions.kmh_to_ms
+    .. autofunction:: pymove.utils.conversions.meters_to_kilometers
+    .. autofunction:: pymove.utils.conversions.kilometers_to_meters
+    .. autofunction:: pymove.utils.conversions.seconds_to_minutes
+    .. autofunction:: pymove.utils.conversions.minute_to_seconds
+    .. autofunction:: pymove.utils.conversions.minute_to_hours
+    .. autofunction:: pymove.utils.conversions.hours_to_minute
+    .. autofunction:: pymove.utils.conversions.seconds_to_hours
+    .. autofunction:: pymove.utils.conversions.hours_to_seconds
+
+
 .. autosummary::
 	datetime.
 
     .. autofunction:: pymove.utils.datetime.date_to_str
     .. autofunction:: pymove.utils.datetime.str_to_datetime
+    .. autofunction:: pymove.utils.datetime.to_str
+    .. autofunction:: pymove.utils.datetime.to_min
+    .. autofunction:: pymove.utils.datetime.min_to_datetime
+    .. autofunction:: pymove.utils.datetime.to_day_of_week_int
+    .. autofunction:: pymove.utils.datetime.working_day
+    .. autofunction:: pymove.utils.datetime.now_str
+    .. autofunction:: pymove.utils.datetime.deltatime_str
+    .. autofunction:: pymove.utils.datetime.timestamp_to_millis
+    .. autofunction:: pymove.utils.datetime.millis_to_timestamp
+    .. autofunction:: pymove.utils.datetime.time_to_str
+    .. autofunction:: pymove.utils.datetime.str_to_time
+    .. autofunction:: pymove.utils.datetime.elapsed_time_dt
+    .. autofunction:: pymove.utils.datetime.diff_time
+
 
 .. autosummary::
 	db.
