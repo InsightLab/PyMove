@@ -3,12 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+==================================
 Welcome to pymove's documentation!
 ==================================
-
-===================
-What's PyMove?
-===================
 
 PyMove is a Python library for processing and visualization of trajectories and other spatial-temporal data.
 
@@ -46,18 +43,9 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-
-Contribute
-----------
-
-Support
--------
-
-License
--------
-
 .. toctree::
    :maxdepth: 4
-   :caption: Contents:
+   :caption: References
+   :hidden:
 
    references/pymove
