@@ -10,7 +10,7 @@ Semantic
     semantic.create_or_update_out_of_the_bbox
     semantic.create_or_update_gps_deactivated_signal
     semantic.create_or_update_gps_jump
-    semantic.create_or_update_short_trajectory    
+    semantic.create_or_update_short_trajectory
     semantic.create_or_update_gps_block_signal
     semantic.filter_block_signal_by_repeated_amount_of_points
     semantic.filter_block_signal_by_time
@@ -22,7 +22,7 @@ Semantic
     .. autofunction:: pymove.semantic.semantic.create_or_update_out_of_the_bbox
     .. autofunction:: pymove.semantic.semantic.create_or_update_gps_deactivated_signal
     .. autofunction:: pymove.semantic.semantic.create_or_update_gps_jump
-    .. autofunction:: pymove.semantic.semantic.create_or_update_short_trajectory    
+    .. autofunction:: pymove.semantic.semantic.create_or_update_short_trajectory
     .. autofunction:: pymove.semantic.semantic.create_or_update_gps_block_signal
     .. autofunction:: pymove.semantic.semantic.filter_block_signal_by_repeated_amount_of_points
     .. autofunction:: pymove.semantic.semantic.filter_block_signal_by_time
