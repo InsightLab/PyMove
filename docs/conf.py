@@ -75,3 +75,9 @@ napoleon_numpy_docstring = True
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+try:
+    import pymove
+    version = pymove.__version__
+except ImportError:
+    version = ''
