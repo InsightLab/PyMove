@@ -30,7 +30,7 @@ Installation
 ------------
 
 
-Indices 
+Indices
 --------
 
 * :ref:`genindex`
@@ -174,7 +174,7 @@ Semantic
 
 .. autosummary::
     semantic.create_or_update_out_of_the_bbox
-    
+
 
 ===================
 Models

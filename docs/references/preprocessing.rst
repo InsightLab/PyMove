@@ -55,10 +55,6 @@ Preprocessing
 
 
 .. autosummary::
-	map_matching.
-
-
-.. autosummary::
 	segmentation.bbox_split
 	segmentation._drop_single_point
 	segmentation._filter_and_dist_time_speed
@@ -95,9 +91,3 @@ Preprocessing
 	.. autofunction:: pymove.preprocessing.stay_point_detection.create_update_datetime_in_format_cyclical
 	.. autofunction:: pymove.preprocessing.stay_point_detection.create_or_update_move_stop_by_dist_time
 	.. autofunction:: pymove.preprocessing.stay_point_detection.create_update_move_and_stop_by_radius
-
-
-
-
-
-
