@@ -14,6 +14,7 @@ import sys
 
 sys.path.insert(0, '..')
 
+master_doc = 'index'
 
 # -- Project information -----------------------------------------------------
 
