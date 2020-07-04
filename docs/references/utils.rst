@@ -5,7 +5,24 @@ Utils
 .. currentmodule:: pymove.utils
 
 .. autosummary::
-	conversions.
+	conversions.lat_meters
+    conversions.list_to_str
+    conversions.list_to_csv_str
+    conversions.list_to_svm_line
+    conversions.lon_to_x_spherical
+    conversions.lat_to_y_spherical
+    conversions.x_to_lon_spherical
+    conversions.y_to_lat_spherical
+    conversions.ms_to_kmh
+    conversions.kmh_to_ms
+    conversions.meters_to_kilometers
+    conversions.kilometers_to_meters
+    conversions.seconds_to_minutes
+    conversions.minute_to_seconds
+    conversions.minute_to_hours
+    conversions.hours_to_minute
+    conversions.seconds_to_hours
+    conversions.hours_to_seconds
 
     .. autofunction:: pymove.utils.conversions.lat_meters
     .. autofunction:: pymove.utils.conversions.list_to_str
@@ -28,7 +45,21 @@ Utils
 
 
 .. autosummary::
-	datetime.
+	datetime.date_to_str
+    datetime.str_to_datetime
+    datetime.to_str
+    datetime.to_min
+    datetime.min_to_datetime
+    datetime.to_day_of_week_int
+    datetime.working_day
+    datetime.now_str
+    datetime.deltatime_str
+    datetime.timestamp_to_millis
+    datetime.millis_to_timestamp
+    datetime.time_to_str
+    datetime.str_to_time
+    datetime.elapsed_time_dt
+    datetime.diff_time
 
     .. autofunction:: pymove.utils.datetime.date_to_str
     .. autofunction:: pymove.utils.datetime.str_to_datetime
@@ -48,7 +79,15 @@ Utils
 
 
 .. autosummary::
-	db.
+	db.connect_postgres
+    db.write_postgres
+    db.read_postgres
+    db.read_sql_inmem_uncompressed
+    db.read_sql_tmpfile
+    db.connect_mongo
+    db.get_mongo_collection
+    db.write_mongo
+    db.read_mongo
 
     .. autofunction:: pymove.utils.db.connect_postgres
     .. autofunction:: pymove.utils.db.write_postgres
@@ -62,26 +101,33 @@ Utils
 
 
 .. autosummary::
-	distances.
+	distances.haversine
 
     .. autofunction:: pymove.utils.distances.haversine
 
 
 .. autosummary::
-	log.
+	log.timer_decorator
+    log._log_progress
 
     .. autofunction:: pymove.utils.log.timer_decorator
     .. autofunction:: pymove.utils.log._log_progress
 
 
 .. autosummary::
-	mapfolium.
+	mapfolium.add_map_legend
 
     .. autofunction:: pymove.utils.mapfolium.add_map_legend
 
 
 .. autosummary::
-	math.
+	math.std
+    math.avg_std
+    math.std_sample
+    math.avg_std_sample
+    math.arrays_avg
+    math.array_stats
+    math.interpolation
 
     .. autofunction:: pymove.utils.math.std
     .. autofunction:: pymove.utils.math.avg_std
@@ -93,7 +139,12 @@ Utils
 
 
 .. autosummary::
-	mem.
+	mem.reduce_mem_usage_automatic
+    mem.total_size
+    mem.begin_operation
+    mem.end_operation
+    mem.sizeof_fmt
+    mem.top_mem_vars
 
     .. autofunction:: pymove.utils.mem.reduce_mem_usage_automatic
     .. autofunction:: pymove.utils.mem.total_size
@@ -104,7 +155,13 @@ Utils
 
 
 .. autosummary::
-	trajectories.
+	trajectories.read_csv
+    trajectories.format_labels
+    trajectories.flatten_dict
+    trajectories.flatten_columns
+    trajectories.shift
+    trajectories.fill_list_with_new_values
+    trajectories.save_bbox
 
     .. autofunction:: pymove.utils.trajectories.read_csv
     .. autofunction:: pymove.utils.trajectories.format_labels
@@ -116,7 +173,8 @@ Utils
 
 
 .. autosummary::
-	transformations.
+	transformations.feature_values_using_filter
+    transformations.feature_values_using_filter_and_indexes
 
     .. autofunction:: pymove.utils.transformations.feature_values_using_filter
     .. autofunction:: pymove.utils.transformations.feature_values_using_filter_and_indexes

@@ -5,30 +5,30 @@ Visualization
 .. currentmodule:: pymove.visualization
 
 .. autosummary::
-	visualization.generate_color
-	visualization.rgb
-	visualization.hex_rgb
-	visualization.cmap_hex_color
-	visualization.save_map
-	visualization.save_wkt
-	visualization.show_object_id_by_date
-	visualization.show_lat_lon_gps
-	visualization.create_base_map
-	visualization._filter_and_generate_colors
-	visualization._filter_generated_feature
-	visualization._add_begin_end_markers_to_folium_map
-	visualization._add_trajectories_to_folium_map
-	visualization.heatmap
-	visualization.cluster
-	visualization.faster_cluster
-	visualization.plot_markers
-	visualization.plot_trajectories_with_folium
-	visualization.plot_trajectory_by_id_folium
-	visualization.plot_trajectory_by_period
-	visualization.plot_trajectory_by_day_week
-	visualization.plot_trajectory_by_date
-	visualization.plot_trajectory_by_hour
-	visualization.plot_stops
+	generate_color
+	rgb
+	hex_rgb
+	cmap_hex_color
+	save_map
+	save_wkt
+	show_object_id_by_date
+	show_lat_lon_gps
+	create_base_map
+	_filter_and_generate_colors
+	_filter_generated_feature
+	_add_begin_end_markers_to_folium_map
+	_add_trajectories_to_folium_map
+	heatmap
+	cluster
+	faster_cluster
+	plot_markers
+	plot_trajectories_with_folium
+	plot_trajectory_by_id_folium
+	plot_trajectory_by_period
+	plot_trajectory_by_day_week
+	plot_trajectory_by_date
+	plot_trajectory_by_hour
+	plot_stops
 
 
 .. autofunction:: pymove.visualization.visualization.generate_color
