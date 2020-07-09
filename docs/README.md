@@ -14,10 +14,16 @@ Here we will describe how to create a docs, configure the conf.py file and updat
 
 ### 2.1. Create the documentation
 0. Install Sphinx!
+
 `pip install Sphinx`
-1. First, make the directory docs with command:
+`pip install pip install sphinx_rtd_theme`
+
+1. First, make the directory docs with command
+
 `mkdir docs`
+
 2. Run the following command
+
 `sphinx-apidoc -o docs pymove -full`
 
 Finish! Your documentation has been created! The generated files are of the extension .rst (reStructuredText).
@@ -27,13 +33,19 @@ There are **two main files**:
 
 ### 2.2. Configure the conf.py
 In the file **conf.py**, include the following imports:
+
 `import os`
+
 `import sys`
+
 And include the following code snippet, referring to the library path:
+
 `sys.path.append(os.path.join(os.path.dirname(__name__), '..'))`
+
 Now, you must:
 1. Describe project informations
 2. Configure extensions
+
 `extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
@@ -43,14 +55,31 @@ Now, you must:
     'sphinx_rtd_theme'
 ]
 `
+
 3. Configure theme html
+
 `html_theme = 'sphinx_rtd_theme'`
+
 and finish!
 
 ### 2.3. Generating the .html files
 To generate the .html files, just access the docs folder, just run the following command:
+
 `make html`
+
 ### 2.4. Hospedando docs in [Readthedocs](https://readthedocs.org/)
+1. Log in to Readthedocs with your github account
+2. Import the project/repository
+3. Select the project and the branch where your project contains the documentation
+4. Click on build project
+5. After preparing the environment and finalizing the building process, you can see your project's documentation in **view docs**.
+
 ### 2.5. Update the documentation
+To update the documentation just run the following command and move the generated files to the folder `references/`.
+
+`sphinx-apidoc -o docs pymove`
+
+
+
 
 
