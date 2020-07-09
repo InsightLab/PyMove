@@ -10,7 +10,6 @@ from tqdm import tqdm_notebook as tqdm
 from pymove.preprocessing import filters
 from pymove.utils import constants, distances
 from pymove.utils.constants import (
-    COLORS,
     COUNT,
     DATE,
     DATETIME,
@@ -1516,7 +1515,6 @@ def plot_incial_end_points(
         Point color.
     map_: Folium map.
     """
-
     # plot the start tnz_point
     line = list_rowns[0][1]
         
