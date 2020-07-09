@@ -23,6 +23,12 @@ from pymove.utils.constants import (
     STOP,
     TILES,
     TRAJ_ID,
+    USER_POINT,
+    LINE_COLOR,
+    POI_POINT,
+    EVENT_POINT,
+    UID,
+    EVENT_ID,
 )
 from pymove.utils.datetime import str_to_datetime
 from pymove.utils.mapfolium import add_map_legend
@@ -232,6 +238,28 @@ def create_base_map(
         control_scale=True,
         zoom_start=default_zoom_start,
         tiles=tile,
+    )
+    return base_map
+
+
+def generate_base_map(default_location, default_zoom_start=12):
+    """
+    Generate a folium map.
+    Parameters
+    ----------
+    default_location : tuple.
+        Represents coordinates lat, lon which will be the center of the map.
+    default_zoom_start : int, optional, default 12.
+        Represents the zoom which will be the center of the map.
+    Returns
+    -------
+    base_map : folium.folium.Map.
+        Represents a folium map.
+    """
+    base_map = folium.Map(
+        location=default_location, 
+        control_scale=True, 
+        zoom_start=default_zoom_start
     )
     return base_map
 
@@ -1410,38 +1438,145 @@ def plot_stops(
     else:
         return base_map
 
-
-# TODO
-
 def _format_tags(line, slice_):
+    """
+    Create or format tags.
 
+    Parameters:
+    -----------
+    line: Line to add a tag.
+
+    slice_: Tag interval.
+    """
     map_formated_tags = map(lambda tag: '{}: {}'.format(tag, line[tag]), slice_)
 
     return '<br/>'.join(map_formated_tags)
 
 
+def _circle_maker(
+    iter_tuple, 
+    user_lat, 
+    user_lon, 
+    slice_tags, 
+    user_point, 
+    map_
+):
+    """
+    Return a circle.
+
+    Parameters:
+    -----------
+    iter_tuple: DataFrame iter_tuple.
+    user_lat: String.
+        Latitude column name.
+    user_lon: String.
+        Longitude column name.
+    slice_tags:
+
+    user_point: String.
+        Point color.
+    map_: Folium map.
+    """
+    _, line = iter_tuple
+
+    x = line[user_lat]
+    y = line[user_lon]
+
+    tags_formated = _format_tags(line, slice_tags)
+
+    folium.Circle(
+        radius=1,
+        location=[x, y],
+        popup=tags_formated,
+        color=user_point,
+        fill=False
+    ).add_to(map_)
+
+def plot_incial_end_points(
+    list_rowns, 
+    user_lat, 
+    user_lon, 
+    slice_tags, 
+    base_map,
+    map_
+):
+        """
+    Returns incial and end points.
+
+    Parameters:
+    -----------
+    list_rowns: List of DataFrame iter_tuple.
+    user_lat: String.
+        Latitude column name.
+    user_lon: String.
+        Longitude column name.
+    slice_tags:
+
+    user_point: String.
+        Point color.
+    map_: Folium map.
+    """
+
+    # plot the start tnz_point
+    line = list_rowns[0][1]
+        
+    tags_formated = _format_tags(line, slice_tags)
+
+    x = line[user_lat]
+    y = line[user_lon]
+
+    folium.Marker(
+        location=[x, y],
+        popup='START<br/>' + tags_formated,
+        icon=folium.Icon(color='green')
+    ).add_to(base_map)
+
+    line = list_rowns[-1][1]
+
+    tags_formated = _format_tags(line, slice_tags)
+
+    x = line[user_lat]
+    y = line[user_lon]
+
+    folium.Marker(
+        location=[x, y],
+        popup='END<br/>' + tags_formated,
+        icon=folium.Icon(color='red', icon='info-sign')
+    ).add_to(base_map)
+
+
 def add_traj_folium(
-    df,
-    dict_plot=constants.dict_plot,
-    dict_labels=constants.dict_labels,
+    move_data,
+    user_lat=LATITUDE,
+    user_lon=LONGITUDE,
+    user_point=USER_POINT,
+    line_color=LINE_COLOR,
+    user_datetime=DATETIME,
     sort=False,
-    folium_map=None,
+    base_map=None,
     slice_tags=None,
-    tiles='OpenStreetMap'
+    tiles=TILES[0]
 ):
     """
     Receivies a MoveDataFrame and returns a folium map with the trajectories plots.
 
     Parameters:
     ----------
-    df: Dataframe
+    move_data: Dataframe
         Trajectory data.
-    dict_plot: dictionary, optional, default pymove.utils.constants.dict_plot
-        folium plot paramenters.
-    dict_labels: dictionary, optional, default pymove.utils.constants.dict_labels
+    user_lat: String, optional, default 'lat'.
+        Latitude column name.
+    user_lon: String, optional, default 'lon'.
+        Longitude column name.
+    user_point: String, optional, default 'purple'.
+        User point color.
+    line_color: String, optional, default 'blue'.
+        Line color.
+    user_datetime: String, optional, default 'datetime'.
+        Datetime column name.
     sort:Boolean, optional, default False.
         If True the data will be sorted.
-    folium_map: Folium map, optional, default None.
+    base_map: Folium map, optional, default None.
         A folium map to plot the trajectories. If None a map will be created.
     slice_tags: optional, default None.
     tiles: string, optional, default 'OpenStreetMap'.
@@ -1452,104 +1587,65 @@ def add_traj_folium(
         A folium map.
     """
 
-    def circle_maker(iter_tuple, map_):
-
-        _, line = iter_tuple
-
-        x = line[dict_labels['tnz_lat']]
-        y = line[dict_labels['tnz_lon']]
-
-        tags_formated = _format_tags(line, slice_tags)
-
-        folium.Circle(
-            radius=1,
-            location=[x, y],
-            popup=tags_formated,
-            color=dict_plot['tnz_point'],
-            fill=False
-        ).add_to(map_)
-
-    def plot_incial_end_points(list_rowns, map_):
-
-        # plot the start tnz_point
-        line = list_rowns[0][1]
-        # tags_formated = str(line[slice_tags]).replace('\n','<br/>').replace('\s', ':\s')
-        tags_formated = _format_tags(line, slice_tags)
-
-        x = line[dict_labels['tnz_lat']]
-        y = line[dict_labels['tnz_lon']]
-
-        folium.Marker(
-            location=[x, y],
-            popup='START<br/>' + tags_formated,
-            icon=folium.Icon(color='green')
-        ).add_to(folium_map)
-
-        # folium.Circle(
-        #             radius=1,
-        #             location=[x, y],
-        #             tooltip='START<br/>'+tags_formated,
-        #             color=dict_plot['start'],
-        #             fill=False,
-        #         ).add_to(folium_map)
-
-        # plot the last tnz_point
-        line = list_rowns[-1][1]
-        # tags_formated = str(line[slice_tags]).replace('\n','<br/>').replace('\s', ':\s')
-        tags_formated = _format_tags(line, slice_tags)
-
-        x = line[dict_labels['tnz_lat']]
-        y = line[dict_labels['tnz_lon']]
-
-        # folium.Circle(
-        #             radius=1,
-        #             location=[x, y],
-        #             tooltip='END<br/>'+tags_formated,
-        #             color=dict_plot['end'],
-        #             fill=False,
-        #         ).add_to(folium_map)
-        folium.Marker(
-            location=[x, y],
-            popup='END<br/>' + tags_formated,
-            icon=folium.Icon(color='red', icon='info-sign')
-        ).add_to(folium_map)
-
     if not slice_tags:
-        slice_tags = df.columns
+        slice_tags = move_data.columns
 
     # If not have a map a map is create with mean to lat and lon
-    if not folium_map:
-        initial_lat = df[dict_labels['tnz_lat']].mean()
-        initial_lon = df[dict_labels['tnz_lon']].mean()
-        folium_map = create_base_map([initial_lat, initial_lon], tile=tiles)
+    if not base_map:
+        initial_lat = move_data[user_lat].mean()
+        initial_lon = move_data[user_lon].mean()
+        base_map = create_base_map(
+            move_data=move_data,
+            lat_origin=initial_lat,
+            lon_origin=initial_lon,
+            tile=tiles
+        )
 
     # if needs sort the data
     if sort:
-        df.sort_values(dict_labels['tnz_datetime'], inplace=True)
+        move_data.sort_values(user_datetime, inplace=True)
 
     # plot the lines
-    tnz_points = list(zip(df[dict_labels['tnz_lat']], df[dict_labels['tnz_lon']]))
+    tnz_points = list(zip(move_data[user_lat], move_data[user_lon]))
 
     folium.PolyLine(
         tnz_points,
-        color=dict_plot['line'],
+        color=line_color,
         weight=2
-    ).add_to(folium_map)
+    ).add_to(base_map)
 
-    list(map(lambda x: circle_maker(x, folium_map), df.iterrows()))
+    list(map(lambda x:
+     _circle_maker(
+        x, user_lat, 
+        user_lon, 
+        slice_tags, 
+        user_point, 
+        base_map
+     ), 
+     move_data.iterrows()
+     )
+    )
 
-    plot_incial_end_points(list(df.iterrows()), folium_map)
+    plot_incial_end_points(
+        list(move_data.iterrows()), 
+        user_lat,
+         user_lon, 
+        slice_tags, 
+        base_map,
+        base_map
+    )
 
-    return folium_map
+    return base_map
 
 
 def add_point_folium(
-    df,
-    dict_plot=constants.dict_plot,
-    dict_labels=constants.dict_labels,
-    folium_map=None,
+    move_data,
+    user_lat=LATITUDE,
+    user_lon=LONGITUDE,
+    poi_point=POI_POINT,
+    base_map=None,
     slice_tags=None,
-    tiles='cartodbpositron'
+    tiles=TILES[0]
 ):
     """
     Receivies a MoveDataFrame and returns a folium map with the trajectories plots
@@ -1557,14 +1653,17 @@ def add_point_folium(
 
     Parameters:
     ----------
-    df: Dataframe
+    move_data: Dataframe
         Trajectory data.
-    dict_plot: dictionary, optional, default pymove.utils.constants.dict_plot
-        folium plot paramenters.
-    dict_labels: dictionary, optional, default pymove.utils.constants.dict_labels
+    user_lat: String, optional, default 'lat'.
+        Latitude column name.
+    user_lon: String, optional, default 'lon'.
+        Longitude column name.
+    poi_point: String, optional, default 'red'.
+        Poi point color.
     sort:Boolean, optional, default False.
         If True the data will be sorted.
-    folium_map: Folium map, optional, default None.
+    base_map: Folium map, optional, default None.
         A folium map to plot the trajectories. If None a map will be created.
     slice_tags: optional, default None.
     tiles: string, optional, default 'OpenStreetMap'.
@@ -1576,43 +1675,41 @@ def add_point_folium(
     """
 
     if not slice_tags:
-        slice_tags = df.columns
+        slice_tags = move_data.columns
 
     # If not have a map a map is create with mean to lat and lon
-    if not folium_map:
-        initial_lat = df[dict_labels['lat']].mean()
-        initial_lon = df[dict_labels['lon']].mean()
-        folium_map = create_base_map([initial_lat, initial_lon], tile=tiles)
+    if not base_map:
+        initial_lat = move_data[user_lat].mean()
+        initial_lon = move_data[user_lon].mean()
+        base_map = create_base_map(
+            move_data=move_data,
+            lat_origin=initial_lat,
+            lon_origin=initial_lon,
+            tile=tiles
+        )
 
-    def circle_maker(iter_tuple, map_):
+    list(map(lambda x: 
+        _circle_maker(
+            x, 
+            user_lat, 
+            user_lon, 
+            slice_tags, 
+            user_point, 
+            base_map
+        ),
+         move_data.iterrows()
+        )
+    )
 
-        _, line = iter_tuple
-
-        x = line[dict_labels['lat']]
-        y = line[dict_labels['lon']]
-
-        # tags_formated = str(line[slice_tags]).replace('\n','<br/>').replace('\s', ':\s')
-        tags_formated = _format_tags(line, slice_tags)
-
-        folium.Circle(
-            radius=1,
-            location=[x, y],
-            popup=tags_formated,
-            tooltip=tags_formated,
-            color=dict_plot['poi_point'],
-            fill=False
-        ).add_to(map_)
-
-    list(map(lambda x: circle_maker(x, folium_map), df.iterrows()))
-
-    return folium_map
+    return base_map
 
 
 def add_poi_folium(
-    df,
-    dict_plot=constants.dict_plot,
-    dict_labels=constants.dict_labels,
-    folium_map=None,
+    move_data,
+    poi_lat=LATITUDE,
+    poi_lon=LONGITUDE,
+    poi_point=POI_POINT,
+    base_map=None,
     slice_tags=None
 ):
 
@@ -1621,55 +1718,56 @@ def add_poi_folium(
 
     Parameters:
     ----------
-    df: DataFrame
+    move_data: DataFrame
         Trajectory input data
-    dict_plot: dictionary, optional, default pymove.utils.constants.dict_plot
-        folium plot paramenters.
-    dict_labels: dictionary, optional, default pymove.utils.constants.dict_labels
-    folium_map: Folium map, optional, default None.
+    poi_lat: String, optional, default 'lat'.
+        Latitude column name.
+    poi_lon: String, optional, default 'lon'.
+        Longitude column name.
+    poi_point: String, optional, default 'red'.
+        Poi point color.
+    base_map: Folium map, optional, default None.
         A folium map to plot. If None a map. If None a map will be created.
     """
 
     if not slice_tags:
-        slice_tags = df.columns
+        slice_tags = move_data.columns
 
     # If not have a map a map is create with mean to lat and lon
-    if not folium_map:
-        initial_lat = df[dict_labels['poi_lat']].mean()
-        initial_lon = df[dict_labels['poi_lon']].mean()
-        folium_map = create_base_map([initial_lat, initial_lon])
+    if not base_map:
+        initial_lat = move_data[poi_lat].mean()
+        initial_lon = move_data[poi_lon].mean()
+        base_map = create_base_map(
+            move_data=move_data,
+            lat_origin=initial_lat,
+            lon_origin=initial_lon
+        )
 
-    def circle_maker(iter_tuple, map_):
+    list(map(lambda x: 
+        _circle_maker(
+            x, 
+            user_lat, 
+            user_lon, 
+            slice_tags, 
+            user_point, 
+            base_map
+        ),
+        move_data.iterrows()
+        )
+    )
 
-        _, line = iter_tuple
-
-        x = line[dict_labels['poi_lat']]
-        y = line[dict_labels['poi_lon']]
-
-        # tags_formated = str(line[slice_tags]).replace('\n','<br/>').replace('\s', ':\s')
-        tags_formated = _format_tags(line, slice_tags)
-
-        folium.Circle(
-            radius=1,
-            location=[x, y],
-            popup=tags_formated,
-            tooltip=tags_formated,
-            color=dict_plot['poi_point'],
-            fill=False
-        ).add_to(map_)
-
-    list(map(lambda x: circle_maker(x, folium_map), df.iterrows()))
-
-    return folium_map
+    return base_map
 
 
 def add_event_folium(
-    df,
-    dict_plot=constants.dict_plot,
-    dict_labels=constants.dict_labels,
-    folium_map=None,
+    move_data,
+    event_lat=LATITUDE,
+    event_lon=LONGITUDE,
+    event_point=EVENT_POINT,
+    radius=150,
+    base_map=None,
     slice_tags=None,
-    tiles='OpenStreetMap'
+    tiles=TILES[0]
 ):
 
     """
@@ -1677,65 +1775,68 @@ def add_event_folium(
 
     Parameters:
     ----------
-    df: DataFrame
+    move_data: DataFrame
         Trajectory input data
-    dict_plot: dictionary, optional, default pymove.utils.constants.dict_plot
-        folium plot paramenters.
-    dict_labels: dictionary, optional, default pymove.utils.constants.dict_labels
-    folium_map: Folium map, optional, default None.
+    event_lat: String, optional, default 'lat'.
+        Latitude column name.
+    event_lon: String, optional, default 'lon'.
+        Longitude column name.
+    event_point: String, optional, default 'red'.
+        Event color.
+    radius: Float, optional, default 150.
+        radius size.
+    base_map: Folium map, optional, default None.
         A folium map to plot. If None a map. If None a map will be created.
     tiles: string, optional, default 'OpenStreetMap'
 
     """
     if not slice_tags:
-        slice_tags = df.columns
+        slice_tags = move_data.columns
 
     # If not have a map a map is create with mean to lat and lon
-    if not folium_map:
-        initial_lat = df[dict_labels['event_lat']].mean()
-        initial_lon = df[dict_labels['event_lon']].mean()
-        folium_map = create_base_map([initial_lat, initial_lon], tile=tiles)
+    if not base_map:
+        initial_lat = move_data[event_lat].mean()
+        initial_lon = move_data[event_lon].mean()
+        base_map = create_base_map(
+            move_data=move_data,
+            lat_origin=initial_lat,
+            lon_origin=initial_lon,
+            tile=tiles
+        )
 
-    def circle_maker(iter_tuple, map_):
+    list(map(lambda x: 
+        _circle_maker(
+            x, 
+            user_lat, 
+            user_lon, 
+            slice_tags, 
+            user_point, 
+            base_map
+        ),
+        move_data.iterrows()
+        )
+    )
 
-        _, line = iter_tuple
-
-        x = line[dict_labels['event_lat']]
-        y = line[dict_labels['event_lon']]
-
-        # tags_formated = str(line[slice_tags]).replace('\n','<br/>').replace('\s', ':\s')
-        tags_formated = _format_tags(line, slice_tags)
-
-        folium.Circle(
-            radius=1,
-            location=[x, y],
-            tooltip=tags_formated,
-            color=dict_plot['event_point'],
-            fill=False
-        ).add_to(map_)
-
-        folium.Circle(
-            radius=dict_plot['radius'],
-            location=[x, y],
-            tooltip=tags_formated,
-            color=dict_plot['event_point'],
-            fill=False,
-            fill_color=dict_plot['event_point']
-        ).add_to(map_)
-
-    list(map(lambda x: circle_maker(x, folium_map), df.iterrows()))
-
-    return folium_map
+    return base_map
 
 
 def show_trajs_with_event(
-    df_,
+    move_data,
     window_time_subject,
     df_event,
     window_time_event,
     radius,
-    dict_plot=constants.dict_plot,
-    dict_labels=constants.dict_labels,
+    event_lat_=LATITUDE,
+    event_lon_=LONGITUDE,
+    event_datetime_=DATETIME,
+    user_lat=LATITUDE,
+    user_lon=LONGITUDE,
+    user_datetime=DATETIME,
+    event_id_=EVENT_ID,
+    event_point=EVENT_POINT,
+    user_id=UID,
+    user_point=USER_POINT,
+    line_color= LINE_COLOR,
     slice_event_show=None,
     slice_subject_show=None
 ):
@@ -1744,7 +1845,7 @@ def show_trajs_with_event(
 
     Parameters:
     -----------
-    df_: DataFrame.
+    move_data: DataFrame.
         Trajetory input data.
     window_time_subject: float.
         The subject time window.
@@ -1752,12 +1853,28 @@ def show_trajs_with_event(
         The event time window.
     radius: float.
         The radius to use.
-    subject_id: int.
-        The subject id.
-    dict_plot: python set, optional, default pymove.utils.dict_plot.
-        The plot Parameters.
-    dict_labels: python set, optional, default pymove.utils.dict_laabels.
-        df_ columns labels.
+    event_lat_: String, optional, default 'lat'.
+        Event latitude column name.
+    event_lon_: String, optional, default 'lon'.
+        Event longitude column name.
+    event_datetime_: String, optional, default 'datetime'.
+        Event datetime column name.
+    user_lat: String, optional, default 'lat'.
+        User latitude column name.
+    user_lon: String, optional, default 'lon'.
+        User longitude column name.
+    user_datetime: String, optional, default 'datetime'.
+        User datetime column name.
+    event_id_: String, optional, default 'id'.
+        Event id column name.
+    event_point: String, optional, default 'red'.
+        Event color.
+    user_id: String, optional, default 'id'.
+        User id column name.
+    user_point: String, optional, default 'orange'.
+        User point color.
+    line_color: String, optional, default 'blue'.
+        Line color.
     slice_envet_show: int, optional, default None.
 
     slice_subject_show: int, optional, default
@@ -1768,7 +1885,7 @@ def show_trajs_with_event(
     delta_tnz = pd.to_timedelta(window_time_subject, unit='s')
 
     # length of df_tnz
-    len_df_tnz = df_.shape[0]
+    len_df_tnz = move_data.shape[0]
 
     # building structure for lat and lon array
     lat_arr = np.zeros(len_df_tnz)
@@ -1780,13 +1897,13 @@ def show_trajs_with_event(
     # for each cvp in df_cvp
     for _, line in df_event.iterrows():
 
-        event_lat = line[dict_labels['event_lat']]
+        event_lat = line[event_lat_]
 
-        event_lon = line[dict_labels['event_lon']]
+        event_lon = line[event_lon_]
 
-        event_datetime = line[dict_labels['event_datetime']]
+        event_datetime = line[event_datetime_]
 
-        event_id = line[dict_labels['event_id']]
+        event_id = line[event_id_]
 
         # building time window for cvp search
         start_time = pd.to_datetime(event_datetime - delta_event)
@@ -1794,7 +1911,7 @@ def show_trajs_with_event(
 
         # filtering df_ for time window
         df_filted = filters.by_datetime(
-            df_,
+            move_data,
             start_datetime=start_time,
             end_datetime=end_time
         )
@@ -1810,8 +1927,8 @@ def show_trajs_with_event(
         df_filted['distances'] = distances.haversine(
             lat_arr[:len_df_temp],
             lon_arr[:len_df_temp],
-            df_filted[dict_labels['tnz_lat']].values,
-            df_filted[dict_labels['tnz_lon']].values
+            df_filted[user_lat].values,
+            df_filted[user_lon].values
         )
 
         # building nearby column
@@ -1822,27 +1939,22 @@ def show_trajs_with_event(
 
             # buildng the df for the first tnz_points of tnz in nearby cvp
             df_begin = df_filted[df_filted['nearby']].sort_values(
-                dict_labels['tnz_datetime']
+                user_datetime
             )
 
-            # making the folium map
-            # folium_map = create_folium_map([df_begin[dict_labels['tnz_lat']].mean(),
-            #                                   df_begin[dict_labels['tnz_lon']].mean()])
+            move_data = df_event[df_event[event_id_] == event_id]
 
-            # plot cvp in map
-
-            df_ = df_event[df_event[dict_labels['event_id']] == event_id]
-
-            folium_map = add_event_folium(
-                df_,
-                dict_plot=dict_plot,
-                dict_labels=dict_labels,
+            base_map = add_event_folium(
+                move_data,
+                event_lat=event_lat_,
+                event_lon=event_lon_,
+                event_point=event_point,
                 slice_tags=slice_event_show
             )
 
             # keep only the first tnz_point nearby to cvp for each tnz
             df_begin.drop_duplicates(
-                subset=[dict_labels['tnz_id'], 'nearby'],
+                subset=[user_id, 'nearby'],
                 inplace=True
             )
 
@@ -1850,11 +1962,11 @@ def show_trajs_with_event(
             tnzs = []
 
             # create an empty dataframe
-            columns_names = list(df_.columns)
+            columns_names = list(move_data.columns)
 
             for time_tnz, id_tnz in zip(
-                df_begin[dict_labels['tnz_datetime']],
-                df_begin[dict_labels['tnz_id']]
+                df_begin[user_datetime],
+                df_begin[user_id]
             ):
 
                 # making the time window for tnz
@@ -1862,7 +1974,7 @@ def show_trajs_with_event(
                 end_time = pd.to_datetime(time_tnz + delta_tnz)
 
                 # building the df for one id
-                df_id = df_[df_[dict_labels['tnz_id']] == id_tnz]
+                df_id = move_data[move_data[user_id] == id_tnz]
 
                 # filtering df_id for time window
                 df_temp = filters.by_datetime(
@@ -1875,33 +1987,48 @@ def show_trajs_with_event(
                 # add to folium map created
                 add_traj_folium(
                     df_temp,
-                    dict_labels=dict_labels,
-                    dict_plot=dict_plot,
-                    folium_map=folium_map,
+                    user_lat=user_lat,
+                    user_lon=user_lon,
+                    user_point=user_point,
+                    line_color=line_color,
+                    base_map=base_map,
                     slice_tags=slice_subject_show,
                     sort=True
                 )
 
             # add to folium maps list: (id cvp, folium map, quantity of tnz in map, df)
-            folium_maps.append((folium_map, pd.concat(tnzs)))
+            folium_maps.append((base_map, pd.concat(tnzs)))
 
     return folium_maps
 
 
 def show_traj_id_with_event(
-    df_,
+    move_data,
     window_time_subject,
     df_event,
     window_time_event,
     radius,
     subject_id,
-    dict_plot=constants.dict_plot,
-    dict_labels=constants.dict_labels,
+    event_lat_=LATITUDE,
+    event_lon_=LONGITUDE,
+    event_datetime_=DATETIME,
+    user_lat=LATITUDE,
+    user_lon=LONGITUDE,
+    user_datetime=DATETIME,
+    event_id_=EVENT_ID,
+    event_point=EVENT_POINT,
+    user_id=UID,
+    user_point=USER_POINT,
+    line_color= LINE_COLOR,
     slice_event_show=None,
     slice_subject_show=None
 ):
     """
-    df_: DataFrame.
+    Plot a trajectory, incluiding your tnz_points lat lon and your tags.
+
+    Parameters:
+    -----------
+    move_data: DataFrame.
         Trajetory input data.
     window_time_subject: float.
         The subject time window.
@@ -1909,34 +2036,59 @@ def show_traj_id_with_event(
         The event time window.
     radius: float.
         The radius to use.
-    subject_id: int.
-        The subject id.
-    dict_plot: python set, optional, default pymove.utils.dict_plot.
-        The plot Parameters.
-    dict_labels: python set, optional, default pymove.utils.dict_laabels.
-        df_ columns labels.
+    event_lat_: String, optional, default 'lat'.
+        Event latitude column name.
+    event_lon_: String, optional, default 'lon'.
+        Event longitude column name.
+    event_datetime_: String, optional, default 'datetime'.
+        Event datetime column name.
+    user_lat: String, optional, default 'lat'.
+        User latitude column name.
+    user_lon: String, optional, default 'lon'.
+        User longitude column name.
+    user_datetime: String, optional, default 'datetime'.
+        User datetime column name.
+    event_id_: String, optional, default 'id'.
+        Event id column name.
+    event_point: String, optional, default 'red'.
+        Event color.
+    user_id: String, optional, default 'id'.
+        User id column name.
+    user_point: String, optional, default 'orange'.
+        User point color.
+    line_color: String, optional, default 'blue'.
+        Line color.
     slice_envet_show: int, optional, default None.
 
     slice_subject_show: int, optional, default
     """
 
-    df_id = df_[df_[dict_labels['tnz_id']] == subject_id]
+    df_id = move_data[move_data[user_id] == subject_id]
 
     return show_trajs_with_event(
-        df_id,
-        window_time_subject,
-        df_event,
-        window_time_event,
-        radius,
-        dict_plot=dict_plot,
-        dict_labels=dict_labels,
-        slice_event_show=slice_event_show,
-        slice_subject_show=slice_subject_show
+    df_id,
+    window_time_subject,
+    df_event,
+    window_time_event,
+    radius,
+    event_lat_=event_lat_,
+    event_lon_=event_lon_,
+    event_datetime_=event_datetime_,
+    user_lat=user_lat,
+    user_lon=user_lon,
+    user_datetime=user_datetime,
+    event_id_=event_id_,
+    event_point=event_point,
+    user_id=user_id,
+    user_point=user_point,
+    line_color= line_color,
+    slice_event_show=slice_event_show,
+    slice_subject_show=slice_subject_show
     )
 
 
-def create_geojson_features_line(
-    df_, label_lat='lat',
+def _create_geojson_features_line(
+    move_data, label_lat='lat',
     label_lon='lon', label_datetime='datetime'
 ):
     """
@@ -1944,7 +2096,7 @@ def create_geojson_features_line(
 
     Parameters:
     -----------
-    df_: DataFrame.
+    move_data: DataFrame.
         Input trajectory data.
     label_datetime: string, optional, default 'datetime'.
         date_time colunm label.
@@ -1956,21 +2108,16 @@ def create_geojson_features_line(
     print('> Creating GeoJSON features...')
     features = []
 
-    row_iterator = df_.iterrows()
+    row_iterator = move_data.iterrows()
     _, last = next(row_iterator)
-    colums = df_.columns
+    colums = move_data.columns
 
-    for i, row in tqdm(row_iterator, total=df_.shape[0] - 1) :
+    for i, row in tqdm(row_iterator, total=move_data.shape[0] - 1) :
         last_time = last[label_datetime].strftime('%Y-%m-%dT%H:%M:%S')
         next_time = row[label_datetime].strftime('%Y-%m-%dT%H:%M:%S')
 
         popup_list = [i + ': ' + str(last[i]) for i in colums]
         popup1 = '<br>'.join(popup_list)
-        # 'id: '+last['id']+'<br>timestamp: '+last_time+'<br>lat:
-        # '+str(row['lat'])+'<br>lon: '+str(row['lon'])
-        # +'<br>activity: '+ row['y_unique']
-        # popup2 = 'id: '+row['id']+'<br>timestamp: '+next_time+'<br>lat:
-        # '+str(row['lat'])+'<br>lon: '+str(row['lon'])
 
         feature = {
             'type': 'Feature',
@@ -1991,7 +2138,6 @@ def create_geojson_features_line(
                     'iconstyle': {
                         'color': 'red',
                         'weight': 4
-                        # 'radius': row['Numerical_data']*40
                     }
                 }
             }
@@ -2004,16 +2150,17 @@ def create_geojson_features_line(
 
 
 def plot_traj_timestamp_geo_json(
-    df_, label_datetime='datetime',
+    move_data, 
+    label_datetime='datetime',
     label_lat='lat', label_lon='lon',
-    tiles='cartodbpositron'
+    tiles=TILES[0]
 ):
     """
     Plot trajectories wit geo_json.
 
     Parameters:
     -----------
-    df_: DataFrame.
+    move_data: DataFrame.
         Input trajectory data.
     label_datetime: string, optional, default 'datetime'.
         date_time colunm label.
@@ -2024,11 +2171,13 @@ def plot_traj_timestamp_geo_json(
     tiles: string, optional, default 'cartodbpositron'.
         folium tiles.
     """
-    features = create_geojson_features_line(df_, label_datetime)
+    features = _create_geojson_features_line(move_data, label_datetime)
     print('creating folium map')
     map_ = create_base_map(
-        default_location=[df_[label_lat].mean(), df_[label_lon].mean()],
-        tile=tiles
+            move_data=move_data,
+            lat_origin=move_data[label_lat].mean(),
+            lon_origin=move_data[label_lon].mean(),
+            tile=tiles
     )
     print('Genering timestamp map')
     plugins.TimestampedGeoJson(
