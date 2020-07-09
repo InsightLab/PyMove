@@ -1,0 +1,56 @@
+# How create doc with Sphinx
+## 1. Getting to know Sphinx
+### 1.1 Sphinx
+Sphinx is a documentation generator or a tool that translates a set of plain text source files into various output formats, automatically producing cross-references, indices, etc. That is, if you have a directory containing a bunch of reStructuredText or Markdown documents, Sphinx can generate a series of HTML files, a PDF file (via LaTeX), man pages and much more.
+
+For more information access the [documentation here](https://www.sphinx-doc.org/en/master/usage/quickstart.html).
+
+#### 1.1.1. Sphinx APIDoc
+It is a tool for automatic generation of Sphinx sources that, using the autodoc extension, document a whole package in the style of other automatic API documentation tools. 
+For more information access the [documentation here] (https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html).
+
+## 2. Tutorial
+Here we will describe how to create a docs, configure the conf.py file and update the documentation.
+
+### 2.1. Create the documentation
+0. Install Sphinx!
+`pip install Sphinx`
+1. First, make the directory docs with command:
+`mkdir docs`
+2. Run the following command
+`sphinx-apidoc -o docs pymove -full`
+
+Finish! Your documentation has been created! The generated files are of the extension .rst (reStructuredText).
+There are **two main files**:
+- **index.rst**: is the root of your documentation
+- **conf.py**: where are the dependencies and internal settings, such as the html theme, and imports and the path to the library.
+
+### 2.2. Configure the conf.py
+In the file **conf.py**, include the following imports:
+`import os`
+`import sys`
+And include the following code snippet, referring to the library path:
+`sys.path.append(os.path.join(os.path.dirname(__name__), '..'))`
+Now, you must:
+1. Describe project informations
+2. Configure extensions
+`extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.coverage',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.todo',
+    'sphinx_rtd_theme'
+]
+`
+3. Configure theme html
+`html_theme = 'sphinx_rtd_theme'`
+and finish!
+
+### 2.3. Generating the .html files
+To generate the .html files, just access the docs folder, just run the following command:
+`make html`
+### 2.4. Hospedando docs in [Readthedocs](https://readthedocs.org/)
+### 2.5. Update the documentation
+
+
