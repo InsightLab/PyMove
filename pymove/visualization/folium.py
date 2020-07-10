@@ -8,26 +8,27 @@ from folium.plugins import FastMarkerCluster, HeatMap, HeatMapWithTime, MarkerCl
 from tqdm import tqdm_notebook as tqdm
 
 from pymove.preprocessing import filters
-from pymove.utils import constants, distances
+from pymove.utils import distances
 from pymove.utils.constants import (
+    COLORS,
     COUNT,
     DATE,
     DATETIME,
     DAY,
+    EVENT_ID,
+    EVENT_POINT,
     HOUR,
     LATITUDE,
+    LINE_COLOR,
     LONGITUDE,
     PERIOD,
+    POI_POINT,
     SITUATION,
     STOP,
     TILES,
     TRAJ_ID,
-    USER_POINT,
-    LINE_COLOR,
-    POI_POINT,
-    EVENT_POINT,
     UID,
-    EVENT_ID,
+    USER_POINT,
 )
 from pymove.utils.datetime import str_to_datetime
 from pymove.utils.mapfolium import add_map_legend
@@ -256,8 +257,8 @@ def generate_base_map(default_location, default_zoom_start=12):
         Represents a folium map.
     """
     base_map = folium.Map(
-        location=default_location, 
-        control_scale=True, 
+        location=default_location,
+        control_scale=True,
         zoom_start=default_zoom_start
     )
     return base_map
@@ -1437,6 +1438,7 @@ def plot_stops(
     else:
         return base_map
 
+
 def _format_tags(line, slice_):
     """
     Create or format tags.
@@ -1453,11 +1455,11 @@ def _format_tags(line, slice_):
 
 
 def _circle_maker(
-    iter_tuple, 
-    user_lat, 
-    user_lon, 
-    slice_tags, 
-    user_point, 
+    iter_tuple,
+    user_lat,
+    user_lon,
+    slice_tags,
+    user_point,
     map_
 ):
     """
@@ -1476,6 +1478,7 @@ def _circle_maker(
         Point color.
     map_: Folium map.
     """
+
     _, line = iter_tuple
 
     x = line[user_lat]
@@ -1491,15 +1494,16 @@ def _circle_maker(
         fill=False
     ).add_to(map_)
 
+
 def plot_incial_end_points(
-    list_rowns, 
-    user_lat, 
-    user_lon, 
-    slice_tags, 
+    list_rowns,
+    user_lat,
+    user_lon,
+    slice_tags,
     base_map,
     map_
 ):
-        """
+    """
     Returns incial and end points.
 
     Parameters:
@@ -1515,9 +1519,10 @@ def plot_incial_end_points(
         Point color.
     map_: Folium map.
     """
+
     # plot the start tnz_point
     line = list_rowns[0][1]
-        
+
     tags_formated = _format_tags(line, slice_tags)
 
     x = line[user_lat]
@@ -1612,23 +1617,25 @@ def add_traj_folium(
         weight=2
     ).add_to(base_map)
 
-    list(map(lambda x:
-     _circle_maker(
-        x, user_lat, 
-        user_lon, 
-        slice_tags, 
-        user_point, 
-        base_map
-     ), 
-     move_data.iterrows()
-     )
+    list(
+        map(
+            lambda x: _circle_maker(
+                x,
+                user_lat,
+                user_lon,
+                slice_tags,
+                user_point,
+                base_map
+            ),
+            move_data.iterrows()
+        )
     )
 
     plot_incial_end_points(
-        list(move_data.iterrows()), 
+        list(move_data.iterrows()),
         user_lat,
-         user_lon, 
-        slice_tags, 
+        user_lon,
+        slice_tags,
         base_map,
         base_map
     )
@@ -1640,6 +1647,7 @@ def add_point_folium(
     move_data,
     user_lat=LATITUDE,
     user_lon=LONGITUDE,
+    user_point=USER_POINT,
     poi_point=POI_POINT,
     base_map=None,
     slice_tags=None,
@@ -1657,6 +1665,8 @@ def add_point_folium(
         Latitude column name.
     user_lon: String, optional, default 'lon'.
         Longitude column name.
+    user_point: String, optional, default 'orange'.
+        The point color.
     poi_point: String, optional, default 'red'.
         Poi point color.
     sort:Boolean, optional, default False.
@@ -1686,16 +1696,17 @@ def add_point_folium(
             tile=tiles
         )
 
-    list(map(lambda x: 
-        _circle_maker(
-            x, 
-            user_lat, 
-            user_lon, 
-            slice_tags, 
-            user_point, 
-            base_map
-        ),
-         move_data.iterrows()
+    list(
+        map(
+            lambda x: _circle_maker(
+                x,
+                user_lat,
+                user_lon,
+                slice_tags,
+                user_point,
+                base_map
+            ),
+            move_data.iterrows()
         )
     )
 
@@ -1741,16 +1752,17 @@ def add_poi_folium(
             lon_origin=initial_lon
         )
 
-    list(map(lambda x: 
-        _circle_maker(
-            x, 
-            user_lat, 
-            user_lon, 
-            slice_tags, 
-            user_point, 
-            base_map
-        ),
-        move_data.iterrows()
+    list(
+        map(
+            lambda x: _circle_maker(
+                x,
+                poi_lat,
+                poi_lon,
+                slice_tags,
+                poi_point,
+                base_map
+            ),
+            move_data.iterrows()
         )
     )
 
@@ -1802,16 +1814,17 @@ def add_event_folium(
             tile=tiles
         )
 
-    list(map(lambda x: 
-        _circle_maker(
-            x, 
-            user_lat, 
-            user_lon, 
-            slice_tags, 
-            user_point, 
-            base_map
-        ),
-        move_data.iterrows()
+    list(
+        map(
+            lambda x: _circle_maker(
+                x,
+                event_lat,
+                event_lon,
+                slice_tags,
+                event_point,
+                base_map
+            ),
+            move_data.iterrows()
         )
     )
 
@@ -1834,7 +1847,7 @@ def show_trajs_with_event(
     event_point=EVENT_POINT,
     user_id=UID,
     user_point=USER_POINT,
-    line_color= LINE_COLOR,
+    line_color=LINE_COLOR,
     slice_event_show=None,
     slice_subject_show=None
 ):
@@ -2017,7 +2030,7 @@ def show_traj_id_with_event(
     event_point=EVENT_POINT,
     user_id=UID,
     user_point=USER_POINT,
-    line_color= LINE_COLOR,
+    line_color=LINE_COLOR,
     slice_event_show=None,
     slice_subject_show=None
 ):
@@ -2064,24 +2077,24 @@ def show_traj_id_with_event(
     df_id = move_data[move_data[user_id] == subject_id]
 
     return show_trajs_with_event(
-    df_id,
-    window_time_subject,
-    df_event,
-    window_time_event,
-    radius,
-    event_lat_=event_lat_,
-    event_lon_=event_lon_,
-    event_datetime_=event_datetime_,
-    user_lat=user_lat,
-    user_lon=user_lon,
-    user_datetime=user_datetime,
-    event_id_=event_id_,
-    event_point=event_point,
-    user_id=user_id,
-    user_point=user_point,
-    line_color= line_color,
-    slice_event_show=slice_event_show,
-    slice_subject_show=slice_subject_show
+        df_id,
+        window_time_subject,
+        df_event,
+        window_time_event,
+        radius,
+        event_lat_=event_lat_,
+        event_lon_=event_lon_,
+        event_datetime_=event_datetime_,
+        user_lat=user_lat,
+        user_lon=user_lon,
+        user_datetime=user_datetime,
+        event_id_=event_id_,
+        event_point=event_point,
+        user_id=user_id,
+        user_point=user_point,
+        line_color=line_color,
+        slice_event_show=slice_event_show,
+        slice_subject_show=slice_subject_show
     )
 
 
@@ -2148,7 +2161,7 @@ def _create_geojson_features_line(
 
 
 def plot_traj_timestamp_geo_json(
-    move_data, 
+    move_data,
     label_datetime='datetime',
     label_lat='lat', label_lon='lon',
     tiles=TILES[0]
@@ -2172,10 +2185,10 @@ def plot_traj_timestamp_geo_json(
     features = _create_geojson_features_line(move_data, label_datetime)
     print('creating folium map')
     map_ = create_base_map(
-            move_data=move_data,
-            lat_origin=move_data[label_lat].mean(),
-            lon_origin=move_data[label_lon].mean(),
-            tile=tiles
+        move_data=move_data,
+        lat_origin=move_data[label_lat].mean(),
+        lon_origin=move_data[label_lon].mean(),
+        tile=tiles
     )
     print('Genering timestamp map')
     plugins.TimestampedGeoJson(
