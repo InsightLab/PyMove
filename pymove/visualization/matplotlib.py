@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 
 from pymove.utils import constants
 from pymove.utils.constants import (
-    COLORS,
     COUNT,
     DATE,
     DATETIME,
