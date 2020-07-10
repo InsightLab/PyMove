@@ -387,6 +387,11 @@ def heatmap_with_time(
     filename : String, optional, default 'heatmap_with_time.html'.
         Represents the file name of new file .html.
 
+    Returns
+    -------
+    folium.folium.Map.
+        Represents a folium map with visualization.
+
     """
 
     if base_map is None:
@@ -1525,7 +1530,7 @@ def plot_incial_end_points(
     map_: Folium map.
     """
 
-    # plot the start tnz_point
+    # plot the start user_point
     line = list_rows[0][1]
 
     tags_formated = _format_tags(line, slice_tags)
@@ -1590,7 +1595,7 @@ def add_traj_folium(
     tiles: string, optional, default 'OpenStreetMap'.
         The map type.
 
-    Returns
+    Returns:
     -------
         A folium map.
     """
@@ -1614,10 +1619,10 @@ def add_traj_folium(
         move_data.sort_values(user_datetime, inplace=True)
 
     # plot the lines
-    tnz_points = list(zip(move_data[user_lat], move_data[user_lon]))
+    user_points = list(zip(move_data[user_lat], move_data[user_lon]))
 
     folium.PolyLine(
-        tnz_points,
+        user_points,
         color=line_color,
         weight=2
     ).add_to(base_map)
@@ -1682,7 +1687,7 @@ def add_point_folium(
     tiles: string, optional, default 'OpenStreetMap'.
         The map type.
 
-    Returns
+    Returns:
     -------
     A folium map.
     """
@@ -1742,6 +1747,11 @@ def add_poi_folium(
         Poi point color.
     base_map: Folium map, optional, default None.
         A folium map to plot. If None a map. If None a map will be created.
+
+    Returns:
+    -------
+    folium.folium.Map.
+        Represents a folium map with visualization.
     """
 
     if not slice_tags:
@@ -1804,6 +1814,9 @@ def add_event_folium(
         A folium map to plot. If None a map. If None a map will be created.
     tiles: string, optional, default 'OpenStreetMap'
 
+    Returns:
+    -------
+    A folium map.
     """
     if not slice_tags:
         slice_tags = move_data.columns
@@ -1857,7 +1870,7 @@ def show_trajs_with_event(
     slice_subject_show=None,
 ):
     """
-    Plot a trajectory, including your tnz_points lat lon and your tags.
+    Plot a trajectory, including your user_points lat lon and your tags.
 
     Parameters
     -----------
@@ -1894,23 +1907,26 @@ def show_trajs_with_event(
     slice_event_show: int, optional, default None.
     slice_subject_show: int, optional, default
 
+    Returns:
+    -------
+    A folium map.
     """
 
     # building structure for deltas
     delta_event = pd.to_timedelta(window_time_event, unit='s')
-    delta_tnz = pd.to_timedelta(window_time_subject, unit='s')
+    delta_user = pd.to_timedelta(window_time_subject, unit='s')
 
-    # length of df_tnz
-    len_df_tnz = move_data.shape[0]
+    # length of df_user
+    len_df_user = move_data.shape[0]
 
     # building structure for lat and lon array
-    lat_arr = np.zeros(len_df_tnz)
-    lon_arr = np.zeros(len_df_tnz)
+    lat_arr = np.zeros(len_df_user)
+    lon_arr = np.zeros(len_df_user)
 
     # folium map list
     folium_maps = []
 
-    # for each cvp in df_cvp
+    # for each event in df_event
     for _, line in df_event.iterrows():
 
         event_lat = line[event_lat_]
@@ -1921,7 +1937,7 @@ def show_trajs_with_event(
 
         event_id = line[event_id_]
 
-        # building time window for cvp search
+        # building time window for event search
         start_time = pd.to_datetime(event_datetime - delta_event)
         end_time = pd.to_datetime(event_datetime + delta_event)
 
@@ -1939,7 +1955,7 @@ def show_trajs_with_event(
         lat_arr[:len_df_temp] = event_lat
         lon_arr[:len_df_temp] = event_lon
 
-        # building distances to cvp column
+        # building distances to event column
         df_filtered['distances'] = distances.haversine(
             lat_arr[:len_df_temp],
             lon_arr[:len_df_temp],
@@ -1950,10 +1966,10 @@ def show_trajs_with_event(
         # building nearby column
         df_filtered['nearby'] = df_filtered['distances'].map(lambda x: (x <= radius))
 
-        # if any data for df_ in cvp time window is True
+        # if any data for df_ in event time window is True
         if df_filtered['nearby'].any():
 
-            # building the df for the first tnz_points of tnz in nearby cvp
+            # building the df for the first user_points of user in nearby event
             df_begin = df_filtered[df_filtered['nearby']].sort_values(
                 user_datetime
             )
@@ -1968,26 +1984,26 @@ def show_trajs_with_event(
                 slice_tags=slice_event_show
             )
 
-            # keep only the first tnz_point nearby to cvp for each tnz
+            # keep only the first user_point nearby to event for each user
             df_begin.drop_duplicates(
                 subset=[user_id, 'nearby'],
                 inplace=True
             )
 
-            # for each tnz nearby to cvp
-            tnzs = []
+            # for each user nearby to event
+            users = []
 
-            for time_tnz, id_tnz in zip(
+            for time_user, id_user in zip(
                 df_begin[user_datetime],
                 df_begin[user_id]
             ):
 
-                # making the time window for tnz
-                start_time = pd.to_datetime(time_tnz - delta_tnz)
-                end_time = pd.to_datetime(time_tnz + delta_tnz)
+                # making the time window for user
+                start_time = pd.to_datetime(time_user - delta_user)
+                end_time = pd.to_datetime(time_user + delta_user)
 
                 # building the df for one id
-                df_id = move_data[move_data[user_id] == id_tnz]
+                df_id = move_data[move_data[user_id] == id_user]
 
                 # filtering df_id for time window
                 df_temp = filters.by_datetime(
@@ -1996,7 +2012,7 @@ def show_trajs_with_event(
                     end_datetime=end_time
                 )
 
-                tnzs.append(df_temp)
+                users.append(df_temp)
                 # add to folium map created
                 add_traj_folium(
                     df_temp,
@@ -2009,8 +2025,8 @@ def show_trajs_with_event(
                     sort=True
                 )
 
-            # add to folium maps list: (id cvp, folium map, quantity of tnz in map, df)
-            folium_maps.append((base_map, pd.concat(tnzs)))
+            # add to folium maps list: (id event, folium map, quantity of user in map, df)
+            folium_maps.append((base_map, pd.concat(users)))
 
     return folium_maps
 
@@ -2037,7 +2053,7 @@ def show_traj_id_with_event(
     slice_subject_show=None
 ):
     """
-    Plot a trajectory, including your tnz_points lat lon and your tags.
+    Plot a trajectory, including your user_points lat lon and your tags.
 
     Parameters
     -----------
@@ -2073,7 +2089,11 @@ def show_traj_id_with_event(
         Line color.
     slice_envet_show: int, optional, default None.
 
-    slice_subject_show: int, optional, default
+    slice_subject_show: int, optional, default.
+
+    Returns:
+    -------
+    A folium map.
     """
 
     df_id = move_data[move_data[user_id] == subject_id]
@@ -2119,6 +2139,10 @@ def _create_geojson_features_line(
         latitude column label.
     label_lon: string, optional, default 'long'.
         longitude column label.
+
+    Returns:
+    -------
+    GeoJSON features.
     """
     print('> Creating GeoJSON features...')
     features = []
@@ -2186,6 +2210,10 @@ def plot_traj_timestamp_geo_json(
         longitude column label.
     tiles: string, optional, default 'cartodbpositron'.
         folium tiles.
+
+    Returns:
+    -------
+    A folium map.
     """
     features = _create_geojson_features_line(move_data, label_datetime)
     print('creating folium map')
