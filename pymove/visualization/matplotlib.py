@@ -26,8 +26,7 @@ def show_object_id_by_date(
     save_fig=True,
     name='shot_points_by_date.png',
 ):
-    """
-    Generates four visualizations based on datetime feature:
+    """Generates four visualizations based on datetime feature:
 
         - Bar chart trajectories by day periods
         - Bar chart trajectories day of the week
