@@ -169,7 +169,7 @@ def show_grid_polygons(
     """
     Plot polygons.
 
-    Parameters:
+    Parameters
     -----------
     df: DataFrame.
         Input move data.

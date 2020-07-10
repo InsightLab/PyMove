@@ -358,7 +358,7 @@ def heatmap_with_time(
     """
     Generate a heatmap with time.
 
-    Parameters:
+    Parameters
     -----------
     move_data: DataFrame.
         Trajectories input data.
@@ -1443,7 +1443,7 @@ def _format_tags(line, slice_):
     """
     Create or format tags.
 
-    Parameters:
+    Parameters
     -----------
     line: Line to add a tag.
 
@@ -1470,7 +1470,7 @@ def _circle_maker(
     """
     Return a circle.
 
-    Parameters:
+    Parameters
     -----------
     iter_tuple: DataFrame iter_tuple.
     user_lat: String.
@@ -1511,7 +1511,7 @@ def plot_incial_end_points(
     """
     Returns incial and end points.
 
-    Parameters:
+    Parameters
     -----------
     list_rows: List of DataFrame iter_tuple.
     user_lat: String.
@@ -1568,7 +1568,7 @@ def add_traj_folium(
     """
     Receives a MoveDataFrame and returns a folium map with the trajectories plots.
 
-    Parameters:
+    Parameters
     ----------
     move_data: Dataframe
         Trajectory data.
@@ -1590,7 +1590,7 @@ def add_traj_folium(
     tiles: string, optional, default 'OpenStreetMap'.
         The map type.
 
-    Returns:
+    Returns
     -------
         A folium map.
     """
@@ -1662,7 +1662,7 @@ def add_point_folium(
     Receives a MoveDataFrame and returns a folium map with the trajectories plots
     and a point.
 
-    Parameters:
+    Parameters
     ----------
     move_data: Dataframe
         Trajectory data.
@@ -1682,7 +1682,7 @@ def add_point_folium(
     tiles: string, optional, default 'OpenStreetMap'.
         The map type.
 
-    Returns:
+    Returns
     -------
     A folium map.
     """
@@ -1730,7 +1730,7 @@ def add_poi_folium(
     """
     Receives a MoveDataFrame and returns a folium map with poi points.
 
-    Parameters:
+    Parameters
     ----------
     move_data: DataFrame
         Trajectory input data
@@ -1788,7 +1788,7 @@ def add_event_folium(
     """
     Receives a MoveDataFrame and returns a folium map with events.
 
-    Parameters:
+    Parameters
     ----------
     move_data: DataFrame
         Trajectory input data
@@ -1859,7 +1859,7 @@ def show_trajs_with_event(
     """
     Plot a trajectory, including your tnz_points lat lon and your tags.
 
-    Parameters:
+    Parameters
     -----------
     move_data: DataFrame.
         Trajectory input data.
@@ -2039,7 +2039,7 @@ def show_traj_id_with_event(
     """
     Plot a trajectory, including your tnz_points lat lon and your tags.
 
-    Parameters:
+    Parameters
     -----------
     move_data: DataFrame.
         Trajectory input data.
@@ -2109,7 +2109,7 @@ def _create_geojson_features_line(
     """
     Create geojson features.
 
-    Parameters:
+    Parameters
     -----------
     move_data: DataFrame.
         Input trajectory data.
@@ -2174,7 +2174,7 @@ def plot_traj_timestamp_geo_json(
     """
     Plot trajectories wit geo_json.
 
-    Parameters:
+    Parameters
     -----------
     move_data: DataFrame.
         Input trajectory data.
