@@ -1,6 +1,15 @@
 import matplotlib.pyplot as plt
 
-from pymove.utils.constants import DATE, DAY, HOUR, LATITUDE, LONGITUDE, PERIOD, TRAJ_ID
+from pymove.utils.constants import (
+    DATE,
+    DAY,
+    HOUR,
+    LATITUDE,
+    LONGITUDE,
+    PERIOD,
+    POLYGON,
+    TRAJ_ID,
+)
 
 
 def show_object_id_by_date(
@@ -44,6 +53,7 @@ def show_object_id_by_date(
     References
     ----------
     https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
+
     """
     if kind is None:
         kind = ['bar', 'bar', 'line', 'line']
@@ -116,6 +126,7 @@ def show_lat_lon_gps(
     -------
     fig : matplotlib.pyplot.figure or None
         The generated picture.
+
     """
     try:
         if LATITUDE in move_data and LONGITUDE in move_data:
@@ -146,41 +157,57 @@ def show_lat_lon_gps(
 
 
 def show_grid_polygons(
-    df_,
+    df,
     id_,
     label_id=TRAJ_ID,
-    label_polygon='polygon',
-    figsize=(10, 10)
+    label_polygon=POLYGON,
+    figsize=(10, 10),
+    return_fig=True,
+    save_fig=False,
+    name='show_grid_polygons.png',
 ):
     """
     Plot polygons.
 
     Parameters:
     -----------
-    df_: DataFrame.
+    df: DataFrame.
         Input move data.
     id_: int.
         Trajectory id.
     label_id: string, optional, default pymove.constants.TRAJ_ID.
 
     label_polygon: string, optional, default 'polygon'.
-        The column name with GeoPandas polygons.
+        The column name with Shapely polygons.
     figsize: 2-tuple, optional, default (10,10).
         The figure size.
+    return_fig : bool, optional, default True.
+        Represents whether or not to save the generated picture.
+    save_fig : bool, optional, default True.
+        Represents whether or not to save the generated picture.
+    name : String, optional, default 'show_grid_polygons.png'.
+        Represents name of a file.
+
+    Returns
+    -------
+    fig : matplotlib.pyplot.figure or None
+        The generated picture.
+
     """
     fig = plt.figure(figsize=figsize)
 
-    # filter dataframe by id
-    df_ = df_[df_[label_id] == id]
+    df = df[df[label_id] == id]
 
-    xs_start, ys_start = df_.iloc[0][label_polygon].exterior.xy
-    # xs_end, ys_end = df_.iloc[1][label_polygon].exterior.xy
+    xs_start, ys_start = df.iloc[0][label_polygon].exterior.xy
 
-    plt.plot(ys_start, xs_start, 'bo', markersize=20)             # start tnz_point
-    # plt.plot(ys_end, xs_end, 'rX', markersize=20)           # end tnz_point
+    plt.plot(ys_start, xs_start, 'bo', markersize=20)
 
-    for idx in range(df_.shape[0]):
-        xs, ys = df_[label_polygon].iloc[idx].exterior.xy
+    for idx in range(df.shape[0]):
+        xs, ys = df[label_polygon].iloc[idx].exterior.xy
         plt.plot(ys, xs, 'g', linewidth=2, markersize=5)
 
-    return df_, fig
+    if save_fig:
+        plt.savefig(name)
+
+    if return_fig:
+        return fig

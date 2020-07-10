@@ -1448,6 +1448,11 @@ def _format_tags(line, slice_):
     line: Line to add a tag.
 
     slice_: Tag interval.
+
+    Returns
+    -------
+    str: formatted html tag
+
     """
     map_formated_tags = map(lambda tag: '{}: {}'.format(tag, line[tag]), slice_)
 
@@ -1496,7 +1501,7 @@ def _circle_maker(
 
 
 def plot_incial_end_points(
-    list_rowns,
+    list_rows,
     user_lat,
     user_lon,
     slice_tags,
@@ -1508,7 +1513,7 @@ def plot_incial_end_points(
 
     Parameters:
     -----------
-    list_rowns: List of DataFrame iter_tuple.
+    list_rows: List of DataFrame iter_tuple.
     user_lat: String.
         Latitude column name.
     user_lon: String.
@@ -1521,7 +1526,7 @@ def plot_incial_end_points(
     """
 
     # plot the start tnz_point
-    line = list_rowns[0][1]
+    line = list_rows[0][1]
 
     tags_formated = _format_tags(line, slice_tags)
 
@@ -1534,7 +1539,7 @@ def plot_incial_end_points(
         icon=folium.Icon(color='green')
     ).add_to(base_map)
 
-    line = list_rowns[-1][1]
+    line = list_rows[-1][1]
 
     tags_formated = _format_tags(line, slice_tags)
 
@@ -1561,7 +1566,7 @@ def add_traj_folium(
     tiles=TILES[0]
 ):
     """
-    Receivies a MoveDataFrame and returns a folium map with the trajectories plots.
+    Receives a MoveDataFrame and returns a folium map with the trajectories plots.
 
     Parameters:
     ----------
@@ -1654,7 +1659,7 @@ def add_point_folium(
     tiles=TILES[0]
 ):
     """
-    Receivies a MoveDataFrame and returns a folium map with the trajectories plots
+    Receives a MoveDataFrame and returns a folium map with the trajectories plots
     and a point.
 
     Parameters:
@@ -1723,7 +1728,7 @@ def add_poi_folium(
 ):
 
     """
-    Receivies a MoveDataFrame and returns a folium map with poi points.
+    Receives a MoveDataFrame and returns a folium map with poi points.
 
     Parameters:
     ----------
@@ -1781,7 +1786,7 @@ def add_event_folium(
 ):
 
     """
-    Receivies a MoveDataFrame and returns a folium map with events.
+    Receives a MoveDataFrame and returns a folium map with events.
 
     Parameters:
     ----------
@@ -1849,15 +1854,15 @@ def show_trajs_with_event(
     user_point=USER_POINT,
     line_color=LINE_COLOR,
     slice_event_show=None,
-    slice_subject_show=None
+    slice_subject_show=None,
 ):
     """
-    Plot a trajectory, incluiding your tnz_points lat lon and your tags.
+    Plot a trajectory, including your tnz_points lat lon and your tags.
 
     Parameters:
     -----------
     move_data: DataFrame.
-        Trajetory input data.
+        Trajectory input data.
     window_time_subject: float.
         The subject time window.
     Window_time_event: float.
@@ -1886,9 +1891,9 @@ def show_trajs_with_event(
         User point color.
     line_color: String, optional, default 'blue'.
         Line color.
-    slice_envet_show: int, optional, default None.
-
+    slice_event_show: int, optional, default None.
     slice_subject_show: int, optional, default
+
     """
 
     # building structure for deltas
@@ -1921,35 +1926,35 @@ def show_trajs_with_event(
         end_time = pd.to_datetime(event_datetime + delta_event)
 
         # filtering df_ for time window
-        df_filted = filters.by_datetime(
+        df_filtered = filters.by_datetime(
             move_data,
             start_datetime=start_time,
             end_datetime=end_time
         )
 
         # length of df_temp
-        len_df_temp = df_filted.shape[0]
+        len_df_temp = df_filtered.shape[0]
 
         # using the util part of the array for haversine function
         lat_arr[:len_df_temp] = event_lat
         lon_arr[:len_df_temp] = event_lon
 
         # building distances to cvp column
-        df_filted['distances'] = distances.haversine(
+        df_filtered['distances'] = distances.haversine(
             lat_arr[:len_df_temp],
             lon_arr[:len_df_temp],
-            df_filted[user_lat].values,
-            df_filted[user_lon].values
+            df_filtered[user_lat].values,
+            df_filtered[user_lon].values
         )
 
         # building nearby column
-        df_filted['nearby'] = df_filted['distances'].map(lambda x: (x <= radius))
+        df_filtered['nearby'] = df_filtered['distances'].map(lambda x: (x <= radius))
 
         # if any data for df_ in cvp time window is True
-        if df_filted['nearby'].any():
+        if df_filtered['nearby'].any():
 
-            # buildng the df for the first tnz_points of tnz in nearby cvp
-            df_begin = df_filted[df_filted['nearby']].sort_values(
+            # building the df for the first tnz_points of tnz in nearby cvp
+            df_begin = df_filtered[df_filtered['nearby']].sort_values(
                 user_datetime
             )
 
@@ -2032,12 +2037,12 @@ def show_traj_id_with_event(
     slice_subject_show=None
 ):
     """
-    Plot a trajectory, incluiding your tnz_points lat lon and your tags.
+    Plot a trajectory, including your tnz_points lat lon and your tags.
 
     Parameters:
     -----------
     move_data: DataFrame.
-        Trajetory input data.
+        Trajectory input data.
     window_time_subject: float.
         The subject time window.
     Window_time_event: float.
@@ -2096,8 +2101,10 @@ def show_traj_id_with_event(
 
 
 def _create_geojson_features_line(
-    move_data, label_lat='lat',
-    label_lon='lon', label_datetime='datetime'
+    move_data,
+    label_lat=LATITUDE,
+    label_lon=LONGITUDE,
+    label_datetime=DATETIME
 ):
     """
     Create geojson features.
@@ -2107,7 +2114,7 @@ def _create_geojson_features_line(
     move_data: DataFrame.
         Input trajectory data.
     label_datetime: string, optional, default 'datetime'.
-        date_time colunm label.
+        date_time colum label.
     label_lat: string, optional, default 'lat'.
         latitude column label.
     label_lon: string, optional, default 'long'.
@@ -2118,13 +2125,13 @@ def _create_geojson_features_line(
 
     row_iterator = move_data.iterrows()
     _, last = next(row_iterator)
-    colums = move_data.columns
+    columns = move_data.columns
 
     for i, row in tqdm(row_iterator, total=move_data.shape[0] - 1) :
         last_time = last[label_datetime].strftime('%Y-%m-%dT%H:%M:%S')
         next_time = row[label_datetime].strftime('%Y-%m-%dT%H:%M:%S')
 
-        popup_list = [i + ': ' + str(last[i]) for i in colums]
+        popup_list = [i + ': ' + str(last[i]) for i in columns]
         popup1 = '<br>'.join(popup_list)
 
         feature = {
@@ -2159,8 +2166,9 @@ def _create_geojson_features_line(
 
 def plot_traj_timestamp_geo_json(
     move_data,
-    label_datetime='datetime',
-    label_lat='lat', label_lon='lon',
+    label_datetime=DATETIME,
+    label_lat=LATITUDE,
+    label_lon=LONGITUDE,
     tiles=TILES[0]
 ):
     """
