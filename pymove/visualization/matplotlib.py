@@ -1,20 +1,6 @@
 import matplotlib.pyplot as plt
 
-from pymove.utils import constants
-from pymove.utils.constants import (
-    COUNT,
-    DATE,
-    DATETIME,
-    DAY,
-    HOUR,
-    LATITUDE,
-    LONGITUDE,
-    PERIOD,
-    SITUATION,
-    STOP,
-    TILES,
-    TRAJ_ID,
-)
+from pymove.utils.constants import DATE, DAY, HOUR, LATITUDE, LONGITUDE, PERIOD, TRAJ_ID
 
 
 def show_object_id_by_date(
@@ -162,7 +148,7 @@ def show_lat_lon_gps(
 def show_grid_polygons(
     df_,
     id_,
-    label_id=constants.TRAJ_ID,
+    label_id=TRAJ_ID,
     label_polygon='polygon',
     figsize=(10, 10)
 ):
