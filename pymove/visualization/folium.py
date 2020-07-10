@@ -1972,9 +1972,6 @@ def show_trajs_with_event(
             # for each tnz nearby to cvp
             tnzs = []
 
-            # create an empty dataframe
-            columns_names = list(move_data.columns)
-
             for time_tnz, id_tnz in zip(
                 df_begin[user_datetime],
                 df_begin[user_id]
