@@ -1595,7 +1595,7 @@ def add_traj_folium(
     tiles: string, optional, default 'OpenStreetMap'.
         The map type.
 
-    Returns:
+    Returns
     -------
         A folium map.
     """
@@ -1687,7 +1687,7 @@ def add_point_folium(
     tiles: string, optional, default 'OpenStreetMap'.
         The map type.
 
-    Returns:
+    Returns
     -------
     A folium map.
     """
@@ -1748,7 +1748,7 @@ def add_poi_folium(
     base_map: Folium map, optional, default None.
         A folium map to plot. If None a map. If None a map will be created.
 
-    Returns:
+    Returns
     -------
     folium.folium.Map.
         Represents a folium map with visualization.
@@ -1814,7 +1814,7 @@ def add_event_folium(
         A folium map to plot. If None a map. If None a map will be created.
     tiles: string, optional, default 'OpenStreetMap'
 
-    Returns:
+    Returns
     -------
     A folium map.
     """
@@ -1907,9 +1907,9 @@ def show_trajs_with_event(
     slice_event_show: int, optional, default None.
     slice_subject_show: int, optional, default
 
-    Returns:
+    Returns
     -------
-    A folium map.
+    A list of folium maps.
     """
 
     # building structure for deltas
@@ -2091,7 +2091,7 @@ def show_traj_id_with_event(
 
     slice_subject_show: int, optional, default.
 
-    Returns:
+    Returns
     -------
     A folium map.
     """
@@ -2117,7 +2117,7 @@ def show_traj_id_with_event(
         line_color=line_color,
         slice_event_show=slice_event_show,
         slice_subject_show=slice_subject_show
-    )
+    )[0]
 
 
 def _create_geojson_features_line(
@@ -2140,7 +2140,7 @@ def _create_geojson_features_line(
     label_lon: string, optional, default 'long'.
         longitude column label.
 
-    Returns:
+    Returns
     -------
     GeoJSON features.
     """
@@ -2211,7 +2211,7 @@ def plot_traj_timestamp_geo_json(
     tiles: string, optional, default 'cartodbpositron'.
         folium tiles.
 
-    Returns:
+    Returns
     -------
     A folium map.
     """
