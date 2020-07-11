@@ -29,14 +29,7 @@ from pymove.utils.constants import (
 )
 from pymove.utils.datetime import str_to_datetime
 from pymove.utils.log import progress_bar
-from pymove.utils.visual import (
-    add_map_legend,
-    cmap_hex_color,
-    generate_color,
-    get_cmap,
-    hex_rgb,
-    rgb,
-)
+from pymove.utils.visual import add_map_legend, cmap_hex_color, get_cmap
 
 
 def save_map(
