@@ -598,6 +598,8 @@ def test_join_with_poi_datetime():
     )
 
     integration.join_with_poi_datetime(move_df, pois, time_window=45000)
+    print(move_df.columns)
+    print(expected.columns)
     assert_frame_equal(move_df, expected, check_dtype=False)
 
 

@@ -1,11 +1,8 @@
 import folium
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from folium import plugins
 from folium.plugins import FastMarkerCluster, HeatMap, HeatMapWithTime, MarkerCluster
-from tqdm import tqdm_notebook as tqdm
 
 from pymove.preprocessing import filters
 from pymove.utils import distances
@@ -31,88 +28,15 @@ from pymove.utils.constants import (
     USER_POINT,
 )
 from pymove.utils.datetime import str_to_datetime
-from pymove.utils.mapfolium import add_map_legend
-
-
-def generate_color():
-    """
-    Generates a random color.
-
-    Returns
-    -------
-    Random HEX color
-    """
-    return COLORS[np.random.randint(0, len(COLORS))]
-
-
-def rgb(rgb_colors):
-    """
-    Return a tuple of integers, as used in AWT/Java plots.
-
-    Parameters
-    ----------
-    rgb_colors : list
-        Represents a list with three positions that correspond to the percentage red,
-        green and blue colors.
-
-    Returns
-    -------
-    tuple
-        Represents a tuple of integers that correspond the colors values.
-
-    Examples
-    --------
-    >>> from pymove.visualization.visualization import rgb
-    >>> rgb([0.6,0.2,0.2])
-        (51, 51, 153)
-    """
-    blue = rgb_colors[0]
-    red = rgb_colors[1]
-    green = rgb_colors[2]
-    return int(red * 255), int(green * 255), int(blue * 255)
-
-
-def hex_rgb(rgb_colors):
-    """
-    Return a hex string, as used in Tk plots.
-
-    Parameters
-    ----------
-    rgb_colors : list
-        Represents a list with three positions that correspond to the percentage red,
-        green and blue colors.
-
-    Returns
-    -------
-    String
-        Represents a color in hexadecimal format.
-
-    Examples
-    --------
-    >>> from pymove.visualization.visualization import hex_rgb
-    >>> hex_rgb([0.6,0.2,0.2])
-    '#333399'
-    """
-    return '#%02X%02X%02X' % rgb(rgb_colors)
-
-
-def cmap_hex_color(cmap, i):
-    """
-    Convert a Colormap to hex color.
-
-    Parameters
-    ----------
-    cmap : matplotlib.colors.ListedColormap
-        Represents the Colormap.
-    i : int
-        List color index.
-
-    Returns
-    -------
-    String
-        Represents corresponding hex string.
-    """
-    return matplotlib.colors.rgb2hex(cmap(i))
+from pymove.utils.log import progress_bar
+from pymove.utils.visual import (
+    add_map_legend,
+    cmap_hex_color,
+    generate_color,
+    get_cmap,
+    hex_rgb,
+    rgb,
+)
 
 
 def save_map(
@@ -120,7 +44,7 @@ def save_map(
     filename,
     tiles=TILES[0],
     label_id=TRAJ_ID,
-    cmap='tab20',
+    cmap='Set1',
     return_map=False
 ):
     """
@@ -150,7 +74,7 @@ def save_map(
     )
 
     ids = move_data[label_id].unique()
-    cmap_ = plt.cm.get_cmap(cmap)
+    cmap_ = get_cmap(cmap)
     num = cmap_.N
 
     for id_ in ids:
@@ -166,36 +90,6 @@ def save_map(
 
     if return_map:
         return map_
-
-
-def save_wkt(move_data, filename, label_id=TRAJ_ID):
-    """
-    Save a visualization in a map in a new file .wkt.
-
-    Parameters
-    ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    filename : String
-        Represents the filename.
-    label_id : String
-        Represents column name of trajectory id.
-
-    """
-
-    str_ = '%s;linestring\n' % label_id
-    ids = move_data[label_id].unique()
-    for id_ in ids:
-        move_df = move_data[move_data[label_id] == id_]
-        curr_str = '%s;LINESTRING(' % id_
-        curr_str += ','.join(
-            '%s %s' % (x[0], x[1])
-            for x in move_df[[LONGITUDE, LATITUDE]].values
-        )
-        curr_str += ')\n'
-        str_ += curr_str
-    with open(filename, 'w') as f:
-        f.write(str_)
 
 
 def create_base_map(
@@ -675,7 +569,7 @@ def plot_markers(
 
 
 def _filter_and_generate_colors(
-    move_data, id_=None, n_rows=None, color='black'
+    move_data, id_=None, n_rows=None, color=None
 ):
     """
     Filters the dataframe and generate colors for folium map.
@@ -685,11 +579,11 @@ def _filter_and_generate_colors(
     move_data : pymove.core.MoveDataFrameAbstract subclass.
         Input trajectory data.
     id_: int or None.
-        The TRAJ_ID'srs to be plotted
+        The TRAJ_ID's to be plotted
     n_rows : int, optional, default None.
         Represents number of data rows that are will plot.
     color: string or None.
-        The color of each id
+        The color of the trajectory, of each trajectory or a colormap
 
     Returns
     -------
@@ -715,14 +609,27 @@ def _filter_and_generate_colors(
         ]
 
     if id_ is not None:
-        items = list(zip([id_], [color]))
+        if color is None:
+            color = 'black'
+        items = [(id_, color)]
     else:
+        if color is None:
+            color = 'Set1'
         ids = mv_df[TRAJ_ID].unique()
+
         if isinstance(color, str):
-            colors = [generate_color() for _ in ids]
+            cmap_ = get_cmap(color)
+            num = cmap_.N
+            colors = [
+                cmap_hex_color(cmap_, (i % num))
+                for i, _ in enumerate(ids)
+            ]
+            diff = (len(ids) // len(colors)) + 1
+            colors *= diff
         else:
             colors = color[:]
-        items = list(zip(ids, colors))
+        items = [*zip(ids, colors)]
+
     return mv_df, items
 
 
@@ -840,7 +747,7 @@ def plot_trajectories_with_folium(
     base_map=None,
     tile=TILES[0],
     save_as_html=False,
-    color='black',
+    color=None,
     filename='plot_trajectories_with_folium.html',
 ):
     """
@@ -870,8 +777,9 @@ def plot_trajectories_with_folium(
         Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
-    color : String, optional, default 'black'.
-        Represents line'srs color of visualization.
+    color : String, list, optional, default None.
+        Represents line colors of visualization.
+        Can be a single color name, a list of colors or a colormap name.
     filename : String, optional, default 'plot_trajectory_with_folium.html'.
         Represents the file name of new file .html.
 
@@ -945,7 +853,8 @@ def plot_trajectory_by_id_folium(
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
     color : String, optional, default 'black'.
-        Represents line'srs color of visualization.
+        Represents line colors of visualization.
+        Can be a single color name, a list of colors or a colormap.
     filename : String, optional, default 'plot_trajectory_by_id_folium.html'.
         Represents the file name of new file .html.
 
@@ -989,7 +898,7 @@ def plot_trajectory_by_period(
     base_map=None,
     tile=TILES[0],
     save_as_html=False,
-    color='black',
+    color=None,
     filename='plot_trajectory_by_period_with_folium.html',
 ):
     """
@@ -1023,9 +932,9 @@ def plot_trajectory_by_period(
         Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default 'black'.
-        Represents line'srs color of visualization.
-        Pass a list if plotting for many users. Else colors will be random
+    color : String or List, optional, default None.
+        Represents line colors of visualization.
+        Can be a single color name, a list of colors or a colormap.
     filename : String, optional, default 'plot_trajectory_by_period.html'.
         Represents the file name of new file .html.
 
@@ -1075,7 +984,7 @@ def plot_trajectory_by_day_week(
     base_map=None,
     tile=TILES[0],
     save_as_html=False,
-    color='black',
+    color=None,
     filename='plot_trajectory_by_day_week.html',
 ):
     """
@@ -1109,9 +1018,9 @@ def plot_trajectory_by_day_week(
         Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default 'black'.
-        Represents line'srs color of visualization.
-        Pass a list if plotting for many users. Else colors will be random
+    color : String or List, optional, default None.
+        Represents line colors of visualization.
+        Can be a single color name, a list of colors or a colormap.
     filename : String, optional, default 'plot_trajectory_by_day_week.html'.
         Represents the file name of new file .html.
 
@@ -1162,7 +1071,7 @@ def plot_trajectory_by_date(
     base_map=None,
     tile=TILES[0],
     save_as_html=False,
-    color='black',
+    color=None,
     filename='plot_trajectory_by_date.html',
 ):
     """
@@ -1198,9 +1107,9 @@ def plot_trajectory_by_date(
         Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default 'black'.
-        Represents line'srs color of visualization.
-        Pass a list if plotting for many users. Else colors will be random
+    color : String or List, optional, default None.
+        Represents line colors of visualization.
+        Can be a single color name, a list of colors or a colormap.
     filename : String, optional, default 'plot_trejectory_with_folium.html'.
         Represents the file name of new file .html.
 
@@ -1258,7 +1167,7 @@ def plot_trajectory_by_hour(
     base_map=None,
     tile=TILES[0],
     save_as_html=False,
-    color='black',
+    color=None,
     filename='plot_trajectory_by_hour.html',
 ):
     """
@@ -1294,9 +1203,9 @@ def plot_trajectory_by_hour(
         Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default 'black'.
-        Represents line'srs color of visualization.
-        Pass a list if plotting for many users. Else colors will be random
+    color : String or List, optional, default None.
+        Represents line colors of visualization.
+        Can be a single color name, a list of colors or a colormap.
     filename : String, optional, default 'plot_trajectory_by_hour.html'.
         Represents the file name of new file .html.
 
@@ -1347,7 +1256,7 @@ def plot_stops(
     base_map=None,
     tile=TILES[0],
     save_as_html=False,
-    color='black',
+    color=None,
     filename='plot_stops.html',
 ):
     """
@@ -1385,9 +1294,9 @@ def plot_stops(
         Represents the map'srs tiles.
     save_as_html : bool, optional, default False.
         Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default 'black'.
-        Represents line'srs color of visualization.
-        Pass a list if plotting for many users. Else colors will be random
+    color : String or List, optional, default None.
+        Represents line colors of visualization.
+        Can be a single color name, a list of colors or a colormap.
     filename : String, optional, default 'plot_stops.html'.
         Represents the file name of new file .html.
 
@@ -2151,7 +2060,7 @@ def _create_geojson_features_line(
     _, last = next(row_iterator)
     columns = move_data.columns
 
-    for i, row in tqdm(row_iterator, total=move_data.shape[0] - 1) :
+    for i, row in progress_bar(row_iterator, total=move_data.shape[0] - 1) :
         last_time = last[label_datetime].strftime('%Y-%m-%dT%H:%M:%S')
         next_time = row[label_datetime].strftime('%Y-%m-%dT%H:%M:%S')
 
