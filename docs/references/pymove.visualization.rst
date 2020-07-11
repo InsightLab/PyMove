@@ -4,10 +4,18 @@ pymove.visualization package
 Submodules
 ----------
 
-pymove.visualization.visualization module
------------------------------------------
+pymove.visualization.folium module
+----------------------------------
 
-.. automodule:: pymove.visualization.visualization
+.. automodule:: pymove.visualization.folium
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pymove.visualization.matplotlib module
+--------------------------------------
+
+.. automodule:: pymove.visualization.matplotlib
    :members:
    :undoc-members:
    :show-inheritance:
