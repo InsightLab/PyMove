@@ -9,7 +9,9 @@ script:
   - python setup.py install
   - pip install pytest
   - pip install coverage
+  - pip install geopandas
   - coverage run -m pytest
+
 after_script:
   - if [[ "$TRAVIS_BRANCH" = "master" || "$TRAVIS_BRANCH" = "developer" ]];
         then
