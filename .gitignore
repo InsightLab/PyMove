@@ -65,12 +65,10 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/_static/
 
 # PyBuilder
 target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
 
 # pyenv
 .python-version
@@ -244,4 +242,3 @@ modules.xml
 # End of https://www.gitignore.io/api/macos,pycharm+all,jupyternotebooks
 .idea
 .vscode
-.DS_Store

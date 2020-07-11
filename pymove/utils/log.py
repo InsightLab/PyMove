@@ -4,7 +4,7 @@ from functools import wraps
 from IPython import get_ipython
 from IPython.display import display
 from ipywidgets import HTML, IntProgress, VBox
-from tqdm import tqdm
+from tqdm import tqdm as _tqdm
 
 from pymove.utils.datetime import deltatime_str
 
@@ -26,7 +26,7 @@ def timer_decorator(func):
     return wrapper
 
 
-def _log_progress(sequence, every=None, size=None, desc='Items'):
+def _log_progress(sequence, desc='Items', total=None, miniters=None):
     """
     Make and display a progress bar.
 
@@ -34,36 +34,36 @@ def _log_progress(sequence, every=None, size=None, desc='Items'):
     ----------
     sequence : list.
         Represents a elements sequence.
-    every : int, optional, default None.
-        Represents the steps in which the bar will be updated
-    size : int, optional, default None.
-        Represents the size/number elements in sequence.
     desc : String, optional, default 'Items'.
         Represents the description of the operation.
+    total : int, optional, default None.
+        Represents the total/number elements in sequence.
+    miniters : int, optional, default None.
+        Represents the steps in which the bar will be updated
 
     """
 
     is_iterator = False
-    if size is None:
+    if total is None:
         try:
-            size = len(sequence)
+            total = len(sequence)
         except TypeError:
             is_iterator = True
-    if size is not None:
-        if every is None:
-            if size <= 200:
-                every = 1
+    if total is not None:
+        if miniters is None:
+            if total <= 200:
+                miniters = 1
             else:
-                every = int(size / 200)
+                miniters = int(total / 200)
     else:
-        if every is None:
-            raise AssertionError('Sequence is iterator, set every')
+        if miniters is None:
+            miniters = 1
 
     if is_iterator:
         progress = IntProgress(min=0, max=1, value=1)
         progress.bar_style = 'info'
     else:
-        progress = IntProgress(min=0, max=size, value=0)
+        progress = IntProgress(min=0, max=total, value=0)
     label = HTML()
     box = VBox(children=[label, progress])
     display(box)
@@ -71,12 +71,12 @@ def _log_progress(sequence, every=None, size=None, desc='Items'):
     index = 0
     try:
         for index, record in enumerate(sequence, 1):
-            if index == 1 or index % every == 0:
+            if index == 1 or index % miniters == 0:
                 if is_iterator:
                     label.value = '%s: %s / ?' % (desc, index)
                 else:
                     progress.value = index
-                    label.value = u'%s: %s / %s' % (desc, index, size)
+                    label.value = u'%s: %s / %s' % (desc, index, total)
             yield record
     except Exception:
         progress.bar_style = 'danger'
@@ -93,4 +93,4 @@ try:
     else:
         raise NameError
 except NameError:
-    progress_bar = tqdm
+    progress_bar = _tqdm
