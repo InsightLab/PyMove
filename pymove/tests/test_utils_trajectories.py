@@ -138,7 +138,7 @@ def test_save_bbox(tmpdir):
         'fit_bounds': 1,
         'poly_line': 1
     }
-    m = trajectories.save_bbox(bbox, file=filename_write_default, return_map=True)
+    m = trajectories.plot_bbox(bbox, file=filename_write_default, save_map=True)
     to_dict = m.to_dict(ordered=False)['children']
     actual = defaultdict(int)
     for key in to_dict.keys():

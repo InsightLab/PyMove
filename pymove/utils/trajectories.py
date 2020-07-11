@@ -274,7 +274,7 @@ def fill_list_with_new_values(original_list, new_list_values):
     original_list[:n] = new_list_values
 
 
-def folium_plot_bbox(
+def plot_bbox(
         bbox_tuple,
         tiles=TILES[0],
         color='red',
@@ -282,7 +282,7 @@ def folium_plot_bbox(
         file='bbox.html'
 ):
     """
-    Save bbox as file .html using Folium.
+    Plots a bbox using Folium.
 
     Parameters
     ----------
@@ -302,11 +302,9 @@ def folium_plot_bbox(
     save_map: Boolean, optional, default False.
         Wether to save the bbox folium map.
 
-    Examples
+    Returns
     --------
-    >>> from pymove.trajectories import folium_plot_bbox
-    >>> bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
-    >>> folium_plot_bbox(bbox, 'bbox.html')
+    folium map with bounding box
 
     """
 
@@ -327,4 +325,4 @@ def folium_plot_bbox(
     if save_map:
         m.save(file)
 
-    return m, polygon
+    return m

@@ -6,7 +6,7 @@ Sphinx is a documentation generator or a tool that translates a set of plain tex
 For more information access the [documentation here](https://www.sphinx-doc.org/en/master/usage/quickstart.html).
 
 #### 1.1.1. Sphinx APIDoc
-It is a tool for automatic generation of Sphinx sources that, using the autodoc extension, document a whole package in the style of other automatic API documentation tools. 
+It is a tool for automatic generation of Sphinx sources that, using the autodoc extension, document a whole package in the style of other automatic API documentation tools.
 For more information access the [documentation here] (https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html).
 
 ## 2. Tutorial
@@ -78,8 +78,3 @@ To generate the .html files, just access the docs folder, just run the following
 To update the documentation just run the following command and move the generated files to the folder `references/`.
 
 `sphinx-apidoc -o docs pymove`
-
-
-
-
-
