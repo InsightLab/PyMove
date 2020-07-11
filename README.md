@@ -194,8 +194,6 @@ It is recommended to create a virtual environment to use pymove. Requirements: A
 6.  Install pymove in developer mode
     -   `pip install -e .`
 
----
-
 ### For windows users
 
 If you installed from `pip` or `github`, you may encounter an error related to `shapely` due to some dll dependencies. To fix this, run `conda install shapely`.
