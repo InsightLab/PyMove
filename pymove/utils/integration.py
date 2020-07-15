@@ -697,20 +697,20 @@ def join_with_poi_datetime_optimizer(
 
     except Exception as e:
         raise e
-        
-        
+
+
 def join_with_pois_by_dist_and_datetime(
-    df_, 
-    df_pois, 
-    label_date=DATETIME, 
-    label_event_id=EVENT_ID, 
-    label_event_type=EVENT_TYPE, 
+    df_,
+    df_pois,
+    label_date=DATETIME,
+    label_event_id=EVENT_ID,
+    label_event_type=EVENT_TYPE,
     time_window=3600,
     radius=1000
 ):
     """
     It performs the integration between trajectories and points of interest,
-    generating new columns referring to the category of the point of interest, 
+    generating new columns referring to the category of the point of interest,
     the distance between the location of the vehiculo and location of the poi
     based on the distance and on time of each point of the trajectories.
 
@@ -718,7 +718,7 @@ def join_with_pois_by_dist_and_datetime(
     ----------
     df_ : dataframe
         The input trajectory data.
-    
+
     df_pois : dataframe
         The input events points of interest data.
 
@@ -753,15 +753,19 @@ def join_with_pois_by_dist_and_datetime(
         for idx in progress_bar(df_.index, total=df_.shape[0]):
 
             # set min and max of coordinates by radius
-            latmin, lonmin, latmax, lonmax = filters.get_bbox_by_radius((df_.at[idx, LATITUDE], df_.at[idx, LONGITUDE]), radius)
-            
+            latmin, lonmin, latmax, lonmax = filters.get_bbox_by_radius(
+                (df_.at[idx, LATITUDE], df_.at[idx, LONGITUDE]), radius
+            )
+
             # filter event by radius
-            df_filtered = filters.by_bbox(df_pois, (latmin, lonmin, latmax, lonmax))
-            
+            df_filtered = filters.by_bbox(
+                df_pois, (latmin, lonmin, latmax, lonmax)
+            )
+
             # filter event by datetime
             filters.by_datetime(
-                df_filtered, 
-                start_datetime=window_start[idx], 
+                df_filtered,
+                start_datetime=window_start[idx],
                 end_datetime=window_end[idx],
                 inplace=True
             )
@@ -774,14 +778,18 @@ def join_with_pois_by_dist_and_datetime(
                 df_filtered.reset_index(drop=True, inplace=True)
 
                 # create lat and lon array to operation
-                lat_user = np.full(size_filter, df_.at[idx, LATITUDE], dtype=np.float64)
-                lon_user = np.full(size_filter, df_.at[idx, LONGITUDE], dtype=np.float64)
+                lat_user = np.full(
+                    size_filter, df_.at[idx, LATITUDE], dtype=np.float64
+                )
+                lon_user = np.full(
+                    size_filter, df_.at[idx, LONGITUDE], dtype=np.float64
+                )
 
                 # calculate of distances between points
                 distances = haversine(
-                    lat_user, 
-                    lon_user, 
-                    df_filtered[LATITUDE].to_numpy(), 
+                    lat_user,
+                    lon_user,
+                    df_filtered[LATITUDE].to_numpy(),
                     df_filtered[LONGITUDE].to_numpy()
                 )
 
@@ -790,16 +798,28 @@ def join_with_pois_by_dist_and_datetime(
                 event_id[idx] = df_filtered.at[0, label_event_id]
 
                 if len(distances) > 1:
-                    current_distances = np.concatenate((current_distances, distances[1:]))
-                    event_type = np.concatenate((event_type, df_filtered[label_event_type].to_numpy()[1:]))
-                    event_id = np.concatenate((event_id, df_filtered[label_event_id].to_numpy()[1:]))
+                    current_distances = np.concatenate(
+                        (current_distances, distances[1:])
+                    )
+                    event_type = np.concatenate(
+                        (event_type,
+                         df_filtered[label_event_type].to_numpy()[1:])
+                    )
+                    event_id = np.concatenate(
+                        (event_id,
+                         df_filtered[label_event_id].to_numpy()[1:])
+                    )
 
-                    for i in range(len(distances)-1):
+                    distances_size = len(distances) - 1
+
+                    for i in range(distances_size):
                         for key in columns:
-                            columns[key] = np.concatenate((columns[key], [df_.at[idx, key]]))
+                            columns[key] = np.concatenate(
+                                (columns[key], [df_.at[idx, key]])
+                            )
 
         new_df = pd.DataFrame()
-        
+
         for key, value in columns.items():
             new_df[key] = value
 
