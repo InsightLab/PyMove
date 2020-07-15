@@ -28,14 +28,14 @@ def get_bbox_by_radius(coordinates, radius=1000):
     """
     try:
         earth_radius = 6371000
-        r = radius/earth_radius
+        r = radius / earth_radius
 
         lat, lon = np.radians(coordinates)
 
         latmin = lat - r
         latmax = lat + r
 
-        delta_lon = np.arcsin(np.sin(r)/np.cos(lat))
+        delta_lon = np.arcsin(np.sin(r) / np.cos(lat))
 
         lonmin = lon - delta_lon
         lonmax = lon + delta_lon
