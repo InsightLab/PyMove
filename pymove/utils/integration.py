@@ -706,7 +706,8 @@ def join_with_pois_by_dist_and_datetime(
     label_event_id=EVENT_ID,
     label_event_type=EVENT_TYPE,
     time_window=3600,
-    radius=1000
+    radius=1000,
+    inplace=False
 ):
     """
     It performs the integration between trajectories and points of interest,
@@ -818,17 +819,22 @@ def join_with_pois_by_dist_and_datetime(
                                 (columns[key], [df_.at[idx, key]])
                             )
 
-        new_df = pd.DataFrame()
+        if inplace:
+            for i in range(df_.shape[0], len(current_distances)):
+                df_.loc[i] = np.nan
+
+        else:
+            df_ = pd.DataFrame()
 
         for key, value in columns.items():
-            new_df[key] = value
+            df_[key] = value
 
-        new_df[label_event_id] = event_id
-        new_df[DIST_EVENT] = current_distances
-        new_df[label_event_type] = event_type
+        df_[label_event_id] = event_id
+        df_[DIST_EVENT] = current_distances
+        df_[label_event_type] = event_type
         print('Integration with event was completed')
 
-        return new_df
+        return df_
 
     except Exception as e:
         raise e
