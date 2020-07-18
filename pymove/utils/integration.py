@@ -259,6 +259,52 @@ def _reset_set_window__and_creates_event_id_type(
     return window_starts, window_ends, current_distances, event_id, event_type
 
 
+def _reset_set_window_and_creates_event_id_type_all(
+    df_, df_events, label_date, time_window
+):
+    """
+    Resets the indexes of the dataframes, set time window, and returns
+    the current distance between the two dataframes, and return their
+    respective variables (event_id, event_type).
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+
+    df_events : dataframe
+        The input event point of interest data.
+
+    label_date : String
+        Label of df_ referring to the datetime.
+
+    time_window : Int
+        Number of seconds of the time window.
+
+    Returns
+    -------
+    window_starts, window_ends, current_distances, event_id, event_type
+
+    """
+
+    # get a vector with windows time to each point
+    df_.reset_index(drop=True, inplace=True)
+    df_events.reset_index(drop=True, inplace=True)
+
+    # compute windows time
+    window_starts = df_[label_date] - pd.Timedelta(seconds=time_window)
+    window_ends = df_[label_date] + pd.Timedelta(seconds=time_window)
+
+    # create vector to store distances
+    current_distances = np.full(
+        df_.shape[0], None, dtype=np.ndarray
+    )
+    event_type = np.full(df_.shape[0], None, dtype=np.ndarray)
+    event_id = np.full(df_.shape[0], None, dtype=np.ndarray)
+
+    return window_starts, window_ends, current_distances, event_id, event_type
+
+
 def join_with_pois(
     df_, df_pois, label_id=TRAJ_ID, label_poi_name=NAME_POI, reset_index=True
 ):
@@ -707,7 +753,6 @@ def join_with_pois_by_dist_and_datetime(
     label_event_type=EVENT_TYPE,
     time_window=3600,
     radius=1000,
-    inplace=False
 ):
     """
     It performs the integration between trajectories and points of interest,
@@ -741,11 +786,7 @@ def join_with_pois_by_dist_and_datetime(
     try:
         print('Integration with Events...')
 
-        columns = dict()
-        for i in df_.columns:
-            columns[i] = df_[i].to_list()
-
-        values = _reset_set_window__and_creates_event_id_type(
+        values = _reset_set_window_and_creates_event_id_type_all(
             df_, df_pois, label_date, time_window
         )
 
@@ -794,47 +835,14 @@ def join_with_pois_by_dist_and_datetime(
                     df_filtered[LONGITUDE].to_numpy()
                 )
 
-                current_distances[idx] = distances[0]
-                event_type[idx] = df_filtered.at[0, label_event_type]
-                event_id[idx] = df_filtered.at[0, label_event_id]
-
-                if len(distances) > 1:
-                    current_distances = np.concatenate(
-                        (current_distances, distances[1:])
-                    )
-                    event_type = np.concatenate(
-                        (event_type,
-                         df_filtered[label_event_type].to_numpy()[1:])
-                    )
-                    event_id = np.concatenate(
-                        (event_id,
-                         df_filtered[label_event_id].to_numpy()[1:])
-                    )
-
-                    distances_size = len(distances) - 1
-
-                    for i in range(distances_size):
-                        for key in columns:
-                            columns[key] = np.concatenate(
-                                (columns[key], [df_.at[idx, key]])
-                            )
-
-        if inplace:
-            for i in range(df_.shape[0], len(current_distances)):
-                df_.loc[i] = np.nan
-
-        else:
-            df_ = pd.DataFrame()
-
-        for key, value in columns.items():
-            df_[key] = value
+                current_distances[idx] = distances
+                event_type[idx] = df_filtered[label_event_type].to_numpy(dtype=np.ndarray)
+                event_id[idx] = df_filtered[label_event_id].to_numpy(dtype=np.ndarray)
 
         df_[label_event_id] = event_id
         df_[DIST_EVENT] = current_distances
         df_[label_event_type] = event_type
         print('Integration with event was completed')
-
-        return df_
 
     except Exception as e:
         raise e
