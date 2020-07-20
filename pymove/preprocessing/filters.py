@@ -16,9 +16,12 @@ from pymove.utils.constants import (
 
 def get_bbox_by_radius(coordinates, radius=1000):
     """
+    Defines minimum and maximum coordinates,
+    given a distance radius from a point.
+
     Parameters
     ----------
-    coords: tupla (lat, lon)
+    coords : tupla (lat, lon)
         The coordinates of point
 
     radius: Float, optional (1000 by default)
@@ -26,10 +29,11 @@ def get_bbox_by_radius(coordinates, radius=1000):
     Returns
     -------
     array
-        coordinates min and max
+        coordinates min and max of the bbox
 
-    references:
-        https://mathmesquita.me/2017/01/16/filtrando-localizacao-em-um-raio.html
+    references
+    ----------
+    https://mathmesquita.me/2017/01/16/filtrando-localizacao-em-um-raio.html
     """
     try:
         earth_radius = 6371000
