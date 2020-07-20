@@ -797,7 +797,7 @@ def join_with_pois_by_dist_and_datetime(
 
             # set min and max of coordinates by radius
             bbox = filters.get_bbox_by_radius(
-                (df_.at[idx, LATITUDE], df_.at[idx, LONGITUDE]), radius
+                (row[LATITUDE], row[LONGITUDE]), radius
             )
 
             # filter event by radius
@@ -822,10 +822,10 @@ def join_with_pois_by_dist_and_datetime(
 
                 # create lat and lon array to operation
                 lat_user = np.full(
-                    size_filter, df_.at[idx, LATITUDE], dtype=np.float64
+                    size_filter, row[LATITUDE], dtype=np.float64
                 )
                 lon_user = np.full(
-                    size_filter, df_.at[idx, LONGITUDE], dtype=np.float64
+                    size_filter, row[LONGITUDE], dtype=np.float64
                 )
 
                 # calculate of distances between points
