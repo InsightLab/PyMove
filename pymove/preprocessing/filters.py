@@ -14,6 +14,38 @@ from pymove.utils.constants import (
 )
 
 
+def get_bbox_by_radius(coordinates, radius=1000):
+    """
+    Parameters
+    ----------
+    coords : tupla (lat, lon)
+        The coordinates of point
+
+    radius: Float, optional (1000 by default)
+
+    references:
+        https://mathmesquita.me/2017/01/16/filtrando-localizacao-em-um-raio.html
+    """
+    try:
+        earth_radius = 6371000
+        r = radius / earth_radius
+
+        lat, lon = np.radians(coordinates)
+
+        latmin = lat - r
+        latmax = lat + r
+
+        delta_lon = np.arcsin(np.sin(r) / np.cos(lat))
+
+        lonmin = lon - delta_lon
+        lonmax = lon + delta_lon
+
+        return np.rad2deg([latmin, lonmin, latmax, lonmax])
+
+    except Exception as e:
+        raise e
+
+
 def by_bbox(move_data, bbox, filter_out=False, inplace=False):
     """
     Filters points of the trajectories according to specified bounding box.
