@@ -753,6 +753,7 @@ def join_with_pois_by_dist_and_datetime(
     label_event_type=EVENT_TYPE,
     time_window=3600,
     radius=1000,
+    inplace=False
 ):
     """
     It performs the integration between trajectories and points of interest,
@@ -792,16 +793,16 @@ def join_with_pois_by_dist_and_datetime(
 
         window_start, window_end, current_distances, event_id, event_type = values
 
-        for idx in progress_bar(df_.index, total=df_.shape[0]):
+        for idx, row in progress_bar(df_.iterrows(), total=df_.shape[0]):
 
             # set min and max of coordinates by radius
-            latmin, lonmin, latmax, lonmax = filters.get_bbox_by_radius(
+            bbox = filters.get_bbox_by_radius(
                 (df_.at[idx, LATITUDE], df_.at[idx, LONGITUDE]), radius
             )
 
             # filter event by radius
             df_filtered = filters.by_bbox(
-                df_pois, (latmin, lonmin, latmax, lonmax)
+                df_pois, bbox
             )
 
             # filter event by datetime
