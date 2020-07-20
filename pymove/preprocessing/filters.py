@@ -31,9 +31,9 @@ def get_bbox_by_radius(coordinates, radius=1000):
     array
         coordinates min and max of the bbox
 
-    references
+    References
     ----------
-    https://mathmesquita.me/2017/01/16/filtrando-localizacao-em-um-raio.html
+        https://mathmesquita.me/2017/01/16/filtrando-localizacao-em-um-raio.html
     """
     try:
         earth_radius = 6371000
