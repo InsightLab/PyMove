@@ -284,7 +284,7 @@ def _reset_set_window_and_creates_event_id_type_all(
     Returns
     -------
     window_starts, window_ends, current_distances, event_id, event_type
-
+        arrays with default values for join operation
     """
 
     # get a vector with windows time to each point
@@ -758,7 +758,7 @@ def join_with_pois_by_dist_and_datetime(
     """
     It performs the integration between trajectories and points of interest,
     generating new columns referring to the category of the point of interest,
-    the distance between the location of the vehiculo and location of the poi
+    the distance between the location of the user and location of the poi
     based on the distance and on time of each point of the trajectories.
 
     Parameters
@@ -786,6 +786,9 @@ def join_with_pois_by_dist_and_datetime(
     """
     try:
         print('Integration with Events...')
+
+        if label_date not in df_pois:
+            raise KeyError("POI's dataframe must contain a %s column" % label_date)
 
         values = _reset_set_window_and_creates_event_id_type_all(
             df_, df_pois, label_date, time_window
