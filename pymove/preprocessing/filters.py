@@ -18,10 +18,15 @@ def get_bbox_by_radius(coordinates, radius=1000):
     """
     Parameters
     ----------
-    coords : tupla (lat, lon)
+    coords: tupla (lat, lon)
         The coordinates of point
 
     radius: Float, optional (1000 by default)
+
+    Returns
+    -------
+    array
+        coordinates min and max
 
     references:
         https://mathmesquita.me/2017/01/16/filtrando-localizacao-em-um-raio.html
