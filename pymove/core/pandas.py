@@ -104,7 +104,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if MoveDataFrame.has_columns(tdf):
             MoveDataFrame.validate_move_data_frame(tdf)
-            super(PandasMoveDataFrame, self).__init__(tdf)
+            self._data = tdf
             self._type = TYPE_PANDAS
             self.last_operation = None
         else:

@@ -10,10 +10,10 @@ except Exception as e:
     raise e
 
 DEPENDENCIES = [
-    'pytz==2019.3',
+    'pytz',
     'tqdm',
     'numpy',
-    'pandas',
+    'pandas<=1.0.5',
     'scipy',
     'geojson',
     'matplotlib',
