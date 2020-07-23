@@ -2,7 +2,7 @@ import os
 from collections import defaultdict
 
 import numpy as np
-from numpy.testing import assert_array_equal, assert_equal
+from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_equal
 from pandas import DataFrame
 from pandas.testing import assert_frame_equal
 
@@ -123,6 +123,56 @@ def test_fill_list_with_new_values():
     trajectories.fill_list_with_new_values(original_list=original_list,
                                            new_list_values=new_list)
     assert_array_equal(original_list, exected)
+
+
+def test_object_for_array():
+    data_1 = '[1, 2, 3]'
+    data_2 = '[event, event]'
+
+    expected_data_1 = np.array([1, 2, 3], dtype=np.int32)
+    expected_data_2 = np.array(['event', 'event'], dtype='object_')
+
+    assert_array_almost_equal(trajectories.object_for_array(data_1), expected_data_1)
+    assert_array_equal(trajectories.object_for_array(data_2), expected_data_2)
+
+
+def test_column_to_array():
+    list_data_1 = [
+        '[1, 2, 3]',
+        '[5, 8]',
+        '[13, 21, 34, 55]',
+        '[89, 144]'
+    ]
+
+    list_data_2 = [
+        '[event]',
+        '[missa, culto]',
+        '[festa da cidade]'
+    ]
+
+    df_1 = DataFrame(list_data_1, columns=['label'])
+    df_2 = DataFrame(list_data_2, columns=['label'])
+
+    expected_data_1 = DataFrame(
+        data={'label': [[1, 2, 3],
+                        [5, 8],
+                        [13, 21, 34, 55],
+                        [89, 144]]},
+        index=[0, 1, 2, 3]
+    )
+
+    expected_data_2 = DataFrame(
+        data={'label': [['event'],
+                        ['missa', 'culto'],
+                        ['festa da cidade']]},
+        index=[0, 1, 2]
+    )
+
+    trajectories.column_to_array(df_1, 'label')
+    trajectories.column_to_array(df_2, 'label')
+
+    assert_frame_equal(df_1, expected_data_1)
+    assert_frame_equal(df_2, expected_data_2)
 
 
 def test_save_bbox(tmpdir):
