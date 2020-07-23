@@ -16,6 +16,7 @@ from pymove.utils.constants import (
     TYPE_DASK,
     TYPE_PANDAS,
 )
+from pymove.utils.log import progress_bar
 
 
 def read_csv(
@@ -272,6 +273,65 @@ def fill_list_with_new_values(original_list, new_list_values):
 
     n = len(new_list_values)
     original_list[:n] = new_list_values
+
+
+def object_for_array(object_):
+    """
+    Transforms an object into an array.
+
+    Parameters
+    ----------
+    object : String
+        object representing a list of integers or strings.
+
+    Returns
+    -------
+    array
+        object converted to a list
+    """
+
+    if object_ is None:
+        return object_
+
+    try:
+        conv = np.array(object_[1:-1].split(', '))
+
+        if conv[0].isdigit():
+            return conv.astype(np.int32)
+        else:
+            return conv.astype('object_')
+
+    except Exception as e:
+        raise e
+
+
+def column_to_array(df_, label_conversion):
+    """
+    Transforms all columns values to list.
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+
+    label_conversion : Object
+        Label of df_ referring to the column for conversion.
+    """
+    try:
+
+        if label_conversion not in df_:
+            raise KeyError(
+                "POI's dataframe must contain a %s column" % label_conversion
+            )
+
+        arr = np.full(df_.shape[0], None, dtype=np.ndarray)
+        for idx, row in progress_bar(df_.iterrows(), total=df_.shape[0]):
+            arr[idx] = object_for_array(row[label_conversion])
+
+        df_[label_conversion] = arr
+
+    except Exception as e:
+        raise e
 
 
 def plot_bbox(
