@@ -3,6 +3,21 @@ from numpy.testing import assert_almost_equal
 from pymove import math
 
 
+def test_isnumber():
+    value_1 = 'str'
+    expected_value_1 = False
+
+    value_2 = 1
+    expected_value_2 = True
+
+    value_3 = 1.2
+    expected_value_3 = True
+
+    assert_almost_equal(math.is_number(value_1), expected_value_1)
+    assert_almost_equal(math.is_number(value_2), expected_value_2)
+    assert_almost_equal(math.is_number(value_3), expected_value_3)
+
+
 def test_std():
     expected = 277.0178494048513
 
