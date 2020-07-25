@@ -4,6 +4,14 @@ pymove.utils package
 Submodules
 ----------
 
+pymove.utils.constants module
+-----------------------------
+
+.. automodule:: pymove.utils.constants
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pymove.utils.conversions module
 -------------------------------
 
@@ -52,14 +60,6 @@ pymove.utils.log module
    :undoc-members:
    :show-inheritance:
 
-pymove.utils.mapfolium module
------------------------------
-
-.. automodule:: pymove.utils.mapfolium
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pymove.utils.math module
 ------------------------
 
@@ -88,6 +88,14 @@ pymove.utils.transformations module
 -----------------------------------
 
 .. automodule:: pymove.utils.transformations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pymove.utils.visual module
+--------------------------
+
+.. automodule:: pymove.utils.visual
    :members:
    :undoc-members:
    :show-inheritance:

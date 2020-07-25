@@ -1,6 +1,27 @@
 import math
 
 
+def is_number(value):
+    """
+    Returns if value is numerical or not
+
+    Parameters
+    ----------
+    value : Integer, Float, String
+
+    Returns
+    -------
+    boolean
+        True if numerical, otherwise False
+    """
+
+    try:
+        float(value)
+    except ValueError:
+        return False
+    return True
+
+
 def std(values_array):
     """
     Compute standard deviation.

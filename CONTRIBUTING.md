@@ -54,7 +54,13 @@ We use `flake8` and `codacy` to standardize our code. Some styles you shoud foll
 
 ## Testing
 It is important to know if our code is behaving like expected, so it is important to run and develop tests for new implementations
--   Follow the instructions in out [testing](.testing.md) file.
+-   Follow the instructions in our [testing](.testing.md) file.
+
+## Documenting
+To enable automatic documentation we use sphinx, follwing the Numpy Docstring style.
+When creating new modules these need to be added to the docs.
+-   Follow the instructions in our [documentation](.documentation.md) file.
+
 
 ## License
 By contributing, you agree that your contributions will be licensed under its MIT License.
