@@ -127,13 +127,16 @@ def test_fill_list_with_new_values():
 
 def test_object_for_array():
     data_1 = '[1, 2, 3]'
-    data_2 = '[event, event]'
+    data_2 = '[1.5, 2.5, 3.5]'
+    data_3 = '[event, event]'
 
-    expected_data_1 = np.array([1, 2, 3], dtype=np.int32)
-    expected_data_2 = np.array(['event', 'event'], dtype='object_')
+    expected_data_1 = np.array([1., 2., 3.], dtype=np.float32)
+    expected_data_2 = np.array([1.5, 2.5, 3.5], dtype=np.float32)
+    expected_data_3 = np.array(['event', 'event'], dtype='object_')
 
     assert_array_almost_equal(trajectories.object_for_array(data_1), expected_data_1)
-    assert_array_equal(trajectories.object_for_array(data_2), expected_data_2)
+    assert_array_almost_equal(trajectories.object_for_array(data_2), expected_data_2)
+    assert_array_equal(trajectories.object_for_array(data_3), expected_data_3)
 
 
 def test_column_to_array():
