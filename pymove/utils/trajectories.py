@@ -17,6 +17,7 @@ from pymove.utils.constants import (
     TYPE_PANDAS,
 )
 from pymove.utils.log import progress_bar
+from pymove.utils.math import is_number
 
 
 def read_csv(
@@ -296,8 +297,8 @@ def object_for_array(object_):
     try:
         conv = np.array(object_[1:-1].split(', '))
 
-        if conv[0].isdigit():
-            return conv.astype(np.int32)
+        if is_number(conv[0]):
+            return conv.astype(np.float32)
         else:
             return conv.astype('object_')
 
@@ -321,7 +322,7 @@ def column_to_array(df_, label_conversion):
 
         if label_conversion not in df_:
             raise KeyError(
-                "POI's dataframe must contain a %s column" % label_conversion
+                'Dataframe must contain a %s column' % label_conversion
             )
 
         arr = np.full(df_.shape[0], None, dtype=np.ndarray)
