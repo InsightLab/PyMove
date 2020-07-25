@@ -3,7 +3,7 @@ from numpy.testing import assert_almost_equal
 from pymove import math
 
 
-def test_isnumber():
+def test_is_number():
     value_1 = 'str'
     expected_value_1 = False
 
