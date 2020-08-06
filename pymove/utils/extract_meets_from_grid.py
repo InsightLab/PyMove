@@ -239,3 +239,14 @@ def filter_by_lenght_of_stay(
     df = df[df.index.isin(list(zip(list_id_grids, list_slots )))]
 
     return df        
+
+def join_meets_with_POIs(df_, df_POIs, label_id='index', reset_index='True')
+
+    if label_id=='index' and 'index' not in df_POIs:
+        df_POIs.reset_index(inplace=True)
+
+    df_ = df_.reset_index()
+    integration.join_with_POIs(df_, df_POIs,label_id, label_POI, reset_index)
+    df_ = df_.set_index(keys=['index_grid', 'time_slot'])
+
+    return df_
