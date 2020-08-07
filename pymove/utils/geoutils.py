@@ -13,6 +13,15 @@ from pymove.utils.constants import (
 )
 from pymove.utils.log import progress_bar
 
+BINARY = [
+    np.asarray(
+        list('{0:05b}'.format(x)), dtype=int
+    ) for x in range(0, len(BASE_32))
+]
+
+
+BASE_32_TO_BIN = dict(zip(BASE_32, BINARY))
+
 
 def v_color(ob):
     """
@@ -53,8 +62,8 @@ def plot_bounds(ax, ob, color='b'):
     """
     Plot the limites of geometric object.
 
-    Parametros:
-    -----------
+    Parameters
+    ----------
     ax : axes.Axes
         Single axes object
     ob : LineString, MultiLineString
@@ -111,7 +120,7 @@ def _encode(lat, lon, precision=15):
         Number of characters in resulting geohash.
 
     Return
-    -------
+    ------
     string
         Geohash of supplied latitude/longitude.
     """
@@ -129,35 +138,11 @@ def _decode(geohash):
         Geohash string to be converted to latitude/longitude.
 
     Return
-    -------
+    ------
     (lat : number, lon : number)
         Geohashed location.
     """
     return gh.decode(geohash)
-
-
-def binary():
-    """
-    Transform base32 values into binary format.
-
-    Return
-    ------
-    array
-        binary form of each value in base32
-    """
-    bin = np.full(len(BASE_32), 0, dtype=np.ndarray)
-    for idx in range(len(BASE_32)):
-        bin[idx] = np.asarray(list('{0:05b}'.format(idx)), dtype=np.int32)
-
-    return bin
-
-
-def base_32_to_bin():
-    """
-    Returns a dictionary with a key being a value in base32
-    and a value being its binary form.
-    """
-    return dict(zip(BASE_32, binary()))
 
 
 def _bin_geohash(lat, lon, precision=15):
@@ -179,8 +164,7 @@ def _bin_geohash(lat, lon, precision=15):
         Returns a binary geohash array
     """
     hashed = _encode(lat, lon, precision)
-    b2b = base_32_to_bin()
-    return np.concatenate([b2b[x] for x in hashed])
+    return np.concatenate([BASE_32_TO_BIN[x] for x in hashed])
 
 
 def _reset_and_create_arrays_none(df_, reset_index=True):
@@ -194,8 +178,8 @@ def _reset_and_create_arrays_none(df_, reset_index=True):
     reset_index : boolean, optional, default True
         Condition to reset the df index.
 
-    Returns
-    -------
+    Return
+    ------
     arrays
         Returns arrays of none values, of the size of the df.
     """
@@ -203,11 +187,11 @@ def _reset_and_create_arrays_none(df_, reset_index=True):
         df_.reset_index(drop=True, inplace=True)
 
     latitudes = np.full(
-        df_.shape[0], None, dtype=np.float32
+        df_.shape[0], None, dtype=np.float64
     )
 
     longitudes = np.full(
-        df_.shape[0], None, dtype=np.float32
+        df_.shape[0], None, dtype=np.float64
     )
 
     geohash = np.full(
@@ -243,7 +227,9 @@ def create_geohash_df(df_, precision=15):
             geohash[idx] = _encode(row[LATITUDE], row[LONGITUDE], precision)
 
         df_[GEOHASH] = geohash
-        print('\n\ngeohash feature was created.')
+        print('\n================================================')
+        print('\n========> geohash feature was created. <========')
+        print('\n================================================')
 
     except Exception as e:
         raise e
@@ -253,7 +239,7 @@ def create_bin_geohash_df(df_, precision=15):
     """
     Create trajectory geohash binaries and integrate with df.
 
-    Parametros
+    Parameters
     ----------
     df_ : dataframe
         The input trajectories data.
@@ -269,13 +255,15 @@ def create_bin_geohash_df(df_, precision=15):
             bin_geohash[idx] = _bin_geohash(row[LATITUDE], row[LONGITUDE], precision)
 
         df_[BIN_GEOHASH] = bin_geohash
-        print('\n\nbin_geohash features was created.')
+        print('\n================================================')
+        print('\n=====> bin_geohash features was created. <======')
+        print('\n================================================')
 
     except Exception as e:
         raise e
 
 
-def decode_geohash_to_latlon(df_, label_geohash='geohash', reset_index=True):
+def decode_geohash_to_latlon(df_, label_geohash=GEOHASH, reset_index=True):
     """
     Decode feature with hash of trajectories back to
     geographic coordinates.
@@ -302,7 +290,9 @@ def decode_geohash_to_latlon(df_, label_geohash='geohash', reset_index=True):
 
         df_[LATITUDE_DECODE] = lat
         df_[LONGITUDE_DECODE] = lon
-        print('\n\nlat and lon decode features was created.')
+        print('\n================================================')
+        print('\n==> lat and lon decode features was created. <==')
+        print('\n================================================')
 
     except Exception as e:
         raise e
