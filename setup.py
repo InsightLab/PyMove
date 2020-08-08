@@ -13,7 +13,7 @@ DEPENDENCIES = [
     'pytz==2019.3',
     'tqdm',
     'numpy',
-    'pandas',
+    'pandas<=1.0.5',
     'scipy',
     'geojson',
     'matplotlib',
