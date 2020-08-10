@@ -39,10 +39,10 @@ def test_plot_coords(tmpdir):
         file_write_default.dirname, file_write_default.basename
     )
 
-    line = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    coords = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    geoutils.plot_line(ax, line)
+    geoutils.plot_coords(ax, coords)
     plt.savefig(filename_write_default)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
@@ -62,10 +62,10 @@ def test_plot_bounds(tmpdir):
         file_write_default.dirname, file_write_default.basename
     )
 
-    line = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    bounds = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    geoutils.plot_line(ax, line)
+    geoutils.plot_bounds(ax, bounds)
     plt.savefig(filename_write_default)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
