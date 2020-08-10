@@ -30,7 +30,8 @@ DEPENDENCIES = [
     'ipywidgets',
     'IPython',
     'psycopg2',
-    'pymongo'
+    'pymongo',
+    'geohash2'
 ]
 setup(
     name='pymove',
