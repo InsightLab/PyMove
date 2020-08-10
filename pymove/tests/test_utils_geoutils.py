@@ -9,7 +9,7 @@ from pandas.testing import assert_frame_equal
 from shapely.geometry import LineString
 
 from pymove.utils import geoutils
-from pymove.utils.contants import (
+from pymove.utils.constants import (
     BIN_GEOHASH,
     GEOHASH,
     LATITUDE,
