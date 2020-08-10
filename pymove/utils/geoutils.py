@@ -4,7 +4,7 @@ import numpy as np
 from pymove.utils.constants import (
     BASE_32,
     BIN_GEOHASH,
-    COLOR,
+    COLORS,
     GEOHASH,
     LATITUDE,
     LATITUDE_DECODE,
@@ -38,7 +38,7 @@ def v_color(ob):
     string
         Geometric object color
      """
-    return COLOR[ob.is_simple]
+    return COLORS[ob.is_simple + 33]
 
 
 def plot_coords(ax, ob, color='r'):
