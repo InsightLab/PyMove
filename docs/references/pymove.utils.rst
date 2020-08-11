@@ -44,6 +44,14 @@ pymove.utils.distances module
    :undoc-members:
    :show-inheritance:
 
+pymove.utils.geoutils module
+----------------------------
+
+.. automodule:: pymove.utils.geoutils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pymove.utils.integration module
 -------------------------------
 

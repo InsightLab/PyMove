@@ -5,6 +5,18 @@ TRAJ_ID = 'id'
 TID = 'tid'
 UID = 'user_id'
 
+GEOHASH = 'geohash'
+BIN_GEOHASH = 'bin_geohash'
+LATITUDE_DECODE = 'lat_decode'
+LONGITUDE_DECODE = 'lon_decode'
+
+BASE_32 = ['0', '1', '2', '3', '4', '5',
+           '6', '7', '8', '9', 'a', 'b',
+           'c', 'd', 'e', 'f', 'g', 'h',
+           'i', 'j', 'k', 'l', 'm', 'n',
+           'o', 'p', 'q', 'r', 's', 't',
+           'u', 'v', 'w', 'x', 'y', 'z']
+
 POI = 'poi'
 ID_POI = 'id_poi'
 DIST_POI = 'dist_poi'
@@ -120,6 +132,8 @@ COLORS = {
     30: '#C71585',  # medium violet red
     31: '#FF1493',  # deep pink
     32: '#FFB6C1',  # light pink
+    33: '#ffcc33',  # sunglow
+    34: '#6699cc'   # blue gray
 }
 
 TILES = [
