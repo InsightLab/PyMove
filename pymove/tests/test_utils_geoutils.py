@@ -43,7 +43,7 @@ def test_plot_coords(tmpdir):
 
     fig, ax = plt.subplots(figsize=(21, 9))
     geoutils.plot_coords(ax, coords)
-    plt.savefig(filename_write_default, fig=fig)
+    plt.savefig(filename_write_default, fig=fig, dpi=100)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
     data_dir = os.path.join(test_dir, 'baseline/plot_coords.png')
@@ -66,7 +66,7 @@ def test_plot_bounds(tmpdir):
 
     fig, ax = plt.subplots(figsize=(21, 9))
     geoutils.plot_bounds(ax, bounds)
-    plt.savefig(filename_write_default, fig=fig)
+    plt.savefig(filename_write_default, fig=fig, dpi=100)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
     data_dir = os.path.join(test_dir, 'baseline/plot_bounds.png')
@@ -89,7 +89,7 @@ def test_plot_line(tmpdir):
 
     fig, ax = plt.subplots(figsize=(21, 9))
     geoutils.plot_line(ax, line)
-    plt.savefig(filename_write_default, fig=fig)
+    plt.savefig(filename_write_default, fig=fig, dpi=100)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
     data_dir = os.path.join(test_dir, 'baseline/plot_line.png')
