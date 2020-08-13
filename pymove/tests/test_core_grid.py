@@ -59,12 +59,13 @@ def test_get_grid():
 
     grid = _default_grid().get_grid()
 
-    expected = {'lon_min_x': 116.319236,
-                'lat_min_y': 39.984094,
-                'grid_size_lat_y': 5,
-                'grid_size_lon_x': 5,
-                'cell_size_by_degree': 0.0001353464801860623
-                }
+    expected = {
+        'lon_min_x': 116.319236,
+        'lat_min_y': 39.984094,
+        'grid_size_lat_y': 5,
+        'grid_size_lon_x': 5,
+        'cell_size_by_degree': 0.0001353464801860623
+    }
     assert_equal(grid, expected)
 
 
@@ -72,7 +73,7 @@ def test_create_update_index_grid_feature():
 
     move_df = _default_move_df()
     grid = Grid(move_df, 15)
-    grid.create_update_index_grid_feature(data=move_df)
+    grid.create_update_index_grid_feature(data=move_df, unique_index=False)
 
     # Testing function with sorted data
     expected = DataFrame(
@@ -98,7 +99,7 @@ def test_create_update_index_grid_feature():
     unsorted_move_df = _default_move_df(unsorted_list_data)
 
     grid = Grid(move_df, 15)
-    grid.create_update_index_grid_feature(data=unsorted_move_df)
+    grid.create_update_index_grid_feature(data=unsorted_move_df, unique_index=False)
 
     expected = DataFrame(
         data=[
@@ -248,7 +249,9 @@ def test_create_all_polygons_to_all_point_on_grid():
     move_df = _default_move_df()
     grid = Grid(move_df, 15)
 
-    all_polygon = grid.create_all_polygons_to_all_point_on_grid(move_df)
+    all_polygon = grid.create_all_polygons_to_all_point_on_grid(
+        move_df, unique_index=False
+    )
 
     assert_frame_equal(all_polygon, expected)
 
