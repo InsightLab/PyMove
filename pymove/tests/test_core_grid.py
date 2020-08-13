@@ -119,6 +119,89 @@ def test_create_update_index_grid_feature():
     assert_frame_equal(unsorted_move_df, expected)
 
 
+def test_convert_two_index_grid_to_one():
+    grid = Grid(dict_grid={
+        'lon_min_x': 116.319236,
+        'lat_min_y': 39.984094,
+        'grid_size_lat_y': 2,
+        'grid_size_lon_x': 2,
+        'cell_size_by_degree': 9.023098679070821e-05
+    })
+
+    df = DataFrame({
+        'lat': {0: 39.984094, 1: 39.984198, 2: 39.984224, 3: 39.984224},
+        'lon': {0: 116.319236, 1: 116.319322, 2: 116.319402, 3: 116.319402},
+        'datetime': {
+            0: Timestamp('2008-10-23 05:53:05'),
+            1: Timestamp('2008-10-23 05:53:06'),
+            2: Timestamp('2008-10-23 05:53:11'),
+            3: Timestamp('2008-10-23 05:53:11')
+        },
+        'id': {0: 1, 1: 1, 2: 1, 3: 1},
+        'index_grid_lat': {0: 0, 1: 1, 2: 1, 3: 1},
+        'index_grid_lon': {0: 0, 1: 0, 2: 1, 3: 1}}
+    )
+
+    expected = DataFrame({
+        'lat': {0: 39.984094, 1: 39.984198, 2: 39.984224, 3: 39.984224},
+        'lon': {0: 116.319236, 1: 116.319322, 2: 116.319402, 3: 116.319402},
+        'datetime': {
+            0: Timestamp('2008-10-23 05:53:05'),
+            1: Timestamp('2008-10-23 05:53:06'),
+            2: Timestamp('2008-10-23 05:53:11'),
+            3: Timestamp('2008-10-23 05:53:11')
+        },
+        'id': {0: 1, 1: 1, 2: 1, 3: 1},
+        'index_grid_lat': {0: 0, 1: 1, 2: 1, 3: 1},
+        'index_grid_lon': {0: 0, 1: 0, 2: 1, 3: 1},
+        'index_grid': {0: 0, 1: 1, 2: 3, 3: 3}
+    })
+
+    grid.convert_two_index_grid_to_one(df)
+    assert_frame_equal(df, expected)
+
+
+def test_convert_one_index_grid_to_two():
+    grid = Grid(dict_grid={
+        'lon_min_x': 116.319236,
+        'lat_min_y': 39.984094,
+        'grid_size_lat_y': 2,
+        'grid_size_lon_x': 2,
+        'cell_size_by_degree': 9.023098679070821e-05
+    })
+
+    df = DataFrame({
+        'lat': {0: 39.984094, 1: 39.984198, 2: 39.984224, 3: 39.984224},
+        'lon': {0: 116.319236, 1: 116.319322, 2: 116.319402, 3: 116.319402},
+        'datetime': {
+            0: Timestamp('2008-10-23 05:53:05'),
+            1: Timestamp('2008-10-23 05:53:06'),
+            2: Timestamp('2008-10-23 05:53:11'),
+            3: Timestamp('2008-10-23 05:53:11')
+        },
+        'id': {0: 1, 1: 1, 2: 1, 3: 1},
+        'index_grid': {0: 0, 1: 1, 2: 3, 3: 3}
+    })
+
+    expected = DataFrame({
+        'lat': {0: 39.984094, 1: 39.984198, 2: 39.984224, 3: 39.984224},
+        'lon': {0: 116.319236, 1: 116.319322, 2: 116.319402, 3: 116.319402},
+        'datetime': {
+            0: Timestamp('2008-10-23 05:53:05'),
+            1: Timestamp('2008-10-23 05:53:06'),
+            2: Timestamp('2008-10-23 05:53:11'),
+            3: Timestamp('2008-10-23 05:53:11')
+        },
+        'id': {0: 1, 1: 1, 2: 1, 3: 1},
+        'index_grid': {0: 0, 1: 1, 2: 3, 3: 3},
+        'index_grid_lat': {0: 0, 1: 1, 2: 1, 3: 1},
+        'index_grid_lon': {0: 0, 1: 0, 2: 1, 3: 1}
+    })
+
+    grid.convert_one_index_grid_to_two(df)
+    assert_frame_equal(df, expected)
+
+
 def test_create_one_polygon_to_point_on_grid():
     expected = [[39.984094, 116.3193713464802],
                 [39.984229346480184, 116.3193713464802],
