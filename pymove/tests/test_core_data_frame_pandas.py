@@ -463,7 +463,6 @@ def test_to_grid():
     )
 
     g = move_df.to_grid(8)
-    print(g)
     assert isinstance(move_df.to_grid(8), Grid)
 
 
@@ -858,7 +857,6 @@ def test_generate_dist_time_speed_features():
     assert DIST_TO_PREV not in move_df
 
     move_df.generate_dist_time_speed_features()
-    print(move_df)
     assert_frame_equal(move_df, expected)
 
 
@@ -921,7 +919,6 @@ def test_generate_dist_features():
     assert DIST_PREV_TO_NEXT not in move_df
 
     move_df.generate_dist_features()
-    print(move_df)
     assert_frame_equal(move_df, expected)
 
 
@@ -984,7 +981,6 @@ def test_generate_time_features():
     assert TIME_PREV_TO_NEXT not in move_df
 
     move_df.generate_time_features()
-    print(move_df)
     assert_frame_equal(move_df, expected)
 
 
@@ -1052,7 +1048,6 @@ def test_generate_speed_features():
     assert SPEED_PREV_TO_NEXT not in move_df
 
     move_df.generate_speed_features()
-    print(move_df)
     assert_frame_equal(move_df, expected)
 
 
@@ -1120,7 +1115,6 @@ def test_generate_move_and_stop_by_radius():
     assert SITUATION not in move_df
 
     move_df.generate_move_and_stop_by_radius()
-    print(move_df)
     assert_frame_equal(move_df, expected)
 
 
