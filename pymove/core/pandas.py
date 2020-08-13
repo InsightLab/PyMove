@@ -600,7 +600,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('to_grid')
-        grid_ = Grid(self, cell_size, meters_by_degree)
+        grid_ = Grid(
+            data=self, cell_size=cell_size, meters_by_degree=meters_by_degree
+        )
         self.last_operation = end_operation(operation)
 
         return grid_

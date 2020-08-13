@@ -49,7 +49,7 @@ class Grid:
             Represents the corresponding meters of lat by degree.
 
         """
-        if not (data or dict_grid):
+        if data is None and dict_grid is None:
             raise ValueError('must pass either a dataframe or a grid dictionary')
 
         self.last_operation = None
@@ -315,7 +315,7 @@ class Grid:
             self.last_operation = end_operation(operation)
             raise e
 
-    def create_all_polygons_to_all_point_on_grid(self, data):
+    def create_all_polygons_to_all_point_on_grid(self, data, unique_index=True):
         """
         Create all polygons to all points represented in a grid.
 
@@ -323,6 +323,8 @@ class Grid:
         ----------
         data : pandas.core.frame.DataFrame
             Represents the dataset with contains lat, long and datetime.
+        unique_index: boolean
+            How to index the grid
 
         Returns
         -------
@@ -335,7 +337,7 @@ class Grid:
         operation = begin_operation('create_all_polygons_to_all_point_on_grid')
 
         try:
-            self.create_update_index_grid_feature(data)
+            self.create_update_index_grid_feature(data, unique_index)
             datapolygons = data.loc[
                 :, ['id', 'index_grid_lat', 'index_grid_lon']
             ].drop_duplicates()

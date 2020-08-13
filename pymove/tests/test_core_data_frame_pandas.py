@@ -462,6 +462,8 @@ def test_to_grid():
         traj_id=TRAJ_ID,
     )
 
+    g = move_df.to_grid(8)
+    print(g)
     assert isinstance(move_df.to_grid(8), Grid)
 
 
