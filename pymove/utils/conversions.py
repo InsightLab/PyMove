@@ -3,7 +3,6 @@ import math
 import numpy as np
 
 from pymove.utils import constants
-from pymove.utils.constants import INDEX_GRID, INDEX_GRID_LAT, INDEX_GRID_LON
 
 
 def lat_meters(lat):
@@ -696,59 +695,3 @@ def hours_to_seconds(
             return move_data
     except Exception as e:
         raise e
-
-
-def convert_two_index_grid_to_one(
-    df_,
-    dic_grid,
-    label_grid_lat=INDEX_GRID_LAT,
-    label_grid_lon=INDEX_GRID_LON,
-):
-    """
-    Converts grid lat-lon ids to unique values
-
-    Parameters
-    ----------
-    df_ : dataframe
-        Dataframe with grid lat-lon ids
-    dic_grid : dictionary
-        Dictionary with grid information
-            'lon_min_x': minimum x of grid,
-            'lat_min_y': minimum y of grid,
-            'grid_size_lat_y': lat y size of grid,
-            'grid_size_lon_x': lon x size of grid,
-            'cell_size_by_degree': cell size in radians,
-    label_grid_lat : str, optional
-        grid lat id column, by default INDEX_GRID_LAT
-    label_grid_lon : str, optional
-        grid lon id column, by default INDEX_GRID_LON
-    """
-
-    df_[INDEX_GRID] = (
-        df_[label_grid_lon] * dic_grid['grid_size_lat_y'] + df_[label_grid_lat]
-    )
-
-
-def convert_one_index_grid_to_two(
-    df_, dic_grid=None, label_grid_index=INDEX_GRID,
-):
-    """
-    Converts grid lat-lon ids to unique values
-
-    Parameters
-    ----------
-    df_ : dataframe
-        Dataframe with grid lat-lon ids
-    dic_grid : dictionary
-        Dictionary with grid information
-            'lon_min_x': minimum x of grid,
-            'lat_min_y': minimum y of grid,
-            'grid_size_lat_y': lat y size of grid,
-            'grid_size_lon_x': lon x size of grid,
-            'cell_size_by_degree': cell size in radians,
-    label_grid_index : str, optional
-        grid unique id column, by default INDEX_GRID
-    """
-
-    df_[INDEX_GRID_LAT] = df_[label_grid_index] % dic_grid['grid_size_lat_y']
-    df_[INDEX_GRID_LON] = df_[label_grid_index] // dic_grid['grid_size_lat_y']
