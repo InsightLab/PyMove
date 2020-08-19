@@ -7,7 +7,6 @@ from folium.plugins import FastMarkerCluster, HeatMap, HeatMapWithTime, MarkerCl
 from pymove.preprocessing import filters
 from pymove.utils import distances
 from pymove.utils.constants import (
-    COLORS,
     COUNT,
     DATE,
     DATETIME,

@@ -1,15 +1,6 @@
 import matplotlib.pyplot as plt
 
-from pymove.utils.constants import (
-    DATE,
-    DAY,
-    HOUR,
-    LATITUDE,
-    LONGITUDE,
-    PERIOD,
-    POLYGON,
-    TRAJ_ID,
-)
+from pymove.utils.constants import DATE, DAY, HOUR, LATITUDE, LONGITUDE, PERIOD, TRAJ_ID
 
 
 def show_object_id_by_date(
