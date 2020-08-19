@@ -35,7 +35,7 @@ DEPENDENCIES = [
 ]
 setup(
     name='pymove',
-    version='1.5.0',
+    version='2.0.0',
     author='Insight Data Science Lab',
     author_email='insightlab@dc.ufc.br',
     license='MIT',
