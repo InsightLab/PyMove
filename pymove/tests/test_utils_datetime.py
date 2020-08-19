@@ -1,8 +1,9 @@
 import datetime as dt
 
-from pandas import Timestamp
+from pandas import DataFrame, Timestamp
+from pandas.testing import assert_frame_equal
 
-from pymove import datetime
+from pymove import MoveDataFrame, datetime
 
 default_date = dt.datetime.strptime('2018-03-12', '%Y-%m-%d')
 
@@ -11,6 +12,19 @@ default_date_time = dt.datetime.strptime('2018-03-12 12:08:07', '%Y-%m-%d %H:%M:
 str_date_default = '2018-03-12'
 
 str_date_time_default = '2018-03-12 12:08:07'
+
+list_data = [
+    [39.984094, 116.319236, '2008-10-23 05:44:05', 1],
+    [39.984198, 116.319322, '2008-10-23 05:56:06', 1],
+    [39.984224, 116.319402, '2008-10-23 05:56:11', 1],
+    [39.984224, 116.319402, '2008-10-23 06:10:15', 1],
+]
+
+
+def _default_move_df():
+    return MoveDataFrame(
+        data=list_data,
+    )
 
 
 def test_date_to_str():
@@ -193,3 +207,21 @@ def test_diff_time():
     diff_time = datetime.diff_time(start_date, end_date)
 
     assert(diff_time == expected)
+
+
+def test_create_time_slot_in_minute():
+    df = _default_move_df()
+    expected = DataFrame({
+        'lat': {0: 39.984094, 1: 39.984198, 2: 39.984224, 3: 39.984224},
+        'lon': {0: 116.319236, 1: 116.319322, 2: 116.319402, 3: 116.319402},
+        'datetime': {
+            0: Timestamp('2008-10-23 05:44:05'),
+            1: Timestamp('2008-10-23 05:56:06'),
+            2: Timestamp('2008-10-23 05:56:11'),
+            3: Timestamp('2008-10-23 06:10:15')
+        },
+        'id': {0: 1, 1: 1, 2: 1, 3: 1},
+        'time_slot': {0: 22, 1: 23, 2: 23, 3: 24}
+    })
+    datetime.create_time_slot_in_minute(df)
+    assert_frame_equal(df, expected)

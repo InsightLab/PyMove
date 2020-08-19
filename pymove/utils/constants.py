@@ -5,6 +5,18 @@ TRAJ_ID = 'id'
 TID = 'tid'
 UID = 'user_id'
 
+GEOHASH = 'geohash'
+BIN_GEOHASH = 'bin_geohash'
+LATITUDE_DECODE = 'lat_decode'
+LONGITUDE_DECODE = 'lon_decode'
+
+BASE_32 = ['0', '1', '2', '3', '4', '5',
+           '6', '7', '8', '9', 'a', 'b',
+           'c', 'd', 'e', 'f', 'g', 'h',
+           'i', 'j', 'k', 'l', 'm', 'n',
+           'o', 'p', 'q', 'r', 's', 't',
+           'u', 'v', 'w', 'x', 'y', 'z']
+
 POI = 'poi'
 ID_POI = 'id_poi'
 DIST_POI = 'dist_poi'
@@ -45,7 +57,7 @@ DAY_PERIODS = [
     'Afternoon',
     'Evening'
 ]
-
+TIME_SLOT = 'time_slot'
 TYPE_DASK = 'dask'
 TYPE_PANDAS = 'pandas'
 
@@ -60,6 +72,7 @@ SPEED_TO_NEXT = 'speed_to_next'
 SPEED_PREV_TO_NEXT = 'speed_prev_to_next'
 INDEX_GRID_LAT = 'index_grid_lat'
 INDEX_GRID_LON = 'index_grid_lon'
+INDEX_GRID = 'index_grid'
 TID_PART = 'tid_part'
 TID_SPEED = 'tid_speed'
 TID_TIME = 'tid_time'
@@ -120,6 +133,8 @@ COLORS = {
     30: '#C71585',  # medium violet red
     31: '#FF1493',  # deep pink
     32: '#FFB6C1',  # light pink
+    33: '#ffcc33',  # sunglow
+    34: '#6699cc'   # blue gray
 }
 
 TILES = [
@@ -130,3 +145,8 @@ TILES = [
     'Stamen Watercolor',
     'OpenStreetMap'
 ]
+
+USER_POINT = 'orange'
+LINE_COLOR = 'blue'
+POI_POINT = 'red'
+EVENT_POINT = 'purple'

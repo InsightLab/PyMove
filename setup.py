@@ -10,10 +10,10 @@ except Exception as e:
     raise e
 
 DEPENDENCIES = [
-    'pytz==2019.3',
+    'pytz',
     'tqdm',
     'numpy',
-    'pandas',
+    'pandas<=1.0.5',
     'scipy',
     'geojson',
     'matplotlib',
@@ -30,11 +30,12 @@ DEPENDENCIES = [
     'ipywidgets',
     'IPython',
     'psycopg2',
-    'pymongo'
+    'pymongo',
+    'geohash2'
 ]
 setup(
     name='pymove',
-    version='1.5.0',
+    version='2.0.0',
     author='Insight Data Science Lab',
     author_email='insightlab@dc.ufc.br',
     license='MIT',
@@ -49,7 +50,6 @@ setup(
         'pymove.core',
         'pymove.models',
         'pymove.models.pattern_mining',
-        'pymove.osm_module',
         'pymove.preprocessing',
         'pymove.semantic',
         'pymove.tests',

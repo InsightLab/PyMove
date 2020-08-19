@@ -8,7 +8,7 @@
 -   [ ] All new and existing tests passed (see `.testing.md`).
 -   [ ] I have added tests to cover my changes.
 -   [ ] My change requires a change to the documentation.
--   [ ] I have updated the documentation accordingly.
+-   [ ] I have updated the documentation accordingly (see `.documentation.md`).
 
 ## Description
 
