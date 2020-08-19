@@ -124,9 +124,10 @@ def create_base_map(
         location=[lat_origin, lon_origin],
         control_scale=True,
         zoom_start=default_zoom_start,
-        tiles= tile
+        tiles=tile
     )
     return base_map
+
 
 def generate_base_map(default_location, default_zoom_start=12):
     """
