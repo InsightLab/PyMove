@@ -57,7 +57,7 @@ DAY_PERIODS = [
     'Afternoon',
     'Evening'
 ]
-
+TIME_SLOT = 'time_slot'
 TYPE_DASK = 'dask'
 TYPE_PANDAS = 'pandas'
 
