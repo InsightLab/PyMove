@@ -286,6 +286,7 @@ def test_save_grid_pkl(tmpdir):
     grid.save_grid_pkl(filename_write_default)
 
     saved_grid = grid.read_grid_pkl(filename_write_default)
+    saved_grid = saved_grid.get_grid()
 
     assert_equal(saved_grid, expected)
 
