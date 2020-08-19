@@ -337,12 +337,12 @@ class Grid:
         operation = begin_operation('create_all_polygons_to_all_point_on_grid')
 
         try:
-            self.create_update_index_grid_feature(data, unique_index)
+            self.create_update_index_grid_feature(data, unique_index=False)
+            print(data)
             datapolygons = data.loc[
                 :, ['id', 'index_grid_lat', 'index_grid_lon']
             ].drop_duplicates()
             size = datapolygons.shape[0]
-
             # transform series in numpyarray
             index_grid_lat = np.array(data['index_grid_lat'])
             index_grid_lon = np.array(data['index_grid_lon'])
@@ -454,7 +454,7 @@ class Grid:
             with open(filename, 'rb') as f:
                 dict_grid = joblib.load(f)
             self.last_operation = end_operation(operation)
-            return dict_grid
+            return Grid(dict_grid=dict_grid)
         except Exception as e:
             self.last_operation = end_operation(operation)
             raise e
