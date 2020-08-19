@@ -25,8 +25,7 @@ BASE_32_TO_BIN = dict(zip(BASE_32, BINARY))
 
 def v_color(ob):
     """
-    Returns '#ffcc33' if object crosses,
-    otherwise it returns '#6699cc'.
+    Returns '#ffcc33' if object crosses otherwise it returns '#6699cc'.
 
     Parameters
     ----------

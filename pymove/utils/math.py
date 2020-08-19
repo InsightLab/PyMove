@@ -3,7 +3,7 @@ import math
 
 def is_number(value):
     """
-    Returns if value is numerical or not
+    Returns if value is numerical or not.
 
     Parameters
     ----------
