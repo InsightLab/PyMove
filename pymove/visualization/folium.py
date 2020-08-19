@@ -128,7 +128,6 @@ def create_base_map(
     )
     return base_map
 
-
 def generate_base_map(default_location, default_zoom_start=12):
     """
     Generate a folium map.
