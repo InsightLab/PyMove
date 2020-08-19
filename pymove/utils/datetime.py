@@ -3,6 +3,8 @@ import datetime
 import holidays
 from pandas._libs.tslibs.timestamps import Timestamp
 
+from pymove.utils.constants import DATETIME, TIME_SLOT
+
 
 def date_to_str(date):
     """
@@ -106,86 +108,6 @@ def min_to_datetime(min_):
     """
 
     return datetime.datetime.utcfromtimestamp(min_ * 60)
-
-
-# TODO: ve o que sao os parametros e tipo dos param
-# def slot_of_day_to_time(slot_of_day1, time_window_duration=5):
-#     """Converts a slot of day to a time (datetime)
-#
-#     Parameters
-#     ----------
-#     slot_of_day1 :
-#
-#     time_window_duration: Integer, optional(5 by default)
-#
-#     Returns
-#     -------
-#     """
-#     min1 = slot_of_day1 * time_window_duration
-#     return datetime.time(min1 // 60, min1 % 60)
-#
-#
-# #TODO: vê o que são os parametros e tipo dos param
-# def slot_of_day(dt1, time_window_duration=5):
-#     """Converts
-#
-#     Parameters
-#     ----------
-#     slot_of_day1 :
-#
-#     time_window_duration: Integer, optional(5 by default)
-#
-#     Returns
-#     -------
-#     """
-#     return (dt1.hour * 60 + dt1.minute) // time_window_duration
-#
-#
-# #TODO: vê o que são os parametros e tipo dos param
-# def slot(dt1, time_window_duration=5):
-#     """Converts
-#
-#     Parameters
-#     ----------
-#     slot_of_day1 :
-#
-#     time_window_duration: Integer, optional(5 by default)
-#
-#     Returns
-#     -------
-#     """
-#     minute = (dt1.minute // time_window_duration) * time_window_duration
-#     return datetime.datetime(dt1.year, dt1.month, dt1.day, dt1.hour, minute)
-#
-#
-# # TODO: Finalizar
-# def str_to_min_slot(dt_str, time_window_duration=5):
-#     """Converts a datetime string to an int minute time slot
-#     (approximated to the time slot).
-#     Same as datetime_str_to_min_slot, but another implementation.
-#     To do almost the reverse (consider time slot approximation)
-#     use: min_to_datetime.
-#
-#     Parameters
-#     ----------
-#     dt_str : datetime.datetime
-#         Represents a datetime in datetime"srs format.
-#     time_window_duration: int
-#
-#     Returns
-#     -------
-#     dt_slot : int
-#         Represents minutes from.
-#
-#     Examples
-#     --------
-#     >>> from pymove import datetime
-#     >>> datetime.str_to_min_slot("2014-01-01 20:56:00)
-#     23143495
-#     """
-#     dt = to_str(dt_str)
-#     dt_slot = slot(dt, time_window_duration)
-#     return dt_slot
 
 
 def to_day_of_week_int(date):
@@ -454,3 +376,57 @@ def diff_time(start_time, end_time):
     """
 
     return int((end_time - start_time).total_seconds() * 1000)
+
+
+def create_time_slot_in_minute(
+    df,
+    slot_interval=15,
+    initial_slot=0,
+    label_datetime=DATETIME,
+    label_time_slot=TIME_SLOT,
+    inplace=True
+):
+    """
+    Partitions the time in slot windows
+
+    Parameters
+    ----------
+    df : dataframe
+        dataframe with datetime column
+    slot_interval : int, optional
+        size of the slot window in minutes, by default 5
+    initial_slot : int, optional
+        initial window time, by default 0
+    label_datetime : str, optional
+        name of the datetime column, by default DATETIME
+    label_time_slot : str, optional
+        name of the time slot column, by default TIME_SLOT
+    inplace : boolean, optional
+        wether the operation will be done in the original dataframe
+
+    Examples
+    --------
+    from pymove import datetime
+    >>> df
+            lat         lon            datetime  id
+    0  39.984094  116.319236 2008-10-23 05:44:05   1
+    1  39.984198  116.319322 2008-10-23 05:56:06   1
+    2  39.984224  116.319402 2008-10-23 05:56:11   1
+    3  39.984224  116.319402 2008-10-23 06:10:15   1
+
+    >>> datetime.create_time_slot_in_minute(df, inplace=False)
+             lat         lon            datetime  id  time_slot
+    0  39.984094  116.319236 2008-10-23 05:44:05   1         22
+    1  39.984198  116.319322 2008-10-23 05:56:06   1         23
+    2  39.984224  116.319402 2008-10-23 05:56:11   1         23
+    3  39.984224  116.319402 2008-10-23 06:10:15   1         24
+
+    """
+    if df.dtypes[label_datetime] != 'datetime64[ns]':
+        raise ValueError('{} colum must be of type datetime'.format(label_datetime))
+    if not inplace:
+        df = df[:]
+    minute_day = df[label_datetime].dt.hour * 60 + df[label_datetime].dt.minute
+    df[label_time_slot] = minute_day // slot_interval + initial_slot
+    if not inplace:
+        return df
