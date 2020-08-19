@@ -291,12 +291,13 @@ def test_save_grid_pkl(tmpdir):
 
 
 def read_grid_pkl(tmpdir):
-    expected = {'lon_min_x': 116.319236,
-                'lat_min_y': 39.984094,
-                'grid_size_lat_y': 5,
-                'grid_size_lon_x': 5,
-                'cell_size_by_degree': 0.0001353464801860623
-                }
+    expected = {
+        'lon_min_x': 116.319236,
+        'lat_min_y': 39.984094,
+        'grid_size_lat_y': 5,
+        'grid_size_lon_x': 5,
+        'cell_size_by_degree': 0.0001353464801860623
+    }
     d = tmpdir.mkdir('core')
 
     file_write_default = d.join('test_read_grid.pkl')
@@ -310,5 +311,6 @@ def read_grid_pkl(tmpdir):
         joblib.dump(grid.get_grid(), f)
 
     saved_grid = grid.read_grid_pkl(filename_write_default)
+    saved_grid = saved_grid.get_grid()
 
     assert_equal(saved_grid, expected)
