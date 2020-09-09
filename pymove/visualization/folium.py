@@ -29,7 +29,7 @@ from pymove.utils.constants import (
 from pymove.utils.datetime import str_to_datetime
 from pymove.utils.log import progress_bar
 from pymove.utils.visual import add_map_legend, cmap_hex_color, get_cmap
-
+import os.path
 
 def save_map(
     move_data,
@@ -656,7 +656,7 @@ def _filter_generated_feature(move_data, feature, values):
     return mv_df
 
 
-def _add_begin_end_markers_to_folium_map(move_data, base_map):
+def _add_begin_end_markers_to_folium_map(move_data, base_map, traj_id=TRAJ_ID):
     """
     Adds a green marker to beginning of the trajectory and a red marker to the
     end of the trajectory.
@@ -667,25 +667,33 @@ def _add_begin_end_markers_to_folium_map(move_data, base_map):
         Input trajectory data.
     base_map : folium.folium.Map, optional, default None.
         Represents the folium map. If not informed, a new map is generated.
-
+    TRAJ_ID: string, optional default pymove.utils.constantS.TRAJ_ID
+        Trajectory id.s
     """
+    folder = os.path.dirname(__file__)
+    start_path = os.path.join(folder,"images","start1.png")
+
+    end_path = os.path.join(folder,"images","end.png")
+    points = folium.map.FeatureGroup("The start and end pointrs of trajectory with id: "+str(move_data.iloc[0][traj_id]))
 
     folium.Marker(
         location=[move_data.iloc[0][LATITUDE], move_data.iloc[0][LONGITUDE]],
-        color='green',
+        color='black',
         clustered_marker=True,
         popup='Início',
-        icon=folium.Icon(color='green', icon='info-sign'),
-    ).add_to(base_map)
+        #icon=folium.DivIcon(html=f"""<div style=" height:20px; width:15px; background-color: 'green'; ">START</div>""")
+        icon= folium.features.CustomIcon(start_path, icon_size=(80, 80)),
+    ).add_to(points)
 
     folium.Marker(
         location=[move_data.iloc[-1][LATITUDE], move_data.iloc[-1][LONGITUDE]],
         color='red',
         clustered_marker=True,
         popup='Fim',
-        icon=folium.Icon(color='red', icon='info-sign'),
-    ).add_to(base_map)
+        icon=folium.features.CustomIcon(end_path, icon_size=(80, 80)),
+    ).add_to(points)
 
+    base_map.add_child(points)
 
 def _add_trajectories_to_folium_map(
     move_data,
@@ -713,10 +721,11 @@ def _add_trajectories_to_folium_map(
 
     """
 
+
     for _id, color in items:
         mv = move_data[move_data[TRAJ_ID] == _id]
 
-        _add_begin_end_markers_to_folium_map(move_data, base_map)
+        _add_begin_end_markers_to_folium_map(mv, base_map, TRAJ_ID)
 
         folium.PolyLine(
             mv[[LATITUDE, LONGITUDE]], color=color, weight=2.5, opacity=1
@@ -797,7 +806,7 @@ def plot_trajectories_with_folium(
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
-
+    folium.map.LayerControl(collapsed=False).add_to(base_map)
     return base_map
 
 
