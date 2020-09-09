@@ -1370,6 +1370,60 @@ def plot_stops(
         return base_map
 
 
+def plot_bbox(
+        bbox_tuple,
+        tiles=TILES[0],
+        color='red',
+        save_map=False,
+        file='bbox.html'
+):
+    """
+    Plots a bbox using Folium.
+
+    Parameters
+    ----------
+    bbox_tuple : tuple.
+        Represents a bound box, that is a tuple of 4 values with the
+        min and max limits of latitude e longitude.
+    tiles : String, optional, default 'OpenStreetMap'.
+        Represents tyles'srs type_.
+        Example: 'openstreetmap', 'cartodbpositron',
+                'stamentoner', 'stamenterrain',
+                'mapquestopen', 'MapQuest Open Aerial',
+                'Mapbox Control Room' and 'Mapbox Bright'.
+    color : String, optional, default 'red'.
+        Represents color of lines on map.
+    file : String, optional, default 'bbox.html'.
+        Represents filename.
+    save_map: Boolean, optional, default False.
+        Wether to save the bbox folium map.
+
+    Returns
+    --------
+    folium map with bounding box
+
+    """
+
+    m = folium.Map(tiles=tiles)
+    m.fit_bounds(
+        [[bbox_tuple[0], bbox_tuple[1]], [bbox_tuple[2], bbox_tuple[3]]]
+    )
+    points_ = [
+        (bbox_tuple[0], bbox_tuple[1]),
+        (bbox_tuple[0], bbox_tuple[3]),
+        (bbox_tuple[2], bbox_tuple[3]),
+        (bbox_tuple[2], bbox_tuple[1]),
+        (bbox_tuple[0], bbox_tuple[1]),
+    ]
+    polygon = folium.PolyLine(points_, weight=3, color=color)
+    polygon.add_to(m)
+
+    if save_map:
+        m.save(file)
+
+    return m
+
+
 def _format_tags(line, slice_):
     """
     Create or format tags.
