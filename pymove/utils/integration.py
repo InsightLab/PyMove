@@ -259,6 +259,52 @@ def _reset_set_window__and_creates_event_id_type(
     return window_starts, window_ends, current_distances, event_id, event_type
 
 
+def _reset_set_window_and_creates_event_id_type_all(
+    df_, df_events, label_date, time_window
+):
+    """
+    Resets the indexes of the dataframes, set time window, and returns
+    the current distance between the two dataframes, and return their
+    respective variables (event_id, event_type).
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+
+    df_events : dataframe
+        The input event point of interest data.
+
+    label_date : String
+        Label of df_ referring to the datetime.
+
+    time_window : Int
+        Number of seconds of the time window.
+
+    Returns
+    -------
+    window_starts, window_ends, current_distances, event_id, event_type
+        arrays with default values for join operation
+    """
+
+    # get a vector with windows time to each point
+    df_.reset_index(drop=True, inplace=True)
+    df_events.reset_index(drop=True, inplace=True)
+
+    # compute windows time
+    window_starts = df_[label_date] - pd.Timedelta(seconds=time_window)
+    window_ends = df_[label_date] + pd.Timedelta(seconds=time_window)
+
+    # create vector to store distances
+    current_distances = np.full(
+        df_.shape[0], None, dtype=np.ndarray
+    )
+    event_type = np.full(df_.shape[0], None, dtype=np.ndarray)
+    event_id = np.full(df_.shape[0], None, dtype=np.ndarray)
+
+    return window_starts, window_ends, current_distances, event_id, event_type
+
+
 def join_with_pois(
     df_, df_pois, label_id=TRAJ_ID, label_poi_name=NAME_POI, reset_index=True
 ):
@@ -694,6 +740,113 @@ def join_with_poi_datetime_optimizer(
         df_[DIST_EVENT] = minimum_distances
         df_[label_event_type] = event_type
         print('Integration with events was completed')
+
+    except Exception as e:
+        raise e
+
+
+def join_with_pois_by_dist_and_datetime(
+    df_,
+    df_pois,
+    label_date=DATETIME,
+    label_event_id=EVENT_ID,
+    label_event_type=EVENT_TYPE,
+    time_window=3600,
+    radius=1000,
+    inplace=False
+):
+    """
+    It performs the integration between trajectories and points of interest,
+    generating new columns referring to the category of the point of interest,
+    the distance between the location of the user and location of the poi
+    based on the distance and on time of each point of the trajectories.
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+
+    df_pois : dataframe
+        The input events points of interest data.
+
+    label_date : String, optional("datetime" by default)
+        Label of df_ referring to the datetime of the input trajectory data.
+
+    label_event_id : String, optional("event_id" by default)
+        Label of df_events referring to the id of the event.
+
+    label_event_type : String, optional("event_type" by default)
+        Label of df_events referring to the type of the event.
+
+    time_window : Float, optional(3600 by default)
+        tolerable length of time range for assigning the event's
+        point of interest to the trajectory point.
+
+    radius: Float, optional (1000 by default)
+    """
+    try:
+        print('Integration with Events...')
+
+        if label_date not in df_pois:
+            raise KeyError("POI's dataframe must contain a %s column" % label_date)
+
+        values = _reset_set_window_and_creates_event_id_type_all(
+            df_, df_pois, label_date, time_window
+        )
+
+        window_start, window_end, current_distances, event_id, event_type = values
+
+        for idx, row in progress_bar(df_.iterrows(), total=df_.shape[0]):
+
+            # set min and max of coordinates by radius
+            bbox = filters.get_bbox_by_radius(
+                (row[LATITUDE], row[LONGITUDE]), radius
+            )
+
+            # filter event by radius
+            df_filtered = filters.by_bbox(
+                df_pois, bbox
+            )
+
+            # filter event by datetime
+            filters.by_datetime(
+                df_filtered,
+                start_datetime=window_start[idx],
+                end_datetime=window_end[idx],
+                inplace=True
+            )
+
+            # get df_filtered size
+            size_filter = df_filtered.shape[0]
+
+            if size_filter > 0:
+                # reseting index of data frame
+                df_filtered.reset_index(drop=True, inplace=True)
+
+                # create lat and lon array to operation
+                lat_user = np.full(
+                    size_filter, row[LATITUDE], dtype=np.float64
+                )
+                lon_user = np.full(
+                    size_filter, row[LONGITUDE], dtype=np.float64
+                )
+
+                # calculate of distances between points
+                distances = haversine(
+                    lat_user,
+                    lon_user,
+                    df_filtered[LATITUDE].to_numpy(),
+                    df_filtered[LONGITUDE].to_numpy()
+                )
+
+                current_distances[idx] = distances
+                event_type[idx] = df_filtered[label_event_type].to_numpy(dtype=np.ndarray)
+                event_id[idx] = df_filtered[label_event_id].to_numpy(dtype=np.ndarray)
+
+        df_[label_event_id] = event_id
+        df_[DIST_EVENT] = current_distances
+        df_[label_event_type] = event_type
+        print('Integration with event was completed')
 
     except Exception as e:
         raise e

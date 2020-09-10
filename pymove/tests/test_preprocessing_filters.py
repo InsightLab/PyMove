@@ -1,4 +1,5 @@
 from numpy import nan
+from numpy.testing import assert_array_almost_equal
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
 
@@ -160,6 +161,28 @@ def _prepare_df_with_long_trajectory():
         'speed_to_prev',
     ]
     return move_df[cols], cols
+
+
+def test_get_bbox_by_radius():
+    list_data = [
+        [39.984092712402344, 116.31923675537101, '2008-10-23 05:53:05', 1],
+        [39.984199952392578, 116.31932067871094, '2008-10-23 05:53:06', 1],
+        [39.984222412109375, 116.31940460205078, '2008-10-23 05:53:11', 2],
+        [39.984222412109375, 116.31940460205078, '2008-10-23 05:53:11', 2],
+    ]
+
+    move_df = MoveDataFrame(list_data)
+
+    bbox = filters.get_bbox_by_radius((move_df[LATITUDE], move_df[LONGITUDE]))
+
+    bbox_expected = [
+        [39.9750995, 39.97520674, 39.9752292, 39.9752292],
+        [116.30749968, 116.30758358, 116.3076675, 116.3076675],
+        [39.99308593, 39.99319317, 39.99321563, 39.99321563],
+        [116.33097383, 116.33105777, 116.3311417, 116.3311417]
+    ]
+
+    assert_array_almost_equal(bbox, bbox_expected)
 
 
 def test_by_bbox():
