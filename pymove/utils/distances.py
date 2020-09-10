@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import distance
 
-from pymove import datetime
+from pymove import utils
 
 
 def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
@@ -158,19 +158,19 @@ def MEDT(traj1, traj2, label_lat='lat', label_lon='lon', label_time='datetime'):
             this_distance = distance.euclidean(
                 (traj1[label_lat].iloc[i],
                  traj1[label_lon].iloc[i],
-                 float(datetime.timestamp_to_millis(
+                 float(utils.datetime.timestamp_to_millis(
                      traj1[label_time].iloc[i]
                  )) / 1000000000),
                 (traj2[label_lat].iloc[i],
                  traj2[label_lon].iloc[i],
-                 float(datetime.timestamp_to_millis(
+                 float(utils.datetime.timestamp_to_millis(
                      traj2[label_time].iloc[i]
                  )) / 1000000000),
             )
             soma = soma + this_distance
         for j in range(len(traj1) + 1, len(traj2)):
             soma = soma + \
-                float(datetime.timestamp_to_millis(
+                float(utils.datetime.timestamp_to_millis(
                     traj2[label_time].iloc[j])) / 1000000000
 
     elif(len(traj1) > len(traj2)):
@@ -178,18 +178,18 @@ def MEDT(traj1, traj2, label_lat='lat', label_lon='lon', label_time='datetime'):
             this_distance = distance.euclidean(
                 (traj1[label_lat].iloc[i],
                  traj1[label_lon].iloc[i],
-                 float(datetime.timestamp_to_millis(
+                 float(utils.datetime.timestamp_to_millis(
                      traj1[label_time].iloc[i]
                  )) / 1000000000),
                 (traj2[label_lat].iloc[i],
                  traj2[label_lon].iloc[i],
-                 float(datetime.timestamp_to_millis(
+                 float(utils.datetime.timestamp_to_millis(
                      traj2[label_time].iloc[i]
                  )) / 1000000000),
             )
             soma = soma + this_distance
         for j in range(len(traj2) + 1, len(traj1)):
             soma = soma + \
-                float(datetime.timestamp_to_millis(
+                float(utils.datetime.timestamp_to_millis(
                     traj1[label_time].iloc[j])) / 1000000000
     return soma
