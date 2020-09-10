@@ -37,7 +37,7 @@ def test_create_or_update_datetime_in_format_cyclical():
     move_df, cols = _prepare_default_df()
 
     stay_point_detection.create_or_update_datetime_in_format_cyclical(move_df)
-    print(move_df)
+
     expected = DataFrame(
         data=[
             [
@@ -152,7 +152,7 @@ def test_create_or_update_move_stop_by_dist_time():
         columns=cols,
         index=[0, 1, 2, 3],
     )
-    print(move_df)
+
     assert_frame_equal(move_df, expected)
 
 

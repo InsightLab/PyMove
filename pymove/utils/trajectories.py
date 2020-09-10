@@ -16,6 +16,8 @@ from pymove.utils.constants import (
     TYPE_DASK,
     TYPE_PANDAS,
 )
+from pymove.utils.log import progress_bar
+from pymove.utils.math import is_number
 
 
 def read_csv(
@@ -110,6 +112,25 @@ def read_csv(
     return MoveDataFrame(
         df, latitude, longitude, datetime, traj_id, type_, n_partitions
     )
+
+
+def invert_dict(dict_):
+    """
+    Inverts the key:value relation of a dictionary
+
+    Parameters
+    ----------
+    dict_ : dict
+        dictionary to be inverted
+
+    Returns
+    -------
+    dict
+        inverted dict
+
+    """
+
+    return {v: k for k, v in dict_.items()}
 
 
 def flatten_dict(d, parent_key='', sep='_'):
@@ -255,19 +276,80 @@ def fill_list_with_new_values(original_list, new_list_values):
     original_list[:n] = new_list_values
 
 
-def save_bbox(
-        bbox_tuple, file='bbox.html', tiles=TILES[0], color='red', return_map=False
+def object_for_array(object_):
+    """
+    Transforms an object into an array.
+
+    Parameters
+    ----------
+    object : String
+        object representing a list of integers or strings.
+
+    Returns
+    -------
+    array
+        object converted to a list
+    """
+
+    if object_ is None:
+        return object_
+
+    try:
+        conv = np.array(object_[1:-1].split(', '))
+
+        if is_number(conv[0]):
+            return conv.astype(np.float32)
+        else:
+            return conv.astype('object_')
+
+    except Exception as e:
+        raise e
+
+
+def column_to_array(df_, label_conversion):
+    """
+    Transforms all columns values to list.
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectory data.
+
+    label_conversion : Object
+        Label of df_ referring to the column for conversion.
+    """
+    try:
+
+        if label_conversion not in df_:
+            raise KeyError(
+                'Dataframe must contain a %s column' % label_conversion
+            )
+
+        arr = np.full(df_.shape[0], None, dtype=np.ndarray)
+        for idx, row in progress_bar(df_.iterrows(), total=df_.shape[0]):
+            arr[idx] = object_for_array(row[label_conversion])
+
+        df_[label_conversion] = arr
+
+    except Exception as e:
+        raise e
+
+
+def plot_bbox(
+        bbox_tuple,
+        tiles=TILES[0],
+        color='red',
+        save_map=False,
+        file='bbox.html'
 ):
     """
-    Save bbox as file .html using Folium.
+    Plots a bbox using Folium.
 
     Parameters
     ----------
     bbox_tuple : tuple.
         Represents a bound box, that is a tuple of 4 values with the
         min and max limits of latitude e longitude.
-    file : String, optional, default 'bbox.html'.
-        Represents filename.
     tiles : String, optional, default 'OpenStreetMap'.
         Represents tyles'srs type_.
         Example: 'openstreetmap', 'cartodbpositron',
@@ -276,14 +358,14 @@ def save_bbox(
                 'Mapbox Control Room' and 'Mapbox Bright'.
     color : String, optional, default 'red'.
         Represents color of lines on map.
-    return_map: Boolean, optional, default False.
-        Wether to return the bbox folium map.
+    file : String, optional, default 'bbox.html'.
+        Represents filename.
+    save_map: Boolean, optional, default False.
+        Wether to save the bbox folium map.
 
-    Examples
+    Returns
     --------
-    >>> from pymove.trajectories import save_bbox
-    >>> bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
-    >>> save_bbox(bbox, 'bbox.html')
+    folium map with bounding box
 
     """
 
@@ -298,7 +380,10 @@ def save_bbox(
         (bbox_tuple[2], bbox_tuple[1]),
         (bbox_tuple[0], bbox_tuple[1]),
     ]
-    folium.PolyLine(points_, weight=3, color=color).add_to(m)
-    m.save(file)
-    if return_map:
-        return m
+    polygon = folium.PolyLine(points_, weight=3, color=color)
+    polygon.add_to(m)
+
+    if save_map:
+        m.save(file)
+
+    return m

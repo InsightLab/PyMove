@@ -394,6 +394,75 @@ def test__reset_set_window__and_creates_event_id_type():
     assert_array_equal(event_type, type_expected)
 
 
+def test_reset_set_window_and_creates_event_id_type_all():
+    list_move = [
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984559000000004, 116.326696, Timestamp('2008-10-23 10:37:26'), 1],
+        [40.002899, 116.32151999999999, Timestamp('2008-10-23 10:50:16'), 1],
+        [40.016238, 116.30769099999999, Timestamp('2008-10-23 11:03:06'), 1],
+        [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'), 2],
+        [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'), 2],
+        [39.993527, 116.32648300000001, Timestamp('2008-10-24 00:02:14'), 2],
+        [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'), 3],
+        [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'), 3],
+    ]
+
+    move_df = MoveDataFrame(list_move)
+
+    list_events = [
+        [39.984094, 116.319236, 1, Timestamp('2008-10-24 01:57:57'),
+         'show do tropykalia'],
+        [39.991013, 116.326384, 2, Timestamp('2008-10-24 00:22:01'),
+         'evento da prefeitura'],
+        [40.01, 116.312615, 3, Timestamp('2008-10-25 00:21:01'),
+         'show do seu joao'],
+        [40.013821, 116.306531, 4, Timestamp('2008-10-26 00:22:01'),
+         'missa']
+    ]
+
+    pois = DataFrame(
+        data=list_events,
+        columns=[LATITUDE, LONGITUDE, EVENT_ID, DATETIME, EVENT_TYPE],
+        index=[0, 1, 2, 3]
+    )
+
+    list_win_start = [
+        '2008-10-23T03:53:05.000000000', '2008-10-23T08:37:26.000000000',
+        '2008-10-23T08:50:16.000000000', '2008-10-23T09:03:06.000000000',
+        '2008-10-23T09:58:33.000000000', '2008-10-23T21:50:45.000000000',
+        '2008-10-23T22:02:14.000000000', '2008-10-23T22:22:01.000000000',
+        '2008-10-23T23:57:57.000000000'
+    ]
+
+    win_start_expected = Series(pd.to_datetime(list_win_start), name=DATETIME)
+
+    list_win_end = [
+        '2008-10-23T07:53:05.000000000', '2008-10-23T12:37:26.000000000',
+        '2008-10-23T12:50:16.000000000', '2008-10-23T13:03:06.000000000',
+        '2008-10-23T13:58:33.000000000', '2008-10-24T01:50:45.000000000',
+        '2008-10-24T02:02:14.000000000', '2008-10-24T02:22:01.000000000',
+        '2008-10-24T03:57:57.000000000'
+    ]
+
+    win_end_expected = Series(pd.to_datetime(list_win_end), name=DATETIME)
+
+    dist_expected = np.full(9, None, dtype=np.ndarray)
+    type_expected = np.full(9, None, dtype=np.ndarray)
+    id_expected = np.full(9, None, dtype=np.ndarray)
+
+    window_starts, window_ends, current_distances, event_id, event_type = (
+        integration._reset_set_window_and_creates_event_id_type_all(
+            move_df, pois, DATETIME, 7200
+        )
+    )
+
+    assert_series_equal(window_starts, win_start_expected)
+    assert_series_equal(window_ends, win_end_expected)
+    assert_array_equal(current_distances, dist_expected)
+    assert_array_equal(event_id, id_expected)
+    assert_array_equal(event_type, type_expected)
+
+
 def test_join_with_pois():
     move_df = MoveDataFrame(list_move)
 
@@ -646,6 +715,78 @@ def test_join_with_poi_datetime_optimizer():
     )
 
     integration.join_with_poi_datetime_optimizer(move_df, pois, time_window=45000)
+    assert_frame_equal(move_df, expected, check_dtype=False)
+
+
+def test_join_with_pois_by_dist_and_datetime():
+    list_move = [
+        [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+        [39.984559000000004, 116.326696, Timestamp('2008-10-23 10:37:26'), 1],
+        [40.002899, 116.32151999999999, Timestamp('2008-10-23 10:50:16'), 1],
+        [40.016238, 116.30769099999999, Timestamp('2008-10-23 11:03:06'), 1],
+        [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'), 2],
+        [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'), 2],
+        [39.993527, 116.32648300000001, Timestamp('2008-10-24 00:02:14'), 2],
+        [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'), 3],
+        [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'), 3],
+    ]
+
+    move_df = MoveDataFrame(list_move)
+
+    list_events = [
+        [39.984094, 116.319236, 1, Timestamp('2008-10-24 01:57:57'),
+         'show do tropykalia'],
+        [39.991013, 116.326384, 2, Timestamp('2008-10-24 00:22:01'),
+         'evento da prefeitura'],
+        [40.01, 116.312615, 3, Timestamp('2008-10-25 00:21:01'),
+         'show do seu joao'],
+        [40.013821, 116.306531, 4, Timestamp('2008-10-26 00:22:01'),
+         'missa']
+    ]
+
+    pois = DataFrame(
+        data=list_events,
+        columns=[LATITUDE, LONGITUDE, EVENT_ID, DATETIME, EVENT_TYPE],
+        index=[0, 1, 2, 3]
+    )
+
+    expected = DataFrame(
+        data=[
+            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'),
+             1, None, None, None],
+            [39.984559000000004, 116.326696, Timestamp('2008-10-23 10:37:26'),
+             1, None, None, None],
+            [40.002899, 116.32151999999999, Timestamp('2008-10-23 10:50:16'),
+             1, None, None, None],
+            [40.016238, 116.30769099999999, Timestamp('2008-10-23 11:03:06'),
+             1, None, None, None],
+            [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'),
+             2, None, None, None],
+            [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'),
+             2, [2], [2294.0758201547073], ['evento da prefeitura']],
+            [39.993527, 116.32648300000001, Timestamp('2008-10-24 00:02:14'),
+             2, [1, 2], [1217.1198213850694, 279.6712398549538],
+             ['show do tropykalia', 'evento da prefeitura']],
+            [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'),
+             3, [1, 2], [900.7798955139455, 1383.9587958381394],
+             ['show do tropykalia', 'evento da prefeitura']],
+            [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'),
+             3, [1, 2], [770.188754517813, 1688.0786831571447],
+             ['show do tropykalia', 'evento da prefeitura']]
+        ],
+
+        columns=[
+            LATITUDE, LONGITUDE, DATETIME, TRAJ_ID,
+            EVENT_ID, DIST_EVENT, EVENT_TYPE
+        ],
+
+        index=[0, 1, 2, 3, 4, 5, 6, 7, 8]
+    )
+
+    integration.join_with_pois_by_dist_and_datetime(
+        move_df, pois, radius=3000, time_window=7200
+    )
+
     assert_frame_equal(move_df, expected, check_dtype=False)
 
 
