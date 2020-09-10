@@ -1,4 +1,8 @@
 import numpy as np
+import pandas as pd
+from scipy.spatial import distance
+
+from pymove import datetime
 
 
 def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
@@ -41,8 +45,8 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
         if to_radians:
             lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
         a = (
-            np.sin((lat2 - lat1) / 2.0) ** 2
-            + np.cos(lat1)
+            np.sin((lat2 - lat1) / 2.0)
+            ** 2 + np.cos(lat1)
             * np.cos(lat2)
             * np.sin((lon2 - lon1) / 2.0) ** 2
         )
@@ -51,3 +55,141 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
         return (earth_radius * 2 * np.arctan2(a ** 0.5, (1 - a) ** 0.5)) * 1000
     except Exception as e:
         raise e
+
+
+def _nearest_points(traj1, traj2, label_lat='lat', label_lon='lon'):
+    """
+    For each point on a trajectory, it returns the point closest to
+    another trajectory based on the Euclidean distance.
+
+    Parameters
+    ----------
+    traj1: dataframe
+        The input of one trajectory.
+
+    traj2: dataframe
+        The input of another trajectory.
+
+    label_lat: string ("lat" by default)
+        Label of the trajectories dataframe referring to the latitude.
+
+    label_lon: string ("lon" by default)
+        Label of the trajectories dataframe referring to the longitude.
+    """
+
+    result = pd.DataFrame(columns=traj1.columns)
+
+    for i in range(0, len(traj1)):
+        round_result = 999999999999999
+        round_traj = []
+        for j in range(0, len(traj2)):
+            this_distance = distance.euclidean(
+                (traj1[label_lat].iloc[i], traj1[label_lon].iloc[i]),
+                (traj2[label_lat].iloc[j], traj2[label_lon].iloc[j]),
+            )
+            if this_distance < round_result:
+                round_result = this_distance
+                round_traj = traj2.iloc[j]
+        result = result.append(round_traj)
+
+    return result
+
+
+def MEDP(traj1, traj2, label_lat='lat', label_lon='lon'):
+    """
+    Returns the Mean Euclidian Distance Predictive between
+    two trajectories, which considers only the spatial
+    dimension for the similarity measure.
+
+    Parameters
+    ----------
+    traj1: dataframe
+        The input of one trajectory.
+
+    traj2: dataframe
+        The input of another trajectory.
+
+    label_lat: string ("lat" by default)
+        Label of the trajectories dataframe referring to the latitude.
+
+    label_lon: string ("lon" by default)
+        Label of the trajectories dataframe referring to the longitude.
+    """
+
+    soma = 0
+    traj2 = _nearest_points(traj1, traj2, label_lat, label_lon)
+    for i in range(0, len(traj1)):
+        this_distance = distance.euclidean(
+            (traj1[label_lat].iloc[i],
+             traj1[label_lon].iloc[i]),
+            (traj2[label_lat].iloc[i],
+             traj2[label_lon].iloc[i]))
+        soma = soma + this_distance
+    return soma
+
+
+def MEDT(traj1, traj2, label_lat='lat', label_lon='lon', label_time='datetime'):
+    """
+    Returns the Mean Euclidian Distance Trajectory between two
+    trajectories, which considers the spatial dimension and the
+    temporal dimension when measuring similarity.
+
+    Parameters
+    ----------
+    traj1: dataframe
+        The input of one trajectory.
+
+    traj2: dataframe
+        The input of another trajectory.
+
+    label_lat: string ("lat" by default)
+        Label of the trajectories dataframe referring to the latitude.
+
+    label_lon: string ("lon" by default)
+        Label of the trajectories dataframe referring to the longitude.
+
+    label_time: string ("datetime" by default)
+        Label of the trajectories dataframe referring to the timestamp.
+    """
+
+    soma = 0
+    if(len(traj2) > len(traj1)):
+        for i in range(0, len(traj1)):
+            this_distance = distance.euclidean(
+                (traj1[label_lat].iloc[i],
+                 traj1[label_lon].iloc[i],
+                 float(datetime.timestamp_to_millis(
+                     traj1[label_time].iloc[i]
+                 )) / 1000000000),
+                (traj2[label_lat].iloc[i],
+                 traj2[label_lon].iloc[i],
+                 float(datetime.timestamp_to_millis(
+                     traj2[label_time].iloc[i]
+                 )) / 1000000000),
+            )
+            soma = soma + this_distance
+        for j in range(len(traj1) + 1, len(traj2)):
+            soma = soma + \
+                float(datetime.timestamp_to_millis(
+                    traj2[label_time].iloc[j])) / 1000000000
+
+    elif(len(traj1) > len(traj2)):
+        for i in range(0, len(traj2)):
+            this_distance = distance.euclidean(
+                (traj1[label_lat].iloc[i],
+                 traj1[label_lon].iloc[i],
+                 float(datetime.timestamp_to_millis(
+                     traj1[label_time].iloc[i]
+                 )) / 1000000000),
+                (traj2[label_lat].iloc[i],
+                 traj2[label_lon].iloc[i],
+                 float(datetime.timestamp_to_millis(
+                     traj2[label_time].iloc[i]
+                 )) / 1000000000),
+            )
+            soma = soma + this_distance
+        for j in range(len(traj2) + 1, len(traj1)):
+            soma = soma + \
+                float(datetime.timestamp_to_millis(
+                    traj1[label_time].iloc[j])) / 1000000000
+    return soma
