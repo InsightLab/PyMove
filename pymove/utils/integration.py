@@ -508,19 +508,21 @@ def join_with_pois_by_category(
         )
         ids_POIs = np.full(df_.shape[0], np.NAN, dtype='object_')
 
-        size_categories = df_pois[label_category].unique()
-        print('There are %s categories' % len(size_categories))
+        unique_categories = df_pois[label_category].unique()
+        size_categories = len(unique_categories)
+        print('There are %s categories' % size_categories)
 
-        for c in size_categories:
-            print(
-                'computing dist to category: %s' % c,
-                flush=True
-            )
+        for i, c in enumerate(unique_categories, start=1):
+            # print(
+            #     'computing dist to category: %s' % c,
+            #     flush=True
+            # )
             # creating lat and lon array to operation
             df_category = df_pois[df_pois[label_category] == c]
             df_category.reset_index(drop=True, inplace=True)
 
-            for idx, row in progress_bar(df_.iterrows(), total=len(df_)):
+            desc = 'computing dist to {} category ({}/{})'.format(c, i, size_categories)
+            for idx, row in progress_bar(df_.iterrows(), total=len(df_), desc=desc):
                 lat_user = np.full(
                     df_category.shape[0], row[LATITUDE], dtype=np.float64
                 )
