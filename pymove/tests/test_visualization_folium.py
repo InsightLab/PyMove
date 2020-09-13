@@ -999,7 +999,6 @@ def test_add_point_folium(tmpdir):
         user_lat=LATITUDE,
         user_lon=LONGITUDE,
         user_point=USER_POINT,
-        poi_point=POI_POINT,
         base_map=None,
         slice_tags=None,
         tiles=TILES[0]

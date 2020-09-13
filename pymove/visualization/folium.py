@@ -1450,6 +1450,7 @@ def _circle_maker(
     user_lon,
     slice_tags,
     user_point,
+    radius,
     map_
 ):
     """
@@ -1466,6 +1467,8 @@ def _circle_maker(
 
     user_point: String.
         Point color.
+    radius: Float.
+        radius size.
     map_: Folium map.
     """
 
@@ -1477,7 +1480,7 @@ def _circle_maker(
     tags_formated = _format_tags(line, slice_tags)
 
     folium.Circle(
-        radius=1,
+        radius=radius,
         location=[x, y],
         popup=tags_formated,
         color=user_point,
@@ -1615,6 +1618,7 @@ def add_traj_folium(
                 user_lon,
                 slice_tags,
                 user_point,
+                1,
                 base_map
             ),
             move_data.iterrows()
@@ -1638,7 +1642,7 @@ def add_point_folium(
     user_lat=LATITUDE,
     user_lon=LONGITUDE,
     user_point=USER_POINT,
-    poi_point=POI_POINT,
+    radius=2,
     base_map=None,
     slice_tags=None,
     tiles=TILES[0]
@@ -1657,8 +1661,8 @@ def add_point_folium(
         Longitude column name.
     user_point: String, optional, default 'orange'.
         The point color.
-    poi_point: String, optional, default 'red'.
-        Poi point color.
+    radius: Float, optional, default 2.
+        radius size.
     sort:Boolean, optional, default False.
         If True the data will be sorted.
     base_map: Folium map, optional, default None.
@@ -1694,6 +1698,7 @@ def add_point_folium(
                 user_lon,
                 slice_tags,
                 user_point,
+                radius,
                 base_map
             ),
             move_data.iterrows()
@@ -1708,6 +1713,7 @@ def add_poi_folium(
     poi_lat=LATITUDE,
     poi_lon=LONGITUDE,
     poi_point=POI_POINT,
+    radius=2,
     base_map=None,
     slice_tags=None
 ):
@@ -1725,6 +1731,8 @@ def add_poi_folium(
         Longitude column name.
     poi_point: String, optional, default 'red'.
         Poi point color.
+    radius: Float, optional, default 2.
+        radius size.
     base_map: Folium map, optional, default None.
         A folium map to plot. If None a map. If None a map will be created.
 
@@ -1755,6 +1763,7 @@ def add_poi_folium(
                 poi_lon,
                 slice_tags,
                 poi_point,
+                radius,
                 base_map
             ),
             move_data.iterrows()
@@ -1769,7 +1778,7 @@ def add_event_folium(
     event_lat=LATITUDE,
     event_lon=LONGITUDE,
     event_point=EVENT_POINT,
-    radius=150,
+    radius=2,
     base_map=None,
     slice_tags=None,
     tiles=TILES[0]
@@ -1788,7 +1797,7 @@ def add_event_folium(
         Longitude column name.
     event_point: String, optional, default 'red'.
         Event color.
-    radius: Float, optional, default 150.
+    radius: Float, optional, default 2.
         radius size.
     base_map: Folium map, optional, default None.
         A folium map to plot. If None a map. If None a map will be created.
@@ -1820,6 +1829,7 @@ def add_event_folium(
                 event_lon,
                 slice_tags,
                 event_point,
+                radius,
                 base_map
             ),
             move_data.iterrows()
