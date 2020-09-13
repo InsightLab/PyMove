@@ -29,7 +29,7 @@ from pymove.utils.constants import (
 from pymove.utils.datetime import str_to_datetime
 from pymove.utils.log import progress_bar
 from pymove.utils.visual import add_map_legend, cmap_hex_color, get_cmap
-import os.path
+
 
 def save_map(
     move_data,
@@ -537,11 +537,19 @@ def plot_markers(
     if n_rows is None:
         n_rows = move_data.shape[0]
 
-    _add_begin_end_markers_to_folium_map(move_data.iloc[:n_rows], base_map)
-
-    for row in move_data.iloc[1: n_rows - 1].iterrows():
+    for i, row in enumerate(move_data.iloc[:n_rows].iterrows()):
+        if i == 0:
+            se = '<b>START</b>\n'
+            color = 'green'
+        elif i == n_rows - 1:
+            se = '<b>END\ns</b>\n'
+            color = 'red'
+        else:
+            se = ''
+            color = 'blue'
         pop = (
-            '<b>Latitude:</b> '
+            se
+            + '<b>Latitude:</b> '
             + str(row[1][LATITUDE])
             + '\n<b>Longitude:</b> '
             + str(row[1][LONGITUDE])
@@ -550,8 +558,10 @@ def plot_markers(
         )
         folium.Marker(
             location=[row[1][LATITUDE], row[1][LONGITUDE]],
+            color=color,
             clustered_marker=True,
             popup=pop,
+            icon=folium.Icon(color=color)
         ).add_to(base_map)
 
     if save_as_html:
@@ -656,7 +666,7 @@ def _filter_generated_feature(move_data, feature, values):
     return mv_df
 
 
-def _add_begin_end_markers_to_folium_map(move_data, base_map, traj_id=TRAJ_ID):
+def _add_begin_end_markers_to_folium_map(move_data, base_map, color=None, _id=None):
     """
     Adds a green marker to beginning of the trajectory and a red marker to the
     end of the trajectory.
@@ -667,22 +677,24 @@ def _add_begin_end_markers_to_folium_map(move_data, base_map, traj_id=TRAJ_ID):
         Input trajectory data.
     base_map : folium.folium.Map, optional, default None.
         Represents the folium map. If not informed, a new map is generated.
-    TRAJ_ID: string, optional default pymove.utils.constantS.TRAJ_ID
-        Trajectory id.s
+    color : string, optional, default None
+        Color of the markers
+    id: int, optional, default None
+        Id of the trajectory
     """
-    folder = os.path.dirname(__file__)
-    start_path = os.path.join(folder,"images","start1.png")
 
-    end_path = os.path.join(folder,"images","end.png")
-    points = folium.map.FeatureGroup("The start and end pointrs of trajectory with id: "+str(move_data.iloc[0][traj_id]))
+    points = folium.map.FeatureGroup(
+        'The start and end points of trajectory {}'.format(_id or '')
+    )
 
     folium.Marker(
         location=[move_data.iloc[0][LATITUDE], move_data.iloc[0][LONGITUDE]],
-        color='black',
+        color='green',
         clustered_marker=True,
         popup='Início',
-        #icon=folium.DivIcon(html=f"""<div style=" height:20px; width:15px; background-color: 'green'; ">START</div>""")
-        icon= folium.features.CustomIcon(start_path, icon_size=(80, 80)),
+        icon=plugins.BeautifyIcon(
+            icon='play', icon_shape='marker', background_color=color or 'green'
+        )
     ).add_to(points)
 
     folium.Marker(
@@ -690,10 +702,13 @@ def _add_begin_end_markers_to_folium_map(move_data, base_map, traj_id=TRAJ_ID):
         color='red',
         clustered_marker=True,
         popup='Fim',
-        icon=folium.features.CustomIcon(end_path, icon_size=(80, 80)),
+        icon=plugins.BeautifyIcon(
+            icon='times-circle', icon_shape='marker', background_color=color or 'red'
+        )
     ).add_to(points)
 
     base_map.add_child(points)
+
 
 def _add_trajectories_to_folium_map(
     move_data,
@@ -721,11 +736,10 @@ def _add_trajectories_to_folium_map(
 
     """
 
-
     for _id, color in items:
         mv = move_data[move_data[TRAJ_ID] == _id]
 
-        _add_begin_end_markers_to_folium_map(mv, base_map, TRAJ_ID)
+        _add_begin_end_markers_to_folium_map(mv, base_map, color, _id)
 
         folium.PolyLine(
             mv[[LATITUDE, LONGITUDE]], color=color, weight=2.5, opacity=1
@@ -733,6 +747,8 @@ def _add_trajectories_to_folium_map(
 
     if legend:
         add_map_legend(base_map, 'Color by user ID', items)
+
+    folium.map.LayerControl(collapsed=False).add_to(base_map)
 
     if save_as_html:
         base_map.save(outfile=filename)
@@ -806,7 +822,7 @@ def plot_trajectories_with_folium(
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
-    folium.map.LayerControl(collapsed=False).add_to(base_map)
+
     return base_map
 
 
@@ -821,7 +837,7 @@ def plot_trajectory_by_id_folium(
     base_map=None,
     tile=TILES[0],
     save_as_html=False,
-    color='black',
+    color='blue',
     filename='plot_trajectory_by_id_folium.html',
 ):
     """
@@ -1354,6 +1370,60 @@ def plot_stops(
         return base_map
 
 
+def plot_bbox(
+        bbox_tuple,
+        tiles=TILES[0],
+        color='red',
+        save_map=False,
+        file='bbox.html'
+):
+    """
+    Plots a bbox using Folium.
+
+    Parameters
+    ----------
+    bbox_tuple : tuple.
+        Represents a bound box, that is a tuple of 4 values with the
+        min and max limits of latitude e longitude.
+    tiles : String, optional, default 'OpenStreetMap'.
+        Represents tyles'srs type_.
+        Example: 'openstreetmap', 'cartodbpositron',
+                'stamentoner', 'stamenterrain',
+                'mapquestopen', 'MapQuest Open Aerial',
+                'Mapbox Control Room' and 'Mapbox Bright'.
+    color : String, optional, default 'red'.
+        Represents color of lines on map.
+    file : String, optional, default 'bbox.html'.
+        Represents filename.
+    save_map: Boolean, optional, default False.
+        Wether to save the bbox folium map.
+
+    Returns
+    --------
+    folium map with bounding box
+
+    """
+
+    m = folium.Map(tiles=tiles)
+    m.fit_bounds(
+        [[bbox_tuple[0], bbox_tuple[1]], [bbox_tuple[2], bbox_tuple[3]]]
+    )
+    points_ = [
+        (bbox_tuple[0], bbox_tuple[1]),
+        (bbox_tuple[0], bbox_tuple[3]),
+        (bbox_tuple[2], bbox_tuple[3]),
+        (bbox_tuple[2], bbox_tuple[1]),
+        (bbox_tuple[0], bbox_tuple[1]),
+    ]
+    polygon = folium.PolyLine(points_, weight=3, color=color)
+    polygon.add_to(m)
+
+    if save_map:
+        m.save(file)
+
+    return m
+
+
 def _format_tags(line, slice_):
     """
     Create or format tags.
@@ -1380,6 +1450,7 @@ def _circle_maker(
     user_lon,
     slice_tags,
     user_point,
+    radius,
     map_
 ):
     """
@@ -1396,6 +1467,8 @@ def _circle_maker(
 
     user_point: String.
         Point color.
+    radius: Float.
+        radius size.
     map_: Folium map.
     """
 
@@ -1407,7 +1480,7 @@ def _circle_maker(
     tags_formated = _format_tags(line, slice_tags)
 
     folium.Circle(
-        radius=1,
+        radius=radius,
         location=[x, y],
         popup=tags_formated,
         color=user_point,
@@ -1545,6 +1618,7 @@ def add_traj_folium(
                 user_lon,
                 slice_tags,
                 user_point,
+                1,
                 base_map
             ),
             move_data.iterrows()
@@ -1568,7 +1642,7 @@ def add_point_folium(
     user_lat=LATITUDE,
     user_lon=LONGITUDE,
     user_point=USER_POINT,
-    poi_point=POI_POINT,
+    radius=2,
     base_map=None,
     slice_tags=None,
     tiles=TILES[0]
@@ -1587,8 +1661,8 @@ def add_point_folium(
         Longitude column name.
     user_point: String, optional, default 'orange'.
         The point color.
-    poi_point: String, optional, default 'red'.
-        Poi point color.
+    radius: Float, optional, default 2.
+        radius size.
     sort:Boolean, optional, default False.
         If True the data will be sorted.
     base_map: Folium map, optional, default None.
@@ -1624,6 +1698,7 @@ def add_point_folium(
                 user_lon,
                 slice_tags,
                 user_point,
+                radius,
                 base_map
             ),
             move_data.iterrows()
@@ -1638,6 +1713,7 @@ def add_poi_folium(
     poi_lat=LATITUDE,
     poi_lon=LONGITUDE,
     poi_point=POI_POINT,
+    radius=2,
     base_map=None,
     slice_tags=None
 ):
@@ -1655,6 +1731,8 @@ def add_poi_folium(
         Longitude column name.
     poi_point: String, optional, default 'red'.
         Poi point color.
+    radius: Float, optional, default 2.
+        radius size.
     base_map: Folium map, optional, default None.
         A folium map to plot. If None a map. If None a map will be created.
 
@@ -1685,6 +1763,7 @@ def add_poi_folium(
                 poi_lon,
                 slice_tags,
                 poi_point,
+                radius,
                 base_map
             ),
             move_data.iterrows()
@@ -1699,7 +1778,7 @@ def add_event_folium(
     event_lat=LATITUDE,
     event_lon=LONGITUDE,
     event_point=EVENT_POINT,
-    radius=150,
+    radius=2,
     base_map=None,
     slice_tags=None,
     tiles=TILES[0]
@@ -1718,7 +1797,7 @@ def add_event_folium(
         Longitude column name.
     event_point: String, optional, default 'red'.
         Event color.
-    radius: Float, optional, default 150.
+    radius: Float, optional, default 2.
         radius size.
     base_map: Folium map, optional, default None.
         A folium map to plot. If None a map. If None a map will be created.
@@ -1750,6 +1829,7 @@ def add_event_folium(
                 event_lon,
                 slice_tags,
                 event_point,
+                radius,
                 base_map
             ),
             move_data.iterrows()
