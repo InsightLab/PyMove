@@ -69,7 +69,7 @@ def _assert_plot(map_info):
            and count_l_popup == 2
            and count_head == 4
            and count_body == 5
-           and count_script == 18)
+           and count_script == 20)
 
     assert('L.marker(\n[39.984094,116.319236]' in map_info
            and 'L.marker(\n[39.984217,116.319422]' in map_info
@@ -114,6 +114,225 @@ def test_create_base_map():
     assert_array_equal(base_map.location, [39.984094, 116.319236])
 
     assert(base_map.control_scale is True)
+
+
+def test_heatmap(tmpdir):
+
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('heatmap.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map = folium.heatmap(move_df)
+
+    assert_array_equal(base_map.location, [39.984094, 116.319236])
+
+    folium.heatmap(
+        move_df,
+        save_as_html=True,
+        filename=filename_write_default
+    )
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.heatLayer')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 1
+           and count_head == 2
+           and count_body == 3
+           and count_script == 14)
+
+    assert(('L.heatLayer(\n[[39.984094,116.319236,1.0],'
+            '[39.984198,116.319322,1.0],'
+            '[39.984211,116.319389,1.0],'
+            '[39.984217,116.319422,1.0],'
+            '[39.984224,116.319402,1.0]]')in map_info)
+
+
+def test_heatmap_with_time(tmpdir):
+
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('heatmap_with_time.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map = folium.heatmap_with_time(move_df)
+
+    assert_array_equal(base_map.location, [39.984094, 116.319236])
+
+    folium.heatmap(
+        move_df,
+        save_as_html=True,
+        filename=filename_write_default
+    )
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.heatLayer')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 1
+           and count_head == 2
+           and count_body == 3
+           and count_script == 14)
+
+    assert(('L.heatLayer(\n[[39.984094,116.319236,1.0],'
+            '[39.984198,116.319322,1.0],'
+            '[39.984211,116.319389,1.0],'
+            '[39.984217,116.319422,1.0],'
+            '[39.984224,116.319402,1.0]]')in map_info)
+
+
+def test_cluster(tmpdir):
+
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('cluster.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map = folium.cluster(move_df)
+
+    assert_array_equal(base_map.location, [39.984094, 116.319236])
+
+    folium.cluster(
+        move_df,
+        save_as_html=True,
+        filename=filename_write_default
+    )
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.marker')
+
+    count_l_popup = map_info.count('L.popup')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(
+        count_l_map == 1
+        and count_l_tileLayer == 1
+        and count_l_marker == 6
+        and count_l_popup == 5
+        and count_head == 2
+        and count_body == 3
+        and count_script == 14
+    )
+
+    assert(
+        'L.marker(\n[39.984094,116.319236]' in map_info
+        and 'L.marker(\n[39.984198,116.319322]' in map_info
+        and 'L.marker(\n[39.984224,116.319402]' in map_info
+        and 'L.marker(\n[39.984211,116.319389]' in map_info
+        and 'L.marker(\n[39.984217,116.319422]' in map_info
+    )
+
+
+def test_faster_cluster(tmpdir):
+
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('faster_cluster.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map = folium.faster_cluster(move_df)
+
+    assert_array_equal(base_map.location, [39.984094, 116.319236])
+
+    folium.faster_cluster(
+        move_df,
+        save_as_html=True,
+        filename=filename_write_default
+    )
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.circle')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(count_l_map == 1
+           and count_l_tileLayer == 1
+           and count_l_marker == 1
+           and count_head == 2
+           and count_body == 3
+           and count_script == 14)
+
+    assert(('data=[[39.984094,116.319236],'
+            '[39.984198,116.319322],'
+            '[39.984224,116.319402],'
+            '[39.984211,116.319389],'
+            '[39.984217,116.319422]]') in map_info)
 
 
 def test_plot_markers(tmpdir):
@@ -172,6 +391,189 @@ def test_plot_markers(tmpdir):
            and 'L.marker(\n[39.984211,116.319389]' in map_info)
 
 
+def test_filter_and_generate_colors():
+
+    move_df = _default_move_df()
+
+    expected_df = DataFrame(
+        data=[
+            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
+            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+            [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 1]
+        ],
+        columns=['lat', 'lon', 'datetime', 'id'],
+        index=[0, 1, 2],
+    )
+
+    expected_items = [(1, 'black')]
+
+    mv_df, items = folium._filter_and_generate_colors(move_df, 1, 3)
+    print(items, mv_df)
+    assert_frame_equal(mv_df, expected_df)
+
+    assert_array_equal(items, expected_items)
+
+
+def test_filter_generated_feature():
+
+    expected_one_value = DataFrame(
+        data=[
+            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+        ],
+        columns=['lat', 'lon', 'datetime', 'id'],
+        index=[1],
+    )
+
+    expected_multiples_value = DataFrame(
+        data=[
+            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
+            [39.984211, 116.319389, Timestamp('2008-10-23 05:53:16'), 1],
+        ],
+        columns=['lat', 'lon', 'datetime', 'id'],
+        index=[1, 3],
+    )
+
+    move_df = _default_move_df()
+
+    filtered_df = folium._filter_generated_feature(move_df, 'lat', [39.984198])
+
+    assert_frame_equal(filtered_df, expected_one_value)
+
+    filtered_df = folium._filter_generated_feature(
+        move_df, 'lat', [39.984198, 39.984211]
+    )
+
+    assert_frame_equal(filtered_df, expected_multiples_value)
+
+    try:
+        folium._filter_generated_feature(move_df, 'lat', [33.5659])
+        raise AssertionError(
+            'KeyError error not raised by MoveDataFrame'
+        )
+    except KeyError:
+        pass
+
+
+def test_add_begin_end_markers_to_folium_map(tmpdir):
+
+    move_df = _default_move_df()
+
+    base_map = folium.create_base_map(
+        move_data=move_df,
+        lat_origin=None,
+        lon_origin=None,
+        tile=TILES[0],
+        default_zoom_start=12)
+
+    folium._add_begin_end_markers_to_folium_map(move_df, base_map)
+
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('base_map_color.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map.save(filename_write_default)
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.marker')
+
+    count_l_popup = map_info.count('L.popup')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(
+        count_l_map == 1
+        and count_l_tileLayer == 1
+        and count_l_marker == 2
+        and count_l_popup == 2
+        and count_head == 2
+        and count_body == 3
+        and count_script == 14
+    )
+
+    assert(('L.marker(\n[39.984094,116.319236],'
+            '\n{"clusteredMarker":true,"color":"green"}')in map_info
+           and ('L.marker(\n[39.984217,116.319422],'
+                '\n{"clusteredMarker":true,"color":"red"}')in map_info)
+
+
+def test_add_trajectories_to_folium_map(tmpdir):
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('map.html')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    base_map = folium.create_base_map(
+        move_data=move_df,
+        lat_origin=None,
+        lon_origin=None,
+        tile=TILES[0],
+        default_zoom_start=12
+    )
+
+    folium.heatmap(
+        move_df,
+        save_as_html=True,
+        filename=filename_write_default
+    )
+
+    file = codecs.open(filename_write_default, 'r')
+
+    map_info = file.read()
+
+    map_info = map_info.replace(' ', '')
+
+    count_l_map = map_info.count('L.map')
+
+    count_l_tileLayer = map_info.count('L.tileLayer')
+
+    count_l_marker = map_info.count('L.heatLayer')
+
+    count_head = map_info.count('head')
+
+    count_body = map_info.count('body')
+
+    count_script = map_info.count('script')
+
+    assert(
+        count_l_map == 1
+        and count_l_tileLayer == 1
+        and count_l_marker == 1
+        and count_head == 2
+        and count_body == 3
+        and count_script == 14
+    )
+
+    assert(
+        (
+            'L.heatLayer(\n[[39.984094,116.319236,1.0],'
+            '[39.984198,116.319322,1.0],'
+            '[39.984211,116.319389,1.0],'
+            '[39.984217,116.319422,1.0],'
+            '[39.984224,116.319402,1.0]]'
+        ) in map_info
+    )
+
+
 def test_plot_trajectories_with_folium(tmpdir):
 
     move_df = _default_move_df()
@@ -218,7 +620,7 @@ def test_plot_trajectories_with_folium(tmpdir):
            and count_l_popup == 2
            and count_head == 4
            and count_body == 5
-           and count_script == 18)
+           and count_script == 20)
 
     assert('L.marker(\n[39.984094,116.319236]' in map_info
            and 'L.marker(\n[39.984224,116.319402]' in map_info
@@ -447,300 +849,6 @@ def test_plot_bbox(tmpdir):
     assert_equal(expected, actual)
 
 
-def test_faster_cluster(tmpdir):
-
-    move_df = _default_move_df()
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('faster_cluster.html')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    base_map = folium.faster_cluster(move_df)
-
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
-
-    folium.faster_cluster(
-        move_df,
-        save_as_html=True,
-        filename=filename_write_default
-    )
-
-    file = codecs.open(filename_write_default, 'r')
-
-    map_info = file.read()
-
-    map_info = map_info.replace(' ', '')
-
-    count_l_map = map_info.count('L.map')
-
-    count_l_tileLayer = map_info.count('L.tileLayer')
-
-    count_l_marker = map_info.count('L.circle')
-
-    count_head = map_info.count('head')
-
-    count_body = map_info.count('body')
-
-    count_script = map_info.count('script')
-
-    assert(count_l_map == 1
-           and count_l_tileLayer == 1
-           and count_l_marker == 1
-           and count_head == 2
-           and count_body == 3
-           and count_script == 14)
-
-    assert(('data=[[39.984094,116.319236],'
-            '[39.984198,116.319322],'
-            '[39.984224,116.319402],'
-            '[39.984211,116.319389],'
-            '[39.984217,116.319422]]') in map_info)
-
-
-def test_cluster(tmpdir):
-
-    move_df = _default_move_df()
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('cluster.html')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    base_map = folium.cluster(move_df)
-
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
-
-    folium.cluster(
-        move_df,
-        save_as_html=True,
-        filename=filename_write_default
-    )
-
-    file = codecs.open(filename_write_default, 'r')
-
-    map_info = file.read()
-
-    map_info = map_info.replace(' ', '')
-
-    count_l_map = map_info.count('L.map')
-
-    count_l_tileLayer = map_info.count('L.tileLayer')
-
-    count_l_marker = map_info.count('L.marker')
-
-    count_l_popup = map_info.count('L.popup')
-
-    count_head = map_info.count('head')
-
-    count_body = map_info.count('body')
-
-    count_script = map_info.count('script')
-
-    assert(
-        count_l_map == 1
-        and count_l_tileLayer == 1
-        and count_l_marker == 6
-        and count_l_popup == 5
-        and count_head == 2
-        and count_body == 3
-        and count_script == 14
-    )
-
-    assert(
-        'L.marker(\n[39.984094,116.319236]' in map_info
-        and 'L.marker(\n[39.984198,116.319322]' in map_info
-        and 'L.marker(\n[39.984224,116.319402]' in map_info
-        and 'L.marker(\n[39.984211,116.319389]' in map_info
-        and 'L.marker(\n[39.984217,116.319422]' in map_info
-    )
-
-
-def test_add_trajectories_to_folium_map(tmpdir):
-    move_df = _default_move_df()
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('map.html')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    base_map = folium.create_base_map(
-        move_data=move_df,
-        lat_origin=None,
-        lon_origin=None,
-        tile=TILES[0],
-        default_zoom_start=12
-    )
-
-    folium.heatmap(
-        move_df,
-        save_as_html=True,
-        filename=filename_write_default
-    )
-
-    file = codecs.open(filename_write_default, 'r')
-
-    map_info = file.read()
-
-    map_info = map_info.replace(' ', '')
-
-    count_l_map = map_info.count('L.map')
-
-    count_l_tileLayer = map_info.count('L.tileLayer')
-
-    count_l_marker = map_info.count('L.heatLayer')
-
-    count_head = map_info.count('head')
-
-    count_body = map_info.count('body')
-
-    count_script = map_info.count('script')
-
-    assert(
-        count_l_map == 1
-        and count_l_tileLayer == 1
-        and count_l_marker == 1
-        and count_head == 2
-        and count_body == 3
-        and count_script == 14
-    )
-
-    assert(
-        (
-            'L.heatLayer(\n[[39.984094,116.319236,1.0],'
-            '[39.984198,116.319322,1.0],'
-            '[39.984211,116.319389,1.0],'
-            '[39.984217,116.319422,1.0],'
-            '[39.984224,116.319402,1.0]]'
-        ) in map_info
-    )
-
-
-def test_filter_generated_feature():
-
-    expected_one_value = DataFrame(
-        data=[
-            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
-        ],
-        columns=['lat', 'lon', 'datetime', 'id'],
-        index=[1],
-    )
-
-    expected_multiples_value = DataFrame(
-        data=[
-            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
-            [39.984211, 116.319389, Timestamp('2008-10-23 05:53:16'), 1],
-        ],
-        columns=['lat', 'lon', 'datetime', 'id'],
-        index=[1, 3],
-    )
-
-    move_df = _default_move_df()
-
-    filtered_df = folium._filter_generated_feature(move_df, 'lat', [39.984198])
-
-    assert_frame_equal(filtered_df, expected_one_value)
-
-    filtered_df = folium._filter_generated_feature(
-        move_df, 'lat', [39.984198, 39.984211]
-    )
-
-    assert_frame_equal(filtered_df, expected_multiples_value)
-
-    try:
-        folium._filter_generated_feature(move_df, 'lat', [33.5659])
-        raise AssertionError(
-            'KeyError error not raised by MoveDataFrame'
-        )
-    except KeyError:
-        pass
-
-
-def test_filter_and_generate_colors():
-
-    move_df = _default_move_df()
-
-    expected_df = DataFrame(
-        data=[
-            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
-            [39.984198, 116.319322, Timestamp('2008-10-23 05:53:06'), 1],
-            [39.984224, 116.319402, Timestamp('2008-10-23 05:53:11'), 1]
-        ],
-        columns=['lat', 'lon', 'datetime', 'id'],
-        index=[0, 1, 2],
-    )
-
-    expected_items = [(1, 'black')]
-
-    mv_df, items = folium._filter_and_generate_colors(move_df, 1, 3)
-    print(items, mv_df)
-    assert_frame_equal(mv_df, expected_df)
-
-    assert_array_equal(items, expected_items)
-
-
-def test_add_begin_end_markers_to_folium_map(tmpdir):
-
-    move_df = _default_move_df()
-
-    base_map = folium.create_base_map(
-        move_data=move_df,
-        lat_origin=None,
-        lon_origin=None,
-        tile=TILES[0],
-        default_zoom_start=12)
-
-    folium._add_begin_end_markers_to_folium_map(move_df, base_map)
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('base_map_color.html')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    base_map.save(filename_write_default)
-
-    file = codecs.open(filename_write_default, 'r')
-
-    map_info = file.read()
-
-    map_info = map_info.replace(' ', '')
-
-    count_l_map = map_info.count('L.map')
-
-    count_l_tileLayer = map_info.count('L.tileLayer')
-
-    count_l_marker = map_info.count('L.marker')
-
-    count_l_popup = map_info.count('L.popup')
-
-    count_head = map_info.count('head')
-
-    count_body = map_info.count('body')
-
-    count_script = map_info.count('script')
-
-    assert(count_l_map == 1
-           and count_l_tileLayer == 1
-           and count_l_marker == 2
-           and count_l_popup == 2
-           and count_head == 2
-           and count_body == 3
-           and count_script == 12)
-
-    assert(('L.marker(\n[39.984094,116.319236],'
-            '\n{"clusteredMarker":true,"color":"green"}')in map_info
-           and ('L.marker(\n[39.984217,116.319422],'
-                '\n{"clusteredMarker":true,"color":"red"}')in map_info)
-
-
 def test_plot_incial_end_points(tmpdir):
     move_df = _default_move_df()
 
@@ -881,7 +989,7 @@ def test_add_point_folium(tmpdir):
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('add_point_folium')
+    file_write_default = d.join('add_point_folium.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
@@ -952,7 +1060,7 @@ def test_add_poi_folium(tmpdir):
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('add_point_folium')
+    file_write_default = d.join('add_point_folium.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
@@ -1021,7 +1129,7 @@ def test_add_event_folium(tmpdir):
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('add_event_folium')
+    file_write_default = d.join('add_event_folium.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
@@ -1086,18 +1194,11 @@ def test_add_event_folium(tmpdir):
     )
 
 
-def test_show_trajs_with_event(tmpdir):
+def test_show_trajs_with_event():
 
     move_df = _default_move_df()
 
     df_event = move_df.iloc[0:3, :]
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('show_trajs_with_event')
-    filename = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
 
     list_ = folium.show_trajs_with_event(
         move_data=move_df,
@@ -1126,18 +1227,11 @@ def test_show_trajs_with_event(tmpdir):
         assert(base_map.control_scale is True)
 
 
-def test_show_traj_id_with_event(tmpdir):
+def test_show_traj_id_with_event():
 
     move_df = _default_move_df()
 
     df_event = move_df.iloc[0:3, :]
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('show_traj_with_id_event')
-    filename = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
 
     list_ = folium.show_traj_id_with_event(
         move_data=move_df,
@@ -1167,16 +1261,9 @@ def test_show_traj_id_with_event(tmpdir):
     assert list_[0].control_scale is True
 
 
-def test_create_geojson_features_line(tmpdir):
+def test_create_geojson_features_line():
 
     move_df = _default_move_df()
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('create_geojson_features_line')
-    filename = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
 
     features = folium._create_geojson_features_line(move_df)
 
@@ -1205,16 +1292,16 @@ def test_plot_traj_timestamp_geo_json(tmpdir):
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('test_traj_timestamp_geo_json')
+    file_write_default = d.join('test_traj_timestamp_geo_json.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
     base_map = folium.plot_traj_timestamp_geo_json(move_df)
 
-    base_map.save('map2.html')
+    base_map.save(filename)
 
-    file = codecs.open('map2.html', 'r')
+    file = codecs.open(filename, 'r')
 
     map_info = file.read()
 
@@ -1249,109 +1336,3 @@ def test_plot_traj_timestamp_geo_json(tmpdir):
         and count_body == 3
         and count_script == 22
     )
-
-
-def test_heatmap(tmpdir):
-
-    move_df = _default_move_df()
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('heatmap.html')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    base_map = folium.heatmap(move_df)
-
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
-
-    folium.heatmap(
-        move_df,
-        save_as_html=True,
-        filename=filename_write_default
-    )
-
-    file = codecs.open(filename_write_default, 'r')
-
-    map_info = file.read()
-
-    map_info = map_info.replace(' ', '')
-
-    count_l_map = map_info.count('L.map')
-
-    count_l_tileLayer = map_info.count('L.tileLayer')
-
-    count_l_marker = map_info.count('L.heatLayer')
-
-    count_head = map_info.count('head')
-
-    count_body = map_info.count('body')
-
-    count_script = map_info.count('script')
-
-    assert(count_l_map == 1
-           and count_l_tileLayer == 1
-           and count_l_marker == 1
-           and count_head == 2
-           and count_body == 3
-           and count_script == 14)
-
-    assert(('L.heatLayer(\n[[39.984094,116.319236,1.0],'
-            '[39.984198,116.319322,1.0],'
-            '[39.984211,116.319389,1.0],'
-            '[39.984217,116.319422,1.0],'
-            '[39.984224,116.319402,1.0]]')in map_info)
-
-
-def test_heatmap_with_time(tmpdir):
-
-    move_df = _default_move_df()
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('heatmap_with_time.html')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    base_map = folium.heatmap_with_time(move_df)
-
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
-
-    folium.heatmap(
-        move_df,
-        save_as_html=True,
-        filename=filename_write_default
-    )
-
-    file = codecs.open(filename_write_default, 'r')
-
-    map_info = file.read()
-
-    map_info = map_info.replace(' ', '')
-
-    count_l_map = map_info.count('L.map')
-
-    count_l_tileLayer = map_info.count('L.tileLayer')
-
-    count_l_marker = map_info.count('L.heatLayer')
-
-    count_head = map_info.count('head')
-
-    count_body = map_info.count('body')
-
-    count_script = map_info.count('script')
-
-    assert(count_l_map == 1
-           and count_l_tileLayer == 1
-           and count_l_marker == 1
-           and count_head == 2
-           and count_body == 3
-           and count_script == 14)
-
-    assert(('L.heatLayer(\n[[39.984094,116.319236,1.0],'
-            '[39.984198,116.319322,1.0],'
-            '[39.984211,116.319389,1.0],'
-            '[39.984217,116.319422,1.0],'
-            '[39.984224,116.319402,1.0]]')in map_info)
