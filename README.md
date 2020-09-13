@@ -135,6 +135,8 @@ PyMove is a Python library for processing and visualization of trajectories and 
 
 We will also release wrappers to some useful Java libraries frequently used in the mobility domain.
 
+Read the full documentation on [ReadTheDocs](https://pymove.readthedocs.io/en/latest/)
+
 ---
 
 ## Main Features
