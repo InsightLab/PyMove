@@ -513,10 +513,6 @@ def join_with_pois_by_category(
         print('There are %s categories' % size_categories)
 
         for i, c in enumerate(unique_categories, start=1):
-            # print(
-            #     'computing dist to category: %s' % c,
-            #     flush=True
-            # )
             # creating lat and lon array to operation
             df_category = df_pois[df_pois[label_category] == c]
             df_category.reset_index(drop=True, inplace=True)
