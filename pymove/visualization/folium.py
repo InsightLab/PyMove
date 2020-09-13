@@ -689,7 +689,7 @@ def _add_begin_end_markers_to_folium_map(move_data, base_map, color=None, _id=No
 
     folium.Marker(
         location=[move_data.iloc[0][LATITUDE], move_data.iloc[0][LONGITUDE]],
-        color='black',
+        color='green',
         clustered_marker=True,
         popup='Início',
         icon=plugins.BeautifyIcon(
