@@ -13,9 +13,11 @@ from pymove.utils.constants import (
     DIST_PREV_TO_NEXT,
     DIST_TO_NEXT,
     DIST_TO_PREV,
+    EQU_ID,
     HOUR,
     HOUR_COS,
     HOUR_SIN,
+    INDEX_GRID,
     LATITUDE,
     LONGITUDE,
     MOVE,
@@ -2729,6 +2731,25 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self.last_operation = end_operation(operation)
 
         return _shift
+
+    def discrete_df(self, region_size=1000):
+        operation = begin_operation('discrete_df')
+        print('\nDiscriting dataframe...')
+        try:
+            data_ = self._data
+            data_ = PandasMoveDataFrame(data_)
+
+            grid = Grid(data_, cell_size=region_size)
+            grid.create_update_index_grid_features(data_)
+
+            data_.rename(columns={INDEX_GRID: EQU_ID}, inplace=True)
+
+            self._data = data_
+            self.last_operation = end_operation(operation)
+
+        except Exception as e:
+            self.last_operation = end_operation(operation)
+            raise e
 
     def all(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
         """
