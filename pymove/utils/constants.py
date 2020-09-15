@@ -4,6 +4,7 @@ DATETIME = 'datetime'
 TRAJ_ID = 'id'
 TID = 'tid'
 UID = 'user_id'
+EQU_ID = 'equ_id'
 
 GEOHASH = 'geohash'
 BIN_GEOHASH = 'bin_geohash'
