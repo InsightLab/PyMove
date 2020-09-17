@@ -13,6 +13,7 @@ Subpackages
    pymove.semantic
    pymove.utils
    pymove.visualization
+   pymove.query
 
 Module contents
 ---------------
