@@ -1,9 +1,6 @@
 language: python
 python: '3.6'
 
-services:
-  - mongodb
-  - postgresql
 script:
   - python setup.py sdist >/dev/null
   - python setup.py install
