@@ -29,13 +29,11 @@ DEPENDENCIES = [
     'holidays',
     'ipywidgets',
     'IPython',
-    'psycopg2',
-    'pymongo',
     'geohash2'
 ]
 setup(
     name='pymove',
-    version='2.0.0',
+    version='2.1.0',
     author='Insight Data Science Lab',
     author_email='insightlab@dc.ufc.br',
     license='MIT',

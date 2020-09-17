@@ -28,14 +28,6 @@ pymove.utils.datetime module
    :undoc-members:
    :show-inheritance:
 
-pymove.utils.db module
-----------------------
-
-.. automodule:: pymove.utils.db
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pymove.utils.distances module
 -----------------------------
 
