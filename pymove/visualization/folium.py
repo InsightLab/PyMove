@@ -636,9 +636,9 @@ def _filter_and_generate_colors(
         if color_by_id is not None:
             keys = color_by_id.keys()
             for key in keys:
-                for i in range(len(items)):
-                    if int(key) == int(items[i][0]):
-                        items[i] = (int(key),color_by_id[key])
+                for count, item in enumerate(items):
+                    if int(key) == int(item[0]):
+                        items[count] = (int(key),color_by_id[key])
     return mv_df, items
 
 
@@ -829,7 +829,7 @@ def plot_trajectories_with_folium(
     mv_df, items = _filter_and_generate_colors(
         move_data, n_rows=n_rows, color=color, color_by_id=color_by_id
     )
-    
+
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
