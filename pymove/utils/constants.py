@@ -6,6 +6,7 @@ TID = 'tid'
 UID = 'user_id'
 
 LOCAL_LABEL = 'local_label'
+GRID_ID = 'grid_id'
 
 GEOHASH = 'geohash'
 BIN_GEOHASH = 'bin_geohash'
