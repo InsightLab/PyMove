@@ -13,6 +13,7 @@ from pymove.utils.constants import (
     DIST_PREV_TO_NEXT,
     DIST_TO_NEXT,
     DIST_TO_PREV,
+    GRID_ID,
     HOUR,
     HOUR_COS,
     HOUR_SIN,
@@ -3562,6 +3563,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         try:
             grid = Grid(self, cell_size=region_size)
             grid.create_update_index_grid_feature(self)
+            self.rename(columns={INDEX_GRID: GRID_ID}, inplace=True)
             self.reset_index(drop=True, inplace=True)
             self.last_operation = end_operation(operation)
 
