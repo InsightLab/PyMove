@@ -408,7 +408,7 @@ def test_filter_and_generate_colors():
     expected_items = [(1, 'black')]
 
     mv_df, items = folium._filter_and_generate_colors(move_df, 1, 3)
-    print(items, mv_df)
+
     assert_frame_equal(mv_df, expected_df)
 
     assert_array_equal(items, expected_items)
