@@ -637,8 +637,8 @@ def _filter_and_generate_colors(
             keys = color_by_id.keys()
             for key in keys:
                 for count, item in enumerate(items):
-                    if int(key) == int(item[0]):
-                        items[count] = (int(key),color_by_id[key])
+                    if str(key) == str(item[0]):
+                        items[count] = (item[0], color_by_id[key])
     return mv_df, items
 
 
