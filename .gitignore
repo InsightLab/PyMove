@@ -105,9 +105,6 @@ developing/
 # mypy
 .mypy_cache/
 
-
-
-
 # Created by https://www.gitignore.io/api/macos,pycharm+all,jupyternotebooks
 # Edit at https://www.gitignore.io/?templates=macos,pycharm+all,jupyternotebooks
 
@@ -240,5 +237,7 @@ modules.xml
 .idea/sonarlint
 
 # End of https://www.gitignore.io/api/macos,pycharm+all,jupyternotebooks
-.idea
+
+# Start of gitignore for vscode
 .vscode
+.devcontainer
