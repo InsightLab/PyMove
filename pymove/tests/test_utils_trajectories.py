@@ -1,5 +1,4 @@
 import os
-from collections import defaultdict
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_equal
@@ -176,30 +175,3 @@ def test_column_to_array():
 
     assert_frame_equal(df_1, expected_data_1)
     assert_frame_equal(df_2, expected_data_2)
-
-
-def test_save_bbox(tmpdir):
-    d = tmpdir.mkdir('utils')
-    file_write_default = d.join('bbox.html')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
-    expected = {
-        'cartodbpositron': 1,
-        'fit_bounds': 1,
-        'poly_line': 1
-    }
-    m = trajectories.plot_bbox(bbox, file=filename_write_default, save_map=True)
-    to_dict = m.to_dict(ordered=False)['children']
-    actual = defaultdict(int)
-    for key in to_dict.keys():
-        value = key.split('_')
-        if len(value) > 1:
-            value = '_'.join(key.split('_')[:-1])
-        else:
-            value = value[0]
-        actual[value] += 1
-    actual = dict(actual)
-    assert_equal(expected, actual)
