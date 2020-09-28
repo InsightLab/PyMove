@@ -150,3 +150,6 @@ USER_POINT = 'orange'
 LINE_COLOR = 'blue'
 POI_POINT = 'red'
 EVENT_POINT = 'purple'
+
+MEDP = 'MEDP'
+MEDT = 'MEDT'
