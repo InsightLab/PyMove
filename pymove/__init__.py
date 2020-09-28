@@ -12,6 +12,7 @@ from .core import grid
 from .core.dask import DaskMoveDataFrame
 from .core.dataframe import MoveDataFrame
 from .core.pandas import PandasMoveDataFrame
+from .core.pandas_discrete import PandasDiscreteMoveDataFrame
 from .models.pattern_mining import clustering
 from .preprocessing import compression, filters, segmentation, stay_point_detection
 from .query import query
