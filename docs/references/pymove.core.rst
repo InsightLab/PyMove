@@ -44,6 +44,13 @@ pymove.core.pandas module
    :undoc-members:
    :show-inheritance:
 
+pymove.core.pandas_discrete module
+----------------------------------
+
+.. automodule:: pymove.core.pandas
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
