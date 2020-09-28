@@ -49,6 +49,7 @@ setup(
         'pymove.models',
         'pymove.models.pattern_mining',
         'pymove.preprocessing',
+        'pymove.query',
         'pymove.semantic',
         'pymove.tests',
         'pymove.uncertainty',
