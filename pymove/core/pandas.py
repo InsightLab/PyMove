@@ -17,6 +17,7 @@ from pymove.utils.constants import (
     HOUR_COS,
     HOUR_SIN,
     LATITUDE,
+    LOCAL_LABEL,
     LONGITUDE,
     MOVE,
     PERIOD,
@@ -623,6 +624,36 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self.last_operation = end_operation(operation)
 
         return data_
+
+    def to_dicrete_move_df(self, local_label=LOCAL_LABEL):
+        """
+        Generate a discrete dataframe move.
+
+        Parameters
+        ----------
+        local_label : str, optional, default 'local_label'.
+            Represents the column name of feature local label.
+
+        Returns
+        -------
+        pymove.core.pandas.PandasDiscreteMoveDataFrame
+            Represents an PandasMoveDataFrame dicretized.
+        """
+
+        operation = begin_operation('to_discrete_move_df')
+        data_ = self._data
+
+        if local_label not in data_:
+            raise ValueError(
+                'columns {} not in df'.format(local_label)
+            )
+
+        self.last_operation = end_operation(operation)
+
+        from pymove.core.pandas_discrete import PandasDiscreteMoveDataFrame
+        return PandasDiscreteMoveDataFrame(
+            data_, LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, local_label
+        )
 
     def info(
             self,
