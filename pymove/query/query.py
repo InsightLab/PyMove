@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from pymove import distances
+from pymove.utils import distances
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, MEDP, MEDT, TRAJ_ID
 
 
