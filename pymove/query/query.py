@@ -2,17 +2,18 @@ import numpy as np
 import pandas as pd
 
 from pymove import distances
+from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, MEDP, MEDT, TRAJ_ID
 
 
 def range_query(
     traj,
     move_df,
-    move_df_id='id',
+    id=TRAJ_ID,
     range=1000,
-    distance='MEDP',
-    label_lat='lat',
-    label_lon='lon',
-    label_time='datetime'
+    distance=MEDP,
+    latitude=LATITUDE,
+    longitude=LONGITUDE,
+    datetime=DATETIME
 ):
     """
     Given a distance, a trajectory, and a MoveDataFrame
@@ -28,7 +29,7 @@ def range_query(
     move_df: dataframe
         The input trajectory data.
 
-    move_df_id: string ("id" by default)
+    id: string ("id" by default)
         Label of the trajectories dataframe referring to the MoveDataFrame id.
 
     range: float (1000 by default)
@@ -37,27 +38,27 @@ def range_query(
     distance: string ("MEDP" by default)
         Distance measure type.
 
-    label_lat: string ("lat" by default)
+    latitude: string ("lat" by default)
         Label of the trajectories dataframe referring to the latitude.
 
-    label_lon: string ("lon" by default)
+    longitude: string ("lon" by default)
         Label of the trajectories dataframe referring to the longitude.
 
-    label_time: string ("datetime" by default)
+    datetime: string ("datetime" by default)
         Label of the trajectories dataframe referring to the timestamp.
     """
 
     result = traj.copy()
     result.drop(result.index, inplace=True)
-    if (distance == 'MEDP'):
-        for move_traj in move_df[move_df_id].unique():
-            this = move_df.loc[move_df[move_df_id] == move_traj]
-            if (distances.MEDP(traj, this, label_lat, label_lon) < range):
+    if (distance == MEDP):
+        for move_traj in move_df[id].unique():
+            this = move_df.loc[move_df[id] == move_traj]
+            if (distances.MEDP(traj, this, latitude, longitude) < range):
                 result = result.append(this)
-    elif (distance == 'MEDT'):
-        for move_traj in move_df[move_df_id].unique():
-            this = move_df.loc[move_df[move_df_id] == move_traj]
-            if (distances.MEDT(traj, this, label_lat, label_lon, label_time) < range):
+    elif (distance == MEDT):
+        for move_traj in move_df[id].unique():
+            this = move_df.loc[move_df[id] == move_traj]
+            if (distances.MEDT(traj, this, latitude, longitude, datetime) < range):
                 result = result.append(this)
     return result
 
@@ -65,12 +66,12 @@ def range_query(
 def knn_query(
     traj,
     move_df,
-    move_df_id='id',
     k=5,
-    label_lat='lat',
-    label_lon='lon',
-    label_time='datetime',
-    distance='MEDP'
+    id=TRAJ_ID,
+    latitude=LATITUDE,
+    longitude=LONGITUDE,
+    datetime=DATETIME,
+    distance=MEDP
 ):
     """
     Given a k, a trajectory and a
@@ -85,7 +86,7 @@ def knn_query(
     move_df: dataframe
         The input trajectory data.
 
-    move_df_id: string ("id" by default)
+    id: string ("id" by default)
         Label of the trajectories dataframe referring to the MoveDataFrame id.
 
     range: float (1000 by default)
@@ -94,23 +95,23 @@ def knn_query(
     distance: string ("MEDP" by default)
         Similarity measure type.
 
-    label_lat: string ("lat" by default)
+    latitude: string ("lat" by default)
         Label of the trajectories dataframe referring to the latitude.
 
-    label_lon: string ("lon" by default)
+    longitude: string ("lon" by default)
         Label of the trajectories dataframe referring to the longitude.
 
-    label_time: string ("datetime" by default)
+    datetime: string ("datetime" by default)
         Label of the trajectories dataframe referring to the timestamp.
     """
 
-    k_list = pd.DataFrame([[np.Inf, 'empty']] * k, columns=['distance', 'traj_id'])
+    k_list = pd.DataFrame([[np.Inf, 'empty']] * k, columns=['distance', TRAJ_ID])
 
-    if (distance == 'MEDP'):
-        for traj_id in move_df[move_df_id].unique():
-            if (traj_id != traj[move_df_id].values[0]):
-                this = move_df.loc[move_df[move_df_id] == traj_id]
-                this_distance = distances.MEDP(traj, this, label_lat, label_lon)
+    if (distance == MEDP):
+        for traj_id in move_df[id].unique():
+            if (traj_id != traj[id].values[0]):
+                this = move_df.loc[move_df[id] == traj_id]
+                this_distance = distances.MEDP(traj, this, latitude, longitude)
                 n = 0
                 for n in range(k):
                     if (this_distance < k_list.loc[n, 'distance']):
@@ -119,12 +120,12 @@ def knn_query(
                         break
                     n = n + 1
 
-    elif (distance == 'MEDT'):
-        for traj_id in move_df[move_df_id].unique():
-            if (traj_id != traj[move_df_id].values[0]):
-                this = move_df.loc[move_df[move_df_id] == traj_id]
+    elif (distance == MEDT):
+        for traj_id in move_df[id].unique():
+            if (traj_id != traj[id].values[0]):
+                this = move_df.loc[move_df[id] == traj_id]
                 this_distance = distances.MEDT(
-                    traj, this, label_lat, label_lon, label_time)
+                    traj, this, latitude, longitude, datetime)
                 n = 0
                 for n in range(k):
                     if (this_distance < k_list.loc[n, 'distance']):
@@ -137,6 +138,6 @@ def knn_query(
     print('Gerando DataFrame com as k trajetórias mais próximas')
     for n in range(k):
         result = result.append(
-            move_df.loc[move_df[move_df_id] == k_list.loc[n, 'traj_id']])
+            move_df.loc[move_df[id] == k_list.loc[n, 'traj_id']])
 
     return result
