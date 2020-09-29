@@ -501,7 +501,7 @@ def _calc_time_threshold(seg_mean, seg_std):
     return threshold
 
 
-def _threshold_time_statistics(df_statistics, mean_coef=1.0, std_coef=1.0, inplace=True):
+def threshold_time_statistics(df_statistics, mean_coef=1.0, std_coef=1.0, inplace=True):
     """
     Calculates and creates the threshold column in the time statistics
     dataframe for each segment
