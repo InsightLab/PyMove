@@ -316,5 +316,5 @@ def test_threshold_time_statistics():
         index=[0, 1, 2, 3]
     )
 
-    datetime._threshold_time_statistics(statistics)
+    datetime.threshold_time_statistics(statistics)
     assert_frame_equal(statistics, expected)
