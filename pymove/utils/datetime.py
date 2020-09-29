@@ -3,7 +3,20 @@ import datetime
 import holidays
 from pandas._libs.tslibs.timestamps import Timestamp
 
-from pymove.utils.constants import DATETIME, TIME_SLOT
+from pymove.utils.constants import (
+    COUNT,
+    DATETIME,
+    LOCAL_LABEL,
+    MAX,
+    MEAN,
+    MIN,
+    PREV_LOCAL,
+    STD,
+    SUM,
+    THRESHOLD,
+    TIME_SLOT,
+    TIME_TO_PREV,
+)
 
 
 def date_to_str(date):
@@ -379,12 +392,12 @@ def diff_time(start_time, end_time):
 
 
 def create_time_slot_in_minute(
-    df,
-    slot_interval=15,
-    initial_slot=0,
-    label_datetime=DATETIME,
-    label_time_slot=TIME_SLOT,
-    inplace=True
+        df,
+        slot_interval=15,
+        initial_slot=0,
+        label_datetime=DATETIME,
+        label_time_slot=TIME_SLOT,
+        inplace=True
 ):
     """
     Partitions the time in slot windows
@@ -430,3 +443,93 @@ def create_time_slot_in_minute(
     df[label_time_slot] = minute_day // slot_interval + initial_slot
     if not inplace:
         return df
+
+
+def generate_time_statistics(df_, local_label=LOCAL_LABEL):
+    """
+    Calculates time statistics (average, standard deviation, minimum,
+    maximum, sum and count) of the pairwise local labels of a symbolic trajectory.
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectories data.
+    local_label : str, optional, default 'local_label'
+        The name of the feature with local id
+
+    Return
+    ------
+    dataframe
+        Statistics infomations of the pairwise local labels
+
+    """
+    df_statistics = df_.groupby(
+        [local_label, PREV_LOCAL]
+    ).agg({TIME_TO_PREV: [
+        MEAN, STD, MIN, MAX, SUM, COUNT
+    ]})
+    df_statistics.columns = df_statistics.columns.droplevel(0)
+    df_statistics.fillna(0, inplace=True)
+    df_statistics.reset_index(inplace=True)
+
+    return df_statistics
+
+
+def _calc_time_threshold(seg_mean, seg_std):
+    """
+    Auxiliary function for calculating the threshold based on the
+     mean and standard deviation of the time transitions between
+     adjacent places on discrete MoveDataFrame.
+
+    Parameters
+    ----------
+    seg_mean : float
+        The time mean between two local labels (segment).
+    seg_std : float
+        The time mean between two local labels (segment).
+
+    Return
+    ------
+    float
+        The threshold based on the mean and standard deviation
+        of transition time for the segment.
+
+    """
+
+    threshold = seg_std + seg_mean
+    threshold = float('{:.1f}'.format(threshold))
+    return threshold
+
+
+def threshold_time_statistics(df_statistics, mean_coef=1.0, std_coef=1.0, inplace=True):
+    """
+    Calculates and creates the threshold column in the time statistics
+    dataframe for each segment
+
+    Parameters
+    ----------
+    df_statistics : dataframe
+        Time Statistics of the pairwise local labels.
+    mean_coef : float
+        Multiplication coefficient of the mean time for the segment, default 1.0
+    std_coef : float
+        Multiplication coefficient of sdt time for the segment, default 1.0
+
+    Return
+    ------
+    dataframe
+        DataFrame of time statistics with the aditional feature: threshold,
+        which indicates the time limit of the trajectory segment.
+
+    """
+    if not inplace:
+        df_statistics = df_statistics[:]
+    try:
+        df_statistics[THRESHOLD] = df_statistics.apply(
+            lambda x: _calc_time_threshold(x[MEAN] * mean_coef, x[STD] * std_coef), axis=1
+        )
+
+        if not inplace:
+            return df_statistics
+    except Exception as e:
+        raise e
