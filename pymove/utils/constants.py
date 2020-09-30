@@ -154,6 +154,10 @@ LINE_COLOR = 'blue'
 POI_POINT = 'red'
 EVENT_POINT = 'purple'
 
+
+MEDP = 'MEDP'
+MEDT = 'MEDT'
+
 LOCAL_LABEL = 'local_label'
 PREV_LOCAL = 'prev_local'
 TID_STAT = 'tid_stat'
