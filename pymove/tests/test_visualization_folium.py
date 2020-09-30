@@ -638,7 +638,7 @@ def test_plot_trajectories_with_folium(tmpdir):
         ) in map_info
     )
     assert(('L.polyline(\n[[39.984094,116.319236],[39.984198,116.319322],[39.984224,116.319402]],'
-        '\n{"bubblingMouseEvents":true,') in map_info)
+        '\n{"bubblingMouseEvents":true,"color":"blue"') in map_info)
 
 def test_plot_trajectory_by_id_folium(tmpdir):
 
