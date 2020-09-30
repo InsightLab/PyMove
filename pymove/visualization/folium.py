@@ -117,8 +117,8 @@ def create_base_map(
     """
 
     if lat_origin is None and lon_origin is None:
-        lat_origin = move_data.iloc[0][LATITUDE]
-        lon_origin = move_data.iloc[0][LONGITUDE]
+        lat_origin = move_data[LATITUDE].median()
+        lon_origin = move_data[LONGITUDE].median()
     base_map = folium.Map(
         location=[lat_origin, lon_origin],
         control_scale=True,
