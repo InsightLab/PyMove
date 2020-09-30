@@ -181,7 +181,7 @@ def test_by_max_time():
     segmented_time = segmentation.by_max_time(
         move_df, max_time_between_adj_points=0, inplace=False
     )
-    print(segmented_time)
+
     expected = DataFrame(
         data=[
             [

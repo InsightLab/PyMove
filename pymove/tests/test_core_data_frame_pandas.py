@@ -8,7 +8,13 @@ from numpy.testing import assert_allclose, assert_array_equal
 from pandas import DataFrame, Series, Timedelta, Timestamp
 from pandas.testing import assert_frame_equal, assert_series_equal
 
-from pymove import DaskMoveDataFrame, MoveDataFrame, PandasMoveDataFrame, read_csv
+from pymove import (
+    DaskMoveDataFrame,
+    MoveDataFrame,
+    PandasDiscreteMoveDataFrame,
+    PandasMoveDataFrame,
+    read_csv,
+)
 from pymove.core.grid import Grid
 from pymove.utils.constants import (
     DATE,
@@ -19,6 +25,7 @@ from pymove.utils.constants import (
     HOUR,
     HOUR_SIN,
     LATITUDE,
+    LOCAL_LABEL,
     LONGITUDE,
     PERIOD,
     SITUATION,
@@ -476,6 +483,36 @@ def test_to_data_frame():
     )
 
     assert isinstance(move_df.to_data_frame(), DataFrame)
+
+
+def test_to_discrete_move_df():
+    move_df = PandasDiscreteMoveDataFrame(
+        data={DATETIME: ['2020-01-01 01:08:29',
+                         '2020-01-05 01:13:24',
+                         '2020-01-06 02:21:53',
+                         '2020-01-06 03:34:48',
+                         '2020-01-08 05:55:41'],
+              LATITUDE: [3.754245,
+                         3.150849,
+                         3.754249,
+                         3.165933,
+                         3.920178],
+              LONGITUDE: [38.3456743,
+                          38.6913486,
+                          38.3456743,
+                          38.2715962,
+                          38.5161605],
+              TRAJ_ID: ['pwe-5089',
+                        'xjt-1579',
+                        'tre-1890',
+                        'xjt-1579',
+                        'pwe-5089'],
+              LOCAL_LABEL: [1, 4, 2, 16, 32]},
+    )
+
+    assert isinstance(
+        move_df.to_dicrete_move_df(), PandasDiscreteMoveDataFrame
+    )
 
 
 def test_describe():
