@@ -33,6 +33,7 @@ list_data = [
     [39.984211, 116.319389, '2008-10-23 05:53:16', 1],
     [39.984217, 116.319422, '2008-10-23 05:53:21', 1],
 ]
+MAP_CENTER = [39.984211, 116.319389]
 
 
 def _default_move_df():
@@ -63,20 +64,25 @@ def _assert_plot(map_info):
 
     count_script = map_info.count('script')
 
-    assert(count_l_map == 1
-           and count_l_tileLayer == 1
-           and count_l_marker == 2
-           and count_l_popup == 2
-           and count_head == 4
-           and count_body == 5
-           and count_script == 20)
+    assert (
+        count_l_map == 1
+        and count_l_tileLayer == 1
+        and count_l_marker == 2
+        and count_l_popup == 2
+        and count_head == 4
+        and count_body == 5
+        and count_script == 20
+    )
 
-    assert('L.marker(\n[39.984094,116.319236]' in map_info
-           and 'L.marker(\n[39.984217,116.319422]' in map_info
-           and 'center:[39.984094,116.319236]' in map_info
-           and ('L.polyline(\n[[39.984094,116.319236],'
-                '[39.984198,116.319322],[39.984224,116.319402],'
-                '[39.984211,116.319389],[39.984217,116.319422]]') in map_info)
+    assert(
+        'L.marker(\n[39.984094,116.319236]' in map_info
+        and 'L.marker(\n[39.984217,116.319422]' in map_info
+        and (
+            'L.polyline(\n[[39.984094,116.319236],'
+            '[39.984198,116.319322],[39.984224,116.319402],'
+            '[39.984211,116.319389],[39.984217,116.319422]]'
+        ) in map_info
+    )
 
 
 def test_save_map(tmpdir):
@@ -111,7 +117,7 @@ def test_create_base_map():
 
     base_map = folium.create_base_map(move_data=move_df)
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     assert(base_map.control_scale is True)
 
@@ -129,7 +135,7 @@ def test_heatmap(tmpdir):
 
     base_map = folium.heatmap(move_df)
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     folium.heatmap(
         move_df,
@@ -182,7 +188,7 @@ def test_heatmap_with_time(tmpdir):
 
     base_map = folium.heatmap_with_time(move_df)
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     folium.heatmap(
         move_df,
@@ -235,7 +241,7 @@ def test_cluster(tmpdir):
 
     base_map = folium.cluster(move_df)
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     folium.cluster(
         move_df,
@@ -295,7 +301,7 @@ def test_faster_cluster(tmpdir):
 
     base_map = folium.faster_cluster(move_df)
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     folium.faster_cluster(
         move_df,
@@ -341,7 +347,7 @@ def test_plot_markers(tmpdir):
 
     base_map = folium.plot_markers(move_df, n_rows=3)
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     d = tmpdir.mkdir('visualization')
 
@@ -592,7 +598,7 @@ def test_plot_trajectories_with_folium(tmpdir):
         filename=filename
     )
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     file = codecs.open(filename, 'r')
 
@@ -622,11 +628,14 @@ def test_plot_trajectories_with_folium(tmpdir):
            and count_body == 5
            and count_script == 20)
 
-    assert('L.marker(\n[39.984094,116.319236]' in map_info
-           and 'L.marker(\n[39.984224,116.319402]' in map_info
-           and 'center:[39.984094,116.319236]' in map_info
-           and ('L.polyline(\n[[39.984094,116.319236],'
-                '[39.984198,116.319322],[39.984224,116.319402]]') in map_info)
+    assert(
+        'L.marker(\n[39.984094,116.319236]' in map_info
+        and 'L.marker(\n[39.984224,116.319402]' in map_info
+        and (
+            'L.polyline(\n[[39.984094,116.319236],'
+            '[39.984198,116.319322],[39.984224,116.319402]]'
+        ) in map_info
+    )
 
 
 def test_plot_trajectory_by_id_folium(tmpdir):
@@ -647,7 +656,7 @@ def test_plot_trajectory_by_id_folium(tmpdir):
         filename=filename_write_default
     )
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     file = codecs.open(filename_write_default, 'r')
 
@@ -674,7 +683,7 @@ def test_plot_trajectory_by_period(tmpdir):
         filename=filename_write_default
     )
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     file = codecs.open(filename_write_default, 'r')
 
@@ -701,7 +710,7 @@ def test_plot_trajectory_by_day_week(tmpdir):
         filename=filename_write_default
     )
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     file = codecs.open(filename_write_default, 'r')
 
@@ -729,7 +738,7 @@ def test_plot_trajectory_by_date(tmpdir):
         filename=filename_write_default
     )
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     file = codecs.open(filename_write_default, 'r')
 
@@ -757,7 +766,7 @@ def test_plot_trajectory_by_hour(tmpdir):
         filename=filename_write_default
     )
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     file = codecs.open(filename_write_default, 'r')
 
@@ -779,7 +788,7 @@ def test_plot_stops(tmpdir):
 
     base_map = folium.plot_stops(move_df, radius=10)
 
-    assert_array_equal(base_map.location, [39.984094, 116.319236])
+    assert_array_equal(base_map.location, MAP_CENTER)
 
     folium.plot_stops(
         move_df,
@@ -816,10 +825,11 @@ def test_plot_stops(tmpdir):
            and count_body == 5
            and count_script == 18)
 
-    assert('L.circle(\n[39.984224,116.319402]' in map_info
-           and 'L.circle(\n[39.984211,116.319389]' in map_info
-           and 'L.circle(\n[39.984217,116.319422]' in map_info
-           and 'center:[39.984094,116.319236]' in map_info)
+    assert(
+        'L.circle(\n[39.984224,116.319402]' in map_info
+        and 'L.circle(\n[39.984211,116.319389]' in map_info
+        and 'L.circle(\n[39.984217,116.319422]' in map_info
+    )
 
 
 def test_plot_bbox(tmpdir):
