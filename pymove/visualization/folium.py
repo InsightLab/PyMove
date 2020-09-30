@@ -117,8 +117,8 @@ def create_base_map(
     """
 
     if lat_origin is None and lon_origin is None:
-        lat_origin = move_data.iloc[0][LATITUDE]
-        lon_origin = move_data.iloc[0][LONGITUDE]
+        lat_origin = move_data[LATITUDE].median()
+        lon_origin = move_data[LONGITUDE].median()
     base_map = folium.Map(
         location=[lat_origin, lon_origin],
         control_scale=True,
@@ -571,7 +571,7 @@ def plot_markers(
 
 
 def _filter_and_generate_colors(
-    move_data, id_=None, n_rows=None, color=None
+    move_data, id_=None, n_rows=None, color=None, color_by_id=None
 ):
     """
     Filters the dataframe and generate colors for folium map.
@@ -586,6 +586,8 @@ def _filter_and_generate_colors(
         Represents number of data rows that are will plot.
     color: string or None.
         The color of the trajectory, of each trajectory or a colormap
+    color_by_id: dict, optional, default None.
+        A dictionary where the key is the trajectory id and value is a color(string).
 
     Returns
     -------
@@ -631,7 +633,12 @@ def _filter_and_generate_colors(
         else:
             colors = color[:]
         items = [*zip(ids, colors)]
-
+        if color_by_id is not None:
+            keys = color_by_id.keys()
+            for key in keys:
+                for count, item in enumerate(items):
+                    if str(key) == str(item[0]):
+                        items[count] = (item[0], color_by_id[key])
     return mv_df, items
 
 
@@ -765,6 +772,7 @@ def plot_trajectories_with_folium(
     tile=TILES[0],
     save_as_html=False,
     color=None,
+    color_by_id=None,
     filename='plot_trajectories_with_folium.html',
 ):
     """
@@ -797,6 +805,8 @@ def plot_trajectories_with_folium(
     color : String, list, optional, default None.
         Represents line colors of visualization.
         Can be a single color name, a list of colors or a colormap name.
+    color_by_id: dict, optional, default None.
+        A dictionary where the key is the trajectory id and value is a color(string).
     filename : String, optional, default 'plot_trajectory_with_folium.html'.
         Represents the file name of new file .html.
 
@@ -817,8 +827,9 @@ def plot_trajectories_with_folium(
         )
 
     mv_df, items = _filter_and_generate_colors(
-        move_data, n_rows=n_rows, color=color
+        move_data, n_rows=n_rows, color=color, color_by_id=color_by_id
     )
+
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
@@ -916,6 +927,7 @@ def plot_trajectory_by_period(
     tile=TILES[0],
     save_as_html=False,
     color=None,
+    color_by_id=None,
     filename='plot_trajectory_by_period_with_folium.html',
 ):
     """
@@ -952,6 +964,8 @@ def plot_trajectory_by_period(
     color : String or List, optional, default None.
         Represents line colors of visualization.
         Can be a single color name, a list of colors or a colormap.
+    color_by_id: dict, optional, default None.
+        A dictionary where the key is the trajectory id and value is a color.
     filename : String, optional, default 'plot_trajectory_by_period.html'.
         Represents the file name of new file .html.
 
@@ -981,7 +995,7 @@ def plot_trajectory_by_period(
         move_data.generate_time_of_day_features()
 
     mv_df = _filter_generated_feature(move_data, PERIOD, [period])
-    mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
+    mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color, color_by_id)
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
@@ -1002,6 +1016,7 @@ def plot_trajectory_by_day_week(
     tile=TILES[0],
     save_as_html=False,
     color=None,
+    color_by_id=None,
     filename='plot_trajectory_by_day_week.html',
 ):
     """
@@ -1038,6 +1053,8 @@ def plot_trajectory_by_day_week(
     color : String or List, optional, default None.
         Represents line colors of visualization.
         Can be a single color name, a list of colors or a colormap.
+    color_by_id: dict, optional, default None.
+        A dictionary where the key is the trajectory id and value is a color.
     filename : String, optional, default 'plot_trajectory_by_day_week.html'.
         Represents the file name of new file .html.
 
@@ -1067,7 +1084,7 @@ def plot_trajectory_by_day_week(
         move_data.generate_day_of_the_week_features()
 
     mv_df = _filter_generated_feature(move_data, DAY, [day_week])
-    mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
+    mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color, color_by_id)
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
@@ -1089,6 +1106,7 @@ def plot_trajectory_by_date(
     tile=TILES[0],
     save_as_html=False,
     color=None,
+    color_by_id=None,
     filename='plot_trajectory_by_date.html',
 ):
     """
@@ -1127,6 +1145,8 @@ def plot_trajectory_by_date(
     color : String or List, optional, default None.
         Represents line colors of visualization.
         Can be a single color name, a list of colors or a colormap.
+    color_by_id: dict, optional, default None.
+        A dictionary where the key is the trajectory id and value is a color.
     filename : String, optional, default 'plot_trejectory_with_folium.html'.
         Represents the file name of new file .html.
 
@@ -1163,7 +1183,7 @@ def plot_trajectory_by_date(
         move_data.generate_date_features()
 
     mv_df = _filter_generated_feature(move_data, DATE, [start_date, end_date])
-    mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
+    mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color, color_by_id)
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
@@ -1185,6 +1205,7 @@ def plot_trajectory_by_hour(
     tile=TILES[0],
     save_as_html=False,
     color=None,
+    color_by_id=None,
     filename='plot_trajectory_by_hour.html',
 ):
     """
@@ -1223,6 +1244,8 @@ def plot_trajectory_by_hour(
     color : String or List, optional, default None.
         Represents line colors of visualization.
         Can be a single color name, a list of colors or a colormap.
+    color_by_id: dict, optional, default None.
+        A dictionary where the key is the trajectory id and value is a color.
     filename : String, optional, default 'plot_trajectory_by_hour.html'.
         Represents the file name of new file .html.
 
@@ -1252,7 +1275,7 @@ def plot_trajectory_by_hour(
         move_data.generate_hour_features()
 
     mv_df = _filter_generated_feature(move_data, HOUR, [start_hour, end_hour])
-    mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color)
+    mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color, color_by_id)
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
