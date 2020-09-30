@@ -595,7 +595,8 @@ def test_plot_trajectories_with_folium(tmpdir):
         move_df,
         n_rows=3,
         save_as_html=True,
-        filename=filename
+        filename=filename,
+        color_by_id={'1':'blue'}
     )
 
     assert_array_equal(base_map.location, MAP_CENTER)
@@ -636,7 +637,8 @@ def test_plot_trajectories_with_folium(tmpdir):
             '[39.984198,116.319322],[39.984224,116.319402]]'
         ) in map_info
     )
-
+    assert(('L.polyline(\n[[39.984094,116.319236],[39.984198,116.319322],[39.984224,116.319402]],'
+        '\n{"bubblingMouseEvents":true,') in map_info)
 
 def test_plot_trajectory_by_id_folium(tmpdir):
 
