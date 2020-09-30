@@ -3,6 +3,7 @@ import pandas as pd
 
 from pymove.utils import distances
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, MEDP, MEDT, TRAJ_ID
+from pymove.utils.log import progress_bar
 
 
 def range_query(
@@ -46,20 +47,36 @@ def range_query(
 
     datetime: string ("datetime" by default)
         Label of the trajectories dataframe referring to the timestamp.
+
+    Raises
+    ------
+        ValueError: if distance measure is invalid
+
     """
 
     result = traj.copy()
     result.drop(result.index, inplace=True)
+
     if (distance == MEDP):
-        for move_traj in move_df[id].unique():
-            this = move_df.loc[move_df[id] == move_traj]
-            if (distances.MEDP(traj, this, latitude, longitude) < range):
-                result = result.append(this)
+        def dist_measure(traj, this, latitude, longitude, datetime):
+            return distances.MEDP(
+                traj, this, latitude, longitude
+            )
     elif (distance == MEDT):
-        for move_traj in move_df[id].unique():
-            this = move_df.loc[move_df[id] == move_traj]
-            if (distances.MEDT(traj, this, latitude, longitude, datetime) < range):
-                result = result.append(this)
+        def dist_measure(traj, this, latitude, longitude, datetime):
+            return distances.MEDT(
+                traj, this, latitude, longitude, datetime
+            )
+    else:
+        raise ValueError('Unknown distance measure. Use MEDP or MEDT')
+
+    for traj_id in progress_bar(
+        move_df[id].unique(), desc='Querying range by {}'.format(distance)
+    ):
+        this = move_df.loc[move_df[id] == traj_id]
+        if dist_measure(traj, this, latitude, longitude, datetime) < range:
+            result = result.append(this)
+
     return result
 
 
@@ -103,36 +120,43 @@ def knn_query(
 
     datetime: string ("datetime" by default)
         Label of the trajectories dataframe referring to the timestamp.
+
+    Raises
+    ------
+        ValueError: if distance measure is invalid
+
     """
 
     k_list = pd.DataFrame([[np.Inf, 'empty']] * k, columns=['distance', TRAJ_ID])
 
     if (distance == MEDP):
-        for traj_id in move_df[id].unique():
-            if (traj_id != traj[id].values[0]):
-                this = move_df.loc[move_df[id] == traj_id]
-                this_distance = distances.MEDP(traj, this, latitude, longitude)
-                n = 0
-                for n in range(k):
-                    if (this_distance < k_list.loc[n, 'distance']):
-                        k_list.loc[n, 'distance'] = this_distance
-                        k_list.loc[n, 'traj_id'] = traj_id
-                        break
-                    n = n + 1
-
+        def dist_measure(traj, this, latitude, longitude, datetime):
+            return distances.MEDP(
+                traj, this, latitude, longitude
+            )
     elif (distance == MEDT):
-        for traj_id in move_df[id].unique():
-            if (traj_id != traj[id].values[0]):
-                this = move_df.loc[move_df[id] == traj_id]
-                this_distance = distances.MEDT(
-                    traj, this, latitude, longitude, datetime)
-                n = 0
-                for n in range(k):
-                    if (this_distance < k_list.loc[n, 'distance']):
-                        k_list.loc[n, 'distance'] = this_distance
-                        k_list.loc[n, 'traj_id'] = traj_id
-                        break
-                    n = n + 1
+        def dist_measure(traj, this, latitude, longitude, datetime):
+            return distances.MEDT(
+                traj, this, latitude, longitude, datetime
+            )
+    else:
+        raise ValueError('Unknown distance measure. Use MEDP or MEDT')
+
+    for traj_id in progress_bar(
+        move_df[id].unique(), desc='Querying knn by {}'.format(distance)
+    ):
+        if (traj_id != traj[id].values[0]):
+            this = move_df.loc[move_df[id] == traj_id]
+            this_distance = dist_measure(
+                traj, this, latitude, longitude, datetime
+            )
+            n = 0
+            for n in range(k):
+                if (this_distance < k_list.loc[n, 'distance']):
+                    k_list.loc[n, 'distance'] = this_distance
+                    k_list.loc[n, 'traj_id'] = traj_id
+                    break
+                n = n + 1
 
     result = traj.copy()
     print('Gerando DataFrame com as k trajetórias mais próximas')
