@@ -268,10 +268,10 @@ class Grid:
         lat_init = self.lat_min_y + cell_size * index_grid_lat
         lon_init = self.lon_min_x + cell_size * index_grid_lon
         polygon = Polygon((
-            (lat_init, lon_init),
-            (lat_init + cell_size, lon_init),
-            (lat_init + cell_size, lon_init + cell_size,),
-            (lat_init, lon_init + cell_size),
+            (lon_init, lat_init),
+            (lon_init, lat_init + cell_size),
+            (lon_init + cell_size, lat_init + cell_size),
+            (lon_init + cell_size, lat_init)
         ))
         self.last_operation = end_operation(operation)
 
@@ -301,10 +301,10 @@ class Grid:
                 for j in range(self.grid_size_lon_x):
                     # Cria o polygon da célula
                     grid_polygon[i][j] = Polygon((
-                        (lat_init, lon_init),
-                        (lat_init + cell_size, lon_init),
-                        (lat_init + cell_size, lon_init + cell_size),
-                        (lat_init, lon_init + cell_size),
+                        (lon_init, lat_init),
+                        (lon_init, lat_init + cell_size),
+                        (lon_init + cell_size, lat_init + cell_size),
+                        (lon_init + cell_size, lat_init)
                     ))
                     lon_init += cell_size
                 lat_init += cell_size
