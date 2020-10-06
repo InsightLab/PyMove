@@ -12,7 +12,6 @@ from pymove.preprocessing.segmentation import (
 )
 from pymove.utils.constants import (
     DATETIME,
-    GRID_ID,
     INDEX_GRID,
     LATITUDE,
     LOCAL_LABEL,
@@ -43,6 +42,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         local_label=LOCAL_LABEL
     ):
         """
+
         Checks whether past data has 'lat', 'lon', 'datetime' and 'local_label'
         columns, and renames it with the PyMove lib standard. After starts the
         attributes of the class.
@@ -289,7 +289,6 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
                         (statistics[local_label]
                          == local_label_) & (statistics[PREV_LOCAL] == prev_local)
                     ][THRESHOLD].values
-                    time_row = row[TIME_TO_PREV]
 
                 filter_.append(row[TIME_TO_PREV] > threshold)
 
