@@ -246,7 +246,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         PandasMoveDataFrame or None
             Object with new features or None if ``inplace=True``.
 
-      """
+        """
         if inplace:
             data_ = self
         else:
@@ -290,10 +290,10 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
                          == local_label_) & (statistics[PREV_LOCAL] == prev_local)
                     ][THRESHOLD].values
 
-                filter_.append(row[TIME_TO_PREV] > threshold)
+                    filter_.append(row[TIME_TO_PREV] > threshold)
 
-            filter_ = np.array(filter_)
-            current_tid, count = _update_curr_tid_count(filter_, data_,
+                filter_ = np.array(filter_)
+                current_tid, count = _update_curr_tid_count(filter_, data_,
                                                         idx, label_tid_stat,
                                                         current_tid, count)
 
