@@ -17,7 +17,6 @@ from pymove.utils.constants import (
     LOCAL_LABEL,
     LONGITUDE,
     PREV_LOCAL,
-    SPEED_TO_PREV,
     THRESHOLD,
     TID,
     TID_STAT,
@@ -293,9 +292,8 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
                     filter_.append(row[TIME_TO_PREV] > threshold)
 
                 filter_ = np.array(filter_)
-                current_tid, count = _update_curr_tid_count(filter_, data_,
-                                                        idx, label_tid_stat,
-                                                        current_tid, count)
+                current_tid, count = _update_curr_tid_count(
+                    filter_, data_, idx, label_tid_stat, current_tid, count)
 
             if label_id == TID_STAT:
                 self.reset_index(drop=True, inplace=True)
