@@ -12,13 +12,11 @@ from pymove.preprocessing.segmentation import (
 )
 from pymove.utils.constants import (
     DATETIME,
-    GRID_ID,
     INDEX_GRID,
     LATITUDE,
     LOCAL_LABEL,
     LONGITUDE,
     PREV_LOCAL,
-    SPEED_TO_PREV,
     THRESHOLD,
     TID,
     TID_STAT,
@@ -43,6 +41,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         local_label=LOCAL_LABEL
     ):
         """
+
         Checks whether past data has 'lat', 'lon', 'datetime' and 'local_label'
         columns, and renames it with the PyMove lib standard. After starts the
         attributes of the class.
@@ -246,7 +245,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         PandasMoveDataFrame or None
             Object with new features or None if ``inplace=True``.
 
-      """
+        """
         if inplace:
             data_ = self
         else:
@@ -289,14 +288,12 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
                         (statistics[local_label]
                          == local_label_) & (statistics[PREV_LOCAL] == prev_local)
                     ][THRESHOLD].values
-                    time_row = row[TIME_TO_PREV]
 
-                filter_.append(row[TIME_TO_PREV] > threshold)
+                    filter_.append(row[TIME_TO_PREV] > threshold)
 
-            filter_ = np.array(filter_)
-            current_tid, count = _update_curr_tid_count(filter_, data_,
-                                                        idx, label_tid_stat,
-                                                        current_tid, count)
+                filter_ = np.array(filter_)
+                current_tid, count = _update_curr_tid_count(
+                    filter_, data_, idx, label_tid_stat, current_tid, count)
 
             if label_id == TID_STAT:
                 self.reset_index(drop=True, inplace=True)
