@@ -5,6 +5,9 @@ TRAJ_ID = 'id'
 TID = 'tid'
 UID = 'user_id'
 
+LOCAL_LABEL = 'local_label'
+GRID_ID = 'grid_id'
+
 GEOHASH = 'geohash'
 BIN_GEOHASH = 'bin_geohash'
 LATITUDE_DECODE = 'lat_decode'
@@ -150,3 +153,17 @@ USER_POINT = 'orange'
 LINE_COLOR = 'blue'
 POI_POINT = 'red'
 EVENT_POINT = 'purple'
+
+
+MEDP = 'MEDP'
+MEDT = 'MEDT'
+
+LOCAL_LABEL = 'local_label'
+PREV_LOCAL = 'prev_local'
+TID_STAT = 'tid_stat'
+THRESHOLD = 'threshold'
+MEAN = 'mean'
+STD = 'std'
+MIN = 'min'
+MAX = 'max'
+SUM = 'sum'
