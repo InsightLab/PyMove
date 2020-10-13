@@ -167,3 +167,5 @@ STD = 'std'
 MIN = 'min'
 MAX = 'max'
 SUM = 'sum'
+
+POINT = 'Point'
