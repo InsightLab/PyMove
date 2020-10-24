@@ -243,6 +243,7 @@ def y_to_lat_spherical(y):
 def geometry_points_to_lat_and_lon(
     move_data,
     geometry_label=constants.GEOMETRY,
+    drop_geometry=True,
     inplace=True
 ):
     """
@@ -257,6 +258,9 @@ def geometry_points_to_lat_and_lon(
 
     geometry: String, optional, default 'geometry'.
         Represents column name of the geometry column.
+
+    drop_geometry: Boolean, optional, default True.
+        Option to drop the geometry column
 
     inplace: Boolean, optional, default True.
         Whether the operation will be done in the original dataframe
@@ -277,7 +281,9 @@ def geometry_points_to_lat_and_lon(
         ]
         move_data[constants.LONGITUDE] = move_data[constants.GEOMETRY].map(lambda p: p.x)
         move_data[constants.LATITUDE] = move_data[constants.GEOMETRY].map(lambda q: q.y)
-        move_data.drop(constants.GEOMETRY, axis=1, inplace=True)
+
+        if drop_geometry:
+            move_data.drop(constants.GEOMETRY, axis=1, inplace=True)
 
         if not inplace:
             return move_data
