@@ -1,8 +1,7 @@
-import geopandas
 from numpy import nan
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
-from shapely import wkt
+from shapely.geometry import Point
 
 from pymove import MoveDataFrame, conversions
 from pymove.utils.constants import (
@@ -88,15 +87,13 @@ def test_y_to_lat_spherical():
     assert(conversions.y_to_lat_spherical(-4285978.17) == expected)
 
 
-def test_geometry_point_to_lat_and_lon():
+def test_geometry_points_to_lat_and_lon():
     move_df = DataFrame(
-        data=[['1', 'POINT (116.36184 39.77529)'],
-              ['2', 'POINT (116.36298 39.77564)'],
-              ['3', 'POINT (116.33767 39.83148)']],
+        data=[['1', Point(116.36184, 39.77529)],
+              ['2', Point(116.36298, 39.77564)],
+              ['3', Point(116.33767, 39.83148)]],
         columns=[TRAJ_ID, GEOMETRY],
     )
-    move_df[GEOMETRY] = move_df[GEOMETRY].apply(wkt.loads)
-    move_df = geopandas.GeoDataFrame(move_df, geometry=GEOMETRY)
 
     expected = DataFrame(
         data=[['1', 116.36184, 39.77529],
@@ -104,11 +101,10 @@ def test_geometry_point_to_lat_and_lon():
               ['3', 116.33767, 39.83148]],
         columns=[TRAJ_ID, LONGITUDE, LATITUDE]
     )
-    expected = geopandas.GeoDataFrame(expected)
 
-    new_move_df = conversions.geometry_point_to_lat_and_lon(move_df, inplace=False)
+    new_move_df = conversions.geometry_points_to_lat_and_lon(move_df, inplace=False)
 
-    assert_frame_equal(new_move_df, expected, check_dtype=False)
+    assert_frame_equal(new_move_df, expected)
 
 
 def test_ms_to_kmh():
