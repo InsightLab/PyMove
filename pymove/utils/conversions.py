@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+from shapely.geometry import Point
 
 from pymove.utils import constants
 
@@ -272,10 +273,11 @@ def geometry_points_to_lat_and_lon(
             move_data = move_data[:]
 
         move_data = move_data[
-            move_data[constants.GEOMETRY].type == constants.POINT
+            move_data[constants.GEOMETRY].map(type) == Point
         ]
-        move_data[constants.LONGITUDE] = move_data[constants.GEOMETRY].x
-        move_data[constants.LATITUDE] = move_data[constants.GEOMETRY].y
+        move_data[constants.LONGITUDE] = move_data[constants.GEOMETRY].map(lambda p: p.x)
+        move_data[constants.LATITUDE] = move_data[constants.GEOMETRY].map(lambda q: q.y)
+        move_data.drop(constants.GEOMETRY, axis=1, inplace=True)
 
         if not inplace:
             return move_data
