@@ -272,23 +272,20 @@ def geometry_points_to_lat_and_lon(
         not done inplace
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
+    if not inplace:
+        move_data = move_data[:]
 
-        move_data = move_data[
-            move_data[constants.GEOMETRY].map(type) == Point
-        ]
-        move_data[constants.LONGITUDE] = move_data[constants.GEOMETRY].map(lambda p: p.x)
-        move_data[constants.LATITUDE] = move_data[constants.GEOMETRY].map(lambda q: q.y)
+    move_data = move_data[
+        move_data[constants.GEOMETRY].map(type) == Point
+    ]
+    move_data[constants.LONGITUDE] = move_data[constants.GEOMETRY].map(lambda p: p.x)
+    move_data[constants.LATITUDE] = move_data[constants.GEOMETRY].map(lambda q: q.y)
 
-        if drop_geometry:
-            move_data.drop(constants.GEOMETRY, axis=1, inplace=True)
+    if drop_geometry:
+        move_data.drop(constants.GEOMETRY, axis=1, inplace=True)
 
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        return move_data
 
 
 def ms_to_kmh(
