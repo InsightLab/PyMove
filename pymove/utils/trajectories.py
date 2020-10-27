@@ -15,7 +15,6 @@ from pymove.utils.constants import (
     TYPE_DASK,
     TYPE_PANDAS,
 )
-from pymove.utils.log import progress_bar
 from pymove.utils.math import is_number
 
 
@@ -324,11 +323,11 @@ def column_to_array(df_, label_conversion):
                 'Dataframe must contain a %s column' % label_conversion
             )
 
-        arr = np.full(df_.shape[0], None, dtype=np.ndarray)
-        for idx, row in progress_bar(df_.iterrows(), total=df_.shape[0]):
-            arr[idx] = object_for_array(row[label_conversion])
-
-        df_[label_conversion] = arr
+        df_[label_conversion] = (
+            df_[label_conversion].apply(
+                lambda x: object_for_array(x)
+            )
+        )
 
     except Exception as e:
         raise e
