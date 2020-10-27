@@ -177,14 +177,14 @@ def augmentation_trajectories_df(df_, frac=0.5):
                 i += 1
 
                 append_row(
-                    new_df, 
+                    new_df,
                     columns={
-                        TRAJ_ID: traj_id, 
-                        TRAJECTORY: t1, 
-                        DATETIME: d1, 
-                        LATITUDE: lat1, 
-                        LONGITUDE: lon1, 
-                        TID: tid1, 
+                        TRAJ_ID: traj_id,
+                        TRAJECTORY: t1,
+                        DATETIME: d1,
+                        LATITUDE: lat1,
+                        LONGITUDE: lon1,
+                        TID: tid1,
                         LABEL: row1[LABEL]
                     }
                 )
@@ -193,8 +193,8 @@ def augmentation_trajectories_df(df_, frac=0.5):
                 tid2 = [row2[TRAJ_ID] + x.date().strftime('%Y%m%d') + str(i) for x in d2]
                 i += 1
 
-                append(
-                    new_df, 
+                append_row(
+                    new_df,
                     columns={
                         TRAJ_ID: traj_id,
                         TRAJECTORY: t2,
