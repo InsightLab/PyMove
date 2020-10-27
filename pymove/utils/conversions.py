@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+from shapely.geometry import Point
 
 from pymove.utils import constants
 
@@ -237,6 +238,54 @@ def y_to_lat_spherical(y):
     """
 
     return np.degrees(np.arctan(np.sinh(y / 6378137.0)))
+
+
+def geometry_points_to_lat_and_lon(
+    move_data,
+    geometry_label=constants.GEOMETRY,
+    drop_geometry=True,
+    inplace=True
+):
+    """
+    Converts the geometry column to latitude and longitude
+    columns (named 'lat' and 'lon'), removing geometries
+    that are not of the Point type.
+
+    Parameters
+    ----------
+    move_data : pymove.core.MoveDataFrameAbstract subclass.
+        Input trajectory data.
+
+    geometry: String, optional, default 'geometry'.
+        Represents column name of the geometry column.
+
+    drop_geometry: Boolean, optional, default True.
+        Option to drop the geometry column
+
+    inplace: Boolean, optional, default True.
+        Whether the operation will be done in the original dataframe
+
+    Returns
+    -------
+    dataframe or None
+        A new dataframe with the converted feature if operation
+        not done inplace
+    """
+
+    if not inplace:
+        move_data = move_data[:]
+
+    move_data = move_data[
+        move_data[constants.GEOMETRY].map(type) == Point
+    ]
+    move_data[constants.LONGITUDE] = move_data[constants.GEOMETRY].map(lambda p: p.x)
+    move_data[constants.LATITUDE] = move_data[constants.GEOMETRY].map(lambda q: q.y)
+
+    if drop_geometry:
+        move_data.drop(constants.GEOMETRY, axis=1, inplace=True)
+
+    if not inplace:
+        return move_data
 
 
 def ms_to_kmh(

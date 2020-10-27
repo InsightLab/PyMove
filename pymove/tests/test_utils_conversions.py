@@ -1,11 +1,13 @@
 from numpy import nan
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
+from shapely.geometry import Point
 
 from pymove import MoveDataFrame, conversions
 from pymove.utils.constants import (
     DATETIME,
     DIST_TO_PREV,
+    GEOMETRY,
     LATITUDE,
     LONGITUDE,
     SPEED_TO_PREV,
@@ -83,6 +85,39 @@ def test_y_to_lat_spherical():
     expected = -35.89350841198311
 
     assert(conversions.y_to_lat_spherical(-4285978.17) == expected)
+
+
+def test_geometry_points_to_lat_and_lon():
+    move_df = DataFrame(
+        data=[['1', Point(116.36184, 39.77529)],
+              ['2', Point(116.36298, 39.77564)],
+              ['3', Point(116.33767, 39.83148)]],
+        columns=[TRAJ_ID, GEOMETRY],
+    )
+
+    expected_geometry_drop = DataFrame(
+        data=[['1', 116.36184, 39.77529],
+              ['2', 116.36298, 39.77564],
+              ['3', 116.33767, 39.83148]],
+        columns=[TRAJ_ID, LONGITUDE, LATITUDE]
+    )
+
+    expected_with_geometry = DataFrame(
+        data=[['1', Point(116.36184, 39.77529), 116.36184, 39.77529],
+              ['2', Point(116.36298, 39.77564), 116.36298, 39.77564],
+              ['3', Point(116.33767, 39.83148), 116.33767, 39.83148]],
+        columns=[TRAJ_ID, GEOMETRY, LONGITUDE, LATITUDE]
+    )
+
+    new_move_df = conversions.geometry_points_to_lat_and_lon(
+        move_df, inplace=False, drop_geometry=True
+    )
+    assert_frame_equal(new_move_df, expected_geometry_drop)
+
+    new_move_df2 = conversions.geometry_points_to_lat_and_lon(
+        move_df, inplace=False, drop_geometry=False
+    )
+    assert_frame_equal(new_move_df2, expected_with_geometry)
 
 
 def test_ms_to_kmh():
