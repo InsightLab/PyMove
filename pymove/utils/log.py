@@ -26,15 +26,15 @@ def timer_decorator(func):
     return wrapper
 
 
-def _log_progress(sequence, desc='Items', total=None, miniters=None):
+def _log_progress(sequence, desc=None, total=None, miniters=None):
     """
     Make and display a progress bar.
 
     Parameters
     ----------
-    sequence : list.
-        Represents a elements sequence.
-    desc : String, optional, default 'Items'.
+    sequence : list or iterable.
+        Represents a sequence of elements.
+    desc : String, optional, default None.
         Represents the description of the operation.
     total : int, optional, default None.
         Represents the total/number elements in sequence.
@@ -42,7 +42,8 @@ def _log_progress(sequence, desc='Items', total=None, miniters=None):
         Represents the steps in which the bar will be updated
 
     """
-
+    if desc is None:
+        desc = ''
     is_iterator = False
     if total is None:
         try:
