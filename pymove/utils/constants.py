@@ -1,11 +1,11 @@
+LABEL = 'label'
 LATITUDE = 'lat'
 LONGITUDE = 'lon'
 DATETIME = 'datetime'
 TRAJ_ID = 'id'
+TRAJECTORY = 'trajectory'
 TID = 'tid'
 UID = 'user_id'
-TRAJECTORY = 'trajectory'
-LABEL = 'label'
 
 LOCAL_LABEL = 'local_label'
 GRID_ID = 'grid_id'
