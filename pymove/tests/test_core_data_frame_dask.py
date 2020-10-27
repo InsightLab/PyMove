@@ -87,7 +87,7 @@ def _validate_move_data_frame_data(data):
             return False
         return True
     except AttributeError:
-        print(AttributeError)
+        return False
 
 
 def test_move_data_frame_from_list():

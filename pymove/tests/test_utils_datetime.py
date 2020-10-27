@@ -1,9 +1,23 @@
 import datetime as dt
 
+from numpy import nan
+from numpy.testing import assert_equal
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
 
 from pymove import MoveDataFrame, datetime
+from pymove.utils.constants import (
+    COUNT,
+    LOCAL_LABEL,
+    MAX,
+    MEAN,
+    MIN,
+    PREV_LOCAL,
+    STD,
+    SUM,
+    THRESHOLD,
+    TIME_TO_PREV,
+)
 
 default_date = dt.datetime.strptime('2018-03-12', '%Y-%m-%d')
 
@@ -225,3 +239,82 @@ def test_create_time_slot_in_minute():
     })
     datetime.create_time_slot_in_minute(df)
     assert_frame_equal(df, expected)
+
+
+def test_generate_time_statistics():
+    df_ = DataFrame(
+        data=[
+            [261, nan, nan],
+            [580, 261, 252],
+            [376, 580, 91],
+            [386, 376, 17449],
+            [644, 386, 21824]
+        ],
+        columns=[LOCAL_LABEL, PREV_LOCAL, TIME_TO_PREV],
+        index=[0, 1, 2, 3, 4]
+    )
+
+    expected = DataFrame(
+        data=[
+            [376, 580.0, 91.0, 0.0, 91.0, 91.0, 91.0, 1],
+            [386, 376.0, 17449.0, 0.0, 17449.0, 17449.0, 17449.0, 1],
+            [580, 261.0, 252.0, 0.0, 252.0, 252.0, 252.0, 1],
+            [644, 386.0, 21824.0, 0.0, 21824.0, 21824.0, 21824.0, 1]
+        ],
+        columns=[LOCAL_LABEL, PREV_LOCAL, MEAN, STD, MIN, MAX, SUM, COUNT],
+        index=[0, 1, 2, 3]
+    )
+
+    df_statistics = datetime.generate_time_statistics(df_)
+    assert_frame_equal(df_statistics, expected)
+
+
+def test_calc_time_threshold():
+    mean1, std1 = 0.0, 91.0
+    mean2, std2 = 0.0, 17449.0
+    mean3, std3 = 0.0, 252.0
+    mean4, std4 = 0.0, 21824.0
+
+    expected1 = 91.0
+    expected2 = 17449.0
+    expected3 = 252.0
+    expected4 = 21824.0
+
+    threshold1 = datetime._calc_time_threshold(mean1, std1)
+    threshold2 = datetime._calc_time_threshold(mean2, std2)
+    threshold3 = datetime._calc_time_threshold(mean3, std3)
+    threshold4 = datetime._calc_time_threshold(mean4, std4)
+
+    assert_equal(threshold1, expected1)
+    assert_equal(threshold2, expected2)
+    assert_equal(threshold3, expected3)
+    assert_equal(threshold4, expected4)
+
+
+def test_threshold_time_statistics():
+    statistics = DataFrame(
+        data=[
+            [376, 580.0, 91.0, 0.0, 91.0, 91.0, 91.0, 1],
+            [386, 376.0, 17449.0, 0.0, 17449.0, 17449.0, 17449.0, 1],
+            [580, 261.0, 252.0, 0.0, 252.0, 252.0, 252.0, 1],
+            [644, 386.0, 21824.0, 0.0, 21824.0, 21824.0, 21824.0, 1]
+        ],
+        columns=[LOCAL_LABEL, PREV_LOCAL, MEAN, STD, MIN, MAX, SUM, COUNT],
+        index=[0, 1, 2, 3]
+    )
+
+    expected = DataFrame(
+        data=[
+            [376, 580.0, 91.0, 0.0, 91.0, 91.0, 91.0, 1, 91.0],
+            [386, 376.0, 17449.0, 0.0, 17449.0, 17449.0, 17449.0, 1, 17449.0],
+            [580, 261.0, 252.0, 0.0, 252.0, 252.0, 252.0, 1, 252.0],
+            [644, 386.0, 21824.0, 0.0, 21824.0, 21824.0, 21824.0, 1, 21824.0]
+        ],
+        columns=[
+            LOCAL_LABEL, PREV_LOCAL, MEAN, STD, MIN, MAX, SUM, COUNT, THRESHOLD
+        ],
+        index=[0, 1, 2, 3]
+    )
+
+    datetime.threshold_time_statistics(statistics)
+    assert_frame_equal(statistics, expected)
