@@ -14,7 +14,7 @@ from pymove.utils.constants import (
     TRAJECTORY,
 )
 from pymove.utils.data_augmentation import (
-    append,
+    append_row,
     augmentation_trajectories_df,
     generate_target_feature,
     generate_trajectories_df,
@@ -180,7 +180,7 @@ def test_append_row():
               TID: ['def-1111202001010'],
               LABEL: 6})
 
-    append(traj_df, row=row)
+    append_row(traj_df, row=row)
     assert_frame_equal(expected, traj_df)
 
 
