@@ -4,6 +4,8 @@ DATETIME = 'datetime'
 TRAJ_ID = 'id'
 TID = 'tid'
 UID = 'user_id'
+TRAJECTORY = 'trajectory'
+LABEL = 'label'
 
 LOCAL_LABEL = 'local_label'
 GRID_ID = 'grid_id'
