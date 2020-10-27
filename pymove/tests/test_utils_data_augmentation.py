@@ -14,13 +14,13 @@ from pymove.utils.constants import (
     TRAJECTORY,
 )
 from pymove.utils.data_augmentation import (
-    append,
+    append_row,
     augmentation_trajectories_df,
     generate_target_feature,
     generate_trajectories_df,
     insert_points_in_df,
     instance_crossover,
-    split,
+    split_crossover,
 )
 
 list_data1 = [['abc-0000', 1, 3.1234567, 38.1234567,
@@ -143,7 +143,7 @@ def test_split_crossover():
     expected1 = [0, 2, 5, 7, 9]
     expected2 = [1, 3, 4, 6, 8]
 
-    s1, s2 = split(s1, s2)
+    s1, s2 = split_crossover(s1, s2)
 
     assert_array_almost_equal(expected1, s1)
     assert_array_almost_equal(expected2, s2)
@@ -180,7 +180,7 @@ def test_append_row():
               TID: ['def-1111202001010'],
               LABEL: 6})
 
-    append(traj_df, row=row)
+    append_row(traj_df, row=row)
     assert_frame_equal(expected, traj_df)
 
 
