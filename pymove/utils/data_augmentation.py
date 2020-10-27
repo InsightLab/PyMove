@@ -76,7 +76,7 @@ def generate_target_feature(df_):
         )
 
 
-def split(sequence_a, sequence_b, frac=0.5):
+def split_crossover(sequence_a, sequence_b, frac=0.5):
     """
     Divide two arrays in the indicated ratio
     and exchange their halves.
@@ -110,16 +110,10 @@ def split(sequence_a, sequence_b, frac=0.5):
     return sequence_a, sequence_b
 
 
-def append(
+def append_row(
     df_,
-    traj_id=None,
-    trajectory=None,
-    datetime=None,
-    latitude=None,
-    longitude=None,
-    tid=None,
-    label=None,
-    row=None
+    row=None,
+    columns=None
 ):
     """
     Insert a new line in the dataframe with
@@ -129,44 +123,20 @@ def append(
     ----------
     df_ : dataframe
         The input trajectories data.
-    traj_id : str, optional, default None
-        The id of the object in movement.
-    trajectory : list, np.ndarray, optional, default None
-        The array of points.
-    datetime : list, np.ndarray, optional, default None
-        The timestamp of each point of a trajectory.
-    latitude : list, np.ndarray, optional, default None
-        The latitude(s) in degrees.
-    longitude : list, np.ndarray, optional, default None
-        The longitude(s) in degrees.
-    tid : list, np.ndarray, optional, default None
-        The id(s) of the trajectories.
-    label : number, optional, default None
-        The label of the trajectory.
     row : series, optional, default None
         The row of a dataframe.
+    columns : dict, optional, default None
+        Dictionary containing the values to be added.
     """
 
     if row is not None:
-        df_.at[df_.shape[0]] = [
-            row[TRAJ_ID],
-            np.array(row[TRAJECTORY], dtype=np.int32).tolist(),
-            np.array(row[DATETIME], dtype='object_').tolist(),
-            np.array(row[LATITUDE], dtype=np.float32).tolist(),
-            np.array(row[LONGITUDE], dtype=np.float32).tolist(),
-            np.array(row[TID], dtype='object_').tolist(),
-            row[LABEL]
-        ]
+        keys = row.index.tolist()
+        df_.at[df_.shape[0], keys] = row.values
     else:
-        df_.at[df_.shape[0]] = [
-            traj_id,
-            np.array(trajectory, dtype=np.int32).tolist(),
-            np.array(datetime, dtype='object_').tolist(),
-            np.array(latitude, dtype=np.float32).tolist(),
-            np.array(longitude, dtype=np.float32).tolist(),
-            np.array(tid, dtype='object_').tolist(),
-            np.int64(label)
-        ]
+        if isinstance(columns, dict):
+            keys = list(columns.keys())
+            values = [np.array(v).tolist() for v in list(columns.values())]
+            df_.at[df_.shape[0], keys] = values
 
 
 def augmentation_trajectories_df(df_, frac=0.5):
@@ -197,22 +167,44 @@ def augmentation_trajectories_df(df_, frac=0.5):
                 and str(row1[TRAJECTORY]) != str(row2[TRAJECTORY])
             ):
 
-                t1, t2 = split(row1[TRAJECTORY], row2[TRAJECTORY], frac)
-                d1, d2 = split(row1[DATETIME], row2[DATETIME], frac)
-                lat1, lat2 = split(row1[LATITUDE], row2[LATITUDE], frac)
-                lon1, lon2 = split(row1[LONGITUDE], row2[LONGITUDE], frac)
+                t1, t2 = split_crossover(row1[TRAJECTORY], row2[TRAJECTORY], frac)
+                d1, d2 = split_crossover(row1[DATETIME], row2[DATETIME], frac)
+                lat1, lat2 = split_crossover(row1[LATITUDE], row2[LATITUDE], frac)
+                lon1, lon2 = split_crossover(row1[LONGITUDE], row2[LONGITUDE], frac)
 
                 traj_id = row1[TRAJ_ID] + '_' + row2[TRAJ_ID]
                 tid1 = [row1[TRAJ_ID] + x.date().strftime('%Y%m%d') + str(i) for x in d1]
                 i += 1
 
-                append(new_df, traj_id, t1, d1, lat1, lon1, tid1, row1[LABEL])
+                append_row(
+                    new_df, 
+                    columns={
+                        TRAJ_ID: traj_id, 
+                        TRAJECTORY: t1, 
+                        DATETIME: d1, 
+                        LATITUDE: lat1, 
+                        LONGITUDE: lon1, 
+                        TID: tid1, 
+                        LABEL: row1[LABEL]
+                    }
+                )
 
                 traj_id = row2[TRAJ_ID] + '_' + row1[TRAJ_ID]
                 tid2 = [row2[TRAJ_ID] + x.date().strftime('%Y%m%d') + str(i) for x in d2]
                 i += 1
 
-                append(new_df, traj_id, t2, d2, lat2, lon2, tid2, row2[LABEL])
+                append(
+                    new_df, 
+                    columns={
+                        TRAJ_ID: traj_id,
+                        TRAJECTORY: t2,
+                        DATETIME: d2,
+                        LATITUDE: lat2,
+                        LONGITUDE: lon2,
+                        TID: tid2,
+                        LABEL: row2[LABEL]
+                    }
+                )
 
     new_df[LABEL] = new_df[LABEL].astype(np.int64)
     return new_df
