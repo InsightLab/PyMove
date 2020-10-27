@@ -223,7 +223,7 @@ def insert_points_in_df(df_, aug_df):
         The data of unobserved trajectories.
 
     """
-    for idx, row in progress_bar(aug_df.iterrows(), aug_df.shape[0]):
+    for idx, row in progress_bar(aug_df.iterrows(), total=aug_df.shape[0]):
         traj = row[TRAJECTORY]
         date = row[DATETIME][:-1]
         lat = row[LATITUDE][:-1]
