@@ -136,7 +136,7 @@ def test_generate_target_feature():
     assert_frame_equal(expected, traj_df)
 
 
-def test_split():
+def test_split_crossover():
     s1 = [0, 2, 4, 6, 8]
     s2 = [1, 3, 5, 7, 9]
 
@@ -149,7 +149,7 @@ def test_split():
     assert_array_almost_equal(expected2, s2)
 
 
-def test_append():
+def test_append_row():
     traj_df = pd.DataFrame(
         data={
             TRAJ_ID: ['abc-0000'],
