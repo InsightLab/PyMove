@@ -19,6 +19,14 @@ pymove.utils.conversions module
    :members:
    :undoc-members:
    :show-inheritance:
+   
+pymove.utils.data_augmentation module
+-------------------------------------
+
+.. automodule:: pymove.utils.data_augmentation
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 pymove.utils.datetime module
 ----------------------------
