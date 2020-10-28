@@ -1,7 +1,9 @@
+LABEL = 'label'
 LATITUDE = 'lat'
 LONGITUDE = 'lon'
 DATETIME = 'datetime'
 TRAJ_ID = 'id'
+TRAJECTORY = 'trajectory'
 TID = 'tid'
 UID = 'user_id'
 
