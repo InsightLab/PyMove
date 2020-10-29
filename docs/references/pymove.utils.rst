@@ -19,7 +19,7 @@ pymove.utils.conversions module
    :members:
    :undoc-members:
    :show-inheritance:
-   
+
 pymove.utils.data_augmentation module
 -------------------------------------
 
