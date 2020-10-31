@@ -169,14 +169,15 @@ Requirements: Anaconda Python distribution installed and accessible
  you want to call your environment, and replace `x.x` with the Python version
  you wish to use. (To see a list of available python versions first,
  type conda search "^python$" and press enter.)
-       -  `conda create -n <env_name> python=x.x`
-       -  Press y to proceed. This will install the Python version and all the
+    -  `conda create -n <env_name> python=x.x`
+
+    -  Press y to proceed. This will install the Python version and all the
  associated anaconda packaged libraries at `path_to_your_anaconda_location/anaconda/envs/env_name`
 
 2.  Activate your virtual environment. To activate or switch into your
  virtual environment, simply type the following where yourenvname is the
  name you gave to your environment at creation.
-       -   `conda activate <env_name>`
+    -   `conda activate <env_name>`
 
 3.  Now install the package from either `conda`, `pip` or `github`
 
@@ -197,7 +198,7 @@ Requirements: Anaconda Python distribution installed and accessible
 1.  Clone this repository
     -   `git clone https://github.com/InsightLab/PyMove`
 
-3.  Switch to folder PyMove
+2.  Switch to folder PyMove
     -   `cd PyMove`
 
 3.  Switch to a new branch

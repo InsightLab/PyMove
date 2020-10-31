@@ -18,11 +18,11 @@ Pull requests are the best way to propose changes to the codebase.
 We actively welcome your pull requests:
 
 1.  Fork the repo and create your branch from `master`.
-1.  If you've added code that should be tested, add tests.
-1.  If you've changed APIs, update the documentation.
-1.  Ensure the test suite passes.
-1.  Make sure your code lints.
-1.  Issue that pull request!
+2.  If you've added code that should be tested, add tests.
+3.  If you've changed APIs, update the documentation.
+4.  Ensure the test suite passes.
+5.  Make sure your code lints.
+6.  Issue that pull request!
 
 ## Any contributions be under the [MIT Software License](http://choosealicense.com/licenses/mit/)
 In short, when you submit code changes, your submissions are understood to be
