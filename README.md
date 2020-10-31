@@ -131,9 +131,11 @@
 
 ## What is PyMove
 
-PyMove is a Python library for processing and visualization of trajectories and other spatial-temporal data.
+PyMove is a Python library for processing and visualization
+ of trajectories and other spatial-temporal data.
 
-We will also release wrappers to some useful Java libraries frequently used in the mobility domain.
+We will also release wrappers to some useful Java libraries
+ frequently used in the mobility domain.
 
 Read the full documentation on [ReadTheDocs](https://pymove.readthedocs.io/en/latest/)
 
@@ -144,25 +146,39 @@ Read the full documentation on [ReadTheDocs](https://pymove.readthedocs.io/en/la
 PyMove **proposes**:
 
 -   A familiar and similar syntax to Pandas;
+
 -   Clear documentation;
--   Extensibility, since you can implement your main data structure by manipulating other data structures such as Dask DataFrame, numpy arrays, etc., in addition to adding new modules;
+
+-   Extensibility, since you can implement your main data structure by
+ manipulating other data structures such as
+ Dask DataFrame, numpy arrays, etc., in addition to adding new modules;
+
 -   Flexibility, as the user can switch between different data structures;
+
 -   Operations for data preprocessing, pattern mining and data visualization.
 
 ---
 
 ## Creating a Virtual Environment
 
-It is recommended to create a virtual environment to use pymove. Requirements: Anaconda Python distribution installed and accessible
+It is recommended to create a virtual environment to use pymove.
 
-1.  In the terminal client enter the following where `env_name` is the name you want to call your environment, and replace `x.x` with the Python version you wish to use. (To see a list of available python versions first, type conda search "^python$" and press enter.)
-    -   `conda create -n <env_name> python=x.x`
-    -   Press y to proceed. This will install the Python version and all the associated anaconda packaged libraries at `path_to_your_anaconda_location/anaconda/envs/env_name`
+Requirements: Anaconda Python distribution installed and accessible
 
-2.  Activate your virtual environment. To activate or switch into your virtual environment, simply type the following where yourenvname is the name you gave to your environment at creation.
-    -   `conda activate <env_name>`
+1.  In the terminal client enter the following where `env_name` is the name
+ you want to call your environment, and replace `x.x` with the Python version
+ you wish to use. (To see a list of available python versions first,
+ type conda search "^python$" and press enter.)
+       -  `conda create -n <env_name> python=x.x`
+       -  Press y to proceed. This will install the Python version and all the
+ associated anaconda packaged libraries at `path_to_your_anaconda_location/anaconda/envs/env_name`
 
-3.  Now install the package from either `conda`, `pip` or `github`
+1.  Activate your virtual environment. To activate or switch into your
+ virtual environment, simply type the following where yourenvname is the
+ name you gave to your environment at creation.
+       -   `conda activate <env_name>`
+
+1.  Now install the package from either `conda`, `pip` or `github`
 
 ---
 
@@ -181,21 +197,22 @@ It is recommended to create a virtual environment to use pymove. Requirements: A
 1.  Clone this repository
     -   `git clone https://github.com/InsightLab/PyMove`
 
-2. Switch to folder PyMove
+1.  Switch to folder PyMove
     -   `cd PyMove`
 
-3.  Switch to a new branch
+1.  Switch to a new branch
     -   `git checkout -b developer`
 
-4.  Make a pull of branch
+1.  Make a pull of branch
     -   `git pull origin developer`
 
-5.  Install pymove in developer mode
+1.  Install pymove in developer mode
     -   `pip install -r requirements-dev.txt`
 
 ### For windows users
 
-If you installed from `pip` or `github`, you may encounter an error related to `shapely` due to some dll dependencies. To fix this, run `conda install shapely`.
+If you installed from `pip` or `github`, you may encounter an error related to
+ `shapely` due to some dll dependencies. To fix this, run `conda install shapely`.
 
 ---
 
