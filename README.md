@@ -181,7 +181,7 @@ It is recommended to create a virtual environment to use pymove. Requirements: A
 1.  Clone this repository
     -   `git clone https://github.com/InsightLab/PyMove`
 
-2. Switch to folder PyMove
+2.  Switch to folder PyMove
     -   `cd PyMove`
 
 3.  Switch to a new branch
