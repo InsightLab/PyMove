@@ -1,0 +1,38 @@
+name: Lint and Test
+on: [push]
+
+jobs:
+  lint:
+    name: Code Formatting
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.6
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade "pip<20"
+        pip install -r requirements-dev.txt
+    - name: Code Formatting Tests
+      working-directory: ${{ github.workspace }}
+      run: |
+        flake8
+  test:
+    name: Code Testing
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.6
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade "pip<20"
+        pip install -r requirements-dev.txt
+    - name: Code Formatting Tests
+      working-directory: ${{ github.workspace }}
+      run: |
+        pytest
