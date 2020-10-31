@@ -173,12 +173,12 @@ Requirements: Anaconda Python distribution installed and accessible
        -  Press y to proceed. This will install the Python version and all the
  associated anaconda packaged libraries at `path_to_your_anaconda_location/anaconda/envs/env_name`
 
-1.  Activate your virtual environment. To activate or switch into your
+2.  Activate your virtual environment. To activate or switch into your
  virtual environment, simply type the following where yourenvname is the
  name you gave to your environment at creation.
        -   `conda activate <env_name>`
 
-1.  Now install the package from either `conda`, `pip` or `github`
+3.  Now install the package from either `conda`, `pip` or `github`
 
 ---
 
@@ -197,16 +197,16 @@ Requirements: Anaconda Python distribution installed and accessible
 1.  Clone this repository
     -   `git clone https://github.com/InsightLab/PyMove`
 
-1.  Switch to folder PyMove
+3.  Switch to folder PyMove
     -   `cd PyMove`
 
-1.  Switch to a new branch
+3.  Switch to a new branch
     -   `git checkout -b developer`
 
-1.  Make a pull of branch
+4.  Make a pull of branch
     -   `git pull origin developer`
 
-1.  Install pymove in developer mode
+5.  Install pymove in developer mode
     -   `pip install -r requirements-dev.txt`
 
 ### For windows users
