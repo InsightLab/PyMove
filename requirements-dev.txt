@@ -1,6 +1,7 @@
 -e .
 pre-commit
 bump2version
+flake8
 pytest
 coverage
 geopandas
