@@ -169,9 +169,9 @@ Requirements: Anaconda Python distribution installed and accessible
  you want to call your environment, and replace `x.x` with the Python version
  you wish to use. (To see a list of available python versions first,
  type conda search "^python$" and press enter.)
-    -  `conda create -n <env_name> python=x.x`
+    -   `conda create -n <env_name> python=x.x`
 
-    -  Press y to proceed. This will install the Python version and all the
+    -   Press y to proceed. This will install the Python version and all the
  associated anaconda packaged libraries at `path_to_your_anaconda_location/anaconda/envs/env_name`
 
 2.  Activate your virtual environment. To activate or switch into your
