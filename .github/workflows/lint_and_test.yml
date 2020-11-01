@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   lint:
-    name: Code Formatting
+    name: Code Linting
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -15,7 +15,7 @@ jobs:
       run: |
         python -m pip install --upgrade "pip<20"
         pip install -r requirements-dev.txt
-    - name: Code Formatting Tests
+    - name: Linting
       working-directory: ${{ github.workspace }}
       run: |
         flake8
@@ -32,7 +32,7 @@ jobs:
       run: |
         python -m pip install --upgrade "pip<20"
         pip install -r requirements-dev.txt
-    - name: Code Formatting Tests
+    - name: Testing
       working-directory: ${{ github.workspace }}
       run: |
         pytest
