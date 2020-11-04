@@ -3,10 +3,12 @@ import pandas as pd
 
 from pymove.utils.constants import (
     DATETIME,
+    DESTINY,
     LABEL,
     LATITUDE,
     LOCAL_LABEL,
     LONGITUDE,
+    START,
     TID,
     TRAJ_ID,
     TRAJECTORY,
@@ -56,28 +58,32 @@ def generate_trajectories_df(df_):
     if TID not in df_:
         df_.generate_tid_based_on_id_datetime()
         df_.reset_index(drop=True, inplace=True)
-        
+
     tids = df_[TID].unique()
     new_df = pd.DataFrame(
-        columns = df_.columns
+        columns=df_.columns
     )
-                   
+
     for tid in progress_bar(tids, total=len(tids)):
         filter_ = df_[df_[TID] == tid]
         filter_.reset_index(drop=True, inplace=True)
-        
+
         if filter_.shape[0] > 4:
-            
+
             values = []
             for col in filter_.columns:
                 if filter_[col].nunique() == 1:
                     values.append(filter_.at[0, col])
                 else:
-                    values.append(np.array(filter_[col], dtype=type(filter_.at[0, col])).tolist())
-            
+                    values.append(
+                        np.array(
+                            filter_[col], dtype=type(filter_.at[0, col])
+                        ).tolist()
+                    )
+
             row = pd.Series(values, filter_.columns)
             append_row(new_df, row=row)
-                
+
     return new_df
 
 
@@ -138,16 +144,16 @@ def split_crossover(sequence_a, sequence_b, frac=0.5):
     """
     size_a = int(len(sequence_a) * frac)
     size_b = int(len(sequence_b) * frac)
-    
+
     sequence_a1 = sequence_a[:size_a]
     sequence_a2 = sequence_a[size_a:]
-    
+
     sequence_b1 = sequence_b[:size_b]
     sequence_b2 = sequence_b[size_b:]
-    
+
     sequence_a = np.concatenate((sequence_a1, sequence_b2))
     sequence_b = np.concatenate((sequence_b1, sequence_a2))
-    
+
     return sequence_a, sequence_b
 
 
@@ -165,17 +171,20 @@ def _augmentation(df_, aug_df, frac=0.5):
         Represents the percentage to be exchanged.
     """
     df_.reset_index(drop=True, inplace=True)
-    
+
     for idx in range(df_.shape[0] - 1):
         for idx_ in range(idx + 1, df_.shape[0]):
             sequences1 = []
             sequences2 = []
-            
+
             columns = df_.columns
-          
+
             for col in columns:
-                if (isinstance(df_.at[idx, col], list) and 
-                    isinstance(df_.at[idx_, col], list)):
+                if isinstance(
+                    df_.at[idx, col], list
+                ) and isinstance(
+                    df_.at[idx_, col], list
+                ):
                     seq1, seq2 = split_crossover(
                         df_.at[idx, col],
                         df_.at[idx_, col],
@@ -188,12 +197,12 @@ def _augmentation(df_, aug_df, frac=0.5):
                     value2 = df_.at[idx_, col]
 
                     if isinstance(value1, str) and isinstance(value2, str):
-                        sequences1.append(value1+'_'+value2)
-                        sequences2.append(value2+'_'+value1)
+                        sequences1.append(value1 + '_' + value2)
+                        sequences2.append(value2 + '_' + value1)
                     else:
                         sequences1.append(value1)
                         sequences2.append(value2)
-            
+
             row = pd.Series(sequences1, index=columns)
             append_row(aug_df, row=row)
 
@@ -202,17 +211,17 @@ def _augmentation(df_, aug_df, frac=0.5):
 
 
 def augmentation_trajectories_df(
-    df_, 
-    restriction='destination only', 
+    df_,
+    restriction='destination only',
     label_trajectory=TRAJECTORY,
-    insert_at_df=False, 
-    frac=0.5, 
+    insert_at_df=False,
+    frac=0.5,
 ):
     """
-    Generate new data from unobserved trajectories, 
-    given a specific restriction. By default, the 
+    Generate new data from unobserved trajectories,
+    given a specific restriction. By default, the
     algorithm uses the same route destination constraint.
-    
+
     Parameters
     ----------
     df_ : dataframe
@@ -226,16 +235,16 @@ def augmentation_trajectories_df(
         If True then value of copy is ignored.
     frac : number, optional, default 0.5
         Represents the percentage to be exchanged.
-         
+
     Returns
     -------
     DataFrame or None
         Dataframe with the new data generated.
     """
-    
+
     if DESTINY not in df_:
         generate_destiny_feature(df_, label_trajectory=label_trajectory)
-        
+
     if restriction == 'departure and destination':
         generate_start_feature(df_)
 
@@ -247,10 +256,10 @@ def augmentation_trajectories_df(
     destinations = df_[DESTINY].unique()
     for dest in progress_bar(destinations, total=len(destinations)):
         filter_ = df_[df_[DESTINY] == dest]
-        
+
         if restriction == 'departure and destination':
             starts = filter_[START].unique()
-            
+
             for st in progress_bar(starts, total=len(starts)):
                 ffilter_ = filter_[filter_[START] == st]
 
@@ -260,7 +269,7 @@ def augmentation_trajectories_df(
         else:
             if filter_.shape[0] >= 2:
                 _augmentation(filter_, aug_df, frac=frac)
-                
+
     return aug_df
 
 
@@ -277,39 +286,39 @@ def insert_points_in_df(df_, aug_df):
         The data of unobserved trajectories.
     """
     for idx, row in progress_bar(aug_df.iterrows(), total=aug_df.shape[0]):
-        
+
         keys = row.index.tolist()
         values = row.values.tolist()
-        
+
         row_df = pd.DataFrame()
-        
+
         for k, v in zip(keys, values):
             if k in df_:
                 if isinstance(v, np.ndarray):
                     row_df[k] = v
-        
+
         for k, v in zip(keys, values):
             if k in df_:
                 if not isinstance(v, np.ndarray):
                     row_df[k] = v
-                
+
         for idx_, row_ in row_df.iterrows():
             append_row(df_, row=row_)
 
 
 def instance_crossover_augmentation(
-    df_, 
-    restriction='destination only', 
-    label_trajectory=TRAJECTORY, 
+    df_,
+    restriction='destination only',
+    label_trajectory=TRAJECTORY,
     frac=0.5
 ):
     """
-    Generate new data from unobserved trajectories, 
-    with a specific restriction. By default, the 
-    algorithm uses the same destination constraint 
-    as the route and inserts the points on the 
+    Generate new data from unobserved trajectories,
+    with a specific restriction. By default, the
+    algorithm uses the same destination constraint
+    as the route and inserts the points on the
     original dataframe.
-    
+
     Parameters
     ----------
     df_ : dataframe
@@ -320,7 +329,7 @@ def instance_crossover_augmentation(
         Label of the points sequences.
     frac : number, optional, default 0.5
         Represents the percentage to be exchanged.
-         
+
     Returns
     -------
     DataFrame or None
@@ -328,16 +337,16 @@ def instance_crossover_augmentation(
     """
     try:
         traj_df = generate_trajectories_df(df_)
-        
+
         generate_destiny_feature(traj_df, label_trajectory=label_trajectory)
-        
+
         if restriction == 'departure and destination':
             generate_start_feature(traj_df, label_trajectory=label_trajectory)
-        
+
         aug_df = augmentation_trajectories_df(
             traj_df, restriction=restriction, frac=frac
         )
         insert_points_in_df(df_, aug_df)
-        
+
     except Exception as e:
         raise e
