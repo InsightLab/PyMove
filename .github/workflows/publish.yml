@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-n-publish:
-    if: github.event.base_ref == 'refs/heads/master' && startsWith(github.ref, 'refs/tags')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     name: Build and publish package
     runs-on: ubuntu-latest
     steps:
