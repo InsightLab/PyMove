@@ -6,15 +6,7 @@ import numpy as np
 import pandas as pd
 
 from pymove.core.dataframe import MoveDataFrame
-from pymove.utils.constants import (
-    DATETIME,
-    LATITUDE,
-    LONGITUDE,
-    TILES,
-    TRAJ_ID,
-    TYPE_DASK,
-    TYPE_PANDAS,
-)
+from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID, TYPE_PANDAS
 from pymove.utils.math import is_number
 
 
@@ -324,9 +316,7 @@ def column_to_array(df_, label_conversion):
             )
 
         df_[label_conversion] = (
-            df_[label_conversion].apply(
-                lambda x: object_for_array(x)
-            )
+            df_[label_conversion].apply(object_for_array)
         )
 
     except Exception as e:

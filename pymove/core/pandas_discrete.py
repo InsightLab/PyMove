@@ -12,7 +12,6 @@ from pymove.preprocessing.segmentation import (
 )
 from pymove.utils.constants import (
     DATETIME,
-    INDEX_GRID,
     LATITUDE,
     LOCAL_LABEL,
     LONGITUDE,
@@ -281,7 +280,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
                 md = pd.DataFrame(md)
 
                 filter_ = []
-                for index, row in md.iterrows():
+                for _, row in md.iterrows():
                     local_label_ = row[local_label]
                     prev_local = row[PREV_LOCAL]
                     threshold = statistics[
