@@ -160,8 +160,8 @@ def augmentation_trajectories_df(df_, frac=0.5):
     )
 
     i = 0
-    for idx1, row1 in progress_bar(df_.iterrows(), total=df_.shape[0]):
-        for idx2, row2 in df_.iterrows():
+    for _, row1 in progress_bar(df_.iterrows(), total=df_.shape[0]):
+        for _, row2 in df_.iterrows():
             if (
                 row1[LABEL] == row2[LABEL]
                 and str(row1[TRAJECTORY]) != str(row2[TRAJECTORY])
@@ -223,7 +223,7 @@ def insert_points_in_df(df_, aug_df):
         The data of unobserved trajectories.
 
     """
-    for idx, row in progress_bar(aug_df.iterrows(), total=aug_df.shape[0]):
+    for _, row in progress_bar(aug_df.iterrows(), total=aug_df.shape[0]):
         traj = row[TRAJECTORY]
         date = row[DATETIME][:-1]
         lat = row[LATITUDE][:-1]
