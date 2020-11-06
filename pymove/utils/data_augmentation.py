@@ -294,7 +294,7 @@ def insert_points_in_df(df_, aug_df):
 
         for k, v in zip(keys, values):
             if k in df_:
-                if isinstance(v, np.ndarray):
+                if isinstance(v, list) or isinstance(v, np.ndarray):
                     row_df[k] = v
 
         for k, v in zip(keys, values):
