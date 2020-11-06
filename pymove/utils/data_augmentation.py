@@ -101,7 +101,7 @@ def generate_start_feature(df_, label_trajectory=TRAJECTORY):
     """
     if START not in df_:
         df_[START] = df_[label_trajectory].apply(
-            lambda x: np.int32(x[0])
+            lambda x: np.int64(x[0])
         )
 
 
@@ -119,7 +119,7 @@ def generate_destiny_feature(df_, label_trajectory=TRAJECTORY):
     """
     if DESTINY not in df_:
         df_[DESTINY] = df_[label_trajectory].apply(
-            lambda x: np.int32(x[-1])
+            lambda x: np.int64(x[-1])
         )
 
 
@@ -180,11 +180,15 @@ def _augmentation(df_, aug_df, frac=0.5):
             columns = df_.columns
 
             for col in columns:
-                if isinstance(
+                if (isinstance(
                     df_.at[idx, col], list
-                ) and isinstance(
+                ) or isinstance(
+                    df_.at[idx, col], np.ndarray
+                )) and (isinstance(
                     df_.at[idx_, col], list
-                ):
+                ) or isinstance(
+                    df_.at[idx_, col], np.ndarray
+                )):
                     seq1, seq2 = split_crossover(
                         df_.at[idx, col],
                         df_.at[idx_, col],
@@ -299,7 +303,7 @@ def insert_points_in_df(df_, aug_df):
 
         for k, v in zip(keys, values):
             if k in df_:
-                if not isinstance(v, np.ndarray):
+                if not isinstance(v, list) and not isinstance(v, np.ndarray):
                     row_df[k] = v
 
         for idx_, row_ in row_df.iterrows():
