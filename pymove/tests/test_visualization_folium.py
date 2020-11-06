@@ -172,7 +172,7 @@ def test_heatmap(tmpdir):
             '[39.984198,116.319322,1.0],'
             '[39.984211,116.319389,1.0],'
             '[39.984217,116.319422,1.0],'
-            '[39.984224,116.319402,1.0]]')in map_info)
+            '[39.984224,116.319402,1.0]]') in map_info)
 
 
 def test_heatmap_with_time(tmpdir):
@@ -225,7 +225,7 @@ def test_heatmap_with_time(tmpdir):
             '[39.984198,116.319322,1.0],'
             '[39.984211,116.319389,1.0],'
             '[39.984217,116.319422,1.0],'
-            '[39.984224,116.319402,1.0]]')in map_info)
+            '[39.984224,116.319402,1.0]]') in map_info)
 
 
 def test_cluster(tmpdir):
@@ -513,9 +513,9 @@ def test_add_begin_end_markers_to_folium_map(tmpdir):
     )
 
     assert(('L.marker(\n[39.984094,116.319236],'
-            '\n{"clusteredMarker":true,"color":"green"}')in map_info
+            '\n{"clusteredMarker":true,"color":"green"}') in map_info
            and ('L.marker(\n[39.984217,116.319422],'
-                '\n{"clusteredMarker":true,"color":"red"}')in map_info)
+                '\n{"clusteredMarker":true,"color":"red"}') in map_info)
 
 
 def test_add_trajectories_to_folium_map(tmpdir):
@@ -925,8 +925,8 @@ def test_plot_incial_end_points(tmpdir):
            and count_body == 3
            and count_script == 12)
 
-    assert(('L.marker(\n[39.984094,116.319236]')in map_info
-           and ('L.marker(\n[39.984217,116.319422],')in map_info)
+    assert(('L.marker(\n[39.984094,116.319236]') in map_info
+           and ('L.marker(\n[39.984217,116.319422],') in map_info)
 
 
 def test_add_traj_folium(tmpdir):
