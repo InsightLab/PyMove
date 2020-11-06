@@ -320,10 +320,10 @@ def test_range_query():
         index=[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38]
     )
 
-    medp_move_df = query.range_query(traj_df, move_df, range=100, distance='MEDP')
+    medp_move_df = query.range_query(traj_df, move_df, min_dist=100, distance='MEDP')
     assert_frame_equal(medp_move_df, expected_MEDP)
 
-    medt_move_df = query.range_query(traj_df, move_df, range=700, distance='MEDT')
+    medt_move_df = query.range_query(traj_df, move_df, min_dist=700, distance='MEDT')
     assert_frame_equal(medt_move_df, expected_MEDT)
 
 

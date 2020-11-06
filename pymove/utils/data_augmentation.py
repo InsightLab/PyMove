@@ -289,7 +289,7 @@ def insert_points_in_df(df_, aug_df):
     aug_df : dataframe
         The data of unobserved trajectories.
     """
-    for idx, row in progress_bar(aug_df.iterrows(), total=aug_df.shape[0]):
+    for _, row in progress_bar(aug_df.iterrows(), total=aug_df.shape[0]):
 
         keys = row.index.tolist()
         values = row.values.tolist()
@@ -306,7 +306,7 @@ def insert_points_in_df(df_, aug_df):
                 if not isinstance(v, list) and not isinstance(v, np.ndarray):
                     row_df[k] = v
 
-        for idx_, row_ in row_df.iterrows():
+        for _, row_ in row_df.iterrows():
             append_row(df_, row=row_)
 
 

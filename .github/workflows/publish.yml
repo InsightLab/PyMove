@@ -6,15 +6,15 @@ on:
 
 jobs:
   build-n-publish:
-    if: github.event.base_ref == 'refs/heads/master' && startsWith(github.ref, 'refs/tags')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     name: Build and publish package
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.6
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@main
+    - name: Set up Python 3.7
+      uses: actions/setup-python@main
       with:
-        python-version: 3.6
+        python-version: 3.7
     - name: Install dependencies
       run: |
         python -m pip install --upgrade "pip<20"

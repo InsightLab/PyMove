@@ -9,8 +9,8 @@ from pymove.utils.log import progress_bar
 def range_query(
     traj,
     move_df,
-    id=TRAJ_ID,
-    range=1000,
+    _id=TRAJ_ID,
+    min_dist=1000,
     distance=MEDP,
     latitude=LATITUDE,
     longitude=LONGITUDE,
@@ -30,10 +30,10 @@ def range_query(
     move_df: dataframe
         The input trajectory data.
 
-    id: string ("id" by default)
+    _id: string ("id" by default)
         Label of the trajectories dataframe referring to the MoveDataFrame id.
 
-    range: float (1000 by default)
+    min_dist: float (1000 by default)
         Minimum distance measure.
 
     distance: string ("MEDP" by default)
@@ -71,10 +71,10 @@ def range_query(
         raise ValueError('Unknown distance measure. Use MEDP or MEDT')
 
     for traj_id in progress_bar(
-        move_df[id].unique(), desc='Querying range by {}'.format(distance)
+        move_df[_id].unique(), desc='Querying range by {}'.format(distance)
     ):
-        this = move_df.loc[move_df[id] == traj_id]
-        if dist_measure(traj, this, latitude, longitude, datetime) < range:
+        this = move_df.loc[move_df[_id] == traj_id]
+        if dist_measure(traj, this, latitude, longitude, datetime) < min_dist:
             result = result.append(this)
 
     return result
