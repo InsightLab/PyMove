@@ -7,6 +7,8 @@ TRAJECTORY = 'trajectory'
 TID = 'tid'
 UID = 'user_id'
 
+START = 'start'
+DESTINY = 'destiny'
 LOCAL_LABEL = 'local_label'
 GRID_ID = 'grid_id'
 
