@@ -866,152 +866,18 @@ def test_plot_bbox(tmpdir):
     assert_equal(expected, actual)
 
 
-def test_plot_incial_end_points(tmpdir):
-    move_df = _default_move_df()
-
-    base_map = folium.create_base_map(
-        move_data=move_df,
-        lat_origin=None,
-        lon_origin=None,
-        tile=TILES[0],
-        default_zoom_start=12
-    )
-
-    slice_tags = move_df.columns
-
-    folium.plot_incial_end_points(
-        list_rows=list(move_df.iterrows()),
-        user_lat='lat',
-        user_lon='lon',
-        slice_tags=slice_tags,
-        base_map=base_map,
-        map_=base_map
-    )
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('base_map_color.html')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    base_map.save(filename_write_default)
-
-    file = codecs.open(filename_write_default, 'r')
-
-    map_info = file.read()
-
-    map_info = map_info.replace(' ', '')
-
-    count_l_map = map_info.count('L.map')
-
-    count_l_tileLayer = map_info.count('L.tileLayer')
-
-    count_l_marker = map_info.count('L.marker')
-
-    count_l_popup = map_info.count('L.popup')
-
-    count_head = map_info.count('head')
-
-    count_body = map_info.count('body')
-
-    count_script = map_info.count('script')
-
-    assert(count_l_map == 1
-           and count_l_tileLayer == 1
-           and count_l_marker == 2
-           and count_l_popup == 2
-           and count_head == 2
-           and count_body == 3
-           and count_script == 12)
-
-    assert(('L.marker(\n[39.984094,116.319236]') in map_info
-           and ('L.marker(\n[39.984217,116.319422],') in map_info)
-
-
-def test_add_traj_folium(tmpdir):
+def test_plot_point_folium(tmpdir):
 
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('add_traj_folium.html')
+    file_write_default = d.join('plot_point_folium.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    base_map = folium.add_traj_folium(
-        move_data=move_df,
-        user_lat=LATITUDE,
-        user_lon=LONGITUDE,
-        user_point=USER_POINT,
-        line_color=LINE_COLOR,
-        user_datetime=DATETIME,
-        sort=False,
-        base_map=None,
-        slice_tags=None,
-        tiles=TILES[0]
-    )
-
-    assert_array_equal(base_map.location, [move_df['lat'].mean(), move_df['lon'].mean()])
-
-    base_map.save(filename)
-
-    file = codecs.open(filename, 'r')
-
-    map_info = file.read()
-
-    map_info = map_info.replace(' ', '')
-
-    count_l_map = map_info.count('L.map')
-
-    count_l_tileLayer = map_info.count('L.tileLayer')
-
-    count_l_marker = map_info.count('L.marker')
-
-    count_l_popup = map_info.count('L.popup')
-
-    count_l_polyline = map_info.count('L.polyline')
-
-    count_l_circle = map_info.count('L.circle')
-
-    count_head = map_info.count('head')
-
-    count_body = map_info.count('body')
-
-    count_script = map_info.count('script')
-
-    assert(count_l_map == 1
-           and count_l_tileLayer == 1
-           and count_l_marker == 2
-           and count_l_popup == 7
-           and count_l_polyline == 1
-           and count_l_circle == 5
-           and count_head == 2
-           and count_body == 3
-           and count_script == 12)
-
-    assert(
-        'L.marker(\n[39.984094,116.319236]' in map_info
-        and 'L.marker(\n[39.984217,116.319422]' in map_info
-        and 'L.polyline(\n[[39.984094,116.319236],'
-        '[39.984198,116.319322],[39.984224,116.319402],'
-        '[39.984211,116.319389],[39.984217,116.319422]]' in map_info
-    )
-
-
-def test_add_point_folium(tmpdir):
-
-    move_df = _default_move_df()
-
-    d = tmpdir.mkdir('visualization')
-
-    file_write_default = d.join('add_point_folium.html')
-    filename = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    base_map = folium.add_point_folium(
+    base_map = folium.plot_points_folium(
         move_data=move_df,
         user_lat=LATITUDE,
         user_lon=LONGITUDE,
@@ -1070,18 +936,18 @@ def test_add_point_folium(tmpdir):
     )
 
 
-def test_add_poi_folium(tmpdir):
+def test_plot_poi_folium(tmpdir):
 
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('add_point_folium.html')
+    file_write_default = d.join('plot_point_folium.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    base_map = folium.add_poi_folium(
+    base_map = folium.plot_poi_folium(
         move_data=move_df,
         poi_lat=LATITUDE,
         poi_lon=LONGITUDE,
@@ -1139,18 +1005,18 @@ def test_add_poi_folium(tmpdir):
     )
 
 
-def test_add_event_folium(tmpdir):
+def test_plot_event_folium(tmpdir):
 
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('add_event_folium.html')
+    file_write_default = d.join('plot_event_folium.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    base_map = folium.add_event_folium(
+    base_map = folium.plot_event_folium(
         move_data=move_df,
         event_lat=LATITUDE,
         event_lon=LONGITUDE,
