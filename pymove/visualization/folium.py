@@ -736,7 +736,7 @@ def _add_trajectories_to_folium_map(
     if legend:
         add_map_legend(base_map, 'Color by user ID', items)
 
-    folium.map.LayerControl(collapsed=False).add_to(base_map)
+    folium.map.LayerControl().add_to(base_map)
 
     if save_as_html:
         base_map.save(outfile=filename)
