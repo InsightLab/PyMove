@@ -120,6 +120,28 @@ def test_geometry_points_to_lat_and_lon():
     assert_frame_equal(new_move_df2, expected_with_geometry)
 
 
+def test_lat_and_lon_decimal_degrees_to_decimal():
+    move_df = DataFrame(
+        data=[['0', '28.0N', '94.8W'],
+              ['1', '41.3N', '50.4W'],
+              ['1', '40.8N', '47.5W']],
+        columns=['id', 'lat', 'lon']
+    )
+
+    expected = DataFrame(
+        data=[['0', 28.0, -94.8],
+              ['1', 41.3, -50.4],
+              ['1', 40.8, -47.5]],
+        columns=['id', 'lat', 'lon'],
+        dtype='object'
+    )
+
+    new_move_df = conversions.lat_and_lon_decimal_degrees_to_decimal(
+        move_df, inplace=False
+    )
+    assert_frame_equal(new_move_df, expected)
+
+
 def test_ms_to_kmh():
 
     move_df = _default_move_df()
