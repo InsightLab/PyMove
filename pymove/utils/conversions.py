@@ -287,24 +287,55 @@ def geometry_points_to_lat_and_lon(
     if not inplace:
         return move_data
 
-def lat_and_lon_decimal_degrees_to_decimal(move_data, latitude=constants.LATITUDE, longitude=constants.LONGITUDE, inplace=True):
+
+def lat_and_lon_decimal_degrees_to_decimal(
+    move_data,
+    latitude=constants.LATITUDE,
+    longitude=constants.LONGITUDE,
+    inplace=True
+):
+    """
+    Converts latitude and longitude format from
+    decimal degrees to decimal format.
+
+    Parameters
+    ----------
+    move_data : pymove.core.MoveDataFrameAbstract subclass.
+        Input trajectory data.
+
+    latitude: String, optional, default 'lat'.
+        Represents column name of the latitude column.
+
+    longitude: String, optional, default 'lon'.
+        Represents column name of the longitude column.
+
+    inplace: Boolean, optional, default True.
+        Whether the operation will be done in the original dataframe
+
+    Returns
+    -------
+    dataframe or None
+        A new dataframe with the converted feature if operation
+        not done inplace
+    """
     if not inplace:
         move_data = move_data[:]
 
-    copy_lat = move_data['Latitude'].copy()
-    copy_lon = move_data['Longitude'].copy()
+    copy_lat = move_data[latitude].copy()
+    copy_lon = move_data[longitude].copy()
     for i in move_data.index:
-        if (move_data['Latitude'][i][-1:] == 'N'):
-            move_data['Latitude'][i] = float(copy_lat[i][:-1])
-        else: 
-            move_data['Latitude'][i] = float(copy_lat[i][:-1]) * -1
-        if (move_data['Longitude'][i][-1:] == 'E'):
-            move_data['Longitude'][i] = float(copy_lat[i][:-1]) 
+        if (move_data[latitude][i][-1:] == 'N'):
+            move_data[latitude][i] = float(copy_lat[i][:-1])
         else:
-            move_data['Longitude'][i] = float(copy_lon[i][:-1]) * -1
-    
+            move_data[latitude][i] = float(copy_lat[i][:-1]) * -1
+        if (move_data[longitude][i][-1:] == 'E'):
+            move_data[longitude][i] = float(copy_lat[i][:-1])
+        else:
+            move_data[longitude][i] = float(copy_lon[i][:-1]) * -1
+
     if not inplace:
         return move_data
+
 
 def ms_to_kmh(
     move_data,
