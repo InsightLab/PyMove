@@ -287,6 +287,24 @@ def geometry_points_to_lat_and_lon(
     if not inplace:
         return move_data
 
+def lat_and_lon_decimal_degrees_to_decimal(move_data, latitude=constants.LATITUDE, longitude=constants.LONGITUDE, inplace=True):
+    if not inplace:
+        move_data = move_data[:]
+
+    copy_lat = move_data['Latitude'].copy()
+    copy_lon = move_data['Longitude'].copy()
+    for i in move_data.index:
+        if (move_data['Latitude'][i][-1:] == 'N'):
+            move_data['Latitude'][i] = float(copy_lat[i][:-1])
+        else: 
+            move_data['Latitude'][i] = float(copy_lat[i][:-1]) * -1
+        if (move_data['Longitude'][i][-1:] == 'E'):
+            move_data['Longitude'][i] = float(copy_lat[i][:-1]) 
+        else:
+            move_data['Longitude'][i] = float(copy_lon[i][:-1]) * -1
+    
+    if not inplace:
+        return move_data
 
 def ms_to_kmh(
     move_data,
