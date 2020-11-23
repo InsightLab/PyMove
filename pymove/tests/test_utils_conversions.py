@@ -133,7 +133,6 @@ def test_lat_and_lon_decimal_degrees_to_decimal():
               ['1', 41.3, -50.4],
               ['1', 40.8, -47.5]],
         columns=['id', 'lat', 'lon'],
-        dtype='object'
     )
 
     new_move_df = conversions.lat_and_lon_decimal_degrees_to_decimal(

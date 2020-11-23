@@ -321,17 +321,19 @@ def lat_and_lon_decimal_degrees_to_decimal(
     if not inplace:
         move_data = move_data[:]
 
-    copy_lat = move_data[latitude].copy()
-    copy_lon = move_data[longitude].copy()
-    for i in move_data.index:
-        if (move_data[latitude][i][-1:] == 'N'):
-            move_data[latitude][i] = float(copy_lat[i][:-1])
+    def _decimal_degree_to_decimal(row):
+        if (row[latitude][-1:] == 'N'):
+            row[latitude] = float(row[latitude][:-1])
         else:
-            move_data[latitude][i] = float(copy_lat[i][:-1]) * -1
-        if (move_data[longitude][i][-1:] == 'E'):
-            move_data[longitude][i] = float(copy_lat[i][:-1])
+            row[latitude] = float(row[latitude][:-1]) * -1
+
+        if (row[longitude][-1:] == 'E'):
+            row[longitude] = float(row[longitude][:-1])
         else:
-            move_data[longitude][i] = float(copy_lon[i][:-1]) * -1
+            row[longitude] = float(row[longitude][:-1]) * -1
+        return row
+
+    move_data = move_data.apply(_decimal_degree_to_decimal, axis=1)
 
     if not inplace:
         return move_data
