@@ -377,3 +377,62 @@ def test_instance_crossover_augmentation():
 
     instance_crossover_augmentation(move_df, label_trajectory=LOCAL_LABEL)
     assert_frame_equal(move_df, expected)
+
+
+def test_find_all_paths():
+    G = {
+        1: {2, 6}, 
+        2: {3}, 
+        3: {8}, 
+        8: {8, 9}, 
+        6: {7}, 
+        7: {8, 11}, 
+        11: {11, 12}, 
+        5: {6}, 
+        9: {14}, 
+        14: {14}, 
+        12: {13}, 
+        13: {14}
+    }
+    
+    expected = [
+        [1, 2, 3, 8, 9, 14],
+        [1, 6, 7, 8, 9, 14],
+        [1, 6, 7, 11, 12, 13, 14]
+    ]
+    
+    graph = nx.DiGraph(G)
+    paths = find_all_paths(graph, 1, 14)
+    assert_array_equal(expected, paths)
+    
+    
+def test_paths_to_df():
+    G = {
+        1: {2, 6}, 
+        2: {3}, 
+        3: {8}, 
+        8: {8, 9}, 
+        6: {7}, 
+        7: {8, 11}, 
+        11: {11, 12}, 
+        5: {6}, 
+        9: {14}, 
+        14: {14}, 
+        12: {13}, 
+        13: {14}
+    }
+    
+    expected = pd.DataFrame(
+        data = [
+            [[1, 2, 3, 8, 9]], [[1, 6, 7, 8, 9]], [[1, 2, 3, 8, 9, 14]],
+            [[1, 6, 7, 8, 9, 14]], [[1, 6, 7, 11, 12, 13, 14]],
+            [[1, 6, 7, 11, 12]], [[1, 6, 7, 11, 12, 13]], [[2, 3, 8, 9, 14]],
+            [[6, 7, 8, 9, 14]], [[6, 7, 11, 12, 13, 14]], [[6, 7, 11, 12, 13]],
+            [[7, 11, 12, 13, 14]], [[5, 6, 7, 8, 9]], [[5, 6, 7, 8, 9, 14]], 
+            [[5, 6, 7, 11, 12, 13, 14]], [[5, 6, 7, 11, 12]], [[5, 6, 7, 11, 12, 13]]
+        ],
+        columns=[TRAJECTORY]
+    )
+    
+    aug_df = paths_to_df(graph)
+    assert_frame_equal(expected, aug_df)
