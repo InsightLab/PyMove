@@ -354,3 +354,136 @@ def instance_crossover_augmentation(
 
     except Exception as e:
         raise e
+
+
+def find_all_paths(graph, start_vertex, end_vertex, path=[]):
+    """
+    Find all paths from start_vertex to end_vertex in graph.
+    
+    Parameters
+    ----------
+    graph : NetworkX DiGraph
+        Representation of points in a targeted manner.
+        
+    start_vertex : node
+        Starting node for path.
+        
+    end_vertex : node
+        Ending node for path.
+        
+    path : list
+        List to add paths
+        
+    Returns
+    -------
+    paths : generator of lists
+        A generator of all paths between start_vertex and end_vertex.
+        
+    Examples
+    --------
+    >>> G = {1: {2, 6}, 
+             2: {3}, 
+             3: {8}, 
+             5: {6}, 
+             6: {7}, 
+             7: {8, 11}, 
+             8: {8, 9}, 
+             9: {14}, 
+             11: {11, 12}, 
+             12: {13}, 
+             13: {14}
+             14: {14}, 
+        }
+    >>> graph = nx.DiGraph(G)
+    >>> find_all_paths(graph, 1, 14)
+    [[1, 2, 3, 8, 9, 14], [1, 6, 7, 8, 9, 14], [1, 6, 7, 11, 12, 13, 14]]
+    
+    References
+    ----------
+    https://www.python-course.eu/pygraph.php
+    
+    """
+
+    path = path + [start_vertex]
+
+    if start_vertex == end_vertex:
+        return [path]
+
+    if start_vertex not in graph:
+        return []
+
+    paths = []
+    for vertex in graph[start_vertex]:
+        if vertex not in path:
+            extended_paths = find_all_paths(graph, vertex, end_vertex, path)
+
+            for p in extended_paths:
+                paths.append(p)
+
+    return paths
+
+
+def paths_to_df(graph, label_trajectory='trajectory', min_path=5, start_vertex=None, end_vertex=None):
+    """
+    Generates a new dataframe with all the paths 
+    found for a start point and an end point.
+    
+    Parameters
+    ----------
+    graph : NetworkX DiGraph
+        Representation of points in a targeted manner.
+        
+    label_trajectory : str, optional, default 'trajectory'
+        Feature name
+        
+    min_path : number, optional, default 5
+        Minimum length of a path.
+        
+    start_vertex : node, optional, default None
+        Starting node for path.
+        
+    end_vertex : node, optional, default None
+        Ending node for path.
+        
+    Return
+    ------
+    dataframe
+        All paths found in the graph.
+        
+    """
+    
+    aug_df = pd.DataFrame(columns=[label_trajectory])
+    
+    if start_vertex is None and end_vertex is None:
+        for v1 in list(graph.adj.keys()):
+            for v2 in list(graph.adj.keys()):
+                paths = find_all_paths(graph, v1, v2)
+                if paths:
+                    for path in paths:
+                        if len(path) >= min_path:
+                            append_row(aug_df, columns={label_trajectory: path})
+                            
+    elif start_vertex is None:
+        for v in list(graph.adj.keys()):
+            paths = find_all_paths(graph, v, end_vertex)
+            if paths:
+                for path in paths:
+                    if len(path) >= min_path:
+                        append_row(aug_df, columns={label_trajectory: path})
+                        
+    elif end_vertex is None:
+        for v in list(graph.adj.keys()):
+            paths = find_all_paths(graph, start_vertex, v)
+            if paths:
+                for path in paths:
+                    if len(path) >= min_path:
+                        append_row(aug_df, columns={label_trajectory: path})
+                        
+    else:
+        paths = find_all_paths(graph, start_vertex, end_vertex)
+        if paths:
+            for path in paths:
+                if len(path) >= min_path:
+                    append_row(aug_df, columns={label_trajectory: path})
+    
+    return aug_df
