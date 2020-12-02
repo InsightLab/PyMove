@@ -173,3 +173,5 @@ MAX = 'max'
 SUM = 'sum'
 
 POINT = 'Point'
+
+N_CLUSTER = 'n_cluster'

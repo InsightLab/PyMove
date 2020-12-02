@@ -40,6 +40,11 @@ def lat_meters(lat):
     return meters
 
 
+def meters_to_eps(meters):
+    # TODO
+    pass
+
+
 def list_to_str(input_list, delimiter=','):
     """
     Concatenates list elements, joining them by the separator specified by the
@@ -276,13 +281,13 @@ def geometry_points_to_lat_and_lon(
         move_data = move_data[:]
 
     move_data = move_data[
-        move_data[constants.GEOMETRY].map(type) == Point
+        move_data[geometry_label].map(type) == Point
     ]
-    move_data[constants.LONGITUDE] = move_data[constants.GEOMETRY].map(lambda p: p.x)
-    move_data[constants.LATITUDE] = move_data[constants.GEOMETRY].map(lambda q: q.y)
+    move_data[constants.LONGITUDE] = move_data[geometry_label].map(lambda p: p.x)
+    move_data[constants.LATITUDE] = move_data[geometry_label].map(lambda q: q.y)
 
     if drop_geometry:
-        move_data.drop(constants.GEOMETRY, axis=1, inplace=True)
+        move_data.drop(geometry_label, axis=1, inplace=True)
 
     if not inplace:
         return move_data
