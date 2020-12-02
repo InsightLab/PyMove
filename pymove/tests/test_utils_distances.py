@@ -72,6 +72,7 @@ def test_haversine():
 
     assert_almost_equal(dist, expected)
 
+
 def text_distance_in_meters():
     expected = 0.56021344523276
 
