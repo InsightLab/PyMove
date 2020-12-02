@@ -473,7 +473,6 @@ def paths_to_df(
     for v1 in start_vertex:
         for v2 in end_vertex:
             paths = find_all_paths(graph, v1, v2)
-            print(paths)
             if paths:
                 for path in paths:
                     if len(path) >= min_path:
