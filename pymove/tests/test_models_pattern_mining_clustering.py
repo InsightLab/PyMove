@@ -1,7 +1,7 @@
 from numpy.testing import assert_almost_equal, assert_equal
 
 from pymove import MoveDataFrame, clustering
-from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
+from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, N_CLUSTER, TRAJ_ID
 
 list_data = [
     [39.984094, 116.319236, '2008-10-23 05:53:05', 1],
@@ -9,11 +9,11 @@ list_data = [
     [39.984224, 116.319402, '2008-10-23 05:53:11', 1],
     [39.984211, 116.319389, '2008-10-23 05:53:16', 1],
     [39.984217, 116.319422, '2008-10-23 05:53:21', 1],
-    [39.984710, 116.319865, '2008-10-23 05:53:23', 1],
-    [39.984674, 116.319810, '2008-10-23 05:53:28', 1],
-    [39.984623, 116.319773, '2008-10-23 05:53:33', 1],
-    [39.984606, 116.319732, '2008-10-23 05:53:38', 1],
-    [39.984555, 116.319728, '2008-10-23 05:53:43', 1]
+    [39.984710, 116.319865, '2008-10-24 05:53:23', 1],
+    [39.984674, 116.319810, '2008-10-24 05:53:28', 1],
+    [39.984623, 116.319773, '2008-10-24 05:53:33', 1],
+    [39.984606, 116.319732, '2008-10-25 05:53:38', 1],
+    [39.984555, 116.319728, '2008-10-25 05:53:43', 1]
 ]
 
 
@@ -39,7 +39,7 @@ def test_elbow_method():
     }
 
     inertia_dic = clustering.elbow_method(
-        move_data=move_df[[LATITUDE, LONGITUDE]],
+        move_data=move_df,
         max_clusters=3,
         random_state=42
     )
@@ -52,16 +52,26 @@ def test_gap_statistic():
     move_df = _default_move_df()
 
     expected = {
-        1: 14.337926129735244,
-        2: 16.30937476102708,
-        3: 16.16313972395028
+        1: 15.003405379700,
+        2: 17.250022546200,
+        3: 17.503418909704
     }
 
     inertia_dic = clustering.gap_statistic(
-        move_data=move_df[[LATITUDE, LONGITUDE]],
+        move_data=move_df,
         max_clusters=3,
         random_state=42
     )
 
     assert_equal(list(inertia_dic.keys()), list(expected.keys()))
     assert_almost_equal(list(inertia_dic.values()), list(expected.values()))
+
+
+def test_dbscan_clustering():
+    move_df = _default_move_df()
+    expected = [0, 1]
+
+    move_df.generate_day_of_the_week_features(inplace=True)
+    clustering.dbscan_clustering(move_df, 'day', min_sample=3, inplace=True)
+    clusters = move_df[N_CLUSTER].unique()
+    assert_equal(expected, clusters)
