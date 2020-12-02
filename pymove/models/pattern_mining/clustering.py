@@ -37,7 +37,7 @@ def elbow_method(
 
     Example
     -------
-    clustering.elbow_method(move_data=move_df[['lat', 'lon']], k_iteration=3)
+    clustering.elbow_method(move_data=move_df, k_iteration=3)
         {
             1: 55084.15957839036,
             4: 245.68365592382938,
