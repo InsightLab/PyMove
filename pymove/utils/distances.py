@@ -3,10 +3,10 @@ import pandas as pd
 from scipy.spatial import distance
 
 from pymove import utils
-from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE
+from pymove.utils.constants import DATETIME, EARTH_RADIUS, LATITUDE, LONGITUDE
 
 
-def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
+def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=EARTH_RADIUS):
     """
     Calculate the great circle distance between two points on the earth
     (specified in decimal degrees or in radians). All (lat, lon) coordinates
