@@ -59,9 +59,9 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=6371):
         raise e
 
 
-def distance_in_meters(lat1, lon1, lat2, lon2):
+def euclidean_distance_in_meters(lat1, lon1, lat2, lon2):
     """
-    Calculate the distance in meters between two points.
+    Calculate the euclidean distance in meters between two points.
 
     Parameters
     ----------
@@ -77,7 +77,7 @@ def distance_in_meters(lat1, lon1, lat2, lon2):
     Returns 
     -------
     float
-        distance in meters between the two points.
+        euclidean distance in meters between the two points.
     """
 
     meters_by_radians=6371

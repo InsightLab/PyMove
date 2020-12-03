@@ -72,8 +72,8 @@ def test_haversine():
 
     assert_almost_equal(dist, expected)
 
-def text_distance_in_meters():
-    expected = 0.56021344523276
+def test_distance_in_meters():
+    expected = 9.757976024363016
 
     dist = distances.distance_in_meters(-3.797864, -38.501597, -3.797890, -38.501681)
 
