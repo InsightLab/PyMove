@@ -1,6 +1,7 @@
+import math
+
 import numpy as np
 import pandas as pd
-import math
 from scipy.spatial import distance
 
 from pymove import utils
@@ -74,15 +75,15 @@ def euclidean_distance_in_meters(lat1, lon1, lat2, lon2):
     lon2 : float
         longitude of the another point.
 
-    Returns 
+    Returns
     -------
     float
         euclidean distance in meters between the two points.
     """
 
-    meters_by_radians=6371
-    dist_eucl= math.sqrt( (lat1-lat2)**2 + (lon1 -lon2)**2 )
-    dist_eucl_meters = dist_eucl*meters_by_radians
+    meters_by_radians = 6371
+    dist_eucl = math.sqrt((lat1 - lat2) ** 2 + (lon1 - lon2) ** 2)
+    dist_eucl_meters = dist_eucl * meters_by_radians
 
     return dist_eucl_meters
 
