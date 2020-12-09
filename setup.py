@@ -14,6 +14,7 @@ DEPENDENCIES = [
     'dask[dataframe]',
     'folium>=0.10.1',
     'geohash2',
+    'networkx',
     'geojson',
     'holidays',
     'IPython',
