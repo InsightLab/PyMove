@@ -1,3 +1,6 @@
+import random
+
+import networkx as nx
 import numpy as np
 import pandas as pd
 
@@ -40,7 +43,33 @@ def append_row(df_, row=None, columns=None):
             df_.at[df_.shape[0], keys] = values
 
 
-def generate_trajectories_df(df_):
+def generate_arrays(df_, columns=None):
+    """
+    Generates an arrays with the values
+    for each column of the passed dataframe
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectories data.
+    columns : list, np.ndarray, optional, default None
+
+    Returns
+    -------
+    array
+        list format dataframe columns
+    """
+    if columns is None:
+        columns = df_.columns
+
+    arr = np.full(len(columns), None, dtype=np.ndarray)
+    for idx, col in enumerate(columns):
+        arr[idx] = df_[col].values
+
+    return arr
+
+
+def generate_trajectories_df(df_, min_points=5):
     """
     Generates a dataframe with the sequence of
     location points of a trajectory.
@@ -68,7 +97,7 @@ def generate_trajectories_df(df_):
         filter_ = df_[df_[TID] == tid]
         filter_.reset_index(drop=True, inplace=True)
 
-        if filter_.shape[0] > 4:
+        if filter_.shape[0] >= min_points:
 
             values = []
             for col in filter_.columns:
@@ -85,6 +114,62 @@ def generate_trajectories_df(df_):
             append_row(new_df, row=row)
 
     return new_df
+
+
+def generate_transition_graphx(df_, label_nodes=LOCAL_LABEL):
+    """
+    Generates the transition graph from the sequences of points
+    that represent the trajectory of an object.
+
+    Parameters
+    ----------
+    df_ : dataframe
+        The input trajectories data.
+
+    label_nodes : str, optinal, default 'local_label'
+        Label of the points sequences.
+
+    Returns
+    -------
+    graph : NetworkX DiGraph
+        Representation of points in a targeted manner.
+    """
+    G = nx.DiGraph()
+
+    lats, lons, times, trajectories = generate_arrays(
+        df_, columns=[LATITUDE, LONGITUDE, DATETIME, label_nodes]
+    )
+
+    for traj, lat, lon, time in progress_bar(
+        zip(trajectories, lats, lons, times), total=len(trajectories)
+    ):
+        if traj[0] in list(G.nodes):
+            dt = nx.get_node_attributes(G, 'dt')[traj[0]]
+            dt.append(time[0])
+            G.add_node(traj[0], dt=dt)
+
+        else:
+            G.add_node(traj[0], pos=(lat[0], lon[0]), dt=[time[0]])
+
+        for i in range(1, len(traj)):
+            if traj[i] in list(G.nodes):
+                dt = nx.get_node_attributes(G, 'dt')[traj[i]]
+                dt.append(time[i])
+                G.add_node(traj[i], dt=dt)
+
+            else:
+                G.add_node(traj[i], pos=(lat[i], lon[i]), dt=[time[i]])
+
+            if traj[i] in G.adj[traj[i - 1]]:
+                edge_data = G.get_edge_data(traj[i - 1], traj[i])
+                time_edge = time[i] - time[i - 1]
+                weight = (edge_data['weight'] + time_edge) / 2
+                G.add_edge(traj[i - 1], traj[i], weight=weight)
+
+            else:
+                time_edge = time[i] - time[i - 1]
+                G.add_edge(traj[i - 1], traj[i], weight=time_edge)
+    return G
 
 
 def generate_start_feature(df_, label_trajectory=TRAJECTORY):
@@ -327,10 +412,13 @@ def instance_crossover_augmentation(
     ----------
     df_ : dataframe
         The input trajectories data.
+
     restriction : str, optional, default 'destination only'
         Constraint used to generate new data.
+
     label_trajectory : str, optional, default 'trajectory'
         Label of the points sequences.
+
     frac : number, optional, default 0.5
         Represents the percentage to be exchanged.
 
@@ -356,7 +444,7 @@ def instance_crossover_augmentation(
         raise e
 
 
-def find_all_paths(graph, start_vertex, end_vertex, path=[]):
+def find_all_paths(graph, source, target, path=[]):
     """
     Find all paths from start_vertex to end_vertex in graph.
 
@@ -403,19 +491,18 @@ def find_all_paths(graph, start_vertex, end_vertex, path=[]):
     https://www.python-course.eu/pygraph.php
 
     """
+    path = path + [source]
 
-    path = path + [start_vertex]
-
-    if start_vertex == end_vertex:
+    if source == target:
         return [path]
 
-    if start_vertex not in graph:
+    if source not in graph:
         return []
 
     paths = []
-    for vertex in graph[start_vertex]:
+    for vertex in graph[source]:
         if vertex not in path:
-            extended_paths = find_all_paths(graph, vertex, end_vertex, path)
+            extended_paths = find_all_paths(graph, vertex, target, path)
 
             for p in extended_paths:
                 paths.append(p)
@@ -423,59 +510,140 @@ def find_all_paths(graph, start_vertex, end_vertex, path=[]):
     return paths
 
 
-def paths_to_df(
-    graph,
-    label_trajectory='trajectory',
-    min_path=5,
-    start_vertex=None,
-    end_vertex=None
-):
+def extract_latlon_and_datetime_in_graph(graphx, path):
     """
-    Generates a new dataframe with all the paths
-    found for a start point and an end point.
+    Extracts the space and time information
+    (latitude, longitude, datetime) that were
+    inserted in each node in the graph at the
+    time of its construction.
 
     Parameters
     ----------
-    graph : NetworkX DiGraph
+    graphx : NetworkX DiGraph
         Representation of points in a targeted manner.
 
-    label_trajectory : str, optional, default 'trajectory'
-        Feature name
+    path : list, np.ndarray
+        List of node to search in the graph.
+
+    Returns
+    -------
+    arrays
+        Space and time information contained in the transition graph.
+    """
+
+    pos = nx.get_node_attributes(graphx, 'pos')
+    dt = nx.get_node_attributes(graphx, 'dt')
+
+    lats, lons, times = [], [], []
+
+    lats.append(pos[path[0]][0])
+    lons.append(pos[path[0]][1])
+
+    random_date = random.sample(dt[path[0]], 1)
+    times.append(random_date[0])
+
+    for i in range(1, len(path)):
+        lats.append(pos[path[i]][0])
+        lons.append(pos[path[i]][1])
+
+        edge_data = graphx.get_edge_data(path[i - 1], path[i])
+        times.append(times[i - 1] + edge_data['weight'])
+
+    return lats, lons, times
+
+
+def transition_graph_augmentation_from_source_and_target(
+    aug_df,
+    graphx,
+    source,
+    target,
+    min_path=5,
+    label_nodes=LOCAL_LABEL
+):
+    """
+    Generation of unobserved trajectories
+    for all nodes or for a known origin
+    and/or destination in a transition graph.
+
+    Parameters
+    ----------
+    aug_df : dataframe
+        New dataframe to add the found trajectories.
+
+    graphx : NetworkX DiGraph
+        Representation of points in a targeted manner.
+
+    source : node
+        Starting node
+
+    target : node
+        Ending node
 
     min_path : number, optional, default 5
         Minimum length of a path.
 
-    start_vertex : node, optional, default None
-        Starting node for path.
+    label_nodes : str, optional, default 'local_label'
+        Label of the points sequences.
+    """
+    paths = find_all_paths(
+        graphx, source, target
+    )
 
-    end_vertex : node, optional, default None
-        Ending node for path.
+    if paths:
+        for path in paths:
+            if len(path) >= min_path:
+                arr = extract_latlon_and_datetime_in_graph(
+                    graphx, path
+                )
 
-    Return
-    ------
-    dataframe
-        All paths found in the graph.
+                lats, lons, times = arr
+                append_row(aug_df, columns={
+                    label_nodes: path,
+                    LATITUDE: lats,
+                    LONGITUDE: lons,
+                    DATETIME: times,
+                })
 
+
+def transition_graph_augmentation_all_vertex(
+    aug_df,
+    graphx,
+    source=None,
+    target=None,
+    min_path=5,
+):
     """
 
-    aug_df = pd.DataFrame(columns=[label_trajectory])
 
-    if start_vertex is None:
-        start_vertex = list(graph.adj.keys())
+    Parameters
+    ----------
+    aug_df : dataframe
+        New dataframe to add the found trajectories.
+
+    graphx : NetworkX DiGraph
+        Representation of points in a targeted manner.
+
+    source : node, optional, default None
+        Starting node
+
+    target : node, optional, default None
+        Ending node
+
+    min_path : number, optional, default 5
+        Minimum length of a path.
+    """
+    if source is None:
+        source = list(graphx.nodes)
     else:
-        start_vertex = [start_vertex]
+        source = [source]
 
-    if end_vertex is None:
-        end_vertex = list(graph.adj.keys())
+    if target is None:
+        target = list(graphx.nodes)
     else:
-        end_vertex = [end_vertex]
+        target = [target]
 
-    for v1 in start_vertex:
-        for v2 in end_vertex:
-            paths = find_all_paths(graph, v1, v2)
-            if paths:
-                for path in paths:
-                    if len(path) >= min_path:
-                        append_row(aug_df, columns={label_trajectory: path})
-
-    return aug_df
+    for s in source:
+        for t in target:
+            transition_graph_augmentation_from_source_and_target(
+                aug_df, graphx, s, t, min_path
+            )
