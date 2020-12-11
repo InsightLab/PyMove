@@ -316,8 +316,8 @@ def geometry_points_to_lat_and_lon(
 
 def lat_and_lon_decimal_degrees_to_decimal(
     move_data,
-    latitude=constants.LATITUDE,
-    longitude=constants.LONGITUDE,
+    latitude=LATITUDE,
+    longitude=LONGITUDE,
     inplace=True
 ):
     """
