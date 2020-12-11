@@ -3,7 +3,15 @@ import math
 import numpy as np
 from shapely.geometry import Point
 
-from pymove.utils import constants
+from pymove.utils.constants import (
+    DIST_TO_PREV,
+    EARTH_RADIUS,
+    GEOMETRY,
+    LATITUDE,
+    LONGITUDE,
+    SPEED_TO_PREV,
+    TIME_TO_PREV,
+)
 
 
 def lat_meters(lat):
@@ -38,6 +46,25 @@ def lat_meters(lat):
     meters_lgn = 111412.84 * math.cos(rlat) - 93.5 * math.cos(3 * rlat)
     meters = (meters_lat + meters_lgn) / 2
     return meters
+
+
+def meters_to_eps(radius_meters, earth_radius=EARTH_RADIUS):
+    """
+    Converts radius in meters to eps
+
+    Parameters
+    ----------
+    radius_meters : float
+        radius in meters
+    earth_radius : float, optional
+        radius of the earth in the location, by default EARTH_RADIUS
+
+    Returns
+    -------
+    float
+        radius in eps
+    """
+    return radius_meters / earth_radius
 
 
 def list_to_str(input_list, delimiter=','):
@@ -242,7 +269,7 @@ def y_to_lat_spherical(y):
 
 def geometry_points_to_lat_and_lon(
     move_data,
-    geometry_label=constants.GEOMETRY,
+    geometry_label=GEOMETRY,
     drop_geometry=True,
     inplace=True
 ):
@@ -276,13 +303,64 @@ def geometry_points_to_lat_and_lon(
         move_data = move_data[:]
 
     move_data = move_data[
-        move_data[constants.GEOMETRY].map(type) == Point
+        move_data[geometry_label].map(type) == Point
     ]
-    move_data[constants.LONGITUDE] = move_data[constants.GEOMETRY].map(lambda p: p.x)
-    move_data[constants.LATITUDE] = move_data[constants.GEOMETRY].map(lambda q: q.y)
+    move_data[LONGITUDE] = move_data[geometry_label].map(lambda p: p.x)
+    move_data[LATITUDE] = move_data[geometry_label].map(lambda q: q.y)
 
     if drop_geometry:
-        move_data.drop(constants.GEOMETRY, axis=1, inplace=True)
+        move_data.drop(geometry_label, axis=1, inplace=True)
+
+    if not inplace:
+        return move_data
+
+
+def lat_and_lon_decimal_degrees_to_decimal(
+    move_data,
+    latitude=LATITUDE,
+    longitude=LONGITUDE,
+    inplace=True
+):
+    """
+    Converts latitude and longitude format from
+    decimal degrees to decimal format.
+
+    Parameters
+    ----------
+    move_data : pymove.core.MoveDataFrameAbstract subclass.
+        Input trajectory data.
+
+    latitude: String, optional, default 'lat'.
+        Represents column name of the latitude column.
+
+    longitude: String, optional, default 'lon'.
+        Represents column name of the longitude column.
+
+    inplace: Boolean, optional, default True.
+        Whether the operation will be done in the original dataframe
+
+    Returns
+    -------
+    dataframe or None
+        A new dataframe with the converted feature if operation
+        not done inplace
+    """
+    if not inplace:
+        move_data = move_data[:]
+
+    def _decimal_degree_to_decimal(row):
+        if (row[latitude][-1:] == 'N'):
+            row[latitude] = float(row[latitude][:-1])
+        else:
+            row[latitude] = float(row[latitude][:-1]) * -1
+
+        if (row[longitude][-1:] == 'E'):
+            row[longitude] = float(row[longitude][:-1])
+        else:
+            row[longitude] = float(row[longitude][:-1]) * -1
+        return row
+
+    move_data = move_data.apply(_decimal_degree_to_decimal, axis=1)
 
     if not inplace:
         return move_data
@@ -290,7 +368,7 @@ def geometry_points_to_lat_and_lon(
 
 def ms_to_kmh(
     move_data,
-    label_speed=constants.SPEED_TO_PREV,
+    label_speed=SPEED_TO_PREV,
     new_label=None,
     inplace=True,
 ):
@@ -337,7 +415,7 @@ def ms_to_kmh(
 
 def kmh_to_ms(
     move_data,
-    label_speed=constants.SPEED_TO_PREV,
+    label_speed=SPEED_TO_PREV,
     new_label=None,
     inplace=True,
 ):
@@ -385,7 +463,7 @@ def kmh_to_ms(
 
 def meters_to_kilometers(
     move_data,
-    label_distance=constants.DIST_TO_PREV,
+    label_distance=DIST_TO_PREV,
     new_label=None,
     inplace=True,
 ):
@@ -432,7 +510,7 @@ def meters_to_kilometers(
 
 def kilometers_to_meters(
     move_data,
-    label_distance=constants.DIST_TO_PREV,
+    label_distance=DIST_TO_PREV,
     new_label=None,
     inplace=True,
 ):
@@ -479,7 +557,7 @@ def kilometers_to_meters(
 
 
 def seconds_to_minutes(
-    move_data, label_time=constants.TIME_TO_PREV, new_label=None, inplace=True
+    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
 ):
     """
     Convert values, in seconds, in label_distance column to minutes.
@@ -523,7 +601,7 @@ def seconds_to_minutes(
 
 
 def minute_to_seconds(
-    move_data, label_time=constants.TIME_TO_PREV, new_label=None, inplace=True
+    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
 ):
     """
     Convert values, in minutes, in label_distance column to seconds.
@@ -568,7 +646,7 @@ def minute_to_seconds(
 
 
 def minute_to_hours(
-    move_data, label_time=constants.TIME_TO_PREV, new_label=None, inplace=True
+    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
 ):
     """
     Convert values, in minutes, in label_distance column to hours.
@@ -613,7 +691,7 @@ def minute_to_hours(
 
 
 def hours_to_minute(
-    move_data, label_time=constants.TIME_TO_PREV, new_label=None, inplace=True
+    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
 ):
     """
     Convert values, in hours, in label_distance column to minute.
@@ -658,7 +736,7 @@ def hours_to_minute(
 
 
 def seconds_to_hours(
-    move_data, label_time=constants.TIME_TO_PREV, new_label=None, inplace=True
+    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
 ):
     """
     Convert values, in seconds, in label_distance column to hours.
@@ -702,7 +780,7 @@ def seconds_to_hours(
 
 
 def hours_to_seconds(
-    move_data, label_time=constants.TIME_TO_PREV, new_label=None, inplace=True
+    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
 ):
     """
     Convert values, in hours, in label_distance column to seconds.
