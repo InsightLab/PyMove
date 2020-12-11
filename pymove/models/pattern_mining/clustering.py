@@ -131,7 +131,8 @@ def dbscan_clustering(
     metric='euclidean',
     inplace=False
 ):
-    """Performs density based clustering on the move_dataframe according to cluster_by
+    """
+    Performs density based clustering on the move_dataframe according to cluster_by
 
     Parameters
     ----------

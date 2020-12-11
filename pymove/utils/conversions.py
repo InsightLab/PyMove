@@ -49,7 +49,8 @@ def lat_meters(lat):
 
 
 def meters_to_eps(radius_meters, earth_radius=EARTH_RADIUS):
-    """Converts radius in meters to eps
+    """
+    Converts radius in meters to eps
 
     Parameters
     ----------
