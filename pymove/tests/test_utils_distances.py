@@ -73,6 +73,16 @@ def test_haversine():
     assert_almost_equal(dist, expected)
 
 
+def test_euclidean_distance_in_meters():
+    expected = 0.56021344523276
+
+    dist = distances.euclidean_distance_in_meters(
+        -3.797864, -38.501597, -3.797890, -38.501681
+    )
+
+    assert_almost_equal(dist, expected)
+
+
 def test_MEDP():
     expected = 241.91923668814994
 

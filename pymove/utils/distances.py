@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance
@@ -56,6 +58,34 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=EARTH_RADIUS
         return (earth_radius * 2 * np.arctan2(a ** 0.5, (1 - a) ** 0.5)) * 1000
     except Exception as e:
         raise e
+
+
+def euclidean_distance_in_meters(lat1, lon1, lat2, lon2):
+    """
+    Calculate the euclidean distance in meters between two points.
+
+    Parameters
+    ----------
+    lat1 : float
+        latitude of the one point.
+    lon1 : float
+        longitude of the one point.
+    lat2 : float
+        latitude of the another point.
+    lon2 : float
+        longitude of the another point.
+
+    Returns
+    -------
+    float
+        euclidean distance in meters between the two points.
+    """
+
+    meters_by_radians = 6371
+    dist_eucl = math.sqrt((lat1 - lat2) ** 2 + (lon1 - lon2) ** 2)
+    dist_eucl_meters = dist_eucl * meters_by_radians
+
+    return dist_eucl_meters
 
 
 def nearest_points(traj1, traj2, latitude=LATITUDE, longitude=LONGITUDE):

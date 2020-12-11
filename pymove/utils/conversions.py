@@ -314,6 +314,57 @@ def geometry_points_to_lat_and_lon(
         return move_data
 
 
+def lat_and_lon_decimal_degrees_to_decimal(
+    move_data,
+    latitude=constants.LATITUDE,
+    longitude=constants.LONGITUDE,
+    inplace=True
+):
+    """
+    Converts latitude and longitude format from
+    decimal degrees to decimal format.
+
+    Parameters
+    ----------
+    move_data : pymove.core.MoveDataFrameAbstract subclass.
+        Input trajectory data.
+
+    latitude: String, optional, default 'lat'.
+        Represents column name of the latitude column.
+
+    longitude: String, optional, default 'lon'.
+        Represents column name of the longitude column.
+
+    inplace: Boolean, optional, default True.
+        Whether the operation will be done in the original dataframe
+
+    Returns
+    -------
+    dataframe or None
+        A new dataframe with the converted feature if operation
+        not done inplace
+    """
+    if not inplace:
+        move_data = move_data[:]
+
+    def _decimal_degree_to_decimal(row):
+        if (row[latitude][-1:] == 'N'):
+            row[latitude] = float(row[latitude][:-1])
+        else:
+            row[latitude] = float(row[latitude][:-1]) * -1
+
+        if (row[longitude][-1:] == 'E'):
+            row[longitude] = float(row[longitude][:-1])
+        else:
+            row[longitude] = float(row[longitude][:-1]) * -1
+        return row
+
+    move_data = move_data.apply(_decimal_degree_to_decimal, axis=1)
+
+    if not inplace:
+        return move_data
+
+
 def ms_to_kmh(
     move_data,
     label_speed=SPEED_TO_PREV,
