@@ -24,6 +24,7 @@ DEPENDENCIES = [
     'numpy',
     'pandas<=1.0.5',
     'psutil',
+    'python-dateutil',
     'pytz',
     'scikit-learn',
     'scipy',
