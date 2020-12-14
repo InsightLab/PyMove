@@ -5,3 +5,5 @@ flake8
 pytest
 coverage
 geopandas
+sphinx
+sphinx_rtd_theme
