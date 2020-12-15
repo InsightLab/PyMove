@@ -453,10 +453,10 @@ def _find_all_paths(graph, source, target, path=[]):
     graph : NetworkX DiGraph
         Representation of points in a targeted manner.
 
-    start_vertex : node
+    source : node
         Starting node for path.
 
-    end_vertex : node
+    target : node
         Ending node for path.
 
     path : list
