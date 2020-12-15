@@ -19,11 +19,11 @@ from pymove.utils.constants import (
 )
 from pymove.utils.data_augmentation import (
     _augmentation,
+    _extract_latlon_and_datetime_in_graph,
+    _find_all_paths,
+    _generate_arrays,
     append_row,
     augmentation_trajectories_df,
-    extract_latlon_and_datetime_in_graph,
-    find_all_paths,
-    generate_arrays,
     generate_destiny_feature,
     generate_start_feature,
     generate_transition_graphx,
@@ -426,7 +426,7 @@ def test_generate_arrays():
          'def-11112020010109', 'def-11112020010109', 'def-11112020010109',
          'def-11112020010109'], dtype=object)
 
-    arr = generate_arrays(move)
+    arr = _generate_arrays(move)
 
     assert_array_equal(arr[0], expected[0])
     assert_array_equal(arr[1], expected[1])
@@ -491,7 +491,7 @@ def test_find_all_paths():
 
     expected = [[1, 2, 3, 8, 9, 14], [1, 6, 7, 8, 9, 14], [1, 6, 7, 11, 12, 13, 14]]
 
-    paths = find_all_paths(G, 1, 14)
+    paths = _find_all_paths(G, 1, 14)
 
     assert_array_equal(paths, expected)
 
@@ -531,7 +531,7 @@ def test_extract_latlon_and_datetime_in_graph():
          pd.Timestamp('2020-01-01 06:20:40')]
     )
 
-    lat, lon, time = extract_latlon_and_datetime_in_graph(G, [5, 7, 9])
+    lat, lon, time = _extract_latlon_and_datetime_in_graph(G, [5, 7, 9])
 
     assert_array_equal(lat, expected[0])
     assert_array_equal(lon, expected[1])
