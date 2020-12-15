@@ -43,7 +43,7 @@ def append_row(df_, row=None, columns=None):
             df_.at[df_.shape[0], keys] = values
 
 
-def generate_arrays(df_, columns=None):
+def _generate_arrays(df_, columns=None):
     """
     Generates an arrays with the values
     for each column of the passed dataframe
@@ -136,7 +136,7 @@ def generate_transition_graphx(df_, label_nodes=LOCAL_LABEL):
     """
     G = nx.DiGraph()
 
-    lats, lons, times, trajectories = generate_arrays(
+    lats, lons, times, trajectories = _generate_arrays(
         df_, columns=[LATITUDE, LONGITUDE, DATETIME, label_nodes]
     )
 
@@ -444,7 +444,7 @@ def instance_crossover_augmentation(
         raise e
 
 
-def find_all_paths(graph, source, target, path=[]):
+def _find_all_paths(graph, source, target, path=[]):
     """
     Find all paths from start_vertex to end_vertex in graph.
 
@@ -502,7 +502,7 @@ def find_all_paths(graph, source, target, path=[]):
     paths = []
     for vertex in graph[source]:
         if vertex not in path:
-            extended_paths = find_all_paths(graph, vertex, target, path)
+            extended_paths = _find_all_paths(graph, vertex, target, path)
 
             for p in extended_paths:
                 paths.append(p)
@@ -510,7 +510,7 @@ def find_all_paths(graph, source, target, path=[]):
     return paths
 
 
-def extract_latlon_and_datetime_in_graph(graphx, path):
+def _extract_latlon_and_datetime_in_graph(graphx, path):
     """
     Extracts the space and time information
     (latitude, longitude, datetime) that were
@@ -562,8 +562,8 @@ def transition_graph_augmentation_from_source_and_target(
 ):
     """
     Generation of unobserved trajectories
-    for all nodes or for a known origin
-    and/or destination in a transition graph.
+    from a known origin and destination
+    in a transition graph.
 
     Parameters
     ----------
@@ -585,14 +585,14 @@ def transition_graph_augmentation_from_source_and_target(
     label_nodes : str, optional, default 'local_label'
         Label of the points sequences.
     """
-    paths = find_all_paths(
+    paths = _find_all_paths(
         graphx, source, target
     )
 
     if paths:
         for path in paths:
             if len(path) >= min_path:
-                arr = extract_latlon_and_datetime_in_graph(
+                arr = _extract_latlon_and_datetime_in_graph(
                     graphx, path
                 )
 
@@ -613,7 +613,9 @@ def transition_graph_augmentation_all_vertex(
     min_path=5,
 ):
     """
-
+    Generation of unobserved trajectories
+    for all nodes or for a known origin
+    and/or destination in a transition graph.
 
     Parameters
     ----------
