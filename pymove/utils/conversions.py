@@ -318,8 +318,7 @@ def geometry_points_to_lat_and_lon(
 def lat_and_lon_decimal_degrees_to_decimal(
     move_data,
     latitude=LATITUDE,
-    longitude=LONGITUDE,
-    inplace=True
+    longitude=LONGITUDE
 ):
     """
     Converts latitude and longitude format from
@@ -336,18 +335,12 @@ def lat_and_lon_decimal_degrees_to_decimal(
     longitude: String, optional, default 'lon'.
         Represents column name of the longitude column.
 
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
-
     Returns
     -------
     dataframe or None
         A new dataframe with the converted feature if operation
         not done inplace
     """
-    if not inplace:
-        move_data = move_data[:]
-
     def _decimal_degree_to_decimal(row):
         if (row[latitude][-1:] == 'N'):
             row[latitude] = float(row[latitude][:-1])
@@ -360,10 +353,7 @@ def lat_and_lon_decimal_degrees_to_decimal(
             row[longitude] = float(row[longitude][:-1]) * -1
         return row
 
-    move_data = move_data.apply(_decimal_degree_to_decimal, axis=1)
-
-    if not inplace:
-        return move_data
+    return move_data.apply(_decimal_degree_to_decimal, axis=1)
 
 
 def ms_to_kmh(

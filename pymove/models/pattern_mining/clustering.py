@@ -115,7 +115,7 @@ def gap_statistic(
         orig_disp = km.inertia_
         # Calculate gap statistic
         gap = np.log(np.mean(ref_disps)) - np.log(orig_disp)
-        # Assign this loop'srs gap statistic to gaps
+        # Assign this loop gap statistic to gaps
         gaps[k] = gap
 
     return gaps

@@ -92,14 +92,6 @@ pymove.utils.trajectories module
    :undoc-members:
    :show-inheritance:
 
-pymove.utils.transformations module
------------------------------------
-
-.. automodule:: pymove.utils.transformations
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pymove.utils.visual module
 --------------------------
 

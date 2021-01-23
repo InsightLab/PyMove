@@ -901,13 +901,15 @@ def join_with_home_by_id(
                 ids_without_home.append(idx)
             else:
                 home = df_home[filter_home].iloc[0]
-                lat_user = df_.at[idx, LATITUDE]
-                lon_user = df_.at[idx, LONGITUDE]
+                lat_user = df_.at[idx, LATITUDE].values
+                lon_user = df_.at[idx, LONGITUDE].values
 
                 # if user has a single tuple
                 if not isinstance(lat_user, np.ndarray):
+                    lat_home = home[LATITUDE].values
+                    lon_home = home[LONGITUDE].values
                     df_.at[idx, DIST_HOME] = haversine(
-                        lat_user, lon_user, home[LATITUDE], home[LONGITUDE]
+                        lat_user, lon_user, lat_home, lon_home
                     )
                     df_.at[idx, HOME] = home[label_address]
                     df_.at[idx, label_city] = home[label_city]

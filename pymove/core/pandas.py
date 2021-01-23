@@ -207,6 +207,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             if MoveDataFrame.has_columns(rename_):
                 self._mgr = rename_._mgr
+                self._item_cache = dict()
                 rename_ = None
             else:
                 raise AttributeError(
@@ -783,6 +784,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             sum size of id.
         int
             size of id.
+        int
+            starting index
 
         """
 
@@ -1699,6 +1702,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace:
             self._mgr = _sort_values._mgr
+            self._item_cache = dict()
             return None
         return PandasMoveDataFrame(data=_sort_values)
 
@@ -1745,6 +1749,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace:
             self._mgr = _reset_index._mgr
+            self._item_cache = dict()
             return None
         return PandasMoveDataFrame(data=_reset_index)
 
@@ -1812,6 +1817,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         )
         if inplace:
             self._mgr = _set_index._mgr
+            self._item_cache = dict()
             _set_index = None
         if _set_index is not None and MoveDataFrame.has_columns(_set_index):
             _set_index = PandasMoveDataFrame(data=_set_index)
@@ -1902,6 +1908,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace:
             self._mgr = _drop._mgr
+            self._item_cache = dict()
             _drop = None
         if _drop is not None and MoveDataFrame.has_columns(_drop):
             _drop = PandasMoveDataFrame(data=_drop)
@@ -1941,6 +1948,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace:
             self._mgr = _drop_duplicates._mgr
+            self._item_cache = dict()
             return None
         return PandasMoveDataFrame(data=_drop_duplicates)
 
@@ -2044,6 +2052,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace:
             self._mgr = _fillna._mgr
+            self._item_cache = dict()
             return None
         return PandasMoveDataFrame(data=_fillna)
 
@@ -2103,6 +2112,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if inplace:
             self._mgr = _dropna._mgr
+            self._item_cache = dict()
             _dropna = None
         if _dropna is not None and MoveDataFrame.has_columns(_dropna):
             _dropna = PandasMoveDataFrame(data=_dropna)

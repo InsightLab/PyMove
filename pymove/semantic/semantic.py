@@ -457,7 +457,7 @@ def filter_block_signal_by_time(
 
     try:
         if not inplace:
-            move_data = move_data[:]
+            move_data = move_data.copy()
 
         if BLOCK not in move_data:
             create_or_update_gps_block_signal(
@@ -467,7 +467,7 @@ def filter_block_signal_by_time(
         df_agg_tid = move_data.groupby(by=label_tid).agg(
             {TIME_TO_PREV: 'sum', BLOCK: 'sum'}
         )
-        filter_ = (df_agg_tid[TIME_TO_PREV] > max_time_stop) & (df_agg_tid[BLOCK])
+        filter_ = (df_agg_tid[TIME_TO_PREV] > max_time_stop) & (df_agg_tid[BLOCK] > 0)
 
         if filter_out:
             idx = df_agg_tid[~filter_].index
@@ -476,6 +476,7 @@ def filter_block_signal_by_time(
 
         filter_ = move_data[move_data[label_tid].isin(idx)].index
         move_data.drop(index=filter_, inplace=True)
+
         if not inplace:
             return move_data
 
@@ -528,7 +529,7 @@ def filter_longer_time_to_stop_segment_by_id(
     """
     try:
         if not inplace:
-            move_data = move_data[:]
+            move_data = move_data.copy()
 
         if label_segment_stop not in move_data:
             stay_point_detection.create_or_update_move_stop_by_dist_time(
@@ -541,7 +542,7 @@ def filter_longer_time_to_stop_segment_by_id(
 
         filter_ = df_agg_id_stop.groupby(
             [label_id], as_index=False
-        )[TIME_TO_PREV].idxmax()
+        ).idxmax()[TIME_TO_PREV]
 
         if filter_out:
             segments = df_agg_id_stop.loc[~df_agg_id_stop.index.isin(filter_)]

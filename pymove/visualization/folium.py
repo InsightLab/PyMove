@@ -1376,6 +1376,7 @@ def plot_stops(
 
 def plot_bbox(
     bbox_tuple,
+    base_map=None,
     tiles=TILES[0],
     color='red',
     save_map=False,
@@ -1389,6 +1390,8 @@ def plot_bbox(
     bbox_tuple : tuple.
         Represents a bound box, that is a tuple of 4 values with the
         min and max limits of latitude e longitude.
+    base_map: Folium map, optional, default None.
+        A folium map to plot the trajectories. If None a map will be created.
     tiles : String, optional, default 'OpenStreetMap'.
     color : String, optional, default 'red'.
         Represents color of lines on map.
@@ -1402,9 +1405,9 @@ def plot_bbox(
     folium map with bounding box
 
     """
-
-    m = folium.Map(tiles=tiles)
-    m.fit_bounds(
+    if base_map is None:
+        base_map = folium.Map(tiles=tiles)
+    base_map.fit_bounds(
         [[bbox_tuple[0], bbox_tuple[1]], [bbox_tuple[2], bbox_tuple[3]]]
     )
     points_ = [
@@ -1415,12 +1418,12 @@ def plot_bbox(
         (bbox_tuple[0], bbox_tuple[1]),
     ]
     polygon = folium.PolyLine(points_, weight=3, color=color)
-    polygon.add_to(m)
+    polygon.add_to(base_map)
 
     if save_map:
-        m.save(file)
+        base_map.save(file)
 
-    return m
+    return base_map
 
 
 def _format_tags(line, slice_):
@@ -1793,7 +1796,6 @@ def show_trajs_with_event(
                 subset=[user_id, 'nearby'],
                 inplace=True
             )
-
             # for each user nearby to event
             users = []
 
@@ -1801,7 +1803,6 @@ def show_trajs_with_event(
                 df_begin[user_datetime],
                 df_begin[user_id]
             ):
-
                 # making the time window for user
                 start_time = pd.to_datetime(time_user - delta_user)
                 end_time = pd.to_datetime(time_user + delta_user)
@@ -1831,7 +1832,6 @@ def show_trajs_with_event(
                     base_map=base_map,
                     slice_tags=slice_subject_show
                 )
-
             # add to folium maps list: (id event, folium map, quantity of user in map, df)
             folium_maps.append((base_map, pd.concat(users)))
 

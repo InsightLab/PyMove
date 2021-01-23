@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance
@@ -82,7 +80,7 @@ def euclidean_distance_in_meters(lat1, lon1, lat2, lon2):
     """
 
     meters_by_radians = 6371
-    dist_eucl = math.sqrt((lat1 - lat2) ** 2 + (lon1 - lon2) ** 2)
+    dist_eucl = np.sqrt((lat1 - lat2) ** 2 + (lon1 - lon2) ** 2)
     dist_eucl_meters = dist_eucl * meters_by_radians
 
     return dist_eucl_meters

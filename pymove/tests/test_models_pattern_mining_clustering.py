@@ -52,9 +52,9 @@ def test_gap_statistic():
     move_df = _default_move_df()
 
     expected = {
-        1: 15.003405379700,
-        2: 17.250022546200,
-        3: 17.503418909704
+        1: 15.0034053,
+        2: 16.9803748,
+        3: 17.4322918
     }
 
     inertia_dic = clustering.gap_statistic(
