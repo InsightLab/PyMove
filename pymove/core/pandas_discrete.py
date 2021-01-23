@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-from pymove.core.dataframe import MoveDataFrame
 from pymove.core.grid import Grid
 from pymove.core.pandas import PandasMoveDataFrame
 from pymove.preprocessing.filters import clean_trajectories_with_few_points
@@ -45,9 +44,9 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         columns, and renames it with the PyMove lib standard. After starts the
         attributes of the class.
 
-        - self._data : Represents trajectory data.
+        - self._mgr : Represents trajectory data.
         - self._type : Represents the type of layer below the data structure.
-        - self.last_operation : Represents the last operation perfomed.
+        - self.last_operation : Represents the last operation performed.
 
         Parameters
         ----------
@@ -73,40 +72,17 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         """
 
-        super()
-
-        if isinstance(data, dict):
-            data = pd.DataFrame.from_dict(data)
-        elif (
-            (isinstance(data, list) or isinstance(data, np.ndarray))
-            and len(data) >= 5
-        ):
-            zip_list = [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, local_label]
-            for i in range(len(data[0])):
-                try:
-                    zip_list[i] = zip_list[i]
-                except KeyError:
-                    zip_list.append(i)
-            data = pd.DataFrame(data, columns=zip_list)
-
-        mapping_columns = MoveDataFrame.format_labels(
-            traj_id, latitude, longitude, datetime
+        super(PandasDiscreteMoveDataFrame, self).__init__(
+            data=data,
+            latitude=latitude,
+            longitude=longitude,
+            datetime=datetime,
+            traj_id=traj_id
         )
-        tdf = data.rename(columns=mapping_columns)
 
-        if local_label not in tdf:
+        if local_label not in self:
             raise ValueError(
                 '{} column not in dataframe'.format(local_label)
-            )
-
-        if MoveDataFrame.has_columns(tdf):
-            MoveDataFrame.validate_move_data_frame(tdf)
-            self._data = tdf
-            self._type = TYPE_PANDAS
-            self.last_operation = None
-        else:
-            raise AttributeError(
-                'Couldn\'t instantiate MoveDataFrame because data has missing columns'
             )
 
     def discretize_based_grid(self, region_size=1000):
@@ -117,20 +93,15 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         Parameters
         ----------
         region_size: number, optional, default 1000
-            Size of grid'srs cell.
+            Size of grid cell.
         """
 
         operation = begin_operation('discretize based on grid')
         print('\nDiscretizing dataframe...')
-        try:
-            grid = Grid(self, cell_size=region_size)
-            grid.create_update_index_grid_feature(self)
-            self.reset_index(drop=True, inplace=True)
-            self.last_operation = end_operation(operation)
-
-        except Exception as e:
-            self.last_operation = end_operation(operation)
-            raise e
+        grid = Grid(self, cell_size=region_size)
+        grid.create_update_index_grid_feature(self)
+        self.reset_index(drop=True, inplace=True)
+        self.last_operation = end_operation(operation)
 
     def generate_prev_local_features(
         self, label_id=TRAJ_ID, local_label=LOCAL_LABEL, sort=True, inplace=True
@@ -141,7 +112,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         Parameters
         ----------
         label_id : str, optional, default 'id'.
-            Represents name of column of trajectory'srs id.
+            Represents name of column of trajectory id.
         local_label : String, optional, default 'local_label'
             Indicates name of column of place labels on symbolic trajectory.
         If sort == True the dataframe will be sorted, default True.
@@ -222,7 +193,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         Parameters
         ----------
         label_id : str, optional, default 'id'.
-            Represents name of column of trajectory'srs id.
+            Represents name of column of trajectory id.
         local_label : String, optional, default 'local_label'
             Indicates name of column of place labels on symbolic trajectory.
         mean_coef : float

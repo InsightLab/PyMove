@@ -1028,11 +1028,10 @@ def test_generate_speed_features():
     expected = DataFrame(
         data=[
             [
-                0,
+                1,
                 39.984094,
                 116.319236,
                 Timestamp('2008-10-23 05:53:05'),
-                1,
                 nan,
                 13.690153134343689,
                 nan,
@@ -1042,7 +1041,6 @@ def test_generate_speed_features():
                 39.984198,
                 116.319322,
                 Timestamp('2008-10-23 05:53:06'),
-                1,
                 13.690153134343689,
                 nan,
                 nan,
@@ -1052,28 +1050,25 @@ def test_generate_speed_features():
                 39.984224,
                 116.319402,
                 Timestamp('2008-10-23 05:53:11'),
-                2,
                 nan,
                 nan,
                 nan,
             ],
             [
-                3,
+                2,
                 39.984224,
                 116.319402,
                 Timestamp('2008-10-23 05:53:11'),
-                2,
                 nan,
                 nan,
                 nan,
             ],
         ],
         columns=[
-            'index',
+            'id',
             'lat',
             'lon',
             'datetime',
-            'id',
             'speed_to_prev',
             'speed_to_next',
             'speed_prev_to_next',
@@ -1257,7 +1252,8 @@ def test_astype():
         columns=['lat', 'lon', 'datetime', 'id'],
         index=[0, 1, 2, 3],
     )
-    assert_frame_equal(move_df.astype('int64'), expected)
+    result = move_df.astype('int64')
+    assert_frame_equal(result, expected)
 
 
 def test_sort_values():
@@ -1657,7 +1653,7 @@ def test_convert_to():
 
     assert move_df._type == TYPE_PANDAS
     assert isinstance(move_df, PandasMoveDataFrame)
-    assert isinstance(move_df._data, DataFrame)
+    assert isinstance(move_df, DataFrame)
 
     move_df_dask = move_df.convert_to('dask')
     assert move_df_dask._type == TYPE_DASK
@@ -1666,7 +1662,7 @@ def test_convert_to():
 
     assert move_df._type == TYPE_PANDAS
     assert isinstance(move_df, PandasMoveDataFrame)
-    assert isinstance(move_df._data, DataFrame)
+    assert isinstance(move_df, DataFrame)
 
 
 def test_get_type():

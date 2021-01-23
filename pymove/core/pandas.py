@@ -86,6 +86,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if isinstance(data, dict):
             data = pd.DataFrame.from_dict(data)
+        elif isinstance(data, pd.DataFrame):
+            data = pd.DataFrame(data)
         elif (
             isinstance(data, list) or isinstance(data, np.ndarray)
         ):
@@ -104,7 +106,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if MoveDataFrame.has_columns(tdf):
             MoveDataFrame.validate_move_data_frame(tdf)
-            super(PandasMoveDataFrame, self).__init__(tdf, columns=columns)
+            super(PandasMoveDataFrame, self).__init__(tdf)
             self._type = TYPE_PANDAS
             self.last_operation = None
         else:
@@ -236,6 +238,58 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             return PandasMoveDataFrame(item)
         return item
 
+    def head(self, n=5):
+        """
+        Return the first n rows.
+
+        This function returns the first n rows for the object
+        based on position. It is useful for quickly testing if
+        your object has the right type of data in it.
+
+        Parameters
+        ----------
+        n : int, default 5.
+            Number of rows to select.
+
+        Returns
+        -------
+        same type as caller
+            The first n rows of the caller object.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.head.html
+
+        """
+        head_ = super().head(n=n)
+        return PandasMoveDataFrame(data=head_)
+
+    def tail(self, n=5):
+        """
+        Return the last n rows.
+
+        This function returns the last n rows for the object
+        based on position. It is useful for quickly testing if
+        your object has the right type of data in it.
+
+        Parameters
+        ----------
+        n : int, default 5.
+            Number of rows to select.
+
+        Returns
+        -------
+        same type as caller
+            The last n rows of the caller object.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.tail.html
+
+        """
+        tail_ = super().tail(n=n)
+        return PandasMoveDataFrame(data=tail_)
+
     def get_users_number(self):
         """
         Check and return number of users in trajectory data.
@@ -322,6 +376,45 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return PandasDiscreteMoveDataFrame(
             self, LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, local_label
         )
+
+    def copy(self, deep=True):
+        """
+        Make a copy of this object’s indices and data.
+
+        When deep=True (default), a new object will be created with a copy
+        of the calling object data and indices. Modifications to the
+        data or indices of the copy will not be reflected in the original
+        object (see notes below).
+        When deep=False, a new object will be created without copying the calling
+        object data or index (only references to the data and index are copied).
+        Any changes to the data of the original will be reflected in the
+        shallow copy (and vice versa).
+
+        Parameters
+        ----------
+        deep : bool, default True
+            Make a deep copy, including a copy of the data and the indices.
+            With deep=False neither the indices nor the data are copied.
+
+        Returns
+        -------
+        Series or DataFrame
+            Object type matches caller.
+
+        Notes
+        -----
+        When deep=True, data is copied but actual Python objects will not be
+        copied recursively, only the reference to the object.
+        This is in contrast to copy.deepcopy in the Standard Library, which
+        recursively copies object data (see examples below).
+        While Index objects are copied when deep=True, the underlying
+        numpy array is not copied for performance reasons. Since Index is
+        immutable, the underlying data can be safely shared and a
+        copy is not needed.
+
+        """
+        copy_ = super().copy(deep=deep)
+        return PandasMoveDataFrame(data=copy_)
 
     def generate_tid_based_on_id_datetime(
         self, str_format='%Y%m%d%H', sort=True, inplace=True
@@ -712,8 +805,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ids = data_.index.unique()
         sum_size_id = 0
         size_id = 0
+        idx = None
 
-        return ids, sum_size_id, size_id
+        return ids, sum_size_id, size_id, idx
 
     def _return_generated_data(self, data_, columns, operation, inplace):
         """
@@ -738,8 +832,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         print('...Reset index...\n')
-        data_.reset_index(inplace=True)
 
+        data_.reset_index(inplace=True)
         if inplace:
             self.last_operation = end_operation(operation)
             return None
@@ -784,17 +878,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         operation = begin_operation('generate_dist_time_speed_features')
         columns = set(self.columns)
-        idx, size_id, sum_size_id = None, None, None
+        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
+            self, sort, label_id
+        )
 
         try:
             message = '\nCreating or updating distance, time and speed features'
             message += ' in meters by seconds\n'
             print(
                 message
-            )
-
-            ids, sum_size_id, size_id = self._prepare_generate_data(
-                self, sort, label_id
             )
 
             # create new feature to distance
@@ -882,23 +974,18 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         operation = begin_operation('generate_dist_features')
         columns = set(self.columns)
-        idx, size_id, sum_size_id = None, None, None
+        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
+            self, sort, label_id
+        )
 
         try:
             print('\nCreating or updating distance features in meters...\n')
-
-            ids, sum_size_id, size_id = self._prepare_generate_data(
-                self, sort, label_id
-            )
 
             # create ou update columns
             self[DIST_TO_PREV] = label_dtype(-1.0)
             self[DIST_TO_NEXT] = label_dtype(-1.0)
             self[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
 
-            ids = self.index.unique()
-            sum_size_id = 0
-            size_id = 0
             for idx in progress_bar(ids, desc='Generating distance features'):
                 curr_lat = self.at[idx, LATITUDE]
                 curr_lon = self.at[idx, LONGITUDE]
@@ -978,25 +1065,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         operation = begin_operation('generate_time_features')
         columns = set(self.columns)
-        idx, size_id, sum_size_id = None, None, None
+        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
+            self, sort, label_id
+        )
 
         try:
             print(
                 '\nCreating or updating time features seconds\n'
             )
 
-            ids, sum_size_id, size_id = self._prepare_generate_data(
-                self, sort, label_id
-            )
-
             # create new feature to time
             self[TIME_TO_PREV] = label_dtype(-1.0)
             self[TIME_TO_NEXT] = label_dtype(-1.0)
             self[TIME_PREV_TO_NEXT] = label_dtype(-1.0)
-
-            ids = self.index.unique()
-            sum_size_id = 0
-            size_id = 0
 
             for idx in progress_bar(
                 ids, desc='Generating time features'
@@ -1091,7 +1172,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
             d_prev_next = dists[DIST_TO_PREV] + dists[DIST_TO_NEXT]
             self[SPEED_PREV_TO_NEXT] = d_prev_next / times[TIME_PREV_TO_NEXT]
-
+            self._prepare_generate_data(
+                self, sort, label_id
+            )
             return self._return_generated_data(
                 self, columns, operation, inplace
             )
@@ -1511,7 +1594,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
-    def astype(self, dtype, copy=True, errors='raise', **kwargs):
+    def astype(self, dtype, copy=True, errors='raise'):
         """
         Cast a pandas object to a specified dtype.
 
@@ -1521,7 +1604,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Use a numpy.dtype or Python type to cast entire pandas object
             to the same type. Alternatively, use {col: dtype, …},
             where col is a column label and dtype is a numpy.dtype
-            or Python type to cast one or more of the DataFrame'srs
+            or Python type to cast one or more of the DataFrame
             columns to column-specific types.
         copy: bool, optional, default None
             Return a copy when copy=True (be very careful setting
@@ -1531,8 +1614,6 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Control raising of exceptions on invalid data for provided dtype.
             - raise : allow exceptions to be raised
             - ignore : suppress exceptions. On error return original object
-        kwargs:
-             keyword arguments to pass on to the constructor
 
         Returns
         -------
@@ -1562,11 +1643,110 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     'Could not change lat, lon, and datetime type.'
                 )
 
-        _astype = super().astype(dtype, copy, errors, **kwargs)
-        if _astype is not None and MoveDataFrame.has_columns(_astype):
-            _astype = PandasMoveDataFrame(data=_astype)
+        return super().astype(dtype=dtype, copy=copy, errors=errors)
 
-        return _astype
+    def sort_values(
+        self,
+        by,
+        axis=0,
+        ascending=True,
+        inplace=False,
+        kind='quicksort',
+        na_position='last',
+    ):
+        """
+        Sorts the values of the _data, along an axis.
+
+        Parameters
+        ----------
+        by: str or list of str
+            Name or list of names to sort the _data by.
+        axis: Integer, optional, default None, {index (0), columns (1)}
+            if set to 0 or 'index', will count for each column.
+            if set to 1 or 'columns', will count for each row
+        ascending: boolean or list of boolean, default True.
+            Sort ascending vs. descending. Specify list for
+            multiple sort orders.
+            If this is a list of bool, must match the length of the by.
+        inplace: Boolean, optional, default False
+            if set to true the original dataframe will be altered,
+            the duplicates will be dropped in place,
+            otherwise the operation will be made in a copy,
+            that will be returned.
+        kind: 'quicksort', 'mergesort', 'heapsort', default 'quicksort'.
+            Choice of sorting algorithm.
+            For DataFrames, this option is only applied when sorting
+            on a single column or label.
+        na_position: 'first', 'last'.
+            If 'first' puts NaNs at the beginning;
+            If last puts NaNs at the end.
+
+        Returns
+        -------
+        PandasDataframe or None
+            Object with sorted values or None if ``inplace=True``.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html
+
+        """
+
+        _sort_values = super().sort_values(
+            by=by, axis=axis, ascending=ascending,
+            inplace=False, kind=kind, na_position=na_position
+        )
+
+        if inplace:
+            self._mgr = _sort_values._mgr
+            return None
+        return PandasMoveDataFrame(data=_sort_values)
+
+    def reset_index(
+        self, level=None, drop=False, inplace=False, col_level=0, col_fill=''
+    ):
+        """
+        Resets the DataFrame's index, and use the default one. One or more
+        levels can be removed, if the DataFrame has a MultiIndex.
+
+        Parameters
+        ----------
+        level: int, str, tuple, or list. Optional, default None
+            Only the levels specify will be removed from the index.
+            If set to None, all levels are removed.
+        drop: boolean, optional, default False
+            Do not try to insert index into dataframe columns.
+            This resets the index to the default integer index.
+        inplace: bool, optional, default False
+            Modify the DataFrame in place (do not create a new object).
+        col_level: int or str, default 0
+            If the columns have multiple levels, determines which level
+            the labels are inserted into.
+            By default it is inserted into the first level..
+        col_fill: object, default ''
+            If the columns have multiple levels, determines how
+            the other levels are named.
+            If None then the index name is repeated.
+
+        Returns
+        -------
+        PandasMoveDataFrame or None
+            Object with a resetted indexes or None if ``inplace=True``.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html
+
+        """
+
+        _reset_index = super().reset_index(
+            level=level, drop=drop, inplace=False, col_level=col_level, col_fill=col_fill
+        )
+
+        if inplace:
+            self._mgr = _reset_index._mgr
+            return None
+        return PandasMoveDataFrame(data=_reset_index)
 
     def set_index(
         self,
@@ -1588,13 +1768,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             array of the same length as the calling DataFrame,
             or a list containing an arbitrary combination of
             column keys and arrays.
-        drop: bool, optional (True by defautl)
+        drop: bool, optional (True by default)
             Delete columns to be used as the new index.
-        append: bool, optional (False by defautl)
+        append: bool, optional (False by default)
             Whether to append columns to existing index.
-        inplace: bool, optional (False by defautl)
+        inplace: bool, optional (False by default)
             Modify the DataFrame in place (do not create a new object).
-        verify_integrity: bool, optional (False by defautl)
+        verify_integrity: bool, optional (False by default)
             Check the new index for duplicates.
             Otherwise defer the check until necessary.
             Setting to False will improve the performance of this method.
@@ -1621,14 +1801,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             else:
                 aux = set(keys)
             columns = {LATITUDE, LONGITUDE, DATETIME}
-            print(aux, columns)
             if aux & columns:
                 raise AttributeError(
                     'Could not change lat, lon, and datetime type.'
                 )
 
         _set_index = super().set_index(
-            keys, drop, append, inplace=False, verify_integrity=verify_integrity
+            keys=keys, drop=drop, append=append,
+            inplace=False, verify_integrity=verify_integrity
         )
         if inplace:
             self._mgr = _set_index._mgr
@@ -1661,15 +1841,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         axis: str or int, optional, default 0
             Whether to drop labels from the index (0 or 'index')
             or columns (1 or 'columns').
-        index: str or array of str, optional (None by defautl)
+        index: str or array of str, optional (None by default)
             Alternative to specifying axis
             (labels, axis=0 is equivalent to index=labels).
-        columns: str or array of str, optional (None by defautl)
+        columns: str or array of str, optional (None by default)
             Alternative to specifying axis
             (labels, axis=1 is equivalent to columns=labels).
-        level: int or str, optional (None by defautl)
+        level: int or str, optional (None by default)
             For MultiIndex, level from which the labels will be removed.
-        inplace: bool, optional (False by defautl)
+        inplace: bool, optional (False by default)
             If True, do operation inplace and return None.
             Otherwise, make a copy, do operations and return.
         errors:'ignore', 'raise', optional, default 'raise'
@@ -1716,7 +1896,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 )
 
         _drop = super().drop(
-            labels, axis, index, columns, level, inplace=False, errors=errors
+            labels=labels, axis=axis, index=index, columns=columns,
+            level=level, inplace=False, errors=errors
         )
 
         if inplace:
@@ -1726,6 +1907,145 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             _drop = PandasMoveDataFrame(data=_drop)
 
         return _drop
+
+    def drop_duplicates(self, subset=None, keep='first', inplace=False):
+        """
+        Uses the pandas's function drop_duplicates, to remove duplicated rows
+        from data.
+
+        Parameters
+        ----------
+        subset: int or str, optional, default None
+            Only consider certain columns for identifying duplicates,
+            by default use all of the columns
+        keep: 'first', 'lasts', False, optional, default 'first'
+            - first : Drop duplicates except for the first occurrence.
+            - last : Drop duplicates except for the last occurrence.
+            - False : Drop all duplicates.
+        inplace: bool, optional, default False
+            Whether to drop duplicates in place or to return a copy
+
+        Returns
+        -------
+        PandasMoveDataFrame or None
+            Object with duplicated rows or None if ``inplace=True``.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html
+
+        """
+        _drop_duplicates = super().drop_duplicates(
+            subset=subset, keep=keep, inplace=False
+        )
+
+        if inplace:
+            self._mgr = _drop_duplicates._mgr
+            return None
+        return PandasMoveDataFrame(data=_drop_duplicates)
+
+    def shift(self, periods=1, freq=None, axis=0, fill_value=None):
+        """
+        Shift index by desired number of periods with an optional time freq.
+
+        Parameters
+        ----------
+        periods: int, optional, default 1
+            Number of periods to shift. Can be positive or negative.
+        freq: pandas.DateOffset, pandas.Timedelta or str, optional, default None
+            Offset to use from the series module or time rule (e.g. 'EOM').
+            If freq is specified then the index values are shifted but
+            the data is not realigned. That is, use freq if you would like
+            to extend the index when shifting and preserve the original data.
+            When freq is not passed, shift the index without realigning the
+            data. If freq is passed (in this case, the index must be
+            date or datetime, or it will raise a NotImplementedError),
+            the index will be increased using the periods and the freq.
+        axis: 0 or 'index', 1 or 'columns', None, optional, default 0
+            Shift direction.
+        fill_value: object, optional, default None
+            The scalar value to use for newly introduced missing values.
+            The default depends on the dtype of self.
+            For numeric data, np.nan is used.
+            For datetime, timedelta, or period data, etc.
+            NaT is used. For extension dtypes, self.dtype.na_value is used.
+
+        Returns
+        -------
+        PandasMoveDataFrame
+            A copy of the original object, shifted.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.shift.html
+
+        """
+        _shift = super().shift(
+            periods=periods, freq=freq, axis=axis, fill_value=fill_value
+        )
+        return PandasMoveDataFrame(data=_shift)
+
+    def fillna(
+        self,
+        value=None,
+        method=None,
+        axis=None,
+        inplace=False,
+        limit=None,
+        downcast=None,
+    ):
+        """
+        Fill NA/NaN values using the specified method.
+
+        Parameters
+        ----------
+        value : scalar, dict, Series, or DataFrame
+            Value to use to fill holes (e.g. 0), alternately a
+            dict/Series/DataFrame of values specifying which value to use for
+            each index (for a Series) or column (for a DataFrame).  Values not
+            in the dict/Series/DataFrame will not be filled. This value cannot
+            be a list.
+        method : {'backfill', 'bfill', 'pad', 'ffill', None}, default None
+            Method to use for filling holes in reindexed Series
+            pad / ffill: propagate last valid observation forward to next valid
+            backfill / bfill: use next valid observation to fill gap.
+        axis : {0 or 'index', 1 or 'columns'}
+            Axis along which to fill missing values.
+        inplace : bool, default False
+            If True, fill in-place. Note: this will modify any
+            other views on this object (e.g., a no-copy slice for a column in a
+            DataFrame).
+        limit : int, default None
+            If method is specified, this is the maximum number of consecutive
+            NaN values to forward/backward fill. In other words, if there is
+            a gap with more than this number of consecutive NaNs, it will only
+            be partially filled. If method is not specified, this is the
+            maximum number of entries along the entire axis where NaNs will be
+            filled. Must be greater than 0 if not None.
+        downcast : dict, default is None
+            A dict of item->dtype of what to downcast if possible,
+            or the str 'infer' which will try to downcast to an appropriate
+            equal type (e.g. float64 to int64 if possible).
+
+        Returns
+        -------
+        PandasMoveDataFrame or None
+            Object with missing values filled or None if ``inplace=True``.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.fillna.html
+
+        """
+        _fillna = super().fillna(
+            value=value, method=method, axis=axis,
+            inplace=False, limit=limit, downcast=downcast
+        )
+
+        if inplace:
+            self._mgr = _fillna._mgr
+            return None
+        return PandasMoveDataFrame(data=_fillna)
 
     def dropna(
         self, axis=0, how='any', thresh=None, subset=None, inplace=False
@@ -1778,462 +2098,374 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                         'Could not drop columns lat, lon, and datetime.'
                     )
 
-        _dropna = super().dropna(axis, how, thresh, subset, inplace=False)
+        _dropna = super().dropna(
+            axis=axis, how=how, thresh=thresh, subset=subset, inplace=False)
 
         if inplace:
-            self._mgr = _dropna.mgr
+            self._mgr = _dropna._mgr
             _dropna = None
         if _dropna is not None and MoveDataFrame.has_columns(_dropna):
             _dropna = PandasMoveDataFrame(data=_dropna)
 
         return _dropna
 
-    # def sample(
-    #     self,
-    #     n=None,
-    #     frac=None,
-    #     replace=False,
-    #     weights=None,
-    #     random_state=None,
-    #     axis=None,
-    # ):
-    #     """
-    #     Return a random sample of items from an axis of object.
-
-    #     You can use `random_state` for reproducibility.
-
-    #     Parameters
-    #     ----------
-    #     n : int, optional
-    #         Number of items from axis to return. Cannot be used with `frac`.
-    #         Default = 1 if `frac` = None.
-    #     frac : float, optional
-    #         Fraction of axis items to return. Cannot be used with `n`.
-    #     replace : bool, default False
-    #         Allow or disallow sampling of the same row more than once.
-    #     weights : str or ndarray-like, optional
-    #         Default 'None' results in equal probability weighting.
-    #         If passed a Series, will align with target object on index. Index
-    #         values in weights not found in sampled object will be ignored and
-    #         index values in sampled object not in weights will be assigned
-    #         weights of zero.
-    #         If called on a DataFrame, will accept the name of a column
-    #         when axis = 0.
-    #         Unless weights are a Series, weights must be same length as axis
-    #         being sampled.
-    #         If weights do not sum to 1, they will be normalized to sum to 1.
-    #         Missing values in the weights column will be treated as zero.
-    #         Infinite values not allowed.
-    #     random_state : int or numpy.random.RandomState, optional
-    #         Seed for the random number generator (if int), or numpy RandomState
-    #         object.
-    #     axis : {0 or 'index', 1 or 'columns', None}, default None
-    #         Axis to sample. Accepts axis number or name. Default is stat axis
-    #         for given data type (0 for Series and DataFrames).
-
-    #     Returns
-    #     -------
-    #     PandasMoveDataFrame
-    #         A new object of same type as caller containing `n` items randomly
-    #         sampled from the caller object.
-
-    #     See Also
-    #     --------
-    #     numpy.random.choice: Generates a random sample from a given 1-D numpy
-    #         array.
-
-    #     Notes
-    #     -----
-    #     If `frac` > 1, `replacement` should be set to `True`.
-
-    #     References
-    #     ----------
-    #     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sample.html
-
-    #     """
-    #     operation = begin_operation('sample')
-    #     _sample = self._data.sample(
-    #         n, frac, replace, weights, random_state, axis
-    #     )
-    #     _sample = PandasMoveDataFrame(data=_sample)
-    #     self.last_operation = end_operation(operation)
-
-    #     return _sample
-
-    # def isin(self, values):
-    #     """
-    #     Determines whether each element in the DataFrame is contained in values.
-
-    #     values : iterable, Series, DataFrame or dict
-    #         The result will only be true at a location if all the labels match.
-    #         If values is a Series, that'srs the index.
-    #         If values is a dict, the keys must be the
-    #         column names, which must match.
-    #         If values is a DataFrame, then both the
-    #         index and column labels must match.
-
-    #     Returns
-    #     -------
-    #     DataFrame:
-    #         DataFrame of booleans showing whether
-    #         each element in the DataFrame is contained in values
-
-    #     References
-    #     ----------
-    #     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.isin.html
-
-    #     """
-
-    #     if isinstance(values, PandasMoveDataFrame):
-    #         values = values._data
-
-    #     operation = begin_operation('isin')
-    #     _isin = self._data.isin(values)
-    #     self.last_operation = end_operation(operation)
-
-    #     return _isin
-
-    # def append(
-    #     self, other, ignore_index=False, verify_integrity=False, sort=None
-    # ):
-    #     """
-    #     Append rows of other to the end of caller, returning a new object.
-    #     Columns in other that are not in the caller are added as new columns.
-
-    #     Parameters
-    #     ----------
-    #     other : DataFrame or Series/dict-like object, or list of these
-    #         The data to append.
-    #     ignore_index : bool, optional, default False
-    #         If True, do not use the index labels.
-    #     verify_integrity : bool, optional, default False
-    #         If True, raise ValueError on creating index with duplicates.
-    #     sort : bool, optional, default None
-    #         Sort columns if the columns of self and other are not aligned.
-    #         The default sorting is deprecated and will
-    #         change to not-sorting in a future version of pandas.
-    #         Explicitly pass sort=True to silence the warning and sort.
-    #         Explicitly pass sort=False to silence the warning and not sort.
-
-    #     Returns
-    #     -------
-    #     PandasMoveDataFrame
-    #         A dataframe containing rows from both the caller and `other`.
-
-    #     References
-    #     ----------
-    #     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.append.html
-
-    #     """
-
-    #     operation = begin_operation('append')
-
-    #     if isinstance(other, PandasMoveDataFrame):
-    #         other = other._data
-
-    #     _append = self._data.append(
-    #         other, ignore_index, verify_integrity, sort
-    #     )
-    #     _append = PandasMoveDataFrame(data=_append)
-    #     self.last_operation = end_operation(operation)
-
-    #     return _append
-
-    # def join(
-    #     self, other, on=None, how='left', lsuffix='', rsuffix='', sort=False
-    # ):
-    #     """
-    #     Join columns of other, returning a new object.
-
-    #     Join columns with `other` PandasMoveDataFrame either on index or
-    #     on a key column. Efficiently join multiple DataFrame objects
-    #     by index at once by passing a list.
-
-    #     Parameters
-    #     ----------
-    #     other : DataFrame, Series, or list of DataFrame
-    #         Index should be similar to one of the columns in this one. If a
-    #         Series is passed, its name attribute must be set, and that will be
-    #         used as the column name in the resulting joined DataFrame.
-    #     on : str, list of str, or array-like, optional
-    #         Column or index level name(srs) in the caller to join on the index
-    #         in `other`, otherwise joins index-on-index. If multiple
-    #         values given, the `other` DataFrame must have a MultiIndex. Can
-    #         pass an array as the join key if it is not already contained in
-    #         the calling DataFrame. Like an Excel VLOOKUP operation.
-    #     how : {'left', 'right', 'outer', 'inner'}, default 'left'
-    #         How to handle the operation of the two objects.
-
-    #         * left: use calling frame'srs index (or column if on is specified)
-    #         * right: use `other`'srs index.
-    #         * outer: form union of calling frame'srs index (or column if on is
-    #         specified) with `other`'srs index, and sort it.
-    #         lexicographically.
-    #         * inner: form intersection of calling frame'srs index (or column if
-    #         on is specified) with `other`'srs index, preserving the order
-    #         of the calling'srs one.
-    #     lsuffix : str, default ''
-    #         Suffix to use from left frame'srs overlapping columns.
-    #     rsuffix : str, default ''
-    #         Suffix to use from right frame'srs overlapping columns.
-    #     sort : bool, default False
-    #         Order result DataFrame lexicographically by the join key. If False,
-    #         the order of the join key depends on the join type (how keyword).
-
-    #     Returns
-    #     -------
-    #     PandasMoveDataFrame
-    #         A dataframe containing columns from both the caller and `other`.
-
-    #     Notes
-    #     -----
-    #     Parameters `on`, `lsuffix`, and `rsuffix` are not supported when
-    #     passing a list of `DataFrame` objects.
-
-    #     References
-    #     ----------
-    #     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.join.html
-
-    #     """
-
-    #     operation = begin_operation('join')
-
-    #     if isinstance(other, PandasMoveDataFrame):
-    #         other = other._data
-
-    #     _join = self._data.join(other, on, how, lsuffix, rsuffix, sort)
-    #     _join = PandasMoveDataFrame(data=_join)
-    #     self.last_operation = end_operation(operation)
-
-    #     return _join
-
-    # def merge(
-    #         self,
-    #         right,
-    #         how='inner',
-    #         on=None,
-    #         left_on=None,
-    #         right_on=None,
-    #         left_index=False,
-    #         right_index=False,
-    #         sort=False,
-    #         suffixes=('_x', '_y'),
-    #         copy=True,
-    #         indicator=False,
-    #         validate=None
-    # ):
-    #     """
-    #     Merge DataFrame or named Series objects with a database-style join.
-
-    #     The join is done on columns or indexes. If joining columns on columns,
-    #     the DataFrame indexes will be ignored. Otherwise if joining indexes
-    #     on indexes or indexes on a column or columns, the index will be passed on.
-
-    #     Parameters
-    #     ----------
-    #     right: DataFrame or named Series
-    #         Object to merge with.
-    #     how: {‘left’, ‘right’, ‘outer’, ‘inner’}, default ‘inner’
-    #         Type of merge to be performed.
-    #         left: use only keys from left frame, similar to a SQL left outer join;
-    #             preserve key order.
-    #         right: use only keys from right frame, similar to a SQL right outer join;
-    #             preserve key order.
-    #         outer: use union of keys from both frames, similar to a SQL full outer join;
-    #             sort keys lexicographically.
-    #         inner: use intersection of keys from both frames, similar to a SQL inner
-    # join;
-    #             preserve the order of the left keys.
-    #     on: label or list
-    #         Column or index level names to join on. These must be found in both
-    #         DataFrames. If on is None and not merging on indexes then this defaults
-    #         to the intersection of the columns in both DataFrames.
-    #     left_on: label or list, or array-like
-    #         Column or index level names to join on in the left DataFrame. Can
-    #         also be an array or list of arrays of the length of the left DataFrame.
-    #         These arrays are treated as if they are columns.
-    #     right_on: label or list, or array-like
-    #         Column or index level names to join on in the right DataFrame.
-    #         Can also be an array or list of arrays of the length of the right DataFrame.
-    #         These arrays are treated as if they are columns.
-    #     left_index: bool, default False
-    #         Use the index from the left DataFrame as the join key(s).
-    #         If it is a MultiIndex, the number of keys in the other DataFrame
-    #         (either the index or a number of columns) must match the number of levels.
-    #     right_index: bool, default False
-    #         Use the index from the right DataFrame as the join key.
-    #         Same caveats as left_index.
-    #     sort: bool, default False
-    #         Sort the join keys lexicographically in the result DataFrame.
-    #         If False, the order of the join keys depends on the join type (how keyword).
-    #     suffixes: tuple of (str, str), default (‘_x’, ‘_y’)
-    #         Suffix to apply to overlapping column names in the left and right side,
-    #         respectively. To raise an exception on overlapping columns use
-    # (False, False)
-    #     copy: bool, default True
-    #         If False, avoid copy if possible.
-    #     indicator: bool or str, default False
-    #         If True, adds a column to output DataFrame called '_merge' with
-    #         information on the source of each row. If string, column with
-    #         information on source of each row will be added to output DataFrame,
-    #         and column will be named value of string. Information column is
-    #         Categorical-type and takes on a value of 'left_only' for observations
-    #         whose merge key only appears in ‘left’ DataFrame, 'right_only' for
-    #         observations whose merge key only appears in ‘right’ DataFrame,
-    #         and 'both' if the observation’s merge key is found in both.
-    #     validate: str, optional
-    #         If specified, checks if merge is of specified type.
-    #         'one_to_one' or '1:1': check if merge keys are unique in both
-    #             left and right datasets.
-    #         'one_to_many' or '1:m': check if merge keys are unique in left dataset.
-    #         'many_to_one' or 'm:1': check if merge keys are unique in right dataset.
-    #         'many_to_many' or 'm:m': allowed, but does not result in checks.
-
-    #     Returns
-    #     -------
-    #     PandasMoveDataFrame
-    #         A DataFrame of the two merged objects.
-
-    #     References
-    #     ----------
-    #     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.merge.html?highlight=merge#pandas.DataFrame.merge
-
-    #     """
-
-    #     operation = begin_operation('merge')
-
-    #     if isinstance(right, PandasMoveDataFrame):
-    #         right = right._data
-
-    #     _merge = self._data.merge(
-    #         right, how, on, left_on, right_on, left_index, right_index, sort,
-    #         suffixes, copy, indicator, validate
-    #     )
-
-    #     if copy:
-    #         _merge = PandasMoveDataFrame(data=_merge)
-    #     self.last_operation = end_operation(operation)
-
-    #     return _merge
-
-    # def nunique(self, axis=0, dropna=True):
-    #     """
-    #     Count distinct observations over requested axis.
-
-    #     Parameters
-    #     ----------
-    #     axis : 0 or 'index', 1 or 'columns', None, optional, default 0
-    #         The axis to use. 0 or 'index' for row-wise,
-    #         1 or 'columns' for column-wise.
-    #     dropna : bool, optional (default True)
-    #         Don't include NaN in the counts.
-
-    #     Returns
-    #     -------
-    #     Series
-    #         Return Series with number of distinct observations
-
-    #     References
-    #     ----------
-    #     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.unique.html
-
-    #     """
-
-    #     operation = begin_operation('nunique')
-    #     _nunique = self._data.nunique(axis, dropna)
-    #     self.last_operation = end_operation(operation)
-
-    #     return _nunique
-
-    # def write_file(self, file_name, separator=','):
-    #     """
-    #     Write trajectory data to a new file.
-
-    #     Parameters
-    #     ----------
-    #     file_name : str.
-    #         Represents the filename.
-    #     separator : str, optional, default ','.
-    #         Represents the information separator in a new file.
-
-    #     """
-
-    #     operation = begin_operation('write_file')
-    #     self._data.to_csv(
-    #         file_name, sep=separator, encoding='utf-8', index=False
-    #     )
-    #     self.last_operation = end_operation(operation)
-
-    # def to_csv(self, file_name, sep=',', index=True, encoding=None):
-    #     """
-    #     Write object to a comma-separated values (csv) file.
-
-    #     Parameters
-    #     ----------
-    #     file_name: str
-    #         File path or object
-    #     sep: str
-    #         str of length 1. Field delimiter for the output file.
-    #     index: bool
-    #         Boolean indicating whether to save row indexes
-    #     encoding: str, optional (None default)
-    #         A str representing the encoding to use in the output file,
-    #         defaults to 'utf-8'
-
-    #     References
-    #     ----------
-    #     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_csv.html
-
-    #     """
-
-    #     operation = begin_operation('to_csv')
-    #     self._data.to_csv(file_name, sep=sep, index=index, encoding=encoding)
-    #     self.last_operation = end_operation(operation)
-
-    # def convert_to(self, new_type):
-    #     """
-    #     Convert an object from one type to another specified by the user.
-
-    #     Parameters
-    #     ----------
-    #     new_type: 'pandas' or 'dask'
-    #         The type for which the object will be converted.
-
-    #     Returns
-    #     -------
-    #     A subclass of MoveDataFrameAbstractModel
-    #         The converted object.
-
-    #     """
-
-    #     operation = begin_operation('convet_to')
-
-    #     if new_type == TYPE_DASK:
-    #         _dask = MoveDataFrame(
-    #             self._data,
-    #             latitude=LATITUDE,
-    #             longitude=LONGITUDE,
-    #             datetime=DATETIME,
-    #             traj_id=TRAJ_ID,
-    #             type_=TYPE_DASK,
-    #             n_partitions=1,
-    #         )
-    #         self.last_operation = end_operation(operation)
-    #         return _dask
-    #     elif new_type == TYPE_PANDAS:
-    #         self.last_operation = end_operation(operation)
-    #         return self
-
-    # def get_type(self):
-    #     """
-    #     Returns the type of the object.
-
-    #     Returns
-    #     -------
-    #     str
-    #         A string representing the type of the object.
-    #     """
-    #     operation = begin_operation('get_type')
-    #     type_ = self._type
-    #     self.last_operation = end_operation(operation)
-    #     return type_
+    def sample(
+        self,
+        n=None,
+        frac=None,
+        replace=False,
+        weights=None,
+        random_state=None,
+        axis=None,
+    ):
+        """
+        Return a random sample of items from an axis of object.
+
+        You can use `random_state` for reproducibility.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of items from axis to return. Cannot be used with `frac`.
+            Default = 1 if `frac` = None.
+        frac : float, optional
+            Fraction of axis items to return. Cannot be used with `n`.
+        replace : bool, default False
+            Allow or disallow sampling of the same row more than once.
+        weights : str or ndarray-like, optional
+            Default 'None' results in equal probability weighting.
+            If passed a Series, will align with target object on index. Index
+            values in weights not found in sampled object will be ignored and
+            index values in sampled object not in weights will be assigned
+            weights of zero.
+            If called on a DataFrame, will accept the name of a column
+            when axis = 0.
+            Unless weights are a Series, weights must be same length as axis
+            being sampled.
+            If weights do not sum to 1, they will be normalized to sum to 1.
+            Missing values in the weights column will be treated as zero.
+            Infinite values not allowed.
+        random_state : int or numpy.random.RandomState, optional
+            Seed for the random number generator (if int), or numpy RandomState
+            object.
+        axis : {0 or 'index', 1 or 'columns', None}, default None
+            Axis to sample. Accepts axis number or name. Default is stat axis
+            for given data type (0 for Series and DataFrames).
+
+        Returns
+        -------
+        PandasMoveDataFrame
+            A new object of same type as caller containing `n` items randomly
+            sampled from the caller object.
+
+        See Also
+        --------
+        numpy.random.choice: Generates a random sample from a given 1-D numpy
+            array.
+
+        Notes
+        -----
+        If `frac` > 1, `replacement` should be set to `True`.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sample.html
+
+        """
+        _sample = super().sample(
+            n=n, frac=frac, replace=replace, weights=weights,
+            random_state=random_state, axis=axis
+        )
+        return PandasMoveDataFrame(data=_sample)
+
+    def isin(self, values):
+        """
+        Determines whether each element in the DataFrame is contained in values.
+
+        values : iterable, Series, DataFrame or dict
+            The result will only be true at a location if all the labels match.
+            If values is a Series, that'srs the index.
+            If values is a dict, the keys must be the
+            column names, which must match.
+            If values is a DataFrame, then both the
+            index and column labels must match.
+
+        Returns
+        -------
+        DataFrame:
+            DataFrame of booleans showing whether
+            each element in the DataFrame is contained in values
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.isin.html
+
+        """
+        return pd.DataFrame(self).isin(values)
+
+    def append(
+        self, other, ignore_index=False, verify_integrity=False, sort=None
+    ):
+        """
+        Append rows of other to the end of caller, returning a new object.
+        Columns in other that are not in the caller are added as new columns.
+
+        Parameters
+        ----------
+        other : DataFrame or Series/dict-like object, or list of these
+            The data to append.
+        ignore_index : bool, optional, default False
+            If True, do not use the index labels.
+        verify_integrity : bool, optional, default False
+            If True, raise ValueError on creating index with duplicates.
+        sort : bool, optional, default None
+            Sort columns if the columns of self and other are not aligned.
+            The default sorting is deprecated and will
+            change to not-sorting in a future version of pandas.
+            Explicitly pass sort=True to silence the warning and sort.
+            Explicitly pass sort=False to silence the warning and not sort.
+
+        Returns
+        -------
+        PandasMoveDataFrame
+            A dataframe containing rows from both the caller and `other`.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.append.html
+
+        """
+        if isinstance(other, PandasMoveDataFrame):
+            other = pd.DataFrame(other)
+
+        _append = super().append(
+            other=other, ignore_index=ignore_index,
+            verify_integrity=verify_integrity, sort=sort
+        )
+        return PandasMoveDataFrame(data=_append)
+
+    def join(
+        self, other, on=None, how='left', lsuffix='', rsuffix='', sort=False
+    ):
+        """
+        Join columns of other, returning a new object.
+
+        Join columns with `other` PandasMoveDataFrame either on index or
+        on a key column. Efficiently join multiple DataFrame objects
+        by index at once by passing a list.
+
+        Parameters
+        ----------
+        other : DataFrame, Series, or list of DataFrame
+            Index should be similar to one of the columns in this one. If a
+            Series is passed, its name attribute must be set, and that will be
+            used as the column name in the resulting joined DataFrame.
+        on : str, list of str, or array-like, optional
+            Column or index level name(srs) in the caller to join on the index
+            in `other`, otherwise joins index-on-index. If multiple
+            values given, the `other` DataFrame must have a MultiIndex. Can
+            pass an array as the join key if it is not already contained in
+            the calling DataFrame. Like an Excel VLOOKUP operation.
+        how : {'left', 'right', 'outer', 'inner'}, default 'left'
+            How to handle the operation of the two objects.
+
+            * left: use calling frame index (or column if on is specified)
+            * right: use `other` index.
+            * outer: form union of calling frame index (or column if on is
+            specified) with `other` index, and sort it.
+            lexicographically.
+            * inner: form intersection of calling frame index (or column if
+            on is specified) with `other` index, preserving the order
+            of the calling one.
+        lsuffix : str, default ''
+            Suffix to use from left frame overlapping columns.
+        rsuffix : str, default ''
+            Suffix to use from right frame overlapping columns.
+        sort : bool, default False
+            Order result DataFrame lexicographically by the join key. If False,
+            the order of the join key depends on the join type (how keyword).
+
+        Returns
+        -------
+        PandasMoveDataFrame
+            A dataframe containing columns from both the caller and `other`.
+
+        Notes
+        -----
+        Parameters `on`, `lsuffix`, and `rsuffix` are not supported when
+        passing a list of `DataFrame` objects.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.join.html
+
+        """
+        if isinstance(other, PandasMoveDataFrame):
+            other = other._data
+
+        _join = super().join(
+            other=other, on=on, how=how,
+            lsuffix=lsuffix, rsuffix=rsuffix, sort=sort)
+        return PandasMoveDataFrame(data=_join)
+
+    def merge(
+            self,
+            right,
+            how='inner',
+            on=None,
+            left_on=None,
+            right_on=None,
+            left_index=False,
+            right_index=False,
+            sort=False,
+            suffixes=('_x', '_y'),
+            copy=True,
+            indicator=False,
+            validate=None
+    ):
+        """
+        Merge DataFrame or named Series objects with a database-style join.
+
+        The join is done on columns or indexes. If joining columns on columns,
+        the DataFrame indexes will be ignored. Otherwise if joining indexes
+        on indexes or indexes on a column or columns, the index will be passed on.
+
+        Parameters
+        ----------
+        right: DataFrame or named Series
+            Object to merge with.
+        how: {‘left’, ‘right’, ‘outer’, ‘inner’}, default ‘inner’
+            Type of merge to be performed.
+            left: use only keys from left frame, similar to a SQL left outer join;
+                preserve key order.
+            right: use only keys from right frame, similar to a SQL right outer join;
+                preserve key order.
+            outer: use union of keys from both frames, similar to a SQL full outer join;
+                sort keys lexicographically.
+            inner: use intersection of keys from both frames, similar to a SQL inner join;
+                preserve the order of the left keys.
+        on: label or list
+            Column or index level names to join on. These must be found in both
+            DataFrames. If on is None and not merging on indexes then this defaults
+            to the intersection of the columns in both DataFrames.
+        left_on: label or list, or array-like
+            Column or index level names to join on in the left DataFrame. Can
+            also be an array or list of arrays of the length of the left DataFrame.
+            These arrays are treated as if they are columns.
+        right_on: label or list, or array-like
+            Column or index level names to join on in the right DataFrame.
+            Can also be an array or list of arrays of the length of the right DataFrame.
+            These arrays are treated as if they are columns.
+        left_index: bool, default False
+            Use the index from the left DataFrame as the join key(s).
+            If it is a MultiIndex, the number of keys in the other DataFrame
+            (either the index or a number of columns) must match the number of levels.
+        right_index: bool, default False
+            Use the index from the right DataFrame as the join key.
+            Same caveats as left_index.
+        sort: bool, default False
+            Sort the join keys lexicographically in the result DataFrame.
+            If False, the order of the join keys depends on the join type (how keyword).
+        suffixes: tuple of (str, str), default (‘_x’, ‘_y’)
+            Suffix to apply to overlapping column names in the left and right side,
+            respectively. To raise an exception on overlapping columns use (False, False)
+        copy: bool, default True
+            If False, avoid copy if possible.
+        indicator: bool or str, default False
+            If True, adds a column to output DataFrame called '_merge' with
+            information on the source of each row. If string, column with
+            information on source of each row will be added to output DataFrame,
+            and column will be named value of string. Information column is
+            Categorical-type and takes on a value of 'left_only' for observations
+            whose merge key only appears in ‘left’ DataFrame, 'right_only' for
+            observations whose merge key only appears in ‘right’ DataFrame,
+            and 'both' if the observation’s merge key is found in both.
+        validate: str, optional
+            If specified, checks if merge is of specified type.
+            'one_to_one' or '1:1': check if merge keys are unique in both
+                left and right datasets.
+            'one_to_many' or '1:m': check if merge keys are unique in left dataset.
+            'many_to_one' or 'm:1': check if merge keys are unique in right dataset.
+            'many_to_many' or 'm:m': allowed, but does not result in checks.
+
+        Returns
+        -------
+        PandasMoveDataFrame
+            A DataFrame of the two merged objects.
+
+        References
+        ----------
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.merge.html?highlight=merge#pandas.DataFrame.merge
+
+        """
+        if isinstance(right, PandasMoveDataFrame):
+            right = right._data
+
+        _merge = super().merge(
+            right=right, how=how, on=on, left_on=left_on, right_on=right_on,
+            left_index=left_index, right_index=right_index, sort=sort,
+            suffixes=suffixes, copy=copy, indicator=indicator, validate=validate
+        )
+        return PandasMoveDataFrame(data=_merge)
+
+    def write_file(self, file_name, separator=','):
+        """
+        Write trajectory data to a new file.
+
+        Parameters
+        ----------
+        file_name : str.
+            Represents the filename.
+        separator : str, optional, default ','.
+            Represents the information separator in a new file.
+
+        """
+        self.to_csv(
+            file_name, sep=separator, encoding='utf-8', index=False
+        )
+
+    def convert_to(self, new_type):
+        """
+        Convert an object from one type to another specified by the user.
+
+        Parameters
+        ----------
+        new_type: 'pandas' or 'dask'
+            The type for which the object will be converted.
+
+        Returns
+        -------
+        A subclass of MoveDataFrameAbstractModel
+            The converted object.
+
+        """
+
+        operation = begin_operation('convet_to')
+
+        if new_type == TYPE_DASK:
+            _dask = MoveDataFrame(
+                self,
+                latitude=LATITUDE,
+                longitude=LONGITUDE,
+                datetime=DATETIME,
+                traj_id=TRAJ_ID,
+                type_=TYPE_DASK,
+                n_partitions=1,
+            )
+            self.last_operation = end_operation(operation)
+            return _dask
+        elif new_type == TYPE_PANDAS:
+            self.last_operation = end_operation(operation)
+            return self
+
+    def get_type(self):
+        """
+        Returns the type of the object.
+
+        Returns
+        -------
+        str
+            A string representing the type of the object.
+        """
+        type_ = self._type
+        return type_

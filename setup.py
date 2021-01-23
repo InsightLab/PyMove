@@ -22,7 +22,7 @@ DEPENDENCIES = [
     'matplotlib',
     'mplleaflet',
     'numpy',
-    'pandas<=1.0.5',
+    'pandas',
     'psutil',
     'python-dateutil',
     'pytz',
