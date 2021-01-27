@@ -1,6 +1,10 @@
+from typing import Any, Dict, List, Optional, Set, Text, Tuple, Union
+
 import numpy as np
-import pandas as pd
 from matplotlib import pyplot as plt
+from matplotlib.pyplot import figure
+from pandas import DataFrame, Series
+from pandas._libs.tslibs import Timedelta
 
 from pymove.core import MoveDataFrameAbstractModel
 from pymove.core.dataframe import MoveDataFrame
@@ -44,14 +48,14 @@ from pymove.utils.mem import begin_operation, end_operation
 from pymove.utils.trajectories import shift
 
 
-class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
+class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def __init__(
         self,
-        data,
-        latitude=LATITUDE,
-        longitude=LONGITUDE,
-        datetime=DATETIME,
-        traj_id=TRAJ_ID,
+        data: Union[DataFrame, List, Dict],
+        latitude: Optional[Text] = LATITUDE,
+        longitude: Optional[Text] = LONGITUDE,
+        datetime: Optional[Text] = DATETIME,
+        traj_id: Optional[Text] = TRAJ_ID,
     ):
         """
         Checks whether past data has 'lat', 'lon', 'datetime' columns,
@@ -64,30 +68,30 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        data : dict, list, numpy array or pandas.core.DataFrame.
-            Input trajectory data.
-        latitude : str, optional, default 'lat'.
-            Represents column name latitude.
-        longitude : str, optional, default 'lon'.
-            Represents column name longitude.
-        datetime : str, optional, default 'datetime'.
-            Represents column name datetime.
-        traj_id : str, optional, default 'id'.
-            Represents column name trajectory id.
+        data : Union[DataFrame, List, Dict]
+            Input trajectory data
+        latitude : Optional[Text], optional
+            Represents column name latitude, by default LATITUDE
+        longitude : Optional[Text], optional
+            Represents column name longitude, by default LONGITUDE
+        datetime : Optional[Text], optional
+            Represents column name datetime, by default DATETIME
+        traj_id : Optional[Text], optional
+            Represents column name trajectory id, by default TRAJ_ID
 
         Raises
         ------
         KeyError
             If missing one of lat, lon, datetime columns
         ValueError, ParserError
-            If the data types can't be converted.
+            If the data types can't be converted
 
         """
 
         if isinstance(data, dict):
-            data = pd.DataFrame.from_dict(data)
-        elif isinstance(data, pd.DataFrame):
-            data = pd.DataFrame(data)
+            data = DataFrame.from_dict(data)
+        elif isinstance(data, DataFrame):
+            data = DataFrame(data)
         elif (
             isinstance(data, list) or isinstance(data, np.ndarray)
         ):
@@ -97,7 +101,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     zip_list[i] = zip_list[i]
                 except KeyError:
                     zip_list.append(i)
-            data = pd.DataFrame(data, columns=zip_list)
+            data = DataFrame(data, columns=zip_list)
 
         columns = MoveDataFrame.format_labels(
             traj_id, latitude, longitude, datetime
@@ -111,13 +115,25 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = None
         else:
 
-            raise AttributeError(
+            raise KeyError(
                 'Couldn\'t instantiate MoveDataFrame because data has missing columns.'
             )
 
     @property
-    def lat(self):
-        """Checks for the 'lat' column and returns its value."""
+    def lat(self) -> Series:
+        """
+        Checks for the LATITUDE column and returns its value.
+
+        Returns
+        -------
+        Series
+            LATITUDE column
+
+        Raises
+        ------
+        AttributeError
+            If the LATITUDE column is not present in the DataFrame
+        """
         if LATITUDE not in self:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
@@ -126,8 +142,20 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return self[LATITUDE]
 
     @property
-    def lng(self):
-        """Checks for the 'lon' column and returns its value."""
+    def lng(self) -> Series:
+        """
+        Checks for the LONGITUDE column and returns its value.
+
+        Returns
+        -------
+        Series
+            LONGITUDE column
+
+        Raises
+        ------
+        AttributeError
+            If the LONGITUDE column is not present in the DataFrame
+        """
         if LONGITUDE not in self:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
@@ -137,7 +165,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def datetime(self):
-        """Checks for the 'datetime' column and returns its value."""
+        """
+        Checks for the DATETIME column and returns its value.
+
+        Returns
+        -------
+        Series
+            DATETIME column
+
+        Raises
+        ------
+        AttributeError
+            If the DATETIME column is not present in the DataFrame
+        """
         if DATETIME not in self:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
@@ -147,13 +187,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def rename(
             self,
-            mapper=None,
-            index=None,
-            columns=None,
-            axis=None,
-            copy=True,
-            inplace=False
-    ):
+            mapper: Optional[Union[Dict, callable]] = None,
+            index: Optional[Union[Dict, callable]] = None,
+            columns: Optional[Union[Dict, callable]] = None,
+            axis: Optional[Union[int, Text]] = None,
+            copy: Optional[bool] = True,
+            inplace: Optional[bool] = False
+    ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
         Alter axes labels.
 
@@ -161,37 +201,33 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Labels not contained in a dict / Series will be left as-is.
         Extra labels listed don’t throw an error.
 
+
         Parameters
         ----------
-        mapper: dict-like or function
+        mapper : Optional[Union[Dict, callable]], optional
             Dict-like or functions transformations to apply to that axis’ values.
             Use either mapper and axis to specify the axis to target
-            with mapper, or index and columns.
-
-        index: dict-like or function
+            with mapper, or index and columns, by default None
+        index : Optional[Union[Dict, callable]], optional
             Alternative to specifying axis
-            (mapper, axis=0 is equivalent to index=mapper).
-
-        columns: dict-like or function
+            (mapper, axis=0 is equivalent to index=mapper), by default None
+        columns : Optional[Union[Dict, callable]], optional
             Alternative to specifying axis
-            (mapper, axis=1 is equivalent to columns=mapper).
-
-        axis: int or str
+            (mapper, axis=1 is equivalent to columns=mapper), by default None
+        axis : Optional[Union[int, Text]], optional
             Axis to target with mapper.
-            Can be either the axis name (‘index’, ‘columns’) or number (0, 1).
-            The default is ‘index’.
-
-        copy: bool, default True
-            Also copy underlying data.
-
-        inplace: bool, default False
+            Can be either the axis name (‘index’, ‘columns’) or number (0, 1),
+            by default None
+        copy : Optional[bool], optional
+            Also copy underlying data, by default True
+        inplace : Optional[bool], optional
             Whether to return a new DataFrame.
-            If True then value of copy is ignored.
+            If True then value of copy is ignored, by default False
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            DataFrame with the renamed axis labels.
+        Optional[Union[PandasMoveDataFrame, DataFrame]]
+            DataFrame with the renamed axis labels or None
 
         Raises
         ------
@@ -217,7 +253,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             rename_ = PandasMoveDataFrame(data=rename_)
         return rename_
 
-    def len(self):
+    def len(self) -> int:
         """
         Returns the length/row numbers in trajectory data.
 
@@ -233,13 +269,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """Retrieves and item from this object."""
         item = super().__getitem__(key)
         if (
-            isinstance(item, pd.DataFrame)
+            isinstance(item, DataFrame)
             and MoveDataFrame.has_columns(item)
         ):
             return PandasMoveDataFrame(item)
         return item
 
-    def head(self, n=5):
+    def head(self, n: Optional[int] = 5) -> 'PandasMoveDataFrame':
         """
         Return the first n rows.
 
@@ -249,12 +285,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        n : int, default 5.
-            Number of rows to select.
+        n : Optional[int]
+            Number of rows to select, by default 5
 
         Returns
         -------
-        same type as caller
+        PandasMoveDataFrame
             The first n rows of the caller object.
 
         References
@@ -265,7 +301,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         head_ = super().head(n=n)
         return PandasMoveDataFrame(data=head_)
 
-    def tail(self, n=5):
+    def tail(self, n: Optional[int] = 5) -> 'PandasMoveDataFrame':
         """
         Return the last n rows.
 
@@ -275,12 +311,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        n : int, default 5.
-            Number of rows to select.
+        n : Optional[int]
+            Number of rows to select, by default 5
 
         Returns
         -------
-        same type as caller
+        PandasMoveDataFrame
             The last n rows of the caller object.
 
         References
@@ -291,7 +327,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         tail_ = super().tail(n=n)
         return PandasMoveDataFrame(data=tail_)
 
-    def get_users_number(self):
+    def get_users_number(self) -> int:
         """
         Check and return number of users in trajectory data.
 
@@ -312,7 +348,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return number_
 
-    def to_grid(self, cell_size, meters_by_degree=lat_meters(-3.8162973555)):
+    def to_grid(
+        self,
+        cell_size: int,
+        meters_by_degree: Optional[float] = lat_meters(-3.8162973555)
+    ) -> Grid:
         """
         Converts trajectory data to grid format.
 
@@ -321,13 +361,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         cell_size : float.
             Represents grid cell size.
 
-        meters_by_degree : float, optional, default lat_meters(-3.8162973555).
-            Represents the corresponding meters of lat by degree.
+        meters_by_degree : float, optional
+            Represents the corresponding meters of lat by degree,
+            by default lat_meters(-3.8162973555)
 
         Returns
         -------
-        pymove.core.grid
-            Represents the trajectory in grid format.
+        Grid
+            Represents the trajectory in grid format
 
         """
         operation = begin_operation('to_grid')
@@ -337,30 +378,32 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         self.last_operation = end_operation(operation)
         return grid_
 
-    def to_data_frame(self):
+    def to_data_frame(self) -> DataFrame:
         """
         Converts trajectory data to DataFrame format.
 
         Returns
         -------
-        pandas.core.DataFrame
+        DataFrame
             Represents the trajectory in DataFrame format.
 
         """
-        return pd.DataFrame(self)
+        return DataFrame(self)
 
-    def to_dicrete_move_df(self, local_label=LOCAL_LABEL):
+    def to_dicrete_move_df(
+        self, local_label: Optional[Text] = LOCAL_LABEL
+    ) -> 'PandasMoveDataFrame':
         """
         Generate a discrete dataframe move.
 
         Parameters
         ----------
-        local_label : str, optional, default 'local_label'.
-            Represents the column name of feature local label.
+        local_label : Optional[Text], optional
+            Represents the column name of feature local label, default LOCAL_LABEL
 
         Returns
         -------
-        pymove.core.pandas.PandasDiscreteMoveDataFrame
+        PandasDiscreteMoveDataFrame
             Represents an PandasMoveDataFrame discretized.
         """
 
@@ -378,7 +421,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self, LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, local_label
         )
 
-    def copy(self, deep=True):
+    def copy(self, deep: Optional[bool] = True) -> 'PandasMoveDataFrame':
         """
         Make a copy of this object’s indices and data.
 
@@ -393,13 +436,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        deep : bool, default True
+        deep : Optional[bool], optional
             Make a deep copy, including a copy of the data and the indices.
-            With deep=False neither the indices nor the data are copied.
+            With deep=False neither the indices nor the data are copied, by default True
 
         Returns
         -------
-        Series or DataFrame
+        PandasMoveDataFrame
             Object type matches caller.
 
         Notes
@@ -418,25 +461,28 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return PandasMoveDataFrame(data=copy_)
 
     def generate_tid_based_on_id_datetime(
-        self, str_format='%Y%m%d%H', sort=True, inplace=True
-    ):
+        self,
+        str_format: Optional[Text] = '%Y%m%d%H',
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create or update trajectory id based on id and datetime.
 
         Parameters
         ----------
-        str_format : str, optional, default "%Y%m%d%H".
-            Format to consider the datetime
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        str_format : Optional[Text], optional
+             Format to consider the datetime, by default '%Y%m%d%H'
+        sort : Optional[bool], optional
+            Wether to sort the dataframe, by default True
+        inplace : Optional[bool], optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         """
 
@@ -472,20 +518,22 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
-    def generate_date_features(self, inplace=True):
+    def generate_date_features(
+        self, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create or update date feature based on datetime.
 
         Parameters
         ----------
-        inplace : bool, optional, default True.
+        inplace : Optional[bool], optional
             Represents whether the operation will be performed
-            on the data provided or in a copy.
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         """
 
@@ -512,20 +560,22 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
-    def generate_hour_features(self, inplace=True):
+    def generate_hour_features(
+        self, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
-        Create or update hour feature based on datetime.
+        Create or update hour features based on datetime.
 
         Parameters
         ----------
-        inplace : bool, optional, default True.
+        inplace : Optional[bool], optional
             Represents whether the operation will be performed
-            on the data provided or in a copy.
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         """
 
@@ -553,20 +603,22 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
-    def generate_day_of_the_week_features(self, inplace=True):
+    def generate_day_of_the_week_features(
+        self, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
-        Create or update a feature day of the week from datatime.
+        Create or update day of the week features based on datetime.
 
         Parameters
         ----------
-        inplace : bool, optional, default True.
+        inplace : Optional[bool], optional
             Represents whether the operation will be performed
-            on the data provided or in a copy.
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         """
 
@@ -594,8 +646,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def generate_weekend_features(
-        self, create_day_of_week=False, inplace=True
-    ):
+        self, create_day_of_week: Optional[bool] = False, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create or update the feature weekend to the dataframe,
         if this resource indicates that the given day is the
@@ -603,17 +655,17 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        create_day_of_week : bool, optional (default False).
+        create_day_of_week : Optional[bool], optional
             Indicates if the column day should be keeped in the dataframe.
-            If set to False the column will be dropped.
-        inplace : bool, optional, default True.
-            Indicates whether the operation will be performed on
-            the data provided or in a copy.
+            If set to False the column will be dropped, by default False
+        inplace : Optional[bool], optional
+            Represents whether the operation will be performed
+            on the data provided or in a copy, by default True
 
         Returns
-        ----------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        -------
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         """
 
@@ -648,20 +700,22 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
-    def generate_time_of_day_features(self, inplace=True):
+    def generate_time_of_day_features(
+        self, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
-        Create a feature time of day or period from datatime.
+        Create or update time of day features based on datetime.
 
         Parameters
         ----------
-         inplace : bool, optional, default True.
-            Represents whether the operation will be performed on
-            the data provided or in a copy.
+        inplace : Optional[bool], optional
+            Represents whether the operation will be performed
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         Examples
         --------
@@ -711,23 +765,23 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def generate_datetime_in_format_cyclical(
-        self, label_datetime=DATETIME, inplace=True
-    ):
+        self, label_datetime: Optional[Text] = DATETIME, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create or update column with cyclical datetime feature.
 
         Parameters
         ----------
-        label_datetime : str, optional, default 'datetime'.
-            Represents column id type.
-        inplace : bool, optional, default True.
-            Represents whether the operation will be performed on
-            the data provided or in a copy.
+        label_datetime : Optional[Text], optional
+            Represents column id type, by default DATETIME
+        inplace : Optional[bool], optional
+            Represents whether the operation will be performed
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         References
         ----------
@@ -763,28 +817,27 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     @staticmethod
-    def _prepare_generate_data(data_, sort, label_id):
+    def _prepare_generate_data(
+        data_: DataFrame, sort: bool, label_id: Text
+    ) -> Tuple[List, int, int, int]:
         """
         Processes the data and create variables for generate methods.
 
         Parameters
         ----------
-        data_ : dataframe
+        data_ : DataFrame
             Dataframe to be processed.
         sort : bool
             Whether to sort the data.
-        label_id : str
+        label_id : Text
             Name of the label feature.
 
         Returns
         -------
-        array
+        Tuple[List, int, int, int]
             data_ unique ids.
-        int
             sum size of id.
-        int
             size of id.
-        int
             starting index
 
         """
@@ -812,26 +865,28 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return ids, sum_size_id, size_id, idx
 
-    def _return_generated_data(self, data_, columns, operation, inplace):
+    def _return_generated_data(
+        self, data_: DataFrame, columns: Set, operation: Dict, inplace: bool
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Finishes the generate methods.
 
         Parameters
         ----------
-        data_ : dataframe
+        data_ : DataFrame
             Dataframe with the generated features.
-        columns: set
+        columns: Set
             Set with columns before operation
-        operation : dict
+        operation : Dict
             initial stats of the operation.
-        inplace : bool, optional, default True.
+        inplace : bool
             Represents whether the operation will be performed on
             the data provided or in a copy.
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         """
         print('...Reset index...\n')
@@ -847,8 +902,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         return data_
 
     def generate_dist_time_speed_features(
-        self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True
-    ):
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        label_dtype: Optional[callable] = np.float64,
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Firstly, create the three distance to an GPS point P (lat, lon). After,
         create two time features to point P: time to previous and time to next.
@@ -856,20 +915,21 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectories id.
-        label_dtype : type, optional, default np.float64.
-            Represents column id type.
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        label_id : Text, optional
+            Represents name of column of trajectories id, by default TRAJ_ID
+        label_dtype : callable, optional
+            Represents column id type, by default np.float64
+        sort : bool, optional
+            If sort == True the dataframe will be sorted, by True
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
+
 
         Examples
         --------
@@ -945,27 +1005,32 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def generate_dist_features(
-        self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True
-    ):
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        label_dtype: Optional[callable] = np.float64,
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create the three distance in meters to an GPS point P.
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectories id.
-        label_dtype : type, optional, default np.float64.
-            Represents column id type.
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        label_id : Text, optional
+            Represents name of column of trajectories id, by default TRAJ_ID
+        label_dtype : callable, optional
+            Represents column id type, by default np.float64
+        sort : bool, optional
+            If sort == True the dataframe will be sorted, by True
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
+
 
         Examples
         --------
@@ -1036,27 +1101,31 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def generate_time_features(
-        self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True
-    ):
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        label_dtype: Optional[callable] = np.float64,
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create the three time in seconds to an GPS point P.
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectories id.
-        label_dtype : type, optional, default np.float64.
-            Represents column id type_.
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        label_id : Text, optional
+            Represents name of column of trajectories id, by default TRAJ_ID
+        label_dtype : callable, optional
+            Represents column id type, by default np.float64
+        sort : bool, optional
+            If sort == True the dataframe will be sorted, by True
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         Examples
         --------
@@ -1118,31 +1187,32 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def generate_speed_features(
-            self,
-            label_id=TRAJ_ID,
-            label_dtype=np.float64,
-            sort=True,
-            inplace=True
-    ):
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        label_dtype: Optional[callable] = np.float64,
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create the three speed in meter by seconds to an GPS point P.
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectories id.
-        label_dtype : type, optional, default np.float64.
-            Represents column id type_.
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        label_id : Text, optional
+            Represents name of column of trajectories id, by default TRAJ_ID
+        label_dtype : callable, optional
+            Represents column id type, by default np.float64
+        sort : bool, optional
+            If sort == True the dataframe will be sorted, by True
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
+
 
         Examples
         --------
@@ -1189,25 +1259,28 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             raise e
 
     def generate_move_and_stop_by_radius(
-        self, radius=0, target_label=DIST_TO_PREV, inplace=True
+        self,
+        radius: Optional[int] = 0,
+        target_label: Optional[Text] = DIST_TO_PREV,
+        inplace: Optional[bool] = True
     ):
         """
         Create or update column with move and stop points by radius.
 
         Parameters
         ----------
-        radius : int, optional, default 0.
-            Represents radius.
-        target_label : str, optional, default 'dist_to_prev.
-            Represents column id type.
-        inplace : bool, optional, default True.
+        radius : int, optional
+            Represents radius, by default 0
+        target_label : str, optional
+            Represents column to compute, by default DIST_TO_PREV
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        Optional['PandasMoveDataFrame']
+            Object with new features or None
 
         """
 
@@ -1245,13 +1318,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
-    def time_interval(self):
+    def time_interval(self) -> Timedelta:
         """
         Get time difference between max and min datetime in trajectory data.
 
         Returns
         -------
-        datetime64
+        Timedelta
             Represents the time difference.
 
         """
@@ -1262,7 +1335,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         return time_diff
 
-    def get_bbox(self):
+    def get_bbox(self) -> Tuple[float, float, float, float]:
         """
         A bounding box (usually shortened to bbox) is an area defined by two
         longitudes and two latitudes, where:
@@ -1275,9 +1348,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        tuple
+        Tuple[float, float, float, float]:
             Represents a bound box, that is a tuple of 4 values with
             the min and max limits of latitude e longitude.
+            lat_min, lon_min, lat_max, lon_max
 
         Examples
         --------
@@ -1300,32 +1374,32 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def plot_all_features(
         self,
-        dtype=np.float64,
-        figsize=(21, 15),
-        return_fig=True,
-        save_fig=False,
-        name='features.png',
-    ):
+        dtype: Optional[callable] = np.float64,
+        figsize: Optional[Tuple[float, float]] = (21, 15),
+        return_fig: Optional[bool] = True,
+        save_fig: Optional[bool] = False,
+        name: Optional[Text] = 'features.png',
+    ) -> Optional[figure]:
         """
         Generate a visualization for each columns that type is equal dtype.
 
         Parameters
         ----------
-        figsize : tuple, optional, default (21, 15).
-            Represents dimensions of figure.
-        dtype : type, optional, default np.float64.
-            Represents column type.
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
-        save_fig : bool, optional, default False.
-            Represents whether or not to save the generated picture.
-        name : str, optional, default 'features.png'.
-            Represents name of a file.
+        dtype : Optional[callable], optional
+            Represents column type, by default np.float64
+        figsize : Optional[Tuple[float, float]], optional
+            Represents dimensions of figure, by default (21, 15)
+        return_fig : Optional[bool], optional
+            Represents whether or not to return the generated picture, by default True
+        save_fig : Optional[bool], optional
+            Represents whether or not to save the generated picture, by default False
+        name : Optional[Text], optional
+            Represents name of a file, by default 'features.png'
 
         Returns
         -------
-        matplotlib.pyplot.figure or None
-            The generated picture.
+        Optional[figure]
+            The generated picture or None
 
         Raises
         ------
@@ -1362,36 +1436,35 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def plot_trajs(
         self,
-        markers='o',
-        markersize=20,
-        figsize=(10, 10),
-        return_fig=True,
-        save_fig=False,
-        name='trajectories.png',
-    ):
+        markers: Optional[Text] = 'o',
+        markersize: Optional[float] = 20,
+        figsize: Optional[Tuple[int, int]] = (10, 10),
+        return_fig: Optional[bool] = True,
+        save_fig: Optional[bool] = False,
+        name: Optional[Text] = 'trajectories.png',
+    ) -> Optional[figure]:
         """
         Generate a visualization that show trajectories.
 
         Parameters
         ----------
-        figsize : tuple, optional, default (10, 10).
-            Represents dimensions of figure.
-        markers : str, optional, default 'o'.
-            Represents visualization type marker.
-        markersize : int, optional, default 20.
-            Represents visualization size marker.
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
-        save_fig : bool, optional, default False.
-            Represents whether or not to save the generated picture.
-        name : str, optional, default 'trajectories.png'.
-            Represents name of a file.
+        markers : Optional[Text], optional
+             Represents visualization type marker, by default 'o'
+        markersize : Optional[float], optional
+            Represents visualization size marker, by default 20
+        figsize : Optional[Tuple[int, int]], optional
+             Represents dimensions of figure, by default (10, 10)
+        return_fig : Optional[bool], optional
+            Represents whether or not to return the generated picture, by default True
+        save_fig : Optional[bool], optional
+            Represents whether or not to save the generated picture, by default False
+        name : Optional[Text], optional
+            Represents name of a file, by default 'trajectories.png'
 
         Returns
         -------
-        matplotlib.pyplot.figure or None
-            The generated picture.
-
+        Optional[figure]
+            The generated picture or None
         """
 
         operation = begin_operation('plot_trajs')
@@ -1418,42 +1491,41 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def plot_traj_id(
         self,
-        tid,
-        label=TID,
-        feature=None,
-        value=None,
-        figsize=(10, 10),
-        return_fig=True,
-        save_fig=False,
-        name=None,
-    ):
+        tid: Union[int, Text],
+        label: Optional[Text] = TID,
+        feature: Optional[Text] = None,
+        value: Optional[Any] = None,
+        figsize: Optional[Tuple[float, float]] = (10, 10),
+        return_fig: Optional[bool] = True,
+        save_fig: Optional[bool] = False,
+        name: Optional[Text] = None,
+    ) -> Optional[Union['PandasMoveDataFrame', figure]]:
         """
         Generate a visualization that shows a trajectory with the specified tid.
 
         Parameters
         ----------
-        tid : any.
-            Represents the trajectory tid.
-        label : str, optional, default 'traj_id'.
-            Feature with trajectories tids.
-        feature : str, optional, default None.
-            Name of the feature to highlight on plot.
-        value : any, optional, default None.
-            Value of the feature to be highlighted as green marker
-        figsize : tuple, optional, default (10,10).
-            Represents dimensions of figure.
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
-        save_fig : bool, optional, default False.
-            Represents whether or not to save the generated picture.
-        name : str, optional, default None.
-            Represents name of a file.
+        tid :  Union[int, Text].
+            Represents the trajectory tid
+        label : Optional[Text], optional
+            Feature with trajectories tids, by default TID
+        feature : Optional[Text], optional
+            Name of the feature to highlight on plot, by default None
+        value : Optional[Any], optional
+            Value of the feature to be highlighted as green marker, by default None
+        figsize : Optional[Tuple[float, float]], optional
+            Represents dimensions of figure, by default (10, 10)
+        return_fig : Optional[bool], optional
+            Represents whether or not to return the generated picture, by default True
+        save_fig : Optional[bool], optional
+            Represents whether or not to save the generated picture, by default False
+        name : Optional[Text], optional
+            Represents name of a file, by default None
 
         Returns
         -------
-        pymove.core.MoveDataFrameAbstract subclass
+        Optional[Union['PandasMoveDataFrame', figure]]
             Trajectory with the specified tid.
-        matplotlib.pyplot.figure or None
             The generated picture.
 
         Raises
@@ -1597,6 +1669,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
+    # TODO: continue
     def astype(self, dtype, copy=True, errors='raise'):
         """
         Cast a pandas object to a specified dtype.
@@ -2211,7 +2284,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.isin.html
 
         """
-        return pd.DataFrame(self).isin(values)
+        return DataFrame(self).isin(values)
 
     def append(
         self, other, ignore_index=False, verify_integrity=False, sort=None
@@ -2246,7 +2319,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
         if isinstance(other, PandasMoveDataFrame):
-            other = pd.DataFrame(other)
+            other = DataFrame(other)
 
         _append = super().append(
             other=other, ignore_index=ignore_index,

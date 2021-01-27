@@ -1,5 +1,8 @@
+from typing import Dict, List, Optional, Text, Union
+
 import numpy as np
 import pandas as pd
+from pandas.core.frame import DataFrame
 
 from pymove.core.grid import Grid
 from pymove.core.pandas import PandasMoveDataFrame
@@ -20,7 +23,6 @@ from pymove.utils.constants import (
     TID_STAT,
     TIME_TO_PREV,
     TRAJ_ID,
-    TYPE_PANDAS,
 )
 from pymove.utils.datetime import generate_time_statistics, threshold_time_statistics
 from pymove.utils.log import progress_bar
@@ -31,37 +33,30 @@ from pymove.utils.trajectories import shift
 class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
     def __init__(
         self,
-        data,
-        latitude=LATITUDE,
-        longitude=LONGITUDE,
-        datetime=DATETIME,
-        traj_id=TRAJ_ID,
-        local_label=LOCAL_LABEL
+        data: Union[DataFrame, List, Dict],
+        latitude: Optional[Text] = LATITUDE,
+        longitude: Optional[Text] = LONGITUDE,
+        datetime: Optional[Text] = DATETIME,
+        traj_id: Optional[Text] = TRAJ_ID,
+        local_label: Optional[Text] = LOCAL_LABEL
     ):
         """
-
-        Checks whether past data has 'lat', 'lon', 'datetime' and 'local_label'
-        columns, and renames it with the PyMove lib standard. After starts the
-        attributes of the class.
-
-        - self._mgr : Represents trajectory data.
-        - self._type : Represents the type of layer below the data structure.
-        - self.last_operation : Represents the last operation performed.
+        Creates a dataframe using local_label as a discrete feature for localization
 
         Parameters
         ----------
-        data : dict, list, numpy array or pandas.core.DataFrame
-            Input trajectory data.
-        latitude : str, optional, default 'lat'.
-            Represents column name latitude.
-        longitude : str, optional, default 'lon'.
-            Represents column name longitude.
-        datetime : str, optional, default 'datetime'.
-            Represents column name datetime.
-        traj_id : str, optional, default 'id'.
-            Represents column name trajectory id.
-        local_label : str, optional, default 'local_label'.
-            Represents column name local label
+        data : Union[DataFrame, List, Dict]
+            Input trajectory data
+        latitude : Optional[Text], optional
+            Represents column name latitude, by default LATITUDE
+        longitude : Optional[Text], optional
+            Represents column name longitude, by default LONGITUDE
+        datetime : Optional[Text], optional
+            Represents column name datetime, by default DATETIME
+        traj_id : Optional[Text], optional
+            Represents column name trajectory id, by default TRAJ_ID
+        local_label : Optional[Text], optional
+            Represents column name local label, by default LOCAL_LABEL
 
         Raises
         ------
@@ -69,9 +64,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
             If missing one of lat, lon, datetime, local_label columns
         ValueError, ParserError
             If the data types can't be converted.
-
         """
-
         super(PandasDiscreteMoveDataFrame, self).__init__(
             data=data,
             latitude=latitude,
@@ -85,15 +78,15 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
                 '{} column not in dataframe'.format(local_label)
             )
 
-    def discretize_based_grid(self, region_size=1000):
+    def discretize_based_grid(self, region_size: Optional[int] = 1000):
         """
         Discrete space in cells of the same size,
         assigning a unique id to each cell.
 
         Parameters
         ----------
-        region_size: number, optional, default 1000
-            Size of grid cell.
+        region_size: Optional[int], optional
+            Size of grid cell, by default 1000
         """
 
         operation = begin_operation('discretize based on grid')
@@ -104,25 +97,32 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         self.last_operation = end_operation(operation)
 
     def generate_prev_local_features(
-        self, label_id=TRAJ_ID, local_label=LOCAL_LABEL, sort=True, inplace=True
-    ):
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        local_label: Optional[Text] = LOCAL_LABEL,
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasDiscreteMoveDataFrame']:
         """
         Create a feature prev_local with the label of previous local to current point.
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectory id.
-        local_label : String, optional, default 'local_label'
-            Indicates name of column of place labels on symbolic trajectory.
-        If sort == True the dataframe will be sorted, default True.
-        inplace : bool, optional, default True.
+        label_id : Optional[Text], optional
+            Represents name of column of trajectory id, by default TRAJ_ID
+        local_label : Optional[Text], optional
+            Indicates name of column of place labels on symbolic trajectory,
+                by default LOCAL_LABEL
+        sort : Optional[bool], optional
+            Wether the dataframe will be sorted, by default True
+        inplace : Optional[bool], optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
-        Return
-        ------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+            the data provided or in a copy, by default True
+
+        Returns
+        -------
+        Optional['PandasDiscreteMoveDataFrame']
+             Object with new features or None
 
         """
         operation = begin_operation('generate_prev_equ_feature')
@@ -170,44 +170,51 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
     def generate_tid_based_statistics(
             self,
-            label_id=TRAJ_ID,
-            local_label=LOCAL_LABEL,
-            mean_coef=1.0,
-            std_coef=1.0,
-            statistics=None,
-            label_tid_stat=TID_STAT,
-            drop_single_points=False,
-            inplace=True,
-    ):
-
+            label_id: Optional[Text] = TRAJ_ID,
+            local_label: Optional[Text] = LOCAL_LABEL,
+            mean_coef: Optional[float] = 1.0,
+            std_coef: Optional[float] = 1.0,
+            statistics: Optional[DataFrame] = None,
+            label_tid_stat: Optional[Text] = TID_STAT,
+            drop_single_points: Optional[bool] = False,
+            inplace: Optional[bool] = True,
+    ) -> Optional['PandasDiscreteMoveDataFrame']:
         """
         Splits the trajectories into segments based on time statistics for segments.
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectory id.
-        local_label : String, optional, default 'local_label'
-            Indicates name of column of place labels on symbolic trajectory.
-        mean_coef : float
-            Multiplication coefficient of the mean time for the segment, default 1.0
-        std_coef : float
-            Multiplication coefficient of sdt time for the segment, default 1.0
-        statistics : dataframe
-            Time Statistics of the pairwise local labels.
-        label_new_tid : String, optional(TID_PART by default)
+        label_id : Optional[Text], optional
+             Represents name of column of trajectory id, by default TRAJ_ID
+        local_label : Optional[Text], optional
+            Indicates name of column of place labels on symbolic trajectory,
+                by default LOCAL_LABEL
+        mean_coef : Optional[float], optional
+            Multiplication coefficient of the mean time for the segment, by default 1.0
+        std_coef : Optional[float], optional
+            Multiplication coefficient of sdt time for the segment, by default 1.0
+        statistics : Optional[DataFrame], optional
+            Time Statistics of the pairwise local labels, by default None
+        label_tid_stat : Optional[Text], optional
             The label of the column containing the ids of the formed segments.
-            Is the new splitted id.
-        drop_single_points : boolean, optional(True by default)
-            If set to True, drops the trajectories with only one point.
-        inplace : bool, optional, default True.
+            Is the new splitted id, by default TID_STAT
+        drop_single_points : Optional[bool], optional
+            Wether to drop the trajectories with only one point, by default False
+        inplace : Optional[bool], optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
-        Return
-        ------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+            the data provided or in a copy, by default True
 
+        Returns
+        -------
+        Optional['PandasDiscreteMoveDataFrame']
+            Object with new features or None
+
+        Raises
+        ------
+        KeyError
+            If missing local_label column
+        ValueError
+            If the data contains only null values
         """
         if inplace:
             data_ = self
@@ -218,7 +225,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
             self.generate_dist_time_speed_features(TRAJ_ID)
 
         if local_label not in data_:
-            raise ValueError('{} not in data frame.'.format(local_label))
+            raise KeyError('{} not in data frame.'.format(local_label))
 
         if PREV_LOCAL not in data_:
             data_[local_label] = data_[local_label].astype(np.float64)
