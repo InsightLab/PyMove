@@ -121,7 +121,7 @@ def test_create_update_index_grid_feature():
 
 
 def test_convert_two_index_grid_to_one():
-    grid = Grid(dict_grid={
+    grid = Grid(data={
         'lon_min_x': 116.319236,
         'lat_min_y': 39.984094,
         'grid_size_lat_y': 2,
@@ -163,7 +163,7 @@ def test_convert_two_index_grid_to_one():
 
 
 def test_convert_one_index_grid_to_two():
-    grid = Grid(dict_grid={
+    grid = Grid(data={
         'lon_min_x': 116.319236,
         'lat_min_y': 39.984094,
         'grid_size_lat_y': 2,
@@ -225,7 +225,7 @@ def test_create_all_polygons_to_all_point_on_grid():
     expected = DataFrame(
         data=[
             [
-                1, 0, 0, Polygon((
+                0, 0, Polygon((
                     (116.319236, 39.984094),
                     (116.319236, 39.984229346480184),
                     (116.3193713464802, 39.984229346480184),
@@ -234,16 +234,7 @@ def test_create_all_polygons_to_all_point_on_grid():
                 ))
             ],
             [
-                1, 0, 1, Polygon((
-                    (116.319236, 39.984094),
-                    (116.319236, 39.984229346480184),
-                    (116.3193713464802, 39.984229346480184),
-                    (116.3193713464802, 39.984094),
-                    (116.319236, 39.984094)
-                ))
-            ],
-            [
-                1, 4, 4, Polygon((
+                0, 1, Polygon((
                     (116.3193713464802, 39.984094),
                     (116.3193713464802, 39.984229346480184),
                     (116.31950669296039, 39.984229346480184),
@@ -252,25 +243,31 @@ def test_create_all_polygons_to_all_point_on_grid():
                 ))
             ],
             [
-                1, 3, 3, Polygon((
-                    (116.3193713464802, 39.984094),
-                    (116.3193713464802, 39.984229346480184),
-                    (116.31950669296039, 39.984229346480184),
-                    (116.31950669296039, 39.984094),
-                    (116.3193713464802, 39.984094)
+                4, 4, Polygon((
+                    (116.31977738592074, 39.98463538592074),
+                    (116.31977738592074, 39.984770732400925),
+                    (116.31991273240094, 39.984770732400925),
+                    (116.31991273240094, 39.98463538592074),
+                    (116.31977738592074, 39.98463538592074)
+                ))
+            ],
+            [
+                3, 3, Polygon((
+                    (116.31964203944057, 39.984500039440555),
+                    (116.31964203944057, 39.98463538592074),
+                    (116.31977738592076, 39.98463538592074),
+                    (116.31977738592076, 39.984500039440555),
+                    (116.31964203944057, 39.984500039440555)
                 ))
             ],
         ],
-        columns=['id', 'index_grid_lat', 'index_grid_lon', 'polygon'],
+        columns=['index_grid_lat', 'index_grid_lon', 'polygon'],
         index=[0, 2, 5, 7],
     )
     move_df = _default_move_df()
     grid = Grid(move_df, 15)
 
-    all_polygon = grid.create_all_polygons_to_all_point_on_grid(
-        move_df, unique_index=False
-    )
-
+    all_polygon = grid.create_all_polygons_to_all_point_on_grid(move_df)
     assert_frame_equal(all_polygon, expected)
 
 
@@ -286,12 +283,13 @@ def test_point_to_index_grid():
 
 
 def test_save_grid_pkl(tmpdir):
-    expected = {'lon_min_x': 116.319236,
-                'lat_min_y': 39.984094,
-                'grid_size_lat_y': 5,
-                'grid_size_lon_x': 5,
-                'cell_size_by_degree': 0.0001353464801860623
-                }
+    expected = {
+        'lon_min_x': 116.319236,
+        'lat_min_y': 39.984094,
+        'grid_size_lat_y': 5,
+        'grid_size_lon_x': 5,
+        'cell_size_by_degree': 0.0001353464801860623
+    }
     d = tmpdir.mkdir('core')
 
     file_write_default = d.join('test_save_grid.pkl')

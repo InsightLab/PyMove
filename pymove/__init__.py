@@ -11,6 +11,7 @@ from ._version import __version__
 from .core import grid
 from .core.dask import DaskMoveDataFrame
 from .core.dataframe import MoveDataFrame
+from .core.grid import Grid
 from .core.pandas import PandasMoveDataFrame
 from .core.pandas_discrete import PandasDiscreteMoveDataFrame
 from .models.pattern_mining import clustering

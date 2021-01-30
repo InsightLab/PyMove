@@ -3,8 +3,7 @@ from typing import Any, Dict, List, Optional, Set, Text, Tuple, Union
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import figure
-from pandas import DataFrame, Series
-from pandas._libs.tslibs import Timedelta
+from pandas import DataFrame, DateOffset, Series, Timedelta
 
 from pymove.core import MoveDataFrameAbstractModel
 from pymove.core.dataframe import MoveDataFrame
@@ -68,15 +67,15 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        data : Union[DataFrame, List, Dict]
+        data : DataFrame or list or dict
             Input trajectory data
-        latitude : Optional[Text], optional
+        latitude : str, optional
             Represents column name latitude, by default LATITUDE
-        longitude : Optional[Text], optional
+        longitude : str, optional
             Represents column name longitude, by default LONGITUDE
-        datetime : Optional[Text], optional
+        datetime : str, optional
             Represents column name datetime, by default DATETIME
-        traj_id : Optional[Text], optional
+        traj_id : str, optional
             Represents column name trajectory id, by default TRAJ_ID
 
         Raises
@@ -204,29 +203,29 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        mapper : Optional[Union[Dict, callable]], optional
+        mapper : dict or function, optional
             Dict-like or functions transformations to apply to that axis’ values.
             Use either mapper and axis to specify the axis to target
             with mapper, or index and columns, by default None
-        index : Optional[Union[Dict, callable]], optional
+        index : dict or function, optional
             Alternative to specifying axis
             (mapper, axis=0 is equivalent to index=mapper), by default None
-        columns : Optional[Union[Dict, callable]], optional
+        columns : dict or function, optional
             Alternative to specifying axis
             (mapper, axis=1 is equivalent to columns=mapper), by default None
-        axis : Optional[Union[int, Text]], optional
+        axis : int or str, optional
             Axis to target with mapper.
             Can be either the axis name (‘index’, ‘columns’) or number (0, 1),
             by default None
-        copy : Optional[bool], optional
+        copy : bool, optional
             Also copy underlying data, by default True
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Whether to return a new DataFrame.
             If True then value of copy is ignored, by default False
 
         Returns
         -------
-        Optional[Union[PandasMoveDataFrame, DataFrame]]
+        PandasMoveDataFrame, DataFrame
             DataFrame with the renamed axis labels or None
 
         Raises
@@ -285,7 +284,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        n : Optional[int]
+        n : int, optional
             Number of rows to select, by default 5
 
         Returns
@@ -311,7 +310,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        n : Optional[int]
+        n : int, optional
             Number of rows to select, by default 5
 
         Returns
@@ -350,7 +349,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def to_grid(
         self,
-        cell_size: int,
+        cell_size: float,
         meters_by_degree: Optional[float] = lat_meters(-3.8162973555)
     ) -> Grid:
         """
@@ -358,7 +357,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        cell_size : float.
+        cell_size : float
             Represents grid cell size.
 
         meters_by_degree : float, optional
@@ -398,7 +397,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        local_label : Optional[Text], optional
+        local_label : str, optional
             Represents the column name of feature local label, default LOCAL_LABEL
 
         Returns
@@ -436,7 +435,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        deep : Optional[bool], optional
+        deep : bool, optional
             Make a deep copy, including a copy of the data and the indices.
             With deep=False neither the indices nor the data are copied, by default True
 
@@ -471,17 +470,17 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        str_format : Optional[Text], optional
+        str_format : str, optional
              Format to consider the datetime, by default '%Y%m%d%H'
-        sort : Optional[bool], optional
+        sort : bool, optional
             Wether to sort the dataframe, by default True
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Represents whether the operation will be performed on
             the data provided or in a copy, by default True
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         """
@@ -526,13 +525,13 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Represents whether the operation will be performed
             on the data provided or in a copy, by default True
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         """
@@ -568,13 +567,13 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Represents whether the operation will be performed
             on the data provided or in a copy, by default True
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         """
@@ -611,13 +610,13 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Represents whether the operation will be performed
             on the data provided or in a copy, by default True
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         """
@@ -655,16 +654,16 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        create_day_of_week : Optional[bool], optional
+        create_day_of_week : bool, optional
             Indicates if the column day should be keeped in the dataframe.
             If set to False the column will be dropped, by default False
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Represents whether the operation will be performed
             on the data provided or in a copy, by default True
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         """
@@ -708,13 +707,13 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Represents whether the operation will be performed
             on the data provided or in a copy, by default True
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         Examples
@@ -772,15 +771,15 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_datetime : Optional[Text], optional
+        label_datetime : str, optional
             Represents column id type, by default DATETIME
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Represents whether the operation will be performed
             on the data provided or in a copy, by default True
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         References
@@ -829,7 +828,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Dataframe to be processed.
         sort : bool
             Whether to sort the data.
-        label_id : Text
+        label_id : str
             Name of the label feature.
 
         Returns
@@ -875,9 +874,9 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         ----------
         data_ : DataFrame
             Dataframe with the generated features.
-        columns: Set
+        columns: set
             Set with columns before operation
-        operation : Dict
+        operation : dict
             initial stats of the operation.
         inplace : bool
             Represents whether the operation will be performed on
@@ -885,7 +884,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         """
@@ -915,7 +914,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_id : Text, optional
+        label_id : str, optional
             Represents name of column of trajectories id, by default TRAJ_ID
         label_dtype : callable, optional
             Represents column id type, by default np.float64
@@ -927,7 +926,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
 
@@ -1016,7 +1015,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_id : Text, optional
+        label_id : str, optional
             Represents name of column of trajectories id, by default TRAJ_ID
         label_dtype : callable, optional
             Represents column id type, by default np.float64
@@ -1028,7 +1027,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
 
@@ -1112,7 +1111,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_id : Text, optional
+        label_id : str, optional
             Represents name of column of trajectories id, by default TRAJ_ID
         label_dtype : callable, optional
             Represents column id type, by default np.float64
@@ -1124,7 +1123,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         Examples
@@ -1198,7 +1197,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_id : Text, optional
+        label_id : str, optional
             Represents name of column of trajectories id, by default TRAJ_ID
         label_dtype : callable, optional
             Represents column id type, by default np.float64
@@ -1210,7 +1209,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
 
@@ -1279,7 +1278,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        Optional['PandasMoveDataFrame']
+        PandasMoveDataFrame
             Object with new features or None
 
         """
@@ -1385,20 +1384,20 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        dtype : Optional[callable], optional
+        dtype : callable, optional
             Represents column type, by default np.float64
-        figsize : Optional[Tuple[float, float]], optional
+        figsize : tuple(float, float), optional
             Represents dimensions of figure, by default (21, 15)
-        return_fig : Optional[bool], optional
+        return_fig : bool, optional
             Represents whether or not to return the generated picture, by default True
-        save_fig : Optional[bool], optional
+        save_fig : bool, optional
             Represents whether or not to save the generated picture, by default False
-        name : Optional[Text], optional
+        name : str, optional
             Represents name of a file, by default 'features.png'
 
         Returns
         -------
-        Optional[figure]
+        figure
             The generated picture or None
 
         Raises
@@ -1438,7 +1437,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         self,
         markers: Optional[Text] = 'o',
         markersize: Optional[float] = 20,
-        figsize: Optional[Tuple[int, int]] = (10, 10),
+        figsize: Optional[Tuple[float, float]] = (10, 10),
         return_fig: Optional[bool] = True,
         save_fig: Optional[bool] = False,
         name: Optional[Text] = 'trajectories.png',
@@ -1448,22 +1447,22 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        markers : Optional[Text], optional
+        markers : str, optional
              Represents visualization type marker, by default 'o'
-        markersize : Optional[float], optional
+        markersize : float, optional
             Represents visualization size marker, by default 20
-        figsize : Optional[Tuple[int, int]], optional
+        figsize : tuple(float, float), optional
              Represents dimensions of figure, by default (10, 10)
-        return_fig : Optional[bool], optional
+        return_fig : bool, optional
             Represents whether or not to return the generated picture, by default True
-        save_fig : Optional[bool], optional
+        save_fig : bool, optional
             Represents whether or not to save the generated picture, by default False
-        name : Optional[Text], optional
+        name : str, optional
             Represents name of a file, by default 'trajectories.png'
 
         Returns
         -------
-        Optional[figure]
+        figure
             The generated picture or None
         """
 
@@ -1505,26 +1504,26 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        tid :  Union[int, Text].
+        tid :  int, str
             Represents the trajectory tid
-        label : Optional[Text], optional
+        label : str, optional
             Feature with trajectories tids, by default TID
-        feature : Optional[Text], optional
+        feature : str, optional
             Name of the feature to highlight on plot, by default None
-        value : Optional[Any], optional
+        value : any, optional
             Value of the feature to be highlighted as green marker, by default None
-        figsize : Optional[Tuple[float, float]], optional
+        figsize : tuple(float, float), optional
             Represents dimensions of figure, by default (10, 10)
-        return_fig : Optional[bool], optional
+        return_fig : bool, optional
             Represents whether or not to return the generated picture, by default True
-        save_fig : Optional[bool], optional
+        save_fig : bool, optional
             Represents whether or not to save the generated picture, by default False
-        name : Optional[Text], optional
+        name : str, optional
             Represents name of a file, by default None
 
         Returns
         -------
-        Optional[Union['PandasMoveDataFrame', figure]]
+        PandasMoveDataFrame', figure
             Trajectory with the specified tid.
             The generated picture.
 
@@ -1669,25 +1668,30 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
-    # TODO: continue
-    def astype(self, dtype, copy=True, errors='raise'):
+    def astype(
+        self,
+        dtype: Union[callable, Dict],
+        copy: Optional[bool] = True,
+        errors: Optional[Text] = 'raise'
+    ) -> DataFrame:
         """
         Cast a pandas object to a specified dtype.
 
         Parameters
         ----------
-        dtype: data type, or dict of column name -> data type
+        dtype: callable, dict
             Use a numpy.dtype or Python type to cast entire pandas object
             to the same type. Alternatively, use {col: dtype, …},
             where col is a column label and dtype is a numpy.dtype
             or Python type to cast one or more of the DataFrame
             columns to column-specific types.
-        copy: bool, optional, default None
+        copy: bool, optional
             Return a copy when copy=True (be very careful setting
             copy=False as changes to values then
-            may propagate to other pandas objects).
-        errors: 'raise', 'ignore', optional, default raise
-            Control raising of exceptions on invalid data for provided dtype.
+            may propagate to other pandas objects), by default True
+        errors: str, optional
+            Control raising of exceptions on invalid data for provided dtype,
+                by default 'raise
             - raise : allow exceptions to be raised
             - ignore : suppress exceptions. On error return original object
 
@@ -1723,44 +1727,46 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def sort_values(
         self,
-        by,
-        axis=0,
-        ascending=True,
-        inplace=False,
-        kind='quicksort',
-        na_position='last',
-    ):
+        by: Union[Text, List[Text]],
+        axis: Optional[int] = 0,
+        ascending: Optional[bool] = True,
+        inplace: Optional[bool] = False,
+        kind: Optional[Text] = 'quicksort',
+        na_position: Optional[Text] = 'last',
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Sorts the values of the _data, along an axis.
 
         Parameters
         ----------
-        by: str or list of str
-            Name or list of names to sort the _data by.
-        axis: Integer, optional, default None, {index (0), columns (1)}
+        by: str, list
+            Name or list of names to sort the _data by
+        axis: int, optional
             if set to 0 or 'index', will count for each column.
             if set to 1 or 'columns', will count for each row
-        ascending: boolean or list of boolean, default True.
+            by default 0
+        ascending: bool, optional
             Sort ascending vs. descending. Specify list for
             multiple sort orders.
-            If this is a list of bool, must match the length of the by.
-        inplace: Boolean, optional, default False
+            If this is a list of bool, must match the length, by default True
+        inplace: bool, optional
             if set to true the original dataframe will be altered,
             the duplicates will be dropped in place,
             otherwise the operation will be made in a copy,
-            that will be returned.
-        kind: 'quicksort', 'mergesort', 'heapsort', default 'quicksort'.
-            Choice of sorting algorithm.
+            that will be returned, by default False
+        kind: str, optional
+            Choice of sorting algorithm, 'quicksort', 'mergesort', 'heapsort'
             For DataFrames, this option is only applied when sorting
-            on a single column or label.
-        na_position: 'first', 'last'.
+            on a single column or label, by default 'quicksort'
+        na_position: str, optional
+            'first', 'last', by default 'last
             If 'first' puts NaNs at the beginning;
             If last puts NaNs at the end.
 
         Returns
         -------
-        PandasDataframe or None
-            Object with sorted values or None if ``inplace=True``.
+        PandasMoveDataFrame
+            The sorted dataframe or None
 
         References
         ----------
@@ -1780,35 +1786,36 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return PandasMoveDataFrame(data=_sort_values)
 
     def reset_index(
-        self, level=None, drop=False, inplace=False, col_level=0, col_fill=''
-    ):
+        self,
+        level: Optional[Union[int, Text, Tuple, List]] = None,
+        drop: Optional[bool] = False,
+        inplace: Optional[bool] = False,
+        col_level: Optional[Union[int, Text]] = 0,
+        col_fill: Optional[Text] = ''
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Resets the DataFrame's index, and use the default one. One or more
         levels can be removed, if the DataFrame has a MultiIndex.
 
         Parameters
         ----------
-        level: int, str, tuple, or list. Optional, default None
-            Only the levels specify will be removed from the index.
-            If set to None, all levels are removed.
-        drop: boolean, optional, default False
-            Do not try to insert index into dataframe columns.
-            This resets the index to the default integer index.
-        inplace: bool, optional, default False
-            Modify the DataFrame in place (do not create a new object).
-        col_level: int or str, default 0
+        level: int or str or tuple or list, optional
+            Only the levels specify will be removed from the index
+            If set to None, all levels are removed, by default None
+        drop: bool, optional
+            Do not try to insert index into dataframe columns
+            This resets the index to the default integer index, by default False
+        inplace: bool, optional
+            Modify the DataFrame in place (do not create a new object), by default False
+        col_level: int or str, optional
             If the columns have multiple levels, determines which level
-            the labels are inserted into.
-            By default it is inserted into the first level..
-        col_fill: object, default ''
-            If the columns have multiple levels, determines how
-            the other levels are named.
-            If None then the index name is repeated.
+            the labels are inserted into, by default 0
+        col_fill: str, optional
+            If the columns have multiple levels, determines how the other levels are named
+            If None then the index name is repeated, by default ''
 
-        Returns
-        -------
-        PandasMoveDataFrame or None
-            Object with a resetted indexes or None if ``inplace=True``.
+        PandasMoveDataFrame
+            The generated picture or None
 
         References
         ----------
@@ -1828,39 +1835,39 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def set_index(
         self,
-        keys,
-        drop=True,
-        append=False,
-        inplace=False,
-        verify_integrity=False,
-    ):
+        keys: Union[Text, List[Text]],
+        drop: Optional[bool] = True,
+        append: Optional[bool] = False,
+        inplace: Optional[bool] = False,
+        verify_integrity: Optional[bool] = False,
+    ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
         Set the DataFrame index (row labels) using one or more existing columns
         or arrays (of the correct length).
 
         Parameters
         ----------
-        keys: str or array of str.
-            label or array-like or list of labels/arrays.
+        keys: str, list
+            label or array-like or list of labels/arrays
             This parameter can be either a single column key, a single
             array of the same length as the calling DataFrame,
             or a list containing an arbitrary combination of
-            column keys and arrays.
-        drop: bool, optional (True by default)
-            Delete columns to be used as the new index.
-        append: bool, optional (False by default)
-            Whether to append columns to existing index.
-        inplace: bool, optional (False by default)
-            Modify the DataFrame in place (do not create a new object).
-        verify_integrity: bool, optional (False by default)
-            Check the new index for duplicates.
-            Otherwise defer the check until necessary.
-            Setting to False will improve the performance of this method.
+            column keys and arrays
+        drop: bool, optional
+            Delete columns to be used as the new index, by default True
+        append: bool, optional
+            Whether to append columns to existing index, by default True
+        inplace: bool, optional
+            Modify the DataFrame in place (do not create a new object), by default True
+        verify_integrity: bool, optional
+            Check the new index for duplicates
+            Otherwise defer the check until necessary
+            Setting to False will improve the performance of this method, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with a new index or None if ``inplace=True``.
+        PandasMoveDataFrame, DataFrame
+            Object with a new index or None
 
         References
         ----------
@@ -1899,14 +1906,14 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def drop(
         self,
-        labels=None,
-        axis=0,
-        index=None,
-        columns=None,
-        level=None,
-        inplace=False,
-        errors='raise',
-    ):
+        labels: Optional[Union[Text, List[Text]]] = None,
+        axis: Optional[Union[int, Text]] = 0,
+        index: Optional[Union[Text, List[Text]]] = None,
+        columns: Optional[Union[Text, List[Text]]] = None,
+        level: Optional[Union[int, Text]] = None,
+        inplace: Optional[bool] = False,
+        errors: Optional[Text] = 'raise',
+    ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
         Remove rows or columns by specifying label names and corresponding axis,
         or by specifying directly index or column names. When using a multi-
@@ -1915,29 +1922,30 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        labels: str or array of str
-            Index or column labels to drop.
-        axis: str or int, optional, default 0
+        labels: str or list, optional
+            Index or column labels to drop, by default None
+        axis: int or str, optional
             Whether to drop labels from the index (0 or 'index')
-            or columns (1 or 'columns').
-        index: str or array of str, optional (None by default)
+            or columns (1 or 'columns'), by default 0
+        index: str or list, optional
             Alternative to specifying axis
-            (labels, axis=0 is equivalent to index=labels).
-        columns: str or array of str, optional (None by default)
+            (labels, axis=0 is equivalent to index=labels), by default None
+        columns: str or list, optional
             Alternative to specifying axis
-            (labels, axis=1 is equivalent to columns=labels).
-        level: int or str, optional (None by default)
-            For MultiIndex, level from which the labels will be removed.
-        inplace: bool, optional (False by default)
-            If True, do operation inplace and return None.
-            Otherwise, make a copy, do operations and return.
-        errors:'ignore', 'raise', optional, default 'raise'
+            (labels, axis=1 is equivalent to columns=labels), by default None
+        level: str or int, optional
+            For MultiIndex, level from which the labels will be removed, by default None
+        inplace: bool, optional
+            If True, do operation inplace and return None
+            Otherwise, make a copy, do operations and return, by default False
+        errors: bool, optional
+            'ignore', 'raise', by default 'raise'
             If 'ignore', suppress error and only existing labels are dropped.
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object without the removed index or column labels.
+        PandasMoveDataFrame, DataFrame
+            Object without the removed index or column labels or None
 
         Raises
         ------
@@ -1988,27 +1996,33 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         return _drop
 
-    def drop_duplicates(self, subset=None, keep='first', inplace=False):
+    def drop_duplicates(
+        self,
+        subset: Optional[Union[int, Text]] = None,
+        keep: Optional[Union[Text, bool]] = 'first',
+        inplace: Optional[bool] = False
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Uses the pandas's function drop_duplicates, to remove duplicated rows
         from data.
 
         Parameters
         ----------
-        subset: int or str, optional, default None
+        subset: int or str, optional
             Only consider certain columns for identifying duplicates,
-            by default use all of the columns
-        keep: 'first', 'lasts', False, optional, default 'first'
+            by default use all of the columns, by default None
+        keep: str, optional
             - first : Drop duplicates except for the first occurrence.
             - last : Drop duplicates except for the last occurrence.
             - False : Drop all duplicates.
-        inplace: bool, optional, default False
-            Whether to drop duplicates in place or to return a copy
+            by default 'first'
+        inplace: bool, optional
+            Whether to drop duplicates in place or to return a copy, by default False
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with duplicated rows or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with duplicated rows or None
 
         References
         ----------
@@ -2025,7 +2039,13 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             return None
         return PandasMoveDataFrame(data=_drop_duplicates)
 
-    def shift(self, periods=1, freq=None, axis=0, fill_value=None):
+    def shift(
+        self,
+        periods: Optional[int] = 1,
+        freq: Optional[Union[DateOffset, Timedelta, Text]] = None,
+        axis: Optional[Union[int, Text]] = 0,
+        fill_value: Optional[Any] = None
+    ) -> 'PandasMoveDataFrame':
         """
         Shift index by desired number of periods with an optional time freq.
 
@@ -2033,7 +2053,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         ----------
         periods: int, optional, default 1
             Number of periods to shift. Can be positive or negative.
-        freq: pandas.DateOffset, pandas.Timedelta or str, optional, default None
+        freq: DateOffset or Timedelta or str, optional, default None
             Offset to use from the series module or time rule (e.g. 'EOM').
             If freq is specified then the index values are shifted but
             the data is not realigned. That is, use freq if you would like
@@ -2068,12 +2088,12 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def fillna(
         self,
-        value=None,
-        method=None,
-        axis=None,
-        inplace=False,
-        limit=None,
-        downcast=None,
+        value: Optional[Any] = None,
+        method: Optional[Text] = None,
+        axis: Optional[Union[int, Text]] = None,
+        inplace: Optional[bool] = False,
+        limit: Optional[int] = None,
+        downcast: Optional[Dict] = None,
     ):
         """
         Fill NA/NaN values using the specified method.
@@ -2110,8 +2130,8 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with missing values filled or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with missing values filled or None
 
         References
         ----------
@@ -2130,35 +2150,40 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return PandasMoveDataFrame(data=_fillna)
 
     def dropna(
-        self, axis=0, how='any', thresh=None, subset=None, inplace=False
+        self,
+        axis: Optional[Union[int, Text]] = 0,
+        how: Optional[Text] = 'any',
+        thresh: Optional[float] = None,
+        subset: Optional[List] = None,
+        inplace: Optional[bool] = False
     ):
         """
         Removes missing data.
 
         Parameters
         ----------
-        axis: 0 or 'index', 1 or 'columns', None, optional, default 0
-            Determine if rows or columns are removed.
+        axis: 0 or 'index', 1 or 'columns', None, optional
+            Determine if rows or columns are removed, by default 0
             - 0, or 'index' : Drop rows which contain missing values.
             - 1, or 'columns' : Drop columns which contain missing value.
-        how: str, optional, default 'any', options: 'any', 'all'
-            Determine if row or column is removed from DataFrame,
+        how: str, optional
+            Determine if row or column is removed from DataFrame, by default 'any
             when we have at least one NA or all NA.
                - 'any' : If any NA values are present, drop that row or column.
                - 'all' : If all values are NA, drop that row or column.
-        thresh: int, optional, default None
-            Require that many non-NA values.
-        subset: array-like, optional, default None
-            Labels along other axis to consider,
+        thresh: float, optional
+            Require that many non-NA values, by default None
+        subset: array-like, optional
+            Labels along other axis to consider, by default None
             e.g. if you are dropping rows these would be a
             list of columns to include.
-        inplace: bool, optional (default False)
-            If True, do operation inplace and return None
+        inplace: bool, optional
+            If True, do operation inplace and return None, by default False
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with NA entries dropped or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with NA entries dropped or None
 
         References
         ----------
@@ -2194,13 +2219,13 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def sample(
         self,
-        n=None,
-        frac=None,
-        replace=False,
-        weights=None,
-        random_state=None,
-        axis=None,
-    ):
+        n: Optional[int] = None,
+        frac: Optional[float] = None,
+        replace: Optional[bool] = False,
+        weights: Optional[Union[Text, List]] = None,
+        random_state: Optional[int] = None,
+        axis: Optional[Union[int, Text]] = None
+    ) -> 'PandasMoveDataFrame':
         """
         Return a random sample of items from an axis of object.
 
@@ -2209,14 +2234,14 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         n : int, optional
-            Number of items from axis to return. Cannot be used with `frac`.
-            Default = 1 if `frac` = None.
+            Number of items from axis to return. Cannot be used with `frac`,
+            by default None
         frac : float, optional
-            Fraction of axis items to return. Cannot be used with `n`.
-        replace : bool, default False
-            Allow or disallow sampling of the same row more than once.
+            Fraction of axis items to return. Cannot be used with `n`, by deault None
+        replace : bool, optional
+            Allow or disallow sampling of the same row more than once, by default False
         weights : str or ndarray-like, optional
-            Default 'None' results in equal probability weighting.
+            If 'None' results in equal probability weighting.
             If passed a Series, will align with target object on index. Index
             values in weights not found in sampled object will be ignored and
             index values in sampled object not in weights will be assigned
@@ -2228,12 +2253,13 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             If weights do not sum to 1, they will be normalized to sum to 1.
             Missing values in the weights column will be treated as zero.
             Infinite values not allowed.
+            by default None
         random_state : int or numpy.random.RandomState, optional
             Seed for the random number generator (if int), or numpy RandomState
-            object.
-        axis : {0 or 'index', 1 or 'columns', None}, default None
+            object,by default None
+        axis : {0 or 'index', 1 or 'columns', None}, optional
             Axis to sample. Accepts axis number or name. Default is stat axis
-            for given data type (0 for Series and DataFrames).
+            for given data type (0 for Series and DataFrames), by default None
 
         Returns
         -------
@@ -2261,13 +2287,13 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         )
         return PandasMoveDataFrame(data=_sample)
 
-    def isin(self, values):
+    def isin(self, values: Union[List, Series, DataFrame, Dict]) -> DataFrame:
         """
         Determines whether each element in the DataFrame is contained in values.
 
         values : iterable, Series, DataFrame or dict
             The result will only be true at a location if all the labels match.
-            If values is a Series, that'srs the index.
+            If values is a Series, the index.
             If values is a dict, the keys must be the
             column names, which must match.
             If values is a DataFrame, then both the
@@ -2287,8 +2313,12 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return DataFrame(self).isin(values)
 
     def append(
-        self, other, ignore_index=False, verify_integrity=False, sort=None
-    ):
+        self,
+        other: Union['PandasMoveDataFrame', DataFrame],
+        ignore_index: Optional[bool] = False,
+        verify_integrity: Optional[bool] = False,
+        sort: Optional[bool] = False
+    ) -> 'PandasMoveDataFrame':
         """
         Append rows of other to the end of caller, returning a new object.
         Columns in other that are not in the caller are added as new columns.
@@ -2297,16 +2327,17 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         ----------
         other : DataFrame or Series/dict-like object, or list of these
             The data to append.
-        ignore_index : bool, optional, default False
-            If True, do not use the index labels.
-        verify_integrity : bool, optional, default False
-            If True, raise ValueError on creating index with duplicates.
-        sort : bool, optional, default None
-            Sort columns if the columns of self and other are not aligned.
+        ignore_index : bool, optional
+            If True, do not use the index labels, by default False
+        verify_integrity : bool, optional
+            If True, raise ValueError on creating index with duplicates, by default False
+        sort : bool, optional
+            Sort columns if the columns of self and other are not aligned
             The default sorting is deprecated and will
             change to not-sorting in a future version of pandas.
             Explicitly pass sort=True to silence the warning and sort.
             Explicitly pass sort=False to silence the warning and not sort.
+            by default False
 
         Returns
         -------
@@ -2328,8 +2359,14 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         return PandasMoveDataFrame(data=_append)
 
     def join(
-        self, other, on=None, how='left', lsuffix='', rsuffix='', sort=False
-    ):
+        self,
+        other: Union['PandasMoveDataFrame', DataFrame],
+        on: Optional[Union[Text, List]] = None,
+        how: Optional[Text] = 'left',
+        lsuffix: Optional[Text] = '',
+        rsuffix: Optional[Text] = '',
+        sort: Optional[bool] = False
+    ) -> 'PandasMoveDataFrame':
         """
         Join columns of other, returning a new object.
 
@@ -2343,14 +2380,14 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Index should be similar to one of the columns in this one. If a
             Series is passed, its name attribute must be set, and that will be
             used as the column name in the resulting joined DataFrame.
-        on : str, list of str, or array-like, optional
+        on : str or list of str or array-like, optional
             Column or index level name(srs) in the caller to join on the index
             in `other`, otherwise joins index-on-index. If multiple
             values given, the `other` DataFrame must have a MultiIndex. Can
             pass an array as the join key if it is not already contained in
             the calling DataFrame. Like an Excel VLOOKUP operation.
-        how : {'left', 'right', 'outer', 'inner'}, default 'left'
-            How to handle the operation of the two objects.
+        how : {'left', 'right', 'outer', 'inner'}, optional
+            How to handle the operation of the two objects, by default 'left'
 
             * left: use calling frame index (or column if on is specified)
             * right: use `other` index.
@@ -2360,13 +2397,13 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             * inner: form intersection of calling frame index (or column if
             on is specified) with `other` index, preserving the order
             of the calling one.
-        lsuffix : str, default ''
-            Suffix to use from left frame overlapping columns.
-        rsuffix : str, default ''
-            Suffix to use from right frame overlapping columns.
-        sort : bool, default False
+        lsuffix : str, optional
+            Suffix to use from left frame overlapping columns, by default ''
+        rsuffix : str, optional
+            Suffix to use from right frame overlapping columns, by default ''
+        sort : bool, optional
             Order result DataFrame lexicographically by the join key. If False,
-            the order of the join key depends on the join type (how keyword).
+            the order of the join key depends on the join type (how keyword)
 
         Returns
         -------
@@ -2393,19 +2430,19 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def merge(
             self,
-            right,
-            how='inner',
-            on=None,
-            left_on=None,
-            right_on=None,
-            left_index=False,
-            right_index=False,
-            sort=False,
-            suffixes=('_x', '_y'),
-            copy=True,
-            indicator=False,
-            validate=None
-    ):
+            right: Union['PandasMoveDataFrame', DataFrame, Series],
+            how: Optional[Text] = 'inner',
+            on: Optional[Union[Text, List]] = None,
+            left_on: Optional[Union[Text, List]] = None,
+            right_on: Optional[Union[Text, List]] = None,
+            left_index: Optional[bool] = False,
+            right_index: Optional[bool] = False,
+            sort: Optional[bool] = False,
+            suffixes: Optional[Tuple[Text, Text]] = ('_x', '_y'),
+            copy: Optional[bool] = True,
+            indicator: Optional[Union[bool, Text]] = False,
+            validate: Optional[Text] = None
+    ) -> 'PandasMoveDataFrame':
         """
         Merge DataFrame or named Series objects with a database-style join.
 
@@ -2417,8 +2454,8 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         ----------
         right: DataFrame or named Series
             Object to merge with.
-        how: {‘left’, ‘right’, ‘outer’, ‘inner’}, default ‘inner’
-            Type of merge to be performed.
+        how: {‘left’, ‘right’, ‘outer’, ‘inner’}, optional
+            Type of merge to be performed, by default ‘inner’
             left: use only keys from left frame, similar to a SQL left outer join;
                 preserve key order.
             right: use only keys from right frame, similar to a SQL right outer join;
@@ -2427,34 +2464,35 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
                 sort keys lexicographically.
             inner: use intersection of keys from both frames, similar to a SQL inner join;
                 preserve the order of the left keys.
-        on: label or list
+        on: label or list, optional
             Column or index level names to join on. These must be found in both
             DataFrames. If on is None and not merging on indexes then this defaults
-            to the intersection of the columns in both DataFrames.
-        left_on: label or list, or array-like
+            to the intersection of the columns in both DataFrames, by default None
+        left_on: str or list or array-like, optional
             Column or index level names to join on in the left DataFrame. Can
             also be an array or list of arrays of the length of the left DataFrame.
-            These arrays are treated as if they are columns.
-        right_on: label or list, or array-like
+            These arrays are treated as if they are columns, by default None
+        right_on: str or list or array-like, optional
             Column or index level names to join on in the right DataFrame.
             Can also be an array or list of arrays of the length of the right DataFrame.
-            These arrays are treated as if they are columns.
-        left_index: bool, default False
-            Use the index from the left DataFrame as the join key(s).
+            These arrays are treated as if they are columns, by default None
+        left_index: bool, optional
+            Use the index from the left DataFrame as the join key(s), by default False
             If it is a MultiIndex, the number of keys in the other DataFrame
             (either the index or a number of columns) must match the number of levels.
-        right_index: bool, default False
-            Use the index from the right DataFrame as the join key.
+        right_index: bool, optional
+            Use the index from the right DataFrame as the join key, by default False
             Same caveats as left_index.
-        sort: bool, default False
-            Sort the join keys lexicographically in the result DataFrame.
+        sort: bool, optional
+            Sort the join keys lexicographically in the result DataFrame, by default False
             If False, the order of the join keys depends on the join type (how keyword).
-        suffixes: tuple of (str, str), default (‘_x’, ‘_y’)
-            Suffix to apply to overlapping column names in the left and right side,
+        suffixes: tuple of (str, str), optional
+            Suffix to apply to overlapping column names in the left and right side
             respectively. To raise an exception on overlapping columns use (False, False)
-        copy: bool, default True
-            If False, avoid copy if possible.
-        indicator: bool or str, default False
+            by default (‘_x’, ‘_y’)
+        copy: bool, optional
+            If False, avoid copy if possible, by default True
+        indicator: bool or str, optional
             If True, adds a column to output DataFrame called '_merge' with
             information on the source of each row. If string, column with
             information on source of each row will be added to output DataFrame,
@@ -2463,8 +2501,9 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             whose merge key only appears in ‘left’ DataFrame, 'right_only' for
             observations whose merge key only appears in ‘right’ DataFrame,
             and 'both' if the observation’s merge key is found in both.
+            by default False
         validate: str, optional
-            If specified, checks if merge is of specified type.
+            If specified, checks if merge is of specified type, by default None
             'one_to_one' or '1:1': check if merge keys are unique in both
                 left and right datasets.
             'one_to_many' or '1:m': check if merge keys are unique in left dataset.
@@ -2491,23 +2530,23 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         )
         return PandasMoveDataFrame(data=_merge)
 
-    def write_file(self, file_name, separator=','):
+    def write_file(self, file_name: Text, separator: Optional[Text] = ','):
         """
         Write trajectory data to a new file.
 
         Parameters
         ----------
-        file_name : str.
+        file_name : str
             Represents the filename.
-        separator : str, optional, default ','.
-            Represents the information separator in a new file.
+        separator : str, optional
+            Represents the information separator in a new file, by default ','
 
         """
         self.to_csv(
             file_name, sep=separator, encoding='utf-8', index=False
         )
 
-    def convert_to(self, new_type):
+    def convert_to(self, new_type: Text) -> MoveDataFrame:
         """
         Convert an object from one type to another specified by the user.
 
@@ -2541,7 +2580,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             return self
 
-    def get_type(self):
+    def get_type(self) -> Text:
         """
         Returns the type of the object.
 

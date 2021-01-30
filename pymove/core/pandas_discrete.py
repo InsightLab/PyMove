@@ -47,15 +47,15 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         ----------
         data : Union[DataFrame, List, Dict]
             Input trajectory data
-        latitude : Optional[Text], optional
+        latitude : str, optional
             Represents column name latitude, by default LATITUDE
-        longitude : Optional[Text], optional
+        longitude : str, optional
             Represents column name longitude, by default LONGITUDE
-        datetime : Optional[Text], optional
+        datetime : str, optional
             Represents column name datetime, by default DATETIME
-        traj_id : Optional[Text], optional
+        traj_id : str, optional
             Represents column name trajectory id, by default TRAJ_ID
-        local_label : Optional[Text], optional
+        local_label : str, optional
             Represents column name local label, by default LOCAL_LABEL
 
         Raises
@@ -85,7 +85,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         Parameters
         ----------
-        region_size: Optional[int], optional
+        region_size: int, optional
             Size of grid cell, by default 1000
         """
 
@@ -108,20 +108,20 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         Parameters
         ----------
-        label_id : Optional[Text], optional
+        label_id : str, optional
             Represents name of column of trajectory id, by default TRAJ_ID
-        local_label : Optional[Text], optional
+        local_label : str, optional
             Indicates name of column of place labels on symbolic trajectory,
                 by default LOCAL_LABEL
-        sort : Optional[bool], optional
+        sort : bool, optional
             Wether the dataframe will be sorted, by default True
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Represents whether the operation will be performed on
             the data provided or in a copy, by default True
 
         Returns
         -------
-        Optional['PandasDiscreteMoveDataFrame']
+        PandasDiscreteMoveDataFrame
              Object with new features or None
 
         """
@@ -184,29 +184,29 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         Parameters
         ----------
-        label_id : Optional[Text], optional
+        label_id : str, optional
              Represents name of column of trajectory id, by default TRAJ_ID
-        local_label : Optional[Text], optional
+        local_label : str, optional
             Indicates name of column of place labels on symbolic trajectory,
                 by default LOCAL_LABEL
-        mean_coef : Optional[float], optional
+        mean_coef : float, optional
             Multiplication coefficient of the mean time for the segment, by default 1.0
-        std_coef : Optional[float], optional
+        std_coef : float, optional
             Multiplication coefficient of sdt time for the segment, by default 1.0
         statistics : Optional[DataFrame], optional
             Time Statistics of the pairwise local labels, by default None
-        label_tid_stat : Optional[Text], optional
+        label_tid_stat : str, optional
             The label of the column containing the ids of the formed segments.
             Is the new splitted id, by default TID_STAT
-        drop_single_points : Optional[bool], optional
+        drop_single_points : bool, optional
             Wether to drop the trajectories with only one point, by default False
-        inplace : Optional[bool], optional
+        inplace : bool, optional
             Represents whether the operation will be performed on
             the data provided or in a copy, by default True
 
         Returns
         -------
-        Optional['PandasDiscreteMoveDataFrame']
+        PandasDiscreteMoveDataFrame
             Object with new features or None
 
         Raises

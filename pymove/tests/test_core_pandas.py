@@ -213,7 +213,7 @@ def test_attribute_error_from_data_frame():
         raise AssertionError(
             'AttributeError error not raised by MoveDataFrame'
         )
-    except AttributeError:
+    except KeyError:
         pass
 
     df = DataFrame(
@@ -233,7 +233,7 @@ def test_attribute_error_from_data_frame():
         raise AssertionError(
             'AttributeError error not raised by MoveDataFrame'
         )
-    except AttributeError:
+    except KeyError:
         pass
 
     df = DataFrame(
@@ -253,7 +253,7 @@ def test_attribute_error_from_data_frame():
         raise AssertionError(
             'AttributeError error not raised by MoveDataFrame'
         )
-    except AttributeError:
+    except KeyError:
         pass
 
 

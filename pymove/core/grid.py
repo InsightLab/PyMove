@@ -16,7 +16,6 @@ from pymove.utils.constants import (
     LATITUDE,
     LONGITUDE,
     POLYGON,
-    TID,
     TRAJ_ID,
 )
 from pymove.utils.conversions import lat_meters
@@ -36,7 +35,7 @@ class Grid:
 
         Parameters
         ----------
-        data : Union[DataFrame, Dict]
+        data : DataFrame or dict
             Dataframe containing the trajectories
             Dict with grid information
                 'lon_min_x': minimum x of grid,
@@ -44,9 +43,9 @@ class Grid:
                 'grid_size_lat_y': lat y size of grid,
                 'grid_size_lon_x': lon x size of grid,
                 'cell_size_by_degree': cell size in radians,
-        cell_size : Optional[float], optional
+        cell_size : float, optional
             Represents grid cell size, by default None
-        meters_by_degree : Optional[float], optional
+        meters_by_degree : float, optional
             Represents the corresponding meters of lat by degree,
                 by default lat_meters(-3.8162973555)
         """
@@ -85,7 +84,7 @@ class Grid:
 
         Parameters
         ----------
-        dict_grid : Dict
+        dict_grid : dict
             Dictionary with grid information
                 'lon_min_x': minimum x of grid,
                 'lat_min_y': minimum y of grid,
@@ -178,11 +177,11 @@ class Grid:
         ----------
         data : DataFrame
             Represents the dataset with contains lat, long and datetime.
-        unique_index: Optional[bool], optional
+        unique_index: bool, optional
             How to index the grid, by default True
         label_dtype : Optional[Callable], optional
             Represents the type of a value of new column in dataframe, by default np.int64
-        sort : Optional[bool], optional
+        sort : bool, optional
             Represents if needs to sort the dataframe, by default True
 
         """
@@ -220,9 +219,9 @@ class Grid:
         ----------
         data : DataFrame
             Dataframe with grid lat-lon ids
-        label_grid_lat : Optional[Text], optional
+        label_grid_lat : str, optional
            grid lat id column, by default INDEX_GRID_LAT
-        label_grid_lon : Optional[Text], optional
+        label_grid_lon : str, optional
             grid lon id column, by default INDEX_GRID_LON
         """
         dict_grid = self.get_grid()
@@ -242,7 +241,7 @@ class Grid:
         ----------
         data : DataFrame
             Dataframe with grid lat-lon ids
-        label_grid_index : Optional[Text], optional
+        label_grid_index : str, optional
             grid unique id column, by default INDEX_GRID
         """
         dict_grid = self.get_grid()
@@ -323,7 +322,7 @@ class Grid:
             raise e
 
     def create_all_polygons_to_all_point_on_grid(
-        self, data: DataFrame, unique_index: Optional[bool] = True
+        self, data: DataFrame
     ) -> DataFrame:
         """
         Create all polygons to all points represented in a grid.
@@ -332,8 +331,6 @@ class Grid:
         ----------
         data : DataFrame
             Represents the dataset with contains lat, long and datetime
-        unique_index: Optional[bool], optional
-            How to index the grid, by default True
 
         Returns
         -------
@@ -344,15 +341,15 @@ class Grid:
         """
 
         operation = begin_operation('create_all_polygons_to_all_point_on_grid')
-        if unique_index:
+        if INDEX_GRID_LAT not in data or INDEX_GRID_LON not in data:
             self.create_update_index_grid_feature(data, unique_index=False)
 
-        datapolygons = data[['index_grid_lat', 'index_grid_lon']].drop_duplicates()
+        datapolygons = data[[INDEX_GRID_LAT, INDEX_GRID_LON]].drop_duplicates()
 
         polygons = datapolygons.apply(
             lambda row: self.create_one_polygon_to_point_on_grid(
-                row['index_grid_lat'], row['index_grid_lon']
-            ), index=1
+                row[INDEX_GRID_LAT], row[INDEX_GRID_LON]
+            ), axis=1
         )
 
         print('...polygons were created')
@@ -417,7 +414,7 @@ class Grid:
 
         Parameters
         ----------
-        filename : String
+        filename : str
                 Represents the name of a file.
 
         Returns
@@ -434,7 +431,7 @@ class Grid:
         operation = begin_operation('read_grid_pkl')
         with open(filename, 'rb') as f:
             dict_grid = joblib.load(f)
-        grid = Grid(dict_grid=dict_grid)
+        grid = Grid(data=dict_grid)
         self.last_operation = end_operation(operation)
         return grid
 
@@ -456,14 +453,14 @@ class Grid:
             Input trajectory data
         id_ : Text
             Represents the id
-        figsize : Optional[Tuple[int, int]], optional
+        figsize : tuple(int, int), optional
             Represents the size (float: width, float: height) of a figure,
                 by default (10, 10)
-        return_fig : Optional[bool], optional
+        return_fig : bool, optional
             Represents whether or not to save the generated picture, by default True
-        save_fig : Optional[bool], optional
-            [description], by default False
-        name : Optional[Text], optional
+        save_fig : bool, optional
+            Wether to save the figure, by default False
+        name : str, optional
             Represents name of a file, by default 'grid.png'
 
         Returns
@@ -503,3 +500,7 @@ class Grid:
 
         if return_fig:
             return fig
+
+    def __repr__(self) -> str:
+        text = ['{}: {}'.format(k, v) for k, v in self.get_grid().items()]
+        return '\n'.join(text)

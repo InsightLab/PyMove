@@ -31,17 +31,17 @@ class MoveDataFrame:
 
         Parameters
         ----------
-        data : Union[DataFrame, PandasMoveDataFrame, Dict, List]
+        data : DataFrame or PandasMoveDataFrame or dict or list
             Input trajectory data.
-        latitude : Optional[Text], optional
+        latitude : str, optional
             Represents column name latitude, by default LATITUDE
-        longitude : Optional[Text], optional
+        longitude : str, optional
             Represents column name longitude, by default LONGITUDE
-        datetime : Optional[Text], optional
+        datetime : str, optional
             Represents column name datetime, by default DATETIME
-        traj_id : Optional[Text], optional
+        traj_id : str, optional
             Represents column name trajectory id, by default TRAJ_ID
-        type_ : Optional[Text], optional
+        type_ : str, optional
             Number of partitions of the dask dataframe, by default TYPE_PANDAS
         n_partitions : Optional[int], optional
             Amount of partitions for dask dataframe, by default 1
@@ -132,13 +132,13 @@ class MoveDataFrame:
 
         Parameters
         ----------
-        current_id : Text
+        current_id : str
             Represents the column name of feature id
-        current_lat : Text
+        current_lat : str
             Represents the column name of feature latitude
-        current_lon : Text
+        current_lon : str
             Represents the column name of feature longitude
-        current_datetime : Text
+        current_datetime : str
             Represents the column name of feature datetime
 
         Returns
