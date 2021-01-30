@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Set, Text, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Text, Tuple, Union
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -186,9 +186,9 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def rename(
             self,
-            mapper: Optional[Union[Dict, callable]] = None,
-            index: Optional[Union[Dict, callable]] = None,
-            columns: Optional[Union[Dict, callable]] = None,
+            mapper: Optional[Union[Dict, Callable]] = None,
+            index: Optional[Union[Dict, Callable]] = None,
+            columns: Optional[Union[Dict, Callable]] = None,
             axis: Optional[Union[int, Text]] = None,
             copy: Optional[bool] = True,
             inplace: Optional[bool] = False
@@ -903,7 +903,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def generate_dist_time_speed_features(
         self,
         label_id: Optional[Text] = TRAJ_ID,
-        label_dtype: Optional[callable] = np.float64,
+        label_dtype: Optional[Callable] = np.float64,
         sort: Optional[bool] = True,
         inplace: Optional[bool] = True
     ) -> Optional['PandasMoveDataFrame']:
@@ -1006,7 +1006,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def generate_dist_features(
         self,
         label_id: Optional[Text] = TRAJ_ID,
-        label_dtype: Optional[callable] = np.float64,
+        label_dtype: Optional[Callable] = np.float64,
         sort: Optional[bool] = True,
         inplace: Optional[bool] = True
     ) -> Optional['PandasMoveDataFrame']:
@@ -1102,7 +1102,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def generate_time_features(
         self,
         label_id: Optional[Text] = TRAJ_ID,
-        label_dtype: Optional[callable] = np.float64,
+        label_dtype: Optional[Callable] = np.float64,
         sort: Optional[bool] = True,
         inplace: Optional[bool] = True
     ) -> Optional['PandasMoveDataFrame']:
@@ -1188,7 +1188,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def generate_speed_features(
         self,
         label_id: Optional[Text] = TRAJ_ID,
-        label_dtype: Optional[callable] = np.float64,
+        label_dtype: Optional[Callable] = np.float64,
         sort: Optional[bool] = True,
         inplace: Optional[bool] = True
     ) -> Optional['PandasMoveDataFrame']:
@@ -1373,7 +1373,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def plot_all_features(
         self,
-        dtype: Optional[callable] = np.float64,
+        dtype: Optional[Callable] = np.float64,
         figsize: Optional[Tuple[float, float]] = (21, 15),
         return_fig: Optional[bool] = True,
         save_fig: Optional[bool] = False,
@@ -1670,7 +1670,7 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def astype(
         self,
-        dtype: Union[callable, Dict],
+        dtype: Union[Callable, Dict],
         copy: Optional[bool] = True,
         errors: Optional[Text] = 'raise'
     ) -> DataFrame:

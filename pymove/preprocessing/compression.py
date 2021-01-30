@@ -1,4 +1,7 @@
+from typing import Optional, Text
+
 import numpy as np
+from pandas import DataFrame
 
 from pymove.preprocessing.stay_point_detection import (
     create_or_update_move_stop_by_dist_time,
@@ -17,16 +20,16 @@ from pymove.utils.log import progress_bar, timer_decorator
 
 @timer_decorator
 def compress_segment_stop_to_point(
-    move_data,
-    label_segment=SEGMENT_STOP,
-    label_stop=STOP,
-    point_mean='default',
-    drop_moves=False,
-    label_id=TRAJ_ID,
-    dist_radius=30,
-    time_radius=900,
-    inplace=False,
-):
+    move_data: DataFrame,
+    label_segment: Optional[Text] = SEGMENT_STOP,
+    label_stop: Optional[Text] = STOP,
+    point_mean: Optional[Text] = 'default',
+    drop_moves: Optional[bool] = False,
+    label_id: Optional[Text] = TRAJ_ID,
+    dist_radius: Optional[float] = 30,
+    time_radius: Optional[float] = 900,
+    inplace: Optional[bool] = False,
+) -> DataFrame:
     """
     Compress the trajectories using the stop points in the dataframe.
     Compress a segment to point setting lat_mean e lon_mean to each segment.
@@ -35,42 +38,44 @@ def compress_segment_stop_to_point(
     ----------
     move_data : dataframe
        The input trajectory data
-    label_segment : String, optional("segment_stop" by default)
+    label_segment : String, optional
         The label of the column containing the ids of the formed segments.
-        Is the new splitted id.
-    label_stop : String, optional(stop by default)
-        Is the name of the column that indicates if a point is a stop.
-    point_mean : String, optional(default by default)
+        Is the new splitted id, by default SEGMENT_STOP
+    label_stop : String, optional
+        Is the name of the column that indicates if a point is a stop, by default STOP
+    point_mean : String, optional
         Indicates whether the mean points should be calculated using
-        centroids or the point that repeat the most.
-    drop_moves : Boolean, optional(False by default)
-        If set to true, the moving points will be dropped from the dataframe.
-    label_id : String, optional(id by default)
+        centroids or the point that repeat the most, by default 'default'
+    drop_moves : Boolean, optional
+        If set to true, the moving points will be dropped from the dataframe,
+        by default False
+    label_id : String, optional
          Used to create the stay points used in the compression.
          If the dataset already has the stop move, this
          parameter should be ignored.
-         Indicates the label of the id column in the user"srs dataframe.
-    dist_radius : Double, optional(30 by default)
-        Used to create the stay points used in the compression.
+         Indicates the label of the id column in the user dataframe, by default TRAJ_ID
+    dist_radius : Double, optional
+        Used to create the stay points used in the compression, by default 30
         If the dataset already has the stop move, this
         parameter should be ignored.
         The first step in this function is segmenting the trajectory.
         The segments are used to find the stop points.
         The dist_radius defines the distance used in the segmentation.
-    time_radius :  Double, optional(900 by default)
-        Used to create the stay points used in the compression.
+    time_radius :  Double, optional
+        Used to create the stay points used in the compression, by default 900
         If the dataset already has the stop move, this
          parameter should be ignored.
         The time_radius used to determine if a segment is a stop.
         If the user stayed in the segment for a time
         greater than time_radius, than the segment is a stop.
-    inplace : boolean, optional(True by default)
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned.
+        the result of the filtering, otherwise a copy will be returned, by default False
 
     Returns
     -------
-    DataFrame with 3 additional features: segment_stop, lat_mean and lon_mean
+    DataFrame
+        Data with 3 additional features: segment_stop, lat_mean and lon_mean or None
         segment_stop indicates the trajectory segment to which the point belongs
         lat_mean and lon_mean:
             if the default option is used, lat_mean and lon_mean are defined

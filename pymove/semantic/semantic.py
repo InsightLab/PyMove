@@ -1,4 +1,7 @@
+from typing import Optional, Text, Tuple
+
 import numpy as np
+from pandas import DataFrame
 
 from pymove.preprocessing import filters, segmentation, stay_point_detection
 from pymove.utils.constants import (
@@ -9,6 +12,7 @@ from pymove.utils.constants import (
     OUT_BBOX,
     SEGMENT_STOP,
     SHORT,
+    TID_DIST,
     TID_PART,
     TIME_TO_PREV,
     TRAJ_ID,
@@ -16,7 +20,9 @@ from pymove.utils.constants import (
 from pymove.utils.log import timer_decorator
 
 
-def _end_create_operation(move_data, new_label, inplace):
+def _end_create_operation(
+    move_data: DataFrame, new_label: Text, inplace: bool
+) -> Optional[DataFrame]:
     """
     Returns the dataframe after create operation
 
@@ -30,8 +36,8 @@ def _end_create_operation(move_data, new_label, inplace):
 
     Returns
     _______
-    dataframe or None
-        DataFrame with the additional features
+    DataFrame
+        DataFrame with the additional features or None
 
     """
 
@@ -41,8 +47,8 @@ def _end_create_operation(move_data, new_label, inplace):
 
 
 def _process_simple_filter(
-        move_data, new_label, feature, value, inplace
-):
+    move_data: DataFrame, new_label: Text, feature: Text, value: float, inplace: bool
+) -> Optional[DataFrame]:
     """
     Processes create operation with simple filter
 
@@ -60,8 +66,8 @@ def _process_simple_filter(
 
     Returns
     _______
-    dataframe or None
-        DataFrame with the additional features
+    DataFrame
+        DataFrame with the additional features or None
 
     """
 
@@ -79,8 +85,11 @@ def _process_simple_filter(
 
 @timer_decorator
 def create_or_update_out_of_the_bbox(
-        move_data, bbox, new_label=OUT_BBOX, inplace=True
-):
+    move_data: DataFrame,
+    bbox: Tuple[int, int, int, int],
+    new_label: Optional[Text] = OUT_BBOX,
+    inplace: Optional[bool] = True
+) -> Optional[DataFrame]:
     """
     Create or update a boolean feature to detect points out of the bbox.
 
@@ -91,17 +100,19 @@ def create_or_update_out_of_the_bbox(
     bbox : tuple
         Tuple of 4 elements, containing the minimum and maximum values
         of latitude and longitude of the bounding box.
-    new_label: string, optional, default 'out_Bbox'
-        The name of the new feature with detected points out of the bbox.
-    inplace : boolean, optional, default True
+    new_label: string, optional
+        The name of the new feature with detected points out of the bbox,
+        by default OUT_BBOX
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned.
+        the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     _______
-    dataframe
+    DataFrame
         Returns dataframe with a boolean feature with detected
-        points out of the bbox.
+        points out of the bbox, or None
 
     """
 
@@ -127,11 +138,11 @@ def create_or_update_out_of_the_bbox(
 
 @timer_decorator
 def create_or_update_gps_deactivated_signal(
-        move_data,
-        max_time_between_adj_points=7200,
-        new_label=DEACTIVATED,
-        inplace=True
-):
+    move_data: DataFrame,
+    max_time_between_adj_points: Optional[float] = 7200,
+    new_label: Optional[Text] = DEACTIVATED,
+    inplace: Optional[bool] = True
+) -> Optional[DataFrame]:
     """
     Create or update a feature deactivate_signal if the max time between
     adjacent points is equal or less than max_time_between_adj_points.
@@ -140,18 +151,20 @@ def create_or_update_gps_deactivated_signal(
     __________
     move_data: dataframe
         The input trajectories data.
-    max_time_between_adj_points: float, int, optional, defualt 7200.
-        The max time between adjacent points.
-    new_label: string, optional, default 'deactivate_signal'.
-        The name of the new feature with detected deactivated signals.
-    inplace : boolean, optional, default True
+    max_time_between_adj_points: float, optional
+        The max time between adjacent points, by default 7200
+    new_label: string, optional
+        The name of the new feature with detected deactivated signals,
+        by default DEACTIVATED
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned.
+        the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     _______
-    dataframe or None
-        DataFrame with the additional features
+    DataFrame
+        DataFrame with the additional features or None
         'time_to_prev', 'time_to_next', 'time_prev_to_next', 'deactivate_signal'
 
     """
@@ -177,11 +190,11 @@ def create_or_update_gps_deactivated_signal(
 
 @timer_decorator
 def create_or_update_gps_jump(
-        move_data,
-        max_dist_between_adj_points=3000,
-        new_label=JUMP,
-        inplace=True
-):
+    move_data: DataFrame,
+    max_dist_between_adj_points: Optional[float] = 3000,
+    new_label: Optional[Text] = JUMP,
+    inplace: Optional[bool] = True
+) -> Optional[DataFrame]:
     """
     Create or update Jump if the maximum distance between adjacent
     points is greater than max_dist_between_adj_points.
@@ -190,18 +203,19 @@ def create_or_update_gps_jump(
     __________
     move_data: dataframe
         The input trajectories data.
-    max_dist_between_adj_points: float, int, optional, default 3000.
-        The maximum distance between adjacent points.
-    new_label: string, optional, default 'gps_jump'.
-        The name of the new feature with detected deactivated signals.
-    inplace : boolean, optional, default True
+    max_dist_between_adj_points: float, optional
+        The maximum distance between adjacent points, by default 3000
+    new_label: string, optional
+        The name of the new feature with detected deactivated signals, by default GPS_JUMP
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned.
+        the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     _______
-    dataframe or None
-        DataFrame with the additional features:
+    DataFrame
+        DataFrame with the additional features or None
         'dist_to_prev', 'dist_to_next', 'dist_prev_to_next', 'jump'
 
     """
@@ -226,42 +240,44 @@ def create_or_update_gps_jump(
 
 @timer_decorator
 def create_or_update_short_trajectory(
-        move_data,
-        max_dist_between_adj_points=3000,
-        max_time_between_adj_points=7200,
-        max_speed_between_adj_points=50,
-        k_segment_max=50,
-        label_tid=TID_PART,
-        new_label=SHORT,
-        inplace=True
-):
+    move_data: DataFrame,
+    max_dist_between_adj_points: Optional[float] = 3000,
+    max_time_between_adj_points: Optional[float] = 7200,
+    max_speed_between_adj_points: Optional[float] = 50,
+    k_segment_max: Optional[int] = 50,
+    label_tid: Optional[Text] = TID_PART,
+    new_label: Optional[Text] = SHORT,
+    inplace: Optional[bool] = True
+) -> Optional[DataFrame]:
     """
 
     Parameters
     ----------
     move_data : dataframe
        The input trajectory data
-    max_dist_between_adj_points : float, optional, default 3000
+    max_dist_between_adj_points : float, optional
         Specify the maximum distance a point should have from
-        the previous point, in order not to be dropped
-    max_time_between_adj_points : float, optional, default 7200
-        Specify the maximum travel time between two adjacent points
-    max_speed_between_adj_points : float, optional, default 50
-        Specify the maximum speed of travel between two adjacent points
+        the previous point, in order not to be dropped, by default 3000
+    max_time_between_adj_points : float, optional
+        Specify the maximum travel time between two adjacent points, by default 7200
+    max_speed_between_adj_points : float, optional
+        Specify the maximum speed of travel between two adjacent points, by default 50
     k_segment_max: int, optional
-        Specify the maximum number of segments in the trajectory
-    label_tid:  str, optional, default 'tid_part'
-        ?
-    new_label: str, optional, default 'short_traj'
-        The name of the new feature with short trajectories.
-    inplace : boolean, optional, default True
-        if set to true the original dataframe will be altered to
-        contain the result of the filtering, otherwise a copy will be returned.
+        Specify the maximum number of segments in the trajectory, by default 50
+    label_tid:  str, optional
+        The label of the column containing the ids of the formed segments,
+        by default TID_PART
+    new_label: str, optional
+        The name of the new feature with short trajectories, by default SHORT
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     -------
-    dataframe or None
-        DataFrame with the aditional features:
+    DataFrame
+        DataFrame with the aditional features or None
        'dist_to_prev', 'time_to_prev', 'speed_to_prev', 'tid_part', 'short_traj'
 
     """
@@ -295,12 +311,12 @@ def create_or_update_short_trajectory(
 
 @timer_decorator
 def create_or_update_gps_block_signal(
-        move_data,
-        max_time_stop=7200,
-        new_label=BLOCK,
-        label_tid=TID_PART,
-        inplace=True
-):
+    move_data: DataFrame,
+    max_time_stop: Optional[float] = 7200,
+    new_label: Optional[Text] = BLOCK,
+    label_tid: Optional[Text] = TID_PART,
+    inplace: Optional[bool] = True
+) -> Optional[DataFrame]:
     """
     Create a new feature that inform points with speed = 0
 
@@ -308,21 +324,23 @@ def create_or_update_gps_block_signal(
     __________
     move_data: dataFrame
         The input trajectories data.
-    max_time_stop: float, optional, default 7200
-        Maximum time allowed with speed 0
-    new_label: string, optional, default 'block_signal_time'.
-        The name of the new feature with detected deactivated signals.
-    label_tid : str, optional, default 'tid_dist'
-        The label of the column containing the ids of the formed segments.
+    max_time_stop: float, optional
+        Maximum time allowed with speed 0, by default 7200
+    new_label: string, optional
+        The name of the new feature with detected deactivated signals, by default BLOCK
+    label_tid : str, optional
+        The label of the column containing the ids of the formed segments,
+        by default TID_PART
         Is the new slitted id.
-    inplace : boolean, optional, default True
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned.
+        the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     _______
-    dataframe or None
-        DataFrame with the additional features:
+    DataFrame
+        DataFrame with the additional features or None
         'dist_to_prev', 'time_to_prev', 'speed_to_prev',
         'tid_dist', 'block_signal'
 
@@ -358,37 +376,39 @@ def create_or_update_gps_block_signal(
 
 @timer_decorator
 def filter_block_signal_by_repeated_amount_of_points(
-        move_data,
-        amount_max_of_points_stop=30.0,
-        max_time_stop=7200,
-        filter_out=False,
-        label_tid=TID_PART,
-        inplace=False
-):
+    move_data: DataFrame,
+    amount_max_of_points_stop: Optional[float] = 30.0,
+    max_time_stop: Optional[float] = 7200,
+    filter_out: Optional[bool] = False,
+    label_tid: Optional[Text] = TID_PART,
+    inplace: Optional[bool] = False
+) -> Optional[DataFrame]:
     """
-    Filters from dataframe points with blocked signal by ammount of points.
+    Filters from dataframe points with blocked signal by amount of points.
 
     Parameters
     __________
     move_data: dataFrame
         The input trajectories data.
-    amount_max_of_points_stop: float, optional, default 30
-        Maximum number of stopped points
-    max_time_stop: float, optional, default 7200
-        Maximum time allowed with speed 0
-    filter_out: boolean, optional, default False
-        If set to True, it will return trajectory points with blocked signal.
-    label_tid : str, optional, default 'tid_dist'
-        The label of the column containing the ids of the formed segments.
-        Is the new slitted id.
-    inplace : boolean, optional, default True
+    amount_max_of_points_stop: float, optional
+        Maximum number of stopped points, by default 30
+    max_time_stop: float, optional
+        Maximum time allowed with speed 0, by default 7200
+    filter_out: boolean, optional
+        If set to True, it will return trajectory points with blocked signal,
+        by default False
+    label_tid : str, optional
+        The label of the column containing the ids of the formed segments,
+        by default TID_PART
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned.
+        the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     _______
-    dataframe or None
-        Filtered DataFrame with the additional features
+    DataFrame
+        Filtered DataFrame with the additional features or None
         'dist_to_prev', 'time_to_prev', 'speed_to_prev',
         'tid_dist', 'block_signal'
 
@@ -422,12 +442,12 @@ def filter_block_signal_by_repeated_amount_of_points(
 
 @timer_decorator
 def filter_block_signal_by_time(
-        move_data,
-        max_time_stop=7200,
-        filter_out=False,
-        label_tid=TID_PART,
-        inplace=False
-):
+    move_data: DataFrame,
+    max_time_stop: Optional[float] = 7200,
+    filter_out: Optional[bool] = False,
+    label_tid: Optional[Text] = TID_PART,
+    inplace: Optional[bool] = False
+) -> Optional[DataFrame]:
     """
     Filters from dataframe points with blocked signal by time.
 
@@ -435,21 +455,23 @@ def filter_block_signal_by_time(
     __________
     move_data: dataFrame
         The input trajectories data.
-    max_time_stop: float, optional, default 7200
-        Maximum time allowed with speed 0
-    filter_out: boolean, optional, default False
-        If set to True, it will return trajectory points with blocked signal.
-    label_tid : str, optional, default 'tid_dist'
-        The label of the column containing the ids of the formed segments.
-        Is the new slitted id.
-    inplace : boolean, optional, default True
+    max_time_stop: float, optional
+        Maximum time allowed with speed 0, by default 7200
+    filter_out: boolean, optional
+        If set to True, it will return trajectory points with blocked signal,
+        by default False
+    label_tid : str, optional
+        The label of the column containing the ids of the formed segments,
+        by default TID_PART
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned.
+        the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     _______
-    dataframe or None
-        Filtered DataFrame with the additional features
+    DataFrame
+        Filtered DataFrame with the additional features or None
         'dist_to_prev', 'time_to_prev', 'speed_to_prev',
         'tid_dist', 'block_signal'
 
@@ -486,13 +508,13 @@ def filter_block_signal_by_time(
 
 @timer_decorator
 def filter_longer_time_to_stop_segment_by_id(
-        move_data,
-        dist_radius=30,
-        time_radius=900,
-        label_id=TRAJ_ID,
-        label_segment_stop=SEGMENT_STOP,
-        filter_out=False,
-        inplace=False
+    move_data,
+    dist_radius=30,
+    time_radius=900,
+    label_id=TRAJ_ID,
+    label_segment_stop=SEGMENT_STOP,
+    filter_out=False,
+    inplace=False
 ):
     """
     Filters from dataframe segment with longest stop time.
@@ -501,28 +523,28 @@ def filter_longer_time_to_stop_segment_by_id(
     __________
     move_data: dataFrame
         The input trajectories data.
-    dist_radius : float, optional, default 30
-        The first step in this function is segmenting the trajectory.
-        The segments are used to find the stop points.
-        The dist_radius defines the distance used in the segmentation.
-    time_radius :  float, optional, default 900
-        The time_radius used to determine if a segment is a stop.
+    dist_radius : float, optional
+        The dist_radius defines the distance used in the segmentation, by default 30
+    time_radius :  float, optional
+        The time_radius used to determine if a segment is a stop, by default 30
         If the user stayed in the segment for a time
         greater than time_radius, than the segment is a stop.
-    label_tid : str, optional, default 'id'
-        The label of the column containing the ids of the formed segments.
-        Is the new slitted id.
-    label_segment_stop: str, optional, default 'segment_stop'
-    filter_out: boolean, optional, default True
-        If set to True, it will return trajectory points with longer time.
-    inplace : boolean, optional, default True
+    label_tid : str, optional
+        The label of the column containing the ids of the formed segments,
+        by default TRAJ_ID
+    label_segment_stop: str, optional
+        by default 'segment_stop'
+    filter_out: boolean, optional
+        If set to True, it will return trajectory points with longer time, by default True
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned.
+        the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     _______
-    dataframe or None
-        Filtered DataFrame with the additional features
+    DataFrame
+        Filtered DataFrame with the additional features or None
         'dist_to_prev', 'time_to_prev', 'speed_to_prev',
         'tid_dist', 'block_signal'
 

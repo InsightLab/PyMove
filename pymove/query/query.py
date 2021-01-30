@@ -1,5 +1,8 @@
+from typing import Optional, Text
+
 import numpy as np
 import pandas as pd
+from pandas import DataFrame
 
 from pymove.utils import distances
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, MEDP, MEDT, TRAJ_ID
@@ -7,17 +10,17 @@ from pymove.utils.log import progress_bar
 
 
 def range_query(
-    traj,
-    move_df,
-    _id=TRAJ_ID,
-    min_dist=1000,
-    distance=MEDP,
-    latitude=LATITUDE,
-    longitude=LONGITUDE,
-    datetime=DATETIME
-):
+    traj: DataFrame,
+    move_df: DataFrame,
+    _id: Optional[Text] = TRAJ_ID,
+    min_dist: Optional[float] = 1000,
+    distance: Optional[Text] = MEDP,
+    latitude: Optional[Text] = LATITUDE,
+    longitude: Optional[Text] = LONGITUDE,
+    datetime: Optional[Text] = DATETIME
+) -> DataFrame:
     """
-    Given a distance, a trajectory, and a MoveDataFrame
+    Given a distance, a trajectory, and a DataFrame
     with several trajectories, it returns all trajectories that
     have a distance equal to or less than the informed
     trajectory.
@@ -26,27 +29,28 @@ def range_query(
     ----------
     traj: dataframe
         The input of one trajectory.
-
     move_df: dataframe
         The input trajectory data.
+    _id: str, optional
+        Label of the trajectories dataframe user id, by default TRAJ_ID
+    min_dist: float, optional
+        Minimum distance measure, by default 1000
+    distance: string, optional
+        Distance measure type, by default MEDP
+    latitude: string, optional
+        Label of the trajectories dataframe referring to the latitude,
+        by default LATITUDE
+    longitude: string, optional
+        Label of the trajectories dataframe referring to the longitude,
+        by default LONGITUDE
+    datetime: string, optional
+        Label of the trajectories dataframe referring to the timestamp,
+        by default DATETIME
 
-    _id: string ("id" by default)
-        Label of the trajectories dataframe referring to the MoveDataFrame id.
-
-    min_dist: float (1000 by default)
-        Minimum distance measure.
-
-    distance: string ("MEDP" by default)
-        Distance measure type.
-
-    latitude: string ("lat" by default)
-        Label of the trajectories dataframe referring to the latitude.
-
-    longitude: string ("lon" by default)
-        Label of the trajectories dataframe referring to the longitude.
-
-    datetime: string ("datetime" by default)
-        Label of the trajectories dataframe referring to the timestamp.
+    Returns
+    -------
+    DataFrame
+        dataframe with near trajectories
 
     Raises
     ------
@@ -81,45 +85,47 @@ def range_query(
 
 
 def knn_query(
-    traj,
-    move_df,
-    k=5,
-    id=TRAJ_ID,
-    latitude=LATITUDE,
-    longitude=LONGITUDE,
-    datetime=DATETIME,
-    distance=MEDP
-):
+    traj: DataFrame,
+    move_df: DataFrame,
+    k: Optional[int] = 5,
+    _id: Optional[Text] = TRAJ_ID,
+    distance: Optional[Text] = MEDP,
+    latitude: Optional[Text] = LATITUDE,
+    longitude: Optional[Text] = LONGITUDE,
+    datetime: Optional[Text] = DATETIME
+) -> DataFrame:
     """
     Given a k, a trajectory and a
-    MoveDataFrame with multiple paths, it returns
+    DataFrame with multiple paths, it returns
     the k neighboring trajectories closest to the trajectory.
 
     Parameters
     ----------
     traj: dataframe
         The input of one trajectory.
-
     move_df: dataframe
         The input trajectory data.
+    k: int, optional
+        neighboring trajectories, by default 5
+    _id: str, optional
+        Label of the trajectories dataframe user id, by default TRAJ_ID
+    distance: string, optional
+        Distance measure type, by default MEDP
+    latitude: string, optional
+        Label of the trajectories dataframe referring to the latitude,
+        by default LATITUDE
+    longitude: string, optional
+        Label of the trajectories dataframe referring to the longitude,
+        by default LONGITUDE
+    datetime: string, optional
+        Label of the trajectories dataframe referring to the timestamp,
+        by default DATETIME
 
-    id: string ("id" by default)
-        Label of the trajectories dataframe referring to the MoveDataFrame id.
+    Returns
+    -------
+    DataFrame
+        dataframe with near trajectories
 
-    range: float (1000 by default)
-        Minimum similarity rate.
-
-    distance: string ("MEDP" by default)
-        Similarity measure type.
-
-    latitude: string ("lat" by default)
-        Label of the trajectories dataframe referring to the latitude.
-
-    longitude: string ("lon" by default)
-        Label of the trajectories dataframe referring to the longitude.
-
-    datetime: string ("datetime" by default)
-        Label of the trajectories dataframe referring to the timestamp.
 
     Raises
     ------
@@ -143,10 +149,10 @@ def knn_query(
         raise ValueError('Unknown distance measure. Use MEDP or MEDT')
 
     for traj_id in progress_bar(
-        move_df[id].unique(), desc='Querying knn by {}'.format(distance)
+        move_df[_id].unique(), desc='Querying knn by {}'.format(distance)
     ):
-        if (traj_id != traj[id].values[0]):
-            this = move_df.loc[move_df[id] == traj_id]
+        if (traj_id != traj[_id].values[0]):
+            this = move_df.loc[move_df[_id] == traj_id]
             this_distance = dist_measure(
                 traj, this, latitude, longitude, datetime
             )
@@ -162,6 +168,7 @@ def knn_query(
     print('Gerando DataFrame com as k trajetórias mais próximas')
     for n in range(k):
         result = result.append(
-            move_df.loc[move_df[id] == k_list.loc[n, 'traj_id']])
+            move_df.loc[move_df[_id] == k_list.loc[n, 'traj_id']]
+        )
 
     return result
