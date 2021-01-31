@@ -1,4 +1,4 @@
-from typing import Optional, Text, Tuple
+from typing import TYPE_CHECKING, Optional, Text, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -16,6 +16,10 @@ from pymove.utils.constants import (
     TRAJ_ID,
 )
 from pymove.utils.log import progress_bar, timer_decorator
+
+if TYPE_CHECKING:
+    from pymove.core.pandas import PandasMoveDataFrame
+    from pymove.core.dask import DaskMoveDataFrame
 
 
 @timer_decorator
@@ -324,7 +328,7 @@ def _filter_by(
 
 @timer_decorator
 def by_dist_time_speed(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     max_dist_between_adj_points: Optional[float] = 3000,
     max_time_between_adj_points: Optional[float] = 7200,
@@ -332,7 +336,7 @@ def by_dist_time_speed(
     drop_single_points: Optional[bool] = True,
     label_new_tid: Optional[Text] = TID_PART,
     inplace: Optional[bool] = True,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Splits the trajectories into segments based on distance, time and speed.
 
@@ -383,33 +387,29 @@ def by_dist_time_speed(
     if TIME_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
 
-    try:
-        move_data = _filter_by(
-            move_data,
-            label_id,
-            label_new_tid,
-            drop_single_points,
-            max_dist=max_dist_between_adj_points,
-            max_time=max_time_between_adj_points,
-            max_speed=max_speed_between_adj_points,
-            all=True
-        )
-        if not inplace:
-            return move_data
-
-    except Exception as e:
-        raise e
+    move_data = _filter_by(
+        move_data,
+        label_id,
+        label_new_tid,
+        drop_single_points,
+        max_dist=max_dist_between_adj_points,
+        max_time=max_time_between_adj_points,
+        max_speed=max_speed_between_adj_points,
+        all=True
+    )
+    if not inplace:
+        return move_data
 
 
 @timer_decorator
 def by_max_dist(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     max_dist_between_adj_points: Optional[float] = 7200,
     drop_single_points: Optional[bool] = True,
     label_new_tid: Optional[Text] = TID_DIST,
     inplace: Optional[bool] = True,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Segments the trajectories based on distance.
 
@@ -455,32 +455,28 @@ def by_max_dist(
     if DIST_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
 
-    try:
-        move_data = _filter_by(
-            move_data,
-            label_id,
-            label_new_tid,
-            drop_single_points,
-            feature=DIST_TO_PREV,
-            max_between_adj_points=max_dist_between_adj_points,
-            all=False
-        )
-        if not inplace:
-            return move_data
-
-    except Exception as e:
-        raise e
+    move_data = _filter_by(
+        move_data,
+        label_id,
+        label_new_tid,
+        drop_single_points,
+        feature=DIST_TO_PREV,
+        max_between_adj_points=max_dist_between_adj_points,
+        all=False
+    )
+    if not inplace:
+        return move_data
 
 
 @timer_decorator
 def by_max_time(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     max_time_between_adj_points: Optional[float] = 900.0,
     drop_single_points: Optional[bool] = True,
     label_new_tid: Optional[Text] = TID_TIME,
     inplace: Optional[Text] = True,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Splits the trajectories into segments based on a maximum.
 
@@ -527,32 +523,28 @@ def by_max_time(
     if TIME_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
 
-    try:
-        move_data = _filter_by(
-            move_data,
-            label_id,
-            label_new_tid,
-            drop_single_points,
-            feature=TIME_TO_PREV,
-            max_between_adj_points=max_time_between_adj_points,
-            all=False
-        )
-        if not inplace:
-            return move_data
-
-    except Exception as e:
-        raise e
+    move_data = _filter_by(
+        move_data,
+        label_id,
+        label_new_tid,
+        drop_single_points,
+        feature=TIME_TO_PREV,
+        max_between_adj_points=max_time_between_adj_points,
+        all=False
+    )
+    if not inplace:
+        return move_data
 
 
 @timer_decorator
 def by_max_speed(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     max_speed_between_adj_points: Optional[float] = 50.0,
     drop_single_points: Optional[bool] = True,
     label_new_tid: Optional[Text] = TID_SPEED,
     inplace: Optional[bool] = True,
-) -> DataFrame:
+) -> Union['PandasMoveDataFrame', 'DaskMoveDataFrame']:
     """
     Splits the trajectories into segments based on a maximum speed.
 
@@ -598,18 +590,14 @@ def by_max_speed(
     if SPEED_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
 
-    try:
-        move_data = _filter_by(
-            move_data,
-            label_id,
-            label_new_tid,
-            drop_single_points,
-            feature=SPEED_TO_PREV,
-            max_between_adj_points=max_speed_between_adj_points,
-            all=False
-        )
-        if not inplace:
-            return move_data
-
-    except Exception as e:
-        raise e
+    move_data = _filter_by(
+        move_data,
+        label_id,
+        label_new_tid,
+        drop_single_points,
+        feature=SPEED_TO_PREV,
+        max_between_adj_points=max_speed_between_adj_points,
+        all=False
+    )
+    if not inplace:
+        return move_data

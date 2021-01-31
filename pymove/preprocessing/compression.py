@@ -86,88 +86,85 @@ def compress_segment_stop_to_point(
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
+    if not inplace:
+        move_data = move_data[:]
 
-        if (label_segment not in move_data) & (label_stop not in move_data):
-            create_or_update_move_stop_by_dist_time(
-                move_data, dist_radius, time_radius, label_id
-            )
+    if (label_segment not in move_data) & (label_stop not in move_data):
+        create_or_update_move_stop_by_dist_time(
+            move_data, dist_radius, time_radius, label_id
+        )
 
-        print('...setting mean to lat and lon...')
-        lat_mean = np.full(move_data.shape[0], -1.0, dtype=np.float64)
-        lon_mean = np.full(move_data.shape[0], -1.0, dtype=np.float64)
+    print('...setting mean to lat and lon...')
+    lat_mean = np.full(move_data.shape[0], -1.0, dtype=np.float64)
+    lon_mean = np.full(move_data.shape[0], -1.0, dtype=np.float64)
 
-        if drop_moves is False:
-            lat_mean[move_data[~move_data[label_stop]].index] = np.NaN
-            lon_mean[move_data[~move_data[label_stop]].index] = np.NaN
+    if drop_moves is False:
+        lat_mean[move_data[~move_data[label_stop]].index] = np.NaN
+        lon_mean[move_data[~move_data[label_stop]].index] = np.NaN
+    else:
+        print('...move segments will be dropped...')
+
+    print('...get only segments stop...', flush=True)
+    segments = move_data[move_data[label_stop]][label_segment].unique()
+
+    for idx in progress_bar(
+        segments, desc=f'Generating {label_segment} and {label_stop}'
+    ):
+        filter_ = move_data[label_segment] == idx
+
+        size_id = move_data[filter_].shape[0]
+        # verify if filter is None
+        if size_id > 1:
+            # get first and last point of each stop segment
+            ind_start = move_data[filter_].iloc[[0]].index
+            ind_end = move_data[filter_].iloc[[-1]].index
+
+            if point_mean == 'default':
+                # print('...Lat and lon are defined based on point
+                # that repeats most within the segment')
+                p = (
+                    move_data[filter_]
+                    .groupby([LATITUDE, LONGITUDE], as_index=False)
+                    .agg({'id': 'count'})
+                    .sort_values(['id'])
+                    .tail(1)
+                )
+                lat_mean[ind_start] = p.iloc[0, 0]
+                lon_mean[ind_start] = p.iloc[0, 1]
+                lat_mean[ind_end] = p.iloc[0, 0]
+                lon_mean[ind_end] = p.iloc[0, 1]
+
+            elif point_mean == 'centroid':
+                # set lat and lon mean to first_point
+                # and last points to each segment
+                lat_mean[ind_start] = move_data.loc[filter_][LATITUDE].mean()
+                lon_mean[ind_start] = move_data.loc[filter_][LONGITUDE].mean()
+                lat_mean[ind_end] = move_data.loc[filter_][LATITUDE].mean()
+                lon_mean[ind_end] = move_data.loc[filter_][LONGITUDE].mean()
         else:
-            print('...move segments will be dropped...')
+            print('There are segments with only one point: {}'.format(idx))
 
-        print('...get only segments stop...', flush=True)
-        segments = move_data[move_data[label_stop]][label_segment].unique()
+    move_data[LAT_MEAN] = lat_mean
+    move_data[LON_MEAN] = lon_mean
+    del lat_mean
+    del lon_mean
 
-        for idx in progress_bar(
-            segments, desc=f'Generating {label_segment} and {label_stop}'
-        ):
-            filter_ = move_data[label_segment] == idx
+    shape_before = move_data.shape[0]
+    # filter points to drop
+    filter_drop = (
+        (move_data[LAT_MEAN] == -1.0)
+        & (move_data[LON_MEAN] == -1.0)
+    )
+    shape_drop = move_data[filter_drop].shape[0]
 
-            size_id = move_data[filter_].shape[0]
-            # verify if filter is None
-            if size_id > 1:
-                # get first and last point of each stop segment
-                ind_start = move_data[filter_].iloc[[0]].index
-                ind_end = move_data[filter_].iloc[[-1]].index
+    if shape_drop > 0:
+        print('...Dropping %s points...' % shape_drop)
+        move_data.drop(move_data[filter_drop].index, inplace=True)
 
-                if point_mean == 'default':
-                    # print('...Lat and lon are defined based on point
-                    # that repeats most within the segment')
-                    p = (
-                        move_data[filter_]
-                        .groupby([LATITUDE, LONGITUDE], as_index=False)
-                        .agg({'id': 'count'})
-                        .sort_values(['id'])
-                        .tail(1)
-                    )
-                    lat_mean[ind_start] = p.iloc[0, 0]
-                    lon_mean[ind_start] = p.iloc[0, 1]
-                    lat_mean[ind_end] = p.iloc[0, 0]
-                    lon_mean[ind_end] = p.iloc[0, 1]
+    print(
+        '...Shape_before: %s\n...Current shape: %s'
+        % (shape_before, move_data.shape[0])
+    )
 
-                elif point_mean == 'centroid':
-                    # set lat and lon mean to first_point
-                    # and last points to each segment
-                    lat_mean[ind_start] = move_data.loc[filter_][LATITUDE].mean()
-                    lon_mean[ind_start] = move_data.loc[filter_][LONGITUDE].mean()
-                    lat_mean[ind_end] = move_data.loc[filter_][LATITUDE].mean()
-                    lon_mean[ind_end] = move_data.loc[filter_][LONGITUDE].mean()
-            else:
-                print('There are segments with only one point: {}'.format(idx))
-
-        move_data[LAT_MEAN] = lat_mean
-        move_data[LON_MEAN] = lon_mean
-        del lat_mean
-        del lon_mean
-
-        shape_before = move_data.shape[0]
-        # filter points to drop
-        filter_drop = (
-            (move_data[LAT_MEAN] == -1.0)
-            & (move_data[LON_MEAN] == -1.0)
-        )
-        shape_drop = move_data[filter_drop].shape[0]
-
-        if shape_drop > 0:
-            print('...Dropping %s points...' % shape_drop)
-            move_data.drop(move_data[filter_drop].index, inplace=True)
-
-        print(
-            '...Shape_before: %s\n...Current shape: %s'
-            % (shape_before, move_data.shape[0])
-        )
-
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        return move_data

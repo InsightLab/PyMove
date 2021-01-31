@@ -1,12 +1,24 @@
+from typing import Optional, Text, Union
+
 import numpy as np
 import pandas as pd
+from numpy import ndarray
+from pandas.core.frame import DataFrame
 from scipy.spatial import distance
 
 from pymove import utils
 from pymove.utils.constants import DATETIME, EARTH_RADIUS, LATITUDE, LONGITUDE
+from pymove.utils.log import progress_bar
 
 
-def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=EARTH_RADIUS):
+def haversine(
+    lat1: Union[float, ndarray],
+    lon1: Union[float, ndarray],
+    lat2: Union[float, ndarray],
+    lon2: Union[float, ndarray],
+    to_radians: Optional[bool] = True,
+    earth_radius: Optional[float] = EARTH_RADIUS
+) -> Union[float, ndarray]:
     """
     Calculate the great circle distance between two points on the earth
     (specified in decimal degrees or in radians). All (lat, lon) coordinates
@@ -16,22 +28,22 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=EARTH_RADIUS
     Parameters
     ----------
     lat1 : float or array
-        Y offset from your original position in meters.
+        latitute of point 1
     lon1 : float or array
-        Y offset from your original position in meters.
+        longitude of point 1
     lat2 : float or array
-        Y offset from your original position in meters.
+        latitute of point 2
     lon2 : float or array
-        Y offset from your original position in meters.
+        longitude of point 2
     to_radians : boolean
-        Y offset from your original position in meters.
+        Wether to convert the values to radians, by default True
     earth_radius : int
-        Y offset from your original position in meters.
+        Radius of sphere, by default EARTH_RADIUS
 
     Returns
     -------
-    float
-        Represents latitude.
+    float or ndarray
+        Represents distance between points in meters
 
     References
     ----------
@@ -42,40 +54,41 @@ def haversine(lat1, lon1, lat2, lon2, to_radians=True, earth_radius=EARTH_RADIUS
 
     """
 
-    try:
-        if to_radians:
-            lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
-        a = (
-            np.sin((lat2 - lat1) / 2.0)
-            ** 2 + np.cos(lat1)
-            * np.cos(lat2)
-            * np.sin((lon2 - lon1) / 2.0) ** 2
-        )
-        # return earth_radius * 2 * np.arcsin(np.sqrt(a)) * 1000
-        # result in meters (* 1000)
-        return (earth_radius * 2 * np.arctan2(a ** 0.5, (1 - a) ** 0.5)) * 1000
-    except Exception as e:
-        raise e
+    if to_radians:
+        lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
+    a = (
+        np.sin((lat2 - lat1) / 2.0)
+        ** 2 + np.cos(lat1)
+        * np.cos(lat2)
+        * np.sin((lon2 - lon1) / 2.0) ** 2
+    )
+    return (earth_radius * 2 * np.arctan2(a ** 0.5, (1 - a) ** 0.5)) * 1000
 
 
-def euclidean_distance_in_meters(lat1, lon1, lat2, lon2):
+def euclidean_distance_in_meters(
+    lat1: Union[float, ndarray],
+    lon1: Union[float, ndarray],
+    lat2: Union[float, ndarray],
+    lon2: Union[float, ndarray]
+) -> Union[float, ndarray]:
     """
     Calculate the euclidean distance in meters between two points.
 
     Parameters
     ----------
-    lat1 : float
-        latitude of the one point.
-    lon1 : float
-        longitude of the one point.
-    lat2 : float
-        latitude of the another point.
-    lon2 : float
-        longitude of the another point.
+    ----------
+    lat1 : float or array
+        latitute of point 1
+    lon1 : float or array
+        longitude of point 1
+    lat2 : float or array
+        latitute of point 2
+    lon2 : float or array
+        longitude of point 2
 
     Returns
     -------
-    float
+    float or ndarray
         euclidean distance in meters between the two points.
     """
 
@@ -86,7 +99,12 @@ def euclidean_distance_in_meters(lat1, lon1, lat2, lon2):
     return dist_eucl_meters
 
 
-def nearest_points(traj1, traj2, latitude=LATITUDE, longitude=LONGITUDE):
+def nearest_points(
+    traj1: DataFrame,
+    traj2: DataFrame,
+    latitude: Optional[Text] = LATITUDE,
+    longitude: Optional[Text] = LONGITUDE
+) -> DataFrame:
     """
     For each point on a trajectory, it returns the point closest to
     another trajectory based on the Euclidean distance.
@@ -95,36 +113,46 @@ def nearest_points(traj1, traj2, latitude=LATITUDE, longitude=LONGITUDE):
     ----------
     traj1: dataframe
         The input of one trajectory.
-
     traj2: dataframe
         The input of another trajectory.
+    latitude: str, optional
+        Label of the trajectories dataframe referring to the latitude,
+        by default LATITUDE
+    longitude: str, optional
+        Label of the trajectories dataframe referring to the longitude,
+        by default LONGITUDE
 
-    latitude: string ("lat" by default)
-        Label of the trajectories dataframe referring to the latitude.
+    Returns
+    -------
+    DataFrame
+        dataframe with closest points
 
-    longitude: string ("lon" by default)
-        Label of the trajectories dataframe referring to the longitude.
     """
 
     result = pd.DataFrame(columns=traj1.columns)
 
-    for i in range(0, len(traj1)):
+    for _, t1 in progress_bar(traj1.iterrows(), total=traj1.shape[0]):
         round_result = np.Inf
         round_traj = []
-        for j in range(0, len(traj2)):
+        for _, t2 in traj2.iterrows():
             this_distance = distance.euclidean(
-                (traj1[latitude].iloc[i], traj1[longitude].iloc[i]),
-                (traj2[latitude].iloc[j], traj2[longitude].iloc[j]),
+                (t1[latitude], t1[longitude]),
+                (t2[latitude], t2[longitude]),
             )
             if this_distance < round_result:
                 round_result = this_distance
-                round_traj = traj2.iloc[j]
+                round_traj = t2
         result = result.append(round_traj)
 
     return result
 
 
-def MEDP(traj1, traj2, latitude=LATITUDE, longitude=LONGITUDE):
+def MEDP(
+    traj1: DataFrame,
+    traj2: DataFrame,
+    latitude: Optional[Text] = LATITUDE,
+    longitude: Optional[Text] = LONGITUDE
+) -> float:
     """
     Returns the Mean Euclidian Distance Predictive between
     two trajectories, which considers only the spatial
@@ -134,30 +162,41 @@ def MEDP(traj1, traj2, latitude=LATITUDE, longitude=LONGITUDE):
     ----------
     traj1: dataframe
         The input of one trajectory.
-
     traj2: dataframe
         The input of another trajectory.
+    latitude: str, optional
+        Label of the trajectories dataframe referring to the latitude,
+        by default LATITUDE
+    longitude: str, optional
+        Label of the trajectories dataframe referring to the longitude,
+        by default LONGITUDE
 
-    latitude: string ("lat" by default)
-        Label of the trajectories dataframe referring to the latitude.
-
-    longitude: string ("lon" by default)
-        Label of the trajectories dataframe referring to the longitude.
+    Returns
+    -------
+    float
+        total distance
     """
 
     soma = 0
     traj2 = nearest_points(traj1, traj2, latitude, longitude)
-    for i in range(0, len(traj1)):
+    for (_, t1), (_, t2) in progress_bar(
+        zip(traj1.iterrows(), traj2.iterrows()), total=traj1.shape[0]
+    ):
         this_distance = distance.euclidean(
-            (traj1[latitude].iloc[i],
-             traj1[longitude].iloc[i]),
-            (traj2[latitude].iloc[i],
-             traj2[longitude].iloc[i]))
+            (t1[latitude], t1[longitude]),
+            (t2[latitude], t2[longitude])
+        )
         soma = soma + this_distance
     return soma
 
 
-def MEDT(traj1, traj2, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME):
+def MEDT(
+    traj1: DataFrame,
+    traj2: DataFrame,
+    latitude: Optional[Text] = LATITUDE,
+    longitude: Optional[Text] = LONGITUDE,
+    datetime: Optional[Text] = DATETIME
+) -> float:
     """
     Returns the Mean Euclidian Distance Trajectory between two
     trajectories, which considers the spatial dimension and the
@@ -167,18 +206,23 @@ def MEDT(traj1, traj2, latitude=LATITUDE, longitude=LONGITUDE, datetime=DATETIME
     ----------
     traj1: dataframe
         The input of one trajectory.
-
     traj2: dataframe
         The input of another trajectory.
+    latitude: str, optional
+        Label of the trajectories dataframe referring to the latitude,
+        by default LATITUDE
+    longitude: str, optional
+        Label of the trajectories dataframe referring to the longitude,
+        by default LONGITUDE
+    datetime: str, optional
+        Label of the trajectories dataframe referring to the timestamp,
+        by default DATETIME
 
-    latitude: string ("lat" by default)
-        Label of the trajectories dataframe referring to the latitude.
+    Returns
+    -------
+    float
+        total distance
 
-    longitude: string ("lon" by default)
-        Label of the trajectories dataframe referring to the longitude.
-
-    datetime: string ("datetime" by default)
-        Label of the trajectories dataframe referring to the timestamp.
     """
 
     soma = 0

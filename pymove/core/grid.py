@@ -78,7 +78,7 @@ class Grid:
             'cell_size_by_degree': self.cell_size_by_degree,
         }
 
-    def _grid_from_dict(self, dict_grid: Dict) -> None:
+    def _grid_from_dict(self, dict_grid: Dict):
         """
         Coverts the dict grid to a Grid object.
 
@@ -100,7 +100,7 @@ class Grid:
 
     def _create_virtual_grid(
         self, data: DataFrame, cell_size: float, meters_by_degree: float
-    ) -> None:
+    ):
         """
         Create a virtual grid based in dataset bound box.
 
@@ -292,34 +292,30 @@ class Grid:
 
         operation = begin_operation('create_all_polygons_on_grid')
 
-        try:
-            print('\nCreating all polygons on virtual grid', flush=True)
-            grid_polygon = np.array(
-                [
-                    [None for _ in range(self.grid_size_lon_x)]
-                    for _ in range(self.grid_size_lat_y)
-                ]
-            )
-            lat_init = self.lat_min_y
-            cell_size = self.cell_size_by_degree
-            for i in progress_bar(range(self.grid_size_lat_y)):
-                lon_init = self.lon_min_x
-                for j in range(self.grid_size_lon_x):
-                    # Cria o polygon da célula
-                    grid_polygon[i][j] = Polygon((
-                        (lon_init, lat_init),
-                        (lon_init, lat_init + cell_size),
-                        (lon_init + cell_size, lat_init + cell_size),
-                        (lon_init + cell_size, lat_init)
-                    ))
-                    lon_init += cell_size
-                lat_init += cell_size
-            self.grid_polygon = grid_polygon
-            print('...geometries saved on Grid grid_polygon property')
-            self.last_operation = end_operation(operation)
-        except Exception as e:
-            self.last_operation = end_operation(operation)
-            raise e
+        print('\nCreating all polygons on virtual grid', flush=True)
+        grid_polygon = np.array(
+            [
+                [None for _ in range(self.grid_size_lon_x)]
+                for _ in range(self.grid_size_lat_y)
+            ]
+        )
+        lat_init = self.lat_min_y
+        cell_size = self.cell_size_by_degree
+        for i in progress_bar(range(self.grid_size_lat_y)):
+            lon_init = self.lon_min_x
+            for j in range(self.grid_size_lon_x):
+                # Cria o polygon da célula
+                grid_polygon[i][j] = Polygon((
+                    (lon_init, lat_init),
+                    (lon_init, lat_init + cell_size),
+                    (lon_init + cell_size, lat_init + cell_size),
+                    (lon_init + cell_size, lat_init)
+                ))
+                lon_init += cell_size
+            lat_init += cell_size
+        self.grid_polygon = grid_polygon
+        print('...geometries saved on Grid grid_polygon property')
+        self.last_operation = end_operation(operation)
 
     def create_all_polygons_to_all_point_on_grid(
         self, data: DataFrame

@@ -1,7 +1,8 @@
-import datetime
+from datetime import date, datetime
+from typing import Optional, Text, Union
 
 import holidays
-from pandas._libs.tslibs.timestamps import Timestamp
+from pandas import DataFrame, Timestamp
 
 from pymove.utils.constants import (
     COUNT,
@@ -19,81 +20,81 @@ from pymove.utils.constants import (
 )
 
 
-def date_to_str(date):
+def date_to_str(dt: datetime) -> Text:
     """
-    Get date, in string'srs format, from timestamp.
+    Get date, in string format, from timestamp.
 
     Parameters
     ----------
-    date : pandas._libs.tslibs.timestamps.Timestamp
-        Represents a date.
+    dt : datetime
+        Represents a date
 
     Returns
     -------
     str
-        Represents the date in string"srs format.
+        Represents the date in string format
 
     """
 
-    return date.strftime('%Y-%m-%d')
+    return dt.strftime('%Y-%m-%d')
 
 
-def str_to_datetime(dt_str):
+def str_to_datetime(dt_str: Text) -> datetime:
     """
-    Converts a datetime in string"srs format "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S" to
-    datetime"srs format.
+    Converts a datetime in string format "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S" to
+    datetime format.
 
     Parameters
     ----------
-    dt_str : String
-        Represents a datetime in string"srs format.
+    dt_str : str
+        Represents a datetime in string format
 
     Returns
     -------
-    datetime.datetime
-        Represents a datetime in datetime"srs format.
+    datetime
+        Represents a datetime in datetime format
 
     """
 
     if len(dt_str) == 10:
-        return datetime.datetime.strptime(dt_str, '%Y-%m-%d')
+        return datetime.strptime(dt_str, '%Y-%m-%d')
     else:
-        return datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+        return datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
 
-def to_str(data):
+def to_str(dt: datetime) -> Text:
     """
-    Converts a date in datetime'srs format to string"srs format.
+    Converts a date in datetime format to string format.
 
     Parameters
     ----------
-    data : datetime.datetime
-        Represents a datetime in datetime"srs format.
+    dt : datetime
+        Represents a datetime in datetime format.
 
     Returns
     -------
     str
-        Represents a datetime in string"srs format "%Y-%m-%d %H:%M:%S".
+        Represents a datetime in string format "%Y-%m-%d %H:%M:%S".
 
     """
 
-    return data.strftime('%Y-%m-%d %H:%M:%S')
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 
-def to_min(dt):
+def to_min(dt: datetime) -> int:
     """
     Converts a datetime to an int representation in minutes. To do the reverse
     use: min_to_datetime.
 
     Parameters
     ----------
-    dt : datetime.datetime
-        Represents a datetime in datetime"srs format.
+    dt : datetime
+        Represents a datetime in datetime format
 
     Returns
     -------
     int
-        Represents minutes from.
+        Represents minutes from
 
     """
 
@@ -103,34 +104,34 @@ def to_min(dt):
     )
 
 
-def min_to_datetime(min_):
+def min_to_datetime(minutes: int) -> datetime:
     """
     Converts an int representation in minutes to a datetime. To do the reverse
     use: datetime_to_min.
 
     Parameters
     ----------
-    min_ : int
-        Represents minutes.
+    minutes : int
+        Represents minutes
 
     Returns
     -------
-    datetime.datetime
-        Represents minutes in datetime"srs format.
+    datetime
+        Represents minutes in datetime format
 
     """
 
-    return datetime.datetime.utcfromtimestamp(min_ * 60)
+    return datetime.utcfromtimestamp(minutes * 60)
 
 
-def to_day_of_week_int(date):
+def to_day_of_week_int(dt: datetime) -> int:
     """
     Get day of week of a date. Monday == 0...Sunday == 6.
 
     Parameters
     ----------
-    date : datetime.datetime
-        Represents a datetime in datetime"srs format.
+    dt : datetime
+        Represents a datetime in datetime format.
 
     Returns
     -------
@@ -139,10 +140,14 @@ def to_day_of_week_int(date):
 
     """
 
-    return date.weekday()
+    return dt.weekday()
 
 
-def working_day(dt, country='BR', state=None):
+def working_day(
+    dt: Union[Text, datetime],
+    country: Optional[Text] = 'BR',
+    state: Optional[Text] = None
+) -> bool:
     """
     Indices if a day specified by the user is a working day.
 
@@ -150,10 +155,10 @@ def working_day(dt, country='BR', state=None):
     ----------
     dt : str or datetime
         Specifies the day the user wants to know if it is a business day.
-    country : String
-        Indicates country to check for vacation days.
-    state: String
-        Indicates state to check for vacation days.
+    country : str
+        Indicates country to check for vacation days, by default 'BR'
+    state: str
+        Indicates state to check for vacation days, by default None
 
     Returns
     -------
@@ -168,12 +173,11 @@ def working_day(dt, country='BR', state=None):
     """
 
     result = True
-
     if isinstance(dt, str):
         dt = str_to_datetime(dt)
 
-    if isinstance(dt, datetime.datetime):
-        dt = datetime.date(dt.year, dt.month, dt.day)
+    if isinstance(dt, datetime):
+        dt = date(dt.year, dt.month, dt.day)
 
     if dt in holidays.CountryHoliday(country=country, prov=None, state=state):
         result = False
@@ -186,7 +190,7 @@ def working_day(dt, country='BR', state=None):
     return result
 
 
-def now_str():
+def now_str() -> Text:
     """
     Get datetime of now.
 
@@ -196,7 +200,7 @@ def now_str():
     Returns
     -------
     str
-        Represents a data.
+        Represents a date
 
     Examples
     --------
@@ -206,22 +210,22 @@ def now_str():
 
     """
 
-    return to_str(datetime.datetime.now())
+    return to_str(datetime.now())
 
 
-def deltatime_str(deltatime_seconds):
+def deltatime_str(deltatime_seconds: float) -> Text:
     """
     Convert time in a format appropriate of time.
 
     Parameters
     ----------
     deltatime_seconds : float
-        Represents the dataset with contains lat, long and datetime.
+        Represents the elapsed time in seconds
 
     Returns
     -------
-    time_str : String
-        Represents time in a format hh:mm:ss:---.
+    time_str : str
+        Represents time in a format hh:mm:ss
 
     Examples
     --------
@@ -231,7 +235,7 @@ def deltatime_str(deltatime_seconds):
 
     Notes
     -----
-    Output example if more than 24 hours: 25:33:57.123
+    Output example if more than 24 hours: 25:33:57
     https://stackoverflow.com/questions/3620943/measuring-elapsed-time-with-the-time-module
 
     """
@@ -246,20 +250,20 @@ def deltatime_str(deltatime_seconds):
         return '{:05.2f}s'.format(seconds)
 
 
-def timestamp_to_millis(timestamp):
+def timestamp_to_millis(timestamp: Text) -> int:
     """
     Converts a local datetime to a POSIX timestamp in milliseconds (like in
     Java).
 
     Parameters
     ----------
-    timestamp : String
-        Represents a data.
+    timestamp : str
+        Represents a date
 
     Returns
     -------
     int
-        Represents millisecond results.
+        Represents millisecond results
 
     Examples
     --------
@@ -272,7 +276,7 @@ def timestamp_to_millis(timestamp):
     return Timestamp(timestamp).value // 1000000
 
 
-def millis_to_timestamp(milliseconds):
+def millis_to_timestamp(milliseconds: float) -> Timestamp:
     """
     Converts milliseconds to timestamp.
 
@@ -283,7 +287,7 @@ def millis_to_timestamp(milliseconds):
 
     Returns
     -------
-    pandas._libs.tslibs.timestamps.Timestamp
+    Timestamp
         Represents the date corresponding.
 
     Examples
@@ -297,19 +301,19 @@ def millis_to_timestamp(milliseconds):
     return Timestamp(milliseconds, unit='ms')
 
 
-def time_to_str(time):
+def time_to_str(time: Timestamp) -> Text:
     """
-    Get time, in string'srs format, from timestamp.
+    Get time, in string format, from timestamp.
 
     Parameters
     ----------
-    time : pandas._libs.tslibs.timestamps.Timestamp
-        Represents a time.
+    time : Timestamp
+        Represents a time
 
     Returns
     -------
     str
-        Represents the time in string"srs format.
+        Represents the time in string format
 
     Examples
     --------
@@ -322,40 +326,40 @@ def time_to_str(time):
     return time.strftime('%H:%M:%S')
 
 
-def str_to_time(dt_str):
+def str_to_time(dt_str: Text) -> datetime:
     """
-    Converts a time in string'srs format "%H:%M:%S" to datetime'srs format.
+    Converts a time in string format "%H:%M:%S" to datetime format.
 
     Parameters
     ----------
-    dt_str : String
-        Represents a time in string"srs format.
+    dt_str : str
+        Represents a time in string format
 
     Returns
     -------
-    datetime.datetime
-        Represents a time in datetime"srs format.
+    datetime
+        Represents a time in datetime format
 
     Examples
     --------
     >>> from pymove.utils.utils import datetime
     >>> datetime.str_to_time("08:00:00")
-    datetime.datetime(1900, 1, 1, 8, 0)
+    datetime(1900, 1, 1, 8, 0)
 
     """
 
-    return datetime.datetime.strptime(dt_str, '%H:%M:%S')
+    return datetime.strptime(dt_str, '%H:%M:%S')
 
 
-def elapsed_time_dt(start_time):
+def elapsed_time_dt(start_time: datetime) -> int:
     """
     Computes the elapsed time from a specific start time to the moment the
     function is called.
 
     Parameters
     ----------
-    start_time : Datetime
-        Specifies the start time of the time range to be computed.
+    start_time : datetime
+        Specifies the start time of the time range to be computed
 
     Returns
     -------
@@ -365,20 +369,20 @@ def elapsed_time_dt(start_time):
 
     """
 
-    return diff_time(start_time, datetime.datetime.now())
+    return diff_time(start_time, datetime.now())
 
 
-def diff_time(start_time, end_time):
+def diff_time(start_time: datetime, end_time: datetime) -> int:
     """
-    Computes the elapsed time from the start time to the end time specifed by
+    Computes the elapsed time from the start time to the end time specified by
     the user.
 
     Parameters
     ----------
-    start_time : Datetime
-        Specifies the start time of the time range to be computed.
-    end_time : Datetime
-        Specifies the start time of the time range to be computed.
+    start_time : datetime
+        Specifies the start time of the time range to be computed
+    end_time : datetime
+        Specifies the start time of the time range to be computed
 
     Returns
     -------
@@ -392,19 +396,19 @@ def diff_time(start_time, end_time):
 
 
 def create_time_slot_in_minute(
-        df,
-        slot_interval=15,
-        initial_slot=0,
-        label_datetime=DATETIME,
-        label_time_slot=TIME_SLOT,
-        inplace=True
-):
+    data: DataFrame,
+    slot_interval: Optional[int] = 15,
+    initial_slot: Optional[int] = 0,
+    label_datetime: Optional[Text] = DATETIME,
+    label_time_slot: Optional[Text] = TIME_SLOT,
+    inplace: Optional[bool] = True
+) -> Optional[DataFrame]:
     """
     Partitions the time in slot windows
 
     Parameters
     ----------
-    df : dataframe
+    data : DataFrame
         dataframe with datetime column
     slot_interval : int, optional
         size of the slot window in minutes, by default 5
@@ -417,17 +421,22 @@ def create_time_slot_in_minute(
     inplace : boolean, optional
         wether the operation will be done in the original dataframe
 
+    Returns
+    -------
+    DataFrame
+        data with converted time slots or None
+
     Examples
     --------
     from pymove import datetime
-    >>> df
+    >>> data
             lat         lon            datetime  id
     0  39.984094  116.319236 2008-10-23 05:44:05   1
     1  39.984198  116.319322 2008-10-23 05:56:06   1
     2  39.984224  116.319402 2008-10-23 05:56:11   1
     3  39.984224  116.319402 2008-10-23 06:10:15   1
 
-    >>> datetime.create_time_slot_in_minute(df, inplace=False)
+    >>> datetime.create_time_slot_in_minute(data, inplace=False)
              lat         lon            datetime  id  time_slot
     0  39.984094  116.319236 2008-10-23 05:44:05   1         22
     1  39.984198  116.319322 2008-10-23 05:56:06   1         23
@@ -435,35 +444,38 @@ def create_time_slot_in_minute(
     3  39.984224  116.319402 2008-10-23 06:10:15   1         24
 
     """
-    if df.dtypes[label_datetime] != 'datetime64[ns]':
+    if data.dtypes[label_datetime] != 'datetime64[ns]':
         raise ValueError('{} colum must be of type datetime'.format(label_datetime))
     if not inplace:
-        df = df[:]
-    minute_day = df[label_datetime].dt.hour * 60 + df[label_datetime].dt.minute
-    df[label_time_slot] = minute_day // slot_interval + initial_slot
+        data = data[:]
+    minute_day = data[label_datetime].dt.hour * 60 + data[label_datetime].dt.minute
+    data[label_time_slot] = minute_day // slot_interval + initial_slot
     if not inplace:
-        return df
+        return data
 
 
-def generate_time_statistics(df_, local_label=LOCAL_LABEL):
+def generate_time_statistics(
+    data: DataFrame,
+    local_label: Optional[Text] = LOCAL_LABEL
+):
     """
     Calculates time statistics (average, standard deviation, minimum,
     maximum, sum and count) of the pairwise local labels of a symbolic trajectory.
 
     Parameters
     ----------
-    df_ : dataframe
-        The input trajectories data.
-    local_label : str, optional, default 'local_label'
-        The name of the feature with local id
+    data : DataFrame
+        The input trajectories date.
+    local_label : str, optional
+        The name of the feature with local id, by default LOCAL_LABEL
 
     Return
     ------
-    dataframe
+    DataFrame
         Statistics infomations of the pairwise local labels
 
     """
-    df_statistics = df_.groupby(
+    df_statistics = data.groupby(
         [local_label, PREV_LOCAL]
     ).agg({TIME_TO_PREV: [
         MEAN, STD, MIN, MAX, SUM, COUNT
@@ -475,7 +487,7 @@ def generate_time_statistics(df_, local_label=LOCAL_LABEL):
     return df_statistics
 
 
-def _calc_time_threshold(seg_mean, seg_std):
+def _calc_time_threshold(seg_mean: float, seg_std: float) -> float:
     """
     Auxiliary function for calculating the threshold based on the
      mean and standard deviation of the time transitions between
@@ -501,35 +513,37 @@ def _calc_time_threshold(seg_mean, seg_std):
     return threshold
 
 
-def threshold_time_statistics(df_statistics, mean_coef=1.0, std_coef=1.0, inplace=True):
+def threshold_time_statistics(
+    df_statistics: DataFrame,
+    mean_coef: Optional[float] = 1.0,
+    std_coef: Optional[float] = 1.0,
+    inplace: Optional[bool] = True
+) -> Optional[DataFrame]:
     """
     Calculates and creates the threshold column in the time statistics
     dataframe for each segment
 
     Parameters
     ----------
-    df_statistics : dataframe
+    df_statistics : DataFrame
         Time Statistics of the pairwise local labels.
     mean_coef : float
-        Multiplication coefficient of the mean time for the segment, default 1.0
+        Multiplication coefficient of the mean time for the segment, by default 1.0
     std_coef : float
-        Multiplication coefficient of sdt time for the segment, default 1.0
+        Multiplication coefficient of sdt time for the segment, by default 1.0
 
     Return
     ------
-    dataframe
+    DataFrame
         DataFrame of time statistics with the aditional feature: threshold,
-        which indicates the time limit of the trajectory segment.
+        which indicates the time limit of the trajectory segment, or None
 
     """
     if not inplace:
         df_statistics = df_statistics[:]
-    try:
-        df_statistics[THRESHOLD] = df_statistics.apply(
-            lambda x: _calc_time_threshold(x[MEAN] * mean_coef, x[STD] * std_coef), axis=1
-        )
+    df_statistics[THRESHOLD] = df_statistics.apply(
+        lambda x: _calc_time_threshold(x[MEAN] * mean_coef, x[STD] * std_coef), axis=1
+    )
 
-        if not inplace:
-            return df_statistics
-    except Exception as e:
-        raise e
+    if not inplace:
+        return df_statistics

@@ -1,4 +1,4 @@
-from typing import Optional, Text
+from typing import TYPE_CHECKING, Optional, Text, Union
 
 import numpy as np
 from pandas.core.frame import DataFrame
@@ -17,6 +17,10 @@ from pymove.utils.constants import (
     TRAJ_ID,
 )
 from pymove.utils.log import timer_decorator
+
+if TYPE_CHECKING:
+    from pymove.core.pandas import PandasMoveDataFrame
+    from pymove.core.dask import DaskMoveDataFrame
 
 
 def create_or_update_datetime_in_format_cyclical(
@@ -50,35 +54,31 @@ def create_or_update_datetime_in_format_cyclical(
 
     """
 
-    try:
-        if not inplace:
-            move_df = move_data[:]
-        else:
-            move_df = move_data
+    if not inplace:
+        move_df = move_data[:]
+    else:
+        move_df = move_data
 
-        print('Encoding cyclical continuous features - 24-hour time')
-        if label_datetime in move_data:
-            hours = move_df[label_datetime].dt.hour
-            move_df[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
-            move_df[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
-            print('...hour_sin and  hour_cos features were created...\n')
+    print('Encoding cyclical continuous features - 24-hour time')
+    if label_datetime in move_data:
+        hours = move_df[label_datetime].dt.hour
+        move_df[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
+        move_df[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
+        print('...hour_sin and  hour_cos features were created...\n')
 
-        if not inplace:
-            return move_df
-
-    except Exception as e:
-        raise e
+    if not inplace:
+        return move_df
 
 
 @timer_decorator
 def create_or_update_move_stop_by_dist_time(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     dist_radius: Optional[float] = 30,
     time_radius: Optional[float] = 900,
     label_id: Optional[Text] = TRAJ_ID,
     new_label: Optional[Text] = SEGMENT_STOP,
     inplace: Optional[bool] = True
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Determines the stops and moves points of the dataframe, if these points
     already exist, they will be updated.
@@ -116,56 +116,52 @@ def create_or_update_move_stop_by_dist_time(
 
     """
 
-    try:
+    if not inplace:
+        move_df = move_data[:]
+    else:
+        move_df = move_data
 
-        if not inplace:
-            move_df = move_data[:]
-        else:
-            move_df = move_data
+    by_max_dist(
+        move_df,
+        label_id=label_id,
+        max_dist_between_adj_points=dist_radius,
+        label_new_tid=new_label,
+    )
 
-        by_max_dist(
-            move_df,
-            label_id=label_id,
-            max_dist_between_adj_points=dist_radius,
-            label_new_tid=new_label,
-        )
+    move_df.generate_dist_time_speed_features(
+        label_id=new_label
+    )
 
-        move_df.generate_dist_time_speed_features(
-            label_id=new_label
-        )
+    print('Create or update stop as True or False')
+    print(
+        '...Creating stop features as True or False using %s to time in seconds'
+        % time_radius
+    )
+    move_df[STOP] = False
+    move_dataagg_tid = (
+        move_df.groupby(by=new_label)
+        .agg({TIME_TO_PREV: 'sum'})
+        .query('%s > %s' % (TIME_TO_PREV, time_radius))
+        .index
+    )
+    idx = move_df[
+        move_df[new_label].isin(move_dataagg_tid)
+    ].index
+    move_df.at[idx, STOP] = True
+    print(move_df[STOP].value_counts())
 
-        print('Create or update stop as True or False')
-        print(
-            '...Creating stop features as True or False using %s to time in seconds'
-            % time_radius
-        )
-        move_df[STOP] = False
-        move_dataagg_tid = (
-            move_df.groupby(by=new_label)
-            .agg({TIME_TO_PREV: 'sum'})
-            .query('%s > %s' % (TIME_TO_PREV, time_radius))
-            .index
-        )
-        idx = move_df[
-            move_df[new_label].isin(move_dataagg_tid)
-        ].index
-        move_df.at[idx, STOP] = True
-        print(move_df[STOP].value_counts())
-
-        if not inplace:
-            return move_df
-    except Exception as e:
-        raise e
+    if not inplace:
+        return move_df
 
 
 @timer_decorator
 def create_or_update_move_and_stop_by_radius(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     radius: Optional[float] = 0,
     target_label: Optional[Text] = DIST_TO_PREV,
     new_label: Optional[Text] = SITUATION,
     inplace: Optional[bool] = True,
-) -> DataFrame:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Finds the stops and moves points of the dataframe, if these points already
     exist, they will be updated.
@@ -198,30 +194,27 @@ def create_or_update_move_and_stop_by_radius(
 
     """
 
-    try:
-        print('\nCreating or updating features MOVE and STOPS...\n')
+    print('\nCreating or updating features MOVE and STOPS...\n')
 
-        if not inplace:
-            move_df = move_data[:]
-        else:
-            move_df = move_data
+    if not inplace:
+        move_df = move_data[:]
+    else:
+        move_df = move_data
 
-        if DIST_TO_PREV not in move_df:
-            move_df.generate_dist_features()
+    if DIST_TO_PREV not in move_df:
+        move_df.generate_dist_features()
 
-        conditions = (
-            (move_df[target_label] > radius),
-            (move_df[target_label] <= radius),
-        )
-        choices = [MOVE, STOP]
+    conditions = (
+        (move_df[target_label] > radius),
+        (move_df[target_label] <= radius),
+    )
+    choices = [MOVE, STOP]
 
-        move_df[new_label] = np.select(conditions, choices, np.nan)
-        print(
-            '\n....There are %s stops to this parameters\n'
-            % (move_df[move_df[new_label] == STOP].shape[0])
-        )
+    move_df[new_label] = np.select(conditions, choices, np.nan)
+    print(
+        '\n....There are %s stops to this parameters\n'
+        % (move_df[move_df[new_label] == STOP].shape[0])
+    )
 
-        if not inplace:
-            return move_df
-    except Exception as e:
-        raise e
+    if not inplace:
+        return move_df

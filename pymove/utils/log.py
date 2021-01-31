@@ -1,5 +1,6 @@
 import time
 from functools import wraps
+from typing import Callable, Iterable, Optional, Text
 
 from IPython import get_ipython
 from IPython.display import display
@@ -9,7 +10,7 @@ from tqdm import tqdm as _tqdm
 from pymove.utils.datetime import deltatime_str
 
 
-def timer_decorator(func):
+def timer_decorator(func: Callable) -> wraps:
     """A decorator that prints how long a function took to run."""
 
     @wraps(func)
@@ -26,20 +27,25 @@ def timer_decorator(func):
     return wrapper
 
 
-def _log_progress(sequence, desc=None, total=None, miniters=None):
+def _log_progress(
+    sequence: Iterable,
+    desc: Optional[Text] = None,
+    total: Optional[int] = None,
+    miniters: Optional[int] = None
+):
     """
     Make and display a progress bar.
 
     Parameters
     ----------
-    sequence : list or iterable.
+    sequence : iterable
         Represents a sequence of elements.
-    desc : String, optional, default None.
-        Represents the description of the operation.
-    total : int, optional, default None.
-        Represents the total/number elements in sequence.
-    miniters : int, optional, default None.
-        Represents the steps in which the bar will be updated
+    desc : str, optional
+        Represents the description of the operation, by default None.
+    total : int, optional
+        Represents the total/number elements in sequence, by default None.
+    miniters : int, optional
+        Represents the steps in which the bar will be updated, by default None.
 
     """
     if desc is None:

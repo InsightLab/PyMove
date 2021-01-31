@@ -1,10 +1,9 @@
-from typing import Any, Dict, List, Optional, Text, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Text, Union
 
 import dask
 import numpy as np
 import pandas as pd
 from dask.dataframe import DataFrame
-from dask.dataframe.core import Series
 
 from pymove.core import MoveDataFrameAbstractModel
 from pymove.core.dataframe import MoveDataFrame
@@ -16,6 +15,9 @@ from pymove.utils.constants import (
     TYPE_DASK,
     TYPE_PANDAS,
 )
+
+if TYPE_CHECKING:
+    from pymove.core.pandas import PandasMoveDataFrame
 
 
 class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
@@ -387,106 +389,21 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """Show dataset information from dataframe."""
         raise NotImplementedError('To be implemented')
 
-    def min(
-        self,
-        axis: Optional[int] = None,
-        skipna: Optional[bool] = True,
-        split_every: Optional[Any] = False,
-        out: Optional[Any] = None
-    ) -> Union[DataFrame, Series]:
-        """
-        Return the minimum of the values for the requested axis.
+    def min(self):
+        """Return the minimum of the values for the requested axis."""
+        raise NotImplementedError('To be implemented')
 
-        Parameters
-        ----------
-        axis: int, optional, default None, {index (0), columns (1)}.
-            Axis for the function to be applied on.
-        skipna: bool, optional, default None.
-            Exclude NA/null values when computing the result.
-        split_every:
-            ?
-        out:
-            ?
-
-        Returns
-        -------
-        max:Series or DataFrame (if level specified)
-            The minimum values for the request axis.
-
-        References
-        ----------
-        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.min
-
-        """
-
-        return self._data.min(axis, skipna, split_every, out)
-
-    def max(
-        self,
-        axis: Optional[int] = None,
-        skipna: Optional[bool] = True,
-        split_every: Optional[Any] = False,
-        out: Optional[Any] = None
-    ) -> Union[DataFrame, Series]:
-        """
-        Return the maximum of the values for the requested axis..
-
-        Parameters
-        ----------
-        axis: int, optional, default None, {index (0), columns (1)}.
-            Axis for the function to be applied on.
-        skipna: bool, optional, default None.
-            Exclude NA/null values when computing the result.
-        split_every:
-            ?
-        out:
-            ?
-
-        Returns
-        -------
-        max:Series or DataFrame (if level specified)
-            The maximum values for the request axis.
-
-        References
-        ----------
-        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.max
-
-        """
-
-        return self._data.max(axis, skipna, split_every, out)
+    def max(self):
+        """Return the maximum of the values for the requested axis."""
+        raise NotImplementedError('To be implemented')
 
     def count(self):
         """Counts the non-NA cells for each column or row."""
         raise NotImplementedError('To be implemented')
 
-    def groupby(
-        self,
-        by: Union[callable, Dict, Text, List],
-        **kwargs
-    ) -> DataFrame:
-        """
-        Groups dask DataFrame using a mapper or by a Series of columns.
-
-        Parameters
-        ----------
-        by : mapping, function, label, or list of labels
-            Used to determine the groups for the groupby.
-        **kwargs
-            Optional, only accepts keyword argument 'mutated'
-            and is passed to groupby.
-
-        Returns
-        -------
-        DataFrameGroupBy:
-            Returns groupby object that contains information about the groups.
-
-        References
-        ----------
-        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.groupby
-
-        """
-
-        return self._data.groupby(by)
+    def groupby(self):
+        """Groups dask DataFrame using a mapper or by a Series of columns."""
+        raise NotImplementedError('To be implemented')
 
     def plot(self):
         """Plot the data of the dask DataFrame."""
@@ -580,7 +497,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """Write object to a comma-separated values (csv) file."""
         raise NotImplementedError('To be implemented')
 
-    def convert_to(self, new_type: Text) -> MoveDataFrame:
+    def convert_to(
+        self, new_type: Text
+    ) -> Union['PandasMoveDataFrame', 'DaskMoveDataFrame']:
         """
         Convert an object from one type to another specified by the user.
 

@@ -169,15 +169,15 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
             raise e
 
     def generate_tid_based_statistics(
-            self,
-            label_id: Optional[Text] = TRAJ_ID,
-            local_label: Optional[Text] = LOCAL_LABEL,
-            mean_coef: Optional[float] = 1.0,
-            std_coef: Optional[float] = 1.0,
-            statistics: Optional[DataFrame] = None,
-            label_tid_stat: Optional[Text] = TID_STAT,
-            drop_single_points: Optional[bool] = False,
-            inplace: Optional[bool] = True,
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        local_label: Optional[Text] = LOCAL_LABEL,
+        mean_coef: Optional[float] = 1.0,
+        std_coef: Optional[float] = 1.0,
+        statistics: Optional[DataFrame] = None,
+        label_tid_stat: Optional[Text] = TID_STAT,
+        drop_single_points: Optional[bool] = False,
+        inplace: Optional[bool] = True,
     ) -> Optional['PandasDiscreteMoveDataFrame']:
         """
         Splits the trajectories into segments based on time statistics for segments.

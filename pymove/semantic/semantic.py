@@ -1,4 +1,4 @@
-from typing import Optional, Text, Tuple
+from typing import TYPE_CHECKING, Optional, Text, Tuple, Union
 
 import numpy as np
 from pandas import DataFrame
@@ -18,6 +18,10 @@ from pymove.utils.constants import (
     TRAJ_ID,
 )
 from pymove.utils.log import timer_decorator
+
+if TYPE_CHECKING:
+    from pymove.core.pandas import PandasMoveDataFrame
+    from pymove.core.dask import DaskMoveDataFrame
 
 
 def _end_create_operation(
@@ -116,33 +120,30 @@ def create_or_update_out_of_the_bbox(
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
+    if not inplace:
+        move_data = move_data[:]
 
-        print('\nCreate or update boolean feature to detect points out of the bbox')
-        filtered_ = filters.by_bbox(move_data, bbox, filter_out=True)
+    print('\nCreate or update boolean feature to detect points out of the bbox')
+    filtered_ = filters.by_bbox(move_data, bbox, filter_out=True)
 
-        print('...Creating a new label named as %s' % new_label)
-        move_data[new_label] = False
-        if filtered_.shape[0] > 0:
-            print('...Setting % as True\n' % new_label)
-            move_data.at[filtered_.index, new_label] = True
+    print('...Creating a new label named as %s' % new_label)
+    move_data[new_label] = False
+    if filtered_.shape[0] > 0:
+        print('...Setting % as True\n' % new_label)
+        move_data.at[filtered_.index, new_label] = True
 
-        return _end_create_operation(
-            move_data, new_label, inplace
-        )
-    except Exception as e:
-        raise e
+    return _end_create_operation(
+        move_data, new_label, inplace
+    )
 
 
 @timer_decorator
 def create_or_update_gps_deactivated_signal(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     max_time_between_adj_points: Optional[float] = 7200,
     new_label: Optional[Text] = DEACTIVATED,
     inplace: Optional[bool] = True
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Create or update a feature deactivate_signal if the max time between
     adjacent points is equal or less than max_time_between_adj_points.
@@ -169,32 +170,29 @@ def create_or_update_gps_deactivated_signal(
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
+    if not inplace:
+        move_data = move_data[:]
 
-        message = 'Create or update deactivated signal if time max > %srs seconds\n'
-        print(message % max_time_between_adj_points)
-        move_data.generate_time_features()
+    message = 'Create or update deactivated signal if time max > %srs seconds\n'
+    print(message % max_time_between_adj_points)
+    move_data.generate_time_features()
 
-        return _process_simple_filter(
-            move_data,
-            new_label,
-            TIME_TO_PREV,
-            max_time_between_adj_points,
-            inplace
-        )
-    except Exception as e:
-        raise e
+    return _process_simple_filter(
+        move_data,
+        new_label,
+        TIME_TO_PREV,
+        max_time_between_adj_points,
+        inplace
+    )
 
 
 @timer_decorator
 def create_or_update_gps_jump(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     max_dist_between_adj_points: Optional[float] = 3000,
     new_label: Optional[Text] = JUMP,
     inplace: Optional[bool] = True
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Create or update Jump if the maximum distance between adjacent
     points is greater than max_dist_between_adj_points.
@@ -219,28 +217,26 @@ def create_or_update_gps_jump(
         'dist_to_prev', 'dist_to_next', 'dist_prev_to_next', 'jump'
 
     """
-    try:
-        if not inplace:
-            move_data = move_data[:]
 
-        message = 'Create or update jump if dist max > %srs meters\n'
-        print(message % max_dist_between_adj_points)
-        move_data.generate_dist_features()
+    if not inplace:
+        move_data = move_data[:]
 
-        return _process_simple_filter(
-            move_data,
-            new_label,
-            DIST_TO_PREV,
-            max_dist_between_adj_points,
-            inplace
-        )
-    except Exception as e:
-        raise e
+    message = 'Create or update jump if dist max > %srs meters\n'
+    print(message % max_dist_between_adj_points)
+    move_data.generate_dist_features()
+
+    return _process_simple_filter(
+        move_data,
+        new_label,
+        DIST_TO_PREV,
+        max_dist_between_adj_points,
+        inplace
+    )
 
 
 @timer_decorator
 def create_or_update_short_trajectory(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     max_dist_between_adj_points: Optional[float] = 3000,
     max_time_between_adj_points: Optional[float] = 7200,
     max_speed_between_adj_points: Optional[float] = 50,
@@ -248,7 +244,7 @@ def create_or_update_short_trajectory(
     label_tid: Optional[Text] = TID_PART,
     new_label: Optional[Text] = SHORT,
     inplace: Optional[bool] = True
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
 
     Parameters
@@ -282,41 +278,38 @@ def create_or_update_short_trajectory(
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
+    if not inplace:
+        move_data = move_data[:]
 
-        print('\nCreate or update short trajectories...')
+    print('\nCreate or update short trajectories...')
 
-        segmentation.by_dist_time_speed(
-            move_data,
-            max_dist_between_adj_points=max_dist_between_adj_points,
-            max_time_between_adj_points=max_time_between_adj_points,
-            max_speed_between_adj_points=max_speed_between_adj_points,
-            label_new_tid=label_tid
-        )
-        move_data[new_label] = False
+    segmentation.by_dist_time_speed(
+        move_data,
+        max_dist_between_adj_points=max_dist_between_adj_points,
+        max_time_between_adj_points=max_time_between_adj_points,
+        max_speed_between_adj_points=max_speed_between_adj_points,
+        label_new_tid=label_tid
+    )
+    move_data[new_label] = False
 
-        df_count_tid = move_data.groupby(by=label_tid).size()
-        filter_ = df_count_tid <= k_segment_max
-        idx = df_count_tid[filter_].index
-        move_data.loc[move_data[label_tid].isin(idx), new_label] = True
+    df_count_tid = move_data.groupby(by=label_tid).size()
+    filter_ = df_count_tid <= k_segment_max
+    idx = df_count_tid[filter_].index
+    move_data.loc[move_data[label_tid].isin(idx), new_label] = True
 
-        return _end_create_operation(
-            move_data, new_label, inplace
-        )
-    except Exception as e:
-        raise e
+    return _end_create_operation(
+        move_data, new_label, inplace
+    )
 
 
 @timer_decorator
 def create_or_update_gps_block_signal(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     max_time_stop: Optional[float] = 7200,
     new_label: Optional[Text] = BLOCK,
     label_tid: Optional[Text] = TID_PART,
     inplace: Optional[bool] = True
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Create a new feature that inform points with speed = 0
 
@@ -346,43 +339,40 @@ def create_or_update_gps_block_signal(
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
+    if not inplace:
+        move_data = move_data[:]
 
-        message = 'Create or update block_signal if max time stop > %srs seconds\n'
-        print(message % max_time_stop)
-        segmentation.by_max_dist(
-            move_data, max_dist_between_adj_points=0.0, label_new_tid=label_tid
-        )
+    message = 'Create or update block_signal if max time stop > %srs seconds\n'
+    print(message % max_time_stop)
+    segmentation.by_max_dist(
+        move_data, max_dist_between_adj_points=0.0, label_new_tid=label_tid
+    )
 
-        print('Updating dist time speed values')
-        move_data.generate_dist_time_speed_features(label_id=label_tid)
+    print('Updating dist time speed values')
+    move_data.generate_dist_time_speed_features(label_id=label_tid)
 
-        move_data[new_label] = False
+    move_data[new_label] = False
 
-        # SUM the segment block to detect the id that has or more time stopped
-        df_agg_tid = move_data.groupby(by=label_tid).agg({TIME_TO_PREV: 'sum'})
-        filter_ = df_agg_tid[TIME_TO_PREV] >= max_time_stop
-        idx = df_agg_tid[filter_].index
-        move_data.loc[move_data[label_tid].isin(idx), new_label] = True
+    # SUM the segment block to detect the id that has or more time stopped
+    df_agg_tid = move_data.groupby(by=label_tid).agg({TIME_TO_PREV: 'sum'})
+    filter_ = df_agg_tid[TIME_TO_PREV] >= max_time_stop
+    idx = df_agg_tid[filter_].index
+    move_data.loc[move_data[label_tid].isin(idx), new_label] = True
 
-        return _end_create_operation(
-            move_data, new_label, inplace
-        )
-    except Exception as e:
-        raise e
+    return _end_create_operation(
+        move_data, new_label, inplace
+    )
 
 
 @timer_decorator
 def filter_block_signal_by_repeated_amount_of_points(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     amount_max_of_points_stop: Optional[float] = 30.0,
     max_time_stop: Optional[float] = 7200,
     filter_out: Optional[bool] = False,
     label_tid: Optional[Text] = TID_PART,
     inplace: Optional[bool] = False
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Filters from dataframe points with blocked signal by amount of points.
 
@@ -414,40 +404,36 @@ def filter_block_signal_by_repeated_amount_of_points(
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
+    if not inplace:
+        move_data = move_data[:]
 
-        if BLOCK not in move_data:
-            create_or_update_gps_block_signal(
-                move_data, max_time_stop, label_tid=label_tid
-            )
+    if BLOCK not in move_data:
+        create_or_update_gps_block_signal(
+            move_data, max_time_stop, label_tid=label_tid
+        )
 
-        df_count_tid = move_data.groupby(by=[label_tid]).sum()
-        filter_ = df_count_tid[BLOCK] > amount_max_of_points_stop
+    df_count_tid = move_data.groupby(by=[label_tid]).sum()
+    filter_ = df_count_tid[BLOCK] > amount_max_of_points_stop
 
-        if filter_out:
-            idx = df_count_tid[~filter_].index
-        else:
-            idx = df_count_tid[filter_].index
+    if filter_out:
+        idx = df_count_tid[~filter_].index
+    else:
+        idx = df_count_tid[filter_].index
 
-        filter_ = move_data[move_data[label_tid].isin(idx)].index
-        move_data.drop(index=filter_, inplace=True)
-        if not inplace:
-            return move_data
-
-    except Exception as e:
-        raise e
+    filter_ = move_data[move_data[label_tid].isin(idx)].index
+    move_data.drop(index=filter_, inplace=True)
+    if not inplace:
+        return move_data
 
 
 @timer_decorator
 def filter_block_signal_by_time(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     max_time_stop: Optional[float] = 7200,
     filter_out: Optional[bool] = False,
     label_tid: Optional[Text] = TID_PART,
     inplace: Optional[bool] = False
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Filters from dataframe points with blocked signal by time.
 
@@ -477,45 +463,41 @@ def filter_block_signal_by_time(
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data.copy()
+    if not inplace:
+        move_data = move_data.copy()
 
-        if BLOCK not in move_data:
-            create_or_update_gps_block_signal(
-                move_data, max_time_stop, label_tid=label_tid
-            )
-
-        df_agg_tid = move_data.groupby(by=label_tid).agg(
-            {TIME_TO_PREV: 'sum', BLOCK: 'sum'}
+    if BLOCK not in move_data:
+        create_or_update_gps_block_signal(
+            move_data, max_time_stop, label_tid=label_tid
         )
-        filter_ = (df_agg_tid[TIME_TO_PREV] > max_time_stop) & (df_agg_tid[BLOCK] > 0)
 
-        if filter_out:
-            idx = df_agg_tid[~filter_].index
-        else:
-            idx = df_agg_tid[filter_].index
+    df_agg_tid = move_data.groupby(by=label_tid).agg(
+        {TIME_TO_PREV: 'sum', BLOCK: 'sum'}
+    )
+    filter_ = (df_agg_tid[TIME_TO_PREV] > max_time_stop) & (df_agg_tid[BLOCK] > 0)
 
-        filter_ = move_data[move_data[label_tid].isin(idx)].index
-        move_data.drop(index=filter_, inplace=True)
+    if filter_out:
+        idx = df_agg_tid[~filter_].index
+    else:
+        idx = df_agg_tid[filter_].index
 
-        if not inplace:
-            return move_data
+    filter_ = move_data[move_data[label_tid].isin(idx)].index
+    move_data.drop(index=filter_, inplace=True)
 
-    except Exception as e:
-        raise e
+    if not inplace:
+        return move_data
 
 
 @timer_decorator
 def filter_longer_time_to_stop_segment_by_id(
-    move_data,
-    dist_radius=30,
-    time_radius=900,
-    label_id=TRAJ_ID,
-    label_segment_stop=SEGMENT_STOP,
-    filter_out=False,
-    inplace=False
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    dist_radius: Optional[float] = 30,
+    time_radius: Optional[float] = 900,
+    label_id: Optional[Text] = TRAJ_ID,
+    label_segment_stop: Optional[Text] = SEGMENT_STOP,
+    filter_out: Optional[bool] = False,
+    inplace: Optional[bool] = False
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Filters from dataframe segment with longest stop time.
 
@@ -549,33 +531,30 @@ def filter_longer_time_to_stop_segment_by_id(
         'tid_dist', 'block_signal'
 
     """
-    try:
-        if not inplace:
-            move_data = move_data.copy()
 
-        if label_segment_stop not in move_data:
-            stay_point_detection.create_or_update_move_stop_by_dist_time(
-                move_data, dist_radius, time_radius
-            )
+    if not inplace:
+        move_data = move_data.copy()
 
-        df_agg_id_stop = move_data.groupby(
-            [label_id, label_segment_stop], as_index=False
-        ).agg({TIME_TO_PREV: 'sum'})
+    if label_segment_stop not in move_data:
+        stay_point_detection.create_or_update_move_stop_by_dist_time(
+            move_data, dist_radius, time_radius
+        )
 
-        filter_ = df_agg_id_stop.groupby(
-            [label_id], as_index=False
-        ).idxmax()[TIME_TO_PREV]
+    df_agg_id_stop = move_data.groupby(
+        [label_id, label_segment_stop], as_index=False
+    ).agg({TIME_TO_PREV: 'sum'})
 
-        if filter_out:
-            segments = df_agg_id_stop.loc[~df_agg_id_stop.index.isin(filter_)]
-        else:
-            segments = df_agg_id_stop.loc[df_agg_id_stop.index.isin(filter_)]
-        segments = segments[label_segment_stop]
+    filter_ = df_agg_id_stop.groupby(
+        [label_id], as_index=False
+    ).idxmax()[TIME_TO_PREV]
 
-        filter_ = move_data[move_data[label_segment_stop].isin(segments)].index
-        move_data.drop(index=filter_, inplace=True)
-        if not inplace:
-            return move_data
+    if filter_out:
+        segments = df_agg_id_stop.loc[~df_agg_id_stop.index.isin(filter_)]
+    else:
+        segments = df_agg_id_stop.loc[df_agg_id_stop.index.isin(filter_)]
+    segments = segments[label_segment_stop]
 
-    except Exception as e:
-        raise e
+    filter_ = move_data[move_data[label_segment_stop].isin(segments)].index
+    move_data.drop(index=filter_, inplace=True)
+    if not inplace:
+        return move_data

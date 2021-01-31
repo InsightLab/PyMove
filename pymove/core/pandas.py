@@ -1,4 +1,15 @@
-from typing import Any, Callable, Dict, List, Optional, Set, Text, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Text,
+    Tuple,
+    Union,
+)
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -45,6 +56,9 @@ from pymove.utils.distances import haversine
 from pymove.utils.log import progress_bar
 from pymove.utils.mem import begin_operation, end_operation
 from pymove.utils.trajectories import shift
+
+if TYPE_CHECKING:
+    from pymove.core.dask import DaskMoveDataFrame
 
 
 class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
@@ -2546,7 +2560,9 @@ class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             file_name, sep=separator, encoding='utf-8', index=False
         )
 
-    def convert_to(self, new_type: Text) -> MoveDataFrame:
+    def convert_to(
+        self, new_type: Text
+    ) -> Union['PandasMoveDataFrame', 'DaskMoveDataFrame']:
         """
         Convert an object from one type to another specified by the user.
 

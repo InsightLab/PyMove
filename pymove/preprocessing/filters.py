@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Text, Tuple, Union
 
 import numpy as np
 from pandas import DataFrame
@@ -15,6 +15,10 @@ from pymove.utils.constants import (
     TIME_TO_PREV,
     TRAJ_ID,
 )
+
+if TYPE_CHECKING:
+    from pymove.core.pandas import PandasMoveDataFrame
+    from pymove.core.dask import DaskMoveDataFrame
 
 
 def get_bbox_by_radius(
@@ -40,24 +44,20 @@ def get_bbox_by_radius(
     ----------
         https://mathmesquita.me/2017/01/16/filtrando-localizacao-em-um-raio.html
     """
-    try:
-        earth_radius = 6371000
-        r = radius / earth_radius
+    earth_radius = 6371000
+    r = radius / earth_radius
 
-        lat, lon = np.radians(coordinates)
+    lat, lon = np.radians(coordinates)
 
-        latmin = lat - r
-        latmax = lat + r
+    latmin = lat - r
+    latmax = lat + r
 
-        delta_lon = np.arcsin(np.sin(r) / np.cos(lat))
+    delta_lon = np.arcsin(np.sin(r) / np.cos(lat))
 
-        lonmin = lon - delta_lon
-        lonmax = lon + delta_lon
+    lonmin = lon - delta_lon
+    lonmax = lon + delta_lon
 
-        return np.rad2deg([latmin, lonmin, latmax, lonmax])
-
-    except Exception as e:
-        raise e
+    return np.rad2deg([latmin, lonmin, latmax, lonmax])
 
 
 def by_bbox(
@@ -96,13 +96,10 @@ def by_bbox(
         & (move_data[LATITUDE] <= bbox[2])
         & (move_data[LONGITUDE] <= bbox[3])
     )
-    try:
-        if filter_out:
-            filter_ = ~filter_
+    if filter_out:
+        filter_ = ~filter_
 
-        return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
-    except Exception as e:
-        raise e
+    return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
 
 
 def by_datetime(
@@ -139,23 +136,20 @@ def by_datetime(
 
     """
 
-    try:
-        if start_datetime is not None and end_datetime is not None:
-            filter_ = (
-                (move_data[DATETIME] >= start_datetime)
-                & (move_data[DATETIME] <= end_datetime)
-            )
-        elif end_datetime is not None:
-            filter_ = move_data[DATETIME] <= end_datetime
-        else:
-            filter_ = move_data[DATETIME] >= start_datetime
+    if start_datetime is not None and end_datetime is not None:
+        filter_ = (
+            (move_data[DATETIME] >= start_datetime)
+            & (move_data[DATETIME] <= end_datetime)
+        )
+    elif end_datetime is not None:
+        filter_ = move_data[DATETIME] <= end_datetime
+    else:
+        filter_ = move_data[DATETIME] >= start_datetime
 
-        if filter_out:
-            filter_ = ~filter_
+    if filter_out:
+        filter_ = ~filter_
 
-        return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
-    except Exception as e:
-        raise e
+    return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
 
 
 def by_label(
@@ -192,14 +186,11 @@ def by_label(
 
     """
 
-    try:
-        filter_ = move_data[label_name] == value
-        if filter_out:
-            filter_ = ~filter_
+    filter_ = move_data[label_name] == value
+    if filter_out:
+        filter_ = ~filter_
 
-        return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
-    except Exception as e:
-        raise e
+    return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
 
 
 def by_id(
@@ -279,12 +270,12 @@ def by_tid(
 
 
 def outliers(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     jump_coefficient: Optional[float] = 3.0,
     threshold: Optional[float] = 1,
     filter_out: Optional[bool] = False,
     inplace: Optional[bool] = False,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Filters trajectories points that are outliers.
 
@@ -532,13 +523,13 @@ def _clean_gps(move_data: DataFrame, f: callable, **kwargs):
 
 
 def clean_gps_jumps_by_distance(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     jump_coefficient: Optional[float] = 3.0,
     threshold: Optional[float] = 1,
     label_dtype: Optional[callable] = np.float64,
     inplace: Optional[bool] = False,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Removes the trajectories points that are outliers from the dataframe.
 
@@ -577,33 +568,29 @@ def clean_gps_jumps_by_distance(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    try:
-        print(
-            '\nCleaning gps jumps by distance to jump_coefficient %s...\n'
-            % jump_coefficient
-        )
+    print(
+        '\nCleaning gps jumps by distance to jump_coefficient %s...\n'
+        % jump_coefficient
+    )
 
-        move_df = _clean_gps(
-            move_df,
-            outliers,
-            arg1=jump_coefficient,
-            arg2=threshold,
-            outliers=True
-        )
-        if not inplace:
-            return move_df
-
-    except Exception as e:
-        raise e
+    move_df = _clean_gps(
+        move_df,
+        outliers,
+        arg1=jump_coefficient,
+        arg2=threshold,
+        outliers=True
+    )
+    if not inplace:
+        return move_df
 
 
 def clean_gps_nearby_points_by_distances(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     radius_area: Optional[float] = 10.0,
     label_dtype: Optional[callable] = np.float64,
     inplace: Optional[bool] = False,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Removes points from the trajectories when the distance between them and the
     point before is smaller than the value set by the user.
@@ -640,33 +627,29 @@ def clean_gps_nearby_points_by_distances(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    try:
-        print(
-            '\nCleaning gps points from radius of %s meters\n'
-            % radius_area
-        )
+    print(
+        '\nCleaning gps points from radius of %s meters\n'
+        % radius_area
+    )
 
-        move_df = _clean_gps(
-            move_df,
-            _filter_single_by_max,
-            arg1=DIST_TO_PREV,
-            arg2=radius_area,
-            outliers=False
-        )
-        if not inplace:
-            return move_df
-
-    except Exception as e:
-        raise e
+    move_df = _clean_gps(
+        move_df,
+        _filter_single_by_max,
+        arg1=DIST_TO_PREV,
+        arg2=radius_area,
+        outliers=False
+    )
+    if not inplace:
+        return move_df
 
 
 def clean_gps_nearby_points_by_speed(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     speed_radius: Optional[float] = 0.0,
     label_dtype: Optional[Callable] = np.float64,
     inplace: Optional[bool] = False,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Removes points from the trajectories when the speed of travel between them
     and the point before is smaller than the value set by the user.
@@ -697,41 +680,35 @@ def clean_gps_nearby_points_by_speed(
         move_df = move_data[:]
     else:
         move_df = move_data
-    # sum_drop = 0
 
     if SPEED_TO_PREV not in move_df:
         move_df.generate_dist_time_speed_features(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    try:
+    print(
+        '\nCleaning gps points using %s speed radius\n'
+        % speed_radius
+    )
 
-        print(
-            '\nCleaning gps points using %s speed radius\n'
-            % speed_radius
-        )
-
-        move_df = _clean_gps(
-            move_df,
-            _filter_single_by_max,
-            arg1=SPEED_TO_PREV,
-            arg2=speed_radius,
-            outliers=False
-        )
-        if not inplace:
-            return move_df
-
-    except Exception as e:
-        raise e
+    move_df = _clean_gps(
+        move_df,
+        _filter_single_by_max,
+        arg1=SPEED_TO_PREV,
+        arg2=speed_radius,
+        outliers=False
+    )
+    if not inplace:
+        return move_df
 
 
 def clean_gps_speed_max_radius(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     speed_max: Optional[float] = 50.0,
     label_dtype: Optional[Callable] = np.float64,
     inplace: Optional[bool] = False,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Recursively removes trajectories points with speed higher than the value
     specified by the user. Given any point p of the trajectory, the point will
@@ -775,32 +752,28 @@ def clean_gps_speed_max_radius(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    try:
-        print(
-            '\nClean gps points with speed max > %s meters by seconds'
-            % speed_max
-        )
+    print(
+        '\nClean gps points with speed max > %s meters by seconds'
+        % speed_max
+    )
 
-        move_df = _clean_gps(
-            move_df,
-            _filter_speed_max_radius,
-            arg1=SPEED_TO_PREV,
-            arg2=speed_max,
-            outliers=False
-        )
-        if not inplace:
-            return move_df
-
-    except Exception as e:
-        raise e
+    move_df = _clean_gps(
+        move_df,
+        _filter_speed_max_radius,
+        arg1=SPEED_TO_PREV,
+        arg2=speed_max,
+        outliers=False
+    )
+    if not inplace:
+        return move_df
 
 
 def clean_trajectories_with_few_points(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_tid: Optional[Text] = TID,
     min_points_per_trajectory: Optional[int] = 2,
     inplace: Optional[bool] = False
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Removes from the given dataframe, trajectories with fewer points than was
     specified by the user.
@@ -838,56 +811,52 @@ def clean_trajectories_with_few_points(
     if label_tid not in move_df:
         raise KeyError('%s not in dataframe' % label_tid)
 
-    try:
+    print(
+        '\nCleaning gps points from trajectories of fewer than %s points\n'
+        % min_points_per_trajectory
+    )
+
+    if move_df.index.name is not None:
+        print('\n...Reset index for filtering\n')
+        move_df.reset_index(inplace=True)
+
+    move_datacount_tid = move_df.groupby(by=label_tid).size()
+    filter_ = move_datacount_tid < min_points_per_trajectory
+    tids_with_few_points = move_datacount_tid[filter_].index
+    shape_before_drop = move_df.shape
+    idx = move_df[move_df[label_tid].isin(tids_with_few_points)].index
+
+    if idx.shape[0] > 0:
         print(
-            '\nCleaning gps points from trajectories of fewer than %s points\n'
-            % min_points_per_trajectory
+            '\n...There are %s ids with few points'
+            % tids_with_few_points.shape[0]
+        )
+        print(
+            '\n...Tids before drop: %s'
+            % move_df[label_tid].unique().shape[0]
+        )
+        move_df.drop(index=idx, inplace=True)
+        print(
+            '\n...Tids after drop: %s'
+            % move_df[label_tid].unique().shape[0]
+        )
+        print(
+            '\n...Shape - before drop: %s - after drop: %s'
+            % (shape_before_drop, move_df.shape)
         )
 
-        if move_df.index.name is not None:
-            print('\n...Reset index for filtering\n')
-            move_df.reset_index(inplace=True)
-
-        move_datacount_tid = move_df.groupby(by=label_tid).size()
-        filter_ = move_datacount_tid < min_points_per_trajectory
-        tids_with_few_points = move_datacount_tid[filter_].index
-        shape_before_drop = move_df.shape
-        idx = move_df[move_df[label_tid].isin(tids_with_few_points)].index
-
-        if idx.shape[0] > 0:
-            print(
-                '\n...There are %s ids with few points'
-                % tids_with_few_points.shape[0]
-            )
-            print(
-                '\n...Tids before drop: %s'
-                % move_df[label_tid].unique().shape[0]
-            )
-            move_df.drop(index=idx, inplace=True)
-            print(
-                '\n...Tids after drop: %s'
-                % move_df[label_tid].unique().shape[0]
-            )
-            print(
-                '\n...Shape - before drop: %s - after drop: %s'
-                % (shape_before_drop, move_df.shape)
-            )
-
-        if not inplace:
-            return move_df
-
-    except Exception as e:
-        raise e
+    if not inplace:
+        return move_df
 
 
 def clean_trajectories_short_and_few_points(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TID,
     min_trajectory_distance: Optional[float] = 100,
     min_points_per_trajectory: Optional[int] = 2,
     label_dtype: Optional[Callable] = np.float64,
     inplace: Optional[bool] = False,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Eliminates from the given dataframe trajectories with fewer points and
     shorter length than specified values by the user.
@@ -936,53 +905,49 @@ def clean_trajectories_short_and_few_points(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    try:
-        print('\n...Dropping unnecessary trajectories...')
+    print('\n...Dropping unnecessary trajectories...')
 
-        if move_df.index.name is not None:
-            print('reseting index')
-            move_df.reset_index(inplace=True)
+    if move_df.index.name is not None:
+        print('reseting index')
+        move_df.reset_index(inplace=True)
 
-        move_dataagg_tid = move_df.groupby(by=label_id).agg(
-            {DIST_TO_PREV: 'sum'}
-        )
-        filter_ = move_dataagg_tid[DIST_TO_PREV] < min_trajectory_distance
-        tid_selection = move_dataagg_tid[filter_].index
+    move_dataagg_tid = move_df.groupby(by=label_id).agg(
+        {DIST_TO_PREV: 'sum'}
+    )
+    filter_ = move_dataagg_tid[DIST_TO_PREV] < min_trajectory_distance
+    tid_selection = move_dataagg_tid[filter_].index
 
+    print(
+        '\n...short trajectories and trajectories with a minimum distance (%s): %s'
+        % (move_dataagg_tid.shape[0], min_trajectory_distance)
+    )
+    print('\n...There are %s tid do drop' % tid_selection.shape[0])
+    shape_before_drop = move_df.shape
+
+    idx = move_df[move_df[label_id].isin(tid_selection)].index
+    if idx.shape[0] > 0:
+        tids_before_drop = move_df[label_id].unique().shape[0]
         print(
-            '\n...short trajectories and trajectories with a minimum distance (%s): %s'
-            % (move_dataagg_tid.shape[0], min_trajectory_distance)
+            '\n...Tids - before drop: %s - after drop: %s'
+            % (tids_before_drop, move_df[label_id].unique().shape[0])
         )
-        print('\n...There are %s tid do drop' % tid_selection.shape[0])
-        shape_before_drop = move_df.shape
+        move_df.drop(index=idx, inplace=True)
+        print(
+            '\n...Shape - before drop: %s - after drop: %s'
+            % (shape_before_drop, move_df.shape)
+        )
 
-        idx = move_df[move_df[label_id].isin(tid_selection)].index
-        if idx.shape[0] > 0:
-            tids_before_drop = move_df[label_id].unique().shape[0]
-            print(
-                '\n...Tids - before drop: %s - after drop: %s'
-                % (tids_before_drop, move_df[label_id].unique().shape[0])
-            )
-            move_df.drop(index=idx, inplace=True)
-            print(
-                '\n...Shape - before drop: %s - after drop: %s'
-                % (shape_before_drop, move_df.shape)
-            )
-
-        if not inplace:
-            return move_df
-
-    except Exception as e:
-        raise e
+    if not inplace:
+        return move_df
 
 
 def clean_id_by_time_max(
-    move_data: DataFrame,
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     time_max: Optional[float] = 3600,
     label_dtype: Optional[Callable] = np.float64,
     inplace: Optional[bool] = False,
-) -> Optional[DataFrame]:
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Clears GPS points with time by ID greater than a user-defined limit.
 
@@ -1019,35 +984,31 @@ def clean_id_by_time_max(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    try:
+    print(
+        '\nClean gps points with time max by id < %s seconds'
+        % time_max
+    )
+    move_dataid_drop = (
+        move_df.groupby([label_id], as_index=False)
+        .agg({TIME_TO_PREV: 'sum'})
+        .query('%s < %s' % (TIME_TO_PREV, time_max))
+    )
+    print(
+        '...Ids total: %s\nIds to drop:%s'
+        % (
+            move_df[label_id].nunique(),
+            move_dataid_drop[label_id].nunique()
+        )
+    )
+    if move_dataid_drop.shape[0] > 0:
+        before_drop = move_df.shape[0]
+        filter_ = move_df[label_id].isin(move_dataid_drop[label_id])
+        idx = move_df[filter_].index
+        move_df.drop(idx, inplace=True)
         print(
-            '\nClean gps points with time max by id < %s seconds'
-            % time_max
+            '...Rows before drop: %s\n Rows after drop: %s'
+            % (before_drop, move_df.shape[0])
         )
-        move_dataid_drop = (
-            move_df.groupby([label_id], as_index=False)
-            .agg({TIME_TO_PREV: 'sum'})
-            .query('%s < %s' % (TIME_TO_PREV, time_max))
-        )
-        print(
-            '...Ids total: %s\nIds to drop:%s'
-            % (
-                move_df[label_id].nunique(),
-                move_dataid_drop[label_id].nunique()
-            )
-        )
-        if move_dataid_drop.shape[0] > 0:
-            before_drop = move_df.shape[0]
-            filter_ = move_df[label_id].isin(move_dataid_drop[label_id])
-            idx = move_df[filter_].index
-            move_df.drop(idx, inplace=True)
-            print(
-                '...Rows before drop: %s\n Rows after drop: %s'
-                % (before_drop, move_df.shape[0])
-            )
 
-        if not inplace:
-            return move_df
-
-    except Exception as e:
-        raise e
+    if not inplace:
+        return move_df
