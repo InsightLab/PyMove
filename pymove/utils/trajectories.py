@@ -1,9 +1,13 @@
 from __future__ import division
 
 from itertools import chain
+from typing import Dict, List, Optional, Text
 
 import numpy as np
-import pandas as pd
+from numpy import ndarray
+from pandas import DataFrame
+from pandas import read_csv as _read_csv
+from pandas._typing import FilePathOrBuffer
 
 from pymove.core.dataframe import MoveDataFrame
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID, TYPE_PANDAS
@@ -11,21 +15,14 @@ from pymove.utils.math import is_number
 
 
 def read_csv(
-    filename,
-    latitude=LATITUDE,
-    longitude=LONGITUDE,
-    datetime=DATETIME,
-    traj_id=TRAJ_ID,
-    type_=TYPE_PANDAS,
-    n_partitions=1,
-    sep=',',
-    encoding='utf-8',
-    header='infer',
-    names=None,
-    index_col=None,
-    usecols=None,
-    dtype=None,
-    nrows=None,
+    filepath_or_buffer: FilePathOrBuffer,
+    latitude: Optional[Text] = LATITUDE,
+    longitude: Optional[Text] = LONGITUDE,
+    datetime: Optional[Text] = DATETIME,
+    traj_id: Optional[Text] = TRAJ_ID,
+    type_: Optional[Text] = TYPE_PANDAS,
+    n_partitions: Optional[int] = 1,
+    **kwargs
 ):
     """
     Reads a .csv file and structures the data into the desired structure
@@ -34,83 +31,53 @@ def read_csv(
     Parameters
 
     ----------
-    filename : String.
-        Represents coordinates lat, lon which will be the center of the map.
-    latitude : String, optional, default 'lat'.
-        Represents the column name of feature latitude.
-    longitude : String, optional, default 'lon'.
-        Represents the column name of feature longitude.
-    datetime : String, optional, default 'datetime'.
-        Represents the column name of feature datetime.
-    traj_id : String, optional, default 'id'.
-        Represents the column name of feature id trajectory.
-    type_ : String, optional, default 'pandas'.
-        Represents the type of the MoveDataFrame
-    n_partitions : int, optional, default 1.
-        Represents number of partitions for DaskMoveDataFrame
-    sep : String, optional, default ','.
-        Delimiter to use.
-    encoding : String, optional, default 'utf-8'.
-        Encoding to use for UTF when reading/writing
-    header : int, list of int, default ‘infer’
-        Row number(srs) to use as the column names, and the start of the data.
-        Default behavior is to infer the column names: if no names are passed
-        the behavior is identical to header=0 and column names are inferred from
-        the first line of the file, if column names are passed explicitly then
-        the behavior is identical to header=None
-    names : array-like, optional
-        List of column names to use. If the file contains a header row,
-        then you should explicitly pass header=0 to override the column names.
-        Duplicates in this list are not allowed.
-    index_col : int, str, sequence of int / str, or False, default None
-        Column(s) to use as the row labels of the DataFrame, either given as
-        string name or column index.
-        If a sequence of int / str is given, a MultiIndex is used.
-    usecols : list-like or callable, optional, default None
-        Return a subset of the columns. If list-like, all elements must either
-        be positional (i.e. integer indices into the document columns) or strings
-        that correspond to column names provided either by the user in names or
-        inferred from the document header row(s).
-    dtype : Type name or dict of column -> type, optional, default None
-        Data type for data or columns.
-        E.g. {‘a’: np.float64, ‘b’: np.int32, ‘c’: ‘Int64’}
-        Use str or object together with suitable na_values settings to
-        preserve and not interpret dtype.
-    nrows : int, optional, default None
-        Number of rows of file to read. Useful for reading pieces of large files.
+    filepath_or_buffer : str or path object or file-like object
+        Any valid string path is acceptable. The string could be a URL.
+        Valid URL schemes include http, ftp, s3, gs, and file.
+        For file URLs, a host is expected.
+        A local file could be: file://localhost/path/to/table.csv.
+        If you want to pass in a path object, pandas accepts any os.PathLike.
+        By file-like object, we refer to objects with a read() method,
+        such as a file handle (e.g. via builtin open function) or StringIO.
+    latitude : str, optional
+        Represents the column name of feature latitude, by default 'lat'
+    longitude : str, optional
+        Represents the column name of feature longitude, by default 'lon'
+    datetime : str, optional
+        Represents the column name of feature datetime, by default 'datetime'
+    traj_id : str, optional
+        Represents the column name of feature id trajectory, by default 'id'
+    type_ : str, optional
+        Represents the type of the MoveDataFrame, by default 'pandas'
+    n_partitions : int, optional
+        Represents number of partitions for DaskMoveDataFrame, by default 1
+    **kwargs : Pandas read_csv arguments
+        https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html?highlight=read_csv#pandas.read_csv
 
     Returns
     -------
-    pymove.core.MoveDataFrameAbstract subclass.
-        Trajectory data.
+    MoveDataFrameAbstract subclass
+        Trajectory data
 
     """
 
-    df = pd.read_csv(
-        filename,
-        sep=sep,
-        encoding=encoding,
-        header=header,
-        names=names,
-        parse_dates=[datetime],
-        index_col=index_col,
-        usecols=usecols,
-        dtype=dtype,
-        nrows=nrows
+    data = _read_csv(
+        filepath_or_buffer,
+        **kwargs
     )
 
     return MoveDataFrame(
-        df, latitude, longitude, datetime, traj_id, type_, n_partitions
+        data, latitude, longitude, datetime, traj_id, type_, n_partitions
     )
 
 
-def invert_dict(dict_):
+def invert_dict(d: Dict) -> Dict:
     """
     Inverts the key:value relation of a dictionary
 
     Parameters
     ----------
-    dict_ : dict
+    d : dict
         dictionary to be inverted
 
     Returns
@@ -120,21 +87,23 @@ def invert_dict(dict_):
 
     """
 
-    return {v: k for k, v in dict_.items()}
+    return {v: k for k, v in d.items()}
 
 
-def flatten_dict(d, parent_key='', sep='_'):
+def flatten_dict(
+    d: Dict, parent_key: Optional[Text] = '', sep: Optional[Text] = '_'
+) -> Dict:
     """
     Flattens a nested dictionary.
 
     Parameters
     ----------
     d: dict
-        Dictionary to be flattened.
-    parent_key: str, optional, default ''
-        Key of the parent dictionary.
-    sep: str, optional, default '_'
-        Separator for the parent and child keys
+        Dictionary to be flattened
+    parent_key: str, optional
+        Key of the parent dictionary, by default ''
+    sep: str, optional
+        Separator for the parent and child keys, by default '_'
 
     Returns
     -------
@@ -164,13 +133,13 @@ def flatten_dict(d, parent_key='', sep='_'):
     return dict(items)
 
 
-def flatten_columns(df, columns):
+def flatten_columns(data: DataFrame, columns: List) -> DataFrame:
     """
     Transforms columns containing dictionaries in individual columns
 
     Parameters
     ----------
-    df: dataframe
+    data: DataFrame
         Dataframe with columns to be flattened
     columns: list
         List of columns from dataframe containing dictionaries
@@ -187,37 +156,37 @@ def flatten_columns(df, columns):
     Examples
     --------
     >>> d = {'a': 1, 'b': {'c': 2, 'd': 3}}
-    >>>> df = pd.DataFrame({'col1': [1], 'col2': [d]})
-    >>>> flatten_columns(df, ['col2'])
+    >>>> data = pd.DataFrame({'col1': [1], 'col2': [d]})
+    >>>> flatten_columns(data, ['col2'])
        col1  col2_b_d  col2_a  col2_b_c
     0     1         3       1         2
 
     """
     for col in columns:
-        df[f'{col}_'] = df[f'{col}'].apply(flatten_dict)
-        keys = set(chain(*df[f'{col}_'].apply(lambda column: column.keys())))
+        data[f'{col}_'] = data[f'{col}'].apply(flatten_dict)
+        keys = set(chain(*data[f'{col}_'].apply(lambda column: column.keys())))
         for key in keys:
             column_name = f'{col}_{key}'.lower()
-            df[column_name] = df[f'{col}_'].apply(
+            data[column_name] = data[f'{col}_'].apply(
                 lambda cell: cell[key] if key in cell.keys() else np.NaN
             )
     cols_to_drop = [(f'{col}', f'{col}_') for col in columns]
-    return df.drop(columns=list(chain(*cols_to_drop)))
+    return data.drop(columns=list(chain(*cols_to_drop)))
 
 
-def shift(arr, num, fill_value=np.nan):
+def shift(arr: List, num: int, fill_value: Optional[float] = np.nan) -> ndarray:
     """
     Shifts the elements of the given array by the number of periods specified.
 
     Parameters
     ----------
-    arr : array.
-        The array to be shifted.
-    num : int.
-        Number of periods to shift. Can be positive or negative.
-        If posite, the elements will be pulled down, and pulled up otherwise.
-    fill_value : int, optional, default np.nan.
-        The scalar value used for newly introduced missing values.
+    arr : array
+        The array to be shifted
+    num : int
+        Number of periods to shift. Can be positive or negative
+        If positive, the elements will be pulled down, and pulled up otherwise
+    fill_value : float, optional
+        The scalar value used for newly introduced missing values, by default np.nan
 
     Returns
     -------
@@ -248,7 +217,7 @@ def shift(arr, num, fill_value=np.nan):
     return result
 
 
-def fill_list_with_new_values(original_list, new_list_values):
+def fill_list_with_new_values(original_list: List, new_list_values: List):
     """
     Copies elements from one list to another. The elements will be positioned in
     the same position in the new list as they were in their original list.
@@ -256,9 +225,9 @@ def fill_list_with_new_values(original_list, new_list_values):
     Parameters
     ----------
     original_list : list.
-        The list to which the elements will be copied.
+        The list to which the elements will be copied
     new_list_values : list.
-        The list from which elements will be copied.
+        The list from which elements will be copied
 
     """
 
@@ -266,14 +235,14 @@ def fill_list_with_new_values(original_list, new_list_values):
     original_list[:n] = new_list_values
 
 
-def object_for_array(object_):
+def object_for_array(object_: Text) -> ndarray:
     """
     Transforms an object into an array.
 
     Parameters
     ----------
-    object : String
-        object representing a list of integers or strings.
+    object : str
+        object representing a list of integers or strings
 
     Returns
     -------
@@ -284,40 +253,32 @@ def object_for_array(object_):
     if object_ is None:
         return object_
 
-    try:
-        conv = np.array(object_[1:-1].split(', '))
+    conv = np.array(object_[1:-1].split(', '))
 
-        if is_number(conv[0]):
-            return conv.astype(np.float32)
-        else:
-            return conv.astype('object_')
-
-    except Exception as e:
-        raise e
+    if is_number(conv[0]):
+        return conv.astype(np.float32)
+    else:
+        return conv.astype('object_')
 
 
-def column_to_array(df_, label_conversion):
+def column_to_array(data: DataFrame, label_conversion: Text):
     """
     Transforms all columns values to list.
 
     Parameters
     ----------
-    df_ : dataframe
-        The input trajectory data.
+    data : dataframe
+        The input trajectory data
 
-    label_conversion : Object
-        Label of df_ referring to the column for conversion.
+    label_conversion : str
+        Label of data referring to the column for conversion
     """
-    try:
 
-        if label_conversion not in df_:
-            raise KeyError(
-                'Dataframe must contain a %s column' % label_conversion
-            )
-
-        df_[label_conversion] = (
-            df_[label_conversion].apply(object_for_array)
+    if label_conversion not in data:
+        raise KeyError(
+            'Dataframe must contain a %s column' % label_conversion
         )
 
-    except Exception as e:
-        raise e
+    data[label_conversion] = (
+        data[label_conversion].apply(object_for_array)
+    )

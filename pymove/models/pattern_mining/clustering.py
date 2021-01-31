@@ -1,4 +1,7 @@
+from typing import Callable, Dict, Optional, Text, Union
+
 import numpy as np
+from pandas import DataFrame
 from sklearn.cluster import DBSCAN, KMeans
 
 from pymove.utils.constants import EARTH_RADIUS, LATITUDE, LONGITUDE, N_CLUSTER
@@ -8,8 +11,12 @@ from pymove.utils.log import progress_bar, timer_decorator
 
 @timer_decorator
 def elbow_method(
-        move_data, k_initial=1, max_clusters=15, k_iteration=1, random_state=None
-):
+    move_data: DataFrame,
+    k_initial: Optional[int] = 1,
+    max_clusters: Optional[int] = 15,
+    k_iteration: Optional[int] = 1,
+    random_state: Optional[int] = None
+) -> Dict:
     """
     Determines the optimal number of clusters in the range set by the user using
     the elbow method.
@@ -18,17 +25,17 @@ def elbow_method(
     ----------
     move_data : dataframe
         The input trajectory data.
-    k_initial: int, optional (1 by default).
+    k_initial: int, optional
         The initial value used in the interaction of the elbow method.
-        Represents the maximum numbers of clusters.
-    max_clusters: int, optional (15  by default).
+        Represents the maximum numbers of clusters, by default 1
+    max_clusters: int, optional
         The maximum value used in the interaction of the elbow method.
-        Maximum number of clusters to test for
-    k_iteration: int, optional (1 by default).
-        Increment value of the sequence used by the elbow method.
-    random_state: int, RandomState instance, default=None
+        Maximum number of clusters to test for, by default 15
+    k_iteration: int, optional
+        Increment value of the sequence used by the elbow method, by default 1
+    random_state: int, RandomState instance
         Determines random number generation for centroid initialization.
-        Use an int to make the randomness deterministic
+        Use an int to make the randomness deterministic, by default None
 
     Returns
     -------
@@ -60,8 +67,13 @@ def elbow_method(
 
 @timer_decorator
 def gap_statistic(
-    move_data, nrefs=3, k_initial=1, max_clusters=15, k_iteration=1, random_state=None
-):
+    move_data: DataFrame,
+    nrefs: Optional[int] = 3,
+    k_initial: Optional[int] = 1,
+    max_clusters: Optional[int] = 15,
+    k_iteration: Optional[int] = 1,
+    random_state: Optional[int] = None
+) -> Dict:
     """
     Calculates optimal clusters numbers using Gap Statistic from Tibshirani,
     Walther, Hastie.
@@ -70,18 +82,18 @@ def gap_statistic(
     ----------
     move_data: ndarray of shape (n_samples, n_features).
         The input trajectory data.
-    nrefs: int, optional (3 by default).
-        number of sample reference datasets to create
-    k_initial: int, optional (1 by default).
-        The initial value used in the interaction of the elbow method.
+    nrefs: int, optional
+        number of sample reference datasets to create, by default 3
+    k_initial: int, optional.
+        The initial value used in the interaction of the elbow method, by default 1
         Represents the maximum numbers of clusters.
-    max_clusters: int, optional (15  by default).
-        Maximum number of clusters to test for.
-    k_iteration:int, optional (1 by default).
-        Increment value of the sequence used by the elbow method.
-    random_state: int, RandomState instance, default=None
+    max_clusters: int, optional
+        Maximum number of clusters to test for, by default 15
+    k_iteration:int, optional
+        Increment value of the sequence used by the elbow method, by default 1
+    random_state: int, RandomState instance
         Determines random number generation for centroid initialization.
-        Use an int to make the randomness deterministic
+        Use an int to make the randomness deterministic, by default None
 
     Returns
     -------
@@ -115,7 +127,7 @@ def gap_statistic(
         orig_disp = km.inertia_
         # Calculate gap statistic
         gap = np.log(np.mean(ref_disps)) - np.log(orig_disp)
-        # Assign this loop'srs gap statistic to gaps
+        # Assign this loop gap statistic to gaps
         gaps[k] = gap
 
     return gaps
@@ -123,14 +135,14 @@ def gap_statistic(
 
 @timer_decorator
 def dbscan_clustering(
-    move_data,
-    cluster_by,
-    meters=10,
-    min_sample=1680 / 2,
-    earth_radius=EARTH_RADIUS,
-    metric='euclidean',
-    inplace=False
-):
+    move_data: DataFrame,
+    cluster_by: Text,
+    meters: Optional[int] = 10,
+    min_sample: Optional[float] = 1680 / 2,
+    earth_radius: Optional[float] = EARTH_RADIUS,
+    metric: Optional[Union[Text, Callable]] = 'euclidean',
+    inplace: Optional[bool] = False
+) -> Optional[DataFrame]:
     """
     Performs density based clustering on the move_dataframe according to cluster_by
 
@@ -145,9 +157,17 @@ def dbscan_clustering(
     min_sample : float, optional
         the minimum number of samples to consider a cluster, by default 1680/2
     earth_radius : int
-        Y offset from your original position in meters.
-    metric: string, or callable, default euclidean
+        Y offset from your original position in meters, by default EARTH_RADIUS
+    metric: string, or callable, optional
         The metric to use when calculating distance between instances in a feature array
+        by default 'euclidean'
+    inplace : bool, optional
+            Whether to return a new DataFrame, by default False
+
+    Returns
+    -------
+    DataFrame
+        Clustered dataframe or None
     """
     if not inplace:
         move_data = move_data[:]

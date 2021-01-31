@@ -5,10 +5,11 @@ import time
 from collections import deque
 from itertools import chain
 from sys import getsizeof, stderr
+from typing import Callable, Dict, Optional, Text
 
 import numpy as np
-import pandas as pd
 import psutil
+from pandas import DataFrame
 
 try:
     from reprlib import repr
@@ -16,7 +17,7 @@ except ImportError:
     pass
 
 
-def reduce_mem_usage_automatic(df):
+def reduce_mem_usage_automatic(df: DataFrame):
     """
     Reduces the memory usage of the given dataframe.
 
@@ -95,7 +96,9 @@ def reduce_mem_usage_automatic(df):
     )
 
 
-def total_size(o, handlers=None, verbose=False):
+def total_size(
+    o: object, handlers: Dict = None, verbose: Optional[bool] = False
+) -> float:
     """
     Calculates the approximate memory footprint of an given object and all of
     its contents. Automatically finds the contents of the following builtin
@@ -106,13 +109,14 @@ def total_size(o, handlers=None, verbose=False):
     ----------
     o : object
         The object to calculate his memory footprint.
-    handlers : dict, optional(empty by default)
-        To search other containers, add handlers to iterate over their contents
+    handlers : dict, optional
+        To search other containers, add handlers to iterate over their contents,
             handlers = {SomeContainerClass: iter,
                         OtherContainerClass: OtherContainerClass.get_elements}
-    verbose : boolean, optional(False by default)
+         by default None
+    verbose : boolean, optional
         If set to True, the following information will be printed for
-        each content of the object:
+        each content of the object, by default False
             - the size of the object in bytes.
             - his type_
             - the object values
@@ -164,13 +168,13 @@ def total_size(o, handlers=None, verbose=False):
     return sizeof(o)
 
 
-def begin_operation(name):
+def begin_operation(name: Text) -> Dict:
     """
     Gets the stats for the current operation.
 
     Parameters
     ----------
-    name: String
+    name: str
         name of the operation
 
     Returns
@@ -186,7 +190,7 @@ def begin_operation(name):
     return {'process': process, 'init': init, 'start': start, 'name': name}
 
 
-def end_operation(operation):
+def end_operation(operation: Dict) -> Dict:
     """
     Gets the time and memory usage of the operation.
 
@@ -213,7 +217,7 @@ def end_operation(operation):
     }
 
 
-def sizeof_fmt(mem_usage, suffix='B'):
+def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
     """
     Returns the memory usage calculation of the last function.
 
@@ -222,8 +226,8 @@ def sizeof_fmt(mem_usage, suffix='B'):
     mem_usage : int
         memory usage in bytes
 
-    suffix: string, optional, default 'B'
-        suffix of the unit
+    suffix: string, optional
+        suffix of the unit, by default 'B'
 
     Returns
     -------
@@ -239,21 +243,28 @@ def sizeof_fmt(mem_usage, suffix='B'):
     return '{:.1f} {}{}'.format(mem_usage, 'Yi', suffix)
 
 
-def top_mem_vars(variables=locals(), n=10):
+def top_mem_vars(
+    variables: Optional[Callable] = locals(), n: Optional[int] = 10
+) -> DataFrame:
     """
     Shows the sizes of the active variables
 
     Parameters
     ----------
-    variables: locals() or globals(), default locals()
-        Whether to shows local or global variables
+    variables: locals() or globals()
+        Whether to shows local or global variables, by default locals()
     n: int
         number of variables to print
+
+    Returns
+    -------
+    DataFrame
+        dataframe with variables names and sizes
 
     """
 
     vars_ = ((name, getsizeof(value)) for name, value in variables.items())
-    top_vars = pd.DataFrame(
+    top_vars = DataFrame(
         sorted(vars_, key=lambda x: -x[1])[:n],
         columns=['var', 'mem']
     )

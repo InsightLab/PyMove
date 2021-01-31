@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Dict, List, Optional, Text, Union
+
 import dask
 import numpy as np
 import pandas as pd
@@ -14,16 +16,19 @@ from pymove.utils.constants import (
     TYPE_PANDAS,
 )
 
+if TYPE_CHECKING:
+    from pymove.core.pandas import PandasMoveDataFrame
+
 
 class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def __init__(
         self,
-        data,
-        latitude=LATITUDE,
-        longitude=LONGITUDE,
-        datetime=DATETIME,
-        traj_id=TRAJ_ID,
-        n_partitions=1,
+        data: Union[DataFrame, List, Dict],
+        latitude: Optional[Text] = LATITUDE,
+        longitude: Optional[Text] = LONGITUDE,
+        datetime: Optional[Text] = DATETIME,
+        traj_id: Optional[Text] = TRAJ_ID,
+        n_partitions: Optional[int] = 1,
     ):
         """
         Checks whether past data has 'lat', 'lon', 'datetime' columns, and
@@ -91,7 +96,19 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def lat(self):
-        """Checks for the 'lat' column and returns its value."""
+        """
+        Checks for the LATITUDE column and returns its value.
+
+        Returns
+        -------
+        Series
+            LATITUDE column
+
+        Raises
+        ------
+        AttributeError
+            If the LATITUDE column is not present in the DataFrame
+        """
         if LATITUDE not in self.columns:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
@@ -101,7 +118,19 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def lng(self):
-        """Checks for the 'lon' column and returns its value."""
+        """
+        Checks for the LONGITUDE column and returns its value.
+
+        Returns
+        -------
+        Series
+            LONGITUDE column
+
+        Raises
+        ------
+        AttributeError
+            If the LONGITUDE column is not present in the DataFrame
+        """
         if LONGITUDE not in self.columns:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
@@ -111,7 +140,19 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     @property
     def datetime(self):
-        """Checks for the 'datetime' column and returns its value."""
+        """
+        Checks for the DATETIME column and returns its value.
+
+        Returns
+        -------
+        Series
+            DATETIME column
+
+        Raises
+        ------
+        AttributeError
+            If the DATETIME column is not present in the DataFrame
+        """
         if DATETIME not in self.columns:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
@@ -171,7 +212,12 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """Return unique values of Series object."""
         raise NotImplementedError('To be implemented')
 
-    def head(self, n=5, npartitions=1, compute=True):
+    def head(
+        self,
+        n: Optional[int] = 5,
+        npartitions: Optional[int] = 1,
+        compute: Optional[bool] = True
+    ) -> DataFrame:
         """
         Return the first n rows.
 
@@ -186,7 +232,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         npartitions : int, optional, default 1.
             Represents the number partitions.
         compute : bool, optional, default True.
-            ?
+            Wether to perform the operation
 
         Returns
         -------
@@ -196,7 +242,12 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
         return self._data.head(n, npartitions, compute)
 
-    def tail(self, n=5, npartitions=1, compute=True):
+    def tail(
+        self,
+        n: Optional[int] = 5,
+        npartitions: Optional[int] = 1,
+        compute: Optional[bool] = True
+    ) -> DataFrame:
         """
         Return the last n rows.
 
@@ -237,7 +288,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """Converts trajectory data to grid format."""
         raise NotImplementedError('To be implemented')
 
-    def to_data_frame(self):
+    def to_data_frame(self) -> DataFrame:
         """
         Converts trajectory data to DataFrame format.
 
@@ -338,90 +389,21 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """Show dataset information from dataframe."""
         raise NotImplementedError('To be implemented')
 
-    def min(self, axis=None, skipna=True, split_every=False, out=None):
-        """
-        Return the minimum of the values for the requested axis.
+    def min(self):
+        """Return the minimum of the values for the requested axis."""
+        raise NotImplementedError('To be implemented')
 
-        Parameters
-        ----------
-        axis: int, optional, default None, {index (0), columns (1)}.
-            Axis for the function to be applied on.
-        skipna: bool, optional, default None.
-            Exclude NA/null values when computing the result.
-        split_every:
-            ?
-        out:
-            ?
-
-        Returns
-        -------
-        max:Series or DataFrame (if level specified)
-            The minimum values for the request axis.
-
-        References
-        ----------
-        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.min
-
-        """
-
-        return self._data.min(axis, skipna, split_every, out)
-
-    def max(self, axis=None, skipna=True, split_every=False, out=None):
-        """
-        Return the maximum of the values for the requested axis..
-
-        Parameters
-        ----------
-        axis: int, optional, default None, {index (0), columns (1)}.
-            Axis for the function to be applied on.
-        skipna: bool, optional, default None.
-            Exclude NA/null values when computing the result.
-        split_every:
-            ?
-        out:
-            ?
-
-        Returns
-        -------
-        max:Series or DataFrame (if level specified)
-            The maximum values for the request axis.
-
-        References
-        ----------
-        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.max
-
-        """
-
-        return self._data.max(axis, skipna, split_every, out)
+    def max(self):
+        """Return the maximum of the values for the requested axis."""
+        raise NotImplementedError('To be implemented')
 
     def count(self):
         """Counts the non-NA cells for each column or row."""
         raise NotImplementedError('To be implemented')
 
-    def groupby(self, by=None, **kwargs):
-        """
-        Groups dask DataFrame using a mapper or by a Series of columns.
-
-        Parameters
-        ----------
-        by : mapping, function, label, or list of labels, optional, default None
-            Used to determine the groups for the groupby.
-        **kwargs
-            Optional, only accepts keyword argument 'mutated'
-            and is passed to groupby.
-
-        Returns
-        -------
-        DataFrameGroupBy:
-            Returns groupby object that contains information about the groups.
-
-        References
-        ----------
-        https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.DataFrame.groupby
-
-        """
-
-        return self._data.groupby(by)
+    def groupby(self):
+        """Groups dask DataFrame using a mapper or by a Series of columns."""
+        raise NotImplementedError('To be implemented')
 
     def plot(self):
         """Plot the data of the dask DataFrame."""
@@ -515,7 +497,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """Write object to a comma-separated values (csv) file."""
         raise NotImplementedError('To be implemented')
 
-    def convert_to(self, new_type):
+    def convert_to(
+        self, new_type: Text
+    ) -> Union['PandasMoveDataFrame', 'DaskMoveDataFrame']:
         """
         Convert an object from one type to another specified by the user.
 
@@ -544,7 +528,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
                 type_=TYPE_PANDAS
             )
 
-    def get_type(self):
+    def get_type(self) -> Text:
         """
         Returns the type of the object.
 

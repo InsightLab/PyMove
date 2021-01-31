@@ -1,6 +1,20 @@
-import matplotlib.pyplot as plt
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Text,
+    Tuple,
+    Union,
+)
+
 import numpy as np
-import pandas as pd
+from matplotlib import pyplot as plt
+from matplotlib.pyplot import figure
+from pandas import DataFrame, DateOffset, Series, Timedelta
 
 from pymove.core import MoveDataFrameAbstractModel
 from pymove.core.dataframe import MoveDataFrame
@@ -43,52 +57,56 @@ from pymove.utils.log import progress_bar
 from pymove.utils.mem import begin_operation, end_operation
 from pymove.utils.trajectories import shift
 
+if TYPE_CHECKING:
+    from pymove.core.dask import DaskMoveDataFrame
 
-class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
+
+class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
     def __init__(
         self,
-        data,
-        latitude=LATITUDE,
-        longitude=LONGITUDE,
-        datetime=DATETIME,
-        traj_id=TRAJ_ID,
+        data: Union[DataFrame, List, Dict],
+        latitude: Optional[Text] = LATITUDE,
+        longitude: Optional[Text] = LONGITUDE,
+        datetime: Optional[Text] = DATETIME,
+        traj_id: Optional[Text] = TRAJ_ID,
     ):
         """
         Checks whether past data has 'lat', 'lon', 'datetime' columns,
         and renames it with the PyMove lib standard. After starts the
         attributes of the class.
 
-        - self._data : Represents trajectory data.
+        - self._mgr : Represents trajectory data.
         - self._type : Represents the type of layer below the data structure.
         - self.last_operation : Represents the last operation performed.
 
         Parameters
         ----------
-        data : dict, list, numpy array or pandas.core.DataFrame.
-            Input trajectory data.
-        latitude : str, optional, default 'lat'.
-            Represents column name latitude.
-        longitude : str, optional, default 'lon'.
-            Represents column name longitude.
-        datetime : str, optional, default 'datetime'.
-            Represents column name datetime.
-        traj_id : str, optional, default 'id'.
-            Represents column name trajectory id.
+        data : DataFrame or list or dict
+            Input trajectory data
+        latitude : str, optional
+            Represents column name latitude, by default LATITUDE
+        longitude : str, optional
+            Represents column name longitude, by default LONGITUDE
+        datetime : str, optional
+            Represents column name datetime, by default DATETIME
+        traj_id : str, optional
+            Represents column name trajectory id, by default TRAJ_ID
 
         Raises
         ------
         KeyError
             If missing one of lat, lon, datetime columns
         ValueError, ParserError
-            If the data types can't be converted.
+            If the data types can't be converted
 
         """
 
         if isinstance(data, dict):
-            data = pd.DataFrame.from_dict(data)
+            data = DataFrame.from_dict(data)
+        elif isinstance(data, DataFrame):
+            data = DataFrame(data)
         elif (
-            (isinstance(data, list) or isinstance(data, np.ndarray))
-            and len(data) >= 4
+            isinstance(data, list) or isinstance(data, np.ndarray)
         ):
             zip_list = [LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
             for i in range(len(data[0])):
@@ -96,246 +114,99 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     zip_list[i] = zip_list[i]
                 except KeyError:
                     zip_list.append(i)
-            data = pd.DataFrame(data, columns=zip_list)
+            data = DataFrame(data, columns=zip_list)
 
-        mapping_columns = MoveDataFrame.format_labels(
+        columns = MoveDataFrame.format_labels(
             traj_id, latitude, longitude, datetime
         )
-        tdf = data.rename(columns=mapping_columns)
+        tdf = data.rename(columns=columns)
 
         if MoveDataFrame.has_columns(tdf):
             MoveDataFrame.validate_move_data_frame(tdf)
-            self._data = tdf
+            super(PandasMoveDataFrame, self).__init__(tdf)
             self._type = TYPE_PANDAS
             self.last_operation = None
         else:
 
-            raise AttributeError(
+            raise KeyError(
                 'Couldn\'t instantiate MoveDataFrame because data has missing columns.'
             )
 
     @property
-    def lat(self):
-        """Checks for the 'lat' column and returns its value."""
+    def lat(self) -> Series:
+        """
+        Checks for the LATITUDE column and returns its value.
+
+        Returns
+        -------
+        Series
+            LATITUDE column
+
+        Raises
+        ------
+        AttributeError
+            If the LATITUDE column is not present in the DataFrame
+        """
         if LATITUDE not in self:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
                 % LATITUDE
             )
-        return self._data[LATITUDE]
+        return self[LATITUDE]
 
     @property
-    def lng(self):
-        """Checks for the 'lon' column and returns its value."""
+    def lng(self) -> Series:
+        """
+        Checks for the LONGITUDE column and returns its value.
+
+        Returns
+        -------
+        Series
+            LONGITUDE column
+
+        Raises
+        ------
+        AttributeError
+            If the LONGITUDE column is not present in the DataFrame
+        """
         if LONGITUDE not in self:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
                 % LONGITUDE
             )
-        return self._data[LONGITUDE]
+        return self[LONGITUDE]
 
     @property
     def datetime(self):
-        """Checks for the 'datetime' column and returns its value."""
+        """
+        Checks for the DATETIME column and returns its value.
+
+        Returns
+        -------
+        Series
+            DATETIME column
+
+        Raises
+        ------
+        AttributeError
+            If the DATETIME column is not present in the DataFrame
+        """
         if DATETIME not in self:
             raise AttributeError(
                 "The MoveDataFrame does not contain the column '%s.'"
                 % DATETIME
             )
-        return self._data[DATETIME]
-
-    @property
-    def loc(self):
-        """
-        Access a group of rows and columns by label(srs) or a boolean array.
-
-        .loc[] is primarily label based, but may also be used with a boolean
-        array.
-
-        Allowed inputs are:
-        - A single label, e.g. 5 or 'a', (note that 5 is interpreted as a
-        label of the index, and never as an integer position along the index).
-        - A list or array of labels, e.g. ['a', 'b', 'c'].
-        - A slice object with labels, e.g. 'a':'f'.
-            Warning Note that contrary to usual python slices,
-            both the start and the stop are included.
-            A boolean array of the same length as the axis
-            being sliced, e.g. [True, False, True].
-        - A callable function with one argument
-        (the calling Series or DataFrame) and that returns
-        valid output for indexing (one of the above)
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.loc.html
-
-        """
-
-        operation = begin_operation('loc')
-        loc_ = self._data.loc
-        self.last_operation = end_operation(operation)
-
-        return loc_
-
-    @property
-    def iloc(self):
-        """
-        Purely integer-location based indexing for selection by position.
-
-        .iloc[] is primarily integer position based (from 0 to length-1 of the
-        axis), but may also be used with a boolean array.
-
-        Allowed inputs are:
-        - An integer, e.g. 5.
-        - A list or array of integers, e.g. [4, 3, 0].
-        - A slice object with ints, e.g. 1:7.
-        - A boolean array.
-        - A callable function with one argument
-        (the calling Series or DataFrame) and that returns valid
-        output for indexing (one of the above). This is useful in
-         method chains, when you don't have a reference to the calling
-        object, but would like to base your selection on some value.
-
-        .iloc will raise IndexError if a requested indexer is out-of-bounds,
-         except slice indexers which allow out-of-bounds indexing
-        (this conforms with python/numpy slice semantics).
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.iloc.html
-
-        """
-
-        operation = begin_operation('iloc')
-        iloc_ = self._data.iloc
-        self.last_operation = end_operation(operation)
-
-        return iloc_
-
-    @property
-    def at(self):
-        """
-        Access a single value for a row/column label pair.
-        Similar to loc, in that both provide label-based lookups.
-        Use at if you only need to get or set a single value
-        in a DataFrame or Series.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.at.html#pandas.DataFrame.at
-
-        """
-
-        operation = begin_operation('at')
-        at_ = self._data.at
-        self.last_operation = end_operation(operation)
-
-        return at_
-
-    @property
-    def values(self):
-        """
-        Return a Numpy representation of the DataFrame.
-        Only the values in the DataFrame will be returned,
-        the axes labels will be removed. Warning We
-        recommend using DataFrame.to_numpy() instead.
-
-        Returns
-        -------
-        numpy.ndarray
-            The values of the DataFrame.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.values.html
-
-        """
-
-        operation = begin_operation('values')
-        values_ = self._data.values
-        self.last_operation = end_operation(operation)
-
-        return values_
-
-    @property
-    def columns(self):
-        """
-        The column labels of the DataFrame.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.columns.html#pandas.DataFrame.columns
-
-        """
-
-        return self._data.columns
-
-    @property
-    def index(self):
-        """
-        The index (row labels) of the DataFrame.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.index.html#pandas.DataFrame.index
-
-        """
-
-        operation = begin_operation('index')
-        index_ = self._data.index
-        self.last_operation = end_operation(operation)
-
-        return index_
-
-    @property
-    def dtypes(self):
-        """
-        Return the dtypes in the DataFrame. This returns a Series with
-        the data type of each column. The result'srs index is the original
-        DataFrame'srs columns. Columns with mixed types are stored with the
-        object dtype. See the User Guide for more.
-
-        Returns
-        -------
-        pandas.Series
-            The data type of each column.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.dtypes.html
-
-        """
-
-        operation = begin_operation('dtypes')
-        dtypes_ = self._data.dtypes
-        self.last_operation = end_operation(operation)
-        return dtypes_
-
-    @property
-    def shape(self):
-        """
-        Return a tuple representing the dimensionality of the DataFrame.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.shape.html
-
-        """
-
-        operation = begin_operation('shape')
-        shape_ = self._data.shape
-        self.last_operation = end_operation(operation)
-        return shape_
+        return self[DATETIME]
 
     def rename(
             self,
-            mapper=None,
-            index=None,
-            columns=None,
-            axis=None,
-            copy=True,
-            inplace=False
-    ):
+            mapper: Optional[Union[Dict, Callable]] = None,
+            index: Optional[Union[Dict, Callable]] = None,
+            columns: Optional[Union[Dict, Callable]] = None,
+            axis: Optional[Union[int, Text]] = None,
+            copy: Optional[bool] = True,
+            inplace: Optional[bool] = False
+    ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
         Alter axes labels.
 
@@ -343,37 +214,33 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Labels not contained in a dict / Series will be left as-is.
         Extra labels listed don’t throw an error.
 
+
         Parameters
         ----------
-        mapper: dict-like or function
+        mapper : dict or function, optional
             Dict-like or functions transformations to apply to that axis’ values.
             Use either mapper and axis to specify the axis to target
-            with mapper, or index and columns.
-
-        index: dict-like or function
+            with mapper, or index and columns, by default None
+        index : dict or function, optional
             Alternative to specifying axis
-            (mapper, axis=0 is equivalent to index=mapper).
-
-        columns: dict-like or function
+            (mapper, axis=0 is equivalent to index=mapper), by default None
+        columns : dict or function, optional
             Alternative to specifying axis
-            (mapper, axis=1 is equivalent to columns=mapper).
-
-        axis: int or str
+            (mapper, axis=1 is equivalent to columns=mapper), by default None
+        axis : int or str, optional
             Axis to target with mapper.
-            Can be either the axis name (‘index’, ‘columns’) or number (0, 1).
-            The default is ‘index’.
-
-        copy: bool, default True
-            Also copy underlying data.
-
-        inplace: bool, default False
+            Can be either the axis name (‘index’, ‘columns’) or number (0, 1),
+            by default None
+        copy : bool, optional
+            Also copy underlying data, by default True
+        inplace : bool, optional
             Whether to return a new DataFrame.
-            If True then value of copy is ignored.
+            If True then value of copy is ignored, by default False
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            DataFrame with the renamed axis labels.
+        PandasMoveDataFrame, DataFrame
+            DataFrame with the renamed axis labels or None
 
         Raises
         ------
@@ -382,29 +249,24 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
 
-        operation = begin_operation('rename')
-        if columns:
-            rename_ = self._data.rename(mapper=columns, axis=1, copy=copy)
-        elif index:
-            rename_ = self._data.rename(mapper=index, axis=0, copy=copy)
-        else:
-            rename_ = self._data.rename(mapper=mapper, axis=axis, copy=copy)
+        rename_ = super().rename(
+            mapper=mapper, index=index, columns=columns, axis=axis, copy=copy
+        )
 
         if inplace:
             if MoveDataFrame.has_columns(rename_):
-                self._data = rename_
+                self._mgr = rename_._mgr
+                self._item_cache = dict()
                 rename_ = None
             else:
                 raise AttributeError(
                     'Could not rename columns lat, lon, and datetime.'
                 )
-        else:
-            if MoveDataFrame.has_columns(rename_):
-                rename_ = PandasMoveDataFrame(data=rename_)
-        self.last_operation = end_operation(operation)
+        if rename_ is not None and MoveDataFrame.has_columns(rename_):
+            rename_ = PandasMoveDataFrame(data=rename_)
         return rename_
 
-    def len(self):
+    def len(self) -> int:
         """
         Returns the length/row numbers in trajectory data.
 
@@ -414,58 +276,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Represents the trajectory data length.
 
         """
+        return self.shape[0]
 
-        operation = begin_operation('len')
-        len_ = self._data.shape[0]
-        self.last_operation = end_operation(operation)
-
-        return len_
-
-    def unique(self, values):
-        """
-        Return unique values of Series object. Uniques are returned
-        in order of appearance.
-        Hash table-based unique, therefore does NOT sort.
-
-        Parameters
-        ----------
-        values : array, list, series or dataframe.
-            The set of values to identify unique occurrences.
-
-        Returns
-        -------
-        ndarray or ExtensionArray
-            The unique values returned as a NumPy array.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.unique.html
-
-        """
-        operation = begin_operation('unique')
-        unique_ = self._data.unique(values)
-        self.last_operation = end_operation(operation)
-
-        return unique_
-
-    def __setitem__(self, attr, value):
-        """Modifies and item in this object."""
-        self.__dict__['_data'][attr] = value
-
-    def __getitem__(self, name):
+    def __getitem__(self, key):
         """Retrieves and item from this object."""
-        try:
-            item = self.__dict__['_data'][name]
-            if (
-                isinstance(item, pd.DataFrame)
-                and MoveDataFrame.has_columns(item)
-            ):
-                return PandasMoveDataFrame(item)
-            return item
-        except Exception as e:
-            raise e
+        item = super().__getitem__(key)
+        if (
+            isinstance(item, DataFrame)
+            and MoveDataFrame.has_columns(item)
+        ):
+            return PandasMoveDataFrame(item)
+        return item
 
-    def head(self, n=5):
+    def head(self, n: Optional[int] = 5) -> 'PandasMoveDataFrame':
         """
         Return the first n rows.
 
@@ -475,12 +298,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        n : int, default 5.
-            Number of rows to select.
+        n : int, optional
+            Number of rows to select, by default 5
 
         Returns
         -------
-        same type as caller
+        PandasMoveDataFrame
             The first n rows of the caller object.
 
         References
@@ -488,14 +311,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.head.html
 
         """
+        head_ = super().head(n=n)
+        return PandasMoveDataFrame(data=head_)
 
-        operation = begin_operation('head')
-        head_ = self._data.head(n)
-        self.last_operation = end_operation(operation)
-
-        return head_
-
-    def tail(self, n=5):
+    def tail(self, n: Optional[int] = 5) -> 'PandasMoveDataFrame':
         """
         Return the last n rows.
 
@@ -505,12 +324,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        n : int, default 5.
-            Number of rows to select.
+        n : int, optional
+            Number of rows to select, by default 5
 
         Returns
         -------
-        same type as caller
+        PandasMoveDataFrame
             The last n rows of the caller object.
 
         References
@@ -518,14 +337,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.tail.html
 
         """
+        tail_ = super().tail(n=n)
+        return PandasMoveDataFrame(data=tail_)
 
-        operation = begin_operation('tail')
-        tail_ = self._data.tail(n)
-        self.last_operation = end_operation(operation)
-
-        return tail_
-
-    def get_users_number(self):
+    def get_users_number(self) -> int:
         """
         Check and return number of users in trajectory data.
 
@@ -538,112 +353,76 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         operation = begin_operation('get_users_numbers')
 
-        if UID in self._data:
-            number_ = self._data[UID].nunique()
+        if UID in self:
+            number_ = self[UID].nunique()
         else:
             number_ = 1
         self.last_operation = end_operation(operation)
 
         return number_
 
-    def to_numpy(self):
-        """
-        Converts trajectory data to numpy array format.
-
-
-        Returns
-        -------
-        np.array
-            Represents the trajectory in numpy array format.
-
-        """
-
-        operation = begin_operation('to_numpy')
-        numpy_ = self._data.values
-        self.last_operation = end_operation(operation)
-
-        return numpy_
-
-    def to_dict(self, orient='dict'):
-        """
-        Converts trajectory data to dict format.
-
-        Returns
-        -------
-        dict
-            Represents the trajectory in dict format.
-
-        """
-
-        operation = begin_operation('to_dict')
-        dict_ = self._data.to_dict(orient)
-        self.last_operation = end_operation(operation)
-
-        return dict_
-
-    def to_grid(self, cell_size, meters_by_degree=lat_meters(-3.8162973555)):
+    def to_grid(
+        self,
+        cell_size: float,
+        meters_by_degree: Optional[float] = lat_meters(-3.8162973555)
+    ) -> Grid:
         """
         Converts trajectory data to grid format.
 
         Parameters
         ----------
-        cell_size : float.
+        cell_size : float
             Represents grid cell size.
 
-        meters_by_degree : float, optional, default lat_meters(-3.8162973555).
-            Represents the corresponding meters of lat by degree.
+        meters_by_degree : float, optional
+            Represents the corresponding meters of lat by degree,
+            by default lat_meters(-3.8162973555)
 
         Returns
         -------
-        pymove.core.grid
-            Represents the trajectory in grid format.
+        Grid
+            Represents the trajectory in grid format
 
         """
-
         operation = begin_operation('to_grid')
         grid_ = Grid(
             data=self, cell_size=cell_size, meters_by_degree=meters_by_degree
         )
         self.last_operation = end_operation(operation)
-
         return grid_
 
-    def to_data_frame(self):
+    def to_data_frame(self) -> DataFrame:
         """
         Converts trajectory data to DataFrame format.
 
         Returns
         -------
-        pandas.core.DataFrame
+        DataFrame
             Represents the trajectory in DataFrame format.
 
         """
+        return DataFrame(self)
 
-        operation = begin_operation('to_data_frame')
-        data_ = self._data
-        self.last_operation = end_operation(operation)
-
-        return data_
-
-    def to_dicrete_move_df(self, local_label=LOCAL_LABEL):
+    def to_dicrete_move_df(
+        self, local_label: Optional[Text] = LOCAL_LABEL
+    ) -> 'PandasMoveDataFrame':
         """
         Generate a discrete dataframe move.
 
         Parameters
         ----------
-        local_label : str, optional, default 'local_label'.
-            Represents the column name of feature local label.
+        local_label : str, optional
+            Represents the column name of feature local label, default LOCAL_LABEL
 
         Returns
         -------
-        pymove.core.pandas.PandasDiscreteMoveDataFrame
-            Represents an PandasMoveDataFrame dicretized.
+        PandasDiscreteMoveDataFrame
+            Represents an PandasMoveDataFrame discretized.
         """
 
         operation = begin_operation('to_discrete_move_df')
-        data_ = self._data
 
-        if local_label not in data_:
+        if local_label not in self:
             raise ValueError(
                 'columns {} not in df'.format(local_label)
             )
@@ -652,194 +431,31 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         from pymove.core.pandas_discrete import PandasDiscreteMoveDataFrame
         return PandasDiscreteMoveDataFrame(
-            data_, LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, local_label
+            self, LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, local_label
         )
 
-    def info(
-            self,
-            verbose=None,
-            buf=None,
-            max_cols=None,
-            memory_usage=None,
-            null_counts=None
-    ):
+    def copy(self, deep: Optional[bool] = True) -> 'PandasMoveDataFrame':
         """
-        Print a concise summary of a DataFrame.
-
-        This method prints information about a DataFrame including the index
-        dtype and column dtypes, non-null values and memory usage.
-
-        Parameters
-        ----------
-        verbose : bool, optional
-            Whether to print the full summary. By default, the setting
-            in pandas.options.display.max_info_columns is followed.
-        buf : writable buffer, defaults to sys.stdout
-            Where to send the output. By default, the output is printed
-            to sys.stdout. Pass a writable buffer if you need to
-            further process the output.
-        max_cols : int, optional
-            When to switch from the verbose to the truncated output.
-            If the DataFrame has more than max_cols columns, the truncated
-            output is used. By default, the setting in
-            andas.options.display.max_info_columns is used.
-        memory_usage : bool, str, optional
-            Specifies whether total memory usage of the DataFrame elements
-            (including the index) should be displayed. By default, this
-            follows the pandas.options.display.memory_usage setting.
-            True always show memory usage. False never shows memory usage.
-            A value of ‘deep’ is equivalent to 'True with deep introspection'.
-            Memory usage is shown in human-readable units (base-2 representation).
-            Without deep introspection a memory estimation is made based
-            in column dtype and number of rows assuming values consume the
-            same memory amount for corresponding dtypes. With deep memory
-            introspection, a real memory usage calculation is
-            performed at the cost of computational resources.
-        null_counts : bool, optional
-            Whether to show the non-null counts. By default, this is
-            shown only if the frame is smaller than
-            pandas.options.display.max_info_rows and
-            pandas.options.display.max_info_columns. A value of True always
-            shows the counts, and False never shows the counts.
-
-        """
-
-        operation = begin_operation('info')
-        self._data.info(
-            verbose, buf, max_cols, memory_usage, null_counts
-        )
-        self.last_operation = end_operation(operation)
-
-    def describe(self, percentiles=None, include=None, exclude=None):
-        """
-        Generate descriptive statistics.
-
-        Descriptive statistics include those that summarize the central
-        tendency, dispersion and shape of a dataset’srs distribution,
-        excluding NaN values. Analyzes both numeric and object series,
-        as well as DataFrame column sets of mixed data types. The output will
-        vary depending on what is provided. Refer to the notes
-        below for more detail.
-
-        Parameters
-        ----------
-        percentiles : list-like of numbers, optional
-            The percentiles to include in the output.
-            All should fall between 0 and 1. The default is [.25, .5, .75],
-            which returns the 25th, 50th, and 75th percentiles.
-        include : list-like of dtypes or None (default), optional
-            A white list of data types to include in the result.
-            Ignored for Series. Here are the options:
-                ‘all’ : All columns of the input will be included in the output.
-                A list-like of dtypes : Limits the results to the provided
-                data types. To limit the result to numeric types submit
-                numpy.number. To limit it instead to object columns submit
-                the numpy.object data type. Strings can also be used in the
-                style of select_dtypes (e.g. df.describe(include=['O'])).
-                To select pandas categorical columns, use 'category'
-                None (default) : The result will include all numeric columns.
-        exclude : list-like of dtypes or None (default), optional,
-                A black list of data types to omit from the result.
-                Ignored for Series. Here are the options:
-                A list-like of dtypes : Excludes the provided data types from
-                the result. To exclude numeric types submit numpy.number.
-                To exclude object columns submit the data type numpy.object.
-                Strings can also be used in the style of select_dtypes
-                (e.g. df.describe(include=['O'])).
-                To exclude pandas categorical columns, use 'category'
-                None (default) : The result will exclude nothing.
-
-        Returns
-        -------
-        Series or DataFrame
-            Summary statistics of the Series or Dataframe provided.
-
-        Notes
-        -----
-            For numeric data, the result’srs index will include
-            count, mean, std, min, max as well as lower, 50 and upper percentiles.
-            By default the lower percentile is 25 and the upper percentile is 75.
-            The 50 percentile is the same as the median.
-            For object data (e.g. strings or timestamps), the result’srs index
-            will include count, unique, top, and freq. The top is the most common
-            value. The freq is the most common value’srs frequency.
-            Timestamps also include the first and last items.
-            If multiple object values have the highest count, then the
-            count and top results will be arbitrarily chosen from among those
-            with the highest count.
-            For mixed data types provided via a DataFrame, the default is to
-            return only an analysis of numeric columns. If the dataframe consists
-            only of object and categorical data without any numeric columns,
-            the default is to return an analysis of both the object and
-            categorical columns. If include='all' is provided as an option,
-            the result will include a union of attributes of each type.
-            The include and exclude parameters can be used to limit which
-            columns in a DataFrame are analyzed for the output.
-            The parameters are ignored when analyzing a Series.
-
-        """
-
-        operation = begin_operation('describe')
-        describe_ = self._data.describe(percentiles, include, exclude)
-        self.last_operation = end_operation(operation)
-        return describe_
-
-    def memory_usage(self, index=True, deep=False):
-        """
-        Return the memory usage of each column in bytes.
-
-        The memory usage can optionally include the contribution of the
-        index and elements of object dtype.
-        This value is displayed in DataFrame.info by default.
-        This can be suppressed by setting pandas.options.display.memory_usage
-        to False.
-
-        Parameters
-        ----------
-        index : bool, default True
-            Specifies whether to include the memory usage of the DataFrame’srs
-            index in returned Series. If index=True, the memory usage of the
-            index is the first item in the output.
-        deep : bool, default False
-            If True, introspect the data deeply by interrogating object dtypes
-            for system-level memory consumption, and include it in the
-            returned values.
-
-        Returns
-        -------
-        Series
-            A Series whose index is the original column names and whose
-            values is the memory usage of each column in bytes.
-
-        """
-
-        operation = begin_operation('mem_usage')
-        mem_usage_ = self._data.memory_usage(index, deep)
-        self.last_operation = end_operation(operation)
-        return mem_usage_
-
-    def copy(self, deep=True):
-        """
-        Make a copy of this object’srs indices and data.
+        Make a copy of this object’s indices and data.
 
         When deep=True (default), a new object will be created with a copy
-        of the calling object’srs data and indices. Modifications to the
+        of the calling object data and indices. Modifications to the
         data or indices of the copy will not be reflected in the original
         object (see notes below).
         When deep=False, a new object will be created without copying the calling
-        object’srs data or index (only references to the data and index are copied).
+        object data or index (only references to the data and index are copied).
         Any changes to the data of the original will be reflected in the
         shallow copy (and vice versa).
 
         Parameters
         ----------
-        deep : bool, default True
+        deep : bool, optional
             Make a deep copy, including a copy of the data and the indices.
-            With deep=False neither the indices nor the data are copied.
+            With deep=False neither the indices nor the data are copied, by default True
 
         Returns
         -------
-        Series or DataFrame
+        PandasMoveDataFrame
             Object type matches caller.
 
         Notes
@@ -854,42 +470,37 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         copy is not needed.
 
         """
-
-        operation = begin_operation('copy')
-        copy_ = PandasMoveDataFrame(self._data.copy(deep))
-        self.last_operation = end_operation(operation)
-        return copy_
+        copy_ = super().copy(deep=deep)
+        return PandasMoveDataFrame(data=copy_)
 
     def generate_tid_based_on_id_datetime(
-        self, str_format='%Y%m%d%H', sort=True, inplace=True
-    ):
+        self,
+        str_format: Optional[Text] = '%Y%m%d%H',
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create or update trajectory id based on id and datetime.
 
         Parameters
         ----------
-        str_format : str, optional, default "%Y%m%d%H".
-            Format to consider the datetime
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        str_format : str, optional
+             Format to consider the datetime, by default '%Y%m%d%H'
+        sort : bool, optional
+            Wether to sort the dataframe, by default True
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
 
         """
 
         operation = begin_operation('generate_tid_based_on_id_datetime')
-
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
-
+        columns = set(self.columns)
         try:
             print('\nCreating or updating tid feature...\n')
             if sort is True:
@@ -898,9 +509,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     % (TRAJ_ID, DATETIME)
                 )
 
-                data_.sort_values([TRAJ_ID, DATETIME], inplace=True)
+                self.sort_values([TRAJ_ID, DATETIME], inplace=True)
 
-            data_[TID] = data_[TRAJ_ID].astype(str) + data_[
+            self[TID] = self[TRAJ_ID].astype(str) + self[
                 DATETIME
             ].dt.strftime(str_format)
             print('\n...tid feature was created...\n')
@@ -909,138 +520,147 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 self.last_operation = end_operation(operation)
                 return None
 
-            data_ = PandasMoveDataFrame(data=data_)
+            mdf = self.copy()
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
-            return data_
+            return mdf
         except Exception as e:
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
-    def generate_date_features(self, inplace=True):
+    def generate_date_features(
+        self, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create or update date feature based on datetime.
 
         Parameters
         ----------
-        inplace : bool, optional, default True.
+        inplace : bool, optional
             Represents whether the operation will be performed
-            on the data provided or in a copy.
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
 
         """
 
         operation = begin_operation('generate_date_features')
-
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
-
+        columns = set(self.columns)
         try:
             print('Creating date features...')
-            if DATETIME in data_:
-                data_[DATE] = data_[DATETIME].dt.date
+            if DATETIME in self:
+                self[DATE] = self[DATETIME].dt.date
                 print('..Date features was created...\n')
 
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
 
-            data_ = PandasMoveDataFrame(data=data_)
+            mdf = self.copy()
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
-            return data_
+            return mdf
         except Exception as e:
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
-    def generate_hour_features(self, inplace=True):
+    def generate_hour_features(
+        self, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
-        Create or update hour feature based on datetime.
+        Create or update hour features based on datetime.
 
         Parameters
         ----------
-        inplace : bool, optional, default True.
+        inplace : bool, optional
             Represents whether the operation will be performed
-            on the data provided or in a copy.
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
 
         """
 
         operation = begin_operation('generate_hour_features')
-
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
+        columns = set(self.columns)
 
         try:
             print('\nCreating or updating a feature for hour...\n')
-            if DATETIME in data_:
-                data_[HOUR] = data_[DATETIME].dt.hour
+            if DATETIME in self:
+                self[HOUR] = self[DATETIME].dt.hour
                 print('...Hour feature was created...\n')
 
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
 
-            data_ = PandasMoveDataFrame(data=data_)
+            mdf = self.copy()
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
-            return data_
+            return mdf
         except Exception as e:
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
-    def generate_day_of_the_week_features(self, inplace=True):
+    def generate_day_of_the_week_features(
+        self, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
-        Create or update a feature day of the week from datatime.
+        Create or update day of the week features based on datetime.
 
         Parameters
         ----------
-        inplace : bool, optional, default True.
+        inplace : bool, optional
             Represents whether the operation will be performed
-            on the data provided or in a copy.
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
 
         """
 
         operation = begin_operation('generate_day_of_the_week_features')
-
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
+        columns = set(self.columns)
 
         try:
             print('\nCreating or updating day of the week feature...\n')
-            data_[DAY] = data_[DATETIME].dt.day_name()
+            self[DAY] = self[DATETIME].dt.day_name()
             print('...the day of the week feature was created...\n')
 
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
 
-            data_ = PandasMoveDataFrame(data=data_)
+            mdf = self.copy()
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
-            return data_
+            return mdf
         except Exception as e:
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
     def generate_weekend_features(
-        self, create_day_of_week=False, inplace=True
-    ):
+        self, create_day_of_week: Optional[bool] = False, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create or update the feature weekend to the dataframe,
         if this resource indicates that the given day is the
@@ -1048,67 +668,67 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        create_day_of_week : bool, optional (default False).
+        create_day_of_week : bool, optional
             Indicates if the column day should be keeped in the dataframe.
-            If set to False the column will be dropped.
-        inplace : bool, optional, default True.
-            Indicates whether the operation will be performed on
-            the data provided or in a copy.
+            If set to False the column will be dropped, by default False
+        inplace : bool, optional
+            Represents whether the operation will be performed
+            on the data provided or in a copy, by default True
 
         Returns
-        ----------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        -------
+        PandasMoveDataFrame
+            Object with new features or None
 
         """
 
         operation = begin_operation('generate_weekend_features')
-
+        columns = set(self.columns)
         try:
-            if inplace:
-                self.generate_day_of_the_week_features(inplace=inplace)
-                data_ = self._data
-            else:
-                data_ = self.generate_day_of_the_week_features(
-                    inplace=inplace
-                )._data
+            self.generate_day_of_the_week_features(inplace=True)
 
             print('Creating or updating a feature for weekend\n')
-            if DAY in data_:
-                fds = (data_[DAY] == WEEK_DAYS[5]) | (data_[DAY] == WEEK_DAYS[6])
-                index_fds = data_[fds].index
-                data_[WEEK_END] = 0
-                data_.at[index_fds, WEEK_END] = 1
+            if DAY in self:
+                fds = (self[DAY] == WEEK_DAYS[5]) | (self[DAY] == WEEK_DAYS[6])
+                index_fds = self[fds].index
+                self[WEEK_END] = 0
+                self.at[index_fds, WEEK_END] = 1
                 print('...Weekend was set as 1 or 0...\n')
                 if not create_day_of_week:
                     print('...dropping colum day\n')
-                    del data_[DAY]
+                    del self[DAY]
 
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
 
-            data_ = PandasMoveDataFrame(data=data_)
+            mdf = self.copy()
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
-            return data_
+            return mdf
         except Exception as e:
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
-    def generate_time_of_day_features(self, inplace=True):
+    def generate_time_of_day_features(
+        self, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
-        Create a feature time of day or period from datatime.
+        Create or update time of day features based on datetime.
 
         Parameters
         ----------
-         inplace : bool, optional, default True.
-            Represents whether the operation will be performed on
-            the data provided or in a copy.
+        inplace : bool, optional
+            Represents whether the operation will be performed
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
 
         Examples
         --------
@@ -1120,11 +740,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('generate_time_of_day_features')
-
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
+        columns = set(self.columns)
 
         try:
             periods = [
@@ -1136,45 +752,49 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             ]
             print('\n'.join(periods))
 
-            hours = data_[DATETIME].dt.hour
+            hours = self[DATETIME].dt.hour
             conditions = [
                 (hours >= 0) & (hours < 6),
                 (hours >= 6) & (hours < 12),
                 (hours >= 12) & (hours < 18),
                 (hours >= 18) & (hours < 24),
             ]
-            data_[PERIOD] = np.select(conditions, DAY_PERIODS, 'undefined')
+            self[PERIOD] = np.select(conditions, DAY_PERIODS, 'undefined')
             print('...the period of day feature was created')
 
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
 
-            data_ = PandasMoveDataFrame(data=data_)
+            mdf = self.copy()
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
-            return data_
+            return mdf
         except Exception as e:
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
     def generate_datetime_in_format_cyclical(
-        self, label_datetime=DATETIME, inplace=True
-    ):
+        self, label_datetime: Optional[Text] = DATETIME, inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create or update column with cyclical datetime feature.
 
         Parameters
         ----------
-        label_datetime : str, optional, default 'datetime'.
-            Represents column id type.
-        inplace : bool, optional, default True.
-            Represents whether the operation will be performed on
-            the data provided or in a copy.
+        label_datetime : str, optional
+            Represents column id type, by default DATETIME
+        inplace : bool, optional
+            Represents whether the operation will be performed
+            on the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
 
         References
         ----------
@@ -1184,39 +804,41 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('generate_datetime_in_format_cyclical')
-
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
+        columns = set(self.columns)
 
         try:
             print('Encoding cyclical continuous features - 24-hour time')
-            if label_datetime in self._data:
-                hours = data_[label_datetime].dt.hour
-                data_[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
-                data_[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
+            if label_datetime in self:
+                hours = self[label_datetime].dt.hour
+                self[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
+                self[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
                 print('...hour_sin and  hour_cos features were created...\n')
 
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
 
-            data_ = PandasMoveDataFrame(data=data_)
+            mdf = self.copy()
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
-            return data_
+            return mdf
         except Exception as e:
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
     @staticmethod
-    def _prepare_generate_data(data_, sort, label_id):
+    def _prepare_generate_data(
+        data_: DataFrame, sort: bool, label_id: Text
+    ) -> Tuple[List, int, int, int]:
         """
         Processes the data and create variables for generate methods.
 
         Parameters
         ----------
-        data_ : dataframe
+        data_ : DataFrame
             Dataframe to be processed.
         sort : bool
             Whether to sort the data.
@@ -1225,12 +847,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        array
+        Tuple[List, int, int, int]
             data_ unique ids.
-        int
             sum size of id.
-        int
             size of id.
+            starting index
 
         """
 
@@ -1253,43 +874,53 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ids = data_.index.unique()
         sum_size_id = 0
         size_id = 0
+        idx = None
 
-        return ids, sum_size_id, size_id
+        return ids, sum_size_id, size_id, idx
 
-    def _return_generated_data(self, data_, operation, inplace):
+    def _return_generated_data(
+        self, data_: DataFrame, columns: Set, operation: Dict, inplace: bool
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Finishes the generate methods.
 
         Parameters
         ----------
-        data_ : dataframe
+        data_ : DataFrame
             Dataframe with the generated features.
+        columns: set
+            Set with columns before operation
         operation : dict
             initial stats of the operation.
-        inplace : bool, optional, default True.
+        inplace : bool
             Represents whether the operation will be performed on
             the data provided or in a copy.
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
 
         """
         print('...Reset index...\n')
-        data_.reset_index(inplace=True)
 
+        data_.reset_index(inplace=True)
         if inplace:
             self.last_operation = end_operation(operation)
             return None
-
-        data_ = PandasMoveDataFrame(data=data_)
+        data_ = self.copy()
+        drop = set(self.columns) - columns
+        self.drop(columns=[*drop], inplace=True)
         self.last_operation = end_operation(operation)
         return data_
 
     def generate_dist_time_speed_features(
-        self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True
-    ):
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        label_dtype: Optional[Callable] = np.float64,
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Firstly, create the three distance to an GPS point P (lat, lon). After,
         create two time features to point P: time to previous and time to next.
@@ -1297,20 +928,21 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectory'srs id.
-        label_dtype : type, optional, default np.float64.
-            Represents column id type.
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        label_id : str, optional
+            Represents name of column of trajectories id, by default TRAJ_ID
+        label_dtype : callable, optional
+            Represents column id type, by default np.float64
+        sort : bool, optional
+            If sort == True the dataframe will be sorted, by True
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
+
 
         Examples
         --------
@@ -1321,11 +953,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('generate_dist_time_speed_features')
-
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
+        columns = set(self.columns)
+        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
+            self, sort, label_id
+        )
 
         try:
             message = '\nCreating or updating distance, time and speed features'
@@ -1334,50 +965,46 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 message
             )
 
-            ids, sum_size_id, size_id = self._prepare_generate_data(
-                data_, sort, label_id
-            )
-
             # create new feature to distance
-            data_[DIST_TO_PREV] = label_dtype(-1.0)
+            self[DIST_TO_PREV] = label_dtype(-1.0)
 
             # create new feature to time
-            data_[TIME_TO_PREV] = label_dtype(-1.0)
+            self[TIME_TO_PREV] = label_dtype(-1.0)
 
             # create new feature to speed
-            data_[SPEED_TO_PREV] = label_dtype(-1.0)
+            self[SPEED_TO_PREV] = label_dtype(-1.0)
 
             for idx in progress_bar(
                 ids, desc='Generating distance, time and speed features'
             ):
-                curr_lat = data_.at[idx, LATITUDE]
-                curr_lon = data_.at[idx, LONGITUDE]
+                curr_lat = self.at[idx, LATITUDE]
+                curr_lon = self.at[idx, LONGITUDE]
 
                 size_id = curr_lat.size
 
                 if size_id <= 1:
-                    data_.at[idx, DIST_TO_PREV] = np.nan
-                    data_.at[idx, TIME_TO_PREV] = np.nan
-                    data_.at[idx, SPEED_TO_PREV] = np.nan
+                    self.at[idx, DIST_TO_PREV] = np.nan
+                    self.at[idx, TIME_TO_PREV] = np.nan
+                    self.at[idx, SPEED_TO_PREV] = np.nan
                 else:
                     prev_lat = shift(curr_lat, 1)
                     prev_lon = shift(curr_lon, 1)
                     # compute distance from previous to current point
-                    data_.at[idx, DIST_TO_PREV] = haversine(
+                    self.at[idx, DIST_TO_PREV] = haversine(
                         prev_lat, prev_lon, curr_lat, curr_lon
                     )
 
-                    time_ = data_.at[idx, DATETIME].astype(label_dtype)
+                    time_ = self.at[idx, DATETIME].values.astype(label_dtype)
                     time_prev = (time_ - shift(time_, 1)) * (10 ** -9)
-                    data_.at[idx, TIME_TO_PREV] = time_prev
+                    self.at[idx, TIME_TO_PREV] = time_prev
 
                     # set speed features
-                    data_.at[idx, SPEED_TO_PREV] = (
-                        data_.at[idx, DIST_TO_PREV] / time_prev
+                    self.at[idx, SPEED_TO_PREV] = (
+                        self.at[idx, DIST_TO_PREV] / time_prev
                     )  # unit: m/srs
 
             return self._return_generated_data(
-                data_, operation, inplace
+                self, columns, operation, inplace
             )
 
         except Exception as e:
@@ -1385,31 +1012,38 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
                 % (label_id, idx, size_id, sum_size_id)
             )
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
     def generate_dist_features(
-        self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True
-    ):
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        label_dtype: Optional[Callable] = np.float64,
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create the three distance in meters to an GPS point P.
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectory'srs id.
-        label_dtype : type, optional, default np.float64.
-            Represents column id type.
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        label_id : str, optional
+            Represents name of column of trajectories id, by default TRAJ_ID
+        label_dtype : callable, optional
+            Represents column id type, by default np.float64
+        sort : bool, optional
+            If sort == True the dataframe will be sorted, by True
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
+
 
         Examples
         --------
@@ -1420,48 +1054,40 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('generate_dist_features')
-
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
+        columns = set(self.columns)
+        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
+            self, sort, label_id
+        )
 
         try:
             print('\nCreating or updating distance features in meters...\n')
 
-            ids, sum_size_id, size_id = self._prepare_generate_data(
-                data_, sort, label_id
-            )
-
             # create ou update columns
-            data_[DIST_TO_PREV] = label_dtype(-1.0)
-            data_[DIST_TO_NEXT] = label_dtype(-1.0)
-            data_[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
+            self[DIST_TO_PREV] = label_dtype(-1.0)
+            self[DIST_TO_NEXT] = label_dtype(-1.0)
+            self[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
 
-            ids = data_.index.unique()
-            sum_size_id = 0
-            size_id = 0
             for idx in progress_bar(ids, desc='Generating distance features'):
-                curr_lat = data_.at[idx, LATITUDE]
-                curr_lon = data_.at[idx, LONGITUDE]
+                curr_lat = self.at[idx, LATITUDE]
+                curr_lon = self.at[idx, LONGITUDE]
 
                 size_id = curr_lat.size
 
                 if size_id <= 1:
-                    data_.at[idx, DIST_TO_PREV] = np.nan
+                    self.at[idx, DIST_TO_PREV] = np.nan
 
                 else:
                     prev_lat = shift(curr_lat, 1)
                     prev_lon = shift(curr_lon, 1)
                     # compute distance from previous to current point
-                    data_.at[idx, DIST_TO_PREV] = haversine(
+                    self.at[idx, DIST_TO_PREV] = haversine(
                         prev_lat, prev_lon, curr_lat, curr_lon
                     )
 
                     next_lat = shift(curr_lat, -1)
                     next_lon = shift(curr_lon, -1)
                     # compute distance to next point
-                    data_.at[idx, DIST_TO_NEXT] = haversine(
+                    self.at[idx, DIST_TO_NEXT] = haversine(
                         curr_lat, curr_lon, next_lat, next_lon
                     )
 
@@ -1469,12 +1095,12 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     # using numpy shift above: 33.6 srs
 
                     # use distance from previous to next
-                    data_.at[idx, DIST_PREV_TO_NEXT] = haversine(
+                    self.at[idx, DIST_PREV_TO_NEXT] = haversine(
                         prev_lat, prev_lon, next_lat, next_lon
                     )
 
             return self._return_generated_data(
-                data_, operation, inplace
+                self, columns, operation, inplace
             )
 
         except Exception as e:
@@ -1482,31 +1108,37 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
                 % (label_id, idx, size_id, sum_size_id)
             )
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
     def generate_time_features(
-        self, label_id=TRAJ_ID, label_dtype=np.float64, sort=True, inplace=True
-    ):
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        label_dtype: Optional[Callable] = np.float64,
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create the three time in seconds to an GPS point P.
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectory'srs id.
-        label_dtype : type, optional, default np.float64.
-            Represents column id type_.
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        label_id : str, optional
+            Represents name of column of trajectories id, by default TRAJ_ID
+        label_dtype : callable, optional
+            Represents column id type, by default np.float64
+        sort : bool, optional
+            If sort == True the dataframe will be sorted, by True
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
 
         Examples
         --------
@@ -1517,53 +1149,44 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('generate_time_features')
-
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
+        columns = set(self.columns)
+        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
+            self, sort, label_id
+        )
 
         try:
             print(
                 '\nCreating or updating time features seconds\n'
             )
 
-            ids, sum_size_id, size_id = self._prepare_generate_data(
-                data_, sort, label_id
-            )
-
             # create new feature to time
-            data_[TIME_TO_PREV] = label_dtype(-1.0)
-            data_[TIME_TO_NEXT] = label_dtype(-1.0)
-            data_[TIME_PREV_TO_NEXT] = label_dtype(-1.0)
-
-            ids = data_.index.unique()
-            sum_size_id = 0
-            size_id = 0
+            self[TIME_TO_PREV] = label_dtype(-1.0)
+            self[TIME_TO_NEXT] = label_dtype(-1.0)
+            self[TIME_PREV_TO_NEXT] = label_dtype(-1.0)
 
             for idx in progress_bar(
                 ids, desc='Generating time features'
             ):
-                curr_time = data_.at[idx, DATETIME].astype(label_dtype)
+                curr_time = self.at[idx, DATETIME].values.astype(label_dtype)
 
                 size_id = curr_time.size
 
                 if size_id <= 1:
-                    data_.at[idx, TIME_TO_PREV] = np.nan
+                    self.at[idx, TIME_TO_PREV] = np.nan
                 else:
                     prev_time = shift(curr_time, 1)
                     time_prev = (curr_time - prev_time) * (10 ** -9)
-                    data_.at[idx, TIME_TO_PREV] = time_prev
+                    self.at[idx, TIME_TO_PREV] = time_prev
 
                     next_time = shift(curr_time, -1)
                     time_prev = (next_time - curr_time) * (10 ** -9)
-                    data_.at[idx, TIME_TO_NEXT] = time_prev
+                    self.at[idx, TIME_TO_NEXT] = time_prev
 
                     time_prev_to_next = (next_time - prev_time) * (10 ** -9)
-                    data_.at[idx, TIME_PREV_TO_NEXT] = time_prev_to_next
+                    self.at[idx, TIME_PREV_TO_NEXT] = time_prev_to_next
 
             return self._return_generated_data(
-                data_, operation, inplace
+                self, columns, operation, inplace
             )
 
         except Exception as e:
@@ -1571,35 +1194,38 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
                 % (label_id, idx, size_id, sum_size_id)
             )
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
     def generate_speed_features(
-            self,
-            label_id=TRAJ_ID,
-            label_dtype=np.float64,
-            sort=True,
-            inplace=True
-    ):
+        self,
+        label_id: Optional[Text] = TRAJ_ID,
+        label_dtype: Optional[Callable] = np.float64,
+        sort: Optional[bool] = True,
+        inplace: Optional[bool] = True
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Create the three speed in meter by seconds to an GPS point P.
 
         Parameters
         ----------
-        label_id : str, optional, default 'id'.
-            Represents name of column of trajectory'srs id.
-        label_dtype : type, optional, default np.float64.
-            Represents column id type_.
-        sort : bool, optional, default True.
-            If sort == True the dataframe will be sorted.
-        inplace : bool, optional, default True.
+        label_id : str, optional
+            Represents name of column of trajectories id, by default TRAJ_ID
+        label_dtype : callable, optional
+            Represents column id type, by default np.float64
+        sort : bool, optional
+            If sort == True the dataframe will be sorted, by True
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
+
 
         Examples
         --------
@@ -1610,10 +1236,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         """
 
         operation = begin_operation('generate_speed_features')
-        if inplace:
-            data_ = self._data
-        else:
-            data_ = self._data.copy()
+        columns = set(self.columns)
 
         try:
             print(
@@ -1630,95 +1253,102 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 label_id, label_dtype, sort, inplace=False
             )[time_cols]
 
-            data_[SPEED_TO_PREV] = dists[DIST_TO_PREV] / times[TIME_TO_PREV]
-            data_[SPEED_TO_NEXT] = dists[DIST_TO_NEXT] / times[TIME_TO_NEXT]
+            self[SPEED_TO_PREV] = dists[DIST_TO_PREV] / times[TIME_TO_PREV]
+            self[SPEED_TO_NEXT] = dists[DIST_TO_NEXT] / times[TIME_TO_NEXT]
 
             d_prev_next = dists[DIST_TO_PREV] + dists[DIST_TO_NEXT]
-            data_[SPEED_PREV_TO_NEXT] = d_prev_next / times[TIME_PREV_TO_NEXT]
-
+            self[SPEED_PREV_TO_NEXT] = d_prev_next / times[TIME_PREV_TO_NEXT]
+            self._prepare_generate_data(
+                self, sort, label_id
+            )
             return self._return_generated_data(
-                data_, operation, inplace
+                self, columns, operation, inplace
             )
 
         except Exception as e:
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
     def generate_move_and_stop_by_radius(
-        self, radius=0, target_label=DIST_TO_PREV, inplace=True
+        self,
+        radius: Optional[int] = 0,
+        target_label: Optional[Text] = DIST_TO_PREV,
+        inplace: Optional[bool] = True
     ):
         """
         Create or update column with move and stop points by radius.
 
         Parameters
         ----------
-        radius : int, optional, default 0.
-            Represents radius.
-        target_label : str, optional, default 'dist_to_prev.
-            Represents column id type.
-        inplace : bool, optional, default True.
+        radius : int, optional
+            Represents radius, by default 0
+        target_label : str, optional
+            Represents column to compute, by default DIST_TO_PREV
+        inplace : bool, optional
             Represents whether the operation will be performed on
-            the data provided or in a copy.
+            the data provided or in a copy, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with new features or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with new features or None
 
         """
 
         operation = begin_operation('generate_move_and_stop_by_radius')
-
-        if inplace:
-            if DIST_TO_PREV not in self._data:
-                self.generate_dist_features(inplace=inplace)
-            data_ = self._data
-        else:
-            data_ = self.generate_dist_features(inplace=inplace)._data
+        columns = set(self.columns)
 
         try:
+            self.generate_dist_features(inplace=True)
+
             print('\nCreating or updating features MOVE and STOPS...\n')
             conditions = (
-                (data_[target_label] > radius),
-                (data_[target_label] <= radius),
+                (self[target_label] > radius),
+                (self[target_label] <= radius),
             )
             choices = [MOVE, STOP]
 
-            data_[SITUATION] = np.select(conditions, choices, np.nan)
+            self[SITUATION] = np.select(conditions, choices, np.nan)
             print(
                 '\n....There are %s stops to this parameters\n'
-                % (data_[data_[SITUATION] == STOP].shape[0])
+                % (self[self[SITUATION] == STOP].shape[0])
             )
 
             if inplace:
                 self.last_operation = end_operation(operation)
                 return None
 
-            data_ = PandasMoveDataFrame(data=data_)
+            mdf = self.copy()
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
-            return data_
+            return mdf
         except Exception as e:
+            drop = set(self.columns) - columns
+            self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
             raise e
 
-    def time_interval(self):
+    def time_interval(self) -> Timedelta:
         """
         Get time difference between max and min datetime in trajectory data.
 
         Returns
         -------
-        datetime64
+        Timedelta
             Represents the time difference.
 
         """
 
         operation = begin_operation('time_interval')
-        time_diff = self._data[DATETIME].max() - self._data[DATETIME].min()
+        time_diff = self[DATETIME].max() - self[DATETIME].min()
         self.last_operation = end_operation(operation)
 
         return time_diff
 
-    def get_bbox(self):
+    def get_bbox(self) -> Tuple[float, float, float, float]:
         """
         A bounding box (usually shortened to bbox) is an area defined by two
         longitudes and two latitudes, where:
@@ -1731,9 +1361,10 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        tuple
+        Tuple[float, float, float, float]:
             Represents a bound box, that is a tuple of 4 values with
             the min and max limits of latitude e longitude.
+            lat_min, lon_min, lat_max, lon_max
 
         Examples
         --------
@@ -1743,49 +1374,45 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         operation = begin_operation('get_bbox')
 
-        try:
-            bbox_ = (
-                self._data[LATITUDE].min(),
-                self._data[LONGITUDE].min(),
-                self._data[LATITUDE].max(),
-                self._data[LONGITUDE].max(),
-            )
+        bbox_ = (
+            self[LATITUDE].min(),
+            self[LONGITUDE].min(),
+            self[LATITUDE].max(),
+            self[LONGITUDE].max(),
+        )
 
-            self.last_operation = end_operation(operation)
+        self.last_operation = end_operation(operation)
 
-            return bbox_
-        except Exception as e:
-            self.last_operation = end_operation(operation)
-            raise e
+        return bbox_
 
     def plot_all_features(
         self,
-        dtype=np.float64,
-        figsize=(21, 15),
-        return_fig=True,
-        save_fig=False,
-        name='features.png',
-    ):
+        dtype: Optional[Callable] = np.float64,
+        figsize: Optional[Tuple[float, float]] = (21, 15),
+        return_fig: Optional[bool] = True,
+        save_fig: Optional[bool] = False,
+        name: Optional[Text] = 'features.png',
+    ) -> Optional[figure]:
         """
         Generate a visualization for each columns that type is equal dtype.
 
         Parameters
         ----------
-        figsize : tuple, optional, default (21, 15).
-            Represents dimensions of figure.
-        dtype : type, optional, default np.float64.
-            Represents column type.
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
-        save_fig : bool, optional, default False.
-            Represents whether or not to save the generated picture.
-        name : str, optional, default 'features.png'.
-            Represents name of a file.
+        dtype : callable, optional
+            Represents column type, by default np.float64
+        figsize : tuple(float, float), optional
+            Represents dimensions of figure, by default (21, 15)
+        return_fig : bool, optional
+            Represents whether or not to return the generated picture, by default True
+        save_fig : bool, optional
+            Represents whether or not to save the generated picture, by default False
+        name : str, optional
+            Represents name of a file, by default 'features.png'
 
         Returns
         -------
-        matplotlib.pyplot.figure or None
-            The generated picture.
+        figure
+            The generated picture or None
 
         Raises
         ------
@@ -1797,7 +1424,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         operation = begin_operation('plot_all_features')
 
         try:
-            col_dtype = self._data.select_dtypes(include=[dtype]).columns
+            col_dtype = self.select_dtypes(include=[dtype]).columns
             tam = col_dtype.size
             if not tam:
                 raise AttributeError('No columns with dtype %s.' % dtype)
@@ -1806,7 +1433,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             ax_count = 0
             for col in col_dtype:
                 ax[ax_count].set_title(col)
-                self._data[col].plot(subplots=True, ax=ax[ax_count])
+                self[col].plot(subplots=True, ax=ax[ax_count])
                 ax_count += 1
 
             if save_fig:
@@ -1822,48 +1449,47 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def plot_trajs(
         self,
-        markers='o',
-        markersize=20,
-        figsize=(10, 10),
-        return_fig=True,
-        save_fig=False,
-        name='trajectories.png',
-    ):
+        markers: Optional[Text] = 'o',
+        markersize: Optional[float] = 20,
+        figsize: Optional[Tuple[float, float]] = (10, 10),
+        return_fig: Optional[bool] = True,
+        save_fig: Optional[bool] = False,
+        name: Optional[Text] = 'trajectories.png',
+    ) -> Optional[figure]:
         """
         Generate a visualization that show trajectories.
 
         Parameters
         ----------
-        figsize : tuple, optional, default (10, 10).
-            Represents dimensions of figure.
-        markers : str, optional, default 'o'.
-            Represents visualization type marker.
-        markersize : int, optional, default 20.
-            Represents visualization size marker.
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
-        save_fig : bool, optional, default False.
-            Represents whether or not to save the generated picture.
-        name : str, optional, default 'trajectories.png'.
-            Represents name of a file.
+        markers : str, optional
+             Represents visualization type marker, by default 'o'
+        markersize : float, optional
+            Represents visualization size marker, by default 20
+        figsize : tuple(float, float), optional
+             Represents dimensions of figure, by default (10, 10)
+        return_fig : bool, optional
+            Represents whether or not to return the generated picture, by default True
+        save_fig : bool, optional
+            Represents whether or not to save the generated picture, by default False
+        name : str, optional
+            Represents name of a file, by default 'trajectories.png'
 
         Returns
         -------
-        matplotlib.pyplot.figure or None
-            The generated picture.
-
+        figure
+            The generated picture or None
         """
 
         operation = begin_operation('plot_trajs')
 
         fig = plt.figure(figsize=figsize)
 
-        ids = self._data['id'].unique()
+        ids = self['id'].unique()
         for id_ in ids:
-            selfid = self._data[self._data['id'] == id_]
+            self_id = self[self['id'] == id_]
             plt.plot(
-                selfid[LONGITUDE],
-                selfid[LATITUDE],
+                self_id[LONGITUDE],
+                self_id[LATITUDE],
                 markers,
                 markersize=markersize,
             )
@@ -1878,43 +1504,41 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
     def plot_traj_id(
         self,
-        tid,
-        label=TID,
-        feature=None,
-        value=None,
-        figsize=(10, 10),
-        return_fig=True,
-        save_fig=False,
-        name=None,
-    ):
+        tid: Union[int, Text],
+        label: Optional[Text] = TID,
+        feature: Optional[Text] = None,
+        value: Optional[Any] = None,
+        figsize: Optional[Tuple[float, float]] = (10, 10),
+        return_fig: Optional[bool] = True,
+        save_fig: Optional[bool] = False,
+        name: Optional[Text] = None,
+    ) -> Optional[Union['PandasMoveDataFrame', figure]]:
         """
         Generate a visualization that shows a trajectory with the specified tid.
 
         Parameters
         ----------
-        tid : any.
-            Represents the trajectory tid.
-        label : str, optional, default 'traj_id'.
-            Feature with trajectories tids.
-        feature : str, optional, default None.
-            Name of the feature to highlight on plot.
-        value : any, optional, defaut None.
-            Value of the feature to be highlighted as green marker
-        figsize : tuple, optional, default (10,10).
-            Represents dimensions of figure.
-        return_fig : bool, optional, default True.
-            Represents whether or not to save the generated picture.
-        save_fig : bool, optional, default False.
-            Represents whether or not to save the generated picture.
-        name : str, optional, default None.
-            Represents name of a file.
-
+        tid :  int, str
+            Represents the trajectory tid
+        label : str, optional
+            Feature with trajectories tids, by default TID
+        feature : str, optional
+            Name of the feature to highlight on plot, by default None
+        value : any, optional
+            Value of the feature to be highlighted as green marker, by default None
+        figsize : tuple(float, float), optional
+            Represents dimensions of figure, by default (10, 10)
+        return_fig : bool, optional
+            Represents whether or not to return the generated picture, by default True
+        save_fig : bool, optional
+            Represents whether or not to save the generated picture, by default False
+        name : str, optional
+            Represents name of a file, by default None
 
         Returns
         -------
-        pymove.core.MoveDataFrameAbstract subclass
+        PandasMoveDataFrame', figure
             Trajectory with the specified tid.
-        matplotlib.pyplot.figure or None
             The generated picture.
 
         Raises
@@ -1928,11 +1552,11 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         operation = begin_operation('plot_traj_id')
 
-        if label not in self._data:
+        if label not in self:
             self.last_operation = end_operation(operation)
             raise KeyError('%s feature not in dataframe' % label)
 
-        df_ = self._data[self._data[label] == tid]
+        df_ = self[self[label] == tid]
 
         if not len(df_):
             self.last_operation = end_operation(operation)
@@ -1998,55 +1622,55 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             print(
                 '\n%s\n' % message
             )
-            print('Number of Points: %s\n' % self._data.shape[0])
+            print('Number of Points: %s\n' % self.shape[0])
 
-            if TRAJ_ID in self._data:
+            if TRAJ_ID in self:
                 print(
                     'Number of IDs objects: %s\n'
-                    % self._data[TRAJ_ID].nunique()
+                    % self[TRAJ_ID].nunique()
                 )
 
-            if TID in self._data:
+            if TID in self:
                 print(
                     'Number of TIDs trajectory: %s\n'
-                    % self._data[TID].nunique()
+                    % self[TID].nunique()
                 )
 
-            if DATETIME in self._data:
-                dtmax = self._data[DATETIME].max()
-                dtmin = self._data[DATETIME].min()
+            if DATETIME in self:
+                dt_max = self[DATETIME].max()
+                dt_min = self[DATETIME].min()
                 print(
                     'Start Date:%s     End Date:%s\n'
-                    % (dtmin, dtmax)
+                    % (dt_min, dt_max)
                 )
 
-            if LATITUDE and LONGITUDE in self._data:
+            if LATITUDE and LONGITUDE in self:
                 print(
                     'Bounding Box:%s\n' % (self.get_bbox(),)
                 )  # bbox return =  Lat_min , Long_min, Lat_max, Long_max
 
-            if TIME_TO_PREV in self._data:
-                tmax = round(self._data[TIME_TO_PREV].max(), 3)
-                tmin = round(self._data[TIME_TO_PREV].min(), 3)
+            if TIME_TO_PREV in self:
+                t_max = round(self[TIME_TO_PREV].max(), 3)
+                t_min = round(self[TIME_TO_PREV].min(), 3)
                 print(
                     'Gap time MAX:%s     Gap time MIN:%s\n'
-                    % (tmax, tmin)
+                    % (t_max, t_min)
                 )
 
-            if SPEED_TO_PREV in self._data:
-                smax = round(self._data[SPEED_TO_PREV].max(), 3)
-                smin = round(self._data[SPEED_TO_PREV].min(), 3)
+            if SPEED_TO_PREV in self:
+                s_max = round(self[SPEED_TO_PREV].max(), 3)
+                s_min = round(self[SPEED_TO_PREV].min(), 3)
                 print(
                     'Speed MAX:%s    Speed MIN:%s\n'
-                    % (smax, smin)
+                    % (s_max, s_min)
                 )
 
-            if DIST_TO_PREV in self._data:
-                dmax = round(self._data[DIST_TO_PREV].max(), 3)
-                dmin = round(self._data[DIST_TO_PREV].min(), 3)
+            if DIST_TO_PREV in self:
+                d_max = round(self[DIST_TO_PREV].max(), 3)
+                d_min = round(self[DIST_TO_PREV].min(), 3)
                 print(
                     'Distance MAX:%s    Distance MIN:%s\n'
-                    % (dmax, dmin)
+                    % (d_max, d_min)
                 )
 
             print(
@@ -2058,286 +1682,32 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             raise e
 
-    def min(
-        self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs
-    ):
-        """
-        Returns the minimum values for the requested axis of the dataframe.
-
-        Parameters
-        ----------
-        axis: int, optional, default None, {index (0), columns (1)}.
-            Axis for the function to be applied on.
-        skipna: bool, optional, default None.
-            Exclude NA/null values when computing the result.
-        level: int or str, optional, default None.
-            If the axis is a MultiIndex (hierarchical), count along
-            a particular level, collapsing into a Series.
-        numeric_only: bool, optional, default None
-            Include only float, int, boolean columns.
-            If None, will attempt to use everything, then use only numeric data.
-        kwargs:
-            Additional keyword arguments to be passed to the function
-
-        Returns
-        -------
-        Series or DataFrame (if level specified)
-            The minimum values for the request axis.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.min.html
-
-        """
-
-        operation = begin_operation('min')
-        _min = self._data.min(axis, skipna, level, numeric_only, **kwargs)
-        self.last_operation = end_operation(operation)
-
-        return _min
-
-    def max(
-        self, axis=None, skipna=None, level=None, numeric_only=None, **kwargs
-    ):
-        """
-        Returns the maximum  values for the requested axis of the dataframe.
-
-        Parameters
-        ----------
-        axis: int, optional, default None, {index (0), columns (1)}
-            Axis for the function to be applied on.
-        skipna: bool, optional, default None
-            Exclude NA/null values when computing the result.
-        level: int or str, optional, default None
-            If the axis is a MultiIndex (hierarchical), count along
-            a particular level, collapsing into a Series.
-        numeric_only: bool, optional, default None
-            Include only float, int, boolean columns.
-            If None, will attempt to use everything, then use only numeric data.
-        kwargs: keywords.
-            Additional keyword arguments to be passed to the function.
-
-        Returns
-        -------
-        Series or DataFrame (if level specified)
-            The maximum values for the request axis.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.max.html
-
-        """
-
-        operation = begin_operation('max')
-        _max = self._data.max(axis, skipna, level, numeric_only, **kwargs)
-        self.last_operation = end_operation(operation)
-
-        return _max
-
-    def count(self, axis=0, level=None, numeric_only=False):
-        """
-        Uses the pandas'srs function count, to count the number of non-NA cells
-        for each column or row.
-
-        Parameters
-        ----------
-        axis: int, optional, default None, {index (0), columns (1)}
-            if set to 0 or'index', will count for each column.
-            if set to 1 or'columns', will count for each row.
-        level: int or str, optional, default None
-            If the axis is a MultiIndex (hierarchical), count along
-            a particular level, collapsing into a DataFrame.
-            A str specifies the level name
-        numeric_only: bool, optional, default False
-            If set to true, only float, int or boolean data, will be included.
-
-        Returns
-        --------
-        Series or DataFrame.
-            The number of non-NA/null entries for each column/row.
-            If level is specified returns a DataFrame.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.count.html
-
-        """
-
-        operation = begin_operation('count')
-        _count = self._data.count(axis, level, numeric_only)
-        self.last_operation = end_operation(operation)
-
-        return _count
-
-    def groupby(
+    def astype(
         self,
-        by=None,
-        axis=0,
-        level=None,
-        as_index=True,
-        sort=True,
-        group_keys=True,
-        squeeze=False,
-        observed=False,
-        **kwargs,
-    ):
-        """
-        Groups DataFrame using a mapper or by a Series of columns. A groupby
-        operation involves some combination of splitting the object, applying a
-        function, and combining the results. This can be used to group large
-        amounts of data and compute operations on these groups.
-
-        Parameters
-        ----------
-        by : mapping, function, label, or list, optional, default None
-            Used to determine the groups for the groupby.
-            If by is a function, it'srs called on each
-            value of the object'srs index.
-            If a dict or Series is passed, the Series or dict VALUES will
-            be used to determine the groups (the Series' values are first
-            aligned; see .align() method).
-            If an ndarray is passed, the values are used as-is determined
-            by the groups.
-            A label or list of labels may be passed to group by the columns in
-            self. Notice that a tuple is interpreted as a (single) key.
-        axis : int, optional, default None, {index (0), columns (1)}
-            Split along rows (0) or columns (1).
-        level : Integer, level name, or sequence, optional (default None)
-            If the axis is a MultiIndex (hierarchical),
-            group by a particular level or levels.
-        as_index : boolean, optional (default True)
-            For aggregated output, return object with group labels as the index.
-            Only relevant for DataFrame input. as_index=False
-            is effectively 'SQL-style' grouped output.
-        sort : boolean, optional (default True)
-            Sort group keys. Get better performance by turning this off.
-            Note this does not influence the order of observations
-            within each group. Groupby preserves the order
-            of rows within each group.
-        group_keys : boolean, default True
-            When calling apply, add group keys to index to identify pieces.
-        squeeze : boolean, optional (default False)
-            Reduce the dimensionality of the return type if possible,
-            otherwise return a consistent type.
-        observed : boolean, optional (default False)
-            This only applies if any of the groupers are Categorical.
-            If True: only show observed values for categorical groupers.
-            If False: show all values for categorical groupers.
-        **kwargs
-            Optional, only accepts keyword argument 'mutated'
-            and is passed to groupby.
-
-        Returns
-        -------
-        DataFrameGroupBy:
-            Returns groupby object that contains information about the groups.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html
-
-        """
-
-        operation = begin_operation('groupby')
-        _groupby = self._data.groupby(
-            by,
-            axis,
-            level,
-            as_index,
-            sort,
-            group_keys,
-            squeeze,
-            observed,
-            **kwargs,
-        )
-        self.last_operation = end_operation(operation)
-
-        return _groupby
-
-    def plot(self, *args, **kwargs):
-        """
-        Makes a plot of _data.
-
-        Parameters
-        ----------
-        args: arguments
-            Arguments to pass to pandas plotting method
-        kwargs: keywords
-            Options to pass to matplotlib plotting method
-
-        Returns
-        -------
-        `matplotlib.axes.Axes` or numpy.ndarray of them
-            If the backend is not the default matplotlib one, the return value
-            will be the object returned by the backend.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.html
-
-        """
-
-        operation = begin_operation('plot')
-        _plot = self._data.plot(*args, **kwargs)
-        self.last_operation = end_operation(operation)
-
-        return _plot
-
-    def select_dtypes(self, include=None, exclude=None):
-        """
-        Returns a subset of the _data'srs columns based on the column dtypes.
-
-        Parameters
-        ----------
-        include: scalar or list-like
-            A selection of dtypes or strings to be included/excluded.
-        exclude: scalar or list-like
-            A selection of dtypes or strings to be included/excluded.
-
-        Returns
-        -------
-        DataFrame
-            The subset of the object including the dtypes in
-            include and excluding the dtypes in exclude.
-
-        Notes
-        -----
-        One of the parameters: include or exclude must be supplied.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.select_dtypes.html
-
-        """
-
-        operation = begin_operation('select_dtypes')
-        _select_dtypes = self._data.select_dtypes(include, exclude)
-        self.last_operation = end_operation(operation)
-
-        return _select_dtypes
-
-    def astype(self, dtype, copy=True, errors='raise', **kwargs):
+        dtype: Union[Callable, Dict],
+        copy: Optional[bool] = True,
+        errors: Optional[Text] = 'raise'
+    ) -> DataFrame:
         """
         Cast a pandas object to a specified dtype.
 
         Parameters
         ----------
-        dtype: data type, or dict of column name -> data type
+        dtype: callable, dict
             Use a numpy.dtype or Python type to cast entire pandas object
             to the same type. Alternatively, use {col: dtype, …},
             where col is a column label and dtype is a numpy.dtype
-            or Python type to cast one or more of the DataFrame'srs
+            or Python type to cast one or more of the DataFrame
             columns to column-specific types.
-        copy: bool, optional, default None
+        copy: bool, optional
             Return a copy when copy=True (be very careful setting
             copy=False as changes to values then
-            may propagate to other pandas objects).
-        errors: 'raise', 'ignore', optional, default raise
-            Control raising of exceptions on invalid data for provided dtype.
+            may propagate to other pandas objects), by default True
+        errors: str, optional
+            Control raising of exceptions on invalid data for provided dtype,
+                by default 'raise
             - raise : allow exceptions to be raised
             - ignore : suppress exceptions. On error return original object
-        kwargs:
-             keyword arguments to pass on to the constructor
 
         Returns
         -------
@@ -2367,52 +1737,50 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     'Could not change lat, lon, and datetime type.'
                 )
 
-        operation = begin_operation('astype')
-        _astype = self._data.astype(dtype, copy, errors, **kwargs)
-        self.last_operation = end_operation(operation)
-
-        return _astype
+        return super().astype(dtype=dtype, copy=copy, errors=errors)
 
     def sort_values(
         self,
-        by,
-        axis=0,
-        ascending=True,
-        inplace=False,
-        kind='quicksort',
-        na_position='last',
-    ):
+        by: Union[Text, List[Text]],
+        axis: Optional[int] = 0,
+        ascending: Optional[bool] = True,
+        inplace: Optional[bool] = False,
+        kind: Optional[Text] = 'quicksort',
+        na_position: Optional[Text] = 'last',
+    ) -> Optional['PandasMoveDataFrame']:
         """
         Sorts the values of the _data, along an axis.
 
         Parameters
         ----------
-        by: str or list of str
-            Name or list of names to sort the _data by.
-        axis: Integer, optional, default None, {index (0), columns (1)}
-            if set to 0 or'index', will count for each column.
-            if set to 1 or'columns', will count for each row
-        ascending: boolean or list of beoolean, default True.
+        by: str, list
+            Name or list of names to sort the _data by
+        axis: int, optional
+            if set to 0 or 'index', will count for each column.
+            if set to 1 or 'columns', will count for each row
+            by default 0
+        ascending: bool, optional
             Sort ascending vs. descending. Specify list for
             multiple sort orders.
-            If this is a list of bools, must match the length of the by.
-        inplace: Boolean, optional, default False
+            If this is a list of bool, must match the length, by default True
+        inplace: bool, optional
             if set to true the original dataframe will be altered,
             the duplicates will be dropped in place,
             otherwise the operation will be made in a copy,
-            that will be returned.
-        kind: 'quicksort', 'mergesort', 'heapsort', default 'quicksort'.
-            Choice of sorting algorithm.
+            that will be returned, by default False
+        kind: str, optional
+            Choice of sorting algorithm, 'quicksort', 'mergesort', 'heapsort'
             For DataFrames, this option is only applied when sorting
-            on a single column or label.
-        na_position: 'first', 'last'.
+            on a single column or label, by default 'quicksort'
+        na_position: str, optional
+            'first', 'last', by default 'last
             If 'first' puts NaNs at the beginning;
             If last puts NaNs at the end.
 
         Returns
         -------
-        PandasDataframe or None
-            Object with sorted values or None if ``inplace=True``.
+        PandasMoveDataFrame
+            The sorted dataframe or None
 
         References
         ----------
@@ -2420,48 +1788,48 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
 
-        operation = begin_operation('sort_values')
-        _sort_values = self._data.sort_values(
-            by, axis, ascending, inplace, kind, na_position
+        _sort_values = super().sort_values(
+            by=by, axis=axis, ascending=ascending,
+            inplace=False, kind=kind, na_position=na_position
         )
 
         if inplace:
-            self.last_operation = end_operation(operation)
+            self._mgr = _sort_values._mgr
+            self._item_cache = dict()
             return None
-        _sort_values = PandasMoveDataFrame(data=_sort_values)
-        self.last_operation = end_operation(operation)
-        return _sort_values
+        return PandasMoveDataFrame(data=_sort_values)
 
     def reset_index(
-        self, level=None, drop=False, inplace=False, col_level=0, col_fill=''
-    ):
+        self,
+        level: Optional[Union[int, Text, Tuple, List]] = None,
+        drop: Optional[bool] = False,
+        inplace: Optional[bool] = False,
+        col_level: Optional[Union[int, Text]] = 0,
+        col_fill: Optional[Text] = ''
+    ) -> Optional['PandasMoveDataFrame']:
         """
-        Resets the DataFrame'srs index, and use the default one. One or more
+        Resets the DataFrame's index, and use the default one. One or more
         levels can be removed, if the DataFrame has a MultiIndex.
 
         Parameters
         ----------
-        level: int, str, tuple, or list. Optional, default None
-            Only the levels specify will be removed from the index.
-            If set to None, all levels are removed.
-        drop: boolean, optional, default False
-            Do not try to insert index into dataframe columns.
-            This resets the index to the default integer index.
-        inplace: bool, optional, default False
-            Modify the DataFrame in place (do not create a new object).
-        col_level: int or str, default 0
+        level: int or str or tuple or list, optional
+            Only the levels specify will be removed from the index
+            If set to None, all levels are removed, by default None
+        drop: bool, optional
+            Do not try to insert index into dataframe columns
+            This resets the index to the default integer index, by default False
+        inplace: bool, optional
+            Modify the DataFrame in place (do not create a new object), by default False
+        col_level: int or str, optional
             If the columns have multiple levels, determines which level
-            the labels are inserted into.
-            By default it is inserted into the first level..
-        col_fill: object, default ''
-            If the columns have multiple levels, determines how
-            the other levels are named.
-            If None then the index name is repeated.
+            the labels are inserted into, by default 0
+        col_fill: str, optional
+            If the columns have multiple levels, determines how the other levels are named
+            If None then the index name is repeated, by default ''
 
-        Returns
-        -------
-        PandasMoveDataFrame or None
-            Object with a reseted indexes or None if ``inplace=True``.
+        PandasMoveDataFrame
+            The generated picture or None
 
         References
         ----------
@@ -2469,54 +1837,51 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         """
 
-        operation = begin_operation('reset_index')
-        _reset_index = self._data.reset_index(
-            level, drop, inplace, col_level, col_fill
+        _reset_index = super().reset_index(
+            level=level, drop=drop, inplace=False, col_level=col_level, col_fill=col_fill
         )
 
         if inplace:
-            self.last_operation = end_operation(operation)
+            self._mgr = _reset_index._mgr
+            self._item_cache = dict()
             return None
-
-        _reset_index = PandasMoveDataFrame(data=_reset_index)
-        self.last_operation = end_operation(operation)
-        return _reset_index
+        return PandasMoveDataFrame(data=_reset_index)
 
     def set_index(
         self,
-        keys,
-        drop=True,
-        append=False,
-        inplace=False,
-        verify_integrity=False,
-    ):
+        keys: Union[Text, List[Text]],
+        drop: Optional[bool] = True,
+        append: Optional[bool] = False,
+        inplace: Optional[bool] = False,
+        verify_integrity: Optional[bool] = False,
+    ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
         Set the DataFrame index (row labels) using one or more existing columns
         or arrays (of the correct length).
 
         Parameters
         ----------
-        keys: str or array of str.
-            label or array-like or list of labels/arrays.
+        keys: str, list
+            label or array-like or list of labels/arrays
             This parameter can be either a single column key, a single
             array of the same length as the calling DataFrame,
             or a list containing an arbitrary combination of
-            column keys and arrays.
-        drop: bool, optional (True by defautl)
-            Delete columns to be used as the new index.
-        append: bool, optional (False by defautl)
-            Whether to append columns to existing index.
-        inplace: bool, optional (False by defautl)
-            Modify the DataFrame in place (do not create a new object).
-        verify_integrity: bool, optional (False by defautl)
-            Check the new index for duplicates.
-            Otherwise defer the check until necessary.
-            Setting to False will improve the performance of this method.
+            column keys and arrays
+        drop: bool, optional
+            Delete columns to be used as the new index, by default True
+        append: bool, optional
+            Whether to append columns to existing index, by default True
+        inplace: bool, optional
+            Modify the DataFrame in place (do not create a new object), by default True
+        verify_integrity: bool, optional
+            Check the new index for duplicates
+            Otherwise defer the check until necessary
+            Setting to False will improve the performance of this method, by default True
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with a new index or None if ``inplace=True``.
+        PandasMoveDataFrame, DataFrame
+            Object with a new index or None
 
         References
         ----------
@@ -2535,36 +1900,34 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             else:
                 aux = set(keys)
             columns = {LATITUDE, LONGITUDE, DATETIME}
-            print(aux, columns)
             if aux & columns:
                 raise AttributeError(
                     'Could not change lat, lon, and datetime type.'
                 )
 
-        operation = begin_operation('set_index')
-        _set_index = self._data.set_index(
-            keys, drop, append, inplace, verify_integrity
+        _set_index = super().set_index(
+            keys=keys, drop=drop, append=append,
+            inplace=False, verify_integrity=verify_integrity
         )
-
-        if (
-                isinstance(_set_index, pd.DataFrame)
-                and MoveDataFrame.has_columns(_set_index)
-        ):
+        if inplace:
+            self._mgr = _set_index._mgr
+            self._item_cache = dict()
+            _set_index = None
+        if _set_index is not None and MoveDataFrame.has_columns(_set_index):
             _set_index = PandasMoveDataFrame(data=_set_index)
 
-        self.last_operation = end_operation(operation)
         return _set_index
 
     def drop(
         self,
-        labels=None,
-        axis=0,
-        index=None,
-        columns=None,
-        level=None,
-        inplace=False,
-        errors='raise',
-    ):
+        labels: Optional[Union[Text, List[Text]]] = None,
+        axis: Optional[Union[int, Text]] = 0,
+        index: Optional[Union[Text, List[Text]]] = None,
+        columns: Optional[Union[Text, List[Text]]] = None,
+        level: Optional[Union[int, Text]] = None,
+        inplace: Optional[bool] = False,
+        errors: Optional[Text] = 'raise',
+    ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
         Remove rows or columns by specifying label names and corresponding axis,
         or by specifying directly index or column names. When using a multi-
@@ -2573,29 +1936,30 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Parameters
         ----------
-        labels: str or array of str
-            Index or column labels to drop.
-        axis: str or int, optional, default 0
+        labels: str or list, optional
+            Index or column labels to drop, by default None
+        axis: int or str, optional
             Whether to drop labels from the index (0 or 'index')
-            or columns (1 or 'columns').
-        index: str or array of str, optional (None by defautl)
+            or columns (1 or 'columns'), by default 0
+        index: str or list, optional
             Alternative to specifying axis
-            (labels, axis=0 is equivalent to index=labels).
-        columns: str or array of str, optional (None by defautl)
+            (labels, axis=0 is equivalent to index=labels), by default None
+        columns: str or list, optional
             Alternative to specifying axis
-            (labels, axis=1 is equivalent to columns=labels).
-        level: int or str, optional (None by defautl)
-            For MultiIndex, level from which the labels will be removed.
-        inplace: bool, optional (False by defautl)
-            If True, do operation inplace and return None.
-            Otherwise, make a copy, do operations and return.
-        errors:'ignore', 'raise', optional, default 'raise'
+            (labels, axis=1 is equivalent to columns=labels), by default None
+        level: str or int, optional
+            For MultiIndex, level from which the labels will be removed, by default None
+        inplace: bool, optional
+            If True, do operation inplace and return None
+            Otherwise, make a copy, do operations and return, by default False
+        errors: bool, optional
+            'ignore', 'raise', by default 'raise'
             If 'ignore', suppress error and only existing labels are dropped.
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object without the removed index or column labels.
+        PandasMoveDataFrame, DataFrame
+            Object without the removed index or column labels or None
 
         Raises
         ------
@@ -2632,92 +1996,70 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                     'Could not drop columns lat, lon, and datetime.'
                 )
 
-        operation = begin_operation('drop')
-        _drop = self._data.drop(
-            labels, axis, index, columns, level, inplace, errors
+        _drop = super().drop(
+            labels=labels, axis=axis, index=index, columns=columns,
+            level=level, inplace=False, errors=errors
         )
 
-        if (
-                (isinstance(_drop, pd.DataFrame))
-                and MoveDataFrame.has_columns(_drop)
-        ):
+        if inplace:
+            self._mgr = _drop._mgr
+            self._item_cache = dict()
+            _drop = None
+        if _drop is not None and MoveDataFrame.has_columns(_drop):
             _drop = PandasMoveDataFrame(data=_drop)
 
-        self.last_operation = end_operation(operation)
         return _drop
 
-    def duplicated(self, subset=None, keep='first'):
+    def drop_duplicates(
+        self,
+        subset: Optional[Union[int, Text]] = None,
+        keep: Optional[Union[Text, bool]] = 'first',
+        inplace: Optional[bool] = False
+    ) -> Optional['PandasMoveDataFrame']:
         """
-        Returns boolean Series denoting duplicate rows, optionally only
-        considering certain columns.
-
-        Parameters
-        ----------
-        subset: str, array of str, optional, default None
-            Only consider certain columns for identifying duplicates,
-            by default use all of the columns
-        keep: str, optional (default 'first'), options: first', 'last', False.
-            first : Mark duplicates as True except for the first occurrence.
-            last : Mark duplicates as True except for the last occurrence.
-            False : Mark all duplicates as True.
-
-        Returns
-        -------
-        Series
-            Denoting duplicated rows.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.duplicated.html
-
-        """
-
-        operation = begin_operation('duplicated')
-        _duplicated = self._data.duplicated(subset, keep)
-        self.last_operation = end_operation(operation)
-
-        return _duplicated
-
-    def drop_duplicates(self, subset=None, keep='first', inplace=False):
-        """
-        Uses the pandas'srs function drop_duplicates, to remove duplicated rows
+        Uses the pandas's function drop_duplicates, to remove duplicated rows
         from data.
 
         Parameters
         ----------
-        subset: int or str, optional, default None
+        subset: int or str, optional
             Only consider certain columns for identifying duplicates,
-            by default use all of the columns
-        keep: 'first', 'lasts', False, optional, default 'first'
+            by default use all of the columns, by default None
+        keep: str, optional
             - first : Drop duplicates except for the first occurrence.
             - last : Drop duplicates except for the last occurrence.
             - False : Drop all duplicates.
-        inplace: bool, optional, default False
-            Whether to drop duplicates in place or to return a copy
+            by default 'first'
+        inplace: bool, optional
+            Whether to drop duplicates in place or to return a copy, by default False
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with duplicated rows or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with duplicated rows or None
 
         References
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html
 
         """
-
-        operation = begin_operation('drop_duplicates')
-        _drop_duplicates = self._data.drop_duplicates(subset, keep, inplace)
+        _drop_duplicates = super().drop_duplicates(
+            subset=subset, keep=keep, inplace=False
+        )
 
         if inplace:
-            self.last_operation = end_operation(operation)
+            self._mgr = _drop_duplicates._mgr
+            self._item_cache = dict()
             return None
+        return PandasMoveDataFrame(data=_drop_duplicates)
 
-        _drop_duplicates = PandasMoveDataFrame(data=_drop_duplicates)
-        self.last_operation = end_operation(operation)
-        return _drop_duplicates
-
-    def shift(self, periods=1, freq=None, axis=0, fill_value=None):
+    def shift(
+        self,
+        periods: Optional[int] = 1,
+        freq: Optional[Union[DateOffset, Timedelta, Text]] = None,
+        axis: Optional[Union[int, Text]] = 0,
+        fill_value: Optional[Any] = None
+    ) -> 'PandasMoveDataFrame':
         """
         Shift index by desired number of periods with an optional time freq.
 
@@ -2725,8 +2067,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         periods: int, optional, default 1
             Number of periods to shift. Can be positive or negative.
-        freq: pandas.DateOffset, pandas.Timedelta or str, optional, default None
-            Offset to use from the tseries module or time rule (e.g. 'EOM').
+        freq: DateOffset or Timedelta or str, optional, default None
+            Offset to use from the series module or time rule (e.g. 'EOM').
             If freq is specified then the index values are shifted but
             the data is not realigned. That is, use freq if you would like
             to extend the index when shifting and preserve the original data.
@@ -2746,158 +2088,26 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Returns
         -------
         PandasMoveDataFrame
-            A copy of the original object, shifed.
+            A copy of the original object, shifted.
 
         References
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.shift.html
 
         """
-
-        operation = begin_operation('shift')
-        _shift = self._data.shift(periods, freq, axis, fill_value)
-        _shift = PandasMoveDataFrame(data=_shift)
-        self.last_operation = end_operation(operation)
-
-        return _shift
-
-    def all(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
-        """
-        Indicates if all elements are True, potentially over an axis. Returns
-        True unless there at least one element within the Dataframe axis
-        that is False or equivalent.
-
-        Parameters
-        ----------
-        axis: 0 or 'index', 1 or 'columns', None, optional, default 0
-            Indicate which axis or axes should be reduced.
-            - 0 / 'index' : reduce the index, return a Series whose index
-            is the original column labels.
-            - 1 / 'columns' : reduce the columns, return a Series whose index
-            is the original index.
-            - None : reduce all axes, return a scalar.
-        bool_only: bool, optional (None by defautl)
-            Include only boolean columns.
-            If None, will attempt to use everything, then use only boolean data
-        skipna: bool, optional (True by defautl)
-            Exclude NA/null values. If the entire row/column is NA and skipna
-            is True, then the result will be True,
-            as for an empty row/column. If skipna is False,
-            then NA are treated as True,
-            because these are not equal to zero.
-        level: int or str(level name), optional (default None)
-            If the axis is a MultiIndex (hierarchical), count along a
-            particular level, collapsing into a Series.
-        kwargs: any, default None
-            Additional keywords have no effect but might be accepte
-             for compatibility with NumPy.
-
-        Returns
-        -------
-        Series or DataFrame
-            If level is specified, then, DataFrame is returned;
-            otherwise, Series is returned.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.all.html
-
-        """
-
-        operation = begin_operation('all')
-        _all = self._data.all(axis, bool_only, skipna, level, **kwargs)
-        self.last_operation = end_operation(operation)
-
-        return _all
-
-    def any(self, axis=0, bool_only=None, skipna=True, level=None, **kwargs):
-        """
-        Indicates if any element is True, potentially over an axis. Returns
-        False unless there at least one element within the Dataframe axis that
-        is True or equivalent.
-
-        Parameters
-        ----------
-        Parameters
-        ----------
-        axis: 0 or 'index', 1 or 'columns', None, optional, default 0
-            Indicate which axis or axes should be reduced.
-            - 0 / 'index' : reduce the index, return a Series whose index
-            is the original column labels.
-            - 1 / 'columns' : reduce the columns, return a Series whose index
-            is the original index.
-            - None : reduce all axes, return a scalar.
-        bool_only: bool, optional (None by defautl)
-            Include only boolean columns.
-            If None, will attempt to use everything, then use only boolean data
-        skipna: bool, optional (True by defautl)
-            Exclude NA/null values. If the entire row/column is NA and skipna
-            is True, then the result will be True,
-            as for an empty row/column. If skipna is False,
-            then NA are treated as True,
-            because these are not equal to zero.
-        level: int or str(level name), optional (default None)
-            If the axis is a MultiIndex (hierarchical), count along a
-            particular level, collapsing into a Series.
-        kwargs: any, default None
-            Additional keywords have no effect but might be accepte
-             for compatibility with NumPy.
-
-        Returns
-        -------
-        Series or DataFrame
-            If level is specified, then, DataFrame is returned;
-            otherwise, Series is returned.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.any.html
-
-        """
-
-        operation = begin_operation('any')
-        _any = self._data.any(axis, bool_only, skipna, level, **kwargs)
-        self.last_operation = end_operation(operation)
-
-        return _any
-
-    def isna(self):
-        """
-        Detect missing values.
-
-        Return a boolean same-sized object indicating if the values are NA.
-        NA values, such as None or numpy.NaN, gets mapped to True values.
-        Everything else gets mapped to False values.
-        Characters such as empty strings '' or numpy.inf are not
-        considered NA values
-        (unless you set pandas.options.mode.use_inf_as_na = True).
-
-        Returns
-        -------
-        DataFrame
-            DataFrame of booleans showing for each element in
-            DataFrame that indicates whether an element is not an NA value.
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.fillna.html
-
-        """
-
-        operation = begin_operation('isna')
-        _isna = self._data.isna()
-        self.last_operation = end_operation(operation)
-
-        return _isna
+        _shift = super().shift(
+            periods=periods, freq=freq, axis=axis, fill_value=fill_value
+        )
+        return PandasMoveDataFrame(data=_shift)
 
     def fillna(
         self,
-        value=None,
-        method=None,
-        axis=None,
-        inplace=False,
-        limit=None,
-        downcast=None,
+        value: Optional[Any] = None,
+        method: Optional[Text] = None,
+        axis: Optional[Union[int, Text]] = None,
+        inplace: Optional[bool] = False,
+        limit: Optional[int] = None,
+        downcast: Optional[Dict] = None,
     ):
         """
         Fill NA/NaN values using the specified method.
@@ -2934,58 +2144,60 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with missing values filled or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with missing values filled or None
 
         References
         ----------
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.fillna.html
 
         """
-
-        operation = begin_operation('fillna')
-        _fillna = self._data.fillna(
-            value, method, axis, inplace, limit, downcast
+        _fillna = super().fillna(
+            value=value, method=method, axis=axis,
+            inplace=False, limit=limit, downcast=downcast
         )
 
         if inplace:
-            self.last_operation = end_operation(operation)
+            self._mgr = _fillna._mgr
+            self._item_cache = dict()
             return None
-
-        _fillna = PandasMoveDataFrame(data=_fillna)
-        self.last_operation = end_operation(operation)
-        return _fillna
+        return PandasMoveDataFrame(data=_fillna)
 
     def dropna(
-        self, axis=0, how='any', thresh=None, subset=None, inplace=False
+        self,
+        axis: Optional[Union[int, Text]] = 0,
+        how: Optional[Text] = 'any',
+        thresh: Optional[float] = None,
+        subset: Optional[List] = None,
+        inplace: Optional[bool] = False
     ):
         """
         Removes missing data.
 
         Parameters
         ----------
-        axis: 0 or 'index', 1 or 'columns', None, optional, default 0
-            Determine if rows or columns are removed.
+        axis: 0 or 'index', 1 or 'columns', None, optional
+            Determine if rows or columns are removed, by default 0
             - 0, or 'index' : Drop rows which contain missing values.
             - 1, or 'columns' : Drop columns which contain missing value.
-        how: str, optional, default 'any', options: 'any', 'all'
-            Determine if row or column is removed from DataFrame,
+        how: str, optional
+            Determine if row or column is removed from DataFrame, by default 'any
             when we have at least one NA or all NA.
                - 'any' : If any NA values are present, drop that row or column.
                - 'all' : If all values are NA, drop that row or column.
-        thresh: int, optional, default None
-            Require that many non-NA values.
-        subset: array-like, optional, default None
-            Labels along other axis to consider,
+        thresh: float, optional
+            Require that many non-NA values, by default None
+        subset: array-like, optional
+            Labels along other axis to consider, by default None
             e.g. if you are dropping rows these would be a
             list of columns to include.
-        inplace: bool, optional (default False)
-            If True, do operation inplace and return None
+        inplace: bool, optional
+            If True, do operation inplace and return None, by default False
 
         Returns
         -------
-        PandasMoveDataFrame or None
-            Object with NA entries dropped or None if ``inplace=True``.
+        PandasMoveDataFrame
+            Object with NA entries dropped or None
 
         References
         ----------
@@ -3001,33 +2213,33 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         if inplace:
             if axis == 1 or axis == 'columns':
                 columns = [LATITUDE, LONGITUDE, DATETIME]
-                data = self._data[columns]
+                data = self[columns]
                 if data.isnull().values.any():
                     raise AttributeError(
                         'Could not drop columns lat, lon, and datetime.'
                     )
 
-        operation = begin_operation('dropna')
-        _dropna = self._data.dropna(axis, how, thresh, subset, inplace)
+        _dropna = super().dropna(
+            axis=axis, how=how, thresh=thresh, subset=subset, inplace=False)
 
-        if (
-                isinstance(_dropna, pd.DataFrame)
-                and MoveDataFrame.has_columns(_dropna)
-        ):
+        if inplace:
+            self._mgr = _dropna._mgr
+            self._item_cache = dict()
+            _dropna = None
+        if _dropna is not None and MoveDataFrame.has_columns(_dropna):
             _dropna = PandasMoveDataFrame(data=_dropna)
 
-        self.last_operation = end_operation(operation)
         return _dropna
 
     def sample(
         self,
-        n=None,
-        frac=None,
-        replace=False,
-        weights=None,
-        random_state=None,
-        axis=None,
-    ):
+        n: Optional[int] = None,
+        frac: Optional[float] = None,
+        replace: Optional[bool] = False,
+        weights: Optional[Union[Text, List]] = None,
+        random_state: Optional[int] = None,
+        axis: Optional[Union[int, Text]] = None
+    ) -> 'PandasMoveDataFrame':
         """
         Return a random sample of items from an axis of object.
 
@@ -3036,14 +2248,14 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         Parameters
         ----------
         n : int, optional
-            Number of items from axis to return. Cannot be used with `frac`.
-            Default = 1 if `frac` = None.
+            Number of items from axis to return. Cannot be used with `frac`,
+            by default None
         frac : float, optional
-            Fraction of axis items to return. Cannot be used with `n`.
-        replace : bool, default False
-            Allow or disallow sampling of the same row more than once.
+            Fraction of axis items to return. Cannot be used with `n`, by deault None
+        replace : bool, optional
+            Allow or disallow sampling of the same row more than once, by default False
         weights : str or ndarray-like, optional
-            Default 'None' results in equal probability weighting.
+            If 'None' results in equal probability weighting.
             If passed a Series, will align with target object on index. Index
             values in weights not found in sampled object will be ignored and
             index values in sampled object not in weights will be assigned
@@ -3055,12 +2267,13 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             If weights do not sum to 1, they will be normalized to sum to 1.
             Missing values in the weights column will be treated as zero.
             Infinite values not allowed.
+            by default None
         random_state : int or numpy.random.RandomState, optional
             Seed for the random number generator (if int), or numpy RandomState
-            object.
-        axis : {0 or 'index', 1 or 'columns', None}, default None
+            object,by default None
+        axis : {0 or 'index', 1 or 'columns', None}, optional
             Axis to sample. Accepts axis number or name. Default is stat axis
-            for given data type (0 for Series and DataFrames).
+            for given data type (0 for Series and DataFrames), by default None
 
         Returns
         -------
@@ -3082,22 +2295,19 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sample.html
 
         """
-        operation = begin_operation('sample')
-        _sample = self._data.sample(
-            n, frac, replace, weights, random_state, axis
+        _sample = super().sample(
+            n=n, frac=frac, replace=replace, weights=weights,
+            random_state=random_state, axis=axis
         )
-        _sample = PandasMoveDataFrame(data=_sample)
-        self.last_operation = end_operation(operation)
+        return PandasMoveDataFrame(data=_sample)
 
-        return _sample
-
-    def isin(self, values):
+    def isin(self, values: Union[List, Series, DataFrame, Dict]) -> DataFrame:
         """
         Determines whether each element in the DataFrame is contained in values.
 
         values : iterable, Series, DataFrame or dict
             The result will only be true at a location if all the labels match.
-            If values is a Series, that'srs the index.
+            If values is a Series, the index.
             If values is a dict, the keys must be the
             column names, which must match.
             If values is a DataFrame, then both the
@@ -3114,19 +2324,15 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.isin.html
 
         """
-
-        if isinstance(values, PandasMoveDataFrame):
-            values = values._data
-
-        operation = begin_operation('isin')
-        _isin = self._data.isin(values)
-        self.last_operation = end_operation(operation)
-
-        return _isin
+        return DataFrame(self).isin(values)
 
     def append(
-        self, other, ignore_index=False, verify_integrity=False, sort=None
-    ):
+        self,
+        other: Union['PandasMoveDataFrame', DataFrame],
+        ignore_index: Optional[bool] = False,
+        verify_integrity: Optional[bool] = False,
+        sort: Optional[bool] = False
+    ) -> 'PandasMoveDataFrame':
         """
         Append rows of other to the end of caller, returning a new object.
         Columns in other that are not in the caller are added as new columns.
@@ -3135,16 +2341,17 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         other : DataFrame or Series/dict-like object, or list of these
             The data to append.
-        ignore_index : bool, optional, default False
-            If True, do not use the index labels.
-        verify_integrity : bool, optional, default False
-            If True, raise ValueError on creating index with duplicates.
-        sort : bool, optional, default None
-            Sort columns if the columns of self and other are not aligned.
+        ignore_index : bool, optional
+            If True, do not use the index labels, by default False
+        verify_integrity : bool, optional
+            If True, raise ValueError on creating index with duplicates, by default False
+        sort : bool, optional
+            Sort columns if the columns of self and other are not aligned
             The default sorting is deprecated and will
             change to not-sorting in a future version of pandas.
             Explicitly pass sort=True to silence the warning and sort.
             Explicitly pass sort=False to silence the warning and not sort.
+            by default False
 
         Returns
         -------
@@ -3156,23 +2363,24 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.append.html
 
         """
-
-        operation = begin_operation('append')
-
         if isinstance(other, PandasMoveDataFrame):
-            other = other._data
+            other = DataFrame(other)
 
-        _append = self._data.append(
-            other, ignore_index, verify_integrity, sort
+        _append = super().append(
+            other=other, ignore_index=ignore_index,
+            verify_integrity=verify_integrity, sort=sort
         )
-        _append = PandasMoveDataFrame(data=_append)
-        self.last_operation = end_operation(operation)
-
-        return _append
+        return PandasMoveDataFrame(data=_append)
 
     def join(
-        self, other, on=None, how='left', lsuffix='', rsuffix='', sort=False
-    ):
+        self,
+        other: Union['PandasMoveDataFrame', DataFrame],
+        on: Optional[Union[Text, List]] = None,
+        how: Optional[Text] = 'left',
+        lsuffix: Optional[Text] = '',
+        rsuffix: Optional[Text] = '',
+        sort: Optional[bool] = False
+    ) -> 'PandasMoveDataFrame':
         """
         Join columns of other, returning a new object.
 
@@ -3186,30 +2394,30 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             Index should be similar to one of the columns in this one. If a
             Series is passed, its name attribute must be set, and that will be
             used as the column name in the resulting joined DataFrame.
-        on : str, list of str, or array-like, optional
+        on : str or list of str or array-like, optional
             Column or index level name(srs) in the caller to join on the index
             in `other`, otherwise joins index-on-index. If multiple
             values given, the `other` DataFrame must have a MultiIndex. Can
             pass an array as the join key if it is not already contained in
             the calling DataFrame. Like an Excel VLOOKUP operation.
-        how : {'left', 'right', 'outer', 'inner'}, default 'left'
-            How to handle the operation of the two objects.
+        how : {'left', 'right', 'outer', 'inner'}, optional
+            How to handle the operation of the two objects, by default 'left'
 
-            * left: use calling frame'srs index (or column if on is specified)
-            * right: use `other`'srs index.
-            * outer: form union of calling frame'srs index (or column if on is
-            specified) with `other`'srs index, and sort it.
+            * left: use calling frame index (or column if on is specified)
+            * right: use `other` index.
+            * outer: form union of calling frame index (or column if on is
+            specified) with `other` index, and sort it.
             lexicographically.
-            * inner: form intersection of calling frame'srs index (or column if
-            on is specified) with `other`'srs index, preserving the order
-            of the calling'srs one.
-        lsuffix : str, default ''
-            Suffix to use from left frame'srs overlapping columns.
-        rsuffix : str, default ''
-            Suffix to use from right frame'srs overlapping columns.
-        sort : bool, default False
+            * inner: form intersection of calling frame index (or column if
+            on is specified) with `other` index, preserving the order
+            of the calling one.
+        lsuffix : str, optional
+            Suffix to use from left frame overlapping columns, by default ''
+        rsuffix : str, optional
+            Suffix to use from right frame overlapping columns, by default ''
+        sort : bool, optional
             Order result DataFrame lexicographically by the join key. If False,
-            the order of the join key depends on the join type (how keyword).
+            the order of the join key depends on the join type (how keyword)
 
         Returns
         -------
@@ -3226,33 +2434,29 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.join.html
 
         """
-
-        operation = begin_operation('join')
-
         if isinstance(other, PandasMoveDataFrame):
             other = other._data
 
-        _join = self._data.join(other, on, how, lsuffix, rsuffix, sort)
-        _join = PandasMoveDataFrame(data=_join)
-        self.last_operation = end_operation(operation)
-
-        return _join
+        _join = super().join(
+            other=other, on=on, how=how,
+            lsuffix=lsuffix, rsuffix=rsuffix, sort=sort)
+        return PandasMoveDataFrame(data=_join)
 
     def merge(
             self,
-            right,
-            how='inner',
-            on=None,
-            left_on=None,
-            right_on=None,
-            left_index=False,
-            right_index=False,
-            sort=False,
-            suffixes=('_x', '_y'),
-            copy=True,
-            indicator=False,
-            validate=None
-    ):
+            right: Union['PandasMoveDataFrame', DataFrame, Series],
+            how: Optional[Text] = 'inner',
+            on: Optional[Union[Text, List]] = None,
+            left_on: Optional[Union[Text, List]] = None,
+            right_on: Optional[Union[Text, List]] = None,
+            left_index: Optional[bool] = False,
+            right_index: Optional[bool] = False,
+            sort: Optional[bool] = False,
+            suffixes: Optional[Tuple[Text, Text]] = ('_x', '_y'),
+            copy: Optional[bool] = True,
+            indicator: Optional[Union[bool, Text]] = False,
+            validate: Optional[Text] = None
+    ) -> 'PandasMoveDataFrame':
         """
         Merge DataFrame or named Series objects with a database-style join.
 
@@ -3264,8 +2468,8 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         ----------
         right: DataFrame or named Series
             Object to merge with.
-        how: {‘left’, ‘right’, ‘outer’, ‘inner’}, default ‘inner’
-            Type of merge to be performed.
+        how: {‘left’, ‘right’, ‘outer’, ‘inner’}, optional
+            Type of merge to be performed, by default ‘inner’
             left: use only keys from left frame, similar to a SQL left outer join;
                 preserve key order.
             right: use only keys from right frame, similar to a SQL right outer join;
@@ -3274,34 +2478,35 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
                 sort keys lexicographically.
             inner: use intersection of keys from both frames, similar to a SQL inner join;
                 preserve the order of the left keys.
-        on: label or list
+        on: label or list, optional
             Column or index level names to join on. These must be found in both
             DataFrames. If on is None and not merging on indexes then this defaults
-            to the intersection of the columns in both DataFrames.
-        left_on: label or list, or array-like
+            to the intersection of the columns in both DataFrames, by default None
+        left_on: str or list or array-like, optional
             Column or index level names to join on in the left DataFrame. Can
             also be an array or list of arrays of the length of the left DataFrame.
-            These arrays are treated as if they are columns.
-        right_on: label or list, or array-like
+            These arrays are treated as if they are columns, by default None
+        right_on: str or list or array-like, optional
             Column or index level names to join on in the right DataFrame.
             Can also be an array or list of arrays of the length of the right DataFrame.
-            These arrays are treated as if they are columns.
-        left_index: bool, default False
-            Use the index from the left DataFrame as the join key(s).
+            These arrays are treated as if they are columns, by default None
+        left_index: bool, optional
+            Use the index from the left DataFrame as the join key(s), by default False
             If it is a MultiIndex, the number of keys in the other DataFrame
             (either the index or a number of columns) must match the number of levels.
-        right_index: bool, default False
-            Use the index from the right DataFrame as the join key.
+        right_index: bool, optional
+            Use the index from the right DataFrame as the join key, by default False
             Same caveats as left_index.
-        sort: bool, default False
-            Sort the join keys lexicographically in the result DataFrame.
+        sort: bool, optional
+            Sort the join keys lexicographically in the result DataFrame, by default False
             If False, the order of the join keys depends on the join type (how keyword).
-        suffixes: tuple of (str, str), default (‘_x’, ‘_y’)
-            Suffix to apply to overlapping column names in the left and right side,
+        suffixes: tuple of (str, str), optional
+            Suffix to apply to overlapping column names in the left and right side
             respectively. To raise an exception on overlapping columns use (False, False)
-        copy: bool, default True
-            If False, avoid copy if possible.
-        indicator: bool or str, default False
+            by default (‘_x’, ‘_y’)
+        copy: bool, optional
+            If False, avoid copy if possible, by default True
+        indicator: bool or str, optional
             If True, adds a column to output DataFrame called '_merge' with
             information on the source of each row. If string, column with
             information on source of each row will be added to output DataFrame,
@@ -3310,8 +2515,9 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             whose merge key only appears in ‘left’ DataFrame, 'right_only' for
             observations whose merge key only appears in ‘right’ DataFrame,
             and 'both' if the observation’s merge key is found in both.
+            by default False
         validate: str, optional
-            If specified, checks if merge is of specified type.
+            If specified, checks if merge is of specified type, by default None
             'one_to_one' or '1:1': check if merge keys are unique in both
                 left and right datasets.
             'one_to_many' or '1:m': check if merge keys are unique in left dataset.
@@ -3328,98 +2534,35 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.merge.html?highlight=merge#pandas.DataFrame.merge
 
         """
-
-        operation = begin_operation('merge')
-
         if isinstance(right, PandasMoveDataFrame):
             right = right._data
 
-        _merge = self._data.merge(
-            right, how, on, left_on, right_on, left_index, right_index, sort,
-            suffixes, copy, indicator, validate
+        _merge = super().merge(
+            right=right, how=how, on=on, left_on=left_on, right_on=right_on,
+            left_index=left_index, right_index=right_index, sort=sort,
+            suffixes=suffixes, copy=copy, indicator=indicator, validate=validate
         )
+        return PandasMoveDataFrame(data=_merge)
 
-        if copy:
-            _merge = PandasMoveDataFrame(data=_merge)
-        self.last_operation = end_operation(operation)
-
-        return _merge
-
-    def nunique(self, axis=0, dropna=True):
-        """
-        Count distinct observations over requested axis.
-
-        Parameters
-        ----------
-        axis : 0 or 'index', 1 or 'columns', None, optional, default 0
-            The axis to use. 0 or 'index' for row-wise,
-            1 or 'columns' for column-wise.
-        dropna : bool, optional (default True)
-            Don't include NaN in the counts.
-
-        Returns
-        -------
-        Series
-            Return Series with number of distinct observations
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.unique.html
-
-        """
-
-        operation = begin_operation('nunique')
-        _nunique = self._data.nunique(axis, dropna)
-        self.last_operation = end_operation(operation)
-
-        return _nunique
-
-    def write_file(self, file_name, separator=','):
+    def write_file(self, file_name: Text, separator: Optional[Text] = ','):
         """
         Write trajectory data to a new file.
 
         Parameters
         ----------
-        file_name : str.
+        file_name : str
             Represents the filename.
-        separator : str, optional, default ','.
-            Represents the information separator in a new file.
+        separator : str, optional
+            Represents the information separator in a new file, by default ','
 
         """
-
-        operation = begin_operation('write_file')
-        self._data.to_csv(
+        self.to_csv(
             file_name, sep=separator, encoding='utf-8', index=False
         )
-        self.last_operation = end_operation(operation)
 
-    def to_csv(self, file_name, sep=',', index=True, encoding=None):
-        """
-        Write object to a comma-separated values (csv) file.
-
-        Parameters
-        ----------
-        file_name: str
-            File path or object
-        sep: str
-            str of length 1. Field delimiter for the output file.
-        index: bool
-            Boolean indicating whether to save row indexes
-        encoding: str, optional (None default)
-            A str representing the encoding to use in the output file,
-            defaults to 'utf-8'
-
-        References
-        ----------
-        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_csv.html
-
-        """
-
-        operation = begin_operation('to_csv')
-        self._data.to_csv(file_name, sep=sep, index=index, encoding=encoding)
-        self.last_operation = end_operation(operation)
-
-    def convert_to(self, new_type):
+    def convert_to(
+        self, new_type: Text
+    ) -> Union['PandasMoveDataFrame', 'DaskMoveDataFrame']:
         """
         Convert an object from one type to another specified by the user.
 
@@ -3439,7 +2582,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
 
         if new_type == TYPE_DASK:
             _dask = MoveDataFrame(
-                self._data,
+                self,
                 latitude=LATITUDE,
                 longitude=LONGITUDE,
                 datetime=DATETIME,
@@ -3453,7 +2596,7 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
             self.last_operation = end_operation(operation)
             return self
 
-    def get_type(self):
+    def get_type(self) -> Text:
         """
         Returns the type of the object.
 
@@ -3462,7 +2605,5 @@ class PandasMoveDataFrame(pd.DataFrame, MoveDataFrameAbstractModel):
         str
             A string representing the type of the object.
         """
-        operation = begin_operation('get_type')
         type_ = self._type
-        self.last_operation = end_operation(operation)
         return type_

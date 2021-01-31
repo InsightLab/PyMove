@@ -1,5 +1,9 @@
+from typing import TYPE_CHECKING, Optional, Text, Tuple, Union
+
 import numpy as np
 import pandas as pd
+from numpy import ndarray
+from pandas.core.frame import DataFrame
 
 from pymove.utils.constants import (
     DIST_TO_PREV,
@@ -13,9 +17,13 @@ from pymove.utils.constants import (
 )
 from pymove.utils.log import progress_bar, timer_decorator
 
+if TYPE_CHECKING:
+    from pymove.core.pandas import PandasMoveDataFrame
+    from pymove.core.dask import DaskMoveDataFrame
+
 
 @timer_decorator
-def bbox_split(bbox, number_grids):
+def bbox_split(bbox: Tuple[int, int, int, int], number_grids: int) -> DataFrame:
     """
     splits the bounding box in N grids of the same size.
 
@@ -24,12 +32,12 @@ def bbox_split(bbox, number_grids):
     bbox: tuple
         Tuple of 4 elements, containing the minimum and maximum values
         of latitude and longitude of the bounding box.
-    number_grids: Integer
+    number_grids: int
         Determines the number of grids to split the bounding box.
 
     Returns
     -------
-    dataframe
+    DataFrame
         Returns the latitude and longitude coordinates of
         the grids after the split.
 
@@ -61,7 +69,7 @@ def bbox_split(bbox, number_grids):
     return move_data
 
 
-def _drop_single_point(move_data, label_new_tid, label_id):
+def _drop_single_point(move_data: DataFrame, label_new_tid: Text, label_id: Text):
     """
     Removes trajectory with single point.
 
@@ -69,11 +77,11 @@ def _drop_single_point(move_data, label_new_tid, label_id):
     ----------
     move_data: dataframe
         dataframe with trajectories
-    label_new_tid : String
+    label_new_tid : str
         The label of the column containing the ids of the formed segments.
         Is the new splitted id.
-    label_id : String
-         Indicates the label of the id column in the user"srs dataframe.
+    label_id : str
+         Indicates the label of the id column in the user dataframe, by default TRAJ_ID
 
     """
 
@@ -95,7 +103,9 @@ def _drop_single_point(move_data, label_new_tid, label_id):
         print('...No trajs with only one point.', move_data.shape)
 
 
-def _filter_and_dist_time_speed(move_data, idx, max_dist, max_time, max_speed):
+def _filter_and_dist_time_speed(
+    move_data: DataFrame, idx: int, max_dist: float, max_time: float, max_speed: float
+) -> ndarray:
     """
     Filters the dataframe considering thresholds for time, dist and speed
 
@@ -126,7 +136,9 @@ def _filter_and_dist_time_speed(move_data, idx, max_dist, max_time, max_speed):
     )
 
 
-def _filter_or_dist_time_speed(move_data, idx, feature, max_between_adj_points):
+def _filter_or_dist_time_speed(
+    move_data: DataFrame, idx: int, feature: Text, max_between_adj_points: float
+) -> ndarray:
     """
     Filters the dataframe considering thresholds for time, dist and speed
 
@@ -151,7 +163,7 @@ def _filter_or_dist_time_speed(move_data, idx, feature, max_between_adj_points):
     return np.nan_to_num(move_data.at[idx, feature]) > max_between_adj_points
 
 
-def _prepare_segmentation(move_data, label_id, label_new_tid):
+def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: Text):
     """
     Resets the dataframe index, collects unique ids and
     initiates curr_id and count
@@ -189,8 +201,9 @@ def _prepare_segmentation(move_data, label_id, label_new_tid):
 
 
 def _update_curr_tid_count(
-        filter_, move_data, idx, label_new_tid, curr_tid, count
-):
+    filter_: ndarray, move_data: DataFrame, idx: int,
+    label_new_tid: Text, curr_tid: float, count: int
+) -> Tuple[int, int]:
     """
     Updates the tid
 
@@ -236,8 +249,9 @@ def _update_curr_tid_count(
 
 
 def _filter_by(
-        move_data, label_id, label_new_tid, drop_single_points, **kwargs
-):
+    move_data: DataFrame, label_id: Text, label_new_tid: Text,
+    drop_single_points: bool, **kwargs
+) -> DataFrame:
     """
     Splits the trajectories into segments.
 
@@ -245,9 +259,9 @@ def _filter_by(
     ----------
     move_data : dataframe
        The input trajectory data
-    label_id : String, optional(dic_labels["id"] by default)
-         Indicates the label of the id column in the user"srs dataframe.
-    label_new_tid : String, optional(TID_PART by default)
+    label_id : str, optional
+         Indicates the label of the id column in the user dataframe, by default TRAJ_ID
+    label_new_tid : str, optional(TID_PART by default)
         The label of the column containing the ids of the formed segments.
         Is the new splitted id.
     drop_single_points : boolean, optional(True by default)
@@ -269,7 +283,7 @@ def _filter_by(
 
     Note
     ----
-    Time, distance and speeed features must be updated after split.
+    Time, distance and speed features must be updated after split.
 
     """
 
@@ -314,15 +328,15 @@ def _filter_by(
 
 @timer_decorator
 def by_dist_time_speed(
-        move_data,
-        label_id=TRAJ_ID,
-        max_dist_between_adj_points=3000,
-        max_time_between_adj_points=7200,
-        max_speed_between_adj_points=50.0,
-        drop_single_points=True,
-        label_new_tid=TID_PART,
-        inplace=True,
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_id: Optional[Text] = TRAJ_ID,
+    max_dist_between_adj_points: Optional[float] = 3000,
+    max_time_between_adj_points: Optional[float] = 7200,
+    max_speed_between_adj_points: Optional[float] = 50.0,
+    drop_single_points: Optional[bool] = True,
+    label_new_tid: Optional[Text] = TID_PART,
+    inplace: Optional[bool] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Splits the trajectories into segments based on distance, time and speed.
 
@@ -330,33 +344,35 @@ def by_dist_time_speed(
     ----------
     move_data : dataframe
        The input trajectory data
-    label_id : String, optional(dic_labels["id"] by default)
-         Indicates the label of the id column in the user"srs dataframe.
-    max_dist_between_adj_points : Float, optional(3000 by default)
+    label_id : str, optional
+         Indicates the label of the id column in the user dataframe, by default TRAJ_ID
+    max_dist_between_adj_points : float, optional
         Specify the maximum distance a point should have from
-        the previous point, in order not to be dropped
-    max_time_between_adj_points : Float, optional(7200 by default)
-        Specify the maximum travel time between two adjacent points
-    max_speed_between_adj_points : Float, optional(50.0 by default)
-        Specify the maximum speed of travel between two adjacent points
-    drop_single_points : boolean, optional(True by default)
-        If set to True, drops the trajectories with only one point.
-    label_new_tid : String, optional(TID_PART by default)
+        the previous point, in order not to be dropped, by default 3000
+    max_time_between_adj_points : float, optional
+        Specify the maximum travel time between two adjacent points, by default 7200
+    max_speed_between_adj_points : float, optional
+        Specify the maximum speed of travel between two adjacent points, by default 50
+    drop_single_points : boolean, optional
+        If set to True, drops the trajectories with only one point, by default True
+    label_new_tid : str, optional
         The label of the column containing the ids of the formed segments.
-        Is the new splitted id.
-    inplace : boolean, optional(True by default)
+        Is the new splitted id, by default TID_PART
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to
-        contain the result of the filtering, otherwise a copy will be returned.
+        contain the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     -------
-    dataframe
+    DataFrame
         DataFrame with the aditional features: label_new_tid,
-        that indicates the trajectory segment to which the point belongs to.
+        that indicates the trajectory segment to which the point belongs to,
+        by default False
 
     Note
     ----
-    Time, distance and speeed features must be updated after split.
+    Time, distance and speed features must be updated after split.
 
     """
 
@@ -371,33 +387,29 @@ def by_dist_time_speed(
     if TIME_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
 
-    try:
-        move_data = _filter_by(
-            move_data,
-            label_id,
-            label_new_tid,
-            drop_single_points,
-            max_dist=max_dist_between_adj_points,
-            max_time=max_time_between_adj_points,
-            max_speed=max_speed_between_adj_points,
-            all=True
-        )
-        if not inplace:
-            return move_data
-
-    except Exception as e:
-        raise e
+    move_data = _filter_by(
+        move_data,
+        label_id,
+        label_new_tid,
+        drop_single_points,
+        max_dist=max_dist_between_adj_points,
+        max_time=max_time_between_adj_points,
+        max_speed=max_speed_between_adj_points,
+        all=True
+    )
+    if not inplace:
+        return move_data
 
 
 @timer_decorator
 def by_max_dist(
-        move_data,
-        label_id=TRAJ_ID,
-        max_dist_between_adj_points=3000,
-        drop_single_points=True,
-        label_new_tid=TID_DIST,
-        inplace=True,
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_id: Optional[Text] = TRAJ_ID,
+    max_dist_between_adj_points: Optional[float] = 7200,
+    drop_single_points: Optional[bool] = True,
+    label_new_tid: Optional[Text] = TID_DIST,
+    inplace: Optional[bool] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Segments the trajectories based on distance.
 
@@ -405,22 +417,24 @@ def by_max_dist(
     ----------
     move_data : dataframe
        The input trajectory data
-    label_id : String, optional(dic_labels["id"] by default)
-         Indicates the label of the id column in the user"srs dataframe.
-    max_dist_between_adj_points : Float, optional(50.0 by default)
-        Specify the maximum dist between two adjacent points
-    drop_single_points : boolean, optional(True by default)
-        If set to True, drops the trajectories with only one point.
-    label_new_tid : String, optional(TID_DIST by default)
-        The label of the column containing the ids of the formed segments.
+    label_id : str, optional
+         Indicates the label of the id column in the user dataframe, by default TRAJ_ID
+    max_dist_between_adj_points : float, optional
+        Specify the maximum dist between two adjacent points, by default 7200
+    drop_single_points : boolean, optional
+        If set to True, drops the trajectories with only one point, by default True
+    label_new_tid : str, optional
+        The label of the column containing the ids of the formed segments,
+        by default TID_DIST
         Is the new splitted id.
-    inplace : boolean, optional(True by default)
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to
-        contain the result of the filtering, otherwise a copy will be returned.
+        contain the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     -------
-    dataframe
+    DataFrame
         DataFrame with the aditional features: label_segment,
         that indicates the trajectory segment to which the point belongs to.
 
@@ -441,32 +455,28 @@ def by_max_dist(
     if DIST_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
 
-    try:
-        move_data = _filter_by(
-            move_data,
-            label_id,
-            label_new_tid,
-            drop_single_points,
-            feature=DIST_TO_PREV,
-            max_between_adj_points=max_dist_between_adj_points,
-            all=False
-        )
-        if not inplace:
-            return move_data
-
-    except Exception as e:
-        raise e
+    move_data = _filter_by(
+        move_data,
+        label_id,
+        label_new_tid,
+        drop_single_points,
+        feature=DIST_TO_PREV,
+        max_between_adj_points=max_dist_between_adj_points,
+        all=False
+    )
+    if not inplace:
+        return move_data
 
 
 @timer_decorator
 def by_max_time(
-        move_data,
-        label_id=TRAJ_ID,
-        max_time_between_adj_points=900.0,
-        drop_single_points=True,
-        label_new_tid=TID_TIME,
-        inplace=True,
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_id: Optional[Text] = TRAJ_ID,
+    max_time_between_adj_points: Optional[float] = 900.0,
+    drop_single_points: Optional[bool] = True,
+    label_new_tid: Optional[Text] = TID_TIME,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Splits the trajectories into segments based on a maximum.
 
@@ -474,23 +484,25 @@ def by_max_time(
     ----------
     move_data : dataframe
        The input trajectory data
-    label_id : String, optional(id by default)
-         Indicates the label of the id column in the users dataframe.
-    max_time_between_adj_points : Float, optional(50.0 by default)
-        Specify the maximum time between two adjacent points
-    drop_single_points : boolean, optional(True by default)
-        If set to True, drops the trajectories with only one point.
-    label_new_tid : String, optional(TID_TIME by default)
-        The label of the column containing the ids of the formed segments.
+    label_id : str, optional
+         Indicates the label of the id column in the users dataframe, by default TRAJ_ID
+    max_time_between_adj_points : float, optional
+        Specify the maximum time between two adjacent points, by default 900
+    drop_single_points : boolean, optional
+        If set to True, drops the trajectories with only one point, by default True
+    label_new_tid : str, optional
+        The label of the column containing the ids of the formed segments,
+        by default TID_TIME
         Is the new splitted id.
-    inplace : boolean, optional(True by default)
-        if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned.
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to
+        contain the result of the filtering, otherwise a copy will be returned,
+        by default True
 
 
     Returns
     -------
-    dataframe
+    DataFRame
         DataFrame with the additional features: label_segment,
         that indicates the trajectory segment to which the point belongs to.
 
@@ -511,32 +523,28 @@ def by_max_time(
     if TIME_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
 
-    try:
-        move_data = _filter_by(
-            move_data,
-            label_id,
-            label_new_tid,
-            drop_single_points,
-            feature=TIME_TO_PREV,
-            max_between_adj_points=max_time_between_adj_points,
-            all=False
-        )
-        if not inplace:
-            return move_data
-
-    except Exception as e:
-        raise e
+    move_data = _filter_by(
+        move_data,
+        label_id,
+        label_new_tid,
+        drop_single_points,
+        feature=TIME_TO_PREV,
+        max_between_adj_points=max_time_between_adj_points,
+        all=False
+    )
+    if not inplace:
+        return move_data
 
 
 @timer_decorator
 def by_max_speed(
-        move_data,
-        label_id=TRAJ_ID,
-        max_speed_between_adj_points=50.0,
-        drop_single_points=True,
-        label_new_tid=TID_SPEED,
-        inplace=True,
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_id: Optional[Text] = TRAJ_ID,
+    max_speed_between_adj_points: Optional[float] = 50.0,
+    drop_single_points: Optional[bool] = True,
+    label_new_tid: Optional[Text] = TID_SPEED,
+    inplace: Optional[bool] = True,
+) -> Union['PandasMoveDataFrame', 'DaskMoveDataFrame']:
     """
     Splits the trajectories into segments based on a maximum speed.
 
@@ -544,24 +552,26 @@ def by_max_speed(
     ----------
     move_data : dataframe.
        The input trajectory data.
-    label_id : String, optional(id by default).
-         Indicates the label of the id column in the users dataframe.
-    max_speed_between_adj_points : Float, optional(50.0 by default).
-        Specify the maximum speed between two adjacent points.
-    drop_single_points : boolean, optional(True by default)
-        If set to True, drops the trajectories with only one point.
-    label_new_tid : String, optional(TID_SPEED by default)
-        The label of the column containing the ids of the formed segments.
+    label_id : str, optional
+         Indicates the label of the id column in the users dataframe, by default TRAJ_ID
+    max_speed_between_adj_points : float, optional
+        Specify the maximum speed between two adjacent points, by default 50
+    drop_single_points : boolean, optional
+        If set to True, drops the trajectories with only one point, by default True
+    label_new_tid : str, optional
+        The label of the column containing the ids of the formed segments,
+        by default TID_SPEED
         Is the new splitted id.
-    inplace : boolean, optional(True by default)
+    inplace : boolean, optional
         if set to true the original dataframe will be altered to
-        contain the result of the filtering, otherwise a copy will be returned.
+        contain the result of the filtering, otherwise a copy will be returned,
+        by default True
 
     Returns
     -------
-    dataframe
+    DataFrame
         DataFrame with the aditional features: label_segment,
-        that indicates the trajectory segment to which the point belongs to.
+        that indicates the trajectory segment to which the point belongs to
 
     Note
     ----
@@ -580,18 +590,14 @@ def by_max_speed(
     if SPEED_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
 
-    try:
-        move_data = _filter_by(
-            move_data,
-            label_id,
-            label_new_tid,
-            drop_single_points,
-            feature=SPEED_TO_PREV,
-            max_between_adj_points=max_speed_between_adj_points,
-            all=False
-        )
-        if not inplace:
-            return move_data
-
-    except Exception as e:
-        raise e
+    move_data = _filter_by(
+        move_data,
+        label_id,
+        label_new_tid,
+        drop_single_points,
+        feature=SPEED_TO_PREV,
+        max_between_adj_points=max_speed_between_adj_points,
+        all=False
+    )
+    if not inplace:
+        return move_data

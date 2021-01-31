@@ -1,23 +1,27 @@
+from typing import List, Optional, Text, Tuple
+
 from branca.element import MacroElement, Template
+from folium import Map
 from matplotlib.cm import get_cmap as _get_cmap
-from matplotlib.colors import rgb2hex
+from matplotlib.colors import ListedColormap, rgb2hex
 from numpy.random import randint
+from pandas import DataFrame
 
 from pymove.utils.constants import COLORS, LATITUDE, LONGITUDE, TRAJ_ID
 
 
-def add_map_legend(m, title, items):
+def add_map_legend(m: Map, title: Text, items: List[Tuple]):
     """
     Adds a legend for a folium map.
 
     Parameters
     ----------
-    m : folium.map.
+    m : Map
         Represents a folium map.
-    title : string.
-        Represents the title of the legend.
-    items : list of tuple.
-        Represents the color and name of the legend items.
+    title : str
+        Represents the title of the legend
+    items : list of tuple
+        Represents the color and name of the legend items
 
     References
     ----------
@@ -123,25 +127,25 @@ def add_map_legend(m, title, items):
     m.get_root().add_child(macro)
 
 
-def generate_color():
+def generate_color() -> Text:
     """
     Generates a random color.
 
     Returns
     -------
-    Random HEX color
+        Random HEX color
     """
     return COLORS[randint(0, len(COLORS))]
 
 
-def rgb(rgb_colors):
+def rgb(rgb_colors: Tuple[float, float, float]) -> Tuple[int, int, int]:
     """
     Return a tuple of integers, as used in AWT/Java plots.
 
     Parameters
     ----------
-    rgb_colors : list
-        Represents a list with three positions that correspond to the percentage red,
+    rgb_colors : tuple
+        Represents a tuple with three positions that correspond to the percentage red,
         green and blue colors.
 
     Returns
@@ -161,20 +165,20 @@ def rgb(rgb_colors):
     return int(red * 255), int(green * 255), int(blue * 255)
 
 
-def hex_rgb(rgb_colors):
+def hex_rgb(rgb_colors: Tuple[float, float, float]) -> Text:
     """
-    Return a hex string, as used in Tk plots.
+    Return a hex str, as used in Tk plots.
 
     Parameters
     ----------
-    rgb_colors : list
-        Represents a list with three positions that correspond to the percentage red,
-        green and blue colors.
+    rgb_colors : tuple
+        Represents a tuple with three positions that correspond to the percentage red,
+        green and blue colors
 
     Returns
     -------
-    String
-        Represents a color in hexadecimal format.
+    str
+        Represents a color in hexadecimal format
 
     Examples
     --------
@@ -185,21 +189,21 @@ def hex_rgb(rgb_colors):
     return '#%02X%02X%02X' % rgb(rgb_colors)
 
 
-def cmap_hex_color(cmap, i):
+def cmap_hex_color(cmap: ListedColormap, i: int) -> Text:
     """
     Convert a Colormap to hex color.
 
     Parameters
     ----------
-    cmap : matplotlib.colors.ListedColormap
-        Represents the Colormap.
+    cmap : ListedColormap
+        Represents the Colormap
     i : int
-        List color index.
+        List color index
 
     Returns
     -------
-    String
-        Represents corresponding hex string.
+    str
+        Represents corresponding hex str
     """
     return rgb2hex(cmap(i))
 
@@ -208,18 +212,20 @@ def get_cmap(cmap):
     return _get_cmap(cmap)
 
 
-def save_wkt(move_data, filename, label_id=TRAJ_ID):
+def save_wkt(
+    move_data: DataFrame, filename: Text, label_id: Optional[Text] = TRAJ_ID
+):
     """
     Save a visualization in a map in a new file .wkt.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    filename : String
-        Represents the filename.
-    label_id : String
-        Represents column name of trajectory id.
+    move_data : DataFrame
+        Input trajectory data
+    filename : str
+        Represents the filename
+    label_id : str
+        Represents column name of trajectory id
 
     """
 
