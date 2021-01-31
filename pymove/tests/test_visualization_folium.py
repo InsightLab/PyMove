@@ -852,7 +852,7 @@ def test_plot_bbox(tmpdir):
         'fit_bounds': 1,
         'poly_line': 1
     }
-    m = folium.plot_bbox(bbox, file=filename_write_default, save_map=True)
+    m = folium.plot_bbox(bbox, filename=filename_write_default, save_as_html=True)
     to_dict = m.to_dict(ordered=False)['children']
     actual = defaultdict(int)
     for key in to_dict.keys():
@@ -1088,13 +1088,13 @@ def test_show_trajs_with_event():
         df_event=df_event,
         window_time_event=4,
         radius=150,
-        event_lat_=LATITUDE,
-        event_lon_=LONGITUDE,
-        event_datetime_=DATETIME,
+        event_lat=LATITUDE,
+        event_lon=LONGITUDE,
+        event_datetime=DATETIME,
         user_lat=LATITUDE,
         user_lon=LONGITUDE,
         user_datetime=DATETIME,
-        event_id_='id',
+        event_id='id',
         event_point=EVENT_POINT,
         user_id='id',
         user_point=USER_POINT,
@@ -1122,13 +1122,13 @@ def test_show_traj_id_with_event():
         df_event=df_event,
         window_time_event=4,
         radius=150,
-        event_lat_=LATITUDE,
-        event_lon_=LONGITUDE,
-        event_datetime_=DATETIME,
+        event_lat=LATITUDE,
+        event_lon=LONGITUDE,
+        event_datetime=DATETIME,
         user_lat=LATITUDE,
         user_lon=LONGITUDE,
         user_datetime=DATETIME,
-        event_id_='id',
+        event_id='id',
         event_point=EVENT_POINT,
         user_id='id',
         user_point=USER_POINT,

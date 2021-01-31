@@ -1,8 +1,11 @@
+from typing import Any, Dict, List, Optional, Text, Tuple, Union
+
 import folium
 import numpy as np
 import pandas as pd
-from folium import plugins
+from folium import Map, plugins
 from folium.plugins import FastMarkerCluster, HeatMap, HeatMapWithTime, MarkerCluster
+from pandas import DataFrame
 
 from pymove.preprocessing import filters
 from pymove.utils import distances
@@ -32,29 +35,35 @@ from pymove.utils.visual import add_map_legend, cmap_hex_color, get_cmap
 
 
 def save_map(
-    move_data,
-    filename,
-    tiles=TILES[0],
-    label_id=TRAJ_ID,
-    cmap='Set1',
-    return_map=False
-):
+    move_data: DataFrame,
+    filename: Text,
+    tiles: Optional[Text] = TILES[0],
+    label_id: Optional[Text] = TRAJ_ID,
+    cmap: Optional[Text] = 'Set1',
+    return_map: Optional[bool] = False
+) -> Optional[Map]:
     """
-    Save a visualization in a map in a new file.
+    Save a visualization in a map in a new file
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    filename : String
-        Represents the filename.
-    tiles : String
-        Represents the type_ of tile that will be used on the map.
-    label_id : String
-        Represents column name of trajectory id.
-    cmap: String
-        Represents the Colormap.
+    move_data : DataFrame
+        Input trajectory data
+    filename : Text
+        Represents the filename path
+    tiles : str, optional
+        Represents the type_ of tile that will be used on the map, by default TILES[0]
+    label_id : str, optional
+        Represents column name of trajectory id, by default TRAJ_ID
+    cmap : str, optional
+        Color map to use, by default 'Set1'
+    return_map : bool, optional
+        Represents the Colormap, by default False
 
+    Returns
+    -------
+    Map
+        folium map or None
     """
 
     map_ = folium.Map(tiles=tiles)
@@ -85,35 +94,32 @@ def save_map(
 
 
 def create_base_map(
-    move_data,
-    lat_origin=None,
-    lon_origin=None,
-    tile=TILES[0],
-    default_zoom_start=12,
-):
+    move_data: DataFrame,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    tile: Optional[Text] = TILES[0],
+    default_zoom_start: Optional[float] = 12,
+) -> Map:
     """
-    Generate a folium map.
+    Generate a folium map
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    lat_origin : float, optional, default None.
-        Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
-        Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    default_zoom_start : int, optional, default 12.
-        Represents the zoom which will be the center of the map.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
+    move_data : DataFrame
+        Input trajectory data
+    lat_origin : float, optional
+        Represents the latitude which will be the center of the map, by default None
+    lon_origin : float, optional
+        Represents the longitude which will be the center of the map, by default None
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    default_zoom_start : float, optional
+        Represents the zoom which will be the center of the map, by default 12
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map.
-
+    Map
+        a folium map
     """
 
     if lat_origin is None and lon_origin is None:
@@ -129,52 +135,49 @@ def create_base_map(
 
 
 def heatmap(
-    move_data,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    radius=8,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    filename='heatmap.html',
-):
+    move_data: DataFrame,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    radius: Optional[float] = 8,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'heatmap.html',
+) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
-        Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
-        Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    radius : float, optional, default 8.
-        Radius of each “point” of the heatmap.
-    base_map : folium.folium.Map, optional, default None.
+    move_data : DataFrame
+        Input trajectory data
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None
+    lat_origin : float, optional
+        Represents the latitude which will be the center of the map, by default None
+    lon_origin : float, optional
+        Represents the longitude which will be the center of the map, by default None
+    zoom_start : float, optional
+        Initial zoom level for the map, by default 12
+    radius : float, optional
+        Radius of each “point” of the heatmap, by default 8
+    base_map : Map, optional
         Represents the folium map. If not informed, a new map is generated
         using the function create_base_map(), with the lat_origin, lon_origin
-        and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    filename : String, optional, default 'heatmap.html'.
-        Represents the file name of new file .html.
+        and zoom_start, by default None
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False
+    filename : str, optional
+        Represents the file name of new file .html, by default 'heatmap.html'
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
-
+    Map
+        folium Map
     """
     if base_map is None:
         base_map = create_base_map(
@@ -201,61 +204,59 @@ def heatmap(
 
     if save_as_html:
         base_map.save(outfile=filename)
-    else:
-        return base_map
+    return base_map
 
 
 def heatmap_with_time(
-    move_data,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    radius=8,
-    min_opacity=0.5,
-    max_opacity=0.8,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    filename='heatmap_with_time.html'
-):
+    move_data: DataFrame,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    radius: Optional[float] = 8,
+    min_opacity: Optional[float] = 0.5,
+    max_opacity: Optional[float] = 0.8,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'heatmap_time.html',
+) -> Map:
     """
-    Generate a heatmap with time.
+    Generate visualization of Heat Map using folium plugin.
 
     Parameters
-    -----------
-    move_data: DataFrame.
-        Trajectories input data.
-    n_rows: int, optional, default None.
-        the number of rows to use.
-    lat_origin: float, optional, default None.
-        The latitude coordinate to use as origin.
-    lon_origin: float, optional, default None.
-       The longitude coordinate to use as origin.
-    zoom_start: int, optional, default 12.
-        The zoom to start whit.
-    radius: float, optional, default 5.
-        Radius to form heatmap cluster
-    min_opacity: float, optional, default 0.5.
-        Minimum heat opacity
-    max_opacity: float, optional, default 0.8.
-        Maximum heat opacity
-    base_map : folium.folium.Map, optional, default None.
+    ----------
+    move_data : DataFrame
+        Input trajectory data
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None
+    lat_origin : float, optional
+        Represents the latitude which will be the center of the map, by default None
+    lon_origin : float, optional
+        Represents the longitude which will be the center of the map, by default None
+    zoom_start : float, optional
+        Initial zoom level for the map, by default 12
+    radius : float, optional
+        Radius of each “point” of the heatmap, by default 8
+    min_opacity: float, optional
+        Minimum heat opacity, by default 0.5.
+    max_opacity: float, optional
+        Maximum heat opacity, by default 0.8.
+    base_map : Map, optional
         Represents the folium map. If not informed, a new map is generated
         using the function create_base_map(), with the lat_origin, lon_origin
-        and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    filename : String, optional, default 'heatmap_with_time.html'.
-        Represents the file name of new file .html.
+        and zoom_start, by default None
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False
+    filename : str, optional
+        Represents the file name of new file .html, by default 'heatmap_time.html'
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
-
+    Map
+        folium Map
     """
 
     if base_map is None:
@@ -287,7 +288,7 @@ def heatmap_with_time(
     HeatMapWithTime(
         move_data_hour_list,
         radius=radius,
-        gradient={0.2: 'blue', 0.4: 'lime', 0.6: 'orange', 1: 'red'},
+        gradient={0.2: 'blue', 0.4: 'lime', 0.6: USER_POINT, 1: 'red'},
         min_opacity=min_opacity,
         max_opacity=max_opacity,
         use_local_extrema=True
@@ -296,54 +297,52 @@ def heatmap_with_time(
 
     if save_as_html:
         base_map.save(outfile=filename)
-    else:
-        return base_map
+    return base_map
 
 
 def cluster(
-    move_data,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    filename='cluster.html',
-):
+    move_data: DataFrame,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'cluster.html',
+) -> Map:
     """
-    Generate visualization of Marker Cluster using folium plugin.
+    Generate visualization of Heat Map using folium plugin.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
-        Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
-        Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    base_map : folium.folium.Map, optional, default None.
+    move_data : DataFrame
+        Input trajectory data
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None
+    lat_origin : float, optional
+        Represents the latitude which will be the center of the map, by default None
+    lon_origin : float, optional
+        Represents the longitude which will be the center of the map, by default None
+    zoom_start : float, optional
+        Initial zoom level for the map, by default 12
+    radius : float, optional
+        Radius of each “point” of the heatmap, by default 8
+    base_map : Map, optional
         Represents the folium map. If not informed, a new map is generated
         using the function create_base_map(), with the lat_origin, lon_origin
-        and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    filename : String, optional, default 'cluster.html'.
-        Represents the file name of new file .html.
+        and zoom_start, by default None
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False
+    filename : str, optional
+        Represents the file name of new file .html, by default 'cluster.html'
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
-
+    Map
+        folium Map
     """
 
     if base_map is None:
@@ -377,54 +376,52 @@ def cluster(
 
     if save_as_html:
         base_map.save(outfile=filename)
-    else:
-        return base_map
+    return base_map
 
 
 def faster_cluster(
-    move_data,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    filename='faster_cluster.html',
-):
+    move_data: DataFrame,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'faster_cluster.html',
+) -> Map:
     """
-    Generate visualization of Faster Cluster using folium plugin.
+    Generate visualization of Heat Map using folium plugin.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
-        Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
-        Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    base_map : folium.folium.Map, optional, default None.
+    move_data : DataFrame
+        Input trajectory data
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None
+    lat_origin : float, optional
+        Represents the latitude which will be the center of the map, by default None
+    lon_origin : float, optional
+        Represents the longitude which will be the center of the map, by default None
+    zoom_start : float, optional
+        Initial zoom level for the map, by default 12
+    radius : float, optional
+        Radius of each “point” of the heatmap, by default 8
+    base_map : Map, optional
         Represents the folium map. If not informed, a new map is generated
         using the function create_base_map(), with the lat_origin, lon_origin
-        and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    filename : String, optional, default 'faster_cluster.html'.
-        Represents the file name of new file .html.
+        and zoom_start, by default None
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False
+    filename : str, optional
+        Represents the file name of new file .html, by default 'faster_cluster.html'
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
-
+    Map
+        folium Map
     """
 
     if base_map is None:
@@ -453,54 +450,52 @@ def faster_cluster(
 
     if save_as_html:
         base_map.save(outfile=filename)
-    else:
-        return base_map
+    return base_map
 
 
 def plot_markers(
-    move_data,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    filename='plot_markers.html',
-):
+    move_data: DataFrame,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'markers.html',
+) -> Map:
     """
-    Plot markers of Folium on map.
+    Generate visualization of Heat Map using folium plugin.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
-        Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
-        Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    base_map : folium.folium.Map, optional, default None.
+    move_data : DataFrame
+        Input trajectory data
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None
+    lat_origin : float, optional
+        Represents the latitude which will be the center of the map, by default None
+    lon_origin : float, optional
+        Represents the longitude which will be the center of the map, by default None
+    zoom_start : float, optional
+        Initial zoom level for the map, by default 12
+    radius : float, optional
+        Radius of each “point” of the heatmap, by default 8
+    base_map : Map, optional
         Represents the folium map. If not informed, a new map is generated
-        using the function create_base_map(), with the lat_origin,
-        lon_origin and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    filename : String, optional, default 'plot_trejectory_with_folium.html'.
-        Represents the file name of new file .html.
+        using the function create_base_map(), with the lat_origin, lon_origin
+        and zoom_start, by default None
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False
+    filename : str, optional
+        Represents the file name of new file .html, by default 'markers.html'
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
-
+    Map
+        folium Map
     """
 
     if base_map is None:
@@ -544,32 +539,36 @@ def plot_markers(
 
     if save_as_html:
         base_map.save(outfile=filename)
-    else:
-        return base_map
+    return base_map
 
 
 def _filter_and_generate_colors(
-    move_data, id_=None, n_rows=None, color=None, color_by_id=None
-):
+    move_data: DataFrame,
+    id_: Optional[int] = None,
+    n_rows: Optional[int] = None,
+    color: Optional[Text] = None,
+    color_by_id: Optional[Dict] = None
+) -> Tuple[DataFrame, List[Tuple]]:
     """
     Filters the dataframe and generate colors for folium map.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFrame
         Input trajectory data.
-    id_: int or None.
-        The TRAJ_ID's to be plotted
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    color: string or None.
-        The color of the trajectory, of each trajectory or a colormap
-    color_by_id: dict, optional, default None.
-        A dictionary where the key is the trajectory id and value is a color(string).
+    id_: int, optional
+        The TRAJ_ID's to be plotted, by default None
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None.
+    color: str, optional
+        The color of the trajectory, of each trajectory or a colormap, by default None
+    color_by_id: dict, optional
+        A dictionary where the key is the trajectory id and value is a color(str),
+        by default None.
 
     Returns
     -------
-    pymove.core.MoveDataFrameAbstract subclass.
+    DataFrame
         Filtered trajectories
     list of tuples
         list containing a combination of id and color
@@ -623,17 +622,19 @@ def _filter_and_generate_colors(
     return mv_df, items
 
 
-def _filter_generated_feature(move_data, feature, values):
+def _filter_generated_feature(
+    move_data: DataFrame, feature: Text, values: Any
+) -> DataFrame:
     """
     Filters the values from the dataframe.
 
     Parameters
     __________
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFrame
         Input trajectory data.
-    feature: string
+    feature: str
         Name of the feature
-    value:
+    value: any
         value of the feature
 
     Returns
@@ -654,21 +655,26 @@ def _filter_generated_feature(move_data, feature, values):
     return mv_df
 
 
-def _add_begin_end_markers_to_folium_map(move_data, base_map, color=None, _id=None):
+def _add_begin_end_markers_to_folium_map(
+    move_data: DataFrame,
+    base_map: Map,
+    color: Optional[Text] = None,
+    _id: Optional[int] = None
+):
     """
     Adds a green marker to beginning of the trajectory and a red marker to the
     end of the trajectory.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFrane
         Input trajectory data.
-    base_map : folium.folium.Map, optional, default None.
+    base_map : Map, optional
         Represents the folium map. If not informed, a new map is generated.
-    color : string, optional, default None
-        Color of the markers
-    id: int, optional, default None
-        Id of the trajectory
+    color : str, optional
+        Color of the markers, by default None
+    id: int, optional
+        Id of the trajectory, by default None
     """
 
     points = folium.map.FeatureGroup(
@@ -699,28 +705,28 @@ def _add_begin_end_markers_to_folium_map(move_data, base_map, color=None, _id=No
 
 
 def _add_trajectories_to_folium_map(
-    move_data,
-    items,
-    base_map,
-    legend=True,
-    save_as_html=True,
-    filename='map.html',
+    move_data: DataFrame,
+    items: Tuple,
+    base_map: Map,
+    legend: Optional[bool] = True,
+    save_as_html: Optional[bool] = True,
+    filename: Optional[Text] = 'map.html',
 ):
     """
     Adds a trajectory to a folium map with begin and end markers.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFrame
         Input trajectory data.
-    base_map : folium.folium.Map, optional, default None.
+    base_map : Map
         Represents the folium map. If not informed, a new map is generated.
-    legend: boolean, default True
-        Whether to add a legend to the map
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    filename : String, optional, default 'plot_trajectory_by_period.html'.
-        Represents the file name of new file .html.
+    legend: bool
+        Whether to add a legend to the map, by default True
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    filename : str, optional
+        Represents the file name of new file .html, by default 'map.html'.
 
     """
 
@@ -743,58 +749,60 @@ def _add_trajectories_to_folium_map(
 
 
 def plot_trajectories_with_folium(
-    move_data,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    legend=True,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    color=None,
-    color_by_id=None,
-    filename='plot_trajectories_with_folium.html',
-):
+    move_data: DataFrame,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    legend: Optional[bool] = True,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    color: Optional[Union[Text, List[Text]]] = None,
+    color_by_id: Optional[Dict] = None,
+    filename: Optional[Text] = 'plot_trajectories_with_folium.html',
+) -> Map:
     """
     Generate visualization of all trajectories with folium.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFrame
         Input trajectory data.
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None.
+    lat_origin : float, optional
         Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    lon_origin : float, optional
         Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    legend: boolean, default True
-        Whether to add a legend to the map
-    base_map : folium.folium.Map, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    zoom_start : int, optional
+        Initial zoom level for the map, by default 12.
+    legend: boolean
+        Whether to add a legend to the map, by default True
+    base_map : folium.folium.Map, optional
         Represents the folium map. If not informed, a new map is generated
         using the function create_base_map(), with the lat_origin, lon_origin
-         and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    color : String, list, optional, default None.
+         and zoom_start, by default None.
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    color : str, list, optional
         Represents line colors of visualization.
-        Can be a single color name, a list of colors or a colormap name.
-    color_by_id: dict, optional, default None.
-        A dictionary where the key is the trajectory id and value is a color(string).
-    filename : String, optional, default 'plot_trajectory_with_folium.html'.
-        Represents the file name of new file .html.
+        Can be a single color name, a list of colors or a colormap name, by default None.
+    color_by_id: dict, optional
+        A dictionary where the key is the trajectory id and value is a color(str),
+        by default None.
+    filename : str, optional
+        Represents the file name of new file .html,
+        by default 'plot_trajectory_with_folium.html'.
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
+    Map
+        a folium map with visualization.
 
     """
 
@@ -819,58 +827,59 @@ def plot_trajectories_with_folium(
 
 
 def plot_trajectory_by_id_folium(
-    move_data,
-    id_,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    legend=True,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    color='blue',
-    filename='plot_trajectory_by_id_folium.html',
-):
+    move_data: DataFrame,
+    id_: int,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    legend: Optional[bool] = True,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    color: Optional[Union[Text, List[Text]]] = None,
+    filename: Optional[Text] = 'plot_trajectories_with_folium.html',
+) -> Map:
     """
-    Generate visualization of trajectory with the id provided by user.
+    Generate visualization of all trajectories with folium.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
+    move_data : DataFrame
+        Input trajectory data
     id_: int
-        Represents trajectory ID.
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
+        Trajectory id to plot
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None.
+    lat_origin : float, optional
         Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    lon_origin : float, optional
         Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    legend: boolean, default True
-        Whether to add a legend to the map
-    base_map : folium.folium.Map, optional, default None.
-        Represents the folium map. If not informed, a new map is
-        generated using the function create_base_map(), with the
-        lat_origin, lon_origin and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    color : String, optional, default 'black'.
+        If not entered, the first data from the dataset is used, by default None.
+    zoom_start : int, optional
+        Initial zoom level for the map, by default 12.
+    legend: boolean
+        Whether to add a legend to the map, by default True
+    base_map : folium.folium.Map, optional
+        Represents the folium map. If not informed, a new map is generated
+        using the function create_base_map(), with the lat_origin, lon_origin
+         and zoom_start, by default None.
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    color : str, list, optional
         Represents line colors of visualization.
-        Can be a single color name, a list of colors or a colormap.
-    filename : String, optional, default 'plot_trajectory_by_id_folium.html'.
-        Represents the file name of new file .html.
+        Can be a single color name, a list of colors or a colormap name, by default None.
+    filename : str, optional
+        Represents the file name of new file .html,
+        by default 'plot_trajectory_by_id_with_folium.html'.
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
+    Map
+        a folium map with visualization
 
     Raises
     ------
@@ -878,6 +887,7 @@ def plot_trajectory_by_id_folium(
         If there is no user with the id passed
 
     """
+
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -896,64 +906,66 @@ def plot_trajectory_by_id_folium(
 
 
 def plot_trajectory_by_period(
-    move_data,
-    period,
-    id_=None,
-    legend=True,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    color=None,
-    color_by_id=None,
-    filename='plot_trajectory_by_period_with_folium.html',
-):
+    move_data: DataFrame,
+    period: Text,
+    id_: Optional[int] = None,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    legend: Optional[bool] = True,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    color: Optional[Union[Text, List[Text]]] = None,
+    color_by_id: Optional[Dict] = None,
+    filename: Optional[Text] = 'plot_trajectories_by_period.html',
+) -> Map:
     """
-    Generate trajectory view by period of day provided by user.
+    Generate visualization of all trajectories with folium.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    period: String
-        Represents period of day.
-    id_: int or None
-        If int, plots trajectory of the user, else plot for all users
-    legend: boolean, default True
-        Whether to add a legend to the map
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
+    move_data : DataFrame
+        Input trajectory data
+    period: str
+        Period of the day
+    id_: int
+        Trajectory id to plot, by default None
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None.
+    lat_origin : float, optional
         Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    lon_origin : float, optional
         Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    base_map : folium.folium.Map, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    zoom_start : int, optional
+        Initial zoom level for the map, by default 12.
+    legend: boolean
+        Whether to add a legend to the map, by default True
+    base_map : folium.folium.Map, optional
         Represents the folium map. If not informed, a new map is generated
-        using the function create_base_map(), with the lat_origin,
-        lon_origin and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default None.
+        using the function create_base_map(), with the lat_origin, lon_origin
+         and zoom_start, by default None.
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    color : str, list, optional
         Represents line colors of visualization.
-        Can be a single color name, a list of colors or a colormap.
-    color_by_id: dict, optional, default None.
-        A dictionary where the key is the trajectory id and value is a color.
-    filename : String, optional, default 'plot_trajectory_by_period.html'.
-        Represents the file name of new file .html.
+        Can be a single color name, a list of colors or a colormap name, by default None.
+    color_by_id: dict, optional
+        A dictionary where the key is the trajectory id and value is a color,
+        by default None.
+    filename : str, optional
+        Represents the file name of new file .html,
+        by default 'plot_trajectories_by_period.html'.
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
+    Map
+        a folium map with visualization
 
     Raises
     ------
@@ -963,6 +975,7 @@ def plot_trajectory_by_period(
         If there is no user with the id passed
 
     """
+
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -985,73 +998,76 @@ def plot_trajectory_by_period(
 
 
 def plot_trajectory_by_day_week(
-    move_data,
-    day_week,
-    id_=None,
-    legend=True,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    color=None,
-    color_by_id=None,
-    filename='plot_trajectory_by_day_week.html',
-):
+    move_data: DataFrame,
+    day_week: Text,
+    id_: Optional[int] = None,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    legend: Optional[bool] = True,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    color: Optional[Union[Text, List[Text]]] = None,
+    color_by_id: Optional[Dict] = None,
+    filename: Optional[Text] = 'plot_trajectories_by_day_week.html',
+) -> Map:
     """
-    Generate trajectory view by day week provided by user.
+    Generate visualization of all trajectories with folium.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    day_week: String
-        Represents day week.
-    id_: int or None
-        If int, plots trajectory of the user, else plot for all users
-    legend: boolean, default True
-        Whether to add a legend to the map
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
+    move_data : DataFrame
+        Input trajectory data
+    day_week: str
+        Day of the week
+    id_: int
+        Trajectory id to plot, by default None
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None.
+    lat_origin : float, optional
         Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    lon_origin : float, optional
         Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    base_map : folium.folium.Map, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    zoom_start : int, optional
+        Initial zoom level for the map, by default 12.
+    legend: boolean
+        Whether to add a legend to the map, by default True
+    base_map : folium.folium.Map, optional
         Represents the folium map. If not informed, a new map is generated
-        using the function create_base_map(), with the lat_origin,
-        lon_origin and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default None.
+        using the function create_base_map(), with the lat_origin, lon_origin
+         and zoom_start, by default None.
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    color : str, list, optional
         Represents line colors of visualization.
-        Can be a single color name, a list of colors or a colormap.
-    color_by_id: dict, optional, default None.
-        A dictionary where the key is the trajectory id and value is a color.
-    filename : String, optional, default 'plot_trajectory_by_day_week.html'.
-        Represents the file name of new file .html.
+        Can be a single color name, a list of colors or a colormap name, by default None.
+    color_by_id: dict, optional
+        A dictionary where the key is the trajectory id and value is a color,
+        by default None.
+    filename : str, optional
+        Represents the file name of new file .html,
+        by default 'plot_trajectories_by_day_week.html'.
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
+    Map
+        a folium map with visualization
 
     Raises
     ------
     KeyError
-        If day_week value is not found in dataframe
+        If period value is not found in dataframe
     IndexError
         If there is no user with the id passed
 
     """
+
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -1074,72 +1090,74 @@ def plot_trajectory_by_day_week(
 
 
 def plot_trajectory_by_date(
-    move_data,
-    start_date,
-    end_date,
-    id_=None,
-    legend=True,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    color=None,
-    color_by_id=None,
-    filename='plot_trajectory_by_date.html',
-):
+    move_data: DataFrame,
+    start_date: Text,
+    end_date: Text,
+    id_: Optional[int] = None,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    legend: Optional[bool] = True,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    color: Optional[Union[Text, List[Text]]] = None,
+    color_by_id: Optional[Dict] = None,
+    filename: Optional[Text] = 'plot_trajectories_by_date.html',
+) -> Map:
     """
-    Generate trajectory view by period of time provided by user.
+    Generate visualization of all trajectories with folium.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    start_date : String
+    move_data : DataFrame
+        Input trajectory data
+    start_date : str
         Represents start date of time period.
-    end_date : String
+    end_date : str
         Represents end date of time period.
-    id_: int or None
-        If int, plots trajectory of the user, else plot for all users
-    legend: boolean, default True
-        Whether to add a legend to the map
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
+    id_: int, optional
+        Trajectory id to plot, by default None
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None.
+    lat_origin : float, optional
         Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    lon_origin : float, optional
         Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    base_map : folium.folium.Map, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    zoom_start : int, optional
+        Initial zoom level for the map, by default 12.
+    legend: boolean
+        Whether to add a legend to the map, by default True
+    base_map : folium.folium.Map, optional
         Represents the folium map. If not informed, a new map is generated
-        using the function create_base_map(), with the lat_origin,
-        lon_origin and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default None.
+        using the function create_base_map(), with the lat_origin, lon_origin
+         and zoom_start, by default None.
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    color : str, list, optional
         Represents line colors of visualization.
-        Can be a single color name, a list of colors or a colormap.
-    color_by_id: dict, optional, default None.
-        A dictionary where the key is the trajectory id and value is a color.
-    filename : String, optional, default 'plot_trejectory_with_folium.html'.
-        Represents the file name of new file .html.
+        Can be a single color name, a list of colors or a colormap name, by default None.
+    color_by_id: dict, optional
+        A dictionary where the key is the trajectory id and value is a color,
+        by default None.
+    filename : str, optional
+        Represents the file name of new file .html,
+        by default 'plot_trajectories_by_date.html'.
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
+    Map
+        a folium map with visualization
 
     Raises
     ------
     KeyError
-        If start to end date range not found in dataframe
+        If period value is not found in dataframe
     IndexError
         If there is no user with the id passed
 
@@ -1173,76 +1191,79 @@ def plot_trajectory_by_date(
 
 
 def plot_trajectory_by_hour(
-    move_data,
-    start_hour,
-    end_hour,
-    id_=None,
-    legend=True,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    color=None,
-    color_by_id=None,
-    filename='plot_trajectory_by_hour.html',
-):
+    move_data: DataFrame,
+    start_hour: Text,
+    end_hour: Text,
+    id_: Optional[int] = None,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    legend: Optional[bool] = True,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    color: Optional[Union[Text, List[Text]]] = None,
+    color_by_id: Optional[Dict] = None,
+    filename: Optional[Text] = 'plot_trajectories_by_hour.html',
+) -> Map:
     """
-    Generate trajectory view by period of time provided by user.
+    Generate visualization of all trajectories with folium.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    start_hour : int
+    move_data : DataFrame
+        Input trajectory data
+    start_hour : str
         Represents start hour of time period.
-    end_hour : int
+    end_hour : str
         Represents end hour of time period.
-    id_: int or None
-        If int, plots trajectory of the user, else plot for all users
-    legend: boolean, default True
-        Whether to add a legend to the map
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
+    id_: int, optional
+        Trajectory id to plot, by default None
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None.
+    lat_origin : float, optional
         Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    lon_origin : float, optional
         Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    base_map : folium.folium.Map, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    zoom_start : int, optional
+        Initial zoom level for the map, by default 12.
+    legend: boolean
+        Whether to add a legend to the map, by default True
+    base_map : folium.folium.Map, optional
         Represents the folium map. If not informed, a new map is generated
-        using the function create_base_map(), with the lat_origin,
-        lon_origin and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default None.
+        using the function create_base_map(), with the lat_origin, lon_origin
+         and zoom_start, by default None.
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    color : str, list, optional
         Represents line colors of visualization.
-        Can be a single color name, a list of colors or a colormap.
-    color_by_id: dict, optional, default None.
-        A dictionary where the key is the trajectory id and value is a color.
-    filename : String, optional, default 'plot_trajectory_by_hour.html'.
-        Represents the file name of new file .html.
+        Can be a single color name, a list of colors or a colormap name, by default None.
+    color_by_id: dict, optional
+        A dictionary where the key is the trajectory id and value is a color,
+        by default None.
+    filename : str, optional
+        Represents the file name of new file .html,
+        by default 'plot_trajectories_by_hour.html'.
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
+    Map
+        a folium map with visualization
 
     Raises
     ------
     KeyError
-        If start to end hour range not found in dataframe
+        If period value is not found in dataframe
     IndexError
         If there is no user with the id passed
 
     """
+
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -1265,71 +1286,71 @@ def plot_trajectory_by_hour(
 
 
 def plot_stops(
-    move_data,
-    radius=0,
-    weight=3,
-    id_=None,
-    legend=True,
-    n_rows=None,
-    lat_origin=None,
-    lon_origin=None,
-    zoom_start=12,
-    base_map=None,
-    tile=TILES[0],
-    save_as_html=False,
-    color=None,
-    filename='plot_stops.html',
-):
+    move_data: DataFrame,
+    radius: Optional[float] = 0,
+    weight: Optional[float] = 3,
+    id_: Optional[int] = None,
+    n_rows: Optional[int] = None,
+    lat_origin: Optional[float] = None,
+    lon_origin: Optional[float] = None,
+    zoom_start: Optional[float] = 12,
+    legend: Optional[bool] = True,
+    base_map: Optional[Map] = None,
+    tile: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    color: Optional[Union[Text, List[Text]]] = None,
+    filename: Optional[Text] = 'plot_stops.html',
+) -> Map:
     """
-    Generate points on map that represents stops points with folium.
+    Generate visualization of all trajectories with folium.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        Input trajectory data.
-    radius :  Double, optional(900 by default)
+    move_data : DataFrame
+        Input trajectory data
+    radius : float, optional
         The radius value is used to determine if a segment is a stop.
         If the value of the point in target_label is greater than
-        radius, the segment is a stop, otherwise it'srs a move.
-    weight: int or None
-        Stroke width in pixels
-    id_: int or None
-        If int, plots trajectory of the user, else plot for all users
-    legend: boolean, default True
-        Whether to add a legend to the map
-    n_rows : int, optional, default None.
-        Represents number of data rows that are will plot.
-    lat_origin : float, optional, default None.
+        radius, the segment is a stop, by default 0
+    weight: float, optional
+        Stroke width in pixels, by default 3
+    id_: int, optional
+        Trajectory id to plot, by default None
+    n_rows : int, optional
+        Represents number of data rows that are will plot, by default None.
+    lat_origin : float, optional
         Represents the latitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    lon_origin : float, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    lon_origin : float, optional
         Represents the longitude which will be the center of the map.
-        If not entered, the first data from the dataset is used.
-    zoom_start : int, optional, default 12.
-        Initial zoom level for the map
-    base_map : folium.folium.Map, optional, default None.
+        If not entered, the first data from the dataset is used, by default None.
+    zoom_start : int, optional
+        Initial zoom level for the map, by default 12.
+    legend: boolean
+        Whether to add a legend to the map, by default True
+    base_map : folium.folium.Map, optional
         Represents the folium map. If not informed, a new map is generated
-        using the function create_base_map(), with the lat_origin,
-        lon_origin and zoom_start.
-    tile : String, optional, default 'CartoDB positron'.
-        Represents the map'srs tiles.
-    save_as_html : bool, optional, default False.
-        Represents if want save this visualization in a new file .html.
-    color : String or List, optional, default None.
+        using the function create_base_map(), with the lat_origin, lon_origin
+         and zoom_start, by default None.
+    tile : str, optional
+        Represents the map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    color : str, list, optional
         Represents line colors of visualization.
-        Can be a single color name, a list of colors or a colormap.
-    filename : String, optional, default 'plot_stops.html'.
-        Represents the file name of new file .html.
+        Can be a single color name, a list of colors or a colormap name, by default None.
+    filename : str, optional
+        Represents the file name of new file .html, by default 'plot_stops.html'.
 
     Returns
     -------
-    folium.folium.Map.
-        Represents a folium map with visualization.
+    Map
+        a folium map with visualization
 
     Raises
     ------
     KeyError
-        If no STOPs found
+        If period value is not found in dataframe
     IndexError
         If there is no user with the id passed
 
@@ -1370,18 +1391,18 @@ def plot_stops(
 
     if save_as_html:
         base_map.save(outfile=filename)
-    else:
-        return base_map
+
+    return base_map
 
 
 def plot_bbox(
-    bbox_tuple,
-    base_map=None,
-    tiles=TILES[0],
-    color='red',
-    save_map=False,
-    file='bbox.html'
-):
+    bbox_tuple: Tuple[float, float, float, float],
+    base_map: Optional[Map] = None,
+    tiles: Optional[Text] = TILES[0],
+    color: Optional[Text] = 'red',
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'bbox.html'
+) -> Map:
     """
     Plots a bbox using Folium.
 
@@ -1390,19 +1411,22 @@ def plot_bbox(
     bbox_tuple : tuple.
         Represents a bound box, that is a tuple of 4 values with the
         min and max limits of latitude e longitude.
-    base_map: Folium map, optional, default None.
-        A folium map to plot the trajectories. If None a map will be created.
-    tiles : String, optional, default 'OpenStreetMap'.
-    color : String, optional, default 'red'.
-        Represents color of lines on map.
-    file : String, optional, default 'bbox.html'.
-        Represents filename.
-    save_map: Boolean, optional, default False.
-        Wether to save the bbox folium map.
+    base_map: Folium map, optional
+        A folium map to plot the trajectories. If None a map will be created,
+        by default None.
+    tiles : str, optional
+        by default TILES[0]
+    color : str, optional
+        Represents color of lines on map, by default 'red'.
+    file : str, optional
+        Represents filename, by default 'bbox.html'.
+    save_map: Boolean, optional
+        Wether to save the bbox folium map, by default False.
 
     Returns
     --------
-    folium map with bounding box
+    Map
+        folium map with bounding box
 
     """
     if base_map is None:
@@ -1420,8 +1444,8 @@ def plot_bbox(
     polygon = folium.PolyLine(points_, weight=3, color=color)
     polygon.add_to(base_map)
 
-    if save_map:
-        base_map.save(file)
+    if save_as_html:
+        base_map.save(filename)
 
     return base_map
 
@@ -1461,15 +1485,15 @@ def _circle_maker(
     Parameters
     -----------
     iter_tuple: DataFrame iter_tuple.
-    user_lat: String.
+    user_lat: str.
         Latitude column name.
-    user_lon: String.
+    user_lon: str.
         Longitude column name.
     slice_tags:
 
-    user_point: String.
+    user_point: str.
         Point color.
-    radius: Float.
+    radius: float.
         radius size.
     map_: Folium map.
     """
@@ -1491,15 +1515,17 @@ def _circle_maker(
 
 
 def plot_points_folium(
-    move_data,
-    user_lat=LATITUDE,
-    user_lon=LONGITUDE,
-    user_point=USER_POINT,
-    radius=2,
-    base_map=None,
-    slice_tags=None,
-    tiles=TILES[0]
-):
+    move_data: DataFrame,
+    user_lat: Optional[Text] = LATITUDE,
+    user_lon: Optional[Text] = LONGITUDE,
+    user_point: Optional[Text] = USER_POINT,
+    radius: Optional[float] = 2,
+    base_map: Optional[Map] = None,
+    slice_tags: Optional[List] = None,
+    tiles: Optional[Text] = TILES[0],
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'points.html'
+) -> Map:
     """
     Receives a MoveDataFrame and returns a folium map with the trajectories plots
     and a point.
@@ -1508,25 +1534,31 @@ def plot_points_folium(
     ----------
     move_data: Dataframe
         Trajectory data.
-    user_lat: String, optional, default 'lat'.
-        Latitude column name.
-    user_lon: String, optional, default 'lon'.
-        Longitude column name.
-    user_point: String, optional, default 'orange'.
-        The point color.
-    radius: Float, optional, default 2.
-        radius size.
-    sort:Boolean, optional, default False.
-        If True the data will be sorted.
-    base_map: Folium map, optional, default None.
-        A folium map to plot the trajectories. If None a map will be created.
-    slice_tags: optional, default None.
-    tiles: string, optional, default 'OpenStreetMap'.
+    user_lat: str, optional
+        Latitude column name, by default LATITUDE.
+    user_lon: str, optional
+        Longitude column name, by default LONGITUDE.
+    user_point: str, optional
+        The point color, by default USER_POINT.
+    radius: float, optional
+        radius size, by default 2.
+    sort:Boolean, optional
+        If True the data will be sorted, by default False.
+    base_map: Folium map, optional
+        A folium map to plot the trajectories. If None a map will be created,
+        by default None.
+    slice_tags: optional, by default None.
+    tiles: str, optional, by default TILES[0]
         The map type.
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    filename : str, optional
+        Represents the file name of new file .html, by default 'points.html'.
 
     Returns
     -------
-    A folium map.
+    Map
+        A folium map
     """
 
     if not slice_tags:
@@ -1558,6 +1590,8 @@ def plot_points_folium(
         )
     )
 
+    if save_as_html:
+        base_map.save(outfile=filename)
     return base_map
 
 
@@ -1569,8 +1603,10 @@ def plot_poi_folium(
     radius=2,
     base_map=None,
     slice_tags=None,
-    tiles=TILES[0]
-):
+    tiles=TILES[0],
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'pois.html'
+) -> Map:
 
     """
     Receives a MoveDataFrame and returns a folium map with poi points.
@@ -1579,19 +1615,24 @@ def plot_poi_folium(
     ----------
     move_data: DataFrame
         Trajectory input data
-    poi_lat: String, optional, default 'lat'.
-        Latitude column name.
-    poi_lon: String, optional, default 'lon'.
-        Longitude column name.
-    poi_point: String, optional, default 'red'.
-        Poi point color.
-    radius: Float, optional, default 2.
-        radius size.
-    base_map: Folium map, optional, default None.
-        A folium map to plot. If None a map. If None a map will be created.
-    slice_tags: optional, default None.
-    tiles: string, optional, default 'OpenStreetMap'.
+    poi_lat: str, optional
+        Latitude column name, by default LATITUDE.
+    poi_lon: str, optional
+        Longitude column name, by default LONGITUDE.
+    poi_point: str, optional
+        Poi point color, by default POI_POINT.
+    radius: float, optional
+        radius size, by default 2.
+    base_map: Folium map, optional
+        A folium map to plot. If None a map. If None a map will be created,
+        by default None.
+    slice_tags: optional, by default None.
+    tiles: str, optional, by default TILES[0]
         The map type.
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    filename : str, optional
+        Represents the file name of new file .html, by default 'pois.html'.
 
     Returns
     -------
@@ -1606,7 +1647,9 @@ def plot_poi_folium(
         radius=radius,
         base_map=base_map,
         slice_tags=slice_tags,
-        tiles=tiles
+        tiles=tiles,
+        save_as_html=save_as_html,
+        filename=filename
     )
 
 
@@ -1618,8 +1661,10 @@ def plot_event_folium(
     radius=2,
     base_map=None,
     slice_tags=None,
-    tiles=TILES[0]
-):
+    tiles=TILES[0],
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'events.html'
+) -> Map:
 
     """
     Receives a MoveDataFrame and returns a folium map with events.
@@ -1628,17 +1673,22 @@ def plot_event_folium(
     ----------
     move_data: DataFrame
         Trajectory input data
-    event_lat: String, optional, default 'lat'.
-        Latitude column name.
-    event_lon: String, optional, default 'lon'.
-        Longitude column name.
-    event_point: String, optional, default 'red'.
-        Event color.
-    radius: Float, optional, default 2.
-        radius size.
-    base_map: Folium map, optional, default None.
-        A folium map to plot. If None a map. If None a map will be created.
-    tiles: string, optional, default 'OpenStreetMap'
+    event_lat: str, optional
+        Latitude column name, by default LATITUDE.
+    event_lon: str, optional
+        Longitude column name, by default LONGITUDE.
+    event_point: str, optional
+        Event color, by default EVENT_POI
+    radius: float, optional
+        radius size, by default 2.
+    base_map: Folium map, optional
+        A folium map to plot. If None a map. If None a map will be created,
+        by default None.
+    tiles: str, optional, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    filename : str, optional
+        Represents the file name of new file .html, by default 'events.html'.
 
     Returns
     -------
@@ -1652,30 +1702,32 @@ def plot_event_folium(
         radius=radius,
         base_map=base_map,
         slice_tags=slice_tags,
-        tiles=tiles
+        tiles=tiles,
+        save_as_html=save_as_html,
+        filename=filename
     )
 
 
 def show_trajs_with_event(
-    move_data,
-    window_time_subject,
-    df_event,
-    window_time_event,
-    radius,
-    event_lat_=LATITUDE,
-    event_lon_=LONGITUDE,
-    event_datetime_=DATETIME,
-    user_lat=LATITUDE,
-    user_lon=LONGITUDE,
-    user_datetime=DATETIME,
-    event_id_=EVENT_ID,
-    event_point=EVENT_POINT,
-    user_id=UID,
-    user_point=USER_POINT,
-    line_color=LINE_COLOR,
-    slice_event_show=None,
-    slice_subject_show=None,
-):
+    move_data: DataFrame,
+    window_time_subject: float,
+    df_event: DataFrame,
+    window_time_event: float,
+    radius: float,
+    event_lat: Optional[Text] = LATITUDE,
+    event_lon: Optional[Text] = LONGITUDE,
+    event_datetime: Optional[Text] = DATETIME,
+    user_lat: Optional[Text] = LATITUDE,
+    user_lon: Optional[Text] = LONGITUDE,
+    user_datetime: Optional[Text] = DATETIME,
+    event_id: Optional[Text] = EVENT_ID,
+    event_point: Optional[Text] = EVENT_POINT,
+    user_id: Optional[Text] = UID,
+    user_point: Optional[Text] = USER_POINT,
+    line_color: Optional[Text] = LINE_COLOR,
+    slice_event_show: Optional[int] = None,
+    slice_subject_show: Optional[int] = None,
+) -> List[Map]:
     """
     Plot a trajectory, including your user_points lat lon and your tags.
 
@@ -1685,38 +1737,41 @@ def show_trajs_with_event(
         Trajectory input data.
     window_time_subject: float.
         The subject time window.
-    Window_time_event: float.
+    window_time_event: float.
         The event time window.
     radius: float.
         The radius to use.
-    event_lat_: String, optional, default 'lat'.
-        Event latitude column name.
-    event_lon_: String, optional, default 'lon'.
-        Event longitude column name.
-    event_datetime_: String, optional, default 'datetime'.
-        Event datetime column name.
-    user_lat: String, optional, default 'lat'.
-        User latitude column name.
-    user_lon: String, optional, default 'lon'.
-        User longitude column name.
-    user_datetime: String, optional, default 'datetime'.
-        User datetime column name.
-    event_id_: String, optional, default 'id'.
-        Event id column name.
-    event_point: String, optional, default 'red'.
-        Event color.
-    user_id: String, optional, default 'id'.
-        User id column name.
-    user_point: String, optional, default 'orange'.
-        User point color.
-    line_color: String, optional, default 'blue'.
-        Line color.
-    slice_event_show: int, optional, default None.
-    slice_subject_show: int, optional, default
+    event_lat: str, optional
+        Event latitude column name, by default LATITUDE.
+    event_lon: str, optional
+        Event longitude column name, by default LONGITUDE.
+    event_datetime: str, optional
+        Event datetime column name, by default DATETIME.
+    user_lat: str, optional
+        User latitude column name, by default LATITUDE.
+    user_lon: str, optional
+        User longitude column name, by default LONGITUDE.
+    user_datetime: str, optional
+        User datetime column name, by default DATETIME.
+    event_id_: str, optional
+        Event id column name, by default TRAJ_ID.
+    event_point: str, optional
+        Event color, by default EVENT_POI.
+    user_id: str, optional
+        User id column name, by default TRAJ_ID.
+    user_point: str, optional
+        User point color, by default USER_POINT.
+    line_color: str, optional
+        Line color, by default 'blue'.
+    slice_event_show: int, optional
+        by default None.
+    slice_subject_show: int, optional
+        by default None.
 
     Returns
     -------
-    A list of folium maps.
+    list of Map
+        A list of folium maps.
     """
 
     # building structure for deltas
@@ -1736,17 +1791,14 @@ def show_trajs_with_event(
     # for each event in df_event
     for _, line in df_event.iterrows():
 
-        event_lat = line[event_lat_]
-
-        event_lon = line[event_lon_]
-
-        event_datetime = line[event_datetime_]
-
-        event_id = line[event_id_]
+        e_lat = line[event_lat]
+        e_lon = line[event_lon]
+        e_datetime = line[event_datetime]
+        e_id = line[event_id]
 
         # building time window for event search
-        start_time = pd.to_datetime(event_datetime - delta_event)
-        end_time = pd.to_datetime(event_datetime + delta_event)
+        start_time = pd.to_datetime(e_datetime - delta_event)
+        end_time = pd.to_datetime(e_datetime + delta_event)
 
         # filtering df_ for time window
         df_filtered = filters.by_datetime(
@@ -1759,8 +1811,8 @@ def show_trajs_with_event(
         len_df_temp = df_filtered.shape[0]
 
         # using the util part of the array for haversine function
-        lat_arr[:len_df_temp] = event_lat
-        lon_arr[:len_df_temp] = event_lon
+        lat_arr[:len_df_temp] = e_lat
+        lon_arr[:len_df_temp] = e_lon
 
         # building distances to event column
         df_filtered['distances'] = distances.haversine(
@@ -1781,12 +1833,12 @@ def show_trajs_with_event(
                 user_datetime
             )
 
-            move_data = df_event[df_event[event_id_] == event_id]
+            move_data = df_event[df_event[event_id] == e_id]
 
             base_map = plot_event_folium(
                 move_data,
-                event_lat=event_lat_,
-                event_lon=event_lon_,
+                event_lat=event_lat,
+                event_lon=event_lon,
                 event_point=event_point,
                 slice_tags=slice_event_show
             )
@@ -1839,26 +1891,26 @@ def show_trajs_with_event(
 
 
 def show_traj_id_with_event(
-    move_data,
-    window_time_subject,
-    df_event,
-    window_time_event,
-    radius,
-    subject_id,
-    event_lat_=LATITUDE,
-    event_lon_=LONGITUDE,
-    event_datetime_=DATETIME,
-    user_lat=LATITUDE,
-    user_lon=LONGITUDE,
-    user_datetime=DATETIME,
-    event_id_=EVENT_ID,
-    event_point=EVENT_POINT,
-    user_id=UID,
-    user_point=USER_POINT,
-    line_color=LINE_COLOR,
-    slice_event_show=None,
-    slice_subject_show=None
-):
+    move_data: DataFrame,
+    window_time_subject: float,
+    df_event: DataFrame,
+    window_time_event: float,
+    radius: float,
+    subject_id: int,
+    event_lat: Optional[Text] = LATITUDE,
+    event_lon: Optional[Text] = LONGITUDE,
+    event_datetime: Optional[Text] = DATETIME,
+    user_lat: Optional[Text] = LATITUDE,
+    user_lon: Optional[Text] = LONGITUDE,
+    user_datetime: Optional[Text] = DATETIME,
+    event_id: Optional[Text] = EVENT_ID,
+    event_point: Optional[Text] = EVENT_POINT,
+    user_id: Optional[Text] = UID,
+    user_point: Optional[Text] = USER_POINT,
+    line_color: Optional[Text] = LINE_COLOR,
+    slice_event_show: Optional[int] = None,
+    slice_subject_show: Optional[int] = None,
+) -> Map:
     """
     Plot a trajectory, including your user_points lat lon and your tags.
 
@@ -1868,39 +1920,43 @@ def show_traj_id_with_event(
         Trajectory input data.
     window_time_subject: float.
         The subject time window.
-    Window_time_event: float.
+    window_time_event: float.
         The event time window.
     radius: float.
         The radius to use.
-    event_lat_: String, optional, default 'lat'.
-        Event latitude column name.
-    event_lon_: String, optional, default 'lon'.
-        Event longitude column name.
-    event_datetime_: String, optional, default 'datetime'.
-        Event datetime column name.
-    user_lat: String, optional, default 'lat'.
-        User latitude column name.
-    user_lon: String, optional, default 'lon'.
-        User longitude column name.
-    user_datetime: String, optional, default 'datetime'.
-        User datetime column name.
-    event_id_: String, optional, default 'id'.
-        Event id column name.
-    event_point: String, optional, default 'red'.
-        Event color.
-    user_id: String, optional, default 'id'.
-        User id column name.
-    user_point: String, optional, default 'orange'.
-        User point color.
-    line_color: String, optional, default 'blue'.
-        Line color.
-    slice_envet_show: int, optional, default None.
-
-    slice_subject_show: int, optional, default.
+    subject_id: int
+        Id of the trajectory
+    event_lat: str, optional
+        Event latitude column name, by default LATITUDE.
+    event_lon: str, optional
+        Event longitude column name, by default LONGITUDE.
+    event_datetime: str, optional
+        Event datetime column name, by default DATETIME.
+    user_lat: str, optional
+        User latitude column name, by default LATITUDE.
+    user_lon: str, optional
+        User longitude column name, by default LONGITUDE.
+    user_datetime: str, optional
+        User datetime column name, by default DATETIME.
+    event_id_: str, optional
+        Event id column name, by default TRAJ_ID.
+    event_point: str, optional
+        Event color, by default EVENT_POINT.
+    user_id: str, optional
+        User id column name, by default TRAJ_ID.
+    user_point: str, optional
+        User point color, by default USER_POINT.
+    line_color: str, optional
+        Line color, by default 'blue'.
+    slice_event_show: int, optional
+        by default None.
+    slice_subject_show: int, optional
+        by default None.
 
     Returns
     -------
-    A folium map.
+    Map
+        A list of folium maps.
     """
 
     df_id = move_data[move_data[user_id] == subject_id]
@@ -1911,13 +1967,13 @@ def show_traj_id_with_event(
         df_event,
         window_time_event,
         radius,
-        event_lat_=event_lat_,
-        event_lon_=event_lon_,
-        event_datetime_=event_datetime_,
+        event_lat=event_lat,
+        event_lon=event_lon,
+        event_datetime=event_datetime,
         user_lat=user_lat,
         user_lon=user_lon,
         user_datetime=user_datetime,
-        event_id_=event_id_,
+        event_id=event_id,
         event_point=event_point,
         user_id=user_id,
         user_point=user_point,
@@ -1928,11 +1984,11 @@ def show_traj_id_with_event(
 
 
 def _create_geojson_features_line(
-    move_data,
-    label_lat=LATITUDE,
-    label_lon=LONGITUDE,
-    label_datetime=DATETIME
-):
+    move_data: DataFrame,
+    label_lat: Optional[Text] = LATITUDE,
+    label_lon: Optional[Text] = LONGITUDE,
+    label_datetime: Optional[Text] = DATETIME
+) -> List:
     """
     Create geojson features.
 
@@ -1940,16 +1996,17 @@ def _create_geojson_features_line(
     -----------
     move_data: DataFrame.
         Input trajectory data.
-    label_datetime: string, optional, default 'datetime'.
-        date_time colum label.
-    label_lat: string, optional, default 'lat'.
-        latitude column label.
-    label_lon: string, optional, default 'long'.
-        longitude column label.
+    label_datetime: str, optional
+        date_time colum label, by default DATETIME.
+    label_lat: str, optional
+        latitude column label, by default LATITUDE.
+    label_lon: str, optional
+        longitude column label, by default LONGITUDE.
 
     Returns
     -------
-    GeoJSON features.
+    list
+        GeoJSON features.
     """
     print('> Creating GeoJSON features...')
     features = []
@@ -1968,7 +2025,7 @@ def _create_geojson_features_line(
         feature = {
             'type': 'Feature',
             'geometry': {
-                'type': 'LineString',
+                'type': 'Linestr',
                 'coordinates': [
                     [last[label_lon], last[label_lat]],
                     [row[label_lon], row[label_lat]]
@@ -2000,8 +2057,10 @@ def plot_traj_timestamp_geo_json(
     label_lat=LATITUDE,
     label_lon=LONGITUDE,
     label_datetime=DATETIME,
-    tiles=TILES[0]
-):
+    tiles=TILES[0],
+    save_as_html: Optional[bool] = False,
+    filename: Optional[Text] = 'events.html'
+) -> Map:
     """
     Plot trajectories wit geo_json.
 
@@ -2009,18 +2068,23 @@ def plot_traj_timestamp_geo_json(
     -----------
     move_data: DataFrame.
         Input trajectory data.
-    label_datetime: string, optional, default 'datetime'.
+    label_datetime: str, optional, by default DATETIME.
         date_time column label.
-    label_lat: string, optional, default 'lat'.
+    label_lat: str, optional, by default LATITUDE.
         latitude column label.
-    label_lon: string, optional, default 'long'.
+    label_lon: str, optional, by default LONGITUDE.
         longitude column label.
-    tiles: string, optional, default 'cartodbpositron'.
-        folium tiles.
+    tiles: str, optional
+        map tiles, by default TILES[0]
+    save_as_html : bool, optional
+        Represents if want save this visualization in a new file .html, by default False.
+    filename : str, optional
+        Represents the file name of new file .html, by default 'events.html'.
 
     Returns
     -------
-    A folium map.
+    Map
+        A folium map.
     """
     features = _create_geojson_features_line(
         move_data,
@@ -2029,7 +2093,7 @@ def plot_traj_timestamp_geo_json(
         label_datetime=label_datetime
     )
     print('creating folium map')
-    map_ = create_base_map(
+    base_map = create_base_map(
         move_data=move_data,
         lat_origin=move_data[label_lat].mean(),
         lon_origin=move_data[label_lon].mean(),
@@ -2044,5 +2108,7 @@ def plot_traj_timestamp_geo_json(
         },
         period='PT1M',
         add_last_point=True
-    ).add_to(map_)
-    return map_
+    ).add_to(base_map)
+    if save_as_html:
+        base_map.save(filename)
+    return base_map
