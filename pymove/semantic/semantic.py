@@ -12,7 +12,6 @@ from pymove.utils.constants import (
     OUT_BBOX,
     SEGMENT_STOP,
     SHORT,
-    TID_DIST,
     TID_PART,
     TIME_TO_PREV,
     TRAJ_ID,

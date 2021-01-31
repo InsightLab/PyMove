@@ -213,7 +213,8 @@ class Grid:
         label_grid_lat: Optional[Text] = INDEX_GRID_LAT,
         label_grid_lon: Optional[Text] = INDEX_GRID_LON,
     ):
-        """[summary]
+        """
+        Converts grid lat-lon ids to unique values
 
         Parameters
         ----------
@@ -416,12 +417,7 @@ class Grid:
         Returns
         -------
         Grid
-            Grid object containing informations about virtual grid, how
-                - lon_min_x: longitude mínima.
-                - lat_min_y: latitude miníma.
-                - grid_size_lat_y: tamanho da grid latitude.
-                - grid_size_lon_x: tamanho da longitude da grid.
-                - cell_size_by_degree: tamanho da célula da Grid.
+            Grid object containing informations about virtual grid
 
         """
         operation = begin_operation('read_grid_pkl')
@@ -498,5 +494,17 @@ class Grid:
             return fig
 
     def __repr__(self) -> str:
+        """
+        String representation of grid
+
+        Returns
+        -------
+        str
+            lon_min_x: min longitude
+            lat_min_y: min latitude
+            grid_size_lat_y: grid latitude size
+            grid_size_lon_x: grid longitude size
+            cell_size_by_degree: grid cell size
+        """
         text = ['{}: {}'.format(k, v) for k, v in self.get_grid().items()]
         return '\n'.join(text)
