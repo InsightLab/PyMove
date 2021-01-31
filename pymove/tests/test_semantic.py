@@ -392,7 +392,6 @@ def test_filter_block_signal_by_time():
         'tid_part', 'id', 'lat', 'lon', 'datetime',
         'dist_to_prev', 'time_to_prev', 'speed_to_prev', 'block_signal'
     ]
-
     expected = DataFrame(data=[
         [1, 1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:03'), nan, nan, nan,
          False],
@@ -406,6 +405,7 @@ def test_filter_block_signal_by_time():
     new_move_df = semantic.filter_block_signal_by_time(
         move_df, max_time_stop=15, inplace=False
     )
+    # assert False
     assert_frame_equal(new_move_df, expected)
     assert BLOCK not in move_df
 

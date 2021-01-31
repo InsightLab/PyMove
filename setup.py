@@ -22,7 +22,7 @@ DEPENDENCIES = [
     'matplotlib',
     'mplleaflet',
     'numpy',
-    'pandas<=1.0.5',
+    'pandas>=1.1.0',
     'psutil',
     'python-dateutil',
     'pytz',
@@ -33,7 +33,7 @@ DEPENDENCIES = [
 ]
 setup(
     name='pymove',
-    version='2.4.0',
+    version='2.5.0',
     author='Insight Data Science Lab',
     author_email='insightlab@dc.ufc.br',
     license='MIT',

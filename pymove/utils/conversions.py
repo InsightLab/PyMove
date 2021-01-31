@@ -1,6 +1,8 @@
 import math
+from typing import TYPE_CHECKING, List, Optional, Text, Union
 
 import numpy as np
+from pandas import DataFrame
 from shapely.geometry import Point
 
 from pymove.utils.constants import (
@@ -13,8 +15,12 @@ from pymove.utils.constants import (
     TIME_TO_PREV,
 )
 
+if TYPE_CHECKING:
+    from pymove.core.pandas import PandasMoveDataFrame
+    from pymove.core.dask import DaskMoveDataFrame
 
-def lat_meters(lat):
+
+def lat_meters(lat: float) -> float:
     """
     Transform latitude degree to meters.
 
@@ -48,7 +54,9 @@ def lat_meters(lat):
     return meters
 
 
-def meters_to_eps(radius_meters, earth_radius=EARTH_RADIUS):
+def meters_to_eps(
+    radius_meters: float, earth_radius: Optional[float] = EARTH_RADIUS
+) -> float:
     """
     Converts radius in meters to eps
 
@@ -67,7 +75,7 @@ def meters_to_eps(radius_meters, earth_radius=EARTH_RADIUS):
     return radius_meters / earth_radius
 
 
-def list_to_str(input_list, delimiter=','):
+def list_to_str(input_list: List, delimiter: Optional[Text] = ',') -> Text:
     """
     Concatenates list elements, joining them by the separator specified by the
     parameter "delimiter".
@@ -76,14 +84,13 @@ def list_to_str(input_list, delimiter=','):
     ----------
     input_list : list
         List with elements to be joined.
-
-    delimiter : String, optional, default ','.
-        The separator used between elements.
+    delimiter : str, optional
+        The separator used between elements, by default ','.
 
     Returns
     -------
     str
-        Returns a string, resulting from concatenation of list'srs elements,
+        Returns a string, resulting from concatenation of list elements,
         separeted by the delimiter.
 
     """
@@ -93,7 +100,7 @@ def list_to_str(input_list, delimiter=','):
     )
 
 
-def list_to_csv_str(input_list):
+def list_to_csv_str(input_list: List) -> Text:
     """
     Concatenates the elements of the list, joining them by ",".
 
@@ -105,7 +112,7 @@ def list_to_csv_str(input_list):
     Returns
     -------
     str
-        Returns a string, resulting from concatenation of list'srs elements,
+        Returns a string, resulting from concatenation of list elements,
         separeted by ",".
 
     Example
@@ -120,7 +127,7 @@ def list_to_csv_str(input_list):
     return list_to_str(input_list)
 
 
-def list_to_svm_line(original_list):
+def list_to_svm_line(original_list: List) -> Text:
     """
     Concatenates list elements in consecutive element pairs.
 
@@ -151,7 +158,7 @@ def list_to_svm_line(original_list):
     return svm_line.rstrip()
 
 
-def lon_to_x_spherical(lon):
+def lon_to_x_spherical(lon: float) -> float:
     """
     Convert longitude to X EPSG:3857 WGS 84/Pseudo-Mercator.
 
@@ -180,7 +187,7 @@ def lon_to_x_spherical(lon):
     return 6378137 * np.radians(lon)
 
 
-def lat_to_y_spherical(lat):
+def lat_to_y_spherical(lat: float) -> float:
     """
     Convert latitude to Y EPSG:3857 WGS 84/Pseudo-Mercator.
 
@@ -209,7 +216,7 @@ def lat_to_y_spherical(lat):
     return 6378137 * np.log(np.tan(np.pi / 4 + np.radians(lat) / 2.0))
 
 
-def x_to_lon_spherical(x):
+def x_to_lon_spherical(x: float) -> float:
     """
     Convert X EPSG:3857 WGS 84 / Pseudo-Mercator to longitude.
 
@@ -238,7 +245,7 @@ def x_to_lon_spherical(x):
     return np.degrees(x / 6378137.0)
 
 
-def y_to_lat_spherical(y):
+def y_to_lat_spherical(y: float) -> float:
     """
     Convert Y EPSG:3857 WGS 84 / Pseudo-Mercator to latitude.
 
@@ -268,11 +275,11 @@ def y_to_lat_spherical(y):
 
 
 def geometry_points_to_lat_and_lon(
-    move_data,
-    geometry_label=GEOMETRY,
-    drop_geometry=True,
-    inplace=True
-):
+    move_data: DataFrame,
+    geometry_label: Optional[Text] = GEOMETRY,
+    drop_geometry: Optional[bool] = True,
+    inplace: Optional[bool] = True
+) -> DataFrame:
     """
     Converts the geometry column to latitude and longitude
     columns (named 'lat' and 'lon'), removing geometries
@@ -280,23 +287,20 @@ def geometry_points_to_lat_and_lon(
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFrame
         Input trajectory data.
-
-    geometry: String, optional, default 'geometry'.
-        Represents column name of the geometry column.
-
-    drop_geometry: Boolean, optional, default True.
-        Option to drop the geometry column
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    geometry: str, optional
+        Represents column name of the geometry column, by default GEOMETRY
+    drop_geometry: bool, optional
+        Option to drop the geometry column, by default True
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
+
     """
 
     if not inplace:
@@ -316,38 +320,29 @@ def geometry_points_to_lat_and_lon(
 
 
 def lat_and_lon_decimal_degrees_to_decimal(
-    move_data,
-    latitude=LATITUDE,
-    longitude=LONGITUDE,
-    inplace=True
-):
+    move_data: DataFrame,
+    latitude: Optional[Text] = LATITUDE,
+    longitude: Optional[Text] = LONGITUDE
+) -> DataFrame:
     """
     Converts latitude and longitude format from
     decimal degrees to decimal format.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFrame
         Input trajectory data.
-
-    latitude: String, optional, default 'lat'.
-        Represents column name of the latitude column.
-
-    longitude: String, optional, default 'lon'.
-        Represents column name of the longitude column.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    latitude: str, optional
+        Represents column name of the latitude column, by default LATITUDE
+    longitude: str, optional
+        Represents column name of the longitude column, by default LONGITUDE
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
-    """
-    if not inplace:
-        move_data = move_data[:]
+    DataFrame
+        A new dataframe with the converted feature
 
+    """
     def _decimal_degree_to_decimal(row):
         if (row[latitude][-1:] == 'N'):
             row[latitude] = float(row[latitude][:-1])
@@ -360,465 +355,411 @@ def lat_and_lon_decimal_degrees_to_decimal(
             row[longitude] = float(row[longitude][:-1]) * -1
         return row
 
-    move_data = move_data.apply(_decimal_degree_to_decimal, axis=1)
-
-    if not inplace:
-        return move_data
+    return move_data.apply(_decimal_degree_to_decimal, axis=1)
 
 
 def ms_to_kmh(
-    move_data,
-    label_speed=SPEED_TO_PREV,
-    new_label=None,
-    inplace=True,
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_speed: Optional[Text] = SPEED_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[bool] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in ms, in label_speed column to kmh.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFrame
         Input trajectory data.
-
-    label_speed : String, optional, default 'speed_to_prev'.
-        Represents column name of speed.
-
-    new_label: String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    label_speed : str, optional
+        Represents column name of speed, by default SPEED_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_speed not in move_data:
-            move_data.generate_dist_time_speed_features()
-        move_data[label_speed] = move_data[label_speed].apply(
-            lambda row: row * 3.6
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_speed: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_speed not in move_data:
+        move_data.generate_dist_time_speed_features()
+    move_data[label_speed] = move_data[label_speed].apply(
+        lambda row: row * 3.6
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_speed: new_label}, inplace=True)
+    if not inplace:
+        return move_data
 
 
 def kmh_to_ms(
-    move_data,
-    label_speed=SPEED_TO_PREV,
-    new_label=None,
-    inplace=True,
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_speed: Optional[Text] = SPEED_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in kmh, in label_speed column to ms.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFame
         Input trajectory data.
-
-    label_speed : String, optional, default 'speed_to_prev'.
-        Represents column name of speed.
-
-    new_label: String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    label_speed : str, optional
+        Represents column name of speed, by default SPEED_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_speed not in move_data:
-            move_data.generate_dist_time_speed_features()
-            ms_to_kmh(move_data, label_speed)
-        move_data[label_speed] = move_data[label_speed].apply(
-            lambda row: row / 3.6
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_speed: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_speed not in move_data:
+        move_data.generate_dist_time_speed_features()
+        ms_to_kmh(move_data, label_speed)
+    move_data[label_speed] = move_data[label_speed].apply(
+        lambda row: row / 3.6
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_speed: new_label}, inplace=True)
+    if not inplace:
+        return move_data
 
 
 def meters_to_kilometers(
-    move_data,
-    label_distance=DIST_TO_PREV,
-    new_label=None,
-    inplace=True,
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_distance: Optional[Text] = DIST_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in meters, in label_distance column to kilometers.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFame
         Input trajectory data.
-
-    label_distance : String, optional, default 'dist_to_prev'.
-        Represents column name of distance.
-
-    new_label: String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    label_distance : str, optional
+        Represents column name of speed, by default DIST_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
+
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_distance not in move_data:
-            move_data.generate_dist_time_speed_features()
-        move_data[label_distance] = move_data[label_distance].apply(
-            lambda row: row / 1000
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_distance: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_distance not in move_data:
+        move_data.generate_dist_time_speed_features()
+    move_data[label_distance] = move_data[label_distance].apply(
+        lambda row: row / 1000
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_distance: new_label}, inplace=True)
+    if not inplace:
+        return move_data
 
 
 def kilometers_to_meters(
-    move_data,
-    label_distance=DIST_TO_PREV,
-    new_label=None,
-    inplace=True,
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_distance: Optional[Text] = DIST_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in kilometers, in label_distance column to meters.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFame
         Input trajectory data.
-
-    label_distance : String, optional, default 'dist_to_prev'.
-        Represents column name of distance.
-
-    new_label: String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    label_distance : str, optional
+        Represents column name of speed, by default DIST_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_distance not in move_data:
-            move_data.generate_dist_time_speed_features()
-            meters_to_kilometers(move_data, label_distance)
-        move_data[label_distance] = move_data[label_distance].apply(
-            lambda row: row * 1000
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_distance: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_distance not in move_data:
+        move_data.generate_dist_time_speed_features()
+        meters_to_kilometers(move_data, label_distance)
+    move_data[label_distance] = move_data[label_distance].apply(
+        lambda row: row * 1000
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_distance: new_label}, inplace=True)
+    if not inplace:
+        return move_data
 
 
 def seconds_to_minutes(
-    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_time: Optional[Text] = TIME_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in seconds, in label_distance column to minutes.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFame
         Input trajectory data.
-
-    label_time : String, optional, default 'time_to_prev'.
-        Represents column name of time.
-
-    new_label: String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    label_time : str, optional
+        Represents column name of speed, by default TIME_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_time not in move_data:
-            move_data.generate_dist_time_speed_features()
-        move_data[label_time] = move_data[label_time].apply(
-            lambda row: row / 60.0
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_time: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_time not in move_data:
+        move_data.generate_dist_time_speed_features()
+    move_data[label_time] = move_data[label_time].apply(
+        lambda row: row / 60.0
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_time: new_label}, inplace=True)
+    if not inplace:
+        return move_data
 
 
 def minute_to_seconds(
-    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_time: Optional[Text] = TIME_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in minutes, in label_distance column to seconds.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFame
         Input trajectory data.
-
-    label_time : String, optional, default 'time_to_prev'.
-        Represents column name of time.
-
-    new_label: String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    label_time : str, optional
+        Represents column name of speed, by default TIME_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_time not in move_data:
-            move_data.generate_dist_time_speed_features()
-            seconds_to_minutes(move_data, label_time)
-        move_data['time_to_prev'] = move_data['time_to_prev'].apply(
-            lambda row: row * 60.0
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_time: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_time not in move_data:
+        move_data.generate_dist_time_speed_features()
+        seconds_to_minutes(move_data, label_time)
+    move_data['time_to_prev'] = move_data['time_to_prev'].apply(
+        lambda row: row * 60.0
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_time: new_label}, inplace=True)
+    if not inplace:
+        return move_data
 
 
 def minute_to_hours(
-    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_time: Optional[Text] = TIME_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in minutes, in label_distance column to hours.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFame
         Input trajectory data.
-
-    label_time : String, optional, default 'time_to_prev'.
-        Represents column name of time.
-
-    new_label : String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    label_time : str, optional
+        Represents column name of speed, by default TIME_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_time not in move_data:
-            move_data.generate_dist_time_speed_features()
-            seconds_to_minutes(move_data, label_time)
-        move_data[label_time] = move_data[label_time].apply(
-            lambda row: row / 60.0
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_time: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_time not in move_data:
+        move_data.generate_dist_time_speed_features()
+        seconds_to_minutes(move_data, label_time)
+    move_data[label_time] = move_data[label_time].apply(
+        lambda row: row / 60.0
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_time: new_label}, inplace=True)
+    if not inplace:
+        return move_data
 
 
 def hours_to_minute(
-    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_time: Optional[Text] = TIME_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in hours, in label_distance column to minute.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFame
         Input trajectory data.
-
-    label_time : String, optional, default 'time_to_prev'.
-        Represents column name of time.
-
-    new_label : String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    label_time : str, optional
+        Represents column name of speed, by default TIME_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_time not in move_data:
-            move_data.generate_dist_time_speed_features()
-            seconds_to_hours(move_data, label_time)
-        move_data[label_time] = move_data[label_time].apply(
-            lambda row: row * 60.0
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_time: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_time not in move_data:
+        move_data.generate_dist_time_speed_features()
+        seconds_to_hours(move_data, label_time)
+    move_data[label_time] = move_data[label_time].apply(
+        lambda row: row * 60.0
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_time: new_label}, inplace=True)
+    if not inplace:
+        return move_data
 
 
 def seconds_to_hours(
-    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_time: Optional[Text] = TIME_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in seconds, in label_distance column to hours.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
-        The input trajectory data
-
-    label_time : String, optional, default 'time_to_prev'.
-        Represents column name of time.
-
-    new_label : String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    move_data : DataFame
+        Input trajectory data.
+    label_time : str, optional
+        Represents column name of speed, by default TIME_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_time not in move_data:
-            move_data.generate_dist_time_speed_features()
-        move_data[label_time] = move_data[label_time].apply(
-            lambda row: row / 3600.0
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_time: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_time not in move_data:
+        move_data.generate_dist_time_speed_features()
+    move_data[label_time] = move_data[label_time].apply(
+        lambda row: row / 3600.0
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_time: new_label}, inplace=True)
+    if not inplace:
+        return move_data
 
 
 def hours_to_seconds(
-    move_data, label_time=TIME_TO_PREV, new_label=None, inplace=True
-):
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_time: Optional[Text] = TIME_TO_PREV,
+    new_label: Optional[Text] = None,
+    inplace: Optional[Text] = True,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in hours, in label_distance column to seconds.
 
     Parameters
     ----------
-    move_data : pymove.core.MoveDataFrameAbstract subclass.
+    move_data : DataFame
         Input trajectory data.
-
-    label_time : String, optional, default 'time_to_prev'.
-        Represents column name of time.
-
-    new_label : String, optional, default None.
-        Represents a new column that will contain the conversion result.
-
-    inplace: Boolean, optional, default True.
-        Whether the operation will be done in the original dataframe
+    label_time : str, optional
+        Represents column name of speed, by default TIME_TO_PREV
+    new_label: str, optional
+        Represents a new column that will contain the conversion result, by default None
+    inplace: bool, optional
+        Whether the operation will be done in the original dataframe, by default True
 
     Returns
     -------
-    dataframe or None
-        A new dataframe with the converted feature if operation
-        not done inplace
+    DataFrame
+        A new dataframe with the converted feature or None
 
     """
 
-    try:
-        if not inplace:
-            move_data = move_data[:]
-        if label_time not in move_data:
-            move_data.generate_dist_time_speed_features()
-            seconds_to_hours(move_data, label_time)
-        move_data[label_time] = move_data[label_time].apply(
-            lambda row: row * 3600.0
-        )
-        if new_label is not None:
-            move_data.rename(columns={label_time: new_label}, inplace=True)
-        if not inplace:
-            return move_data
-    except Exception as e:
-        raise e
+    if not inplace:
+        move_data = move_data[:]
+    if label_time not in move_data:
+        move_data.generate_dist_time_speed_features()
+        seconds_to_hours(move_data, label_time)
+    move_data[label_time] = move_data[label_time].apply(
+        lambda row: row * 3600.0
+    )
+    if new_label is not None:
+        move_data.rename(columns={label_time: new_label}, inplace=True)
+    if not inplace:
+        return move_data

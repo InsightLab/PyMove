@@ -1,13 +1,14 @@
 import math
+from typing import List, Optional, Tuple, Union
 
 
-def is_number(value):
+def is_number(value: Union[int, float, str]):
     """
     Returns if value is numerical or not.
 
     Parameters
     ----------
-    value : Integer, Float, String
+    value : int, float, str
 
     Returns
     -------
@@ -22,7 +23,7 @@ def is_number(value):
     return True
 
 
-def std(values_array):
+def std(values_array: List[float]) -> float:
     """
     Compute standard deviation.
 
@@ -47,14 +48,10 @@ def std(values_array):
     mean = sum(values_array) / size
     sum_sq = sum([(i - mean) * (i - mean) for i in values_array])
 
-    try:
-        result = math.sqrt(sum_sq / size)
-    except ValueError as e:
-        raise e
-    return result
+    return math.sqrt(sum_sq / size)
 
 
-def avg_std(values_array):
+def avg_std(values_array: List[float]) -> Tuple[float, float]:
     """
     Compute the average of standard deviation.
 
@@ -76,7 +73,7 @@ def avg_std(values_array):
     return avg, std(values_array)
 
 
-def std_sample(values_array):
+def std_sample(values_array: List[float]) -> float:
     """
     Compute the standard deviation of sample.
 
@@ -96,7 +93,7 @@ def std_sample(values_array):
     return std(values_array) * math.sqrt(size / (size - 1))
 
 
-def avg_std_sample(values_array):
+def avg_std_sample(values_array: List[float]) -> Tuple[float, float]:
     """
     Compute the average of standard deviation of sample.
 
@@ -108,7 +105,9 @@ def avg_std_sample(values_array):
     Returns
     -------
     float
-        Represents the value of average of standard deviation of sample.
+        Represents the value of average
+    float
+        Represents the standard deviation of sample.
 
     """
 
@@ -116,7 +115,9 @@ def avg_std_sample(values_array):
     return avg, std_sample(values_array)
 
 
-def arrays_avg(values_array, weights_array=None):
+def arrays_avg(
+    values_array: List[float], weights_array: Optional[List[float]] = None
+) -> float:
     """
     Computes the mean of the elements of the array.
 
@@ -152,7 +153,7 @@ def arrays_avg(values_array, weights_array=None):
     return result / n
 
 
-def array_stats(values_array):
+def array_stats(values_array: List[float]) -> Tuple[float, float, int]:
     """
     Computes the sum of all the elements in the array, the sum of the square of
     each element and the number of elements of the array.
@@ -183,7 +184,7 @@ def array_stats(values_array):
     return sum_, sum_sq, n
 
 
-def interpolation(x0, y0, x1, y1, x):
+def interpolation(x0: float, y0: float, x1: float, y1: float, x: float) -> float:
     """
     Performs interpolation.
 

@@ -1,5 +1,7 @@
+from typing import Dict, List, Optional, Text, Union
 
 from dateutil.parser._parser import ParserError
+from pandas.core.frame import DataFrame
 
 from pymove.utils.constants import (
     DATETIME,
@@ -15,13 +17,13 @@ class MoveDataFrame:
     @staticmethod
     def __new__(
         self,
-        data,
-        latitude=LATITUDE,
-        longitude=LONGITUDE,
-        datetime=DATETIME,
-        traj_id=TRAJ_ID,
-        type_=TYPE_PANDAS,
-        n_partitions=1,
+        data: Union[DataFrame, Dict, List],
+        latitude: Optional[Text] = LATITUDE,
+        longitude: Optional[Text] = LONGITUDE,
+        datetime: Optional[Text] = DATETIME,
+        traj_id: Optional[Text] = TRAJ_ID,
+        type_: Optional[Text] = TYPE_PANDAS,
+        n_partitions: Optional[int] = 1,
     ):
         """
         Creates the PyMove dataframe, which must contain latitude, longitude and datetime.
@@ -29,18 +31,20 @@ class MoveDataFrame:
 
         Parameters
         ----------
-        data : dict, list, numpy array or pandas.core.DataFrame
+        data : DataFrame or PandasMoveDataFrame or dict or list
             Input trajectory data.
-        latitude : str, optional, default 'lat'.
-            Represents column name latitude.
-        longitude : str, optional, default 'lon'.
-            Represents column name longitude.
-        datetime : str, optional, default 'datetime'.
-            Represents column name datetime.
-        traj_id : str, optional, default 'id'.
-            Represents column name trajectory id.
-        n_partitions : int, optional, default 1.
-            Number of partitions of the dask dataframe.
+        latitude : str, optional
+            Represents column name latitude, by default LATITUDE
+        longitude : str, optional
+            Represents column name longitude, by default LONGITUDE
+        datetime : str, optional
+            Represents column name datetime, by default DATETIME
+        traj_id : str, optional
+            Represents column name trajectory id, by default TRAJ_ID
+        type_ : str, optional
+            Number of partitions of the dask dataframe, by default TYPE_PANDAS
+        n_partitions : Optional[int], optional
+            Amount of partitions for dask dataframe, by default 1
 
         Raises
         ------
@@ -50,7 +54,6 @@ class MoveDataFrame:
             If the data types can't be converted.
 
         """
-        self.type = type_
 
         if type_ == TYPE_PANDAS:
             from pymove.core.pandas import PandasMoveDataFrame
@@ -64,20 +67,20 @@ class MoveDataFrame:
             )
 
     @staticmethod
-    def has_columns(data):
+    def has_columns(data: DataFrame) -> bool:
         """
         Checks whether the received dataset has 'lat', 'lon', 'datetime'
         columns.
 
         Parameters
         ----------
-        data : DataFrame.
-            Input trajectory data.
+        data : DataFrame
+            Input trajectory data
 
         Returns
         -------
         bool
-            Represents whether or not you have the required columns.
+            Represents whether or not you have the required columns
 
         """
 
@@ -87,21 +90,21 @@ class MoveDataFrame:
         return False
 
     @staticmethod
-    def validate_move_data_frame(data):
+    def validate_move_data_frame(data: DataFrame):
         """
         Converts the column type to the default type used by PyMove lib.
 
         Parameters
         ----------
-        data : DataFrame.
-            Input trajectory data.
+        data : DataFrame
+            Input trajectory data
 
         Raises
         ------
         KeyError
             If missing one of lat, lon, datetime columns
         ValueError, ParserError
-            If the data types can't be converted.
+            If the data types can't be converted
 
         """
 
@@ -120,25 +123,27 @@ class MoveDataFrame:
             raise e
 
     @staticmethod
-    def format_labels(current_id, current_lat, current_lon, current_datetime):
+    def format_labels(
+        current_id: Text, current_lat: Text, current_lon: Text, current_datetime: Text
+    ) -> Dict:
         """
         Format the labels for the PyMove lib pattern labels output
         lat, lon and datatime.
 
         Parameters
         ----------
-        current_id : String.
-            Represents the column name of feature id.
-        current_lat : String.
-            Represents the column name of feature latitude.
-        current_lon : String.
-            Represents the column name of feature longitude.
-        current_datetime : String.
-            Represents the column name of feature datetime.
+        current_id : str
+            Represents the column name of feature id
+        current_lat : str
+            Represents the column name of feature latitude
+        current_lon : str
+            Represents the column name of feature longitude
+        current_datetime : str
+            Represents the column name of feature datetime
 
         Returns
         -------
-        dict
+        Dict
             Represents a dict with mapping current columns of data
             to format of PyMove column.
 

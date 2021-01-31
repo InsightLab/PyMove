@@ -55,10 +55,6 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def unique(self):
-        pass
-
-    @abc.abstractmethod
     def head(self):
         pass
 
@@ -275,11 +271,11 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def write_file(self):
+    def to_csv(self):
         pass
 
     @abc.abstractmethod
-    def to_csv(self):
+    def write_file(self):
         pass
 
     @abc.abstractmethod

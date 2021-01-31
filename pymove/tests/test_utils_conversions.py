@@ -135,9 +135,7 @@ def test_lat_and_lon_decimal_degrees_to_decimal():
         columns=['id', 'lat', 'lon'],
     )
 
-    new_move_df = conversions.lat_and_lon_decimal_degrees_to_decimal(
-        move_df, inplace=False
-    )
+    new_move_df = conversions.lat_and_lon_decimal_degrees_to_decimal(move_df)
     assert_frame_equal(new_move_df, expected)
 
 
