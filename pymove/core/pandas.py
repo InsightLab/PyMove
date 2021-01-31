@@ -16,7 +16,6 @@ from matplotlib import pyplot as plt
 from matplotlib.pyplot import figure
 from pandas import DataFrame, DateOffset, Series, Timedelta
 
-from pymove.core import MoveDataFrameAbstractModel
 from pymove.core.dataframe import MoveDataFrame
 from pymove.core.grid import Grid
 from pymove.utils.constants import (
@@ -61,7 +60,7 @@ if TYPE_CHECKING:
     from pymove.core.dask import DaskMoveDataFrame
 
 
-class PandasMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
+class PandasMoveDataFrame(DataFrame):
     def __init__(
         self,
         data: Union[DataFrame, List, Dict],
