@@ -1,11 +1,11 @@
 from __future__ import division
 
 from itertools import chain
-from typing import Dict, List, Optional, Text
+from typing import Any, Dict, List, Optional, Text, Union
 
 import numpy as np
 from numpy import ndarray
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from pandas import read_csv as _read_csv
 from pandas._typing import FilePathOrBuffer
 
@@ -174,7 +174,11 @@ def flatten_columns(data: DataFrame, columns: List) -> DataFrame:
     return data.drop(columns=list(chain(*cols_to_drop)))
 
 
-def shift(arr: List, num: int, fill_value: Optional[float] = np.nan) -> ndarray:
+def shift(
+    arr: Union[List, Series, ndarray],
+    num: int,
+    fill_value: Optional[Any] = None
+) -> ndarray:
     """
     Shifts the elements of the given array by the number of periods specified.
 
@@ -205,6 +209,11 @@ def shift(arr: List, num: int, fill_value: Optional[float] = np.nan) -> ndarray:
     """
 
     result = np.empty_like(arr)
+    if fill_value is None:
+        if isinstance(result.dtype, int):
+            fill_value = 0
+        else:
+            fill_value = np.nan
 
     if num > 0:
         result[:num] = fill_value

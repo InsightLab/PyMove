@@ -2,7 +2,6 @@ import os
 from datetime import date
 
 from dask.dataframe import DataFrame as DaskDataFrame
-from matplotlib.testing.compare import compare_images
 from numpy import nan, ndarray
 from numpy.testing import assert_allclose, assert_array_equal
 from pandas import DataFrame, Series, Timedelta, Timestamp
@@ -1163,30 +1162,6 @@ def test_get_bbox():
     )
 
 
-def test_plot_traj_id(tmpdir):
-    move_df = _default_move_df()
-    move_df[TID] = ['1', '2', '3', '4']
-
-    d = tmpdir.mkdir('core')
-
-    file_write_default = d.join('traj_id.png')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    move_df.plot_traj_id('1', save_fig=True, name=filename_write_default)
-
-    test_dir = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(test_dir, 'baseline/traj_id.png')
-
-    compare_images(
-        data_dir,
-        filename_write_default,
-        0.0001,
-        in_decorator=False
-    )
-
-
 def test_min():
     move_df = _default_move_df()
 
@@ -1792,8 +1767,6 @@ def test_rename():
 
     assert isinstance(new_move_df, PandasMoveDataFrame)
 
-    new_move = move_df.rename({0: 'a', 1: 'b'}, axis='index', inplace=False)
-
     assert_frame_equal(new_move_df, expected_index)
 
     assert isinstance(new_move_df, PandasMoveDataFrame)
@@ -1833,58 +1806,3 @@ def test_rename():
         )
     except AttributeError:
         pass
-
-
-def test_plot_all_features(tmpdir):
-
-    move_df = _default_move_df()
-
-    d = tmpdir.mkdir('core')
-
-    file_write_default = d.join('features.png')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    move_df.plot_all_features(save_fig=True, name=filename_write_default)
-
-    test_dir = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(test_dir, 'baseline/features.png')
-
-    compare_images(data_dir,
-                   filename_write_default,
-                   0.0001,
-                   in_decorator=False)
-
-    move_df['lat'] = move_df['lat'].astype('float32')
-    move_df['lon'] = move_df['lon'].astype('float32')
-
-    try:
-        move_df.plot_all_features(name=filename_write_default)
-        raise AssertionError(
-            'AttributeError error not raised by MoveDataFrame'
-        )
-    except AttributeError:
-        pass
-
-
-def test_plot_trajs(tmpdir):
-
-    move_df = _default_move_df()
-
-    d = tmpdir.mkdir('core')
-
-    file_write_default = d.join('trajectories.png')
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    move_df.plot_trajs(save_fig=True, name=filename_write_default)
-
-    test_dir = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(test_dir, 'baseline/trajectories.png')
-
-    compare_images(data_dir,
-                   filename_write_default,
-                   0.0001,
-                   in_decorator=False)

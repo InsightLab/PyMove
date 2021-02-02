@@ -12,6 +12,7 @@ from pymove.utils.constants import (
     LATITUDE,
     LONGITUDE,
     PERIOD,
+    TID,
     TRAJ_ID,
 )
 
@@ -78,57 +79,80 @@ def test_show_object_id_by_date(tmpdir):
     assert(DAY in move_df)
 
 
-def test_show_lat_lon_gps(tmpdir):
+def test_plot_traj_by_id(tmpdir):
+    move_df = _default_move_df()
+    move_df[TID] = ['1', '1', '2', '2', '2']
+
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('traj_id.png')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    mpl.plot_traj_by_id(move_df, '1', save_fig=True, name=filename_write_default)
+
+    test_dir = os.path.abspath(os.path.dirname(__file__))
+    data_dir = os.path.join(test_dir, 'baseline/traj_id.png')
+
+    compare_images(
+        data_dir,
+        filename_write_default,
+        0.0001,
+        in_decorator=False
+    )
+
+
+def test_plot_all_features(tmpdir):
 
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('shot_points_by_date.png')
+    file_write_default = d.join('features.png')
     filename_write_default = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    fig = mpl.show_lat_lon_gps(
-        move_data=move_df,
-        save_fig=True,
-        name=filename_write_default
-    )
+    mpl.plot_all_features(move_df, save_fig=True, name=filename_write_default)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(test_dir, 'baseline/shot_points_by_date.png')
+    data_dir = os.path.join(test_dir, 'baseline/features.png')
 
-    compare_images(
-        data_dir,
-        filename_write_default,
-        0.0001,
-        in_decorator=False
-    )
+    compare_images(data_dir,
+                   filename_write_default,
+                   0.0001,
+                   in_decorator=False)
 
-    assert(fig is not None)
+    move_df['lat'] = move_df['lat'].astype('str')
+    move_df['lon'] = move_df['lon'].astype('str')
 
-    file_write_default = d.join('shot_points_by_date_line.png')
+    try:
+        move_df.plot_all_features(name=filename_write_default)
+        raise AssertionError(
+            'AttributeError error not raised by MoveDataFrame'
+        )
+    except AttributeError:
+        pass
+
+
+def test_plot_trajectories(tmpdir):
+
+    move_df = _default_move_df()
+
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('trajectories.png')
     filename_write_default = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    fig = mpl.show_lat_lon_gps(
-        move_data=move_df,
-        kind='line',
-        plot_start_and_end=False,
-        return_fig=False,
-        save_fig=True,
-        name=file_write_default
-    )
+    mpl.plot_trajectories(move_df, save_fig=True, name=filename_write_default)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(test_dir, 'baseline/shot_points_by_date_line.png')
+    data_dir = os.path.join(test_dir, 'baseline/trajectories.png')
 
-    compare_images(
-        data_dir,
-        filename_write_default,
-        0.0001,
-        in_decorator=False
-    )
-
-    assert(fig is None)
+    compare_images(data_dir,
+                   filename_write_default,
+                   0.0001,
+                   in_decorator=False)
