@@ -88,7 +88,7 @@ def knn_query(
     traj: DataFrame,
     move_df: DataFrame,
     k: Optional[int] = 5,
-    _id: Optional[Text] = TRAJ_ID,
+    id_: Optional[Text] = TRAJ_ID,
     distance: Optional[Text] = MEDP,
     latitude: Optional[Text] = LATITUDE,
     longitude: Optional[Text] = LONGITUDE,
@@ -107,7 +107,7 @@ def knn_query(
         The input trajectory data.
     k: int, optional
         neighboring trajectories, by default 5
-    _id: str, optional
+    id_: str, optional
         Label of the trajectories dataframe user id, by default TRAJ_ID
     distance: string, optional
         Distance measure type, by default MEDP
@@ -149,10 +149,10 @@ def knn_query(
         raise ValueError('Unknown distance measure. Use MEDP or MEDT')
 
     for traj_id in progress_bar(
-        move_df[_id].unique(), desc='Querying knn by {}'.format(distance)
+        move_df[id_].unique(), desc='Querying knn by {}'.format(distance)
     ):
-        if (traj_id != traj[_id].values[0]):
-            this = move_df.loc[move_df[_id] == traj_id]
+        if (traj_id != traj[id_].values[0]):
+            this = move_df.loc[move_df[id_] == traj_id]
             this_distance = dist_measure(
                 traj, this, latitude, longitude, datetime
             )
@@ -168,7 +168,7 @@ def knn_query(
     print('Gerando DataFrame com as k trajetórias mais próximas')
     for n in range(k):
         result = result.append(
-            move_df.loc[move_df[_id] == k_list.loc[n, 'traj_id']]
+            move_df.loc[move_df[id_] == k_list.loc[n, 'traj_id']]
         )
 
     return result

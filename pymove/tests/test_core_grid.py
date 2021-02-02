@@ -225,7 +225,7 @@ def test_create_all_polygons_to_all_point_on_grid():
     expected = DataFrame(
         data=[
             [
-                0, 0, Polygon((
+                1, 0, 0, Polygon((
                     (116.319236, 39.984094),
                     (116.319236, 39.984229346480184),
                     (116.3193713464802, 39.984229346480184),
@@ -234,7 +234,7 @@ def test_create_all_polygons_to_all_point_on_grid():
                 ))
             ],
             [
-                0, 1, Polygon((
+                1, 0, 1, Polygon((
                     (116.3193713464802, 39.984094),
                     (116.3193713464802, 39.984229346480184),
                     (116.31950669296039, 39.984229346480184),
@@ -243,7 +243,7 @@ def test_create_all_polygons_to_all_point_on_grid():
                 ))
             ],
             [
-                4, 4, Polygon((
+                1, 4, 4, Polygon((
                     (116.31977738592074, 39.98463538592074),
                     (116.31977738592074, 39.984770732400925),
                     (116.31991273240094, 39.984770732400925),
@@ -252,7 +252,7 @@ def test_create_all_polygons_to_all_point_on_grid():
                 ))
             ],
             [
-                3, 3, Polygon((
+                1, 3, 3, Polygon((
                     (116.31964203944057, 39.984500039440555),
                     (116.31964203944057, 39.98463538592074),
                     (116.31977738592076, 39.98463538592074),
@@ -261,7 +261,7 @@ def test_create_all_polygons_to_all_point_on_grid():
                 ))
             ],
         ],
-        columns=['index_grid_lat', 'index_grid_lon', 'polygon'],
+        columns=['id', 'index_grid_lat', 'index_grid_lon', 'polygon'],
         index=[0, 2, 5, 7],
     )
     move_df = _default_move_df()

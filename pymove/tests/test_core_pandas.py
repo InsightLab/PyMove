@@ -1163,20 +1163,28 @@ def test_get_bbox():
     )
 
 
-def test_plot_traj_id():
+def test_plot_traj_id(tmpdir):
     move_df = _default_move_df()
     move_df[TID] = ['1', '2', '3', '4']
 
-    df, img = move_df.plot_traj_id('1')
-    expected = DataFrame(
-        data=[
-            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, '1'],
-        ],
-        columns=['lat', 'lon', 'datetime', 'id', 'tid'],
-        index=[0],
+    d = tmpdir.mkdir('core')
+
+    file_write_default = d.join('traj_id.png')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
     )
-    assert_frame_equal(df, expected)
-    assert isinstance(df, PandasMoveDataFrame)
+
+    move_df.plot_traj_id('1', save_fig=True, name=filename_write_default)
+
+    test_dir = os.path.abspath(os.path.dirname(__file__))
+    data_dir = os.path.join(test_dir, 'baseline/traj_id.png')
+
+    compare_images(
+        data_dir,
+        filename_write_default,
+        0.0001,
+        in_decorator=False
+    )
 
 
 def test_min():

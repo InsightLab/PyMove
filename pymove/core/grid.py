@@ -341,7 +341,7 @@ class Grid:
         if INDEX_GRID_LAT not in data or INDEX_GRID_LON not in data:
             self.create_update_index_grid_feature(data, unique_index=False)
 
-        datapolygons = data[[INDEX_GRID_LAT, INDEX_GRID_LON]].drop_duplicates()
+        datapolygons = data[[TRAJ_ID, INDEX_GRID_LAT, INDEX_GRID_LON]].drop_duplicates()
 
         polygons = datapolygons.apply(
             lambda row: self.create_one_polygon_to_point_on_grid(
@@ -430,7 +430,8 @@ class Grid:
     def show_grid_polygons(
         self,
         data: DataFrame,
-        id_: Text,
+        markersize: Optional[float] = 10,
+        linewidth: Optional[float] = 2,
         figsize: Optional[Tuple[int, int]] = (10, 10),
         return_fig: Optional[bool] = True,
         save_fig: Optional[bool] = False,
@@ -443,8 +444,10 @@ class Grid:
         ----------
         data : DataFrame
             Input trajectory data
-        id_ : Text
-            Represents the id
+        markersize : float, optional
+            Represents visualization size marker, by default 10
+        linewidth : float, optional
+            Represents visualization size line, by default 2
         figsize : tuple(int, int), optional
             Represents the size (float: width, float: height) of a figure,
                 by default (10, 10)
@@ -470,20 +473,19 @@ class Grid:
         if POLYGON not in data:
             raise KeyError('POLYGON feature not in dataframe')
 
-        df_ = data[data[TRAJ_ID] == id_]
-        if not len(df_):
-            raise IndexError('No user with id %s in dataframe' % id_)
-        df_.dropna(axis=1, subset=[POLYGON], inplace=True)
+        data.dropna(subset=[POLYGON], inplace=True)
 
         operation = begin_operation('show_grid_polygons')
 
         fig = plt.figure(figsize=figsize)
 
-        for row in df_.iterrows():
+        for _, row in data.iterrows():
             xs, ys = row[POLYGON].exterior.xy
-            plt.plot(ys, xs, 'g', linewidth=2, markersize=5)
-        xs_start, ys_start = df_.iloc[0][POLYGON].exterior.xy
-        plt.plot(ys_start, xs_start, 'bo', markersize=20)  # start point
+            plt.plot(ys, xs, 'g', linewidth=linewidth, markersize=markersize)
+        xs_start, ys_start = data.iloc[0][POLYGON].exterior.xy
+        xs_end, ys_end = data.iloc[-1][POLYGON].exterior.xy
+        plt.plot(ys_start, xs_start, 'bo', markersize=markersize * 1.5)
+        plt.plot(ys_end, xs_end, 'bX', markersize=markersize * 1.5)  # start point
 
         if save_fig:
             plt.savefig(fname=name, fig=fig)
