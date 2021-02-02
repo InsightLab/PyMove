@@ -103,7 +103,7 @@ def nearest_points(
     traj1: DataFrame,
     traj2: DataFrame,
     latitude: Optional[Text] = LATITUDE,
-    longitude: Optional[Text] = LONGITUDE
+    longitude: Optional[Text] = LONGITUDE,
 ) -> DataFrame:
     """
     For each point on a trajectory, it returns the point closest to
@@ -131,7 +131,7 @@ def nearest_points(
 
     result = pd.DataFrame(columns=traj1.columns)
 
-    for _, t1 in progress_bar(traj1.iterrows(), total=traj1.shape[0]):
+    for _, t1 in traj1.iterrows():
         round_result = np.Inf
         round_traj = []
         for _, t2 in traj2.iterrows():
@@ -179,9 +179,7 @@ def MEDP(
 
     soma = 0
     traj2 = nearest_points(traj1, traj2, latitude, longitude)
-    for (_, t1), (_, t2) in progress_bar(
-        zip(traj1.iterrows(), traj2.iterrows()), total=traj1.shape[0]
-    ):
+    for (_, t1), (_, t2) in zip(traj1.iterrows(), traj2.iterrows()):
         this_distance = distance.euclidean(
             (t1[latitude], t1[longitude]),
             (t2[latitude], t2[longitude])

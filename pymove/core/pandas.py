@@ -1449,7 +1449,7 @@ class PandasMoveDataFrame(DataFrame):
     def plot_trajs(
         self,
         markers: Optional[Text] = 'o',
-        markersize: Optional[float] = 20,
+        markersize: Optional[float] = 12,
         figsize: Optional[Tuple[float, float]] = (10, 10),
         return_fig: Optional[bool] = True,
         save_fig: Optional[bool] = False,
@@ -1463,7 +1463,7 @@ class PandasMoveDataFrame(DataFrame):
         markers : str, optional
              Represents visualization type marker, by default 'o'
         markersize : float, optional
-            Represents visualization size marker, by default 20
+            Represents visualization size marker, by default 12
         figsize : tuple(float, float), optional
              Represents dimensions of figure, by default (10, 10)
         return_fig : bool, optional
@@ -1507,11 +1507,12 @@ class PandasMoveDataFrame(DataFrame):
         label: Optional[Text] = TID,
         feature: Optional[Text] = None,
         value: Optional[Any] = None,
+        markersize: Optional[float] = 20,
         figsize: Optional[Tuple[float, float]] = (10, 10),
         return_fig: Optional[bool] = True,
         save_fig: Optional[bool] = False,
         name: Optional[Text] = None,
-    ) -> Optional[Union['PandasMoveDataFrame', figure]]:
+    ) -> Optional[figure]:
         """
         Generate a visualization that shows a trajectory with the specified tid.
 
@@ -1525,6 +1526,8 @@ class PandasMoveDataFrame(DataFrame):
             Name of the feature to highlight on plot, by default None
         value : any, optional
             Value of the feature to be highlighted as green marker, by default None
+        markersize : float, optional
+            Represents visualization size marker, by default 20
         figsize : tuple(float, float), optional
             Represents dimensions of figure, by default (10, 10)
         return_fig : bool, optional
@@ -1564,16 +1567,16 @@ class PandasMoveDataFrame(DataFrame):
         fig = plt.figure(figsize=figsize)
 
         plt.plot(
-            df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=23
+            df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=markersize
         )  # start point
         plt.plot(
-            df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=23
+            df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=markersize
         )  # end point
 
         if (not feature) or (not value) or (feature not in df_):
             plt.plot(df_[LONGITUDE], df_[LATITUDE])
             plt.plot(
-                df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], 'r.', markersize=8
+                df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], 'r.', markersize=markersize/2
             )
         else:
             filter_ = df_[feature] == value
@@ -1581,10 +1584,10 @@ class PandasMoveDataFrame(DataFrame):
             df_points = df_.loc[~filter_]
             plt.plot(df_[LONGITUDE], df_[LATITUDE], linewidth=3)
             plt.plot(
-                df_nodes[LONGITUDE], df_nodes[LATITUDE], 'gs', markersize=13
+                df_nodes[LONGITUDE], df_nodes[LATITUDE], 'gs', markersize=markersize/2
             )
             plt.plot(
-                df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=8
+                df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=markersize/2
             )
 
         if save_fig:
@@ -1592,12 +1595,10 @@ class PandasMoveDataFrame(DataFrame):
                 name = 'trajectory_%s.png' % tid
             plt.savefig(fname=name, fig=fig)
 
-        df_ = PandasMoveDataFrame(df_)
         self.last_operation = end_operation(operation)
 
         if return_fig:
-            return df_, fig
-        return df_
+            return fig
 
     def show_trajectories_info(self):
         """
