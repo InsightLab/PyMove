@@ -1187,7 +1187,6 @@ def test_plot_traj_id(tmpdir):
     )
 
 
-
 def test_min():
     move_df = _default_move_df()
 

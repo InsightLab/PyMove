@@ -484,8 +484,8 @@ class Grid:
             plt.plot(ys, xs, 'g', linewidth=linewidth, markersize=markersize)
         xs_start, ys_start = data.iloc[0][POLYGON].exterior.xy
         xs_end, ys_end = data.iloc[-1][POLYGON].exterior.xy
-        plt.plot(ys_start, xs_start, 'bo', markersize=markersize*1.5)
-        plt.plot(ys_end, xs_end, 'bX', markersize=markersize*1.5)  # start point
+        plt.plot(ys_start, xs_start, 'bo', markersize=markersize * 1.5)
+        plt.plot(ys_end, xs_end, 'bX', markersize=markersize * 1.5)  # start point
 
         if save_fig:
             plt.savefig(fname=name, fig=fig)

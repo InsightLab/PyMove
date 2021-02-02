@@ -8,7 +8,6 @@ from scipy.spatial import distance
 
 from pymove import utils
 from pymove.utils.constants import DATETIME, EARTH_RADIUS, LATITUDE, LONGITUDE
-from pymove.utils.log import progress_bar
 
 
 def haversine(

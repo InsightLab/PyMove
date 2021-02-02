@@ -1576,7 +1576,8 @@ class PandasMoveDataFrame(DataFrame):
         if (not feature) or (not value) or (feature not in df_):
             plt.plot(df_[LONGITUDE], df_[LATITUDE])
             plt.plot(
-                df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE], 'r.', markersize=markersize/2
+                df_.loc[:, LONGITUDE], df_.loc[:, LATITUDE],
+                'r.', markersize=markersize / 2
             )
         else:
             filter_ = df_[feature] == value
@@ -1584,10 +1585,10 @@ class PandasMoveDataFrame(DataFrame):
             df_points = df_.loc[~filter_]
             plt.plot(df_[LONGITUDE], df_[LATITUDE], linewidth=3)
             plt.plot(
-                df_nodes[LONGITUDE], df_nodes[LATITUDE], 'gs', markersize=markersize/2
+                df_nodes[LONGITUDE], df_nodes[LATITUDE], 'gs', markersize=markersize / 2
             )
             plt.plot(
-                df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=markersize/2
+                df_points[LONGITUDE], df_points[LATITUDE], 'r.', markersize=markersize / 2
             )
 
         if save_fig:
