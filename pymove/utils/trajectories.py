@@ -210,7 +210,10 @@ def shift(
 
     result = np.empty_like(arr)
     if fill_value is None:
-        if isinstance(result.dtype, int):
+        dtype = result.dtype
+        if np.issubdtype(dtype, np.bool_):
+            fill_value = False
+        elif np.issubdtype(dtype, np.integer):
             fill_value = 0
         else:
             fill_value = np.nan
