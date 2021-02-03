@@ -96,7 +96,17 @@ def test_shift():
 
     expected = [4, 5, 0, 0, 0]
     array_ = [1, 2, 3, 4, 5]
-    shifted_array = trajectories.shift(arr=array_, num=-3, fill_value=0)
+    shifted_array = trajectories.shift(arr=array_, num=-3)
+    assert_array_equal(shifted_array, expected)
+
+    expected = [False, False, False, True, True]
+    array_ = [True, True, True, True, True]
+    shifted_array = trajectories.shift(arr=array_, num=3)
+    assert_array_equal(shifted_array, expected)
+
+    expected = ['dewberry', 'eggplant', 'nan', 'nan', 'nan']
+    array_ = ['apple', 'banana', 'coconut', 'dewberry', 'eggplant']
+    shifted_array = trajectories.shift(arr=array_, num=-3, fill_value=np.nan)
     assert_array_equal(shifted_array, expected)
 
 
