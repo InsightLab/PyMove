@@ -297,8 +297,6 @@ def outliers(
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned, by default False
 
-
-
     Returns
     -------
     DataFrame
