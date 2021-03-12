@@ -18,8 +18,8 @@ from pymove.utils.constants import (
 from pymove.utils.log import progress_bar, timer_decorator
 
 if TYPE_CHECKING:
-    from pymove.core.pandas import PandasMoveDataFrame
     from pymove.core.dask import DaskMoveDataFrame
+    from pymove.core.pandas import PandasMoveDataFrame
 
 
 @timer_decorator

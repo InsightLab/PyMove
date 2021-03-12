@@ -17,8 +17,8 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade "pip<20"
-        pip install -r requirements-dev.txt
+        python -m pip install --upgrade pip
+        pip install pytest coverage geopandas .
     - name: Coverage
       run: |
         coverage run -m pytest
