@@ -16,8 +16,8 @@ from pymove.utils.constants import (
 )
 
 if TYPE_CHECKING:
-    from pymove.core.pandas import PandasMoveDataFrame
     from pymove.core.dask import DaskMoveDataFrame
+    from pymove.core.pandas import PandasMoveDataFrame
 
 
 def show_object_id_by_date(
