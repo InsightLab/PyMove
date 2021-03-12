@@ -208,7 +208,7 @@ Requirements: Anaconda Python distribution installed and accessible
     -   `git pull origin developer`
 
 5.  Install pymove in developer mode
-    -   `pip install -r requirements-dev.txt`
+    -   `make dev`
 
 ### For windows users
 

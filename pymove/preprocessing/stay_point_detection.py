@@ -19,8 +19,8 @@ from pymove.utils.constants import (
 from pymove.utils.log import timer_decorator
 
 if TYPE_CHECKING:
-    from pymove.core.pandas import PandasMoveDataFrame
     from pymove.core.dask import DaskMoveDataFrame
+    from pymove.core.pandas import PandasMoveDataFrame
 
 
 def create_or_update_datetime_in_format_cyclical(

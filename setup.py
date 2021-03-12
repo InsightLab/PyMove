@@ -1,36 +1,11 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import find_packages, setup
 
-# Get the long description from the README file
-try:
-    long_description = open('README.md', 'r').read()
-except Exception as e:
-    raise e
+with open('README.md', 'r') as f:
+    LONG_DESCRIPTION = f.read()
 
-DEPENDENCIES = [
-    'branca',
-    'dask[dataframe]',
-    'folium>=0.10.1',
-    'geohash2',
-    'geojson',
-    'holidays',
-    'IPython',
-    'ipywidgets',
-    'joblib',
-    'matplotlib',
-    'mplleaflet',
-    'numpy',
-    'pandas>=1.1.0',
-    'psutil',
-    'python-dateutil',
-    'pytz',
-    'scikit-learn',
-    'scipy',
-    'shapely',
-    'tqdm',
-]
+with open('requirements.txt') as f:
+    DEPENDENCIES = f.readlines()
+
 setup(
     name='pymove',
     version='2.6.1',
@@ -40,22 +15,10 @@ setup(
     python_requires='>=3.6',
     description='A lib python to processing and visualization '
                 'of trajectories and other spatial-temporal data',
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
     url='https://github.com/InsightLab/PyMove',
-    packages=[
-        'pymove',
-        'pymove.core',
-        'pymove.models',
-        'pymove.models.pattern_mining',
-        'pymove.preprocessing',
-        'pymove.query',
-        'pymove.semantic',
-        'pymove.tests',
-        'pymove.uncertainty',
-        'pymove.utils',
-        'pymove.visualization',
-    ],
+    packages=find_packages(exclude=['*.tests']),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python :: 3',

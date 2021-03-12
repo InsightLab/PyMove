@@ -19,8 +19,8 @@ from pymove.utils.constants import (
 from pymove.utils.log import timer_decorator
 
 if TYPE_CHECKING:
-    from pymove.core.pandas import PandasMoveDataFrame
     from pymove.core.dask import DaskMoveDataFrame
+    from pymove.core.pandas import PandasMoveDataFrame
 
 
 def _end_create_operation(
