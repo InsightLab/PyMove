@@ -20,8 +20,8 @@ pymove.utils.conversions module
    :undoc-members:
    :show-inheritance:
 
-pymove.utils.data_augmentation module
--------------------------------------
+pymove.utils.data\_augmentation module
+--------------------------------------
 
 .. automodule:: pymove.utils.data_augmentation
    :members:
@@ -99,7 +99,6 @@ pymove.utils.visual module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------

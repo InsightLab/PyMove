@@ -4,7 +4,7 @@ help:
 	@echo " - clean  : clean temporary folders and files"
 	@echo " - test   : runs all unit tests"
 	@echo " - lint   : checks code style"
-	@echo " - doc    : creates documentation in html"
+	@echo " - docs   : creates documentation in html"
 
 dev:
 	pip install -r requirements-dev.txt
@@ -24,5 +24,6 @@ test: clean
 lint: clean
 	flake8
 
-doc: clean
+docs: clean
+	sphinx-apidoc -f -o docs/references pymove pymove/tests/
 	make -C docs html

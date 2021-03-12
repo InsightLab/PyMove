@@ -7,7 +7,6 @@ spatial-temporal data
 
 """
 
-from ._version import __version__
 from .core import grid
 from .core.dask import DaskMoveDataFrame
 from .core.dataframe import MoveDataFrame
@@ -31,3 +30,5 @@ from .utils import (
 )
 from .utils.trajectories import read_csv
 from .visualization import folium, matplotlib
+
+__version__ = '2.6.1'
