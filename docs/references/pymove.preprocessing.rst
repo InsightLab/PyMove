@@ -20,14 +20,6 @@ pymove.preprocessing.filters module
    :undoc-members:
    :show-inheritance:
 
-pymove.preprocessing.map\_matching module
------------------------------------------
-
-.. automodule:: pymove.preprocessing.map_matching
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pymove.preprocessing.segmentation module
 ----------------------------------------
 
@@ -43,7 +35,6 @@ pymove.preprocessing.stay\_point\_detection module
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------
