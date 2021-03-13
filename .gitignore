@@ -343,5 +343,5 @@ examples/*
 !examples/geolife_sample.csv
 !examples/atlantic.csv
 !examples/README.md
-!examples/#*.ipynb
+!examples/[0-9]*.ipynb
 !examples/extracao_geolife.ipynb

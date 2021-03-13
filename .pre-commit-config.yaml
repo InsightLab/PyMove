@@ -8,7 +8,7 @@ repos:
     -   id: mixed-line-ending
         args: ['--fix=lf']
     -   id: check-added-large-files
-        args: ['--maxkb=15000']
+        args: ['--maxkb=25000']
     -   id: no-commit-to-branch
 -   repo: https://github.com/humitos/mirrors-autoflake
     rev: v1.3
