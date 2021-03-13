@@ -47,4 +47,5 @@ Indices and tables
    :maxdepth: 4
    :caption: References
 
-   references/pymove
+   api/pymove
+   examples/notebooks
