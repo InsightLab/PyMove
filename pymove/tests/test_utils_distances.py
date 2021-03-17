@@ -74,7 +74,7 @@ def test_haversine():
 
 
 def test_euclidean_distance_in_meters():
-    expected = 0.56021344523276
+    expected = 9.790407710249447
 
     dist = distances.euclidean_distance_in_meters(
         -3.797864, -38.501597, -3.797890, -38.501681
