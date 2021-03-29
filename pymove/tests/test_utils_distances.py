@@ -1,3 +1,4 @@
+from numpy import array
 from numpy.testing import assert_almost_equal
 from pandas import Timestamp
 
@@ -67,20 +68,28 @@ traj_example3 = [[13.6, -44.6, Timestamp('2012-08-10 00:00:00'),
 
 def test_haversine():
     expected = 9.757976024363016
-
     dist = distances.haversine(-3.797864, -38.501597, -3.797890, -38.501681)
 
     assert_almost_equal(dist, expected)
 
 
 def test_euclidean_distance_in_meters():
-    expected = 0.56021344523276
+    expected = 9.790407710249447
 
     dist = distances.euclidean_distance_in_meters(
         -3.797864, -38.501597, -3.797890, -38.501681
     )
 
     assert_almost_equal(dist, expected)
+
+    expected = [9.790407710249447, 9.790407710249447]
+    dists = distances.euclidean_distance_in_meters(
+        array([-3.797864, -3.797890]),
+        array([-38.501597, -38.501681]),
+        array([-3.797890, -3.797864]),
+        array([-38.501681, -38.501597])
+    )
+    assert_almost_equal(dists, expected)
 
 
 def test_MEDP():
