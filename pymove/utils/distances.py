@@ -75,7 +75,6 @@ def euclidean_distance_in_meters(
 
     Parameters
     ----------
-    ----------
     lat1 : float or array
         latitute of point 1
     lon1 : float or array
@@ -91,12 +90,12 @@ def euclidean_distance_in_meters(
         euclidean distance in meters between the two points.
     """
 
-    y1 = utils.conversions.lat_to_y_spherical(lat=lat1) 
-    y2 = utils.conversions.lat_to_y_spherical(lat=lat2) 
-    x1 = utils.conversions.lon_to_x_spherical(lon=lon1) 
-    x2 = utils.conversions.lon_to_x_spherical(lon=lon2) 
-    
-    dist_eucl_in_meters = ((y1-y2)**2 + (x1-x2)**2)**0.5
+    y1 = utils.conversions.lat_to_y_spherical(lat=lat1)
+    y2 = utils.conversions.lat_to_y_spherical(lat=lat2)
+    x1 = utils.conversions.lon_to_x_spherical(lon=lon1)
+    x2 = utils.conversions.lon_to_x_spherical(lon=lon2)
+
+    dist_eucl_in_meters = ((y1 - y2)**2 + (x1 - x2)**2)**0.5
 
     return dist_eucl_in_meters
 
