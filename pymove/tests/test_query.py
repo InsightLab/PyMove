@@ -105,7 +105,7 @@ list_data = [[33.1, -77.0, Timestamp('2012-05-19 00:00:00'),
              [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
              '             HELENE']]
 
-expected_range_MEDP_data = [[11.6, -46.7, Timestamp('2012-08-01 12:00:00'),
+expected_range_medp_data = [[11.6, -46.7, Timestamp('2012-08-01 12:00:00'),
                             '            ERNESTO'],
                             [12.0, -48.2, Timestamp('2012-08-01 18:00:00'),
                             '            ERNESTO'],
@@ -144,7 +144,7 @@ expected_range_MEDP_data = [[11.6, -46.7, Timestamp('2012-08-01 12:00:00'),
                             [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
                             '             HELENE']]
 
-expected_range_MEDT_data = [[11.6, -46.7, Timestamp('2012-08-01 12:00:00'),
+expected_range_medt_data = [[11.6, -46.7, Timestamp('2012-08-01 12:00:00'),
                             '            ERNESTO'],
                             [12.0, -48.2, Timestamp('2012-08-01 18:00:00'),
                             '            ERNESTO'],
@@ -183,7 +183,7 @@ expected_range_MEDT_data = [[11.6, -46.7, Timestamp('2012-08-01 12:00:00'),
                             [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
                             '             HELENE']]
 
-expected_knn_MEDP_data = [[16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
+expected_knn_medp_data = [[16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
                           '            GONZALO'],
                           [16.4, -55.9, Timestamp('2014-10-12 00:00:00'),
                           '            GONZALO'],
@@ -242,7 +242,7 @@ expected_knn_MEDP_data = [[16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
                           [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
                           '             HELENE']]
 
-expected_knn_MEDT_data = [[16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
+expected_knn_medt_data = [[16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
                           '            GONZALO'],
                           [16.4, -55.9, Timestamp('2014-10-12 00:00:00'),
                           '            GONZALO'],
@@ -309,42 +309,42 @@ def _default_move_df(data=None):
 def test_range_query():
     traj_df = _default_traj_df()
     move_df = _default_move_df()
-    expected_MEDP = DataFrame(
-        data=expected_range_MEDP_data,
+    expected_medp = DataFrame(
+        data=expected_range_medp_data,
         columns=['lat', 'lon', 'datetime', 'id'],
         index=[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38]
     )
-    expected_MEDT = DataFrame(
-        data=expected_range_MEDT_data,
+    expected_medt = DataFrame(
+        data=expected_range_medt_data,
         columns=['lat', 'lon', 'datetime', 'id'],
         index=[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38]
     )
 
     medp_move_df = query.range_query(traj_df, move_df, min_dist=100, distance='MEDP')
-    assert_frame_equal(medp_move_df, expected_MEDP)
+    assert_frame_equal(medp_move_df, expected_medp)
 
     medt_move_df = query.range_query(traj_df, move_df, min_dist=700, distance='MEDT')
-    assert_frame_equal(medt_move_df, expected_MEDT)
+    assert_frame_equal(medt_move_df, expected_medt)
 
 
 def test_knn_query():
     traj_df = _default_traj_df()
     move_df = _default_move_df()
-    expected_MEDP = DataFrame(
-        data=expected_knn_MEDP_data,
+    expected_medp = DataFrame(
+        data=expected_knn_medp_data,
         columns=['lat', 'lon', 'datetime', 'id'],
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20,
                21, 22, 23, 24, 25, 26, 27, 28, 29,
                30, 31, 32, 33, 34, 35, 36, 37, 38]
     )
-    expected_MEDT = DataFrame(
-        data=expected_knn_MEDT_data,
+    expected_medt = DataFrame(
+        data=expected_knn_medt_data,
         columns=['lat', 'lon', 'datetime', 'id'],
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 30, 31, 32, 33, 34, 35, 36, 37, 38]
     )
 
     medp_move_df = query.knn_query(traj_df, move_df, k=2, distance='MEDP')
-    assert_frame_equal(medp_move_df, expected_MEDP)
+    assert_frame_equal(medp_move_df, expected_medp)
 
     medt_move_df = query.knn_query(traj_df, move_df, k=2, distance='MEDT')
-    assert_frame_equal(medt_move_df, expected_MEDT)
+    assert_frame_equal(medt_move_df, expected_medt)

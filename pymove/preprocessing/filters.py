@@ -1,3 +1,24 @@
+"""
+Filtering operations.
+
+get_bbox_by_radius,
+by_bbox,
+by_datetime,
+by_label,
+by_id,
+by_tid,
+outliers,
+clean_consecutive_duplicates,
+clean_gps_jumps_by_distance,
+clean_gps_nearby_points_by_distances,
+clean_gps_nearby_points_by_speed,
+clean_gps_speed_max_radius,
+clean_trajectories_with_few_points,
+clean_trajectories_short_and_few_points,
+clean_id_by_time_max
+
+"""
+
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Text, Tuple, Union
 
 import numpy as np
@@ -25,8 +46,7 @@ def get_bbox_by_radius(
     coordinates: Tuple[float, float], radius: Optional[float] = 1000
 ) -> List:
     """
-    Defines minimum and maximum coordinates,
-    given a distance radius from a point.
+    Defines minimum and maximum coordinates, given a distance radius from a point.
 
     Parameters
     ----------
@@ -89,7 +109,6 @@ def by_bbox(
         Returns dataframe with trajectories points filtered by bounding box or None
 
     """
-
     filter_ = (
         (move_data[LATITUDE] >= bbox[0])
         & (move_data[LONGITUDE] >= bbox[1])
@@ -135,7 +154,6 @@ def by_datetime(
         Returns dataframe with trajectories points filtered by time range or None
 
     """
-
     if start_datetime is not None and end_datetime is not None:
         filter_ = (
             (move_data[DATETIME] >= start_datetime)
@@ -185,7 +203,6 @@ def by_label(
         Returns dataframe with trajectories points filtered by label or None
 
     """
-
     filter_ = move_data[label_name] == value
     if filter_out:
         filter_ = ~filter_
@@ -228,7 +245,6 @@ def by_id(
         Returns dataframe with trajectories points filtered by id or None
 
     """
-
     return by_label(move_data, id_, label_id, filter_out, inplace)
 
 
@@ -265,7 +281,6 @@ def by_tid(
         Returns a dataframe with trajectories points filtered or None
 
     """
-
     return by_label(move_data, tid_, TID, filter_out, inplace)
 
 
@@ -303,7 +318,6 @@ def outliers(
         Returns a dataframe with the trajectories outliers or None
 
     """
-
     if DIST_TO_PREV not in move_data:
         move_data.generate_dist_features()
 
@@ -343,8 +357,9 @@ def clean_consecutive_duplicates(
     inplace: Optional[bool] = False
 ) -> Optional[DataFrame]:
     """
-    Removes consecutive duplicate rows of the Dataframe, optionally only
-    certain columns can be consider.
+    Removes consecutive duplicate rows of the Dataframe.
+
+    Optionally only certain columns can be consider.
 
     Parameters
     ----------
@@ -371,7 +386,6 @@ def clean_consecutive_duplicates(
         The filtered trajectories points without consecutive duplicates or None
 
     """
-
     if keep == 'first':
         n = 1
     else:
@@ -402,14 +416,12 @@ def _filter_single_by_max(move_data: DataFrame, **kwargs):
         Filtered dataframe.
 
     """
-
     return move_data[move_data[kwargs['arg1']] <= kwargs['arg2']]
 
 
 def _filter_speed_max_radius(move_data: DataFrame, **kwargs):
     """
-    Filters from a dataframe rows with current or previous row features
-    exceeding value.
+    Filters from a dataframe rows with current or previous row features exceeding value.
 
     Parameters
     ----------
@@ -434,7 +446,7 @@ def _filter_speed_max_radius(move_data: DataFrame, **kwargs):
 
 def _filter_data(move_data: DataFrame, f: callable, kwargs: Dict):
     """
-    Filter the dataframe using condition from given function
+    Filter the dataframe using condition from given function.
 
     Parameters
     ----------
@@ -455,7 +467,6 @@ def _filter_data(move_data: DataFrame, f: callable, kwargs: Dict):
         Number of rows to be dropped
 
     """
-
     if kwargs['outliers']:
         filter_data_points = f(
             move_data,
@@ -476,7 +487,7 @@ def _filter_data(move_data: DataFrame, f: callable, kwargs: Dict):
 
 def _clean_gps(move_data: DataFrame, f: callable, **kwargs):
     """
-    Cleans gps points from a dataframe using condition from given function
+    Cleans gps points from a dataframe using condition from given function.
 
     Parameters
     ----------
@@ -495,7 +506,6 @@ def _clean_gps(move_data: DataFrame, f: callable, **kwargs):
         Filtered dataframe.
 
     """
-
     if move_data.index.name is not None:
         print('...Reset index for filtering\n')
         move_data.reset_index(inplace=True)
@@ -554,7 +564,6 @@ def clean_gps_jumps_by_distance(
         The filtered trajectories without the gps jumps or None
 
     """
-
     if not inplace:
         move_df = move_data[:]
     else:
@@ -590,8 +599,7 @@ def clean_gps_nearby_points_by_distances(
     inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Removes points from the trajectories when the distance between them and the
-    point before is smaller than the value set by the user.
+    Removes points from the trajectories with smaller distance from the point before.
 
     Parameters
     ----------
@@ -649,8 +657,7 @@ def clean_gps_nearby_points_by_speed(
     inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Removes points from the trajectories when the speed of travel between them
-    and the point before is smaller than the value set by the user.
+    Removes points from the trajectories with smaller speed of travel.
 
     Parameters
     ----------
@@ -673,7 +680,6 @@ def clean_gps_nearby_points_by_speed(
         The filtered trajectories without the gps nearby points by speed or None
 
     """
-
     if not inplace:
         move_df = move_data[:]
     else:
@@ -708,8 +714,9 @@ def clean_gps_speed_max_radius(
     inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Recursively removes trajectories points with speed higher than the value
-    specified by the user. Given any point p of the trajectory, the point will
+    Removes trajectories points with higher speed.
+
+    Given any point p of the trajectory, the point will
     be removed if one of the following happens: if the travel speed from the
     point before p to p is greater than the  max value of speed between adjacent
     points set by the user. Or the travel speed between point p and the next
@@ -739,7 +746,6 @@ def clean_gps_speed_max_radius(
         The filtered trajectories without the gps nearby points or None
 
     """
-
     if not inplace:
         move_df = move_data[:]
     else:
@@ -773,8 +779,7 @@ def clean_trajectories_with_few_points(
     inplace: Optional[bool] = False
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Removes from the given dataframe, trajectories with fewer points than was
-    specified by the user.
+    Removes from the given dataframe, trajectories with fewer points.
 
     Parameters
     ----------
@@ -800,7 +805,6 @@ def clean_trajectories_with_few_points(
         If the label feature is not in the dataframe
 
     """
-
     if not inplace:
         move_df = move_data[:]
     else:
@@ -856,8 +860,7 @@ def clean_trajectories_short_and_few_points(
     inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Eliminates from the given dataframe trajectories with fewer points and
-    shorter length than specified values by the user.
+    Eliminates from the given dataframe trajectories with fewer points and shorter length.
 
     Parameters
     ----------
@@ -887,7 +890,6 @@ def clean_trajectories_short_and_few_points(
         remove_tids_with_few_points must be performed before updating features.
 
     """
-
     if not inplace:
         move_df = move_data[:]
     else:
@@ -971,7 +973,6 @@ def clean_id_by_time_max(
         The filtered trajectories with the maximum time.
 
     """
-
     if not inplace:
         move_df = move_data[:]
     else:

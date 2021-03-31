@@ -1,5 +1,5 @@
-#02 - Exploring Preprocessing
-=============================
+02 - Exploring Preprocessing
+============================
 
 Data preprocessing is a set of activities performed to prepare data for
 future analysis and data mining activities.
@@ -10,14 +10,14 @@ Load data from file
 The dataset used in this tutorial is GeoLife GPS Trajectories. Available
 in https://www.microsoft.com/en-us/download/details.aspx?id=52367
 
-.. code:: ipython3
+.. code:: python
 
     import pandas as pd
     import numpy as np
     from pymove import MoveDataFrame
     from pymove import read_csv
 
-.. code:: ipython3
+.. code:: python
 
     df = pd.read_csv('geolife_sample.csv', parse_dates=['datetime'])
     df.head()
@@ -93,11 +93,11 @@ in https://www.microsoft.com/en-us/download/details.aspx?id=52367
 
 
 
-.. code:: ipython3
+.. code:: python
 
     df_move = MoveDataFrame(df, latitude="lat", longitude="lon", datetime="datetime")
 
-.. code:: ipython3
+.. code:: python
 
     df_move.show_trajectories_info()
 
@@ -128,7 +128,7 @@ filtering.
 
 Importing the module:
 
-.. code:: ipython3
+.. code:: python
 
     from pymove import filters
     df_move = read_csv('geolife_sample.csv')
@@ -137,7 +137,7 @@ A bounding box (usually shortened to bbox) is an area defined by two
 longitudes and two latitudes. The function by_bbox, filters points of
 the trajectories according to a especified bounding box.
 
-.. code:: ipython3
+.. code:: python
 
     bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
     filt_df = filters.by_bbox(df_move, bbox)
@@ -217,7 +217,7 @@ the trajectories according to a especified bounding box.
 by_datetime function filters point trajectories according to the time
 specified by the parameters: start_datetime and end_datetime.
 
-.. code:: ipython3
+.. code:: python
 
     filters.by_datetime(df_move, start_datetime = "2009-03-19 05:45:37", end_datetime = "2009-03-19 05:46:17")
 
@@ -323,7 +323,7 @@ specified by the parameters: start_datetime and end_datetime.
 by label function filters trajectories points according to specified
 value and column label, set by value and label_name respectively.
 
-.. code:: ipython3
+.. code:: python
 
     filters.by_label(df_move, value = 116.327219, label_name = "lon").head()
 
@@ -401,7 +401,7 @@ value and column label, set by value and label_name respectively.
 by_id function filters trajectories points according to especified
 trajectory id.
 
-.. code:: ipython3
+.. code:: python
 
     filters.by_id(df_move, id_=5).head()
 
@@ -480,7 +480,7 @@ A tid is the result of concatenation between the id and date of a
 trajectory. The by_tid function filters trajectory points according to
 the tid specified by the tid\_ parameter.
 
-.. code:: ipython3
+.. code:: python
 
     df_move.generate_tid_based_on_id_datetime()
     filters.by_tid(df_move, "12008102305").head()
@@ -576,7 +576,7 @@ the tid specified by the tid\_ parameter.
 
 outliers function filters trajectories points that are outliers.
 
-.. code:: ipython3
+.. code:: python
 
     outliers_points = filters.outliers(df_move)
     outliers_points.head()
@@ -706,7 +706,7 @@ rows of the Dataframe. Optionally only certaind columns can be consider,
 this is defined by the parameter subset, in this example only the lat
 column is considered.
 
-.. code:: ipython3
+.. code:: python
 
     filtered_df = filters.clean_consecutive_duplicates(df_move, subset = ["lat"])
     len(filtered_df)
@@ -725,7 +725,7 @@ clean_nan_values function removes missing values from the dataframe.
 clean_gps_jumps_by_distance function removes from the dataframe the
 trajectories points that are outliers.
 
-.. code:: ipython3
+.. code:: python
 
     filters.clean_gps_jumps_by_distance(df_move)
 
@@ -911,7 +911,7 @@ clean_gps_nearby_points_by_distances function removes points from the
 trajectories when the distance between them and the point before is
 smaller than the parameter radius_area.
 
-.. code:: ipython3
+.. code:: python
 
     filters.clean_gps_nearby_points_by_distances(df_move, radius_area = 10)
 
@@ -1093,7 +1093,7 @@ clean_gps_nearby_points_by_speed function removes points from the
 trajectories when the speed of travel between them and the point before
 is smaller than the value set by the parameter speed_radius.
 
-.. code:: ipython3
+.. code:: python
 
     filters.clean_gps_nearby_points_by_speed(df_move, speed_radius=40.0)
 
@@ -1325,7 +1325,7 @@ will update the time and distance features in the dataframe and will
 call itself again. The function will finish processing when it can no
 longer find points disrespecting the limit of speed.
 
-.. code:: ipython3
+.. code:: python
 
     filters.clean_gps_speed_max_radius(df_move)
 
@@ -1549,7 +1549,7 @@ clean_trajectories_with_few_points function removes from the given
 dataframe, trajectories with fewer points than was specified by the
 parameter min_points_per_trajectory.
 
-.. code:: ipython3
+.. code:: python
 
     filters.clean_trajectories_with_few_points(df_move)
 
@@ -1738,7 +1738,7 @@ different parameters.
 
 Importing the module:
 
-.. code:: ipython3
+.. code:: python
 
     from pymove import segmentation
     df_move = read_csv('geolife_sample.csv')
@@ -1746,7 +1746,7 @@ Importing the module:
 bbox_split function splits the bounding box in grids of the same size.
 The number of grids is defined by the parameter number_grids.
 
-.. code:: ipython3
+.. code:: python
 
     bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
     segmentation.bbox_split(bbox, number_grids=4)
@@ -1757,7 +1757,7 @@ The number of grids is defined by the parameter number_grids.
     const_lat: 4.74612125
     const_lon: 1.901845250000001
     **********************
-    bbox_split took 00.02s
+    bbox_split took 00.01s
     **********************
 
 
@@ -1831,7 +1831,7 @@ max_time_between_adj_points, max_speed_between_adj_points respectively.
 The column tid_part is added, it indicates the segment to which the
 point belongs to.
 
-.. code:: ipython3
+.. code:: python
 
     segmentation.by_dist_time_speed(
         df_move,
@@ -1902,7 +1902,7 @@ point belongs to.
     ...Reset index...
 
     ******************************
-    by_dist_time_speed took 01.55s
+    by_dist_time_speed took 00.49s
     ******************************
 
 
@@ -2005,7 +2005,7 @@ speed. The speed limit is defined by the parameter
 max_speed_between_adj_points. The column tid_speed is added, it
 indicates the segment to which the point belongs to.
 
-.. code:: ipython3
+.. code:: python
 
     segmentation.by_max_dist(df_move, max_dist_between_adj_points=4000)
     df_move.head()
@@ -2048,7 +2048,7 @@ indicates the segment to which the point belongs to.
     ...Reset index...
 
     ***********************
-    by_max_dist took 00.80s
+    by_max_dist took 00.28s
     ***********************
 
 
@@ -2157,7 +2157,7 @@ The time limit is defined by the parameter max_time_between_adj_points.
 The column tid_time is added, it indicates the segment to which the
 point belongs to.
 
-.. code:: ipython3
+.. code:: python
 
     segmentation.by_max_time(df_move, max_time_between_adj_points=1000)
     df_move.head()
@@ -2200,7 +2200,7 @@ point belongs to.
     ...Reset index...
 
     ***********************
-    by_max_time took 00.68s
+    by_max_time took 00.29s
     ***********************
 
 
@@ -2310,7 +2310,7 @@ point belongs to.
 
 
 
-.. code:: ipython3
+.. code:: python
 
     segmentation.by_max_speed(df_move, max_speed_between_adj_points=70.0)
     df_move.head()
@@ -2353,7 +2353,7 @@ point belongs to.
     ...Reset index...
 
     ************************
-    by_max_speed took 00.78s
+    by_max_speed took 00.36s
     ************************
 
 
@@ -2483,7 +2483,7 @@ places such: a restaurant, a school, a work place.
 
 Importing the module:
 
-.. code:: ipython3
+.. code:: python
 
     from pymove import stay_point_detection
     df_move = read_csv('geolife_sample.csv')
@@ -2491,7 +2491,7 @@ Importing the module:
 stay_point_detection function converts the time data into a cyclical
 format. The columns hour_sin and hour_cos are added to the dataframe.
 
-.. code:: ipython3
+.. code:: python
 
     stay_point_detection.create_or_update_datetime_in_format_cyclical(df_move)
     df_move.head()
@@ -2593,7 +2593,7 @@ trajectory segment to which the point belongs to. The column stop is
 also added, it indicates is the point represents a stop, a place where
 the object was stationary.
 
-.. code:: ipython3
+.. code:: python
 
     stay_point_detection.create_or_update_move_stop_by_dist_time(df_move, dist_radius=40, time_radius=1000)
     df_move.head()
@@ -2655,7 +2655,7 @@ the object was stationary.
     ...Reset index...
 
     ***********************
-    by_max_dist took 01.28s
+    by_max_dist took 00.52s
     ***********************
     ...Sorting by segment_stop and datetime to increase performance
 
@@ -2682,7 +2682,7 @@ the object was stationary.
     False     59915
     Name: stop, dtype: int64
     ***************************************************
-    create_or_update_move_stop_by_dist_time took 37.85s
+    create_or_update_move_stop_by_dist_time took 36.68s
     ***************************************************
 
 
@@ -2803,7 +2803,7 @@ stay points of the trajectories, based on distance. The column situation
 is also added, it indicates if the point represents a stop point or a
 moving point.
 
-.. code:: ipython3
+.. code:: python
 
     stay_point_detection.create_or_update_move_and_stop_by_radius(df_move, radius=2)
     df_move.head()
@@ -2818,7 +2818,7 @@ moving point.
     ....There are 58981 stops to this parameters
 
     ****************************************************
-    create_or_update_move_and_stop_by_radius took 00.13s
+    create_or_update_move_and_stop_by_radius took 00.14s
     ****************************************************
 
 
@@ -2945,7 +2945,7 @@ Compression
 
 Importing the module:
 
-.. code:: ipython3
+.. code:: python
 
     from pymove import compression
     df_move = read_csv('geolife_sample.csv')
@@ -2953,7 +2953,7 @@ Importing the module:
 The function below is used to reduce the size of the trajectory, the
 stop points are used to make the compression.
 
-.. code:: ipython3
+.. code:: python
 
     df_compressed = compression.compress_segment_stop_to_point(df_move)
     len(df_move), len(df_compressed)
@@ -3015,7 +3015,7 @@ stop points are used to make the compression.
     ...Reset index...
 
     ***********************
-    by_max_dist took 01.12s
+    by_max_dist took 01.20s
     ***********************
     ...Sorting by segment_stop and datetime to increase performance
 
@@ -3042,7 +3042,7 @@ stop points are used to make the compression.
     False     65050
     Name: stop, dtype: int64
     ***************************************************
-    create_or_update_move_stop_by_dist_time took 47.05s
+    create_or_update_move_stop_by_dist_time took 53.09s
     ***************************************************
     ...setting mean to lat and lon...
     ...get only segments stop...
@@ -3059,9 +3059,9 @@ stop points are used to make the compression.
     ...Dropping 152033 points...
     ...Shape_before: 217653
     ...Current shape: 65620
-    ******************************************
-    compress_segment_stop_to_point took 54.87s
-    ******************************************
+    **********************************************
+    compress_segment_stop_to_point took 01m:08.30s
+    **********************************************
 
 
 

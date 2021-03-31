@@ -1,4 +1,17 @@
-from __future__ import division
+"""
+Data operations.
+
+read_csv,
+invert_dict,
+flatten_dict,
+flatten_columns,
+shift,
+fill_list_with_new_values,
+object_for_array,
+column_to_array
+
+"""
+
 
 from itertools import chain
 from typing import Any, Dict, List, Optional, Text, Union
@@ -25,11 +38,9 @@ def read_csv(
     **kwargs
 ):
     """
-    Reads a .csv file and structures the data into the desired structure
-    supported by PyMove.
+    Reads a `csv` file and structures the data.
 
     Parameters
-
     ----------
     filepath_or_buffer : str or path object or file-like object
         Any valid string path is acceptable. The string could be a URL.
@@ -60,7 +71,6 @@ def read_csv(
         Trajectory data
 
     """
-
     data = _read_csv(
         filepath_or_buffer,
         **kwargs
@@ -73,7 +83,7 @@ def read_csv(
 
 def invert_dict(d: Dict) -> Dict:
     """
-    Inverts the key:value relation of a dictionary
+    Inverts the key:value relation of a dictionary.
 
     Parameters
     ----------
@@ -86,7 +96,6 @@ def invert_dict(d: Dict) -> Dict:
         inverted dict
 
     """
-
     return {v: k for k, v in d.items()}
 
 
@@ -135,7 +144,7 @@ def flatten_dict(
 
 def flatten_columns(data: DataFrame, columns: List) -> DataFrame:
     """
-    Transforms columns containing dictionaries in individual columns
+    Transforms columns containing dictionaries in individual columns.
 
     Parameters
     ----------
@@ -162,6 +171,9 @@ def flatten_columns(data: DataFrame, columns: List) -> DataFrame:
     0     1         3       1         2
 
     """
+    data = data.copy()
+    if not isinstance(columns, list):
+        columns = [columns]
     for col in columns:
         data[f'{col}_'] = data[f'{col}'].apply(flatten_dict)
         keys = set(chain(*data[f'{col}_'].apply(lambda column: column.keys())))
@@ -203,11 +215,10 @@ def shift(
         Similar to pandas shift, but faster.
 
     References
-    --------
+    ----------
     https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
 
     """
-
     result = np.empty_like(arr)
     if fill_value is None:
         dtype = result.dtype
@@ -231,7 +242,9 @@ def shift(
 
 def fill_list_with_new_values(original_list: List, new_list_values: List):
     """
-    Copies elements from one list to another. The elements will be positioned in
+    Copies elements from one list to another.
+
+    The elements will be positioned in
     the same position in the new list as they were in their original list.
 
     Parameters
@@ -242,7 +255,6 @@ def fill_list_with_new_values(original_list: List, new_list_values: List):
         The list from which elements will be copied
 
     """
-
     n = len(new_list_values)
     original_list[:n] = new_list_values
 
@@ -261,11 +273,10 @@ def object_for_array(object_: Text) -> ndarray:
     array
         object converted to a list
     """
-
     if object_ is None:
         return object_
 
-    conv = np.array(object_[1:-1].split(', '))
+    conv = np.array([*map(str.strip, object_[1:-1].split(','))])
 
     if is_number(conv[0]):
         return conv.astype(np.float32)
@@ -273,7 +284,7 @@ def object_for_array(object_: Text) -> ndarray:
         return conv.astype('object_')
 
 
-def column_to_array(data: DataFrame, label_conversion: Text):
+def column_to_array(data: DataFrame, column: Text):
     """
     Transforms all columns values to list.
 
@@ -282,15 +293,14 @@ def column_to_array(data: DataFrame, label_conversion: Text):
     data : dataframe
         The input trajectory data
 
-    label_conversion : str
+    column : str
         Label of data referring to the column for conversion
     """
-
-    if label_conversion not in data:
+    data = data.copy()
+    if column not in data:
         raise KeyError(
-            'Dataframe must contain a %s column' % label_conversion
+            'Dataframe must contain a %s column' % column
         )
 
-    data[label_conversion] = (
-        data[label_conversion].apply(object_for_array)
-    )
+    data[column] = data[column].apply(object_for_array)
+    return data

@@ -1,9 +1,22 @@
+"""
+Visualization auxiliary operations.
+
+add_map_legend,
+generate_color,
+rgb,
+hex_rgb,
+cmap_hex_color,
+get_cmap,
+save_wkt
+
+"""
+
 from typing import List, Optional, Text, Tuple
 
 from branca.element import MacroElement, Template
 from folium import Map
 from matplotlib.cm import get_cmap as _get_cmap
-from matplotlib.colors import ListedColormap, rgb2hex
+from matplotlib.colors import Colormap, ListedColormap, rgb2hex
 from numpy.random import randint
 from pandas import DataFrame
 
@@ -28,7 +41,6 @@ def add_map_legend(m: Map, title: Text, items: List[Tuple]):
     https://github.com/python-visualization/folium/issues/528#issuecomment-421445303
 
     """
-
     item = "<li><span style='background:%s;'></span>%s</li>"
     list_items = '\n'.join([item % (c, n) for (n, c) in items])
     template = """
@@ -208,7 +220,20 @@ def cmap_hex_color(cmap: ListedColormap, i: int) -> Text:
     return rgb2hex(cmap(i))
 
 
-def get_cmap(cmap):
+def get_cmap(cmap: Text) -> Colormap:
+    """
+    Returns a matplotlib colormap instance.
+
+    Parameters
+    ----------
+    cmap : str
+        name of the colormar
+
+    Returns
+    -------
+    Colormap
+        matplotlib colormap
+    """
     return _get_cmap(cmap)
 
 
@@ -228,7 +253,6 @@ def save_wkt(
         Represents column name of trajectory id
 
     """
-
     str_ = '%s;linestring\n' % label_id
     ids = move_data[label_id].unique()
     for id_ in ids:

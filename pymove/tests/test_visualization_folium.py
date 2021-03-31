@@ -52,7 +52,7 @@ def _assert_plot(map_info):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.marker')
 
@@ -66,7 +66,7 @@ def _assert_plot(map_info):
 
     assert (
         count_l_map == 1
-        and count_l_tileLayer == 1
+        and count_l_title_layer == 1
         and count_l_marker == 2
         and count_l_popup == 2
         and count_head == 4
@@ -151,7 +151,7 @@ def test_heatmap(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.heatLayer')
 
@@ -162,7 +162,7 @@ def test_heatmap(tmpdir):
     count_script = map_info.count('script')
 
     assert(count_l_map == 1
-           and count_l_tileLayer == 1
+           and count_l_title_layer == 1
            and count_l_marker == 1
            and count_head == 2
            and count_body == 3
@@ -204,7 +204,7 @@ def test_heatmap_with_time(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.heatLayer')
 
@@ -215,7 +215,7 @@ def test_heatmap_with_time(tmpdir):
     count_script = map_info.count('script')
 
     assert(count_l_map == 1
-           and count_l_tileLayer == 1
+           and count_l_title_layer == 1
            and count_l_marker == 1
            and count_head == 2
            and count_body == 3
@@ -257,7 +257,7 @@ def test_cluster(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.marker')
 
@@ -271,7 +271,7 @@ def test_cluster(tmpdir):
 
     assert(
         count_l_map == 1
-        and count_l_tileLayer == 1
+        and count_l_title_layer == 1
         and count_l_marker == 6
         and count_l_popup == 5
         and count_head == 2
@@ -317,7 +317,7 @@ def test_faster_cluster(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.circle')
 
@@ -328,7 +328,7 @@ def test_faster_cluster(tmpdir):
     count_script = map_info.count('script')
 
     assert(count_l_map == 1
-           and count_l_tileLayer == 1
+           and count_l_title_layer == 1
            and count_l_marker == 1
            and count_head == 2
            and count_body == 3
@@ -370,7 +370,7 @@ def test_plot_markers(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.marker')
 
@@ -383,7 +383,7 @@ def test_plot_markers(tmpdir):
     count_script = map_info.count('script')
 
     assert(count_l_map == 1
-           and count_l_tileLayer == 1
+           and count_l_title_layer == 1
            and count_l_marker == 5
            and count_l_popup == 5
            and count_head == 2
@@ -490,7 +490,7 @@ def test_add_begin_end_markers_to_folium_map(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.marker')
 
@@ -504,7 +504,7 @@ def test_add_begin_end_markers_to_folium_map(tmpdir):
 
     assert(
         count_l_map == 1
-        and count_l_tileLayer == 1
+        and count_l_title_layer == 1
         and count_l_marker == 2
         and count_l_popup == 2
         and count_head == 2
@@ -550,7 +550,7 @@ def test_add_trajectories_to_folium_map(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.heatLayer')
 
@@ -562,7 +562,7 @@ def test_add_trajectories_to_folium_map(tmpdir):
 
     assert(
         count_l_map == 1
-        and count_l_tileLayer == 1
+        and count_l_title_layer == 1
         and count_l_marker == 1
         and count_head == 2
         and count_body == 3
@@ -609,7 +609,7 @@ def test_plot_trajectories_with_folium(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.marker')
 
@@ -622,7 +622,7 @@ def test_plot_trajectories_with_folium(tmpdir):
     count_script = map_info.count('script')
 
     assert(count_l_map == 1
-           and count_l_tileLayer == 1
+           and count_l_title_layer == 1
            and count_l_marker == 2
            and count_l_popup == 2
            and count_head == 4
@@ -812,7 +812,7 @@ def test_plot_stops(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.circle')
 
@@ -825,7 +825,7 @@ def test_plot_stops(tmpdir):
     count_script = map_info.count('script')
 
     assert(count_l_map == 1
-           and count_l_tileLayer == 1
+           and count_l_title_layer == 1
            and count_l_marker == 3
            and count_l_popup == 3
            and count_head == 4
@@ -899,7 +899,7 @@ def test_plot_point_folium(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.marker')
 
@@ -917,7 +917,7 @@ def test_plot_point_folium(tmpdir):
 
     assert(
         count_l_map == 1
-        and count_l_tileLayer == 1
+        and count_l_title_layer == 1
         and count_l_marker == 0
         and count_l_popup == 5
         and count_l_polyline == 0
@@ -968,7 +968,7 @@ def test_plot_poi_folium(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.marker')
 
@@ -986,7 +986,7 @@ def test_plot_poi_folium(tmpdir):
 
     assert(
         count_l_map == 1
-        and count_l_tileLayer == 1
+        and count_l_title_layer == 1
         and count_l_marker == 0
         and count_l_popup == 5
         and count_l_polyline == 0
@@ -1039,7 +1039,7 @@ def test_plot_event_folium(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_title_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.marker')
 
@@ -1057,7 +1057,7 @@ def test_plot_event_folium(tmpdir):
 
     assert(
         count_l_map == 1
-        and count_l_tileLayer == 1
+        and count_l_title_layer == 1
         and count_l_marker == 0
         and count_l_popup == 5
         and count_l_polyline == 0
@@ -1191,7 +1191,7 @@ def test_plot_traj_timestamp_geo_json(tmpdir):
 
     count_l_map = map_info.count('L.map')
 
-    count_l_tileLayer = map_info.count('L.tileLayer')
+    count_l_tile_layer = map_info.count('L.tileLayer')
 
     count_l_marker = map_info.count('L.heatLayer')
 
@@ -1209,7 +1209,7 @@ def test_plot_traj_timestamp_geo_json(tmpdir):
 
     assert(
         count_l_map == 1
-        and count_l_tileLayer == 1
+        and count_l_tile_layer == 1
         and count_l_marker == 0
         and count_l_polyline == 0
         and count_l_circle == 2

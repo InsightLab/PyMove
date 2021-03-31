@@ -1,5 +1,5 @@
-#05 - Exploring Utils
-=====================
+05 - Exploring Utils
+====================
 
 Falar sobre para se trabalhar com trajetórias pode ser necessária
 algumas c onversões envolvendo tempo e data, distância e etc, fora
@@ -8,30 +8,23 @@ outros utilitários.
 Falar dos módulos presentes no pacote utils - constants - conversions -
 datetime - distances - math - mem - trajectories - transformations
 
---------------
-
 Imports
-~~~~~~~
+-------
 
 .. code:: ipython3
 
     import pymove.utils as utils
     import pymove
-    from pymove import MoveDataFrame
-
---------------
 
 Load data
-~~~~~~~~~
+---------
 
 .. code:: ipython3
 
     move_data = pymove.read_csv("geolife_sample.csv")
 
---------------
-
 Conversions
-~~~~~~~~~~~
+-----------
 
 To transform latitude degree to meters, you can use function
 **lat_meters**. For example, you can convert Fortaleza’s latitude
@@ -1333,7 +1326,7 @@ To get datetime of now, you can use **now_str**.
 
 .. parsed-literal::
 
-    '2021-02-01 21:56:26'
+    '2021-03-31 20:20:10'
 
 
 
@@ -1429,7 +1422,7 @@ the function is called, you can use **elapsed_time_dt**.
 
 .. parsed-literal::
 
-    3821176587586
+    3826182010797
 
 
 
@@ -1467,20 +1460,6 @@ you can use **haversine**.
     9.757976024363016
 
 
-
---------------
-
-.. raw:: html
-
-   <!-- Ver com a arina se é válido fazer a doc dessas 2 -->
-
-.. raw:: html
-
-   <!-- ## Trajectories -->
-
-.. raw:: html
-
-   <!-- ## Transformations -->
 
 Math
 ----
@@ -1579,3 +1558,385 @@ To perfomers interpolation and extrapolation, you can use
 .. parsed-literal::
 
     6.799999999999999
+
+
+
+Trajectories
+------------
+
+To read a csv file into a MoveDataFrame
+
+.. code:: ipython3
+
+    move_data = utils.trajectories.read_csv('geolife_sample.csv')
+    type(move_data)
+
+
+
+
+.. parsed-literal::
+
+    pymove.core.pandas.PandasMoveDataFrame
+
+
+
+To invert the keys values of a dictionary
+
+.. code:: ipython3
+
+    utils.trajectories.invert_dict({1: 'a', 2: 'b'})
+
+
+
+
+.. parsed-literal::
+
+    {'a': 1, 'b': 2}
+
+
+
+To flatten a nested dictionary
+
+.. code:: ipython3
+
+    utils.trajectories.flatten_dict({'1': 'a', '2': {'3': 'b', '4': 'c'}})
+
+
+
+
+.. parsed-literal::
+
+    {'1': 'a', '2_3': 'b', '2_4': 'c'}
+
+
+
+To flatten a dataframe with dict as row values
+
+.. code:: ipython3
+
+    df = move_data.head(3)
+    df['dict_column'] = [{'a': 1}, {'b': 2}, {'c': 3}]
+    df
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>id</th>
+          <th>dict_column</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>1</td>
+          <td>{'a': 1}</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>1</td>
+          <td>{'b': 2}</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>1</td>
+          <td>{'c': 3}</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+.. code:: ipython3
+
+    utils.trajectories.flatten_columns(df, columns='dict_column')
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>id</th>
+          <th>dict_column_c</th>
+          <th>dict_column_b</th>
+          <th>dict_column_a</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>1</td>
+          <td>NaN</td>
+          <td>NaN</td>
+          <td>1.0</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>1</td>
+          <td>NaN</td>
+          <td>2.0</td>
+          <td>NaN</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>1</td>
+          <td>3.0</td>
+          <td>NaN</td>
+          <td>NaN</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+To shift a sequence
+
+.. code:: ipython3
+
+    utils.trajectories.shift([1., 2., 3., 4.], 1)
+
+
+
+
+.. parsed-literal::
+
+    array([nan,  1.,  2.,  3.])
+
+
+
+To fill a sequence with values from another
+
+.. code:: ipython3
+
+    l1 = ['a', 'b', 'c', 'd', 'e']
+    utils.trajectories.fill_list_with_new_values(l1, [1, 2, 3])
+    l1
+
+
+
+
+.. parsed-literal::
+
+    [1, 2, 3, 'd', 'e']
+
+
+
+To transform a string representation back into a list
+
+.. code:: ipython3
+
+    utils.trajectories.object_for_array('[1,2,3,4,5]')
+
+
+
+
+.. parsed-literal::
+
+    array([1., 2., 3., 4., 5.], dtype=float32)
+
+
+
+To convert a column with string representation back into a list
+
+.. code:: ipython3
+
+    df['list_column'] = ['[1,2]', '[3,4]', '[5,6]']
+
+.. code:: ipython3
+
+    df
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>id</th>
+          <th>dict_column</th>
+          <th>list_column</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>1</td>
+          <td>{'a': 1}</td>
+          <td>[1,2]</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>1</td>
+          <td>{'b': 2}</td>
+          <td>[3,4]</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>1</td>
+          <td>{'c': 3}</td>
+          <td>[5,6]</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+.. code:: ipython3
+
+    utils.trajectories.column_to_array(df, column='list_column')
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>id</th>
+          <th>dict_column</th>
+          <th>list_column</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>1</td>
+          <td>{'a': 1}</td>
+          <td>[1.0, 2.0]</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>1</td>
+          <td>{'b': 2}</td>
+          <td>[3.0, 4.0]</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>1</td>
+          <td>{'c': 3}</td>
+          <td>[5.0, 6.0]</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
