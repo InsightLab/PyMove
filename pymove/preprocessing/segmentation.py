@@ -1,3 +1,14 @@
+"""
+Compression operations.
+
+bbox_split,
+by_dist_time_speed,
+by_max_dist,
+by_max_time,
+by_max_speed
+
+"""
+
 from typing import TYPE_CHECKING, Optional, Text, Tuple, Union
 
 import numpy as np
@@ -25,7 +36,7 @@ if TYPE_CHECKING:
 @timer_decorator
 def bbox_split(bbox: Tuple[int, int, int, int], number_grids: int) -> DataFrame:
     """
-    splits the bounding box in N grids of the same size.
+    Splits the bounding box in N grids of the same size.
 
     Parameters
     ----------
@@ -42,7 +53,6 @@ def bbox_split(bbox: Tuple[int, int, int, int], number_grids: int) -> DataFrame:
         the grids after the split.
 
     """
-
     lat_min = bbox[0]
     lon_min = bbox[1]
     lat_max = bbox[2]
@@ -84,7 +94,6 @@ def _drop_single_point(move_data: DataFrame, label_new_tid: Text, label_id: Text
          Indicates the label of the id column in the user dataframe, by default TRAJ_ID
 
     """
-
     shape_before_drop = move_data.shape
     idx = move_data[move_data[label_new_tid] == -1].index
     if idx.shape[0] > 0:
@@ -107,7 +116,7 @@ def _filter_and_dist_time_speed(
     move_data: DataFrame, idx: int, max_dist: float, max_time: float, max_speed: float
 ) -> ndarray:
     """
-    Filters the dataframe considering thresholds for time, dist and speed
+    Filters the dataframe considering thresholds for time, dist and speed.
 
     Parameters
     ----------
@@ -128,7 +137,6 @@ def _filter_and_dist_time_speed(
         filtered indexes from the dataframe
 
     """
-
     return (
         (np.nan_to_num(move_data.at[idx, DIST_TO_PREV]) > max_dist)
         | (np.nan_to_num(move_data.at[idx, TIME_TO_PREV]) > max_time)
@@ -140,7 +148,7 @@ def _filter_or_dist_time_speed(
     move_data: DataFrame, idx: int, feature: Text, max_between_adj_points: float
 ) -> ndarray:
     """
-    Filters the dataframe considering thresholds for time, dist and speed
+    Filters the dataframe considering thresholds for time, dist and speed.
 
     Parameters
     ----------
@@ -159,14 +167,12 @@ def _filter_or_dist_time_speed(
         filtered indexes from the dataframe
 
     """
-
     return np.nan_to_num(move_data.at[idx, feature]) > max_between_adj_points
 
 
 def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: Text):
     """
-    Resets the dataframe index, collects unique ids and
-    initiates curr_id and count
+    Resets the dataframe index, collects unique ids and initiates curr_id and count.
 
     Parameters
     ----------
@@ -187,7 +193,6 @@ def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: T
         initial count
 
     """
-
     if move_data.index.name is None:
         print('...setting %s as index' % label_id, flush=True)
         move_data.set_index(label_id, inplace=True)
@@ -205,7 +210,7 @@ def _update_curr_tid_count(
     label_new_tid: Text, curr_tid: float, count: int
 ) -> Tuple[int, int]:
     """
-    Updates the tid
+    Updates the tid.
 
     Parameters
     ----------
@@ -230,7 +235,6 @@ def _update_curr_tid_count(
         updated count ids
 
     """
-
     curr_tid += 1
     if filter_.shape == ():
         print('id: %s has no point to split' % idx)
@@ -286,7 +290,6 @@ def _filter_by(
     Time, distance and speed features must be updated after split.
 
     """
-
     curr_tid, ids, count = _prepare_segmentation(
         move_data, label_id, label_new_tid
     )
@@ -375,7 +378,6 @@ def by_dist_time_speed(
     Time, distance and speed features must be updated after split.
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -443,7 +445,6 @@ def by_max_dist(
     Speed features must be updated after split.
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -511,7 +512,6 @@ def by_max_time(
     Speed features must be updated after split.
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -578,7 +578,6 @@ def by_max_speed(
     Speed features must be updated after split.
 
     """
-
     if not inplace:
         move_data = move_data[:]
 

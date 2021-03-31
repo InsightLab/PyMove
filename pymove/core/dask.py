@@ -1,3 +1,5 @@
+"""DaskMoveDataFrame class."""
+
 from typing import TYPE_CHECKING, Dict, List, Optional, Text, Union
 
 import dask
@@ -21,6 +23,8 @@ if TYPE_CHECKING:
 
 
 class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
+    """PyMove dataframe extending Dask DataFrame."""
+
     def __init__(
         self,
         data: Union[DataFrame, List, Dict],
@@ -31,9 +35,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         n_partitions: Optional[int] = 1,
     ):
         """
-        Checks whether past data has 'lat', 'lon', 'datetime' columns, and
-        renames it with the PyMove lib standard. After starts the attributes of
-        the class.
+        Checks whether past data has 'lat', 'lon', 'datetime' columns.
+
+        Renames it with the PyMove lib standard. After starts the
+        attributes of the class.
 
         - self._data : Represents trajectory data.
         - self._type : Represents the type of layer below the data structure.
@@ -62,7 +67,6 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             If the data types can't be converted.
 
         """
-
         if isinstance(data, dict):
             data = pd.DataFrame.from_dict(data)
         elif (
@@ -298,7 +302,6 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             Represents the trajectory in DataFrame format.
 
         """
-
         return self._data
 
     def info(self):
@@ -514,7 +517,6 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             The converted object.
 
         """
-
         if new_type == TYPE_DASK:
             return self
         elif new_type == TYPE_PANDAS:
@@ -538,5 +540,4 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             A string representing the type of the object.
 
         """
-
         return self._type

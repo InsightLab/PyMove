@@ -180,8 +180,8 @@ def test_column_to_array():
         index=[0, 1, 2]
     )
 
-    trajectories.column_to_array(df_1, 'label')
-    trajectories.column_to_array(df_2, 'label')
+    df_1 = trajectories.column_to_array(df_1, 'label')
+    df_2 = trajectories.column_to_array(df_2, 'label')
 
     assert_frame_equal(df_1, expected_data_1)
     assert_frame_equal(df_2, expected_data_2)

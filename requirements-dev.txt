@@ -3,6 +3,8 @@ pre-commit
 bump2version
 flake8
 pep8-naming
+flake8-bugbear
+flake8-docstrings
 pytest
 coverage
 geopandas

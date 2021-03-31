@@ -1,9 +1,5 @@
-#04 - Exploring Grid
-====================
-
-.. raw:: html
-
-   <!-- - Falar sobre a problemática: muitos dados e etc, custo de processamento -->
+04 - Exploring Grid
+===================
 
 In trajectories data mining process, there is a need frequent acess
 differents segments and samples of trajectories. With big volume data,
@@ -11,20 +7,12 @@ those acesses can need time and processing. With this, it’s necessary to
 adopt effective techniques to management and handling of this data,
 allowed fast recovery of data.
 
-.. raw:: html
-
-   <!-- - Introduzir o conceito de grid e seus benefícios -->
-
 One approach to this technique takes geographic space into account,
 dividing it into grids, the so-called **grids**, and **creating a time
 index for the trajectories that fall into each cell of this grid**.
 **Each segment** that falls into a grid **is represented by a point with
 coordinates equal to the start time point and the end time point of the
 segment**.
-
-.. raw:: html
-
-   <!-- - Falar sobre como é considerado o conceito de grid no Pymove -->
 
 In PyMove, grids are delimited by coordinates in a cartesian plan based
 tracing in bound box of data. Grids are represented by objects that have
@@ -36,22 +24,19 @@ those attributes:
 -  **grid_size_lon_x:** grid longitude size.
 -  **cell_size_by_degree:** cell size of Grid.
 
-Let’s go!
-~~~~~~~~~
-
 Imports
-~~~~~~~
+-------
 
-.. code:: ipython3
+.. code:: python
 
     import pandas as pd
     from pymove import MoveDataFrame
     from pymove.core.grid import Grid
 
 Load data
-~~~~~~~~~
+---------
 
-.. code:: ipython3
+.. code:: python
 
     df = pd.read_csv('geolife_sample.csv', parse_dates=['datetime'])
     data = MoveDataFrame(df, latitude="lat", longitude="lon", datetime="datetime")
@@ -172,12 +157,10 @@ Load data
 
 
 
---------------
-
 Create virtual Grid
 -------------------
 
-.. code:: ipython3
+.. code:: python
 
     grid = Grid(data, 15)
 
@@ -193,7 +176,7 @@ Create virtual Grid
     ..A virtual grid was created
 
 
-.. code:: ipython3
+.. code:: python
 
     grid.get_grid()
 
@@ -210,12 +193,10 @@ Create virtual Grid
 
 
 
---------------
-
 Create one polygon to point on grid
 -----------------------------------
 
-.. code:: ipython3
+.. code:: python
 
     print(grid.create_one_polygon_to_point_on_grid(2, 1))
 
@@ -225,12 +206,10 @@ Create one polygon to point on grid
     POLYGON ((116.3056033464802 39.97078169296037, 116.3056033464802 39.97091703944056, 116.3057386929604 39.97091703944056, 116.3057386929604 39.97078169296037, 116.3056033464802 39.97078169296037))
 
 
---------------
-
 Create or update index grid feature
 -----------------------------------
 
-.. code:: ipython3
+.. code:: python
 
     grid.create_update_index_grid_feature(data)
 
@@ -243,7 +222,7 @@ Create or update index grid feature
     ...[1000,1000] indexes were created to lat and lon
 
 
-.. code:: ipython3
+.. code:: python
 
     data.head()
 
@@ -324,12 +303,10 @@ Create or update index grid feature
 
 
 
---------------
-
 Create all polygons to all point on grid
 ----------------------------------------
 
-.. code:: ipython3
+.. code:: python
 
     grid_data = grid.create_all_polygons_to_all_point_on_grid(data)
 
@@ -343,7 +320,7 @@ Create all polygons to all point on grid
     ...polygons were created
 
 
-.. code:: ipython3
+.. code:: python
 
     grid_data.head()
 
@@ -421,7 +398,7 @@ Create all polygons to all point on grid
 Create all polygons on grid
 ---------------------------
 
-.. code:: ipython3
+.. code:: python
 
     grid.create_all_polygons_on_grid()
 
@@ -443,7 +420,7 @@ Create all polygons on grid
     ...geometries saved on Grid grid_polygon property
 
 
-.. code:: ipython3
+.. code:: python
 
     (grid.grid_polygon).shape
 
@@ -459,7 +436,7 @@ Create all polygons on grid
 Get point to index grid
 -----------------------
 
-.. code:: ipython3
+.. code:: python
 
     grid.point_to_index_grid(39.984094, 116.319236)
 
@@ -480,14 +457,14 @@ Get point to index grid
 Save grid to .pkl
 -----------------
 
-.. code:: ipython3
+.. code:: python
 
     grid.save_grid_pkl('teste.pkl')
 
 Read .pkl to grid
 -----------------
 
-.. code:: ipython3
+.. code:: python
 
     grid.read_grid_pkl('teste.pkl').get_grid()
 
@@ -507,10 +484,10 @@ Read .pkl to grid
 Show a grid polygons
 --------------------
 
-.. code:: ipython3
+.. code:: python
 
     grid.show_grid_polygons(grid_data, return_fig=False)
 
 
 
-.. image:: 04_Exploring_Grid_files/04_Exploring_Grid_25_0.svg
+.. image:: 04_Exploring_Grid_files/04_Exploring_Grid_25_0.png

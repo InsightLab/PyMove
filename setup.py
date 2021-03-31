@@ -1,3 +1,5 @@
+"""Package setup."""
+
 from setuptools import find_packages, setup
 
 with open('README.md', 'r') as f:

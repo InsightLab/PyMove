@@ -1,3 +1,27 @@
+"""
+Datetime operations.
+
+date_to_str,
+str_to_datetime,
+to_str,
+to_min,
+min_to_datetime,
+to_day_of_week_int,
+working_day,
+now_str,
+deltatime_str,
+timestamp_to_millis,
+millis_to_timestamp,
+time_to_str,
+str_to_time,
+elapsed_time_dt,
+diff_time,
+create_time_slot_in_minute,
+generate_time_statistics,
+threshold_time_statistics
+
+"""
+
 from datetime import date, datetime
 from typing import Optional, Text, Union
 
@@ -35,19 +59,17 @@ def date_to_str(dt: datetime) -> Text:
         Represents the date in string format
 
     """
-
     return dt.strftime('%Y-%m-%d')
 
 
 def str_to_datetime(dt_str: Text) -> datetime:
     """
-    Converts a datetime in string format "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S" to
-    datetime format.
+    Converts a datetime in string format to datetime format.
 
     Parameters
     ----------
     dt_str : str
-        Represents a datetime in string format
+        Represents a datetime in string format, "%Y-%m-%d" or "%Y-%m-%d %H:%M:%S"
 
     Returns
     -------
@@ -55,7 +77,6 @@ def str_to_datetime(dt_str: Text) -> datetime:
         Represents a datetime in datetime format
 
     """
-
     if len(dt_str) == 10:
         return datetime.strptime(dt_str, '%Y-%m-%d')
     else:
@@ -77,14 +98,14 @@ def to_str(dt: datetime) -> Text:
         Represents a datetime in string format "%Y-%m-%d %H:%M:%S".
 
     """
-
     return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 
 def to_min(dt: datetime) -> int:
     """
-    Converts a datetime to an int representation in minutes. To do the reverse
-    use: min_to_datetime.
+    Converts a datetime to an int representation in minutes.
+
+    To do the reverse use: min_to_datetime.
 
     Parameters
     ----------
@@ -97,7 +118,6 @@ def to_min(dt: datetime) -> int:
         Represents minutes from
 
     """
-
     # get an integer time slot from a datetime
     return int(
         (dt - dt.utcfromtimestamp(0)).total_seconds() / 60
@@ -106,8 +126,9 @@ def to_min(dt: datetime) -> int:
 
 def min_to_datetime(minutes: int) -> datetime:
     """
-    Converts an int representation in minutes to a datetime. To do the reverse
-    use: datetime_to_min.
+    Converts an int representation in minutes to a datetime.
+
+    To do the reverse use: datetime_to_min.
 
     Parameters
     ----------
@@ -120,7 +141,6 @@ def min_to_datetime(minutes: int) -> datetime:
         Represents minutes in datetime format
 
     """
-
     return datetime.utcfromtimestamp(minutes * 60)
 
 
@@ -139,7 +159,6 @@ def to_day_of_week_int(dt: datetime) -> int:
         Represents day of week.
 
     """
-
     return dt.weekday()
 
 
@@ -171,7 +190,6 @@ def working_day(
     Countries and States names available in https://pypi.org/project/holidays/
 
     """
-
     result = True
     if isinstance(dt, str):
         dt = str_to_datetime(dt)
@@ -194,9 +212,6 @@ def now_str() -> Text:
     """
     Get datetime of now.
 
-    Parameters
-    ----------
-
     Returns
     -------
     str
@@ -209,7 +224,6 @@ def now_str() -> Text:
     "2019-09-02 13:54:16"
 
     """
-
     return to_str(datetime.now())
 
 
@@ -239,7 +253,6 @@ def deltatime_str(deltatime_seconds: float) -> Text:
     https://stackoverflow.com/questions/3620943/measuring-elapsed-time-with-the-time-module
 
     """
-
     hours, rem = divmod(deltatime_seconds, 3600)
     minutes, seconds = divmod(rem, 60)
     if hours:
@@ -252,8 +265,7 @@ def deltatime_str(deltatime_seconds: float) -> Text:
 
 def timestamp_to_millis(timestamp: Text) -> int:
     """
-    Converts a local datetime to a POSIX timestamp in milliseconds (like in
-    Java).
+    Converts a local datetime to a POSIX timestamp in milliseconds (like in Java).
 
     Parameters
     ----------
@@ -272,7 +284,6 @@ def timestamp_to_millis(timestamp: Text) -> int:
     1449907200123 (UTC)
 
     """
-
     return Timestamp(timestamp).value // 1000000
 
 
@@ -297,7 +308,6 @@ def millis_to_timestamp(milliseconds: float) -> Timestamp:
     "2015-12-12 08:00:00.123000"
 
     """
-
     return Timestamp(milliseconds, unit='ms')
 
 
@@ -322,7 +332,6 @@ def time_to_str(time: Timestamp) -> Text:
     "08:00:00"
 
     """
-
     return time.strftime('%H:%M:%S')
 
 
@@ -347,14 +356,12 @@ def str_to_time(dt_str: Text) -> datetime:
     datetime(1900, 1, 1, 8, 0)
 
     """
-
     return datetime.strptime(dt_str, '%H:%M:%S')
 
 
 def elapsed_time_dt(start_time: datetime) -> int:
     """
-    Computes the elapsed time from a specific start time to the moment the
-    function is called.
+    Computes the elapsed time from a specific start time.
 
     Parameters
     ----------
@@ -368,14 +375,12 @@ def elapsed_time_dt(start_time: datetime) -> int:
         (when the function was called).
 
     """
-
     return diff_time(start_time, datetime.now())
 
 
 def diff_time(start_time: datetime, end_time: datetime) -> int:
     """
-    Computes the elapsed time from the start time to the end time specified by
-    the user.
+    Computes the elapsed time from the start time to the end time specified by the user.
 
     Parameters
     ----------
@@ -391,7 +396,6 @@ def diff_time(start_time: datetime, end_time: datetime) -> int:
         (when the function was called).
 
     """
-
     return int((end_time - start_time).total_seconds() * 1000)
 
 
@@ -404,7 +408,7 @@ def create_time_slot_in_minute(
     inplace: Optional[bool] = True
 ) -> Optional[DataFrame]:
     """
-    Partitions the time in slot windows
+    Partitions the time in slot windows.
 
     Parameters
     ----------
@@ -459,8 +463,10 @@ def generate_time_statistics(
     local_label: Optional[Text] = LOCAL_LABEL
 ):
     """
-    Calculates time statistics (average, standard deviation, minimum,
-    maximum, sum and count) of the pairwise local labels of a symbolic trajectory.
+    Calculates time statistics of the pairwise local labels.
+
+    (average, standard deviation, minimum, maximum, sum and count)
+    of the pairwise local labels of a symbolic trajectory.
 
     Parameters
     ----------
@@ -489,9 +495,10 @@ def generate_time_statistics(
 
 def _calc_time_threshold(seg_mean: float, seg_std: float) -> float:
     """
-    Auxiliary function for calculating the threshold based on the
-     mean and standard deviation of the time transitions between
-     adjacent places on discrete MoveDataFrame.
+    Auxiliary function for calculating the threshold.
+
+    Based on the mean and standard deviation of the time transitions
+    between adjacent places on discrete MoveDataFrame.
 
     Parameters
     ----------
@@ -507,7 +514,6 @@ def _calc_time_threshold(seg_mean: float, seg_std: float) -> float:
         of transition time for the segment.
 
     """
-
     threshold = seg_std + seg_mean
     threshold = float('{:.1f}'.format(threshold))
     return threshold
@@ -520,8 +526,9 @@ def threshold_time_statistics(
     inplace: Optional[bool] = True
 ) -> Optional[DataFrame]:
     """
-    Calculates and creates the threshold column in the time statistics
-    dataframe for each segment
+    Calculates and creates the threshold column.
+
+    The values are based in the time statistics dataframe for each segment.
 
     Parameters
     ----------

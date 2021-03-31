@@ -1,3 +1,5 @@
+"""Grid class."""
+
 import math
 from typing import Callable, Dict, Optional, Text, Tuple, Union
 
@@ -24,11 +26,13 @@ from pymove.utils.mem import begin_operation, end_operation
 
 
 class Grid:
+    """PyMove class representing a grid."""
+
     def __init__(
         self,
         data: Union[DataFrame, Dict],
         cell_size: Optional[float] = None,
-        meters_by_degree: Optional[float] = lat_meters(-3.8162973555)
+        meters_by_degree: Optional[float] = None
     ):
         """
         Creates a virtual grid from the trajectories.
@@ -50,6 +54,8 @@ class Grid:
                 by default lat_meters(-3.8162973555)
         """
         self.last_operation = None
+        if meters_by_degree is None:
+            meters_by_degree = lat_meters(-3.8162973555)
         if isinstance(data, dict):
             self._grid_from_dict(data)
         else:
@@ -114,7 +120,6 @@ class Grid:
             Represents the meters degree of latitude
 
         """
-
         operation = begin_operation('_create_virtual_grid')
 
         bbox = data.get_bbox()
@@ -170,8 +175,9 @@ class Grid:
         sort: Optional[bool] = True
     ):
         """
-        Create or update index grid feature. It not necessary pass dic_grid,
-        because if don't pass, the function create a dic_grid.
+        Create or update index grid feature.
+
+        It is not necessary pass dic_grid, because it creates a dic_grid if not provided.
 
         Parameters
         ----------
@@ -185,7 +191,6 @@ class Grid:
             Represents if needs to sort the dataframe, by default True
 
         """
-
         operation = begin_operation('create_update_index_grid_feature')
 
         print('\nCreating or updating index of the grid feature..\n')
@@ -214,7 +219,7 @@ class Grid:
         label_grid_lon: Optional[Text] = INDEX_GRID_LON,
     ):
         """
-        Converts grid lat-lon ids to unique values
+        Converts grid lat-lon ids to unique values.
 
         Parameters
         ----------
@@ -236,7 +241,7 @@ class Grid:
         label_grid_index: Optional[Text] = INDEX_GRID,
     ):
         """
-        Converts grid lat-lon ids to unique values
+        Converts grid lat-lon ids to unique values.
 
         Parameters
         ----------
@@ -268,7 +273,6 @@ class Grid:
             Represents a polygon of this cell in a grid.
 
         """
-
         operation = begin_operation('create_one_polygon_to_point_on_grid')
 
         cell_size = self.cell_size_by_degree
@@ -286,11 +290,11 @@ class Grid:
 
     def create_all_polygons_on_grid(self):
         """
-        Create all polygons that are represented in a grid and store them in a
-        new dic_grid key .
+        Create all polygons that are represented in a grid.
+
+        Stores the polygons in the `grid_polygon` key
 
         """
-
         operation = begin_operation('create_all_polygons_on_grid')
 
         print('\nCreating all polygons on virtual grid', flush=True)
@@ -336,7 +340,6 @@ class Grid:
             where polygons were saved.
 
         """
-
         operation = begin_operation('create_all_polygons_to_all_point_on_grid')
         if INDEX_GRID_LAT not in data or INDEX_GRID_LON not in data:
             self.create_update_index_grid_feature(data, unique_index=False)
@@ -372,7 +375,6 @@ class Grid:
             Represents the index x in a grid of a point (lat, long)
 
         """
-
         operation = begin_operation('create_all_polygons_to_all_point_on_grid')
 
         indexes_lat_y = np.floor(
@@ -399,7 +401,6 @@ class Grid:
             Represents the name of a file.
 
         """
-
         operation = begin_operation('save_grid_pkl')
         with open(filename, 'wb') as f:
             joblib.dump(self.get_grid(), f)
@@ -488,7 +489,7 @@ class Grid:
         plt.plot(ys_end, xs_end, 'bX', markersize=markersize * 1.5)  # start point
 
         if save_fig:
-            plt.savefig(fname=name, fig=fig)
+            plt.savefig(fname=name)
 
         self.last_operation = end_operation(operation)
 
@@ -497,7 +498,7 @@ class Grid:
 
     def __repr__(self) -> str:
         """
-        String representation of grid
+        String representation of grid.
 
         Returns
         -------

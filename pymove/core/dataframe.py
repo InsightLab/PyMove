@@ -1,3 +1,5 @@
+"""MoveDataFrame class."""
+
 from typing import Dict, List, Optional, Text, Union
 
 from dateutil.parser._parser import ParserError
@@ -14,6 +16,8 @@ from pymove.utils.constants import (
 
 
 class MoveDataFrame:
+    """Auxiliary class to check and transform data into Pymove Dataframes."""
+
     @staticmethod
     def __new__(
         self,
@@ -27,6 +31,7 @@ class MoveDataFrame:
     ):
         """
         Creates the PyMove dataframe, which must contain latitude, longitude and datetime.
+
         The dataframe can be a pandas or dask dataframe.
 
         Parameters
@@ -54,7 +59,6 @@ class MoveDataFrame:
             If the data types can't be converted.
 
         """
-
         if type_ == TYPE_PANDAS:
             from pymove.core.pandas import PandasMoveDataFrame
             return PandasMoveDataFrame(
@@ -69,8 +73,7 @@ class MoveDataFrame:
     @staticmethod
     def has_columns(data: DataFrame) -> bool:
         """
-        Checks whether the received dataset has 'lat', 'lon', 'datetime'
-        columns.
+        Checks whether the received dataset has 'lat', 'lon', 'datetime' columns.
 
         Parameters
         ----------
@@ -83,7 +86,6 @@ class MoveDataFrame:
             Represents whether or not you have the required columns
 
         """
-
         cols = data.columns
         if LATITUDE in cols and LONGITUDE in cols and DATETIME in cols:
             return True
@@ -107,7 +109,6 @@ class MoveDataFrame:
             If the data types can't be converted
 
         """
-
         try:
             if data.dtypes[LATITUDE] != 'float64':
                 data[LATITUDE] = data[LATITUDE].astype('float64')
@@ -127,8 +128,7 @@ class MoveDataFrame:
         current_id: Text, current_lat: Text, current_lon: Text, current_datetime: Text
     ) -> Dict:
         """
-        Format the labels for the PyMove lib pattern labels output
-        lat, lon and datatime.
+        Format the labels for the PyMove lib pattern labels output lat, lon and datatime.
 
         Parameters
         ----------
@@ -148,7 +148,6 @@ class MoveDataFrame:
             to format of PyMove column.
 
         """
-
         return {
             current_id: TRAJ_ID,
             current_lon: LONGITUDE,

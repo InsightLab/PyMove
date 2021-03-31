@@ -92,21 +92,21 @@ def test_euclidean_distance_in_meters():
     assert_almost_equal(dists, expected)
 
 
-def test_MEDP():
+def test_medp():
     expected = 241.91923668814994
 
     move_df1 = MoveDataFrame(data=traj_example1)
     move_df2 = MoveDataFrame(data=traj_example2)
 
-    medp = distances.MEDP(move_df1, move_df2)
+    medp = distances.medp(move_df1, move_df2)
     assert_almost_equal(medp, expected)
 
 
-def test_MEDT():
+def test_medt():
     expected = 619.9417037397966
 
     move_df1 = MoveDataFrame(data=traj_example1)
     move_df2 = MoveDataFrame(data=traj_example3)
 
-    medt = distances.MEDT(move_df1, move_df2)
+    medt = distances.medt(move_df1, move_df2)
     assert_almost_equal(medt, expected)

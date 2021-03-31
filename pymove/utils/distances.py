@@ -1,3 +1,13 @@
+"""
+Distances operations.
+
+haversine,
+euclidean_distance_in_meters,
+nearest_points,
+medp,
+medt
+
+"""
 from typing import Optional, Text, Union
 
 import numpy as np
@@ -19,7 +29,8 @@ def haversine(
     earth_radius: Optional[float] = EARTH_RADIUS
 ) -> Union[float, ndarray]:
     """
-    Calculate the great circle distance between two points on the earth
+    Calculates the great circle distance between two points on the earth.
+
     (specified in decimal degrees or in radians). All (lat, lon) coordinates
     must have numeric dtypes and be of equal length. Result in meters. Use 3956
     in earth radius for miles.
@@ -52,7 +63,6 @@ def haversine(
         https://janakiev.com/blog/gps-points-distance-python/
 
     """
-
     if to_radians:
         lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
     a = (
@@ -89,7 +99,6 @@ def euclidean_distance_in_meters(
     float or ndarray
         euclidean distance in meters between the two points.
     """
-
     y1 = utils.conversions.lat_to_y_spherical(lat=lat1)
     y2 = utils.conversions.lat_to_y_spherical(lat=lat2)
     x1 = utils.conversions.lon_to_x_spherical(lon=lon1)
@@ -107,8 +116,7 @@ def nearest_points(
     longitude: Optional[Text] = LONGITUDE,
 ) -> DataFrame:
     """
-    For each point on a trajectory, it returns the point closest to
-    another trajectory based on the Euclidean distance.
+    Returns the point closest to another trajectory based on the Euclidean distance.
 
     Parameters
     ----------
@@ -129,7 +137,6 @@ def nearest_points(
         dataframe with closest points
 
     """
-
     result = pd.DataFrame(columns=traj1.columns)
 
     for _, t1 in traj1.iterrows():
@@ -148,15 +155,16 @@ def nearest_points(
     return result
 
 
-def MEDP(
+def medp(
     traj1: DataFrame,
     traj2: DataFrame,
     latitude: Optional[Text] = LATITUDE,
     longitude: Optional[Text] = LONGITUDE
 ) -> float:
     """
-    Returns the Mean Euclidian Distance Predictive between
-    two trajectories, which considers only the spatial
+    Returns the Mean Euclidian Distance Predictive between two trajectories.
+
+    Considers only the spatial
     dimension for the similarity measure.
 
     Parameters
@@ -177,7 +185,6 @@ def MEDP(
     float
         total distance
     """
-
     soma = 0
     traj2 = nearest_points(traj1, traj2, latitude, longitude)
     for (_, t1), (_, t2) in zip(traj1.iterrows(), traj2.iterrows()):
@@ -189,7 +196,7 @@ def MEDP(
     return soma
 
 
-def MEDT(
+def medt(
     traj1: DataFrame,
     traj2: DataFrame,
     latitude: Optional[Text] = LATITUDE,
@@ -197,8 +204,9 @@ def MEDT(
     datetime: Optional[Text] = DATETIME
 ) -> float:
     """
-    Returns the Mean Euclidian Distance Trajectory between two
-    trajectories, which considers the spatial dimension and the
+    Returns the Mean Euclidian Distance Trajectory between two trajectories.
+
+    Considers the spatial dimension and the
     temporal dimension when measuring similarity.
 
     Parameters
@@ -223,7 +231,6 @@ def MEDT(
         total distance
 
     """
-
     soma = 0
     proportion = 1000000000
     if(len(traj2) < len(traj1)):
