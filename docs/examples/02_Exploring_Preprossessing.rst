@@ -135,7 +135,7 @@ Importing the module:
 
 A bounding box (usually shortened to bbox) is an area defined by two
 longitudes and two latitudes. The function by_bbox, filters points of
-the trajectories according to a especified bounding box.
+the trajectories according to a choosen bounding box.
 
 .. code:: ipython3
 
@@ -398,7 +398,7 @@ value and column label, set by value and label_name respectively.
 
 
 
-by_id function filters trajectories points according to especified
+by_id function filters trajectories points according to selected
 trajectory id.
 
 .. code:: ipython3
@@ -1315,7 +1315,7 @@ is smaller than the value set by the parameter speed_radius.
 
 
 clean_gps_speed_max_radius function recursively removes trajectories
-points with speed higher than the value especifeid by the user. Given
+points with speed higher than the value set by the user. Given
 any point p of the trajectory, the point will be removed if one of the
 following happens: if the travel speed from the point before p to p is
 greater than the max value of speed between adjacent points set by the
