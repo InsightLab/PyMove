@@ -22,7 +22,7 @@ from pymove.utils.constants import (
     STOP,
     TRAJ_ID,
 )
-from pymove.utils.log import progress_bar, timer_decorator
+from pymove.utils.log import logger, progress_bar, timer_decorator
 
 
 @timer_decorator
@@ -101,7 +101,7 @@ def compress_segment_stop_to_point(
             move_data, dist_radius, time_radius, label_id
         )
 
-    print('...setting mean to lat and lon...')
+    logger.debug('...setting mean to lat and lon...')
     lat_mean = np.full(move_data.shape[0], -1.0, dtype=np.float64)
     lon_mean = np.full(move_data.shape[0], -1.0, dtype=np.float64)
 
@@ -109,9 +109,9 @@ def compress_segment_stop_to_point(
         lat_mean[move_data[~move_data[label_stop]].index] = np.NaN
         lon_mean[move_data[~move_data[label_stop]].index] = np.NaN
     else:
-        print('...move segments will be dropped...')
+        logger.debug('...move segments will be dropped...')
 
-    print('...get only segments stop...', flush=True)
+    logger.debug('...get only segments stop...', flush=True)
     segments = move_data[move_data[label_stop]][label_segment].unique()
 
     for idx in progress_bar(
@@ -127,8 +127,6 @@ def compress_segment_stop_to_point(
             ind_end = move_data[filter_].iloc[[-1]].index
 
             if point_mean == 'default':
-                # print('...Lat and lon are defined based on point
-                # that repeats most within the segment')
                 p = (
                     move_data[filter_]
                     .groupby([LATITUDE, LONGITUDE], as_index=False)
@@ -149,7 +147,7 @@ def compress_segment_stop_to_point(
                 lat_mean[ind_end] = move_data.loc[filter_][LATITUDE].mean()
                 lon_mean[ind_end] = move_data.loc[filter_][LONGITUDE].mean()
         else:
-            print('There are segments with only one point: {}'.format(idx))
+            logger.debug('There are segments with only one point: {}'.format(idx))
 
     move_data[LAT_MEAN] = lat_mean
     move_data[LON_MEAN] = lon_mean
@@ -165,10 +163,10 @@ def compress_segment_stop_to_point(
     shape_drop = move_data[filter_drop].shape[0]
 
     if shape_drop > 0:
-        print('...Dropping %s points...' % shape_drop)
+        logger.debug('...Dropping %s points...' % shape_drop)
         move_data.drop(move_data[filter_drop].index, inplace=True)
 
-    print(
+    logger.debug(
         '...Shape_before: %s\n...Current shape: %s'
         % (shape_before, move_data.shape[0])
     )

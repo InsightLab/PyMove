@@ -21,7 +21,7 @@ from pymove.utils.constants import (
     TRAJ_ID,
 )
 from pymove.utils.conversions import lat_meters
-from pymove.utils.log import progress_bar
+from pymove.utils.log import logger, progress_bar
 from pymove.utils.mem import begin_operation, end_operation
 
 
@@ -103,6 +103,7 @@ class Grid:
         self.grid_size_lat_y = dict_grid['grid_size_lat_y']
         self.grid_size_lon_x = dict_grid['grid_size_lon_x']
         self.cell_size_by_degree = dict_grid['cell_size_by_degree']
+        self.grid_polygon = None
 
     def _create_virtual_grid(
         self, data: DataFrame, cell_size: float, meters_by_degree: float
@@ -123,11 +124,11 @@ class Grid:
         operation = begin_operation('_create_virtual_grid')
 
         bbox = data.get_bbox()
-        print('\nCreating a virtual grid without polygons')
+        logger.debug('\nCreating a virtual grid without polygons')
 
         # Latitude in Fortaleza: -3.8162973555
         cell_size_by_degree = cell_size / meters_by_degree
-        print('...cell size by degree: %s' % cell_size_by_degree)
+        logger.debug('...cell size by degree: %s' % cell_size_by_degree)
 
         lat_min_y = bbox[0]
         lon_min_x = bbox[1]
@@ -153,7 +154,7 @@ class Grid:
             round((lon_max_x - lon_min_x) / cell_size_by_degree)
         )
 
-        print(
+        logger.debug(
             '...grid_size_lat_y:%s\ngrid_size_lon_x:%s'
             % (grid_size_lat_y, grid_size_lon_x)
         )
@@ -163,7 +164,7 @@ class Grid:
         self.grid_size_lat_y = grid_size_lat_y
         self.grid_size_lon_x = grid_size_lon_x
         self.cell_size_by_degree = cell_size_by_degree
-        print('\n..A virtual grid was created')
+        logger.debug('\n..A virtual grid was created')
 
         self.last_operation = end_operation(operation)
 
@@ -193,24 +194,20 @@ class Grid:
         """
         operation = begin_operation('create_update_index_grid_feature')
 
-        print('\nCreating or updating index of the grid feature..\n')
-        try:
-            if sort:
-                data.sort_values([TRAJ_ID, DATETIME], inplace=True)
-            lat_, lon_ = self.point_to_index_grid(
-                data[LATITUDE], data[LONGITUDE]
-            )
-            lat_, lon_ = label_dtype(lat_), label_dtype(lon_)
-            dict_grid = self.get_grid()
-            if unique_index:
-                data[INDEX_GRID] = lon_ * dict_grid['grid_size_lat_y'] + lat_
-            else:
-                data[INDEX_GRID_LAT] = lat_
-                data[INDEX_GRID_LON] = lon_
-            self.last_operation = end_operation(operation)
-        except Exception as e:
-            self.last_operation = end_operation(operation)
-            raise e
+        logger.debug('\nCreating or updating index of the grid feature..\n')
+        if sort:
+            data.sort_values([TRAJ_ID, DATETIME], inplace=True)
+        lat_, lon_ = self.point_to_index_grid(
+            data[LATITUDE], data[LONGITUDE]
+        )
+        lat_, lon_ = label_dtype(lat_), label_dtype(lon_)
+        dict_grid = self.get_grid()
+        if unique_index:
+            data[INDEX_GRID] = lon_ * dict_grid['grid_size_lat_y'] + lat_
+        else:
+            data[INDEX_GRID_LAT] = lat_
+            data[INDEX_GRID_LON] = lon_
+        self.last_operation = end_operation(operation)
 
     def convert_two_index_grid_to_one(
         self,
@@ -297,7 +294,7 @@ class Grid:
         """
         operation = begin_operation('create_all_polygons_on_grid')
 
-        print('\nCreating all polygons on virtual grid', flush=True)
+        logger.debug('\nCreating all polygons on virtual grid', flush=True)
         grid_polygon = np.array(
             [
                 [None for _ in range(self.grid_size_lon_x)]
@@ -319,7 +316,7 @@ class Grid:
                 lon_init += cell_size
             lat_init += cell_size
         self.grid_polygon = grid_polygon
-        print('...geometries saved on Grid grid_polygon property')
+        logger.debug('...geometries saved on Grid grid_polygon property')
         self.last_operation = end_operation(operation)
 
     def create_all_polygons_to_all_point_on_grid(
@@ -352,7 +349,7 @@ class Grid:
             ), axis=1
         )
 
-        print('...polygons were created')
+        logger.debug('...polygons were created')
         datapolygons['polygon'] = polygons
         self.last_operation = end_operation(operation)
         return datapolygons
@@ -383,7 +380,7 @@ class Grid:
         indexes_lon_x = np.floor(
             (np.float64(event_lon) - self.lon_min_x) / self.cell_size_by_degree
         )
-        print(
+        logger.debug(
             '...[%s,%s] indexes were created to lat and lon'
             % (indexes_lat_y.size, indexes_lon_x.size)
         )

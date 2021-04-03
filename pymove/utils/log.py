@@ -5,6 +5,8 @@ timer_decorator
 
 """
 
+import logging
+import os
 import time
 from functools import wraps
 from typing import Callable, Iterable, Optional, Text
@@ -16,6 +18,19 @@ from tqdm import tqdm as _tqdm
 
 from pymove.utils.datetime import deltatime_str
 
+LOG_LEVEL = os.getenv('PYMOVE_VERBOSE', 'INFO')
+logger = logging.getLogger('pymove')
+shell_handler = logging.StreamHandler()
+logger.setLevel(LOG_LEVEL)
+shell_handler.setLevel(LOG_LEVEL)
+logger.addHandler(shell_handler)
+
+
+def set_logging_level(level):
+    """Change logging level."""
+    logger.setLevel(level)
+    shell_handler.setLevel(level)
+
 
 def timer_decorator(func: Callable) -> wraps:
     """A decorator that prints how long a function took to run."""
@@ -26,9 +41,7 @@ def timer_decorator(func: Callable) -> wraps:
         result = func(*args, **kwargs)
         t_total = deltatime_str(time.time() - t_start)
         message = '%s took %s' % (func.__name__, t_total)
-        print('*' * len(message))
-        print(message)
-        print('*' * len(message))
+        logger.debug('{}\n{}\n{}'.format('*' * len(message), message, '*' * len(message)))
         return result
 
     return wrapper
@@ -103,8 +116,34 @@ def _log_progress(
 
 try:
     if get_ipython().__class__.__name__ == 'ZMQInteractiveShell':
-        progress_bar = _log_progress
+        _log_progress_bar = _log_progress
     else:
         raise NameError
 except NameError:
-    progress_bar = _tqdm
+    _log_progress_bar = _tqdm
+
+
+def progress_bar(
+    sequence: Iterable,
+    desc: Optional[Text] = None,
+    total: Optional[int] = None,
+    miniters: Optional[int] = None
+):
+    """
+    Make and display a progress bar.
+
+    Parameters
+    ----------
+    sequence : iterable
+        Represents a sequence of elements.
+    desc : str, optional
+        Represents the description of the operation, by default None.
+    total : int, optional
+        Represents the total/number elements in sequence, by default None.
+    miniters : int, optional
+        Represents the steps in which the bar will be updated, by default None.
+
+    """
+    if logger.level > logging.INFO:
+        return sequence
+    return _log_progress_bar(sequence, desc, total, miniters)

@@ -52,7 +52,7 @@ from pymove.utils.constants import (
 )
 from pymove.utils.conversions import lat_meters
 from pymove.utils.distances import haversine
-from pymove.utils.log import progress_bar
+from pymove.utils.log import logger, progress_bar
 from pymove.utils.mem import begin_operation, end_operation
 from pymove.utils.trajectories import shift
 
@@ -501,9 +501,9 @@ class PandasMoveDataFrame(DataFrame):
         operation = begin_operation('generate_tid_based_on_id_datetime')
         columns = set(self.columns)
         try:
-            print('\nCreating or updating tid feature...\n')
+            logger.debug('\nCreating or updating tid feature...\n')
             if sort is True:
-                print(
+                logger.debug(
                     '...Sorting by %s and %s to increase performance\n'
                     % (TRAJ_ID, DATETIME)
                 )
@@ -513,7 +513,7 @@ class PandasMoveDataFrame(DataFrame):
             self[TID] = self[TRAJ_ID].astype(str) + self[
                 DATETIME
             ].dt.strftime(str_format)
-            print('\n...tid feature was created...\n')
+            logger.debug('\n...tid feature was created...\n')
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -551,10 +551,10 @@ class PandasMoveDataFrame(DataFrame):
         operation = begin_operation('generate_date_features')
         columns = set(self.columns)
         try:
-            print('Creating date features...')
+            logger.debug('Creating date features...')
             if DATETIME in self:
                 self[DATE] = self[DATETIME].dt.date
-                print('..Date features was created...\n')
+                logger.debug('..Date features was created...\n')
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -593,10 +593,10 @@ class PandasMoveDataFrame(DataFrame):
         columns = set(self.columns)
 
         try:
-            print('\nCreating or updating a feature for hour...\n')
+            logger.debug('\nCreating or updating a feature for hour...\n')
             if DATETIME in self:
                 self[HOUR] = self[DATETIME].dt.hour
-                print('...Hour feature was created...\n')
+                logger.debug('...Hour feature was created...\n')
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -635,9 +635,9 @@ class PandasMoveDataFrame(DataFrame):
         columns = set(self.columns)
 
         try:
-            print('\nCreating or updating day of the week feature...\n')
+            logger.debug('\nCreating or updating day of the week feature...\n')
             self[DAY] = self[DATETIME].dt.day_name()
-            print('...the day of the week feature was created...\n')
+            logger.debug('...the day of the week feature was created...\n')
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -684,15 +684,15 @@ class PandasMoveDataFrame(DataFrame):
         try:
             self.generate_day_of_the_week_features(inplace=True)
 
-            print('Creating or updating a feature for weekend\n')
+            logger.debug('Creating or updating a feature for weekend\n')
             if DAY in self:
                 fds = (self[DAY] == WEEK_DAYS[5]) | (self[DAY] == WEEK_DAYS[6])
                 index_fds = self[fds].index
                 self[WEEK_END] = 0
                 self.at[index_fds, WEEK_END] = 1
-                print('...Weekend was set as 1 or 0...\n')
+                logger.debug('...Weekend was set as 1 or 0...\n')
                 if not create_day_of_week:
-                    print('...dropping colum day\n')
+                    logger.debug('...dropping colum day\n')
                     del self[DAY]
 
             if inplace:
@@ -726,6 +726,10 @@ class PandasMoveDataFrame(DataFrame):
         -------
         PandasMoveDataFrame
             Object with new features or None
+                Early morning from 0H to 6H
+                Morning from 6H to 12H
+                Afternoon from 12H to 18H
+                Evening from 18H to 24H
 
         Examples
         --------
@@ -746,7 +750,7 @@ class PandasMoveDataFrame(DataFrame):
                 '...Afternoon from 12H to 18H',
                 '...Evening from 18H to 24H' '\n',
             ]
-            print('\n'.join(periods))
+            logger.debug('\n'.join(periods))
 
             hours = self[DATETIME].dt.hour
             conditions = [
@@ -756,7 +760,7 @@ class PandasMoveDataFrame(DataFrame):
                 (hours >= 18) & (hours < 24),
             ]
             self[PERIOD] = np.select(conditions, DAY_PERIODS, 'undefined')
-            print('...the period of day feature was created')
+            logger.debug('...the period of day feature was created')
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -802,12 +806,12 @@ class PandasMoveDataFrame(DataFrame):
         columns = set(self.columns)
 
         try:
-            print('Encoding cyclical continuous features - 24-hour time')
+            logger.debug('Encoding cyclical continuous features - 24-hour time')
             if label_datetime in self:
                 hours = self[label_datetime].dt.hour
                 self[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
                 self[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
-                print('...hour_sin and  hour_cos features were created...\n')
+                logger.debug('...hour_sin and  hour_cos features were created...\n')
 
             if inplace:
                 self.last_operation = end_operation(operation)
@@ -850,7 +854,7 @@ class PandasMoveDataFrame(DataFrame):
 
         """
         if sort is True:
-            print(
+            logger.debug(
                 '...Sorting by %s and %s to increase performance\n'
                 % (label_id, DATETIME),
                 flush=True,
@@ -858,7 +862,7 @@ class PandasMoveDataFrame(DataFrame):
             data_.sort_values([label_id, DATETIME], inplace=True)
 
         if data_.index.name is None:
-            print(
+            logger.debug(
                 '...Set %s as index to a higher performance\n'
                 % label_id,
                 flush=True,
@@ -896,7 +900,7 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-        print('...Reset index...\n')
+        logger.debug('...Reset index...\n')
 
         data_.reset_index(inplace=True)
         if inplace:
@@ -956,7 +960,7 @@ class PandasMoveDataFrame(DataFrame):
         try:
             message = '\nCreating or updating distance, time and speed features'
             message += ' in meters by seconds\n'
-            print(
+            logger.debug(
                 message
             )
 
@@ -1003,10 +1007,6 @@ class PandasMoveDataFrame(DataFrame):
             )
 
         except Exception as e:
-            print(
-                'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
-                % (label_id, idx, size_id, sum_size_id)
-            )
             drop = set(self.columns) - columns
             self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
@@ -1054,7 +1054,7 @@ class PandasMoveDataFrame(DataFrame):
         )
 
         try:
-            print('\nCreating or updating distance features in meters...\n')
+            logger.debug('\nCreating or updating distance features in meters...\n')
 
             # create ou update columns
             self[DIST_TO_PREV] = label_dtype(-1.0)
@@ -1098,10 +1098,6 @@ class PandasMoveDataFrame(DataFrame):
             )
 
         except Exception as e:
-            print(
-                'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
-                % (label_id, idx, size_id, sum_size_id)
-            )
             drop = set(self.columns) - columns
             self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
@@ -1148,7 +1144,7 @@ class PandasMoveDataFrame(DataFrame):
         )
 
         try:
-            print(
+            logger.debug(
                 '\nCreating or updating time features seconds\n'
             )
 
@@ -1183,10 +1179,6 @@ class PandasMoveDataFrame(DataFrame):
             )
 
         except Exception as e:
-            print(
-                'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
-                % (label_id, idx, size_id, sum_size_id)
-            )
             drop = set(self.columns) - columns
             self.drop(columns=[*drop], inplace=True)
             self.last_operation = end_operation(operation)
@@ -1231,7 +1223,7 @@ class PandasMoveDataFrame(DataFrame):
         columns = set(self.columns)
 
         try:
-            print(
+            logger.debug(
                 '\nCreating or updating speed features meters by seconds\n'
             )
 
@@ -1294,7 +1286,7 @@ class PandasMoveDataFrame(DataFrame):
         try:
             self.generate_dist_features(inplace=True)
 
-            print('\nCreating or updating features MOVE and STOPS...\n')
+            logger.debug('\nCreating or updating features MOVE and STOPS...\n')
             conditions = (
                 (self[target_label] > radius),
                 (self[target_label] <= radius),
@@ -1302,7 +1294,7 @@ class PandasMoveDataFrame(DataFrame):
             choices = [MOVE, STOP]
 
             self[SITUATION] = np.select(conditions, choices, np.nan)
-            print(
+            logger.debug(
                 '\n....There are %s stops to this parameters\n'
                 % (self[self[SITUATION] == STOP].shape[0])
             )
@@ -1393,70 +1385,66 @@ class PandasMoveDataFrame(DataFrame):
         """
         operation = begin_operation('show_trajectories_info')
 
-        try:
-            message = ('=' * 22) + ' INFORMATION ABOUT DATASET ' + ('=' * 22)
+        message = ('=' * 22) + ' INFORMATION ABOUT DATASET ' + ('=' * 22)
+        print(
+            '\n%s\n' % message
+        )
+        print('Number of Points: %s\n' % self.shape[0])
+
+        if TRAJ_ID in self:
             print(
-                '\n%s\n' % message
-            )
-            print('Number of Points: %s\n' % self.shape[0])
-
-            if TRAJ_ID in self:
-                print(
-                    'Number of IDs objects: %s\n'
-                    % self[TRAJ_ID].nunique()
-                )
-
-            if TID in self:
-                print(
-                    'Number of TIDs trajectory: %s\n'
-                    % self[TID].nunique()
-                )
-
-            if DATETIME in self:
-                dt_max = self[DATETIME].max()
-                dt_min = self[DATETIME].min()
-                print(
-                    'Start Date:%s     End Date:%s\n'
-                    % (dt_min, dt_max)
-                )
-
-            if LATITUDE and LONGITUDE in self:
-                print(
-                    'Bounding Box:%s\n' % (self.get_bbox(),)
-                )  # bbox return =  Lat_min , Long_min, Lat_max, Long_max
-
-            if TIME_TO_PREV in self:
-                t_max = round(self[TIME_TO_PREV].max(), 3)
-                t_min = round(self[TIME_TO_PREV].min(), 3)
-                print(
-                    'Gap time MAX:%s     Gap time MIN:%s\n'
-                    % (t_max, t_min)
-                )
-
-            if SPEED_TO_PREV in self:
-                s_max = round(self[SPEED_TO_PREV].max(), 3)
-                s_min = round(self[SPEED_TO_PREV].min(), 3)
-                print(
-                    'Speed MAX:%s    Speed MIN:%s\n'
-                    % (s_max, s_min)
-                )
-
-            if DIST_TO_PREV in self:
-                d_max = round(self[DIST_TO_PREV].max(), 3)
-                d_min = round(self[DIST_TO_PREV].min(), 3)
-                print(
-                    'Distance MAX:%s    Distance MIN:%s\n'
-                    % (d_max, d_min)
-                )
-
-            print(
-                '\n%s\n' % ('=' * len(message))
+                'Number of IDs objects: %s\n'
+                % self[TRAJ_ID].nunique()
             )
 
-            self.last_operation = end_operation(operation)
-        except Exception as e:
-            self.last_operation = end_operation(operation)
-            raise e
+        if TID in self:
+            print(
+                'Number of TIDs trajectory: %s\n'
+                % self[TID].nunique()
+            )
+
+        if DATETIME in self:
+            dt_max = self[DATETIME].max()
+            dt_min = self[DATETIME].min()
+            print(
+                'Start Date:%s     End Date:%s\n'
+                % (dt_min, dt_max)
+            )
+
+        if LATITUDE and LONGITUDE in self:
+            print(
+                'Bounding Box:%s\n' % (self.get_bbox(),)
+            )  # bbox return =  Lat_min , Long_min, Lat_max, Long_max
+
+        if TIME_TO_PREV in self:
+            t_max = round(self[TIME_TO_PREV].max(), 3)
+            t_min = round(self[TIME_TO_PREV].min(), 3)
+            print(
+                'Gap time MAX:%s     Gap time MIN:%s\n'
+                % (t_max, t_min)
+            )
+
+        if SPEED_TO_PREV in self:
+            s_max = round(self[SPEED_TO_PREV].max(), 3)
+            s_min = round(self[SPEED_TO_PREV].min(), 3)
+            print(
+                'Speed MAX:%s    Speed MIN:%s\n'
+                % (s_max, s_min)
+            )
+
+        if DIST_TO_PREV in self:
+            d_max = round(self[DIST_TO_PREV].max(), 3)
+            d_min = round(self[DIST_TO_PREV].min(), 3)
+            print(
+                'Distance MAX:%s    Distance MIN:%s\n'
+                % (d_max, d_min)
+            )
+
+        print(
+            '\n%s\n' % ('=' * len(message))
+        )
+
+        self.last_operation = end_operation(operation)
 
     def astype(
         self,

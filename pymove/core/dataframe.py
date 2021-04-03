@@ -116,12 +116,12 @@ class MoveDataFrame:
                 data[LONGITUDE] = data[LONGITUDE].astype('float64')
             if data.dtypes[DATETIME] != 'datetime64[ns]':
                 data[DATETIME] = data[DATETIME].astype('datetime64[ns]')
-        except KeyError as e:
-            print('dataframe missing one of lat, lon, datetime columns.')
-            raise e
-        except (ValueError, ParserError) as e:
-            print('dtypes cannot be converted.')
-            raise e
+        except KeyError:
+            raise KeyError('dataframe missing one of lat, lon, datetime columns.')
+        except ParserError:
+            raise ParserError('datetime column cannot be parsed')
+        except ValueError:
+            raise ValueError('dtypes cannot be converted.')
 
     @staticmethod
     def format_labels(
