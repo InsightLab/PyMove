@@ -60,7 +60,7 @@ def bbox_split(bbox: Tuple[int, int, int, int], number_grids: int) -> DataFrame:
 
     const_lat = abs(abs(lat_max) - abs(lat_min)) / number_grids
     const_lon = abs(abs(lon_max) - abs(lon_min)) / number_grids
-    logger.debug('const_lat: %s\nconst_lon: %s' % (const_lat, const_lon))
+    logger.debug('const_lat: {}\nconst_lon: {}'.format(const_lat, const_lon))
 
     move_data = pd.DataFrame(
         columns=['lat_min', 'lon_min', 'lat_max', 'lon_max']
@@ -101,15 +101,17 @@ def _drop_single_point(move_data: DataFrame, label_new_tid: Text, label_id: Text
         ids_before_drop = move_data[label_id].unique().shape[0]
         move_data.drop(index=idx, inplace=True)
         logger.debug(
-            '...Object - before drop: %s - after drop: %s'
-            % (ids_before_drop, move_data[label_id].unique().shape[0])
+            '...Object - before drop: {} - after drop: {}'.format(
+                ids_before_drop, move_data[label_id].unique().shape[0]
+            )
         )
         logger.debug(
-            '...Shape - before drop: %s - after drop: %s'
-            % (shape_before_drop, move_data.shape)
+            '...Shape - before drop: {} - after drop: {}'.format(
+                shape_before_drop, move_data.shape
+            )
         )
     else:
-        logger.debug('...No trajectories with only one point.', move_data.shape)
+        logger.debug('...No trajectories with only one point.')
 
 
 def _filter_and_dist_time_speed(
@@ -194,7 +196,7 @@ def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: T
 
     """
     if move_data.index.name is None:
-        logger.debug('...setting %s as index' % label_id)
+        logger.debug('...setting {} as index'.format(label_id))
         move_data.set_index(label_id, inplace=True)
     curr_tid = 0
     if label_new_tid not in move_data:
@@ -237,7 +239,7 @@ def _update_curr_tid_count(
     """
     curr_tid += 1
     if filter_.shape == ():
-        logger.debug('id: %s has no point to split' % idx)
+        logger.debug('id: {} has no point to split'.format(idx))
         move_data.at[idx, label_new_tid] = curr_tid
         count += 1
     else:
@@ -382,9 +384,15 @@ def by_dist_time_speed(
         move_data = move_data[:]
 
     logger.debug('\nSplit trajectories')
-    logger.debug('...max_dist_between_adj_points:', max_dist_between_adj_points)
-    logger.debug('...max_time_between_adj_points:', max_time_between_adj_points)
-    logger.debug('...max_speed_between_adj_points:', max_speed_between_adj_points)
+    logger.debug('...max_dist_between_adj_points: {}'.format(
+        max_dist_between_adj_points
+    ))
+    logger.debug('...max_time_between_adj_points: {}'.format(
+        max_time_between_adj_points
+    ))
+    logger.debug('...max_speed_between_adj_points: {}'.format(
+        max_speed_between_adj_points
+    ))
 
     if TIME_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
@@ -449,8 +457,9 @@ def by_max_dist(
         move_data = move_data[:]
 
     logger.debug(
-        'Split trajectories by max distance between adjacent points:',
-        max_dist_between_adj_points,
+        'Split trajectories by max distance between adjacent points: {}'.format(
+            max_dist_between_adj_points
+        )
     )
 
     if DIST_TO_PREV not in move_data:
@@ -516,8 +525,9 @@ def by_max_time(
         move_data = move_data[:]
 
     logger.debug(
-        'Split trajectories by max_time_between_adj_points:',
-        max_time_between_adj_points,
+        'Split trajectories by max_time_between_adj_points: {}'.format(
+            max_time_between_adj_points
+        )
     )
 
     if TIME_TO_PREV not in move_data:
@@ -582,8 +592,9 @@ def by_max_speed(
         move_data = move_data[:]
 
     logger.debug(
-        'Split trajectories by max_speed_between_adj_points:',
-        max_speed_between_adj_points,
+        'Split trajectories by max_speed_between_adj_points: {}'.format(
+            max_speed_between_adj_points
+        )
     )
 
     if SPEED_TO_PREV not in move_data:

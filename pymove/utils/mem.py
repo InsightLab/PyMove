@@ -283,6 +283,5 @@ def top_mem_vars(
         columns=['var', 'mem']
     )
     top_vars['mem'] = top_vars['mem'].apply(sizeof_fmt)
-    a = ''
-    a.startswith
+
     return top_vars
