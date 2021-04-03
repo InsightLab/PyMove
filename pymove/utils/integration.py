@@ -177,7 +177,7 @@ def join_collective_areas(
 
     polygons = gdf_rules_[label_geometry].unique()
     gdf_[VIOLATING] = False
-    for p in progress_bar(polygons):
+    for p in progress_bar(polygons, desc='Joining trajectories and areas'):
         # intersects = gdf_[label_geometry].apply(lambda x: x.intersects(p))
         intersects = gdf_[label_geometry].intersects(p)
         index = gdf_[intersects].index
@@ -356,12 +356,12 @@ def join_with_pois(
         by default True
 
     """
-    logger.debug('Integration with POIs...')
-
     values = _reset_and_creates_id_and_lat_lon(data, df_pois, True, reset_index)
     current_distances, ids_pois, tag_pois, lat_user, lon_user = values
 
-    for idx, row in progress_bar(data.iterrows(), total=len(data)):
+    for idx, row in progress_bar(
+        data.iterrows(), total=len(data), desc='Integration with POIs'
+    ):
         # create a vector to each lat
         lat_user.fill(row[LATITUDE])
         lon_user.fill(row[LONGITUDE])
@@ -426,8 +426,6 @@ def join_with_pois_optimizer(
         by default True
 
     """
-    logger.debug('Integration with POIs optimized...')
-
     if len(df_pois[label_poi_name].unique()) == len(dist_poi):
         values = _reset_and_creates_id_and_lat_lon(data, df_pois, False, reset_index)
         minimum_distances, ids_pois, tag_pois, lat_poi, lon_poi = values
@@ -437,7 +435,9 @@ def join_with_pois_optimizer(
             inplace=True
         )
 
-        for idx, row in progress_bar(df_pois.iterrows(), total=len(df_pois)):
+        for idx, row in progress_bar(
+            df_pois.iterrows(), total=len(df_pois), desc='Optimized integration with POIs'
+        ):
             # update lat and lon of current index
             lat_poi.fill(row[LATITUDE])
             lon_poi.fill(row[LONGITUDE])
@@ -592,14 +592,12 @@ def join_with_poi_datetime(
         Label of df_events referring to the type of the event, by default EVENT_TYPE
 
     """
-    logger.debug('Integration with Events...')
-
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, label_date, time_window
     )
     window_starts, window_ends, current_distances, event_id, event_type = values
 
-    for idx in progress_bar(data.index):
+    for idx in progress_bar(data.index, total=len(data), desc='Integration with Events'):
         # filter event by datetime
         df_filtered = filters.by_datetime(
             df_events, window_starts[idx], window_ends[idx]
@@ -671,8 +669,6 @@ def join_with_poi_datetime_optimizer(
         Label of df_events referring to the type of the event, by default EVENT_TYPE
 
     """
-    logger.debug('Integration with Events...')
-
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, label_date, time_window
     )
@@ -688,7 +684,9 @@ def join_with_poi_datetime_optimizer(
         inplace=True
     )
 
-    for idx, row in progress_bar(df_events.iterrows(), total=len(df_events)):
+    for idx, row in progress_bar(
+        df_events.iterrows(), total=len(df_events), desc='Integration with Events'
+    ):
         df_filtered = filters.by_datetime(
             data, window_starts[idx], window_ends[idx]
         )
@@ -772,8 +770,6 @@ def join_with_pois_by_dist_and_datetime(
         maximum radius of pois, by default 1000
 
     """
-    logger.debug('Integration with Events...')
-
     if label_date not in df_pois:
         raise KeyError("POI's DataFrame must contain a %s column" % label_date)
 
@@ -783,8 +779,9 @@ def join_with_pois_by_dist_and_datetime(
 
     window_start, window_end, current_distances, event_id, event_type = values
 
-    for idx, row in progress_bar(data.iterrows(), total=data.shape[0]):
-
+    for idx, row in progress_bar(
+        data.iterrows(), total=len(data), desc='Integration with Events'
+    ):
         # set min and max of coordinates by radius
         bbox = filters.get_bbox_by_radius(
             (row[LATITUDE], row[LONGITUDE]), radius
@@ -866,14 +863,15 @@ def join_with_home_by_id(
         flag as an option to drop id's that don't have houses, by default FALSE
 
     """
-    logger.debug('Integration with Home...')
     ids_without_home = []
 
     if data.index.name is None:
         logger.debug('...setting {} as index'.format(label_id))
         data.set_index(label_id, inplace=True)
 
-    for idx in progress_bar(data.index.unique()):
+    for idx in progress_bar(
+        data.index.unique(), total=len(data.index.unique()), desc='Integration with Home'
+    ):
         filter_home = df_home[label_id] == idx
 
         if df_home[filter_home].shape[0] == 0:

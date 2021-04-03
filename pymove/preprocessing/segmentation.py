@@ -194,7 +194,7 @@ def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: T
 
     """
     if move_data.index.name is None:
-        logger.debug('...setting %s as index' % label_id, flush=True)
+        logger.debug('...setting %s as index' % label_id)
         move_data.set_index(label_id, inplace=True)
     curr_tid = 0
     if label_new_tid not in move_data:

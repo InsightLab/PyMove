@@ -26,7 +26,7 @@ shell_handler.setLevel(LOG_LEVEL)
 logger.addHandler(shell_handler)
 
 
-def set_logging_level(level):
+def set_verbosity(level):
     """Change logging level."""
     logger.setLevel(level)
     shell_handler.setLevel(level)

@@ -856,16 +856,14 @@ class PandasMoveDataFrame(DataFrame):
         if sort is True:
             logger.debug(
                 '...Sorting by %s and %s to increase performance\n'
-                % (label_id, DATETIME),
-                flush=True,
+                % (label_id, DATETIME)
             )
-            data_.sort_values([label_id, DATETIME], inplace=True)
+            data_.sort_values([label_id, DATETIME])
 
         if data_.index.name is None:
             logger.debug(
                 '...Set %s as index to a higher performance\n'
-                % label_id,
-                flush=True,
+                % label_id
             )
             data_.set_index(label_id, inplace=True)
 

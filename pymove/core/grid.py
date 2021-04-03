@@ -294,7 +294,7 @@ class Grid:
         """
         operation = begin_operation('create_all_polygons_on_grid')
 
-        logger.debug('\nCreating all polygons on virtual grid', flush=True)
+        logger.debug('\nCreating all polygons on virtual grid')
         grid_polygon = np.array(
             [
                 [None for _ in range(self.grid_size_lon_x)]

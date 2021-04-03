@@ -111,7 +111,7 @@ def compress_segment_stop_to_point(
     else:
         logger.debug('...move segments will be dropped...')
 
-    logger.debug('...get only segments stop...', flush=True)
+    logger.debug('...get only segments stop...')
     segments = move_data[move_data[label_stop]][label_segment].unique()
 
     for idx in progress_bar(

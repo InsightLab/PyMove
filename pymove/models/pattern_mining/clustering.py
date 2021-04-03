@@ -67,7 +67,7 @@ def elbow_method(
     message = 'Executing Elbow Method for {} to {} clusters at {} steps\n'.format(
         k_initial, max_clusters, k_iteration
     )
-    logger.debug(message, flush=True)
+    logger.debug(message)
     inertia_dic = {}
     for k in progress_bar(
         range(k_initial, max_clusters + 1, k_iteration), desc='Running KMeans'
@@ -121,7 +121,7 @@ def gap_statistic(
     message = 'Executing Gap Statistic for {} to {} clusters at {} steps\n'.format(
         k_initial, max_clusters, k_iteration
     )
-    logger.debug(message, flush=True)
+    logger.debug(message)
     gaps = {}
     np.random.seed(random_state)
     for k in progress_bar(

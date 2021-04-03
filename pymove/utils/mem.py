@@ -24,7 +24,7 @@ from pandas import DataFrame
 from pymove.utils.log import logger
 
 try:
-    from reprlib import repr
+    pass
 except ImportError:
     pass
 
@@ -108,7 +108,7 @@ def reduce_mem_usage_automatic(df: DataFrame):
 
 
 def total_size(
-    o: object, handlers: Dict = None, verbose: Optional[bool] = False
+    o: object, handlers: Dict = None, verbose: Optional[bool] = True
 ) -> float:
     """
     Calculates the approximate memory footprint of an given object.
@@ -167,13 +167,14 @@ def total_size(
         seen.add(id(o))
         s = getsizeof(o, default_size)
 
-        if verbose:
-            logger.info(s, type(o), repr(o))
-
         for typ, handler in all_handlers.items():
             if isinstance(o, typ):
                 s += sum(map(sizeof, handler(o)))
                 break
+
+        if verbose:
+            logger.info('Size in bytes: {}, Type: {}'.format(s, type(o)))
+
         return s
 
     return sizeof(o)
@@ -252,17 +253,19 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
 
 
 def top_mem_vars(
-    variables: Optional[Callable] = None, n: Optional[int] = 10
+    variables: Optional[Callable] = None, n: Optional[int] = 10, hide_private=True
 ) -> DataFrame:
     """
     Shows the sizes of the active variables.
 
     Parameters
     ----------
-    variables: locals() or globals()
-        Whether to shows local or global variables, by default locals()
-    n: int
-        number of variables to show
+    variables: locals() or globals(), optional
+        Whether to shows local or global variables, by default globals()
+    n: int, optional
+        number of variables to show, by default
+    hide_private: bool, optional
+        Whether to hide private variables, by default True
 
     Returns
     -------
@@ -271,11 +274,15 @@ def top_mem_vars(
 
     """
     if variables is None:
-        variables = locals()
+        variables = globals()
     vars_ = ((name, getsizeof(value)) for name, value in variables.items())
+    if hide_private:
+        vars_ = filter(lambda x: not x[0].startswith('_'), vars_)
     top_vars = DataFrame(
         sorted(vars_, key=lambda x: -x[1])[:n],
         columns=['var', 'mem']
     )
     top_vars['mem'] = top_vars['mem'].apply(sizeof_fmt)
+    a = ''
+    a.startswith
     return top_vars
