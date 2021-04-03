@@ -128,8 +128,12 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         """
         operation = begin_operation('generate_prev_equ_feature')
-        columns = set(self.columns)
-        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
+        if inplace:
+            data_ = self
+        else:
+            data_ = self.copy()
+
+        ids, size_id, idx = self._prepare_generate_data(
             self, sort, label_id
         )
 
@@ -138,27 +142,28 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
             message
         )
 
-        if (self[local_label].dtype == 'int'):
-            self[local_label] = self[local_label].astype(np.float16)
+        if (data_[local_label].dtype == 'int'):
+            data_[local_label] = data_[local_label].astype(np.float16)
         for idx in progress_bar(
             ids, desc='Generating previous {}'.format(local_label)
         ):
-            current_local = self.at[idx, local_label]
+            current_local = data_.at[idx, local_label]
             current_local = np.array(current_local)
             size_id = current_local.size
 
             if size_id <= 1:
-                self.at[idx, PREV_LOCAL] = np.nan
+                data_.at[idx, PREV_LOCAL] = np.nan
 
             else:
                 prev_local = shift(current_local, 1)
 
                 # previous to current point
-                self.at[idx, PREV_LOCAL] = prev_local
+                data_.at[idx, PREV_LOCAL] = prev_local
 
-        return self._return_generated_data(
-            self, columns, operation, inplace
-        )
+        data_.reset_index(inplace=True)
+        data_.last_operation = end_operation(operation)
+        if not inplace:
+            return data_
 
     def generate_tid_based_statistics(
         self,
