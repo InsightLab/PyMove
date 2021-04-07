@@ -1,3 +1,30 @@
+"""
+Folium operations.
+
+save_map,
+create_base_map,
+heatmap,
+heatmap_with_time,
+cluster,
+faster_cluster,
+plot_markers,
+plot_trajectories_with_folium,
+plot_trajectory_by_id_folium,
+plot_trajectory_by_period,
+plot_trajectory_by_day_week,
+plot_trajectory_by_date,
+plot_trajectory_by_hour,
+plot_stops,
+plot_bbox,
+plot_points_folium,
+plot_poi_folium,
+plot_event_folium,
+show_trajs_with_event,
+show_traj_id_with_event,
+plot_traj_timestamp_geo_json
+
+"""
+
 from typing import Any, Dict, List, Optional, Text, Tuple, Union
 
 import folium
@@ -43,7 +70,7 @@ def save_map(
     return_map: Optional[bool] = False
 ) -> Optional[Map]:
     """
-    Save a visualization in a map in a new file
+    Save a visualization in a map in a new file.
 
     Parameters
     ----------
@@ -65,7 +92,6 @@ def save_map(
     Map
         folium map or None
     """
-
     map_ = folium.Map(tiles=tiles)
     map_.fit_bounds(
         [
@@ -101,7 +127,7 @@ def create_base_map(
     default_zoom_start: Optional[float] = 12,
 ) -> Map:
     """
-    Generate a folium map
+    Generates a folium map.
 
     Parameters
     ----------
@@ -121,7 +147,6 @@ def create_base_map(
     Map
         a folium map
     """
-
     if lat_origin is None and lon_origin is None:
         lat_origin = move_data[LATITUDE].median()
         lon_origin = move_data[LONGITUDE].median()
@@ -258,7 +283,6 @@ def heatmap_with_time(
     Map
         folium Map
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -344,7 +368,6 @@ def cluster(
     Map
         folium Map
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -423,7 +446,6 @@ def faster_cluster(
     Map
         folium Map
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -497,7 +519,6 @@ def plot_markers(
     Map
         folium Map
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -574,7 +595,6 @@ def _filter_and_generate_colors(
         list containing a combination of id and color
 
     """
-
     if n_rows is None:
         n_rows = move_data.shape[0]
 
@@ -629,7 +649,7 @@ def _filter_generated_feature(
     Filters the values from the dataframe.
 
     Parameters
-    __________
+    ----------
     move_data : DataFrame
         Input trajectory data.
     feature: str
@@ -662,8 +682,10 @@ def _add_begin_end_markers_to_folium_map(
     _id: Optional[int] = None
 ):
     """
-    Adds a green marker to beginning of the trajectory and a red marker to the
-    end of the trajectory.
+    Adds markers to the beggining and end of a trajectory.
+
+    Adds a green marker to beginning of the trajectory
+    and a red marker to the end of the trajectory.
 
     Parameters
     ----------
@@ -676,7 +698,6 @@ def _add_begin_end_markers_to_folium_map(
     id: int, optional
         Id of the trajectory, by default None
     """
-
     points = folium.map.FeatureGroup(
         'The start and end points of trajectory {}'.format(_id or '')
     )
@@ -729,7 +750,6 @@ def _add_trajectories_to_folium_map(
         Represents the file name of new file .html, by default 'map.html'.
 
     """
-
     for _id, color in items:
         mv = move_data[move_data[TRAJ_ID] == _id]
 
@@ -805,7 +825,6 @@ def plot_trajectories_with_folium(
         a folium map with visualization.
 
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -887,7 +906,6 @@ def plot_trajectory_by_id_folium(
         If there is no user with the id passed
 
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -975,7 +993,6 @@ def plot_trajectory_by_period(
         If there is no user with the id passed
 
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -1067,7 +1084,6 @@ def plot_trajectory_by_day_week(
         If there is no user with the id passed
 
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -1162,7 +1178,6 @@ def plot_trajectory_by_date(
         If there is no user with the id passed
 
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -1263,7 +1278,6 @@ def plot_trajectory_by_hour(
         If there is no user with the id passed
 
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -1355,7 +1369,6 @@ def plot_stops(
         If there is no user with the id passed
 
     """
-
     if base_map is None:
         base_map = create_base_map(
             move_data,
@@ -1424,7 +1437,7 @@ def plot_bbox(
         Wether to save the bbox folium map, by default False.
 
     Returns
-    --------
+    -------
     Map
         folium map with bounding box
 
@@ -1455,7 +1468,7 @@ def _format_tags(line, slice_):
     Create or format tags.
 
     Parameters
-    -----------
+    ----------
     line: Line to add a tag.
 
     slice_: Tag interval.
@@ -1483,7 +1496,7 @@ def _circle_maker(
     Return a circle.
 
     Parameters
-    -----------
+    ----------
     iter_tuple: DataFrame iter_tuple.
     user_lat: str.
         Latitude column name.
@@ -1497,7 +1510,6 @@ def _circle_maker(
         radius size.
     map_: Folium map.
     """
-
     _, line = iter_tuple
 
     x = line[user_lat]
@@ -1527,8 +1539,7 @@ def plot_points_folium(
     filename: Optional[Text] = 'points.html'
 ) -> Map:
     """
-    Receives a MoveDataFrame and returns a folium map with the trajectories plots
-    and a point.
+    Generates a folium map with the trajectories plots and a point.
 
     Parameters
     ----------
@@ -1560,7 +1571,6 @@ def plot_points_folium(
     Map
         A folium map
     """
-
     if not slice_tags:
         slice_tags = move_data.columns
 
@@ -1607,7 +1617,6 @@ def plot_poi_folium(
     save_as_html: Optional[bool] = False,
     filename: Optional[Text] = 'pois.html'
 ) -> Map:
-
     """
     Receives a MoveDataFrame and returns a folium map with poi points.
 
@@ -1665,7 +1674,6 @@ def plot_event_folium(
     save_as_html: Optional[bool] = False,
     filename: Optional[Text] = 'events.html'
 ) -> Map:
-
     """
     Receives a MoveDataFrame and returns a folium map with events.
 
@@ -1732,7 +1740,7 @@ def show_trajs_with_event(
     Plot a trajectory, including your user_points lat lon and your tags.
 
     Parameters
-    -----------
+    ----------
     move_data: DataFrame.
         Trajectory input data.
     window_time_subject: float.
@@ -1773,7 +1781,6 @@ def show_trajs_with_event(
     list of Map
         A list of folium maps.
     """
-
     # building structure for deltas
     delta_event = pd.to_timedelta(window_time_event, unit='s')
     delta_user = pd.to_timedelta(window_time_subject, unit='s')
@@ -1915,7 +1922,7 @@ def show_traj_id_with_event(
     Plot a trajectory, including your user_points lat lon and your tags.
 
     Parameters
-    -----------
+    ----------
     move_data: DataFrame.
         Trajectory input data.
     window_time_subject: float.
@@ -1958,7 +1965,6 @@ def show_traj_id_with_event(
     Map
         A list of folium maps.
     """
-
     df_id = move_data[move_data[user_id] == subject_id]
 
     return show_trajs_with_event(
@@ -1993,7 +1999,7 @@ def _create_geojson_features_line(
     Create geojson features.
 
     Parameters
-    -----------
+    ----------
     move_data: DataFrame.
         Input trajectory data.
     label_datetime: str, optional
@@ -2008,7 +2014,6 @@ def _create_geojson_features_line(
     list
         GeoJSON features.
     """
-    print('> Creating GeoJSON features...')
     features = []
 
     row_iterator = move_data.iterrows()
@@ -2065,7 +2070,7 @@ def plot_traj_timestamp_geo_json(
     Plot trajectories wit geo_json.
 
     Parameters
-    -----------
+    ----------
     move_data: DataFrame.
         Input trajectory data.
     label_datetime: str, optional, by default DATETIME.
@@ -2092,15 +2097,12 @@ def plot_traj_timestamp_geo_json(
         label_lon=label_lon,
         label_datetime=label_datetime
     )
-    print('creating folium map')
     base_map = create_base_map(
         move_data=move_data,
         lat_origin=move_data[label_lat].mean(),
         lon_origin=move_data[label_lon].mean(),
         tile=tiles
     )
-    print('Genering timestamp map')
-    print(features)
     plugins.TimestampedGeoJson(
         {
             'type': 'FeatureCollection',

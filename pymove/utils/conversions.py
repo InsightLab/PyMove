@@ -1,3 +1,31 @@
+"""
+Unit conversion operations.
+
+lat_meters,
+meters_to_eps,
+list_to_str,
+list_to_csv_str,
+list_to_svm_line,
+lon_to_x_spherical,
+lat_to_y_spherical,
+x_to_lon_spherical,
+y_to_lat_spherical,
+geometry_points_to_lat_and_lon,
+lat_and_lon_decimal_degrees_to_decimal,
+ms_to_kmh,
+kmh_to_ms,
+meters_to_kilometers,
+kilometers_to_meters,
+seconds_to_minutes,
+minute_to_seconds,
+minute_to_hours,
+hours_to_minute,
+seconds_to_hours,
+hours_to_seconds
+
+"""
+
+
 import math
 from typing import TYPE_CHECKING, List, Optional, Text, Union
 
@@ -42,7 +70,6 @@ def lat_meters(lat: float) -> float:
         110826.6722516857
 
     """
-
     rlat = float(lat) * math.pi / 180
     # meter per degree Latitude
     meters_lat = (
@@ -58,7 +85,7 @@ def meters_to_eps(
     radius_meters: float, earth_radius: Optional[float] = EARTH_RADIUS
 ) -> float:
     """
-    Converts radius in meters to eps
+    Converts radius in meters to eps.
 
     Parameters
     ----------
@@ -77,8 +104,7 @@ def meters_to_eps(
 
 def list_to_str(input_list: List, delimiter: Optional[Text] = ',') -> Text:
     """
-    Concatenates list elements, joining them by the separator specified by the
-    parameter "delimiter".
+    Concatenates a list elements, joining them by the separator `delimiter`.
 
     Parameters
     ----------
@@ -94,7 +120,6 @@ def list_to_str(input_list: List, delimiter: Optional[Text] = ',') -> Text:
         separeted by the delimiter.
 
     """
-
     return delimiter.join(
         [x if isinstance(x, str) else repr(x) for x in input_list]
     )
@@ -123,7 +148,6 @@ def list_to_csv_str(input_list: List) -> Text:
     '1 1:2 2:3 3:4 4:5'
 
     """
-
     return list_to_str(input_list)
 
 
@@ -150,7 +174,6 @@ def list_to_svm_line(original_list: List) -> Text:
     '1 1:2 2:3 3:4 4:5'
 
     """
-
     list_size = len(original_list)
     svm_line = '%s ' % original_list[0]
     for i in range(1, list_size):
@@ -183,7 +206,6 @@ def lon_to_x_spherical(lon: float) -> float:
     https://epsg.io/transform
 
     """
-
     return 6378137 * np.radians(lon)
 
 
@@ -212,7 +234,6 @@ def lat_to_y_spherical(lat: float) -> float:
     https://epsg.io/transform
 
     """
-
     return 6378137 * np.log(np.tan(np.pi / 4 + np.radians(lat) / 2.0))
 
 
@@ -241,7 +262,6 @@ def x_to_lon_spherical(x: float) -> float:
     https://epsg.io/transform
 
     """
-
     return np.degrees(x / 6378137.0)
 
 
@@ -270,7 +290,6 @@ def y_to_lat_spherical(y: float) -> float:
     https://epsg.io/transform
 
     """
-
     return np.degrees(np.arctan(np.sinh(y / 6378137.0)))
 
 
@@ -281,9 +300,9 @@ def geometry_points_to_lat_and_lon(
     inplace: Optional[bool] = True
 ) -> DataFrame:
     """
-    Converts the geometry column to latitude and longitude
-    columns (named 'lat' and 'lon'), removing geometries
-    that are not of the Point type.
+    Converts the geometry column to latitude and longitude columns(named 'lat' and 'lon').
+
+    Removes geometries that are not of the Point type.
 
     Parameters
     ----------
@@ -302,7 +321,6 @@ def geometry_points_to_lat_and_lon(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -325,8 +343,7 @@ def lat_and_lon_decimal_degrees_to_decimal(
     longitude: Optional[Text] = LONGITUDE
 ) -> DataFrame:
     """
-    Converts latitude and longitude format from
-    decimal degrees to decimal format.
+    Converts latitude and longitude format from decimal degrees to decimal format.
 
     Parameters
     ----------
@@ -384,7 +401,6 @@ def ms_to_kmh(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_speed not in move_data:
@@ -424,7 +440,6 @@ def kmh_to_ms(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_speed not in move_data:
@@ -466,7 +481,6 @@ def meters_to_kilometers(
 
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_distance not in move_data:
@@ -506,7 +520,6 @@ def kilometers_to_meters(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_distance not in move_data:
@@ -547,7 +560,6 @@ def seconds_to_minutes(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_time not in move_data:
@@ -587,7 +599,6 @@ def minute_to_seconds(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_time not in move_data:
@@ -628,7 +639,6 @@ def minute_to_hours(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_time not in move_data:
@@ -669,7 +679,6 @@ def hours_to_minute(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_time not in move_data:
@@ -710,7 +719,6 @@ def seconds_to_hours(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_time not in move_data:
@@ -750,7 +758,6 @@ def hours_to_seconds(
         A new dataframe with the converted feature or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
     if label_time not in move_data:

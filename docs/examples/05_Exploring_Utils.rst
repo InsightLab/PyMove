@@ -1,37 +1,30 @@
-#05 - Exploring Utils
-=====================
+05 - Exploring Utils
+====================
 
 Falar sobre para se trabalhar com trajetórias pode ser necessária
 algumas c onversões envolvendo tempo e data, distância e etc, fora
 outros utilitários.
 
 Falar dos módulos presentes no pacote utils - constants - conversions -
-datetime - distances - math - mem - trajectories - transformations
-
---------------
+datetime - distances - math - trajectories - log - mem
 
 Imports
-~~~~~~~
+-------
 
 .. code:: ipython3
 
     import pymove.utils as utils
-    import pymove
-    from pymove import MoveDataFrame
-
---------------
+    import pymove as pm
 
 Load data
-~~~~~~~~~
+---------
 
 .. code:: ipython3
 
-    move_data = pymove.read_csv("geolife_sample.csv")
-
---------------
+    move_data = pm.read_csv("geolife_sample.csv")
 
 Conversions
-~~~~~~~~~~~
+-----------
 
 To transform latitude degree to meters, you can use function
 **lat_meters**. For example, you can convert Fortaleza’s latitude
@@ -170,27 +163,10 @@ To convert values, in ms, in label_speed column to kmh, you can use
     utils.conversions.ms_to_kmh(move_data)
 
 
-.. parsed-literal::
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
 
 
 .. code:: ipython3
@@ -1333,7 +1309,7 @@ To get datetime of now, you can use **now_str**.
 
 .. parsed-literal::
 
-    '2021-02-01 21:56:26'
+    '2021-04-03 17:52:30'
 
 
 
@@ -1429,7 +1405,7 @@ the function is called, you can use **elapsed_time_dt**.
 
 .. parsed-literal::
 
-    3821176587586
+    3826432350891
 
 
 
@@ -1467,20 +1443,6 @@ you can use **haversine**.
     9.757976024363016
 
 
-
---------------
-
-.. raw:: html
-
-   <!-- Ver com a arina se é válido fazer a doc dessas 2 -->
-
-.. raw:: html
-
-   <!-- ## Trajectories -->
-
-.. raw:: html
-
-   <!-- ## Transformations -->
 
 Math
 ----
@@ -1579,3 +1541,863 @@ To perfomers interpolation and extrapolation, you can use
 .. parsed-literal::
 
     6.799999999999999
+
+
+
+Trajectories
+------------
+
+To read a csv file into a MoveDataFrame
+
+.. code:: ipython3
+
+    move_data = utils.trajectories.read_csv('geolife_sample.csv')
+    type(move_data)
+
+
+
+
+.. parsed-literal::
+
+    pymove.core.pandas.PandasMoveDataFrame
+
+
+
+To invert the keys values of a dictionary
+
+.. code:: ipython3
+
+    utils.trajectories.invert_dict({1: 'a', 2: 'b'})
+
+
+
+
+.. parsed-literal::
+
+    {'a': 1, 'b': 2}
+
+
+
+To flatten a nested dictionary
+
+.. code:: ipython3
+
+    utils.trajectories.flatten_dict({'1': 'a', '2': {'3': 'b', '4': 'c'}})
+
+
+
+
+.. parsed-literal::
+
+    {'1': 'a', '2_3': 'b', '2_4': 'c'}
+
+
+
+To flatten a dataframe with dict as row values
+
+.. code:: ipython3
+
+    df = move_data.head(3)
+    df['dict_column'] = [{'a': 1}, {'b': 2}, {'c': 3}]
+    df
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>id</th>
+          <th>dict_column</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>1</td>
+          <td>{'a': 1}</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>1</td>
+          <td>{'b': 2}</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>1</td>
+          <td>{'c': 3}</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+.. code:: ipython3
+
+    utils.trajectories.flatten_columns(df, columns='dict_column')
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>id</th>
+          <th>dict_column_c</th>
+          <th>dict_column_a</th>
+          <th>dict_column_b</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>1</td>
+          <td>NaN</td>
+          <td>1.0</td>
+          <td>NaN</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>1</td>
+          <td>NaN</td>
+          <td>NaN</td>
+          <td>2.0</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>1</td>
+          <td>3.0</td>
+          <td>NaN</td>
+          <td>NaN</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+To shift a sequence
+
+.. code:: ipython3
+
+    utils.trajectories.shift([1., 2., 3., 4.], 1)
+
+
+
+
+.. parsed-literal::
+
+    array([nan,  1.,  2.,  3.])
+
+
+
+To fill a sequence with values from another
+
+.. code:: ipython3
+
+    l1 = ['a', 'b', 'c', 'd', 'e']
+    utils.trajectories.fill_list_with_new_values(l1, [1, 2, 3])
+    l1
+
+
+
+
+.. parsed-literal::
+
+    [1, 2, 3, 'd', 'e']
+
+
+
+To transform a string representation back into a list
+
+.. code:: ipython3
+
+    utils.trajectories.object_for_array('[1,2,3,4,5]')
+
+
+
+
+.. parsed-literal::
+
+    array([1., 2., 3., 4., 5.], dtype=float32)
+
+
+
+To convert a column with string representation back into a list
+
+.. code:: ipython3
+
+    df['list_column'] = ['[1,2]', '[3,4]', '[5,6]']
+
+.. code:: ipython3
+
+    df
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>id</th>
+          <th>dict_column</th>
+          <th>list_column</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>1</td>
+          <td>{'a': 1}</td>
+          <td>[1,2]</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>1</td>
+          <td>{'b': 2}</td>
+          <td>[3,4]</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>1</td>
+          <td>{'c': 3}</td>
+          <td>[5,6]</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+.. code:: ipython3
+
+    utils.trajectories.column_to_array(df, column='list_column')
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>id</th>
+          <th>dict_column</th>
+          <th>list_column</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>1</td>
+          <td>{'a': 1}</td>
+          <td>[1.0, 2.0]</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>1</td>
+          <td>{'b': 2}</td>
+          <td>[3.0, 4.0]</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>1</td>
+          <td>{'c': 3}</td>
+          <td>[5.0, 6.0]</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+Log
+---
+
+.. code:: ipython3
+
+    mdf = pm.read_csv('geolife_sample.csv')
+
+To cotrol the verbosity of pymove functions, use the logger
+
+To change verbosity use the ``utils.log.set_verbosity`` method, or
+create and environment variable named ``PYMOVE_VERBOSITY``
+
+By default, the berbosity level is set to ``INFO``
+
+.. code:: ipython3
+
+    utils.log.logger
+
+
+
+
+.. parsed-literal::
+
+    <Logger pymove (INFO)>
+
+
+
+``INFO`` shows only useful information, like progress bars
+
+.. code:: ipython3
+
+    mdf.generate_dist_features(inplace=False).head()
+
+
+
+.. parsed-literal::
+
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>id</th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>dist_to_prev</th>
+          <th>dist_to_next</th>
+          <th>dist_prev_to_next</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>1</td>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>NaN</td>
+          <td>13.690153</td>
+          <td>NaN</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>1</td>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>13.690153</td>
+          <td>7.403788</td>
+          <td>20.223428</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>1</td>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>7.403788</td>
+          <td>1.821083</td>
+          <td>5.888579</td>
+        </tr>
+        <tr>
+          <th>3</th>
+          <td>1</td>
+          <td>39.984211</td>
+          <td>116.319389</td>
+          <td>2008-10-23 05:53:16</td>
+          <td>1.821083</td>
+          <td>2.889671</td>
+          <td>1.873356</td>
+        </tr>
+        <tr>
+          <th>4</th>
+          <td>1</td>
+          <td>39.984217</td>
+          <td>116.319422</td>
+          <td>2008-10-23 05:53:21</td>
+          <td>2.889671</td>
+          <td>66.555997</td>
+          <td>68.727260</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+``DEBUG`` shows information from various steps in the functions
+
+.. code:: ipython3
+
+    utils.log.set_verbosity('DEBUG')
+    mdf.generate_dist_features(inplace=False).head()
+
+
+.. parsed-literal::
+
+    ...Sorting by id and datetime to increase performance
+
+    ...Set id as index to a higher performance
+
+
+    Creating or updating distance features in meters...
+
+
+
+
+.. parsed-literal::
+
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
+
+
+.. parsed-literal::
+
+    ...Reset index...
+
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>id</th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>dist_to_prev</th>
+          <th>dist_to_next</th>
+          <th>dist_prev_to_next</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>1</td>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>NaN</td>
+          <td>13.690153</td>
+          <td>NaN</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>1</td>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>13.690153</td>
+          <td>7.403788</td>
+          <td>20.223428</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>1</td>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>7.403788</td>
+          <td>1.821083</td>
+          <td>5.888579</td>
+        </tr>
+        <tr>
+          <th>3</th>
+          <td>1</td>
+          <td>39.984211</td>
+          <td>116.319389</td>
+          <td>2008-10-23 05:53:16</td>
+          <td>1.821083</td>
+          <td>2.889671</td>
+          <td>1.873356</td>
+        </tr>
+        <tr>
+          <th>4</th>
+          <td>1</td>
+          <td>39.984217</td>
+          <td>116.319422</td>
+          <td>2008-10-23 05:53:21</td>
+          <td>2.889671</td>
+          <td>66.555997</td>
+          <td>68.727260</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+``WARN`` hides all output except warnings and errors
+
+.. code:: ipython3
+
+    utils.log.set_verbosity('WARN')
+    mdf.generate_dist_features(inplace=False).head()
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>id</th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>dist_to_prev</th>
+          <th>dist_to_next</th>
+          <th>dist_prev_to_next</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>1</td>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>NaN</td>
+          <td>13.690153</td>
+          <td>NaN</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>1</td>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>13.690153</td>
+          <td>7.403788</td>
+          <td>20.223428</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>1</td>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>7.403788</td>
+          <td>1.821083</td>
+          <td>5.888579</td>
+        </tr>
+        <tr>
+          <th>3</th>
+          <td>1</td>
+          <td>39.984211</td>
+          <td>116.319389</td>
+          <td>2008-10-23 05:53:16</td>
+          <td>1.821083</td>
+          <td>2.889671</td>
+          <td>1.873356</td>
+        </tr>
+        <tr>
+          <th>4</th>
+          <td>1</td>
+          <td>39.984217</td>
+          <td>116.319422</td>
+          <td>2008-10-23 05:53:21</td>
+          <td>2.889671</td>
+          <td>66.555997</td>
+          <td>68.727260</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+Mem
+---
+
+.. code:: ipython3
+
+    utils.log.set_verbosity('INFO')
+
+Calculate size of variable
+
+.. code:: ipython3
+
+    utils.mem.total_size(mdf, verbose=True)
+
+
+.. parsed-literal::
+
+    Size in bytes: 6965040, Type: <class 'pymove.core.pandas.PandasMoveDataFrame'>
+
+
+
+
+.. parsed-literal::
+
+    6965040
+
+
+
+Reduce size of dataframe
+
+.. code:: ipython3
+
+    utils.mem.reduce_mem_usage_automatic(mdf)
+
+
+.. parsed-literal::
+
+    Memory usage of dataframe is 6.64 MB
+    Memory usage after optimization is: 4.15 MB
+    Decreased by 37.5 %
+
+
+Create a dataframe with the variables with largest memory footpring
+
+.. code:: ipython3
+
+    lst = [*range(10000)]
+
+.. code:: ipython3
+
+    utils.mem.top_mem_vars(globals())
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>var</th>
+          <th>mem</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>move_data</td>
+          <td>6.6 MiB</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>mdf</td>
+          <td>4.2 MiB</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>lst</td>
+          <td>88.0 KiB</td>
+        </tr>
+        <tr>
+          <th>3</th>
+          <td>Out</td>
+          <td>2.2 KiB</td>
+        </tr>
+        <tr>
+          <th>4</th>
+          <td>df</td>
+          <td>1.1 KiB</td>
+        </tr>
+        <tr>
+          <th>5</th>
+          <td>In</td>
+          <td>776.0 B</td>
+        </tr>
+        <tr>
+          <th>6</th>
+          <td>l1</td>
+          <td>96.0 B</td>
+        </tr>
+        <tr>
+          <th>7</th>
+          <td>matplotlib</td>
+          <td>72.0 B</td>
+        </tr>
+        <tr>
+          <th>8</th>
+          <td>sys</td>
+          <td>72.0 B</td>
+        </tr>
+        <tr>
+          <th>9</th>
+          <td>os</td>
+          <td>72.0 B</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>

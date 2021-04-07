@@ -219,8 +219,7 @@ If you installed from `pip` or `github`, you may encounter an error related to
 
 ## Examples
 
-You can access examples of how to use PyMove [here](examples)
-
+You can access examples of how to use PyMove [here](https://github.com/InsightLab/PyMove/tree/master/examples)
 ---
 
 ## Papers
