@@ -20,7 +20,7 @@ setup(
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
     url='https://github.com/InsightLab/PyMove',
-    packages=find_packages(exclude=['*.tests']),
+    packages=find_packages(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python :: 3',
