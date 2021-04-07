@@ -1,3 +1,13 @@
+"""
+Matplolib operations.
+
+show_object_id_by_date,
+plot_trajectories,
+plot_traj_by_id,
+plot_all_features
+
+"""
+
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Text, Tuple, Union
 
 import matplotlib.pyplot as plt
@@ -30,7 +40,7 @@ def show_object_id_by_date(
     name: Optional[Text] = 'shot_points_by_date.png',
 ) -> Optional[figure]:
     """
-    Generates four visualizations based on datetime feature:
+    Generates four visualizations based on datetime feature.
 
         - Bar chart trajectories by day periods
         - Bar chart trajectories day of the week
@@ -97,7 +107,7 @@ def show_object_id_by_date(
         move_data.drop(columns=[DATE, HOUR, PERIOD, DAY], inplace=True)
 
     if save_fig:
-        plt.savefig(fname=name, fig=fig)
+        plt.savefig(fname=name)
 
     if return_fig:
         return fig
@@ -137,7 +147,6 @@ def plot_trajectories(
     figure
         The generated picture or None
     """
-
     fig = plt.figure(figsize=figsize)
 
     ids = move_data['id'].unique()
@@ -151,7 +160,7 @@ def plot_trajectories(
         )
 
     if save_fig:
-        plt.savefig(fname=name, fig=fig)
+        plt.savefig(fname=name)
 
     if return_fig:
         return fig
@@ -212,7 +221,6 @@ def plot_traj_by_id(
         If there is no trajectory with the tid passed
 
     """
-
     if label not in move_data:
         raise KeyError('%s feature not in dataframe' % label)
 
@@ -251,7 +259,7 @@ def plot_traj_by_id(
     if save_fig:
         if not name:
             name = 'trajectory_%s.png' % id_
-        plt.savefig(fname=name, fig=fig)
+        plt.savefig(fname=name)
 
     if return_fig:
         return fig
@@ -294,7 +302,6 @@ def plot_all_features(
         If there are no columns with the specified type
 
     """
-
     col_dtype = move_data.select_dtypes(include=[dtype]).columns
     tam = col_dtype.size
     if not tam:
@@ -308,7 +315,7 @@ def plot_all_features(
         ax_count += 1
 
     if save_fig:
-        plt.savefig(fname=name, fig=fig)
+        plt.savefig(fname=name)
 
     if return_fig:
         return fig

@@ -1,3 +1,5 @@
+"""PyMove constants."""
+
 LABEL = 'label'
 LATITUDE = 'lat'
 LONGITUDE = 'lon'

@@ -1,3 +1,11 @@
+"""
+Query operations.
+
+range_query,
+knn_query
+
+"""
+
 from typing import Optional, Text
 
 import numpy as np
@@ -20,10 +28,9 @@ def range_query(
     datetime: Optional[Text] = DATETIME
 ) -> DataFrame:
     """
-    Given a distance, a trajectory, and a DataFrame
-    with several trajectories, it returns all trajectories that
-    have a distance equal to or less than the informed
-    trajectory.
+    Returns all trajectories that have a distance equal to or less than the trajectory.
+
+    Given a distance, a trajectory, and a DataFrame with several trajectories.
 
     Parameters
     ----------
@@ -57,18 +64,17 @@ def range_query(
         ValueError: if distance measure is invalid
 
     """
-
     result = traj.copy()
     result.drop(result.index, inplace=True)
 
     if (distance == MEDP):
         def dist_measure(traj, this, latitude, longitude, datetime):
-            return distances.MEDP(
+            return distances.medp(
                 traj, this, latitude, longitude
             )
     elif (distance == MEDT):
         def dist_measure(traj, this, latitude, longitude, datetime):
-            return distances.MEDT(
+            return distances.medt(
                 traj, this, latitude, longitude, datetime
             )
     else:
@@ -95,9 +101,9 @@ def knn_query(
     datetime: Optional[Text] = DATETIME
 ) -> DataFrame:
     """
-    Given a k, a trajectory and a
-    DataFrame with multiple paths, it returns
-    the k neighboring trajectories closest to the trajectory.
+    Returns the k neighboring trajectories closest to the trajectory.
+
+    Given a k, a trajectory and a DataFrame with multiple paths.
 
     Parameters
     ----------
@@ -132,17 +138,16 @@ def knn_query(
         ValueError: if distance measure is invalid
 
     """
-
     k_list = pd.DataFrame([[np.Inf, 'empty']] * k, columns=['distance', TRAJ_ID])
 
     if (distance == MEDP):
         def dist_measure(traj, this, latitude, longitude, datetime):
-            return distances.MEDP(
+            return distances.medp(
                 traj, this, latitude, longitude
             )
     elif (distance == MEDT):
         def dist_measure(traj, this, latitude, longitude, datetime):
-            return distances.MEDT(
+            return distances.medt(
                 traj, this, latitude, longitude, datetime
             )
     else:

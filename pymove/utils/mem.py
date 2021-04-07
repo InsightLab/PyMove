@@ -1,4 +1,14 @@
-from __future__ import print_function
+"""
+Memory  operations.
+
+reduce_mem_usage_automatic,
+total_size,
+begin_operation,
+end_operation,
+sizeof_fmt,
+top_mem_vars
+
+"""
 
 import os
 import time
@@ -27,7 +37,6 @@ def reduce_mem_usage_automatic(df: DataFrame):
         The input data to which the operation will be performed.
 
     """
-
     start_mem = df.memory_usage().sum() / 1024 ** 2
     print('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
 
@@ -100,8 +109,9 @@ def total_size(
     o: object, handlers: Dict = None, verbose: Optional[bool] = False
 ) -> float:
     """
-    Calculates the approximate memory footprint of an given object and all of
-    its contents. Automatically finds the contents of the following builtin
+    Calculates the approximate memory footprint of an given object.
+
+    Automatically finds the contents of the following builtin
     containers and their subclasses:  tuple, list, deque, dict, set and
     frozenset.
 
@@ -127,7 +137,6 @@ def total_size(
         The memory used by the given object
 
     """
-
     if handlers is None:
         handlers = {}
 
@@ -183,7 +192,6 @@ def begin_operation(name: Text) -> Dict:
         dictionary with the operation stats
 
     """
-
     process = psutil.Process(os.getpid())
     init = process.memory_info()[0]
     start = time.time()
@@ -205,7 +213,6 @@ def end_operation(operation: Dict) -> Dict:
         dictionary with the operation execution stats
 
     """
-
     finish = operation['process'].memory_info()[0]
     last_operation_name = operation['name']
     last_operation_time_duration = time.time() - operation['start']
@@ -235,7 +242,6 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
         A string of the memory usage in a more readable format
 
     """
-
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(mem_usage) < 1024.0:
             return '{:3.1f} {}{}'.format(mem_usage, unit, suffix)
@@ -244,10 +250,10 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
 
 
 def top_mem_vars(
-    variables: Optional[Callable] = locals(), n: Optional[int] = 10
+    variables: Optional[Callable] = None, n: Optional[int] = 10
 ) -> DataFrame:
     """
-    Shows the sizes of the active variables
+    Shows the sizes of the active variables.
 
     Parameters
     ----------
@@ -262,7 +268,8 @@ def top_mem_vars(
         dataframe with variables names and sizes
 
     """
-
+    if variables is None:
+        variables = locals()
     vars_ = ((name, getsizeof(value)) for name, value in variables.items())
     top_vars = DataFrame(
         sorted(vars_, key=lambda x: -x[1])[:n],

@@ -1,3 +1,5 @@
+"""PandasMoveDataFrame class."""
+
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -59,6 +61,8 @@ if TYPE_CHECKING:
 
 
 class PandasMoveDataFrame(DataFrame):
+    """PyMove dataframe extending Pandas DataFrame."""
+
     def __init__(
         self,
         data: Union[DataFrame, List, Dict],
@@ -68,8 +72,9 @@ class PandasMoveDataFrame(DataFrame):
         traj_id: Optional[Text] = TRAJ_ID,
     ):
         """
-        Checks whether past data has 'lat', 'lon', 'datetime' columns,
-        and renames it with the PyMove lib standard. After starts the
+        Checks whether past data has 'lat', 'lon', 'datetime' columns.
+
+        Renames it with the PyMove lib standard. After starts the
         attributes of the class.
 
         - self._mgr : Represents trajectory data.
@@ -97,7 +102,6 @@ class PandasMoveDataFrame(DataFrame):
             If the data types can't be converted
 
         """
-
         if isinstance(data, dict):
             data = DataFrame.from_dict(data)
         elif isinstance(data, DataFrame):
@@ -245,7 +249,6 @@ class PandasMoveDataFrame(DataFrame):
             If trying to rename a required column inplace
 
         """
-
         rename_ = super().rename(
             mapper=mapper, index=index, columns=columns, axis=axis, copy=copy
         )
@@ -347,7 +350,6 @@ class PandasMoveDataFrame(DataFrame):
             Represents the number of users in trajectory data.
 
         """
-
         operation = begin_operation('get_users_numbers')
 
         if UID in self:
@@ -361,7 +363,7 @@ class PandasMoveDataFrame(DataFrame):
     def to_grid(
         self,
         cell_size: float,
-        meters_by_degree: Optional[float] = lat_meters(-3.8162973555)
+        meters_by_degree: Optional[float] = None
     ) -> Grid:
         """
         Converts trajectory data to grid format.
@@ -382,6 +384,8 @@ class PandasMoveDataFrame(DataFrame):
 
         """
         operation = begin_operation('to_grid')
+        if meters_by_degree is None:
+            meters_by_degree = lat_meters(-3.8162973555)
         grid_ = Grid(
             data=self, cell_size=cell_size, meters_by_degree=meters_by_degree
         )
@@ -416,7 +420,6 @@ class PandasMoveDataFrame(DataFrame):
         PandasDiscreteMoveDataFrame
             Represents an PandasMoveDataFrame discretized.
         """
-
         operation = begin_operation('to_discrete_move_df')
 
         if local_label not in self:
@@ -495,7 +498,6 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_tid_based_on_id_datetime')
         columns = set(self.columns)
         try:
@@ -546,7 +548,6 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_date_features')
         columns = set(self.columns)
         try:
@@ -588,7 +589,6 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_hour_features')
         columns = set(self.columns)
 
@@ -631,7 +631,6 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_day_of_the_week_features')
         columns = set(self.columns)
 
@@ -659,6 +658,8 @@ class PandasMoveDataFrame(DataFrame):
         self, create_day_of_week: Optional[bool] = False, inplace: Optional[bool] = True
     ) -> Optional['PandasMoveDataFrame']:
         """
+        Adds information to rows determining if it is a weekend day.
+
         Create or update the feature weekend to the dataframe,
         if this resource indicates that the given day is the
         weekend, otherwise, it is a day of the week.
@@ -678,7 +679,6 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_weekend_features')
         columns = set(self.columns)
         try:
@@ -735,7 +735,6 @@ class PandasMoveDataFrame(DataFrame):
         - datetime4 = 2019-04-28 20:00:56 -> period = Evening
 
         """
-
         operation = begin_operation('generate_time_of_day_features')
         columns = set(self.columns)
 
@@ -799,7 +798,6 @@ class PandasMoveDataFrame(DataFrame):
         https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
 
         """
-
         operation = begin_operation('generate_datetime_in_format_cyclical')
         columns = set(self.columns)
 
@@ -851,7 +849,6 @@ class PandasMoveDataFrame(DataFrame):
             starting index
 
         """
-
         if sort is True:
             print(
                 '...Sorting by %s and %s to increase performance\n'
@@ -919,6 +916,8 @@ class PandasMoveDataFrame(DataFrame):
         inplace: Optional[bool] = True
     ) -> Optional['PandasMoveDataFrame']:
         """
+        Adds distance, time and speed information to the dataframe.
+
         Firstly, create the three distance to an GPS point P (lat, lon). After,
         create two time features to point P: time to previous and time to next.
         Lastly, create two features to speed using time and distance features.
@@ -948,7 +947,6 @@ class PandasMoveDataFrame(DataFrame):
         - speed_to_prev = 4.13 m/srs, speed_prev = 8.94 m/srs.
 
         """
-
         operation = begin_operation('generate_dist_time_speed_features')
         columns = set(self.columns)
         ids, sum_size_id, size_id, idx = self._prepare_generate_data(
@@ -1049,7 +1047,6 @@ class PandasMoveDataFrame(DataFrame):
         - P.previous to P.next = 1 meters
 
         """
-
         operation = begin_operation('generate_dist_features')
         columns = set(self.columns)
         ids, sum_size_id, size_id, idx = self._prepare_generate_data(
@@ -1144,7 +1141,6 @@ class PandasMoveDataFrame(DataFrame):
         - P.previous to P.next = 20 seconds
 
         """
-
         operation = begin_operation('generate_time_features')
         columns = set(self.columns)
         ids, sum_size_id, size_id, idx = self._prepare_generate_data(
@@ -1231,7 +1227,6 @@ class PandasMoveDataFrame(DataFrame):
         - P.previous to P.next = 2 meter/seconds
 
         """
-
         operation = begin_operation('generate_speed_features')
         columns = set(self.columns)
 
@@ -1293,7 +1288,6 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_move_and_stop_by_radius')
         columns = set(self.columns)
 
@@ -1338,7 +1332,6 @@ class PandasMoveDataFrame(DataFrame):
             Represents the time difference.
 
         """
-
         operation = begin_operation('time_interval')
         time_diff = self[DATETIME].max() - self[DATETIME].min()
         self.last_operation = end_operation(operation)
@@ -1347,6 +1340,8 @@ class PandasMoveDataFrame(DataFrame):
 
     def get_bbox(self) -> Tuple[float, float, float, float]:
         """
+        Returns the bounding box of the dataframe.
+
         A bounding box (usually shortened to bbox) is an area defined by two
         longitudes and two latitudes, where:
 
@@ -1368,7 +1363,6 @@ class PandasMoveDataFrame(DataFrame):
         (22.147577, 113.54884299999999, 41.132062, 121.156224)
 
         """
-
         operation = begin_operation('get_bbox')
 
         bbox_ = (
@@ -1384,8 +1378,9 @@ class PandasMoveDataFrame(DataFrame):
 
     def show_trajectories_info(self):
         """
-        Show dataset information from dataframe, this is number of rows,
-        datetime interval, and bounding box.
+        Show dataset information from dataframe.
+
+        Displays the number of rows, datetime interval, and bounding box.
 
         Examples
         --------
@@ -1396,7 +1391,6 @@ class PandasMoveDataFrame(DataFrame):
         Bounding Box:(22.147577, 113.54884299999999, 41.132062, 121.156224)
         =======================================================================
         """
-
         operation = begin_operation('show_trajectories_info')
 
         try:
@@ -1506,7 +1500,6 @@ class PandasMoveDataFrame(DataFrame):
             If trying to change required types inplace
 
         """
-
         if not copy and isinstance(dtype, str):
             raise AttributeError(
                 'Could not change lat, lon, and datetime type.'
@@ -1569,7 +1562,6 @@ class PandasMoveDataFrame(DataFrame):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html
 
         """
-
         _sort_values = super().sort_values(
             by=by, axis=axis, ascending=ascending,
             inplace=False, kind=kind, na_position=na_position
@@ -1590,8 +1582,9 @@ class PandasMoveDataFrame(DataFrame):
         col_fill: Optional[Text] = ''
     ) -> Optional['PandasMoveDataFrame']:
         """
-        Resets the DataFrame's index, and use the default one. One or more
-        levels can be removed, if the DataFrame has a MultiIndex.
+        Resets the DataFrame's index, and use the default one.
+
+        One or more levels can be removed, if the DataFrame has a MultiIndex.
 
         Parameters
         ----------
@@ -1618,7 +1611,6 @@ class PandasMoveDataFrame(DataFrame):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html
 
         """
-
         _reset_index = super().reset_index(
             level=level, drop=drop, inplace=False, col_level=col_level, col_fill=col_fill
         )
@@ -1638,8 +1630,7 @@ class PandasMoveDataFrame(DataFrame):
         verify_integrity: Optional[bool] = False,
     ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
-        Set the DataFrame index (row labels) using one or more existing columns
-        or arrays (of the correct length).
+        Set the DataFrame index (row labels) using one or more existing columns or arrays.
 
         Parameters
         ----------
@@ -1675,7 +1666,6 @@ class PandasMoveDataFrame(DataFrame):
             If trying to change required columns types
 
         """
-
         if inplace and drop:
             if isinstance(keys, str):
                 aux = {keys}
@@ -1711,10 +1701,12 @@ class PandasMoveDataFrame(DataFrame):
         errors: Optional[Text] = 'raise',
     ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
-        Remove rows or columns by specifying label names and corresponding axis,
-        or by specifying directly index or column names. When using a multi-
-        index, labels on different levels can be removed by specifying the
-        level.
+        Removes rows or columns.
+
+        By specifying label names and corresponding axis,
+        or by specifying directly index or column names.
+        When using a multiindex, labels on different levels
+        can be removed by specifying the level.
 
         Parameters
         ----------
@@ -1755,7 +1747,6 @@ class PandasMoveDataFrame(DataFrame):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html
 
         """
-
         if inplace:
             _labels1 = set()
             _labels2 = set()
@@ -1799,8 +1790,7 @@ class PandasMoveDataFrame(DataFrame):
         inplace: Optional[bool] = False
     ) -> Optional['PandasMoveDataFrame']:
         """
-        Uses the pandas's function drop_duplicates, to remove duplicated rows
-        from data.
+        Uses the pandas's function drop_duplicates, to remove duplicated rows from data.
 
         Parameters
         ----------
@@ -1991,7 +1981,6 @@ class PandasMoveDataFrame(DataFrame):
             If trying to drop required columns inplace
 
         """
-
         if inplace:
             if axis == 1 or axis == 'columns':
                 columns = [LATITUDE, LONGITUDE, DATETIME]
@@ -2117,6 +2106,7 @@ class PandasMoveDataFrame(DataFrame):
     ) -> 'PandasMoveDataFrame':
         """
         Append rows of other to the end of caller, returning a new object.
+
         Columns in other that are not in the caller are added as new columns.
 
         Parameters
@@ -2359,7 +2349,6 @@ class PandasMoveDataFrame(DataFrame):
             The converted object.
 
         """
-
         operation = begin_operation('convet_to')
 
         if new_type == TYPE_DASK:

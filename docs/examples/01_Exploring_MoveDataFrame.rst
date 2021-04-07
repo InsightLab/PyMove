@@ -1,5 +1,5 @@
-#01 - Exploring MoveDataFrame
-=============================
+01 - Exploring MoveDataFrame
+============================
 
 To work with Pymove you need to import the data into our data structure:
 **MoveDataFrame**!
@@ -25,7 +25,7 @@ on!**
 --------------
 
 MoveDataFrame
-~~~~~~~~~~~~~
+-------------
 
 A MoveDataFrame must contain the columns: - ``lat``: represents the
 latitude of the point. - ``lon``: represents the longitude of the point.
@@ -38,20 +38,20 @@ same path**.
 --------------
 
 Creating a MoveDataFrame
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 A MoveDataFrame can be created by passing a Pandas DataFrame, a list,
 dict or even reading a file. Look:
 
-.. code:: ipython3
+.. code:: python
 
     import pymove
     from pymove import MoveDataFrame
 
 From a list
-^^^^^^^^^^^
+~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     list_data = [
         [39.984094, 116.319236, '2008-10-23 05:53:05', 1],
@@ -136,9 +136,9 @@ From a list
 
 
 From a dict
-^^^^^^^^^^^
+~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     dict_data = {
         'lat': [39.984198, 39.984224, 39.984094],
@@ -203,9 +203,9 @@ From a dict
 
 
 From a DataFrame Pandas
-^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     import pandas as pd
 
@@ -286,9 +286,9 @@ From a DataFrame Pandas
 
 
 From a file
-^^^^^^^^^^^
+~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     move_df = pymove.read_csv('geolife_sample.csv')
     move_df.head()
@@ -366,7 +366,7 @@ From a file
 
 Cool, huh? The default flag is Pandas. Look that:
 
-.. code:: ipython3
+.. code:: python
 
     type(move_df)
 
@@ -381,7 +381,7 @@ Cool, huh? The default flag is Pandas. Look that:
 
 Let’s try creating one with Dask!
 
-.. code:: ipython3
+.. code:: python
 
     move_df = pymove.read_csv('geolife_sample.csv', type_='dask')
     move_df.head()
@@ -457,7 +457,7 @@ Let’s try creating one with Dask!
 
 
 
-.. code:: ipython3
+.. code:: python
 
     type(move_df)
 
@@ -470,22 +470,20 @@ Let’s try creating one with Dask!
 
 
 
---------------
-
 What’s in MoveDataFrame?
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 The MoveDataFrame stores the following information:
 
-.. code:: ipython3
+.. code:: python
 
     orig_df = pymove.read_csv('geolife_sample.csv')
     move_df = orig_df.copy()
 
 1. The kind of data he was instantiated
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     move_df.get_type()
 
@@ -498,7 +496,7 @@ The MoveDataFrame stores the following information:
 
 
 
-.. code:: ipython3
+.. code:: python
 
     move_df.columns
 
@@ -511,7 +509,7 @@ The MoveDataFrame stores the following information:
 
 
 
-.. code:: ipython3
+.. code:: python
 
     move_df.dtypes
 
@@ -532,22 +530,22 @@ In addition to these attributes, we have some functions that allow us
 to:
 
 1. View trajectory information
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
-    "%s" % (move_df.get_bbox(),)
+    move_df.get_bbox()
 
 
 
 
 .. parsed-literal::
 
-    '(22.147577, 113.548843, 41.132062, 121.156224)'
+    (22.147577, 113.548843, 41.132062, 121.156224)
 
 
 
-.. code:: ipython3
+.. code:: python
 
     move_df.show_trajectories_info()
 
@@ -571,9 +569,9 @@ to:
 
 
 2. View the number of users
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     move_df.get_users_number()
 
@@ -587,12 +585,12 @@ to:
 
 
 3. Transform our data to
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 a. Numpy
 ^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df.to_numpy()
 
@@ -615,7 +613,7 @@ a. Numpy
 b. Dicts
 ^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     dict_data = move_df.to_dict()
     dict_data.keys()
@@ -632,7 +630,7 @@ b. Dicts
 c. DataFrames
 ^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     df = move_df.to_data_frame()
     print(type(move_df))
@@ -760,9 +758,9 @@ c. DataFrames
 
 
 4. And even switch from a Pandas to Dask and back again!
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     new_move = move_df.convert_to('dask')
     print(type(new_move))
@@ -777,23 +775,20 @@ c. DataFrames
 
 
 5. You can also write files with
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     move_df.write_file('move_df_write_file.txt')
 
-or
-^^
-
-.. code:: ipython3
+.. code:: python
 
     move_df.to_csv('move_data.csv')
 
 6. Create a virtual grid
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     move_df.to_grid(8)
 
@@ -822,9 +817,9 @@ or
 
 
 7. View the information of the last MoveDataFrame operation: operation name, operation time and memory use
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     move_df.last_operation
 
@@ -833,16 +828,14 @@ or
 
 .. parsed-literal::
 
-    {'name': 'to_grid',
-     'time in seconds': 0.007997989654541016,
-     'memory': '12.0 KiB'}
+    {'name': 'to_grid', 'time in seconds': 0.008565902709960938, 'memory': '0.0 B'}
 
 
 
 8. Get data bound box
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     move_df.get_bbox()
 
@@ -856,12 +849,12 @@ or
 
 
 9. Create new columns:
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 a. ``tid``: trajectory id based on Id and datetime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df.generate_tid_based_on_id_datetime()
     move_df.head()
@@ -958,7 +951,7 @@ a. ``tid``: trajectory id based on Id and datetime
 b. ``date``: extract date on datetime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df.generate_date_features()
     move_df.head()
@@ -1056,7 +1049,7 @@ b. ``date``: extract date on datetime
 c. ``hour``: extract hour on datetime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df.generate_hour_features()
     move_df.head()
@@ -1162,7 +1155,7 @@ c. ``hour``: extract hour on datetime
 d. ``day``: day of the week from datatime.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df.generate_day_of_the_week_features()
     move_df.head()
@@ -1274,7 +1267,7 @@ d. ``day``: day of the week from datatime.
 e. ``period``: time of day or period from datatime.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df.generate_time_of_day_features()
     move_df.head()
@@ -1395,7 +1388,7 @@ e. ``period``: time of day or period from datatime.
 f. ``dist_to_prev``, ``time_to_prev``, ``speed_to_prev``: create features of distance, time and speed to an GPS point P (lat, lon).
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df = orig_df.copy()
     move_df.generate_dist_time_speed_features()
@@ -1516,7 +1509,7 @@ f. ``dist_to_prev``, ``time_to_prev``, ``speed_to_prev``: create features of di
 g. ``dist_to_prev``, ``dist_to_next``, ``dist_prev_to_next`` : three distance in meters to an GPS point P (lat, lon).
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df = orig_df.copy()
     move_df.generate_dist_features()
@@ -1637,7 +1630,7 @@ g. ``dist_to_prev``, ``dist_to_next``, ``dist_prev_to_next`` : three distance in
 h. ``time_to_prev``, ``time_to_next``, ``time_prev_to_next`` : three time in seconds to an GPS point P (lat, lon).
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df = orig_df.copy()
     move_df.generate_time_features()
@@ -1758,7 +1751,7 @@ h. ``time_to_prev``, ``time_to_next``, ``time_prev_to_next`` : three time in sec
 i. ``speed_to_prev``, ``speed_to_next``, ``speed_prev_to_next`` : three speed in meters by seconds to an GPS point P (lat, lon).
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df = orig_df.copy()
     move_df.generate_speed_features()
@@ -1907,7 +1900,7 @@ i. ``speed_to_prev``, ``speed_to_next``, ``speed_prev_to_next`` : three speed in
 j. ``situation``: column with move and stop points by radius.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code:: ipython3
+.. code:: python
 
     move_df = orig_df.copy()
     move_df.generate_move_and_stop_by_radius()
@@ -2038,9 +2031,9 @@ j. ``situation``: column with move and stop points by radius.
 
 
 9. Get time difference between max and min datetime in trajectory data.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython3
+.. code:: python
 
     move_df.time_interval()
 
@@ -2051,88 +2044,6 @@ j. ``situation``: column with move and stop points by radius.
 
     Timedelta('146 days 23:53:32')
 
-
-
-10. Create views
-^^^^^^^^^^^^^^^^
-
-a. Plot all features data
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: ipython3
-
-    move_df.plot_all_features(return_fig=False)
-
-
-
-.. image:: 01_Exploring_MoveDataFrame_files/01_Exploring_MoveDataFrame_67_0.svg
-
-
-b. Plot all trajs with scatter plot
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: ipython3
-
-    move_df.plot_trajs(return_fig=False)
-
-
-
-.. image:: 01_Exploring_MoveDataFrame_files/01_Exploring_MoveDataFrame_69_0.svg
-
-
-c. And plot traj by TID feature
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: ipython3
-
-    move_df.generate_tid_based_on_id_datetime()
-    move_df.generate_move_and_stop_by_radius()
-
-
-.. parsed-literal::
-
-
-    Creating or updating tid feature...
-
-    ...Sorting by id and datetime to increase performance
-
-
-    ...tid feature was created...
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance features in meters...
-
-
-
-
-.. parsed-literal::
-
-    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-
-    Creating or updating features MOVE and STOPS...
-
-
-    ....There are 14691 stops to this parameters
-
-
-
-.. code:: ipython3
-
-    move_df.plot_traj_id("12008102305", feature="situation", value="stop", return_fig=False)
-
-
-
-.. image:: 01_Exploring_MoveDataFrame_files/01_Exploring_MoveDataFrame_72_0.svg
 
 
 And that’s it! See upcoming notebooks to learn more about what PyMove can do!

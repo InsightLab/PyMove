@@ -1,3 +1,5 @@
+"""PandasDiscreteMoveDataFrame class."""
+
 from typing import Dict, List, Optional, Text, Union
 
 import numpy as np
@@ -31,6 +33,8 @@ from pymove.utils.trajectories import shift
 
 
 class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
+    """PyMove discrete dataframe extending PandasMoveDataFrame."""
+
     def __init__(
         self,
         data: Union[DataFrame, List, Dict],
@@ -41,7 +45,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         local_label: Optional[Text] = LOCAL_LABEL
     ):
         """
-        Creates a dataframe using local_label as a discrete feature for localization
+        Creates a dataframe using local_label as a discrete feature for localization.
 
         Parameters
         ----------
@@ -80,15 +84,13 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
     def discretize_based_grid(self, region_size: Optional[int] = 1000):
         """
-        Discrete space in cells of the same size,
-        assigning a unique id to each cell.
+        Discrete space in cells of the same size, assigning a unique id to each cell.
 
         Parameters
         ----------
         region_size: int, optional
             Size of grid cell, by default 1000
         """
-
         operation = begin_operation('discretize based on grid')
         print('\nDiscretizing dataframe...')
         grid = Grid(self, cell_size=region_size)

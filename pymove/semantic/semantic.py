@@ -1,3 +1,17 @@
+"""
+Semantic operations.
+
+create_or_update_out_of_the_bbox,
+create_or_update_gps_deactivated_signal,
+create_or_update_gps_jump,
+create_or_update_short_trajectory,
+create_or_update_gps_block_signal,
+filter_block_signal_by_repeated_amount_of_points,
+filter_block_signal_by_time,
+filter_longer_time_to_stop_segment_by_id
+
+"""
+
 from typing import TYPE_CHECKING, Optional, Text, Tuple, Union
 
 import numpy as np
@@ -27,8 +41,10 @@ def _end_create_operation(
     move_data: DataFrame, new_label: Text, inplace: bool
 ) -> Optional[DataFrame]:
     """
-    Returns the dataframe after create operation
+    Returns the dataframe after create operation.
 
+    Parameters
+    ----------
     move_data: dataframe
         The input trajectories data.
     new_label: string
@@ -38,12 +54,11 @@ def _end_create_operation(
         the result of the filtering, otherwise a copy will be returned.
 
     Returns
-    _______
+    -------
     DataFrame
         DataFrame with the additional features or None
 
     """
-
     print(move_data[new_label].value_counts())
     if not inplace:
         return move_data
@@ -53,8 +68,10 @@ def _process_simple_filter(
     move_data: DataFrame, new_label: Text, feature: Text, value: float, inplace: bool
 ) -> Optional[DataFrame]:
     """
-    Processes create operation with simple filter
+    Processes create operation with simple filter.
 
+    Parameters
+    ----------
     move_data: dataframe
         The input trajectories data.
     new_label: string
@@ -68,12 +85,11 @@ def _process_simple_filter(
         the result of the filtering, otherwise a copy will be returned.
 
     Returns
-    _______
+    -------
     DataFrame
         DataFrame with the additional features or None
 
     """
-
     move_data[new_label] = False
     filter_ = move_data[feature] >= value
     idx_start = move_data[filter_].index
@@ -97,7 +113,7 @@ def create_or_update_out_of_the_bbox(
     Create or update a boolean feature to detect points out of the bbox.
 
     Parameters
-    __________
+    ----------
     move_data: dataframe
         The input trajectories data.
     bbox : tuple
@@ -112,13 +128,12 @@ def create_or_update_out_of_the_bbox(
         by default True
 
     Returns
-    _______
+    -------
     DataFrame
         Returns dataframe with a boolean feature with detected
         points out of the bbox, or None
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -144,11 +159,13 @@ def create_or_update_gps_deactivated_signal(
     inplace: Optional[bool] = True
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Create or update a feature deactivate_signal if the max time between
-    adjacent points is equal or less than max_time_between_adj_points.
+    Creates a new feature that inform if point invalid.
+
+    If the max time between adjacent points is equal or
+    less than max_time_between_adj_points.
 
     Parameters
-    __________
+    ----------
     move_data: dataframe
         The input trajectories data.
     max_time_between_adj_points: float, optional
@@ -162,13 +179,12 @@ def create_or_update_gps_deactivated_signal(
         by default True
 
     Returns
-    _______
+    -------
     DataFrame
         DataFrame with the additional features or None
         'time_to_prev', 'time_to_next', 'time_prev_to_next', 'deactivate_signal'
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -193,11 +209,13 @@ def create_or_update_gps_jump(
     inplace: Optional[bool] = True
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Create or update Jump if the maximum distance between adjacent
-    points is greater than max_dist_between_adj_points.
+    Creates a new feature that inform if point is a gps jump.
+
+    A jump is defined if the maximum distance between adjacent points
+    is greater than max_dist_between_adj_points.
 
     Parameters
-    __________
+    ----------
     move_data: dataframe
         The input trajectories data.
     max_dist_between_adj_points: float, optional
@@ -210,13 +228,12 @@ def create_or_update_gps_jump(
         by default True
 
     Returns
-    _______
+    -------
     DataFrame
         DataFrame with the additional features or None
         'dist_to_prev', 'dist_to_next', 'dist_prev_to_next', 'jump'
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -245,6 +262,7 @@ def create_or_update_short_trajectory(
     inplace: Optional[bool] = True
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
+    Creates a new feature that inform if point belongs to a short trajectory.
 
     Parameters
     ----------
@@ -276,7 +294,6 @@ def create_or_update_short_trajectory(
        'dist_to_prev', 'time_to_prev', 'speed_to_prev', 'tid_part', 'short_traj'
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -310,10 +327,10 @@ def create_or_update_gps_block_signal(
     inplace: Optional[bool] = True
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Create a new feature that inform points with speed = 0
+    Creates a new feature that inform points with speed = 0.
 
     Parameters
-    __________
+    ----------
     move_data: dataFrame
         The input trajectories data.
     max_time_stop: float, optional
@@ -330,14 +347,13 @@ def create_or_update_gps_block_signal(
         by default True
 
     Returns
-    _______
+    -------
     DataFrame
         DataFrame with the additional features or None
         'dist_to_prev', 'time_to_prev', 'speed_to_prev',
         'tid_dist', 'block_signal'
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -376,7 +392,7 @@ def filter_block_signal_by_repeated_amount_of_points(
     Filters from dataframe points with blocked signal by amount of points.
 
     Parameters
-    __________
+    ----------
     move_data: dataFrame
         The input trajectories data.
     amount_max_of_points_stop: float, optional
@@ -395,14 +411,13 @@ def filter_block_signal_by_repeated_amount_of_points(
         by default True
 
     Returns
-    _______
+    -------
     DataFrame
         Filtered DataFrame with the additional features or None
         'dist_to_prev', 'time_to_prev', 'speed_to_prev',
         'tid_dist', 'block_signal'
 
     """
-
     if not inplace:
         move_data = move_data[:]
 
@@ -437,7 +452,7 @@ def filter_block_signal_by_time(
     Filters from dataframe points with blocked signal by time.
 
     Parameters
-    __________
+    ----------
     move_data: dataFrame
         The input trajectories data.
     max_time_stop: float, optional
@@ -454,14 +469,13 @@ def filter_block_signal_by_time(
         by default True
 
     Returns
-    _______
+    -------
     DataFrame
         Filtered DataFrame with the additional features or None
         'dist_to_prev', 'time_to_prev', 'speed_to_prev',
         'tid_dist', 'block_signal'
 
     """
-
     if not inplace:
         move_data = move_data.copy()
 
@@ -501,7 +515,7 @@ def filter_longer_time_to_stop_segment_by_id(
     Filters from dataframe segment with longest stop time.
 
     Parameters
-    __________
+    ----------
     move_data: dataFrame
         The input trajectories data.
     dist_radius : float, optional
@@ -523,14 +537,13 @@ def filter_longer_time_to_stop_segment_by_id(
         by default True
 
     Returns
-    _______
+    -------
     DataFrame
         Filtered DataFrame with the additional features or None
         'dist_to_prev', 'time_to_prev', 'speed_to_prev',
         'tid_dist', 'block_signal'
 
     """
-
     if not inplace:
         move_data = move_data.copy()
 

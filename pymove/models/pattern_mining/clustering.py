@@ -1,3 +1,12 @@
+"""
+Clustering operations.
+
+elbow_method,
+gap_statistic,
+dbscan_clustering
+
+"""
+
 from typing import Callable, Dict, Optional, Text, Union
 
 import numpy as np
@@ -18,8 +27,9 @@ def elbow_method(
     random_state: Optional[int] = None
 ) -> Dict:
     """
-    Determines the optimal number of clusters in the range set by the user using
-    the elbow method.
+    Determines the optimal number of clusters.
+
+    In the range set by the user using the elbow method.
 
     Parameters
     ----------
@@ -54,7 +64,6 @@ def elbow_method(
         }
 
     """
-
     message = 'Executing Elbow Method to:\n...K of %srs to %srs from k_iteration:%srs\n'
     message = message % (k_initial, max_clusters, k_iteration)
     print(message, flush=True)
@@ -75,8 +84,9 @@ def gap_statistic(
     random_state: Optional[int] = None
 ) -> Dict:
     """
-    Calculates optimal clusters numbers using Gap Statistic from Tibshirani,
-    Walther, Hastie.
+    Calculates optimal clusters numbers using Gap Statistic.
+
+    From Tibshirani, Walther, Hastie.
 
     Parameters
     ----------
@@ -105,7 +115,6 @@ def gap_statistic(
     https://anaconda.org/milesgranger/gap-statistic/notebook
 
     """
-
     message = 'Executing Gap Statistic to:\n...K of %srs to %srs from k_iteration:%srs\n'
     message = message % (k_initial, max_clusters, k_iteration)
     print(message, flush=True)
@@ -144,7 +153,7 @@ def dbscan_clustering(
     inplace: Optional[bool] = False
 ) -> Optional[DataFrame]:
     """
-    Performs density based clustering on the move_dataframe according to cluster_by
+    Performs density based clustering on the move_dataframe according to cluster_by.
 
     Parameters
     ----------

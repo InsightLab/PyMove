@@ -1,3 +1,16 @@
+"""
+Geo operations.
+
+v_color,
+plot_coords,
+plot_bounds,
+plot_line,
+create_geohash_df,
+create_bin_geohash_df,
+decode_geohash_to_latlon,
+
+"""
+
 from typing import Optional, Text, Tuple, Union
 
 import geohash2 as gh
@@ -43,7 +56,7 @@ def v_color(ob: BaseGeometry) -> Text:
     ------
     str
         Geometric object color
-     """
+    """
     return COLORS[ob.is_simple + 33]
 
 
@@ -91,7 +104,7 @@ def plot_line(
     zorder: Optional[float] = 2
 ):
     """
-    Plot a LineString
+    Plot a LineString.
 
     Parameters
     ----------
@@ -119,8 +132,9 @@ def plot_line(
 
 def _encode(lat: float, lon: float, precision: Optional[float] = 15) -> Text:
     """
-    Encodes latitude/longitude to geohash, either to specified
-    precision or to automatically evaluated precision.
+    Encodes latitude/longitude to geohash.
+
+    Either to specified precision or to automatically evaluated precision.
 
     Parameters
     ----------
@@ -141,8 +155,9 @@ def _encode(lat: float, lon: float, precision: Optional[float] = 15) -> Text:
 
 def _decode(geohash: Text) -> Tuple[float, float]:
     """
-    Decode geohash to latitude/longitude (location is approximate
-    centre of geohash cell, to reasonable precision).
+    Decode geohash to latitude/longitude.
+
+    Location is approximate centre of geohash cell, to reasonable precision.
 
     Parameters
     ----------
@@ -221,8 +236,7 @@ def _reset_and_create_arrays_none(
 
 def create_geohash_df(data: DataFrame, precision: Optional[float] = 15):
     """
-    Create geohash from geographic coordinates
-    and integrate with df.
+    Create geohash from geographic coordinates and integrate with df.
 
     Parameters
     ----------
@@ -231,7 +245,6 @@ def create_geohash_df(data: DataFrame, precision: Optional[float] = 15):
     precision : float, optional
         Number of characters in resulting geohash, by default 15
     """
-
     _, _, geohash, _ = _reset_and_create_arrays_none(data)
 
     for idx, row in progress_bar(
@@ -256,7 +269,6 @@ def create_bin_geohash_df(data: DataFrame, precision: Optional[float] = 15):
     precision : float, optional
         Number of characters in resulting geohash, by default 15
     """
-
     _, _, _, bin_geohash = _reset_and_create_arrays_none(data)
 
     for idx, row in progress_bar(
@@ -276,8 +288,7 @@ def decode_geohash_to_latlon(
     reset_index: Optional[bool] = True
 ):
     """
-    Decode feature with hash of trajectories back to
-    geographic coordinates.
+    Decode feature with hash of trajectories back to geographic coordinates.
 
     Parameters
     ----------
@@ -288,7 +299,6 @@ def decode_geohash_to_latlon(
     reset_index : boolean, optional
         Condition to reset the df index, by default True
     """
-
     if label_geohash not in data:
         raise ValueError('feature {} not in df'.format(label_geohash))
 

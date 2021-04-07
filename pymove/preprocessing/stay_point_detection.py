@@ -1,3 +1,12 @@
+"""
+Stop point detection operations.
+
+create_or_update_datetime_in_format_cyclical,
+create_or_update_move_stop_by_dist_time,
+create_or_update_move_and_stop_by_radius
+
+"""
+
 from typing import TYPE_CHECKING, Optional, Text, Union
 
 import numpy as np
@@ -53,7 +62,6 @@ def create_or_update_datetime_in_format_cyclical(
     https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
 
     """
-
     if not inplace:
         move_df = move_data[:]
     else:
@@ -80,8 +88,9 @@ def create_or_update_move_stop_by_dist_time(
     inplace: Optional[bool] = True
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Determines the stops and moves points of the dataframe, if these points
-    already exist, they will be updated.
+    Determines the stops and moves points of the dataframe.
+
+    If these points already exist, they will be updated.
 
     Parameters
     ----------
@@ -108,14 +117,13 @@ def create_or_update_move_stop_by_dist_time(
         by default True
 
     Returns
-    ------
+    -------
     DataFrame
         DataFrame with 2 aditional features: segment_stop and stop.
         segment_stop indicates the trajectory segment to which the point belongs
         stop indicates if the point represents a stop.
 
     """
-
     if not inplace:
         move_df = move_data[:]
     else:
@@ -163,8 +171,9 @@ def create_or_update_move_and_stop_by_radius(
     inplace: Optional[bool] = True,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Finds the stops and moves points of the dataframe, if these points already
-    exist, they will be updated.
+    Finds the stops and moves points of the dataframe.
+
+    If these points already exist, they will be updated.
 
     Parameters
     ----------
@@ -193,7 +202,6 @@ def create_or_update_move_and_stop_by_radius(
         new_label indicates if the point represents a stop or moving point.
 
     """
-
     print('\nCreating or updating features MOVE and STOPS...\n')
 
     if not inplace:

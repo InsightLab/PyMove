@@ -1,3 +1,10 @@
+"""
+Compression operations.
+
+compress_Segment_stop_to_point
+
+"""
+
 from typing import Optional, Text
 
 import numpy as np
@@ -32,6 +39,7 @@ def compress_segment_stop_to_point(
 ) -> DataFrame:
     """
     Compress the trajectories using the stop points in the dataframe.
+
     Compress a segment to point setting lat_mean e lon_mean to each segment.
 
     Parameters
@@ -85,7 +93,6 @@ def compress_segment_stop_to_point(
             the all points into segment
 
     """
-
     if not inplace:
         move_data = move_data[:]
 

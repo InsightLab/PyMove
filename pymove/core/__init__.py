@@ -1,8 +1,11 @@
 """
-Contains the core of PyMove:
-MoveDataFrame, PandasMoveDataFrame, DaskMoveDataFrame and Grid.
+Contains the core of PyMove.
 
-All functions and objects are available in the main ``pymove`` namespace.
+MoveDataFrame,
+PandasMoveDataFrame,
+DaskMoveDataFrame,
+PandasDiscreteMoveDataFrame,
+Grid
 
 """
 
