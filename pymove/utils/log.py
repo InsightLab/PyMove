@@ -1,6 +1,8 @@
 """
 Logging operations.
 
+progress_bar
+set_verbosity
 timer_decorator
 
 """
