@@ -14,15 +14,17 @@ import os
 import time
 from collections import deque
 from itertools import chain
-from sys import getsizeof, stderr
+from sys import getsizeof
 from typing import Callable, Dict, Optional, Text
 
 import numpy as np
 import psutil
 from pandas import DataFrame
 
+from pymove.utils.log import logger
+
 try:
-    from reprlib import repr
+    pass
 except ImportError:
     pass
 
@@ -38,7 +40,7 @@ def reduce_mem_usage_automatic(df: DataFrame):
 
     """
     start_mem = df.memory_usage().sum() / 1024 ** 2
-    print('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
+    logger.info('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
 
     for col in df.columns:
         col_type = df[col].dtype
@@ -99,14 +101,14 @@ def reduce_mem_usage_automatic(df: DataFrame):
                 df[col] = df[col].astype(np.float64)
 
     end_mem = df.memory_usage().sum() / 1024 ** 2
-    print('Memory usage after optimization is: {:.2f} MB'.format(end_mem))
-    print(
+    logger.info('Memory usage after optimization is: {:.2f} MB'.format(end_mem))
+    logger.info(
         'Decreased by {:.1f} %'.format(100 * (start_mem - end_mem) / start_mem)
     )
 
 
 def total_size(
-    o: object, handlers: Dict = None, verbose: Optional[bool] = False
+    o: object, handlers: Dict = None, verbose: Optional[bool] = True
 ) -> float:
     """
     Calculates the approximate memory footprint of an given object.
@@ -165,13 +167,14 @@ def total_size(
         seen.add(id(o))
         s = getsizeof(o, default_size)
 
-        if verbose:
-            print(s, type(o), repr(o), file=stderr)
-
         for typ, handler in all_handlers.items():
             if isinstance(o, typ):
                 s += sum(map(sizeof, handler(o)))
                 break
+
+        if verbose:
+            logger.info('Size in bytes: {}, Type: {}'.format(s, type(o)))
+
         return s
 
     return sizeof(o)
@@ -250,17 +253,19 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
 
 
 def top_mem_vars(
-    variables: Optional[Callable] = None, n: Optional[int] = 10
+    variables: Optional[Callable] = None, n: Optional[int] = 10, hide_private=True
 ) -> DataFrame:
     """
     Shows the sizes of the active variables.
 
     Parameters
     ----------
-    variables: locals() or globals()
-        Whether to shows local or global variables, by default locals()
-    n: int
-        number of variables to print
+    variables: locals() or globals(), optional
+        Whether to shows local or global variables, by default globals()
+    n: int, optional
+        number of variables to show, by default
+    hide_private: bool, optional
+        Whether to hide private variables, by default True
 
     Returns
     -------
@@ -269,11 +274,14 @@ def top_mem_vars(
 
     """
     if variables is None:
-        variables = locals()
+        variables = globals()
     vars_ = ((name, getsizeof(value)) for name, value in variables.items())
+    if hide_private:
+        vars_ = filter(lambda x: not x[0].startswith('_'), vars_)
     top_vars = DataFrame(
         sorted(vars_, key=lambda x: -x[1])[:n],
         columns=['var', 'mem']
     )
     top_vars['mem'] = top_vars['mem'].apply(sizeof_fmt)
+
     return top_vars

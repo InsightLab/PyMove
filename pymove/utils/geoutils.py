@@ -253,9 +253,6 @@ def create_geohash_df(data: DataFrame, precision: Optional[float] = 15):
         geohash[idx] = _encode(row[LATITUDE], row[LONGITUDE], precision)
 
     data[GEOHASH] = geohash
-    print('\n================================================')
-    print('\n========> geohash feature was created. <========')
-    print('\n================================================')
 
 
 def create_bin_geohash_df(data: DataFrame, precision: Optional[float] = 15):
@@ -277,9 +274,6 @@ def create_bin_geohash_df(data: DataFrame, precision: Optional[float] = 15):
         bin_geohash[idx] = _bin_geohash(row[LATITUDE], row[LONGITUDE], precision)
 
     data[BIN_GEOHASH] = bin_geohash
-    print('\n================================================')
-    print('\n=====> bin_geohash features was created. <======')
-    print('\n================================================')
 
 
 def decode_geohash_to_latlon(
@@ -311,6 +305,3 @@ def decode_geohash_to_latlon(
 
     data[LATITUDE_DECODE] = lat
     data[LONGITUDE_DECODE] = lon
-    print('\n================================================')
-    print('\n==> lat and lon decode features was created. <==')
-    print('\n================================================')

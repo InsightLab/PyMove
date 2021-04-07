@@ -46,7 +46,7 @@ from pymove.utils.constants import (
     VIOLATING,
 )
 from pymove.utils.distances import haversine
-from pymove.utils.log import progress_bar
+from pymove.utils.log import logger, progress_bar
 
 
 def union_poi_bank(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
@@ -63,8 +63,8 @@ def union_poi_bank(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
         Label referring to the Point of Interest category, by default TYPE_POI
 
     """
-    print('union bank categories to one category')
-    print('... There are {} -- {}'.format(data[label_poi].nunique(), label_poi))
+    logger.debug('union bank categories to one category')
+    logger.debug('... There are {} -- {}'.format(data[label_poi].nunique(), label_poi))
     banks = [
         'bancos_filiais',
         'bancos_agencias',
@@ -90,7 +90,7 @@ def union_poi_bus_station(data: DataFrame, label_poi: Optional[Text] = TYPE_POI)
         Label referring to the Point of Interest category, by default TYPE_POI
 
     """
-    print('union bus station categories to one category')
+    logger.debug('union bus station categories to one category')
     filter_bus_station = data[label_poi].isin(
         ['transit_station', 'pontos_de_onibus']
     )
@@ -111,7 +111,7 @@ def union_poi_bar_restaurant(data: DataFrame, label_poi: Optional[Text] = TYPE_P
         Label referring to the Point of Interest category, by default TYPE_POI
 
     """
-    print('union restaurant and bar categories to one category')
+    logger.debug('union restaurant and bar categories to one category')
     filter_bar_restaurant = data[label_poi].isin(['restaurant', 'bar'])
     data.at[data[filter_bar_restaurant].index, label_poi] = 'bar-restaurant'
 
@@ -130,7 +130,7 @@ def union_poi_parks(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
         Label referring to the Point of Interest category, by default TYPE_POI
 
     """
-    print('union parks categories to one category')
+    logger.debug('union parks categories to one category')
     filter_parks = data[label_poi].isin(['pracas_e_parques', 'park'])
     data.at[data[filter_parks].index, label_poi] = 'parks'
 
@@ -149,7 +149,7 @@ def union_poi_police(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
         Label referring to the Point of Interest category, by default TYPE_POI
 
     """
-    print('union distritos policies and police categories')
+    logger.debug('union distritos policies and police categories')
     filter_police = data[label_poi] == 'distritos_policiais'
     data.at[data[filter_police].index, label_poi] = 'police'
 
@@ -173,11 +173,11 @@ def join_collective_areas(
         Label referring to the Point of Interest category, by default GEOMETRY
 
     """
-    print('Integration between trajectories and collectives areas')
+    logger.debug('Integration between trajectories and collectives areas')
 
     polygons = gdf_rules_[label_geometry].unique()
     gdf_[VIOLATING] = False
-    for p in progress_bar(polygons):
+    for p in progress_bar(polygons, desc='Joining trajectories and areas'):
         # intersects = gdf_[label_geometry].apply(lambda x: x.intersects(p))
         intersects = gdf_[label_geometry].intersects(p)
         index = gdf_[intersects].index
@@ -216,7 +216,7 @@ def _reset_and_creates_id_and_lat_lon(
 
     """
     if reset_index:
-        print('... Resetting index to operation...')
+        logger.debug('... Resetting index to operation...')
         data.reset_index(drop=True, inplace=True)
         df_pois.reset_index(drop=True, inplace=True)
 
@@ -356,12 +356,12 @@ def join_with_pois(
         by default True
 
     """
-    print('Integration with POIs...')
-
     values = _reset_and_creates_id_and_lat_lon(data, df_pois, True, reset_index)
     current_distances, ids_pois, tag_pois, lat_user, lon_user = values
 
-    for idx, row in progress_bar(data.iterrows(), total=len(data)):
+    for idx, row in progress_bar(
+        data.iterrows(), total=len(data), desc='Integration with POIs'
+    ):
         # create a vector to each lat
         lat_user.fill(row[LATITUDE])
         lon_user.fill(row[LONGITUDE])
@@ -388,7 +388,7 @@ def join_with_pois(
     data[DIST_POI] = current_distances
     data[NAME_POI] = tag_pois
 
-    print('Integration with POI was finalized')
+    logger.debug('Integration with POI was finalized')
 
 
 def join_with_pois_optimizer(
@@ -426,8 +426,6 @@ def join_with_pois_optimizer(
         by default True
 
     """
-    print('Integration with POIs optimized...')
-
     if len(df_pois[label_poi_name].unique()) == len(dist_poi):
         values = _reset_and_creates_id_and_lat_lon(data, df_pois, False, reset_index)
         minimum_distances, ids_pois, tag_pois, lat_poi, lon_poi = values
@@ -437,7 +435,9 @@ def join_with_pois_optimizer(
             inplace=True
         )
 
-        for idx, row in progress_bar(df_pois.iterrows(), total=len(df_pois)):
+        for idx, row in progress_bar(
+            df_pois.iterrows(), total=len(df_pois), desc='Optimized integration with POIs'
+        ):
             # update lat and lon of current index
             lat_poi.fill(row[LATITUDE])
             lon_poi.fill(row[LONGITUDE])
@@ -456,7 +456,7 @@ def join_with_pois_optimizer(
                 tag_pois.fill(row.type_poi)
             else:
                 # compute dist between a POI and ALL
-                print(data[LONGITUDE].values)
+                logger.debug(data[LONGITUDE].values)
                 current_distances = np.float64(
                     haversine(
                         lat_poi,
@@ -478,9 +478,9 @@ def join_with_pois_optimizer(
         data[ID_POI] = ids_pois
         data[DIST_POI] = minimum_distances
         data[NAME_POI] = tag_pois
-        print('Integration with POI was finalized')
+        logger.debug('Integration with POI was finalized')
     else:
-        print('the size of the dist_poi is different from the size of pois')
+        logger.warn('the size of the dist_poi is different from the size of pois')
 
 
 def join_with_pois_by_category(
@@ -508,7 +508,7 @@ def join_with_pois_by_category(
         Label of df_pois referring to the point of interest id, by default TRAJ_ID
 
     """
-    print('Integration with POIs...')
+    logger.debug('Integration with POIs...')
 
     # get a vector with windows time to each point
     data.reset_index(drop=True, inplace=True)
@@ -522,7 +522,7 @@ def join_with_pois_by_category(
 
     unique_categories = df_pois[label_category].unique()
     size_categories = len(unique_categories)
-    print('There are %s categories' % size_categories)
+    logger.debug('There are %s categories' % size_categories)
 
     for i, c in enumerate(unique_categories, start=1):
         # creating lat and lon array to operation
@@ -555,7 +555,7 @@ def join_with_pois_by_category(
 
         data['id_%s' % c] = ids_pois
         data['dist_%s' % c] = current_distances
-    print('Integration with POI was finalized')
+    logger.debug('Integration with POI was finalized')
 
 
 def join_with_poi_datetime(
@@ -592,14 +592,12 @@ def join_with_poi_datetime(
         Label of df_events referring to the type of the event, by default EVENT_TYPE
 
     """
-    print('Integration with Events...')
-
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, label_date, time_window
     )
     window_starts, window_ends, current_distances, event_id, event_type = values
 
-    for idx in progress_bar(data.index):
+    for idx in progress_bar(data.index, total=len(data), desc='Integration with Events'):
         # filter event by datetime
         df_filtered = filters.by_datetime(
             df_events, window_starts[idx], window_ends[idx]
@@ -634,7 +632,7 @@ def join_with_poi_datetime(
     data[label_event_id] = event_id
     data[DIST_EVENT] = current_distances
     data[label_event_type] = event_type
-    print('Integration with event was completed')
+    logger.debug('Integration with event was completed')
 
 
 def join_with_poi_datetime_optimizer(
@@ -671,8 +669,6 @@ def join_with_poi_datetime_optimizer(
         Label of df_events referring to the type of the event, by default EVENT_TYPE
 
     """
-    print('Integration with Events...')
-
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, label_date, time_window
     )
@@ -688,7 +684,9 @@ def join_with_poi_datetime_optimizer(
         inplace=True
     )
 
-    for idx, row in progress_bar(df_events.iterrows(), total=len(df_events)):
+    for idx, row in progress_bar(
+        df_events.iterrows(), total=len(df_events), desc='Integration with Events'
+    ):
         df_filtered = filters.by_datetime(
             data, window_starts[idx], window_ends[idx]
         )
@@ -733,7 +731,7 @@ def join_with_poi_datetime_optimizer(
     data[label_event_id] = event_id
     data[DIST_EVENT] = minimum_distances
     data[label_event_type] = event_type
-    print('Integration with events was completed')
+    logger.debug('Integration with events was completed')
 
 
 def join_with_pois_by_dist_and_datetime(
@@ -772,8 +770,6 @@ def join_with_pois_by_dist_and_datetime(
         maximum radius of pois, by default 1000
 
     """
-    print('Integration with Events...')
-
     if label_date not in df_pois:
         raise KeyError("POI's DataFrame must contain a %s column" % label_date)
 
@@ -783,8 +779,9 @@ def join_with_pois_by_dist_and_datetime(
 
     window_start, window_end, current_distances, event_id, event_type = values
 
-    for idx, row in progress_bar(data.iterrows(), total=data.shape[0]):
-
+    for idx, row in progress_bar(
+        data.iterrows(), total=len(data), desc='Integration with Events'
+    ):
         # set min and max of coordinates by radius
         bbox = filters.get_bbox_by_radius(
             (row[LATITUDE], row[LONGITUDE]), radius
@@ -833,7 +830,7 @@ def join_with_pois_by_dist_and_datetime(
     data[label_event_id] = event_id
     data[DIST_EVENT] = current_distances
     data[label_event_type] = event_type
-    print('Integration with event was completed')
+    logger.debug('Integration with event was completed')
 
 
 def join_with_home_by_id(
@@ -866,18 +863,19 @@ def join_with_home_by_id(
         flag as an option to drop id's that don't have houses, by default FALSE
 
     """
-    print('Integration with Home...')
     ids_without_home = []
 
     if data.index.name is None:
-        print('...setting {} as index'.format(label_id))
+        logger.debug('...setting {} as index'.format(label_id))
         data.set_index(label_id, inplace=True)
 
-    for idx in progress_bar(data.index.unique()):
+    for idx in progress_bar(
+        data.index.unique(), total=len(data.index.unique()), desc='Integration with Home'
+    ):
         filter_home = df_home[label_id] == idx
 
         if df_home[filter_home].shape[0] == 0:
-            print('...id: {} has not HOME'.format(idx))
+            logger.debug('...id: {} has not HOME'.format(idx))
             ids_without_home.append(idx)
         else:
             home = df_home[filter_home].iloc[0]
@@ -907,7 +905,7 @@ def join_with_home_by_id(
                 data.at[idx, label_city] = np.array(home[label_city])
 
     data.reset_index(inplace=True)
-    print('... Resetting index')
+    logger.debug('... Resetting index')
 
     if drop_id_without_home:
         data.drop(data.loc[data[TRAJ_ID].isin(ids_without_home)].index, inplace=True)
@@ -951,7 +949,7 @@ def merge_home_with_poi(
         id and the distance from the home point, by default True
 
     """
-    print('merge home with POI using shortest distance')
+    logger.debug('merge home with POI using shortest distance')
     idx = data[data[label_dist_home] <= data[label_dist_poi]].index
 
     data.loc[idx, label_name_poi] = label_home

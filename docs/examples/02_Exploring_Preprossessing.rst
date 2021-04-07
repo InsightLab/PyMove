@@ -12,15 +12,34 @@ in https://www.microsoft.com/en-us/download/details.aspx?id=52367
 
 .. code:: python
 
-    import pandas as pd
-    import numpy as np
-    from pymove import MoveDataFrame
     from pymove import read_csv
 
 .. code:: python
 
-    df = pd.read_csv('geolife_sample.csv', parse_dates=['datetime'])
-    df.head()
+    mdf = read_csv('geolife_sample.csv')
+
+.. code:: python
+
+    mdf.show_trajectories_info()
+    mdf.head()
+
+
+.. parsed-literal::
+
+
+    ====================== INFORMATION ABOUT DATASET ======================
+
+    Number of Points: 217653
+
+    Number of IDs objects: 2
+
+    Start Date:2008-10-23 05:53:05     End Date:2009-03-19 05:46:37
+
+    Bounding Box:(22.147577, 113.548843, 41.132062, 121.156224)
+
+
+    =======================================================================
+
 
 
 
@@ -93,33 +112,6 @@ in https://www.microsoft.com/en-us/download/details.aspx?id=52367
 
 
 
-.. code:: python
-
-    df_move = MoveDataFrame(df, latitude="lat", longitude="lon", datetime="datetime")
-
-.. code:: python
-
-    df_move.show_trajectories_info()
-
-
-.. parsed-literal::
-
-
-    ====================== INFORMATION ABOUT DATASET ======================
-
-    Number of Points: 217653
-
-    Number of IDs objects: 2
-
-    Start Date:2008-10-23 05:53:05     End Date:2009-03-19 05:46:37
-
-    Bounding Box:(22.147577, 113.548843, 41.132062, 121.156224)
-
-
-    =======================================================================
-
-
-
 Filtering
 ---------
 
@@ -131,11 +123,11 @@ Importing the module:
 .. code:: python
 
     from pymove import filters
-    df_move = read_csv('geolife_sample.csv')
+    df_move = mdf.copy()
 
 A bounding box (usually shortened to bbox) is an area defined by two
 longitudes and two latitudes. The function by_bbox, filters points of
-the trajectories according to a especified bounding box.
+the trajectories according to a chosen bounding box.
 
 .. code:: python
 
@@ -398,7 +390,7 @@ value and column label, set by value and label_name respectively.
 
 
 
-by_id function filters trajectories points according to especified
+by_id function filters trajectories points according to selected
 trajectory id.
 
 .. code:: python
@@ -486,18 +478,6 @@ the tid specified by the tid\_ parameter.
     filters.by_tid(df_move, "12008102305").head()
 
 
-.. parsed-literal::
-
-
-    Creating or updating tid feature...
-
-    ...Sorting by id and datetime to increase performance
-
-
-    ...tid feature was created...
-
-
-
 
 
 .. raw:: html
@@ -582,29 +562,10 @@ outliers function filters trajectories points that are outliers.
     outliers_points.head()
 
 
-.. parsed-literal::
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance features in meters...
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-    ...Filtering jumps
-
 
 
 
@@ -720,30 +681,12 @@ column is considered.
 
 
 
-clean_nan_values function removes missing values from the dataframe.
-
 clean_gps_jumps_by_distance function removes from the dataframe the
 trajectories points that are outliers.
 
 .. code:: python
 
     filters.clean_gps_jumps_by_distance(df_move)
-
-
-.. parsed-literal::
-
-
-    Cleaning gps jumps by distance to jump_coefficient 3.0...
-
-    ...Filtering jumps
-
-    ...Dropping 383 rows of gps points
-
-    ...Rows before: 217653, Rows after:217270, Sum drop:383
-
-    ...Filtering jumps
-
-    383 GPS points were dropped
 
 
 
@@ -913,19 +856,7 @@ smaller than the parameter radius_area.
 
 .. code:: python
 
-    filters.clean_gps_nearby_points_by_distances(df_move, radius_area = 10)
-
-
-.. parsed-literal::
-
-
-    Cleaning gps points from radius of 10 meters
-
-    ...Dropping 137684 rows of gps points
-
-    ...Rows before: 217653, Rows after:79969, Sum drop:137684
-
-    137684 GPS points were dropped
+    filters.clean_gps_nearby_points_by_distances(df_move, radius_area=10)
 
 
 
@@ -1098,35 +1029,10 @@ is smaller than the value set by the parameter speed_radius.
     filters.clean_gps_nearby_points_by_speed(df_move, speed_radius=40.0)
 
 
-.. parsed-literal::
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-
-    Cleaning gps points using 40.0 speed radius
-
-    ...Dropping 217372 rows of gps points
-
-    ...Rows before: 217653, Rows after:281, Sum drop:217372
-
-    217372 GPS points were dropped
 
 
 
@@ -1315,49 +1221,17 @@ is smaller than the value set by the parameter speed_radius.
 
 
 clean_gps_speed_max_radius function recursively removes trajectories
-points with speed higher than the value especifeid by the user. Given
-any point p of the trajectory, the point will be removed if one of the
-following happens: if the travel speed from the point before p to p is
-greater than the max value of speed between adjacent points set by the
-user. Or the travel speed between point p and the next point is greater
-than the value set by the user. When the clening is done, the function
-will update the time and distance features in the dataframe and will
-call itself again. The function will finish processing when it can no
-longer find points disrespecting the limit of speed.
+points with speed higher than the value set by the user.
 
 .. code:: python
 
     filters.clean_gps_speed_max_radius(df_move)
 
 
-.. parsed-literal::
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-
-    Clean gps points with speed max > 50.0 meters by seconds
-    ...Dropping 349 rows of gps points
-
-    ...Rows before: 217653, Rows after:217304, Sum drop:349
-
-    349 GPS points were dropped
 
 
 
@@ -1554,21 +1428,6 @@ parameter min_points_per_trajectory.
     filters.clean_trajectories_with_few_points(df_move)
 
 
-.. parsed-literal::
-
-
-    Cleaning gps points from trajectories of fewer than 2 points
-
-
-    ...There are 4 ids with few points
-
-    ...Tids before drop: 625
-
-    ...Tids after drop: 621
-
-    ...Shape - before drop: (217653, 8) - after drop: (217649, 8)
-
-
 
 
 .. raw:: html
@@ -1741,7 +1600,7 @@ Importing the module:
 .. code:: python
 
     from pymove import segmentation
-    df_move = read_csv('geolife_sample.csv')
+    df_move = mdf.copy()
 
 bbox_split function splits the bounding box in grids of the same size.
 The number of grids is defined by the parameter number_grids.
@@ -1750,15 +1609,6 @@ The number of grids is defined by the parameter number_grids.
 
     bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
     segmentation.bbox_split(bbox, number_grids=4)
-
-
-.. parsed-literal::
-
-    const_lat: 4.74612125
-    const_lon: 1.901845250000001
-    **********************
-    bbox_split took 00.01s
-    **********************
 
 
 
@@ -1825,11 +1675,7 @@ The number of grids is defined by the parameter number_grids.
 
 
 by_dist_time_speed functions segments the trajectories into clusters
-based on distance, time and speed. The distance, time and speed limits
-by the parameters by max_dist_between_adj_points,
-max_time_between_adj_points, max_speed_between_adj_points respectively.
-The column tid_part is added, it indicates the segment to which the
-point belongs to.
+based on distance, time and speed.
 
 .. code:: python
 
@@ -1842,20 +1688,10 @@ point belongs to.
     df_move.head()
 
 
+
 .. parsed-literal::
 
-
-    Split trajectories
-    ...max_dist_between_adj_points: 5000
-    ...max_time_between_adj_points: 800
-    ...max_speed_between_adj_points: 60.0
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
 
@@ -1864,46 +1700,10 @@ point belongs to.
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
-.. parsed-literal::
-
-    ...Reset index...
-
-    ...setting id as index
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ... Reseting index
-
-    ...No trajs with only one point. (217653, 8)
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
-
-.. parsed-literal::
-
-    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-    ******************************
-    by_dist_time_speed took 00.49s
-    ******************************
 
 
 
@@ -2000,10 +1800,8 @@ point belongs to.
 
 
 
-by_speed function segments the trajectories into clusters based on
-speed. The speed limit is defined by the parameter
-max_speed_between_adj_points. The column tid_speed is added, it
-indicates the segment to which the point belongs to.
+by_max_dist function segments the trajectories into clusters based on
+distance.
 
 .. code:: python
 
@@ -2011,45 +1809,16 @@ indicates the segment to which the point belongs to.
     df_move.head()
 
 
-.. parsed-literal::
-
-    Split trajectories by max distance between adjacent points: 4000
-    ...setting id as index
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
-.. parsed-literal::
-
-    ... Reseting index
-
-    ...No trajs with only one point. (217653, 9)
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-    ***********************
-    by_max_dist took 00.28s
-    ***********************
 
 
 
@@ -2152,10 +1921,8 @@ indicates the segment to which the point belongs to.
 
 
 
-by_time function segments the trajectories into clusters based on time.
-The time limit is defined by the parameter max_time_between_adj_points.
-The column tid_time is added, it indicates the segment to which the
-point belongs to.
+by_max_time function segments the trajectories into clusters based on
+time.
 
 .. code:: python
 
@@ -2163,45 +1930,16 @@ point belongs to.
     df_move.head()
 
 
-.. parsed-literal::
-
-    Split trajectories by max_time_between_adj_points: 1000
-    ...setting id as index
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
-.. parsed-literal::
-
-    ... Reseting index
-
-    ...No trajs with only one point. (217653, 10)
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-    ***********************
-    by_max_time took 00.29s
-    ***********************
 
 
 
@@ -2310,51 +2048,25 @@ point belongs to.
 
 
 
+by_max_speed function segments the trajectories into clusters based on
+speed.
+
 .. code:: python
 
     segmentation.by_max_speed(df_move, max_speed_between_adj_points=70.0)
     df_move.head()
 
 
-.. parsed-literal::
-
-    Split trajectories by max_speed_between_adj_points: 70.0
-    ...setting id as index
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
-.. parsed-literal::
-
-    ... Reseting index
-
-    ...No trajs with only one point. (217653, 11)
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-    ************************
-    by_max_speed took 00.36s
-    ************************
 
 
 
@@ -2469,11 +2181,6 @@ point belongs to.
 
 
 
-segment_traj_by_max_dist function segments the trajectories into
-clusters based on distance. The distance limit is defined by the
-parameter max_dist_between_adj_points. The column tid_dist is added, it
-indicates the segment to which the point belongs to.
-
 Stay point detection
 --------------------
 
@@ -2486,7 +2193,7 @@ Importing the module:
 .. code:: python
 
     from pymove import stay_point_detection
-    df_move = read_csv('geolife_sample.csv')
+    df_move = mdf.copy()
 
 stay_point_detection function converts the time data into a cyclical
 format. The columns hour_sin and hour_cos are added to the dataframe.
@@ -2495,13 +2202,6 @@ format. The columns hour_sin and hour_cos are added to the dataframe.
 
     stay_point_detection.create_or_update_datetime_in_format_cyclical(df_move)
     df_move.head()
-
-
-.. parsed-literal::
-
-    Encoding cyclical continuous features - 24-hour time
-    ...hour_sin and  hour_cos features were created...
-
 
 
 
@@ -2587,11 +2287,7 @@ format. The columns hour_sin and hour_cos are added to the dataframe.
 
 
 create_or_update_move_stop_by_dist_time function creates or updates the
-stay points of the trajectories, based on distance and time metrics. The
-column segment_stop is added to the dataframe, it indicates the
-trajectory segment to which the point belongs to. The column stop is
-also added, it indicates is the point represents a stop, a place where
-the object was stationary.
+stay points of the trajectories, based on distance and time metrics.
 
 .. code:: python
 
@@ -2599,16 +2295,10 @@ the object was stationary.
     df_move.head()
 
 
+
 .. parsed-literal::
 
-    Split trajectories by max distance between adjacent points: 40
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
 
@@ -2617,73 +2307,16 @@ the object was stationary.
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
-.. parsed-literal::
-
-    ...Reset index...
-
-    ...setting id as index
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ... Reseting index
-
-    ...No trajs with only one point. (217653, 10)
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
-
-.. parsed-literal::
-
-    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-    ***********************
-    by_max_dist took 00.52s
-    ***********************
-    ...Sorting by segment_stop and datetime to increase performance
-
-    ...Set segment_stop as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
 
 
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=3512)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-    Create or update stop as True or False
-    ...Creating stop features as True or False using 1000 to time in seconds
-    True     157738
-    False     59915
-    Name: stop, dtype: int64
-    ***************************************************
-    create_or_update_move_stop_by_dist_time took 36.68s
-    ***************************************************
 
 
 
@@ -2799,27 +2432,12 @@ the object was stationary.
 
 
 create_or_update_move_and_stop_by_radius function creates or updates the
-stay points of the trajectories, based on distance. The column situation
-is also added, it indicates if the point represents a stop point or a
-moving point.
+stay points of the trajectories, based on distance.
 
 .. code:: python
 
     stay_point_detection.create_or_update_move_and_stop_by_radius(df_move, radius=2)
     df_move.head()
-
-
-.. parsed-literal::
-
-
-    Creating or updating features MOVE and STOPS...
-
-
-    ....There are 58981 stops to this parameters
-
-    ****************************************************
-    create_or_update_move_and_stop_by_radius took 00.14s
-    ****************************************************
 
 
 
@@ -2948,7 +2566,7 @@ Importing the module:
 .. code:: python
 
     from pymove import compression
-    df_move = read_csv('geolife_sample.csv')
+    df_move = mdf.copy()
 
 The function below is used to reduce the size of the trajectory, the
 stop points are used to make the compression.
@@ -2959,16 +2577,10 @@ stop points are used to make the compression.
     len(df_move), len(df_compressed)
 
 
+
 .. parsed-literal::
 
-    Split trajectories by max distance between adjacent points: 30
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
 
@@ -2977,53 +2589,10 @@ stop points are used to make the compression.
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
-.. parsed-literal::
-
-    ...Reset index...
-
-    ...setting id as index
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ... Reseting index
-
-    ...No trajs with only one point. (217653, 8)
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
-
-.. parsed-literal::
-
-    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-    ***********************
-    by_max_dist took 01.20s
-    ***********************
-    ...Sorting by segment_stop and datetime to increase performance
-
-    ...Set segment_stop as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
 
 
 
@@ -3032,36 +2601,10 @@ stop points are used to make the compression.
     VBox(children=(HTML(value=''), IntProgress(value=0, max=4809)))
 
 
-.. parsed-literal::
-
-    ...Reset index...
-
-    Create or update stop as True or False
-    ...Creating stop features as True or False using 900 to time in seconds
-    True     152603
-    False     65050
-    Name: stop, dtype: int64
-    ***************************************************
-    create_or_update_move_stop_by_dist_time took 53.09s
-    ***************************************************
-    ...setting mean to lat and lon...
-    ...get only segments stop...
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=285)))
-
-
-.. parsed-literal::
-
-    ...Dropping 152033 points...
-    ...Shape_before: 217653
-    ...Current shape: 65620
-    **********************************************
-    compress_segment_stop_to_point took 01m:08.30s
-    **********************************************
 
 
 

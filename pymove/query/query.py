@@ -14,7 +14,7 @@ from pandas import DataFrame
 
 from pymove.utils import distances
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, MEDP, MEDT, TRAJ_ID
-from pymove.utils.log import progress_bar
+from pymove.utils.log import logger, progress_bar
 
 
 def range_query(
@@ -170,7 +170,7 @@ def knn_query(
                 n = n + 1
 
     result = traj.copy()
-    print('Gerando DataFrame com as k trajetórias mais próximas')
+    logger.debug('Generating DataFrame with k nearest trajectories.')
     for n in range(k):
         result = result.append(
             move_df.loc[move_df[id_] == k_list.loc[n, 'traj_id']]
