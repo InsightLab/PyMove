@@ -480,7 +480,7 @@ def join_with_pois_optimizer(
         data[NAME_POI] = tag_pois
         logger.debug('Integration with POI was finalized')
     else:
-        logger.warn('the size of the dist_poi is different from the size of pois')
+        logger.warning('the size of the dist_poi is different from the size of pois')
 
 
 def join_with_pois_by_category(

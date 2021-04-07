@@ -173,6 +173,7 @@ def total_size(
                 break
 
         if verbose:
+
             logger.info('Size in bytes: {}, Type: {}'.format(s, type(o)))
 
         return s

@@ -347,7 +347,7 @@ def outliers(
         return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
 
     else:
-        logger.warn('...Distances features were not created')
+        logger.warning('...Distances features were not created')
         return move_data
 
 

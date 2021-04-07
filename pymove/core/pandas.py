@@ -1988,8 +1988,6 @@ class PandasMoveDataFrame(DataFrame):
             Sort columns if the columns of self and other are not aligned
             The default sorting is deprecated and will
             change to not-sorting in a future version of pandas.
-            Explicitly pass sort=True to silence the warning and sort.
-            Explicitly pass sort=False to silence the warning and not sort.
             by default False
 
         Returns
