@@ -36,6 +36,7 @@ from pymove.utils.constants import (
     TIME_TO_PREV,
     TRAJ_ID,
 )
+from pymove.utils.log import logger
 
 if TYPE_CHECKING:
     from pymove.core.dask import DaskMoveDataFrame
@@ -322,7 +323,7 @@ def outliers(
         move_data.generate_dist_features()
 
     if move_data.index.name is not None:
-        print('...Reset index for filtering\n')
+        logger.debug('...Reset index for filtering\n')
         move_data.reset_index(inplace=True)
 
     if (
@@ -342,11 +343,11 @@ def outliers(
         if filter_out:
             filter_ = ~filter_
 
-        print('...Filtering jumps \n')
+        logger.debug('...Filtering jumps \n')
         return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
 
     else:
-        print('...Distances features were not created')
+        logger.warn('...Distances features were not created')
         return move_data
 
 
@@ -507,25 +508,25 @@ def _clean_gps(move_data: DataFrame, f: callable, **kwargs):
 
     """
     if move_data.index.name is not None:
-        print('...Reset index for filtering\n')
+        logger.debug('...Reset index for filtering\n')
         move_data.reset_index(inplace=True)
 
     filter_data_points, rows_to_drop = _filter_data(move_data, f, kwargs)
 
     sum_drop = 0
     while rows_to_drop > 0:
-        print('...Dropping %s rows of gps points\n' % rows_to_drop)
+        logger.debug('...Dropping %s rows of gps points\n' % rows_to_drop)
         shape_before = move_data.shape[0]
         move_data.drop(index=filter_data_points.index, inplace=True)
         sum_drop = sum_drop + rows_to_drop
-        print(
+        logger.debug(
             '...Rows before: %s, Rows after:%s, Sum drop:%s\n'
             % (shape_before, move_data.shape[0], sum_drop)
         )
 
         filter_data_points, rows_to_drop = _filter_data(move_data, f, kwargs)
 
-    print('%s GPS points were dropped' % sum_drop)
+    logger.debug('%s GPS points were dropped' % sum_drop)
 
     return move_data
 
@@ -575,7 +576,7 @@ def clean_gps_jumps_by_distance(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    print(
+    logger.debug(
         '\nCleaning gps jumps by distance to jump_coefficient %s...\n'
         % jump_coefficient
     )
@@ -633,7 +634,7 @@ def clean_gps_nearby_points_by_distances(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    print(
+    logger.debug(
         '\nCleaning gps points from radius of %s meters\n'
         % radius_area
     )
@@ -690,7 +691,7 @@ def clean_gps_nearby_points_by_speed(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    print(
+    logger.debug(
         '\nCleaning gps points using %s speed radius\n'
         % speed_radius
     )
@@ -756,7 +757,7 @@ def clean_gps_speed_max_radius(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    print(
+    logger.debug(
         '\nClean gps points with speed max > %s meters by seconds'
         % speed_max
     )
@@ -813,13 +814,13 @@ def clean_trajectories_with_few_points(
     if label_tid not in move_df:
         raise KeyError('%s not in dataframe' % label_tid)
 
-    print(
+    logger.debug(
         '\nCleaning gps points from trajectories of fewer than %s points\n'
         % min_points_per_trajectory
     )
 
     if move_df.index.name is not None:
-        print('\n...Reset index for filtering\n')
+        logger.debug('\n...Reset index for filtering\n')
         move_df.reset_index(inplace=True)
 
     move_datacount_tid = move_df.groupby(by=label_tid).size()
@@ -829,20 +830,20 @@ def clean_trajectories_with_few_points(
     idx = move_df[move_df[label_tid].isin(tids_with_few_points)].index
 
     if idx.shape[0] > 0:
-        print(
+        logger.debug(
             '\n...There are %s ids with few points'
             % tids_with_few_points.shape[0]
         )
-        print(
+        logger.debug(
             '\n...Tids before drop: %s'
             % move_df[label_tid].unique().shape[0]
         )
         move_df.drop(index=idx, inplace=True)
-        print(
+        logger.debug(
             '\n...Tids after drop: %s'
             % move_df[label_tid].unique().shape[0]
         )
-        print(
+        logger.debug(
             '\n...Shape - before drop: %s - after drop: %s'
             % (shape_before_drop, move_df.shape)
         )
@@ -895,7 +896,7 @@ def clean_trajectories_short_and_few_points(
     else:
         move_df = move_data
 
-    print('\nRemove short trajectories...')
+    logger.debug('\nRemove short trajectories...')
     clean_trajectories_with_few_points(
         move_df, label_id, min_points_per_trajectory, inplace=True
     )
@@ -905,10 +906,10 @@ def clean_trajectories_short_and_few_points(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    print('\n...Dropping unnecessary trajectories...')
+    logger.debug('\n...Dropping unnecessary trajectories...')
 
     if move_df.index.name is not None:
-        print('reseting index')
+        logger.debug('reseting index')
         move_df.reset_index(inplace=True)
 
     move_dataagg_tid = move_df.groupby(by=label_id).agg(
@@ -917,22 +918,22 @@ def clean_trajectories_short_and_few_points(
     filter_ = move_dataagg_tid[DIST_TO_PREV] < min_trajectory_distance
     tid_selection = move_dataagg_tid[filter_].index
 
-    print(
+    logger.debug(
         '\n...short trajectories and trajectories with a minimum distance (%s): %s'
         % (move_dataagg_tid.shape[0], min_trajectory_distance)
     )
-    print('\n...There are %s tid do drop' % tid_selection.shape[0])
+    logger.debug('\n...There are %s tid do drop' % tid_selection.shape[0])
     shape_before_drop = move_df.shape
 
     idx = move_df[move_df[label_id].isin(tid_selection)].index
     if idx.shape[0] > 0:
         tids_before_drop = move_df[label_id].unique().shape[0]
-        print(
+        logger.debug(
             '\n...Tids - before drop: %s - after drop: %s'
             % (tids_before_drop, move_df[label_id].unique().shape[0])
         )
         move_df.drop(index=idx, inplace=True)
-        print(
+        logger.debug(
             '\n...Shape - before drop: %s - after drop: %s'
             % (shape_before_drop, move_df.shape)
         )
@@ -983,7 +984,7 @@ def clean_id_by_time_max(
             label_id=label_id, label_dtype=label_dtype
         )
 
-    print(
+    logger.debug(
         '\nClean gps points with time max by id < %s seconds'
         % time_max
     )
@@ -992,7 +993,7 @@ def clean_id_by_time_max(
         .agg({TIME_TO_PREV: 'sum'})
         .query('%s < %s' % (TIME_TO_PREV, time_max))
     )
-    print(
+    logger.debug(
         '...Ids total: %s\nIds to drop:%s'
         % (
             move_df[label_id].nunique(),
@@ -1004,7 +1005,7 @@ def clean_id_by_time_max(
         filter_ = move_df[label_id].isin(move_dataid_drop[label_id])
         idx = move_df[filter_].index
         move_df.drop(idx, inplace=True)
-        print(
+        logger.debug(
             '...Rows before drop: %s\n Rows after drop: %s'
             % (before_drop, move_df.shape[0])
         )

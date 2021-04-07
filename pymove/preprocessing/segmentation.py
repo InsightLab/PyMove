@@ -26,7 +26,7 @@ from pymove.utils.constants import (
     TIME_TO_PREV,
     TRAJ_ID,
 )
-from pymove.utils.log import progress_bar, timer_decorator
+from pymove.utils.log import logger, progress_bar, timer_decorator
 
 if TYPE_CHECKING:
     from pymove.core.dask import DaskMoveDataFrame
@@ -60,7 +60,7 @@ def bbox_split(bbox: Tuple[int, int, int, int], number_grids: int) -> DataFrame:
 
     const_lat = abs(abs(lat_max) - abs(lat_min)) / number_grids
     const_lon = abs(abs(lon_max) - abs(lon_min)) / number_grids
-    print('const_lat: %s\nconst_lon: %s' % (const_lat, const_lon))
+    logger.debug('const_lat: {}\nconst_lon: {}'.format(const_lat, const_lon))
 
     move_data = pd.DataFrame(
         columns=['lat_min', 'lon_min', 'lat_max', 'lon_max']
@@ -97,19 +97,21 @@ def _drop_single_point(move_data: DataFrame, label_new_tid: Text, label_id: Text
     shape_before_drop = move_data.shape
     idx = move_data[move_data[label_new_tid] == -1].index
     if idx.shape[0] > 0:
-        print('...Drop Trajectory with a unique GPS point\n')
+        logger.debug('...Drop Trajectory with a unique GPS point\n')
         ids_before_drop = move_data[label_id].unique().shape[0]
         move_data.drop(index=idx, inplace=True)
-        print(
-            '...Object - before drop: %s - after drop: %s'
-            % (ids_before_drop, move_data[label_id].unique().shape[0])
+        logger.debug(
+            '...Object - before drop: {} - after drop: {}'.format(
+                ids_before_drop, move_data[label_id].unique().shape[0]
+            )
         )
-        print(
-            '...Shape - before drop: %s - after drop: %s'
-            % (shape_before_drop, move_data.shape)
+        logger.debug(
+            '...Shape - before drop: {} - after drop: {}'.format(
+                shape_before_drop, move_data.shape
+            )
         )
     else:
-        print('...No trajs with only one point.', move_data.shape)
+        logger.debug('...No trajectories with only one point.')
 
 
 def _filter_and_dist_time_speed(
@@ -194,7 +196,7 @@ def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: T
 
     """
     if move_data.index.name is None:
-        print('...setting %s as index' % label_id, flush=True)
+        logger.debug('...setting {} as index'.format(label_id))
         move_data.set_index(label_id, inplace=True)
     curr_tid = 0
     if label_new_tid not in move_data:
@@ -237,7 +239,7 @@ def _update_curr_tid_count(
     """
     curr_tid += 1
     if filter_.shape == ():
-        print('id: %s has no point to split' % idx)
+        logger.debug('id: {} has no point to split'.format(idx))
         move_data.at[idx, label_new_tid] = curr_tid
         count += 1
     else:
@@ -317,10 +319,10 @@ def _filter_by(
 
     if label_id == label_new_tid:
         move_data.reset_index(drop=True, inplace=True)
-        print('... label_tid = label_new_id, then reseting and drop index')
+        logger.debug('... label_tid = label_new_id, then reseting and drop index')
     else:
         move_data.reset_index(inplace=True)
-        print('... Reseting index\n')
+        logger.debug('... Reseting index\n')
 
     if drop_single_points:
         _drop_single_point(move_data, label_new_tid, label_id)
@@ -381,10 +383,16 @@ def by_dist_time_speed(
     if not inplace:
         move_data = move_data[:]
 
-    print('\nSplit trajectories')
-    print('...max_dist_between_adj_points:', max_dist_between_adj_points)
-    print('...max_time_between_adj_points:', max_time_between_adj_points)
-    print('...max_speed_between_adj_points:', max_speed_between_adj_points)
+    logger.debug('\nSplit trajectories')
+    logger.debug('...max_dist_between_adj_points: {}'.format(
+        max_dist_between_adj_points
+    ))
+    logger.debug('...max_time_between_adj_points: {}'.format(
+        max_time_between_adj_points
+    ))
+    logger.debug('...max_speed_between_adj_points: {}'.format(
+        max_speed_between_adj_points
+    ))
 
     if TIME_TO_PREV not in move_data:
         move_data.generate_dist_time_speed_features()
@@ -448,9 +456,10 @@ def by_max_dist(
     if not inplace:
         move_data = move_data[:]
 
-    print(
-        'Split trajectories by max distance between adjacent points:',
-        max_dist_between_adj_points,
+    logger.debug(
+        'Split trajectories by max distance between adjacent points: {}'.format(
+            max_dist_between_adj_points
+        )
     )
 
     if DIST_TO_PREV not in move_data:
@@ -515,9 +524,10 @@ def by_max_time(
     if not inplace:
         move_data = move_data[:]
 
-    print(
-        'Split trajectories by max_time_between_adj_points:',
-        max_time_between_adj_points,
+    logger.debug(
+        'Split trajectories by max_time_between_adj_points: {}'.format(
+            max_time_between_adj_points
+        )
     )
 
     if TIME_TO_PREV not in move_data:
@@ -581,9 +591,10 @@ def by_max_speed(
     if not inplace:
         move_data = move_data[:]
 
-    print(
-        'Split trajectories by max_speed_between_adj_points:',
-        max_speed_between_adj_points,
+    logger.debug(
+        'Split trajectories by max_speed_between_adj_points: {}'.format(
+            max_speed_between_adj_points
+        )
     )
 
     if SPEED_TO_PREV not in move_data:

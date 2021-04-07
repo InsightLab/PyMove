@@ -15,7 +15,7 @@ from sklearn.cluster import DBSCAN, KMeans
 
 from pymove.utils.constants import EARTH_RADIUS, LATITUDE, LONGITUDE, N_CLUSTER
 from pymove.utils.conversions import meters_to_eps
-from pymove.utils.log import progress_bar, timer_decorator
+from pymove.utils.log import logger, progress_bar, timer_decorator
 
 
 @timer_decorator
@@ -64,11 +64,14 @@ def elbow_method(
         }
 
     """
-    message = 'Executing Elbow Method to:\n...K of %srs to %srs from k_iteration:%srs\n'
-    message = message % (k_initial, max_clusters, k_iteration)
-    print(message, flush=True)
+    message = 'Executing Elbow Method for {} to {} clusters at {} steps\n'.format(
+        k_initial, max_clusters, k_iteration
+    )
+    logger.debug(message)
     inertia_dic = {}
-    for k in progress_bar(range(k_initial, max_clusters + 1, k_iteration)):
+    for k in progress_bar(
+        range(k_initial, max_clusters + 1, k_iteration), desc='Running KMeans'
+    ):
         km = KMeans(n_clusters=k, random_state=random_state)
         inertia_dic[k] = km.fit(move_data[[LATITUDE, LONGITUDE]]).inertia_
     return inertia_dic
@@ -115,12 +118,15 @@ def gap_statistic(
     https://anaconda.org/milesgranger/gap-statistic/notebook
 
     """
-    message = 'Executing Gap Statistic to:\n...K of %srs to %srs from k_iteration:%srs\n'
-    message = message % (k_initial, max_clusters, k_iteration)
-    print(message, flush=True)
+    message = 'Executing Gap Statistic for {} to {} clusters at {} steps\n'.format(
+        k_initial, max_clusters, k_iteration
+    )
+    logger.debug(message)
     gaps = {}
     np.random.seed(random_state)
-    for k in progress_bar(range(k_initial, max_clusters + 1, k_iteration)):
+    for k in progress_bar(
+        range(k_initial, max_clusters + 1, k_iteration), desc='Running KMeans'
+    ):
         # Holder for reference dispersion results
         ref_disps = np.zeros(nrefs)
         # For n references, generate random sample and perform kmeans
