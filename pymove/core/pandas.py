@@ -1,3 +1,5 @@
+"""PandasMoveDataFrame class."""
+
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -50,7 +52,7 @@ from pymove.utils.constants import (
 )
 from pymove.utils.conversions import lat_meters
 from pymove.utils.distances import haversine
-from pymove.utils.log import progress_bar
+from pymove.utils.log import logger, progress_bar
 from pymove.utils.mem import begin_operation, end_operation
 from pymove.utils.trajectories import shift
 
@@ -59,6 +61,8 @@ if TYPE_CHECKING:
 
 
 class PandasMoveDataFrame(DataFrame):
+    """PyMove dataframe extending Pandas DataFrame."""
+
     def __init__(
         self,
         data: Union[DataFrame, List, Dict],
@@ -68,8 +72,9 @@ class PandasMoveDataFrame(DataFrame):
         traj_id: Optional[Text] = TRAJ_ID,
     ):
         """
-        Checks whether past data has 'lat', 'lon', 'datetime' columns,
-        and renames it with the PyMove lib standard. After starts the
+        Checks whether past data has 'lat', 'lon', 'datetime' columns.
+
+        Renames it with the PyMove lib standard. After starts the
         attributes of the class.
 
         - self._mgr : Represents trajectory data.
@@ -97,7 +102,6 @@ class PandasMoveDataFrame(DataFrame):
             If the data types can't be converted
 
         """
-
         if isinstance(data, dict):
             data = DataFrame.from_dict(data)
         elif isinstance(data, DataFrame):
@@ -245,7 +249,6 @@ class PandasMoveDataFrame(DataFrame):
             If trying to rename a required column inplace
 
         """
-
         rename_ = super().rename(
             mapper=mapper, index=index, columns=columns, axis=axis, copy=copy
         )
@@ -347,7 +350,6 @@ class PandasMoveDataFrame(DataFrame):
             Represents the number of users in trajectory data.
 
         """
-
         operation = begin_operation('get_users_numbers')
 
         if UID in self:
@@ -361,7 +363,7 @@ class PandasMoveDataFrame(DataFrame):
     def to_grid(
         self,
         cell_size: float,
-        meters_by_degree: Optional[float] = lat_meters(-3.8162973555)
+        meters_by_degree: Optional[float] = None
     ) -> Grid:
         """
         Converts trajectory data to grid format.
@@ -382,6 +384,8 @@ class PandasMoveDataFrame(DataFrame):
 
         """
         operation = begin_operation('to_grid')
+        if meters_by_degree is None:
+            meters_by_degree = lat_meters(-3.8162973555)
         grid_ = Grid(
             data=self, cell_size=cell_size, meters_by_degree=meters_by_degree
         )
@@ -416,7 +420,6 @@ class PandasMoveDataFrame(DataFrame):
         PandasDiscreteMoveDataFrame
             Represents an PandasMoveDataFrame discretized.
         """
-
         operation = begin_operation('to_discrete_move_df')
 
         if local_label not in self:
@@ -495,38 +498,29 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_tid_based_on_id_datetime')
-        columns = set(self.columns)
-        try:
-            print('\nCreating or updating tid feature...\n')
-            if sort is True:
-                print(
-                    '...Sorting by %s and %s to increase performance\n'
-                    % (TRAJ_ID, DATETIME)
-                )
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
 
-                self.sort_values([TRAJ_ID, DATETIME], inplace=True)
+        logger.debug('\nCreating or updating tid feature...\n')
+        if sort is True:
+            logger.debug(
+                '...Sorting by %s and %s to increase performance\n'
+                % (TRAJ_ID, DATETIME)
+            )
 
-            self[TID] = self[TRAJ_ID].astype(str) + self[
-                DATETIME
-            ].dt.strftime(str_format)
-            print('\n...tid feature was created...\n')
+            data.sort_values([TRAJ_ID, DATETIME], inplace=True)
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
+        data[TID] = data[TRAJ_ID].astype(str) + data[
+            DATETIME
+        ].dt.strftime(str_format)
+        logger.debug('\n...tid feature was created...\n')
 
-            mdf = self.copy()
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            return mdf
-        except Exception as e:
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_date_features(
         self, inplace: Optional[bool] = True
@@ -546,29 +540,20 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_date_features')
-        columns = set(self.columns)
-        try:
-            print('Creating date features...')
-            if DATETIME in self:
-                self[DATE] = self[DATETIME].dt.date
-                print('..Date features was created...\n')
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
+        logger.debug('Creating date features...')
+        if DATETIME in self:
+            data[DATE] = data[DATETIME].dt.date
+            logger.debug('..Date features was created...\n')
 
-            mdf = self.copy()
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            return mdf
-        except Exception as e:
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_hour_features(
         self, inplace: Optional[bool] = True
@@ -588,30 +573,20 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_hour_features')
-        columns = set(self.columns)
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
 
-        try:
-            print('\nCreating or updating a feature for hour...\n')
-            if DATETIME in self:
-                self[HOUR] = self[DATETIME].dt.hour
-                print('...Hour feature was created...\n')
+        logger.debug('\nCreating or updating a feature for hour...\n')
+        if DATETIME in self:
+            data[HOUR] = data[DATETIME].dt.hour
+            logger.debug('...Hour feature was created...\n')
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
-
-            mdf = self.copy()
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            return mdf
-        except Exception as e:
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_day_of_the_week_features(
         self, inplace: Optional[bool] = True
@@ -631,34 +606,26 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_day_of_the_week_features')
-        columns = set(self.columns)
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
 
-        try:
-            print('\nCreating or updating day of the week feature...\n')
-            self[DAY] = self[DATETIME].dt.day_name()
-            print('...the day of the week feature was created...\n')
+        logger.debug('\nCreating or updating day of the week feature...\n')
+        data[DAY] = data[DATETIME].dt.day_name()
+        logger.debug('...the day of the week feature was created...\n')
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
-
-            mdf = self.copy()
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            return mdf
-        except Exception as e:
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_weekend_features(
         self, create_day_of_week: Optional[bool] = False, inplace: Optional[bool] = True
     ) -> Optional['PandasMoveDataFrame']:
         """
+        Adds information to rows determining if it is a weekend day.
+
         Create or update the feature weekend to the dataframe,
         if this resource indicates that the given day is the
         weekend, otherwise, it is a day of the week.
@@ -678,37 +645,28 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_weekend_features')
-        columns = set(self.columns)
-        try:
-            self.generate_day_of_the_week_features(inplace=True)
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
 
-            print('Creating or updating a feature for weekend\n')
-            if DAY in self:
-                fds = (self[DAY] == WEEK_DAYS[5]) | (self[DAY] == WEEK_DAYS[6])
-                index_fds = self[fds].index
-                self[WEEK_END] = 0
-                self.at[index_fds, WEEK_END] = 1
-                print('...Weekend was set as 1 or 0...\n')
-                if not create_day_of_week:
-                    print('...dropping colum day\n')
-                    del self[DAY]
+        data.generate_day_of_the_week_features(inplace=True)
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
+        logger.debug('Creating or updating a feature for weekend\n')
+        if DAY in data:
+            fds = (data[DAY] == WEEK_DAYS[5]) | (data[DAY] == WEEK_DAYS[6])
+            index_fds = data[fds].index
+            data[WEEK_END] = 0
+            data.at[index_fds, WEEK_END] = 1
+            logger.debug('...Weekend was set as 1 or 0...\n')
+            if not create_day_of_week:
+                logger.debug('...dropping colum day\n')
+                del data[DAY]
 
-            mdf = self.copy()
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            return mdf
-        except Exception as e:
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_time_of_day_features(
         self, inplace: Optional[bool] = True
@@ -726,6 +684,10 @@ class PandasMoveDataFrame(DataFrame):
         -------
         PandasMoveDataFrame
             Object with new features or None
+                Early morning from 0H to 6H
+                Morning from 6H to 12H
+                Afternoon from 12H to 18H
+                Evening from 18H to 24H
 
         Examples
         --------
@@ -735,44 +697,34 @@ class PandasMoveDataFrame(DataFrame):
         - datetime4 = 2019-04-28 20:00:56 -> period = Evening
 
         """
-
         operation = begin_operation('generate_time_of_day_features')
-        columns = set(self.columns)
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
 
-        try:
-            periods = [
-                '\n' 'Creating or updating period feature',
-                '...Early morning from 0H to 6H',
-                '...Morning from 6H to 12H',
-                '...Afternoon from 12H to 18H',
-                '...Evening from 18H to 24H' '\n',
-            ]
-            print('\n'.join(periods))
+        periods = [
+            '\n' 'Creating or updating period feature',
+            '...Early morning from 0H to 6H',
+            '...Morning from 6H to 12H',
+            '...Afternoon from 12H to 18H',
+            '...Evening from 18H to 24H' '\n',
+        ]
+        logger.debug('\n'.join(periods))
 
-            hours = self[DATETIME].dt.hour
-            conditions = [
-                (hours >= 0) & (hours < 6),
-                (hours >= 6) & (hours < 12),
-                (hours >= 12) & (hours < 18),
-                (hours >= 18) & (hours < 24),
-            ]
-            self[PERIOD] = np.select(conditions, DAY_PERIODS, 'undefined')
-            print('...the period of day feature was created')
+        hours = data[DATETIME].dt.hour
+        conditions = [
+            (hours >= 0) & (hours < 6),
+            (hours >= 6) & (hours < 12),
+            (hours >= 12) & (hours < 18),
+            (hours >= 18) & (hours < 24),
+        ]
+        data[PERIOD] = np.select(conditions, DAY_PERIODS, 'undefined')
+        logger.debug('...the period of day feature was created')
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
-
-            mdf = self.copy()
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            return mdf
-        except Exception as e:
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_datetime_in_format_cyclical(
         self, label_datetime: Optional[Text] = DATETIME, inplace: Optional[bool] = True
@@ -799,32 +751,22 @@ class PandasMoveDataFrame(DataFrame):
         https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
 
         """
-
         operation = begin_operation('generate_datetime_in_format_cyclical')
-        columns = set(self.columns)
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
 
-        try:
-            print('Encoding cyclical continuous features - 24-hour time')
-            if label_datetime in self:
-                hours = self[label_datetime].dt.hour
-                self[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
-                self[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
-                print('...hour_sin and  hour_cos features were created...\n')
+        logger.debug('Encoding cyclical continuous features - 24-hour time')
+        if label_datetime in data:
+            hours = self[label_datetime].dt.hour
+            data[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
+            data[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
+            logger.debug('...hour_sin and  hour_cos features were created...\n')
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
-
-            mdf = self.copy()
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            return mdf
-        except Exception as e:
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     @staticmethod
     def _prepare_generate_data(
@@ -846,70 +788,29 @@ class PandasMoveDataFrame(DataFrame):
         -------
         Tuple[List, int, int, int]
             data_ unique ids.
-            sum size of id.
             size of id.
             starting index
 
         """
-
         if sort is True:
-            print(
+            logger.debug(
                 '...Sorting by %s and %s to increase performance\n'
-                % (label_id, DATETIME),
-                flush=True,
+                % (label_id, DATETIME)
             )
-            data_.sort_values([label_id, DATETIME], inplace=True)
+            data_.sort_values([label_id, DATETIME])
 
         if data_.index.name is None:
-            print(
+            logger.debug(
                 '...Set %s as index to a higher performance\n'
-                % label_id,
-                flush=True,
+                % label_id
             )
             data_.set_index(label_id, inplace=True)
 
         ids = data_.index.unique()
-        sum_size_id = 0
         size_id = 0
         idx = None
 
-        return ids, sum_size_id, size_id, idx
-
-    def _return_generated_data(
-        self, data_: DataFrame, columns: Set, operation: Dict, inplace: bool
-    ) -> Optional['PandasMoveDataFrame']:
-        """
-        Finishes the generate methods.
-
-        Parameters
-        ----------
-        data_ : DataFrame
-            Dataframe with the generated features.
-        columns: set
-            Set with columns before operation
-        operation : dict
-            initial stats of the operation.
-        inplace : bool
-            Represents whether the operation will be performed on
-            the data provided or in a copy.
-
-        Returns
-        -------
-        PandasMoveDataFrame
-            Object with new features or None
-
-        """
-        print('...Reset index...\n')
-
-        data_.reset_index(inplace=True)
-        if inplace:
-            self.last_operation = end_operation(operation)
-            return None
-        data_ = self.copy()
-        drop = set(self.columns) - columns
-        self.drop(columns=[*drop], inplace=True)
-        self.last_operation = end_operation(operation)
-        return data_
+        return ids, size_id, idx
 
     def generate_dist_time_speed_features(
         self,
@@ -919,6 +820,8 @@ class PandasMoveDataFrame(DataFrame):
         inplace: Optional[bool] = True
     ) -> Optional['PandasMoveDataFrame']:
         """
+        Adds distance, time and speed information to the dataframe.
+
         Firstly, create the three distance to an GPS point P (lat, lon). After,
         create two time features to point P: time to previous and time to next.
         Lastly, create two features to speed using time and distance features.
@@ -940,7 +843,6 @@ class PandasMoveDataFrame(DataFrame):
         PandasMoveDataFrame
             Object with new features or None
 
-
         Examples
         --------
         - dist_to_prev =  248.33 meters, dist_to_prev 536.57 meters
@@ -948,71 +850,63 @@ class PandasMoveDataFrame(DataFrame):
         - speed_to_prev = 4.13 m/srs, speed_prev = 8.94 m/srs.
 
         """
-
         operation = begin_operation('generate_dist_time_speed_features')
-        columns = set(self.columns)
-        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
-            self, sort, label_id
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
+        ids, size_id, idx = self._prepare_generate_data(
+            data, sort, label_id
         )
 
-        try:
-            message = '\nCreating or updating distance, time and speed features'
-            message += ' in meters by seconds\n'
-            print(
-                message
-            )
+        message = '\nCreating or updating distance, time and speed features'
+        message += ' in meters by seconds\n'
+        logger.debug(
+            message
+        )
 
-            # create new feature to distance
-            self[DIST_TO_PREV] = label_dtype(-1.0)
+        # create new feature to distance
+        data[DIST_TO_PREV] = label_dtype(-1.0)
 
-            # create new feature to time
-            self[TIME_TO_PREV] = label_dtype(-1.0)
+        # create new feature to time
+        data[TIME_TO_PREV] = label_dtype(-1.0)
 
-            # create new feature to speed
-            self[SPEED_TO_PREV] = label_dtype(-1.0)
+        # create new feature to speed
+        data[SPEED_TO_PREV] = label_dtype(-1.0)
 
-            for idx in progress_bar(
-                ids, desc='Generating distance, time and speed features'
-            ):
-                curr_lat = self.at[idx, LATITUDE]
-                curr_lon = self.at[idx, LONGITUDE]
+        for idx in progress_bar(
+            ids, desc='Generating distance, time and speed features'
+        ):
+            curr_lat = data.at[idx, LATITUDE]
+            curr_lon = data.at[idx, LONGITUDE]
 
-                size_id = curr_lat.size
+            size_id = curr_lat.size
 
-                if size_id <= 1:
-                    self.at[idx, DIST_TO_PREV] = np.nan
-                    self.at[idx, TIME_TO_PREV] = np.nan
-                    self.at[idx, SPEED_TO_PREV] = np.nan
-                else:
-                    prev_lat = shift(curr_lat, 1)
-                    prev_lon = shift(curr_lon, 1)
-                    # compute distance from previous to current point
-                    self.at[idx, DIST_TO_PREV] = haversine(
-                        prev_lat, prev_lon, curr_lat, curr_lon
-                    )
+            if size_id <= 1:
+                data.at[idx, DIST_TO_PREV] = np.nan
+                data.at[idx, TIME_TO_PREV] = np.nan
+                data.at[idx, SPEED_TO_PREV] = np.nan
+            else:
+                prev_lat = shift(curr_lat, 1)
+                prev_lon = shift(curr_lon, 1)
+                # compute distance from previous to current point
+                data.at[idx, DIST_TO_PREV] = haversine(
+                    prev_lat, prev_lon, curr_lat, curr_lon
+                )
 
-                    time_ = self.at[idx, DATETIME].values.astype(label_dtype)
-                    time_prev = (time_ - shift(time_, 1)) * (10 ** -9)
-                    self.at[idx, TIME_TO_PREV] = time_prev
+                time_ = data.at[idx, DATETIME].values.astype(label_dtype)
+                time_prev = (time_ - shift(time_, 1)) * (10 ** -9)
+                data.at[idx, TIME_TO_PREV] = time_prev
 
-                    # set speed features
-                    self.at[idx, SPEED_TO_PREV] = (
-                        self.at[idx, DIST_TO_PREV] / time_prev
-                    )  # unit: m/srs
+                # set speed features
+                data.at[idx, SPEED_TO_PREV] = (
+                    data.at[idx, DIST_TO_PREV] / time_prev
+                )  # unit: m/srs
 
-            return self._return_generated_data(
-                self, columns, operation, inplace
-            )
-
-        except Exception as e:
-            print(
-                'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
-                % (label_id, idx, size_id, sum_size_id)
-            )
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.reset_index(inplace=True)
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_dist_features(
         self,
@@ -1041,7 +935,6 @@ class PandasMoveDataFrame(DataFrame):
         PandasMoveDataFrame
             Object with new features or None
 
-
         Examples
         --------
         - P to P.next = 2 meters
@@ -1049,66 +942,59 @@ class PandasMoveDataFrame(DataFrame):
         - P.previous to P.next = 1 meters
 
         """
-
         operation = begin_operation('generate_dist_features')
-        columns = set(self.columns)
-        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
-            self, sort, label_id
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
+
+        ids, size_id, idx = self._prepare_generate_data(
+            data, sort, label_id
         )
 
-        try:
-            print('\nCreating or updating distance features in meters...\n')
+        logger.debug('\nCreating or updating distance features in meters...\n')
 
-            # create ou update columns
-            self[DIST_TO_PREV] = label_dtype(-1.0)
-            self[DIST_TO_NEXT] = label_dtype(-1.0)
-            self[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
+        # create ou update columns
+        data[DIST_TO_PREV] = label_dtype(-1.0)
+        data[DIST_TO_NEXT] = label_dtype(-1.0)
+        data[DIST_PREV_TO_NEXT] = label_dtype(-1.0)
 
-            for idx in progress_bar(ids, desc='Generating distance features'):
-                curr_lat = self.at[idx, LATITUDE]
-                curr_lon = self.at[idx, LONGITUDE]
+        for idx in progress_bar(ids, desc='Generating distance features'):
+            curr_lat = data.at[idx, LATITUDE]
+            curr_lon = data.at[idx, LONGITUDE]
 
-                size_id = curr_lat.size
+            size_id = curr_lat.size
 
-                if size_id <= 1:
-                    self.at[idx, DIST_TO_PREV] = np.nan
+            if size_id <= 1:
+                data.at[idx, DIST_TO_PREV] = np.nan
 
-                else:
-                    prev_lat = shift(curr_lat, 1)
-                    prev_lon = shift(curr_lon, 1)
-                    # compute distance from previous to current point
-                    self.at[idx, DIST_TO_PREV] = haversine(
-                        prev_lat, prev_lon, curr_lat, curr_lon
-                    )
+            else:
+                prev_lat = shift(curr_lat, 1)
+                prev_lon = shift(curr_lon, 1)
+                # compute distance from previous to current point
+                data.at[idx, DIST_TO_PREV] = haversine(
+                    prev_lat, prev_lon, curr_lat, curr_lon
+                )
 
-                    next_lat = shift(curr_lat, -1)
-                    next_lon = shift(curr_lon, -1)
-                    # compute distance to next point
-                    self.at[idx, DIST_TO_NEXT] = haversine(
-                        curr_lat, curr_lon, next_lat, next_lon
-                    )
+                next_lat = shift(curr_lat, -1)
+                next_lon = shift(curr_lon, -1)
+                # compute distance to next point
+                data.at[idx, DIST_TO_NEXT] = haversine(
+                    curr_lat, curr_lon, next_lat, next_lon
+                )
 
-                    # using pandas shift in a large dataset: 7min 21s
-                    # using numpy shift above: 33.6 srs
+                # using pandas shift in a large dataset: 7min 21s
+                # using numpy shift above: 33.6 srs
 
-                    # use distance from previous to next
-                    self.at[idx, DIST_PREV_TO_NEXT] = haversine(
-                        prev_lat, prev_lon, next_lat, next_lon
-                    )
+                # use distance from previous to next
+                data.at[idx, DIST_PREV_TO_NEXT] = haversine(
+                    prev_lat, prev_lon, next_lat, next_lon
+                )
 
-            return self._return_generated_data(
-                self, columns, operation, inplace
-            )
-
-        except Exception as e:
-            print(
-                'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
-                % (label_id, idx, size_id, sum_size_id)
-            )
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.reset_index(inplace=True)
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_time_features(
         self,
@@ -1144,57 +1030,50 @@ class PandasMoveDataFrame(DataFrame):
         - P.previous to P.next = 20 seconds
 
         """
-
         operation = begin_operation('generate_time_features')
-        columns = set(self.columns)
-        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
-            self, sort, label_id
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
+
+        ids, size_id, idx = self._prepare_generate_data(
+            data, sort, label_id
         )
 
-        try:
-            print(
-                '\nCreating or updating time features seconds\n'
-            )
+        logger.debug(
+            '\nCreating or updating time features seconds\n'
+        )
 
-            # create new feature to time
-            self[TIME_TO_PREV] = label_dtype(-1.0)
-            self[TIME_TO_NEXT] = label_dtype(-1.0)
-            self[TIME_PREV_TO_NEXT] = label_dtype(-1.0)
+        # create new feature to time
+        data[TIME_TO_PREV] = label_dtype(-1.0)
+        data[TIME_TO_NEXT] = label_dtype(-1.0)
+        data[TIME_PREV_TO_NEXT] = label_dtype(-1.0)
 
-            for idx in progress_bar(
-                ids, desc='Generating time features'
-            ):
-                curr_time = self.at[idx, DATETIME].values.astype(label_dtype)
+        for idx in progress_bar(
+            ids, desc='Generating time features'
+        ):
+            curr_time = data.at[idx, DATETIME].values.astype(label_dtype)
 
-                size_id = curr_time.size
+            size_id = curr_time.size
 
-                if size_id <= 1:
-                    self.at[idx, TIME_TO_PREV] = np.nan
-                else:
-                    prev_time = shift(curr_time, 1)
-                    time_prev = (curr_time - prev_time) * (10 ** -9)
-                    self.at[idx, TIME_TO_PREV] = time_prev
+            if size_id <= 1:
+                data.at[idx, TIME_TO_PREV] = np.nan
+            else:
+                prev_time = shift(curr_time, 1)
+                time_prev = (curr_time - prev_time) * (10 ** -9)
+                data.at[idx, TIME_TO_PREV] = time_prev
 
-                    next_time = shift(curr_time, -1)
-                    time_prev = (next_time - curr_time) * (10 ** -9)
-                    self.at[idx, TIME_TO_NEXT] = time_prev
+                next_time = shift(curr_time, -1)
+                time_prev = (next_time - curr_time) * (10 ** -9)
+                data.at[idx, TIME_TO_NEXT] = time_prev
 
-                    time_prev_to_next = (next_time - prev_time) * (10 ** -9)
-                    self.at[idx, TIME_PREV_TO_NEXT] = time_prev_to_next
+                time_prev_to_next = (next_time - prev_time) * (10 ** -9)
+                data.at[idx, TIME_PREV_TO_NEXT] = time_prev_to_next
 
-            return self._return_generated_data(
-                self, columns, operation, inplace
-            )
-
-        except Exception as e:
-            print(
-                'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
-                % (label_id, idx, size_id, sum_size_id)
-            )
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.reset_index(inplace=True)
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_speed_features(
         self,
@@ -1223,7 +1102,6 @@ class PandasMoveDataFrame(DataFrame):
         PandasMoveDataFrame
             Object with new features or None
 
-
         Examples
         --------
         - P to P.next = 1 meter/seconds
@@ -1231,42 +1109,39 @@ class PandasMoveDataFrame(DataFrame):
         - P.previous to P.next = 2 meter/seconds
 
         """
-
         operation = begin_operation('generate_speed_features')
-        columns = set(self.columns)
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
 
-        try:
-            print(
-                '\nCreating or updating speed features meters by seconds\n'
-            )
+        logger.debug(
+            '\nCreating or updating speed features meters by seconds\n'
+        )
 
-            dist_cols = [DIST_TO_PREV, DIST_TO_NEXT, DIST_PREV_TO_NEXT]
-            time_cols = [TIME_TO_PREV, TIME_TO_NEXT, TIME_PREV_TO_NEXT]
+        dist_cols = [DIST_TO_PREV, DIST_TO_NEXT, DIST_PREV_TO_NEXT]
+        time_cols = [TIME_TO_PREV, TIME_TO_NEXT, TIME_PREV_TO_NEXT]
 
-            dists = self.generate_dist_features(
-                label_id, label_dtype, sort, inplace=False
-            )[dist_cols]
-            times = self.generate_time_features(
-                label_id, label_dtype, sort, inplace=False
-            )[time_cols]
+        dists = data.generate_dist_features(
+            label_id, label_dtype, sort, inplace=False
+        )[dist_cols]
+        times = data.generate_time_features(
+            label_id, label_dtype, sort, inplace=False
+        )[time_cols]
 
-            self[SPEED_TO_PREV] = dists[DIST_TO_PREV] / times[TIME_TO_PREV]
-            self[SPEED_TO_NEXT] = dists[DIST_TO_NEXT] / times[TIME_TO_NEXT]
+        data[SPEED_TO_PREV] = dists[DIST_TO_PREV] / times[TIME_TO_PREV]
+        data[SPEED_TO_NEXT] = dists[DIST_TO_NEXT] / times[TIME_TO_NEXT]
 
-            d_prev_next = dists[DIST_TO_PREV] + dists[DIST_TO_NEXT]
-            self[SPEED_PREV_TO_NEXT] = d_prev_next / times[TIME_PREV_TO_NEXT]
-            self._prepare_generate_data(
-                self, sort, label_id
-            )
-            return self._return_generated_data(
-                self, columns, operation, inplace
-            )
+        d_prev_next = dists[DIST_TO_PREV] + dists[DIST_TO_NEXT]
+        data[SPEED_PREV_TO_NEXT] = d_prev_next / times[TIME_PREV_TO_NEXT]
 
-        except Exception as e:
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        self._prepare_generate_data(
+            data, sort, label_id
+        )
+        data.reset_index(inplace=True)
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def generate_move_and_stop_by_radius(
         self,
@@ -1293,40 +1168,30 @@ class PandasMoveDataFrame(DataFrame):
             Object with new features or None
 
         """
-
         operation = begin_operation('generate_move_and_stop_by_radius')
-        columns = set(self.columns)
+        if not inplace:
+            data = self.copy()
+        else:
+            data = self
 
-        try:
-            self.generate_dist_features(inplace=True)
+        data.generate_dist_features(inplace=True)
 
-            print('\nCreating or updating features MOVE and STOPS...\n')
-            conditions = (
-                (self[target_label] > radius),
-                (self[target_label] <= radius),
-            )
-            choices = [MOVE, STOP]
+        logger.debug('\nCreating or updating features MOVE and STOPS...\n')
+        conditions = (
+            (data[target_label] > radius),
+            (data[target_label] <= radius),
+        )
+        choices = [MOVE, STOP]
 
-            self[SITUATION] = np.select(conditions, choices, np.nan)
-            print(
-                '\n....There are %s stops to this parameters\n'
-                % (self[self[SITUATION] == STOP].shape[0])
-            )
+        data[SITUATION] = np.select(conditions, choices, np.nan)
+        logger.debug(
+            '\n....There are %s stops to this parameters\n'
+            % (data[data[SITUATION] == STOP].shape[0])
+        )
 
-            if inplace:
-                self.last_operation = end_operation(operation)
-                return None
-
-            mdf = self.copy()
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            return mdf
-        except Exception as e:
-            drop = set(self.columns) - columns
-            self.drop(columns=[*drop], inplace=True)
-            self.last_operation = end_operation(operation)
-            raise e
+        data.last_operation = end_operation(operation)
+        if not inplace:
+            return data
 
     def time_interval(self) -> Timedelta:
         """
@@ -1338,7 +1203,6 @@ class PandasMoveDataFrame(DataFrame):
             Represents the time difference.
 
         """
-
         operation = begin_operation('time_interval')
         time_diff = self[DATETIME].max() - self[DATETIME].min()
         self.last_operation = end_operation(operation)
@@ -1347,6 +1211,8 @@ class PandasMoveDataFrame(DataFrame):
 
     def get_bbox(self) -> Tuple[float, float, float, float]:
         """
+        Returns the bounding box of the dataframe.
+
         A bounding box (usually shortened to bbox) is an area defined by two
         longitudes and two latitudes, where:
 
@@ -1368,7 +1234,6 @@ class PandasMoveDataFrame(DataFrame):
         (22.147577, 113.54884299999999, 41.132062, 121.156224)
 
         """
-
         operation = begin_operation('get_bbox')
 
         bbox_ = (
@@ -1384,8 +1249,9 @@ class PandasMoveDataFrame(DataFrame):
 
     def show_trajectories_info(self):
         """
-        Show dataset information from dataframe, this is number of rows,
-        datetime interval, and bounding box.
+        Show dataset information from dataframe.
+
+        Displays the number of rows, datetime interval, and bounding box.
 
         Examples
         --------
@@ -1396,73 +1262,68 @@ class PandasMoveDataFrame(DataFrame):
         Bounding Box:(22.147577, 113.54884299999999, 41.132062, 121.156224)
         =======================================================================
         """
-
         operation = begin_operation('show_trajectories_info')
 
-        try:
-            message = ('=' * 22) + ' INFORMATION ABOUT DATASET ' + ('=' * 22)
+        message = ('=' * 22) + ' INFORMATION ABOUT DATASET ' + ('=' * 22)
+        print(
+            '\n%s\n' % message
+        )
+        print('Number of Points: %s\n' % self.shape[0])
+
+        if TRAJ_ID in self:
             print(
-                '\n%s\n' % message
-            )
-            print('Number of Points: %s\n' % self.shape[0])
-
-            if TRAJ_ID in self:
-                print(
-                    'Number of IDs objects: %s\n'
-                    % self[TRAJ_ID].nunique()
-                )
-
-            if TID in self:
-                print(
-                    'Number of TIDs trajectory: %s\n'
-                    % self[TID].nunique()
-                )
-
-            if DATETIME in self:
-                dt_max = self[DATETIME].max()
-                dt_min = self[DATETIME].min()
-                print(
-                    'Start Date:%s     End Date:%s\n'
-                    % (dt_min, dt_max)
-                )
-
-            if LATITUDE and LONGITUDE in self:
-                print(
-                    'Bounding Box:%s\n' % (self.get_bbox(),)
-                )  # bbox return =  Lat_min , Long_min, Lat_max, Long_max
-
-            if TIME_TO_PREV in self:
-                t_max = round(self[TIME_TO_PREV].max(), 3)
-                t_min = round(self[TIME_TO_PREV].min(), 3)
-                print(
-                    'Gap time MAX:%s     Gap time MIN:%s\n'
-                    % (t_max, t_min)
-                )
-
-            if SPEED_TO_PREV in self:
-                s_max = round(self[SPEED_TO_PREV].max(), 3)
-                s_min = round(self[SPEED_TO_PREV].min(), 3)
-                print(
-                    'Speed MAX:%s    Speed MIN:%s\n'
-                    % (s_max, s_min)
-                )
-
-            if DIST_TO_PREV in self:
-                d_max = round(self[DIST_TO_PREV].max(), 3)
-                d_min = round(self[DIST_TO_PREV].min(), 3)
-                print(
-                    'Distance MAX:%s    Distance MIN:%s\n'
-                    % (d_max, d_min)
-                )
-
-            print(
-                '\n%s\n' % ('=' * len(message))
+                'Number of IDs objects: %s\n'
+                % self[TRAJ_ID].nunique()
             )
 
-            self.last_operation = end_operation(operation)
-        except Exception as e:
-            self.last_operation = end_operation(operation)
-            raise e
+        if TID in self:
+            print(
+                'Number of TIDs trajectory: %s\n'
+                % self[TID].nunique()
+            )
+
+        if DATETIME in self:
+            dt_max = self[DATETIME].max()
+            dt_min = self[DATETIME].min()
+            print(
+                'Start Date:%s     End Date:%s\n'
+                % (dt_min, dt_max)
+            )
+
+        if LATITUDE and LONGITUDE in self:
+            print(
+                'Bounding Box:%s\n' % (self.get_bbox(),)
+            )  # bbox return =  Lat_min , Long_min, Lat_max, Long_max
+
+        if TIME_TO_PREV in self:
+            t_max = round(self[TIME_TO_PREV].max(), 3)
+            t_min = round(self[TIME_TO_PREV].min(), 3)
+            print(
+                'Gap time MAX:%s     Gap time MIN:%s\n'
+                % (t_max, t_min)
+            )
+
+        if SPEED_TO_PREV in self:
+            s_max = round(self[SPEED_TO_PREV].max(), 3)
+            s_min = round(self[SPEED_TO_PREV].min(), 3)
+            print(
+                'Speed MAX:%s    Speed MIN:%s\n'
+                % (s_max, s_min)
+            )
+
+        if DIST_TO_PREV in self:
+            d_max = round(self[DIST_TO_PREV].max(), 3)
+            d_min = round(self[DIST_TO_PREV].min(), 3)
+            print(
+                'Distance MAX:%s    Distance MIN:%s\n'
+                % (d_max, d_min)
+            )
+
+        print(
+            '\n%s\n' % ('=' * len(message))
+        )
+
+        self.last_operation = end_operation(operation)
 
     def astype(
         self,
@@ -1506,7 +1367,6 @@ class PandasMoveDataFrame(DataFrame):
             If trying to change required types inplace
 
         """
-
         if not copy and isinstance(dtype, str):
             raise AttributeError(
                 'Could not change lat, lon, and datetime type.'
@@ -1569,7 +1429,6 @@ class PandasMoveDataFrame(DataFrame):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sort_values.html
 
         """
-
         _sort_values = super().sort_values(
             by=by, axis=axis, ascending=ascending,
             inplace=False, kind=kind, na_position=na_position
@@ -1590,8 +1449,9 @@ class PandasMoveDataFrame(DataFrame):
         col_fill: Optional[Text] = ''
     ) -> Optional['PandasMoveDataFrame']:
         """
-        Resets the DataFrame's index, and use the default one. One or more
-        levels can be removed, if the DataFrame has a MultiIndex.
+        Resets the DataFrame's index, and use the default one.
+
+        One or more levels can be removed, if the DataFrame has a MultiIndex.
 
         Parameters
         ----------
@@ -1618,7 +1478,6 @@ class PandasMoveDataFrame(DataFrame):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html
 
         """
-
         _reset_index = super().reset_index(
             level=level, drop=drop, inplace=False, col_level=col_level, col_fill=col_fill
         )
@@ -1638,8 +1497,7 @@ class PandasMoveDataFrame(DataFrame):
         verify_integrity: Optional[bool] = False,
     ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
-        Set the DataFrame index (row labels) using one or more existing columns
-        or arrays (of the correct length).
+        Set the DataFrame index (row labels) using one or more existing columns or arrays.
 
         Parameters
         ----------
@@ -1675,7 +1533,6 @@ class PandasMoveDataFrame(DataFrame):
             If trying to change required columns types
 
         """
-
         if inplace and drop:
             if isinstance(keys, str):
                 aux = {keys}
@@ -1711,10 +1568,12 @@ class PandasMoveDataFrame(DataFrame):
         errors: Optional[Text] = 'raise',
     ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
         """
-        Remove rows or columns by specifying label names and corresponding axis,
-        or by specifying directly index or column names. When using a multi-
-        index, labels on different levels can be removed by specifying the
-        level.
+        Removes rows or columns.
+
+        By specifying label names and corresponding axis,
+        or by specifying directly index or column names.
+        When using a multiindex, labels on different levels
+        can be removed by specifying the level.
 
         Parameters
         ----------
@@ -1755,7 +1614,6 @@ class PandasMoveDataFrame(DataFrame):
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html
 
         """
-
         if inplace:
             _labels1 = set()
             _labels2 = set()
@@ -1799,8 +1657,7 @@ class PandasMoveDataFrame(DataFrame):
         inplace: Optional[bool] = False
     ) -> Optional['PandasMoveDataFrame']:
         """
-        Uses the pandas's function drop_duplicates, to remove duplicated rows
-        from data.
+        Uses the pandas's function drop_duplicates, to remove duplicated rows from data.
 
         Parameters
         ----------
@@ -1991,7 +1848,6 @@ class PandasMoveDataFrame(DataFrame):
             If trying to drop required columns inplace
 
         """
-
         if inplace:
             if axis == 1 or axis == 'columns':
                 columns = [LATITUDE, LONGITUDE, DATETIME]
@@ -2117,6 +1973,7 @@ class PandasMoveDataFrame(DataFrame):
     ) -> 'PandasMoveDataFrame':
         """
         Append rows of other to the end of caller, returning a new object.
+
         Columns in other that are not in the caller are added as new columns.
 
         Parameters
@@ -2131,8 +1988,6 @@ class PandasMoveDataFrame(DataFrame):
             Sort columns if the columns of self and other are not aligned
             The default sorting is deprecated and will
             change to not-sorting in a future version of pandas.
-            Explicitly pass sort=True to silence the warning and sort.
-            Explicitly pass sort=False to silence the warning and not sort.
             by default False
 
         Returns
@@ -2359,7 +2214,6 @@ class PandasMoveDataFrame(DataFrame):
             The converted object.
 
         """
-
         operation = begin_operation('convet_to')
 
         if new_type == TYPE_DASK:

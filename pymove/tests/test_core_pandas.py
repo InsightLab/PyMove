@@ -98,7 +98,7 @@ def test_move_data_frame_from_list():
     try:
         MoveDataFrame.validate_move_data_frame(move_df)
     except Exception:
-        assert False
+        raise AssertionError
     assert isinstance(move_df, PandasMoveDataFrame)
 
 
@@ -116,7 +116,7 @@ def test_move_data_frame_from_file(tmpdir):
     try:
         MoveDataFrame.validate_move_data_frame(move_df)
     except Exception:
-        assert False
+        raise AssertionError
     assert isinstance(move_df, PandasMoveDataFrame)
 
     file_different_columns = d.join('test_read_different.csv')
@@ -136,7 +136,7 @@ def test_move_data_frame_from_file(tmpdir):
     try:
         MoveDataFrame.validate_move_data_frame(move_df)
     except Exception:
-        assert False
+        raise AssertionError
     assert isinstance(move_df, PandasMoveDataFrame)
 
     file_missing_columns = d.join('test_read_missing.csv')
@@ -152,7 +152,7 @@ def test_move_data_frame_from_file(tmpdir):
     try:
         MoveDataFrame.validate_move_data_frame(move_df)
     except Exception:
-        assert False
+        raise AssertionError
     assert isinstance(move_df, PandasMoveDataFrame)
 
 
@@ -177,7 +177,7 @@ def test_move_data_frame_from_dict():
     try:
         MoveDataFrame.validate_move_data_frame(move_df)
     except Exception:
-        assert False
+        raise AssertionError
     assert isinstance(move_df, PandasMoveDataFrame)
 
 
@@ -190,7 +190,7 @@ def test_move_data_frame_from_data_frame():
     try:
         MoveDataFrame.validate_move_data_frame(move_df)
     except Exception:
-        assert False
+        raise AssertionError
     assert isinstance(move_df, PandasMoveDataFrame)
 
 
@@ -1285,7 +1285,7 @@ def test_set_index():
 
     try:
         move_df.set_index('datetime', inplace=True)
-        assert False
+        raise AssertionError
     except AttributeError:
         assert True
 
@@ -1459,7 +1459,7 @@ def test_dropna():
 
     try:
         move_df.dropna(axis=1, inplace=True)
-        assert False
+        raise AssertionError
     except AttributeError:
         assert True
 

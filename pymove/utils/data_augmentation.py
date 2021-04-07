@@ -1,3 +1,17 @@
+"""
+Data augmentation operations.
+
+append_row,
+generate_trajectories_df,
+generate_start_feature,
+generate_destiny_feature,
+split_crossover,
+augmentation_trajectories_df,
+insert_points_in_df,
+instance_crossover_augmentation
+
+"""
+
 from typing import TYPE_CHECKING, Dict, List, Optional, Text, Tuple, Union
 
 import numpy as np
@@ -17,8 +31,7 @@ def append_row(
     data: DataFrame, row: Optional[Series] = None, columns: Optional[Dict] = None
 ):
     """
-    Insert a new line in the dataframe with
-    the information passed by parameter.
+    Insert a new line in the dataframe with the information passed by parameter.
 
     Parameters
     ----------
@@ -44,8 +57,7 @@ def generate_trajectories_df(
     data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame']
 ) -> DataFrame:
     """
-    Generates a dataframe with the sequence of
-    location points of a trajectory.
+    Generates a dataframe with the sequence of location points of a trajectory.
 
     Parameters
     ----------
@@ -94,8 +106,7 @@ def generate_start_feature(
     data: DataFrame, label_trajectory: Optional[Text] = TRAJECTORY
 ):
     """
-    Removes the last point from the trajectory and
-    adds it in a new column called 'destiny'.
+    Removes the last point from the trajectory and adds it in a new column 'destiny'.
 
     Parameters
     ----------
@@ -115,8 +126,7 @@ def generate_destiny_feature(
     data: DataFrame, label_trajectory: Optional[Text] = TRAJECTORY
 ):
     """
-    Removes the first point from the trajectory and
-    adds it in a new column called 'start'.
+    Removes the first point from the trajectory and adds it in a new column 'start'.
 
     Parameters
     ----------
@@ -136,8 +146,7 @@ def split_crossover(
     sequence_a: List, sequence_b: List, frac: Optional[float] = 0.5
 ) -> Tuple[List, List]:
     """
-    Divide two arrays in the indicated ratio
-    and exchange their halves.
+    Divides two arrays in the indicated ratio and exchange their halves.
 
     Parameters
     ----------
@@ -235,9 +244,9 @@ def augmentation_trajectories_df(
     frac: Optional[float] = 0.5,
 ) -> DataFrame:
     """
-    Generate new data from unobserved trajectories,
-    given a specific restriction. By default, the
-    algorithm uses the same route destination constraint.
+    Generates new data from unobserved trajectories, given a specific restriction.
+
+    By default, the algorithm uses the same route destination constraint.
 
     Parameters
     ----------
@@ -259,7 +268,6 @@ def augmentation_trajectories_df(
         Dataframe with the new data generated
 
     """
-
     if DESTINY not in data:
         generate_destiny_feature(data, label_trajectory=label_trajectory)
 
@@ -293,8 +301,7 @@ def augmentation_trajectories_df(
 
 def insert_points_in_df(data: DataFrame, aug_df: DataFrame):
     """
-    Inserts the points of the generated trajectories
-    to the original data sets.
+    Inserts the points of the generated trajectories to the original data sets.
 
     Parameters
     ----------
@@ -332,9 +339,9 @@ def instance_crossover_augmentation(
     frac: Optional[float] = 0.5
 ):
     """
-    Generate new data from unobserved trajectories,
-    with a specific restriction. By default, the
-    algorithm uses the same destination constraint
+    Generates new data from unobserved trajectories, with a specific restriction.
+
+    By default, the algorithm uses the same destination constraint
     as the route and inserts the points on the
     original dataframe.
 

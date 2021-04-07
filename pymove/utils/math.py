@@ -1,3 +1,17 @@
+"""
+Math operations.
+
+is_number,
+std,
+avg_std,
+std_sample,
+avg_std_sample,
+arrays_avg,
+array_stats,
+interpolation
+
+"""
+
 import math
 from typing import List, Optional, Tuple, Union
 
@@ -15,7 +29,6 @@ def is_number(value: Union[int, float, str]):
     boolean
         True if numerical, otherwise False
     """
-
     try:
         float(value)
     except ValueError:
@@ -43,7 +56,6 @@ def std(values_array: List[float]) -> float:
     http://stackoverflow.com/questions/29046346/comparison-of-power-to-multiplication-in-python
 
     """
-
     size = len(values_array)
     mean = sum(values_array) / size
     sum_sq = sum([(i - mean) * (i - mean) for i in values_array])
@@ -68,7 +80,6 @@ def avg_std(values_array: List[float]) -> Tuple[float, float]:
         Represents the value of standard deviation.
 
     """
-
     avg = sum(values_array) / len(values_array)
     return avg, std(values_array)
 
@@ -88,7 +99,6 @@ def std_sample(values_array: List[float]) -> float:
         Represents the value of standard deviation of sample.
 
     """
-
     size = len(values_array)
     return std(values_array) * math.sqrt(size / (size - 1))
 
@@ -110,7 +120,6 @@ def avg_std_sample(values_array: List[float]) -> Tuple[float, float]:
         Represents the standard deviation of sample.
 
     """
-
     avg = sum(values_array) / len(values_array)
     return avg, std_sample(values_array)
 
@@ -135,7 +144,6 @@ def arrays_avg(
         The mean of the array elements.
 
     """
-
     n = len(values_array)
 
     if weights_array is None:
@@ -155,7 +163,9 @@ def arrays_avg(
 
 def array_stats(values_array: List[float]) -> Tuple[float, float, int]:
     """
-    Computes the sum of all the elements in the array, the sum of the square of
+    Computes statistics about the array.
+
+    The sum of all the elements in the array, the sum of the square of
     each element and the number of elements of the array.
 
     Parameters
@@ -173,7 +183,6 @@ def array_stats(values_array: List[float]) -> Tuple[float, float, int]:
         The number of elements in the array.
 
     """
-
     sum_ = 0
     sum_sq = 0
     n = 0
@@ -212,5 +221,4 @@ def interpolation(x0: float, y0: float, x1: float, y1: float, x: float) -> float
     - interpolation 2: (30, 3, 40, 5, 35) -> 4.0
 
     """
-
     return y0 + (y1 - y0) * ((x - x0) / (x1 - x0))

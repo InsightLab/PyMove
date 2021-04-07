@@ -1,5 +1,5 @@
-#01 - Exploring MoveDataFrame
-=============================
+01 - Exploring MoveDataFrame
+============================
 
 To work with Pymove you need to import the data into our data structure:
 **MoveDataFrame**!
@@ -25,7 +25,7 @@ on!**
 --------------
 
 MoveDataFrame
-~~~~~~~~~~~~~
+-------------
 
 A MoveDataFrame must contain the columns: - ``lat``: represents the
 latitude of the point. - ``lon``: represents the longitude of the point.
@@ -38,18 +38,18 @@ same path**.
 --------------
 
 Creating a MoveDataFrame
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 A MoveDataFrame can be created by passing a Pandas DataFrame, a list,
 dict or even reading a file. Look:
 
 .. code:: ipython3
 
-    import pymove
+    import pymove as pm
     from pymove import MoveDataFrame
 
 From a list
-^^^^^^^^^^^
+~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -136,7 +136,7 @@ From a list
 
 
 From a dict
-^^^^^^^^^^^
+~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -203,7 +203,7 @@ From a dict
 
 
 From a DataFrame Pandas
-^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -286,11 +286,11 @@ From a DataFrame Pandas
 
 
 From a file
-^^^^^^^^^^^
+~~~~~~~~~~~
 
 .. code:: ipython3
 
-    move_df = pymove.read_csv('geolife_sample.csv')
+    move_df = pm.read_csv('geolife_sample.csv')
     move_df.head()
 
 
@@ -383,7 +383,7 @@ Let’s try creating one with Dask!
 
 .. code:: ipython3
 
-    move_df = pymove.read_csv('geolife_sample.csv', type_='dask')
+    move_df = pm.read_csv('geolife_sample.csv', type_='dask')
     move_df.head()
 
 
@@ -470,20 +470,18 @@ Let’s try creating one with Dask!
 
 
 
---------------
-
 What’s in MoveDataFrame?
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 The MoveDataFrame stores the following information:
 
 .. code:: ipython3
 
-    orig_df = pymove.read_csv('geolife_sample.csv')
+    orig_df = pm.read_csv('geolife_sample.csv')
     move_df = orig_df.copy()
 
 1. The kind of data he was instantiated
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -532,20 +530,7 @@ In addition to these attributes, we have some functions that allow us
 to:
 
 1. View trajectory information
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: ipython3
-
-    "%s" % (move_df.get_bbox(),)
-
-
-
-
-.. parsed-literal::
-
-    '(22.147577, 113.548843, 41.132062, 121.156224)'
-
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -571,7 +556,7 @@ to:
 
 
 2. View the number of users
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -587,7 +572,7 @@ to:
 
 
 3. Transform our data to
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 a. Numpy
 ^^^^^^^^
@@ -760,7 +745,7 @@ c. DataFrames
 
 
 4. And even switch from a Pandas to Dask and back again!
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -777,36 +762,22 @@ c. DataFrames
 
 
 5. You can also write files with
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
     move_df.write_file('move_df_write_file.txt')
-
-or
-^^
 
 .. code:: ipython3
 
     move_df.to_csv('move_data.csv')
 
 6. Create a virtual grid
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
     move_df.to_grid(8)
-
-
-.. parsed-literal::
-
-
-    Creating a virtual grid without polygons
-    ...cell size by degree: 7.218478943256657e-05
-    ...grid_size_lat_y:262999
-    grid_size_lon_x:105388
-
-    ..A virtual grid was created
 
 
 
@@ -822,7 +793,7 @@ or
 
 
 7. View the information of the last MoveDataFrame operation: operation name, operation time and memory use
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -833,14 +804,12 @@ or
 
 .. parsed-literal::
 
-    {'name': 'to_grid',
-     'time in seconds': 0.007997989654541016,
-     'memory': '12.0 KiB'}
+    {'name': 'to_grid', 'time in seconds': 0.021413803100585938, 'memory': '0.0 B'}
 
 
 
 8. Get data bound box
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -856,7 +825,7 @@ or
 
 
 9. Create new columns:
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 a. ``tid``: trajectory id based on Id and datetime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -865,18 +834,6 @@ a. ``tid``: trajectory id based on Id and datetime
 
     move_df.generate_tid_based_on_id_datetime()
     move_df.head()
-
-
-.. parsed-literal::
-
-
-    Creating or updating tid feature...
-
-    ...Sorting by id and datetime to increase performance
-
-
-    ...tid feature was created...
-
 
 
 
@@ -962,13 +919,6 @@ b. ``date``: extract date on datetime
 
     move_df.generate_date_features()
     move_df.head()
-
-
-.. parsed-literal::
-
-    Creating date features...
-    ..Date features was created...
-
 
 
 
@@ -1060,15 +1010,6 @@ c. ``hour``: extract hour on datetime
 
     move_df.generate_hour_features()
     move_df.head()
-
-
-.. parsed-literal::
-
-
-    Creating or updating a feature for hour...
-
-    ...Hour feature was created...
-
 
 
 
@@ -1166,15 +1107,6 @@ d. ``day``: day of the week from datatime.
 
     move_df.generate_day_of_the_week_features()
     move_df.head()
-
-
-.. parsed-literal::
-
-
-    Creating or updating day of the week feature...
-
-    ...the day of the week feature was created...
-
 
 
 
@@ -1278,18 +1210,6 @@ e. ``period``: time of day or period from datatime.
 
     move_df.generate_time_of_day_features()
     move_df.head()
-
-
-.. parsed-literal::
-
-
-    Creating or updating period feature
-    ...Early morning from 0H to 6H
-    ...Morning from 6H to 12H
-    ...Afternoon from 12H to 18H
-    ...Evening from 18H to 24H
-
-    ...the period of day feature was created
 
 
 
@@ -1402,27 +1322,10 @@ f. ``dist_to_prev``, ``time_to_prev``, ``speed_to_prev``: create features of di
     move_df.head()
 
 
-.. parsed-literal::
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance, time and speed features in meters by seconds
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
 
 
 
@@ -1523,27 +1426,10 @@ g. ``dist_to_prev``, ``dist_to_next``, ``dist_prev_to_next`` : three distance in
     move_df.head()
 
 
-.. parsed-literal::
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance features in meters...
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
 
 
 
@@ -1644,27 +1530,10 @@ h. ``time_to_prev``, ``time_to_next``, ``time_prev_to_next`` : three time in sec
     move_df.head()
 
 
-.. parsed-literal::
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating time features seconds
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
 
 
 
@@ -1765,55 +1634,16 @@ i. ``speed_to_prev``, ``speed_to_next``, ``speed_prev_to_next`` : three speed in
     move_df.head()
 
 
-.. parsed-literal::
-
-
-    Creating or updating speed features meters by seconds
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance features in meters...
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
-.. parsed-literal::
-
-    ...Reset index...
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating time features seconds
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-    ...Reset index...
-
 
 
 
@@ -1904,7 +1734,171 @@ i. ``speed_to_prev``, ``speed_to_next``, ``speed_prev_to_next`` : three speed in
 
 
 
-j. ``situation``: column with move and stop points by radius.
+j. ``dist_to_prev``, ``time_to_prev``, ``speed_to_prev`` : distance, time and speed from previous ponint
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: ipython3
+
+    move_df = orig_df.copy()
+    move_df.generate_dist_time_speed_features(inplace=False)
+
+
+
+.. parsed-literal::
+
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>id</th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>dist_to_prev</th>
+          <th>time_to_prev</th>
+          <th>speed_to_prev</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>1</td>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>NaN</td>
+          <td>NaN</td>
+          <td>NaN</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>1</td>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>13.690153</td>
+          <td>1.0</td>
+          <td>13.690153</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>1</td>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>7.403788</td>
+          <td>5.0</td>
+          <td>1.480758</td>
+        </tr>
+        <tr>
+          <th>3</th>
+          <td>1</td>
+          <td>39.984211</td>
+          <td>116.319389</td>
+          <td>2008-10-23 05:53:16</td>
+          <td>1.821083</td>
+          <td>5.0</td>
+          <td>0.364217</td>
+        </tr>
+        <tr>
+          <th>4</th>
+          <td>1</td>
+          <td>39.984217</td>
+          <td>116.319422</td>
+          <td>2008-10-23 05:53:21</td>
+          <td>2.889671</td>
+          <td>5.0</td>
+          <td>0.577934</td>
+        </tr>
+        <tr>
+          <th>...</th>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <th>217648</th>
+          <td>5</td>
+          <td>39.999896</td>
+          <td>116.327290</td>
+          <td>2009-03-19 05:46:02</td>
+          <td>7.198855</td>
+          <td>5.0</td>
+          <td>1.439771</td>
+        </tr>
+        <tr>
+          <th>217649</th>
+          <td>5</td>
+          <td>39.999899</td>
+          <td>116.327352</td>
+          <td>2009-03-19 05:46:07</td>
+          <td>5.291709</td>
+          <td>5.0</td>
+          <td>1.058342</td>
+        </tr>
+        <tr>
+          <th>217650</th>
+          <td>5</td>
+          <td>39.999945</td>
+          <td>116.327394</td>
+          <td>2009-03-19 05:46:12</td>
+          <td>6.241949</td>
+          <td>5.0</td>
+          <td>1.248390</td>
+        </tr>
+        <tr>
+          <th>217651</th>
+          <td>5</td>
+          <td>40.000015</td>
+          <td>116.327433</td>
+          <td>2009-03-19 05:46:17</td>
+          <td>8.462920</td>
+          <td>5.0</td>
+          <td>1.692584</td>
+        </tr>
+        <tr>
+          <th>217652</th>
+          <td>5</td>
+          <td>39.999978</td>
+          <td>116.327460</td>
+          <td>2009-03-19 05:46:37</td>
+          <td>4.713399</td>
+          <td>20.0</td>
+          <td>0.235670</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>217653 rows × 7 columns</p>
+    </div>
+
+
+
+K. ``situation``: column with move and stop points by radius.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: ipython3
@@ -1914,33 +1908,10 @@ j. ``situation``: column with move and stop points by radius.
     move_df.head()
 
 
-.. parsed-literal::
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance features in meters...
-
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-
-    Creating or updating features MOVE and STOPS...
-
-
-    ....There are 14691 stops to this parameters
-
 
 
 
@@ -2038,7 +2009,7 @@ j. ``situation``: column with move and stop points by radius.
 
 
 9. Get time difference between max and min datetime in trajectory data.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
@@ -2051,88 +2022,6 @@ j. ``situation``: column with move and stop points by radius.
 
     Timedelta('146 days 23:53:32')
 
-
-
-10. Create views
-^^^^^^^^^^^^^^^^
-
-a. Plot all features data
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: ipython3
-
-    move_df.plot_all_features(return_fig=False)
-
-
-
-.. image:: 01_Exploring_MoveDataFrame_files/01_Exploring_MoveDataFrame_67_0.svg
-
-
-b. Plot all trajs with scatter plot
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: ipython3
-
-    move_df.plot_trajs(return_fig=False)
-
-
-
-.. image:: 01_Exploring_MoveDataFrame_files/01_Exploring_MoveDataFrame_69_0.svg
-
-
-c. And plot traj by TID feature
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: ipython3
-
-    move_df.generate_tid_based_on_id_datetime()
-    move_df.generate_move_and_stop_by_radius()
-
-
-.. parsed-literal::
-
-
-    Creating or updating tid feature...
-
-    ...Sorting by id and datetime to increase performance
-
-
-    ...tid feature was created...
-
-    ...Sorting by id and datetime to increase performance
-
-    ...Set id as index to a higher performance
-
-
-    Creating or updating distance features in meters...
-
-
-
-
-.. parsed-literal::
-
-    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-.. parsed-literal::
-
-    ...Reset index...
-
-
-    Creating or updating features MOVE and STOPS...
-
-
-    ....There are 14691 stops to this parameters
-
-
-
-.. code:: ipython3
-
-    move_df.plot_traj_id("12008102305", feature="situation", value="stop", return_fig=False)
-
-
-
-.. image:: 01_Exploring_MoveDataFrame_files/01_Exploring_MoveDataFrame_72_0.svg
 
 
 And that’s it! See upcoming notebooks to learn more about what PyMove can do!

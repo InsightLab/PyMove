@@ -1,3 +1,5 @@
+"""Package setup."""
+
 from setuptools import find_packages, setup
 
 with open('README.md', 'r') as f:
@@ -8,7 +10,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='pymove',
-    version='2.6.1',
+    version='2.7.0',
     author='Insight Data Science Lab',
     author_email='insightlab@dc.ufc.br',
     license='MIT',

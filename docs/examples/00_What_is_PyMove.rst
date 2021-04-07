@@ -1,5 +1,5 @@
-#00 - What is PyMove?
-=====================
+00 - What is PyMove?
+====================
 
 **PyMove** is a Python library, open-source, that have operations to
 handling trajectories data, ranging from data representation,
@@ -15,7 +15,7 @@ data preprocessing, pattern mining and data visualization.
 --------------
 
 Enviroment settings
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 1. Create an environment using **Conda**
 
@@ -26,7 +26,7 @@ Enviroment settings
 ``conda activate validacao-pymove``
 
 Using PyMove
-^^^^^^^^^^^^
+------------
 
 1. Clone this repository
 
@@ -57,7 +57,7 @@ Using PyMove
 ``import pymove``
 
 What can you do with PyMove?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 With Pymove you can handling trajectories data with operations of: -
 Grid - Preprocessing: this including segmentation, compression, noise

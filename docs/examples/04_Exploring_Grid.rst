@@ -1,9 +1,5 @@
-#04 - Exploring Grid
-====================
-
-.. raw:: html
-
-   <!-- - Falar sobre a problemática: muitos dados e etc, custo de processamento -->
+04 - Exploring Grid
+===================
 
 In trajectories data mining process, there is a need frequent acess
 differents segments and samples of trajectories. With big volume data,
@@ -11,20 +7,12 @@ those acesses can need time and processing. With this, it’s necessary to
 adopt effective techniques to management and handling of this data,
 allowed fast recovery of data.
 
-.. raw:: html
-
-   <!-- - Introduzir o conceito de grid e seus benefícios -->
-
 One approach to this technique takes geographic space into account,
 dividing it into grids, the so-called **grids**, and **creating a time
 index for the trajectories that fall into each cell of this grid**.
 **Each segment** that falls into a grid **is represented by a point with
 coordinates equal to the start time point and the end time point of the
 segment**.
-
-.. raw:: html
-
-   <!-- - Falar sobre como é considerado o conceito de grid no Pymove -->
 
 In PyMove, grids are delimited by coordinates in a cartesian plan based
 tracing in bound box of data. Grids are represented by objects that have
@@ -36,26 +24,21 @@ those attributes:
 -  **grid_size_lon_x:** grid longitude size.
 -  **cell_size_by_degree:** cell size of Grid.
 
-Let’s go!
-~~~~~~~~~
-
 Imports
-~~~~~~~
+-------
 
 .. code:: ipython3
 
-    import pandas as pd
-    from pymove import MoveDataFrame
+    from pymove import read_csv
     from pymove.core.grid import Grid
 
 Load data
-~~~~~~~~~
+---------
 
 .. code:: ipython3
 
-    df = pd.read_csv('geolife_sample.csv', parse_dates=['datetime'])
-    data = MoveDataFrame(df, latitude="lat", longitude="lon", datetime="datetime")
-    data = data[:1000]
+    df = read_csv('geolife_sample.csv', parse_dates=['datetime'])
+    data = df[:1000]
     data
 
 
@@ -172,26 +155,12 @@ Load data
 
 
 
---------------
-
 Create virtual Grid
 -------------------
 
 .. code:: ipython3
 
     grid = Grid(data, 15)
-
-
-.. parsed-literal::
-
-
-    Creating a virtual grid without polygons
-    ...cell size by degree: 0.0001353464801860623
-    ...grid_size_lat_y:341
-    grid_size_lon_x:266
-
-    ..A virtual grid was created
-
 
 .. code:: ipython3
 
@@ -210,8 +179,6 @@ Create virtual Grid
 
 
 
---------------
-
 Create one polygon to point on grid
 -----------------------------------
 
@@ -225,23 +192,12 @@ Create one polygon to point on grid
     POLYGON ((116.3056033464802 39.97078169296037, 116.3056033464802 39.97091703944056, 116.3057386929604 39.97091703944056, 116.3057386929604 39.97078169296037, 116.3056033464802 39.97078169296037))
 
 
---------------
-
 Create or update index grid feature
 -----------------------------------
 
 .. code:: ipython3
 
     grid.create_update_index_grid_feature(data)
-
-
-.. parsed-literal::
-
-
-    Creating or updating index of the grid feature..
-
-    ...[1000,1000] indexes were created to lat and lon
-
 
 .. code:: ipython3
 
@@ -324,24 +280,12 @@ Create or update index grid feature
 
 
 
---------------
-
 Create all polygons to all point on grid
 ----------------------------------------
 
 .. code:: ipython3
 
     grid_data = grid.create_all_polygons_to_all_point_on_grid(data)
-
-
-.. parsed-literal::
-
-
-    Creating or updating index of the grid feature..
-
-    ...[1000,1000] indexes were created to lat and lon
-    ...polygons were created
-
 
 .. code:: ipython3
 
@@ -426,21 +370,10 @@ Create all polygons on grid
     grid.create_all_polygons_on_grid()
 
 
-.. parsed-literal::
-
-
-    Creating all polygons on virtual grid
-
-
 
 .. parsed-literal::
 
     VBox(children=(HTML(value=''), IntProgress(value=0, max=341)))
-
-
-.. parsed-literal::
-
-    ...geometries saved on Grid grid_polygon property
 
 
 .. code:: ipython3
@@ -462,11 +395,6 @@ Get point to index grid
 .. code:: ipython3
 
     grid.point_to_index_grid(39.984094, 116.319236)
-
-
-.. parsed-literal::
-
-    ...[1,1] indexes were created to lat and lon
 
 
 
@@ -513,4 +441,4 @@ Show a grid polygons
 
 
 
-.. image:: 04_Exploring_Grid_files/04_Exploring_Grid_25_0.svg
+.. image:: 04_Exploring_Grid_files/04_Exploring_Grid_25_0.png
