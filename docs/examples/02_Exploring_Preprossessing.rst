@@ -127,8 +127,7 @@ Importing the module:
 
 A bounding box (usually shortened to bbox) is an area defined by two
 longitudes and two latitudes. The function by_bbox, filters points of
-
-the trajectories according to a choosen bounding box.
+the trajectories according to a chosen bounding box.
 
 .. code:: python
 
