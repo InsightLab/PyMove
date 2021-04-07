@@ -27,20 +27,18 @@ those attributes:
 Imports
 -------
 
-.. code:: python
+.. code:: ipython3
 
-    import pandas as pd
-    from pymove import MoveDataFrame
+    from pymove import read_csv
     from pymove.core.grid import Grid
 
 Load data
 ---------
 
-.. code:: python
+.. code:: ipython3
 
-    df = pd.read_csv('geolife_sample.csv', parse_dates=['datetime'])
-    data = MoveDataFrame(df, latitude="lat", longitude="lon", datetime="datetime")
-    data = data[:1000]
+    df = read_csv('geolife_sample.csv', parse_dates=['datetime'])
+    data = df[:1000]
     data
 
 
@@ -160,23 +158,11 @@ Load data
 Create virtual Grid
 -------------------
 
-.. code:: python
+.. code:: ipython3
 
     grid = Grid(data, 15)
 
-
-.. parsed-literal::
-
-
-    Creating a virtual grid without polygons
-    ...cell size by degree: 0.0001353464801860623
-    ...grid_size_lat_y:341
-    grid_size_lon_x:266
-
-    ..A virtual grid was created
-
-
-.. code:: python
+.. code:: ipython3
 
     grid.get_grid()
 
@@ -196,7 +182,7 @@ Create virtual Grid
 Create one polygon to point on grid
 -----------------------------------
 
-.. code:: python
+.. code:: ipython3
 
     print(grid.create_one_polygon_to_point_on_grid(2, 1))
 
@@ -209,20 +195,11 @@ Create one polygon to point on grid
 Create or update index grid feature
 -----------------------------------
 
-.. code:: python
+.. code:: ipython3
 
     grid.create_update_index_grid_feature(data)
 
-
-.. parsed-literal::
-
-
-    Creating or updating index of the grid feature..
-
-    ...[1000,1000] indexes were created to lat and lon
-
-
-.. code:: python
+.. code:: ipython3
 
     data.head()
 
@@ -306,21 +283,11 @@ Create or update index grid feature
 Create all polygons to all point on grid
 ----------------------------------------
 
-.. code:: python
+.. code:: ipython3
 
     grid_data = grid.create_all_polygons_to_all_point_on_grid(data)
 
-
-.. parsed-literal::
-
-
-    Creating or updating index of the grid feature..
-
-    ...[1000,1000] indexes were created to lat and lon
-    ...polygons were created
-
-
-.. code:: python
+.. code:: ipython3
 
     grid_data.head()
 
@@ -398,15 +365,9 @@ Create all polygons to all point on grid
 Create all polygons on grid
 ---------------------------
 
-.. code:: python
+.. code:: ipython3
 
     grid.create_all_polygons_on_grid()
-
-
-.. parsed-literal::
-
-
-    Creating all polygons on virtual grid
 
 
 
@@ -415,12 +376,7 @@ Create all polygons on grid
     VBox(children=(HTML(value=''), IntProgress(value=0, max=341)))
 
 
-.. parsed-literal::
-
-    ...geometries saved on Grid grid_polygon property
-
-
-.. code:: python
+.. code:: ipython3
 
     (grid.grid_polygon).shape
 
@@ -436,14 +392,9 @@ Create all polygons on grid
 Get point to index grid
 -----------------------
 
-.. code:: python
+.. code:: ipython3
 
     grid.point_to_index_grid(39.984094, 116.319236)
-
-
-.. parsed-literal::
-
-    ...[1,1] indexes were created to lat and lon
 
 
 
@@ -457,14 +408,14 @@ Get point to index grid
 Save grid to .pkl
 -----------------
 
-.. code:: python
+.. code:: ipython3
 
     grid.save_grid_pkl('teste.pkl')
 
 Read .pkl to grid
 -----------------
 
-.. code:: python
+.. code:: ipython3
 
     grid.read_grid_pkl('teste.pkl').get_grid()
 
@@ -484,7 +435,7 @@ Read .pkl to grid
 Show a grid polygons
 --------------------
 
-.. code:: python
+.. code:: ipython3
 
     grid.show_grid_polygons(grid_data, return_fig=False)
 

@@ -2014,7 +2014,6 @@ def _create_geojson_features_line(
     list
         GeoJSON features.
     """
-    print('> Creating GeoJSON features...')
     features = []
 
     row_iterator = move_data.iterrows()
@@ -2098,15 +2097,12 @@ def plot_traj_timestamp_geo_json(
         label_lon=label_lon,
         label_datetime=label_datetime
     )
-    print('creating folium map')
     base_map = create_base_map(
         move_data=move_data,
         lat_origin=move_data[label_lat].mean(),
         lon_origin=move_data[label_lon].mean(),
         tile=tiles
     )
-    print('Genering timestamp map')
-    print(features)
     plugins.TimestampedGeoJson(
         {
             'type': 'FeatureCollection',

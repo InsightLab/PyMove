@@ -27,7 +27,7 @@ from pymove.utils.constants import (
     TRAJ_ID,
 )
 from pymove.utils.datetime import generate_time_statistics, threshold_time_statistics
-from pymove.utils.log import progress_bar
+from pymove.utils.log import logger, progress_bar
 from pymove.utils.mem import begin_operation, end_operation
 from pymove.utils.trajectories import shift
 
@@ -92,7 +92,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
             Size of grid cell, by default 1000
         """
         operation = begin_operation('discretize based on grid')
-        print('\nDiscretizing dataframe...')
+        logger.debug('\nDiscretizing dataframe...')
         grid = Grid(self, cell_size=region_size)
         grid.create_update_index_grid_feature(self)
         self.reset_index(drop=True, inplace=True)
@@ -128,47 +128,42 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         """
         operation = begin_operation('generate_prev_equ_feature')
-        columns = set(self.columns)
-        ids, sum_size_id, size_id, idx = self._prepare_generate_data(
+        if inplace:
+            data_ = self
+        else:
+            data_ = self.copy()
+
+        ids, size_id, idx = self._prepare_generate_data(
             self, sort, label_id
         )
 
-        try:
-            message = '\nCreating generate_prev_equ_feature'
-            message += ' in previous equ\n'
-            print(
-                message
-            )
+        message = '\nCreating generate_prev_equ_feature in previous equ\n'
+        logger.debug(
+            message
+        )
 
-            if (self[local_label].dtype == 'int'):
-                self[local_label] = self[local_label].astype(np.float16)
-            for idx in progress_bar(
-                ids, desc='Generating previous {}'.format(local_label)
-            ):
-                current_local = self.at[idx, local_label]
-                current_local = np.array(current_local)
-                size_id = current_local.size
+        if (data_[local_label].dtype == 'int'):
+            data_[local_label] = data_[local_label].astype(np.float16)
+        for idx in progress_bar(
+            ids, desc='Generating previous {}'.format(local_label)
+        ):
+            current_local = data_.at[idx, local_label]
+            current_local = np.array(current_local)
+            size_id = current_local.size
 
-                if size_id <= 1:
-                    self.at[idx, PREV_LOCAL] = np.nan
+            if size_id <= 1:
+                data_.at[idx, PREV_LOCAL] = np.nan
 
-                else:
-                    prev_local = shift(current_local, 1)
+            else:
+                prev_local = shift(current_local, 1)
 
-                    # previous to current point
-                    self.at[idx, PREV_LOCAL] = prev_local
+                # previous to current point
+                data_.at[idx, PREV_LOCAL] = prev_local
 
-            return self._return_generated_data(
-                self, columns, operation, inplace
-            )
-
-        except Exception as e:
-            print(
-                'label_tid:%s\nidx:%s\nsize_id:%s\nsum_size_id:%s'
-                % (label_id, idx, size_id, sum_size_id)
-            )
-            self.last_operation = end_operation(operation)
-            raise e
+        data_.reset_index(inplace=True)
+        data_.last_operation = end_operation(operation)
+        if not inplace:
+            return data_
 
     def generate_tid_based_statistics(
         self,
@@ -271,11 +266,11 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         if label_id == TID_STAT:
             self.reset_index(drop=True, inplace=True)
-            print(
+            logger.debug(
                 '... {} = {}, then reseting and drop index!'.format(TID, TID_STAT))
         else:
             self.reset_index(inplace=True)
-            print('... reseting index\n')
+            logger.debug('... reseting index\n')
 
         if drop_single_points:
             _drop_single_point(data_, TID_STAT, label_id)
