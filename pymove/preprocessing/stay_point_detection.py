@@ -1,7 +1,6 @@
 """
 Stop point detection operations.
 
-create_or_update_datetime_in_format_cyclical,
 create_or_update_move_stop_by_dist_time,
 create_or_update_move_and_stop_by_radius
 
@@ -10,7 +9,6 @@ create_or_update_move_and_stop_by_radius
 from typing import TYPE_CHECKING, Optional, Text, Union
 
 import numpy as np
-from pandas.core.frame import DataFrame
 
 from pymove.preprocessing.segmentation import by_max_dist
 from pymove.utils.constants import (
@@ -30,52 +28,6 @@ from pymove.utils.log import logger, timer_decorator
 if TYPE_CHECKING:
     from pymove.core.dask import DaskMoveDataFrame
     from pymove.core.pandas import PandasMoveDataFrame
-
-
-def create_or_update_datetime_in_format_cyclical(
-    move_data: DataFrame,
-    label_datetime: Optional[Text] = DATETIME,
-    inplace: Optional[bool] = True
-) -> Optional[DataFrame]:
-    """
-    Converts the time data into a cyclical format.
-
-    Parameters
-    ----------
-    move_data : dataframe
-       The input trajectory data
-    label_datetime : str, optional
-        Indicates the column with the data to be converted, by default DATETIME
-    inplace : bool, optional
-        if set to true the original dataframe will be altered to
-        contain the result of the filtering,
-        otherwise a copy will be returned, by default True
-
-    Returns
-    -------
-    DataFrame
-        DataFrame with 2 aditional features: hour_sin and hour_cos.
-
-    Notes
-    -----
-    https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
-    https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
-
-    """
-    if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
-
-    logger.debug('Encoding cyclical continuous features - 24-hour time')
-    if label_datetime in move_data:
-        hours = move_df[label_datetime].dt.hour
-        move_df[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
-        move_df[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
-        logger.debug('...hour_sin and  hour_cos features were created...\n')
-
-    if not inplace:
-        return move_df
 
 
 @timer_decorator

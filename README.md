@@ -237,3 +237,8 @@ You can access examples of how to use PyMove [here](https://github.com/InsightLa
 -   [Knee point detection in Python](https://github.com/arvkevi/kneed)
 -   [TrajSuite Java Library](https://github.com/lukehb/TrajSuite)
 -   [GraphHopper Map-Matching Java Library](https://github.com/graphhopper/map-matching)
+
+
+## Trajectory Data Mining: An Overview Mapping
+Mapping pymove methods with [ZHENG 2015](https://www.microsoft.com/en-us/research/publication/trajectory-data-mining-an-overview/).
+![](.mapping.svg)

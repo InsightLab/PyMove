@@ -1,7 +1,7 @@
 """
 Compression operations.
 
-compress_Segment_stop_to_point
+compress_segment_stop_to_point
 
 """
 
