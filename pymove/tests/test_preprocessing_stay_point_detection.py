@@ -118,7 +118,7 @@ def test_create_or_update_move_and_stop_by_radius():
     ]
 
     stay_point_detection.create_or_update_move_and_stop_by_radius(
-        move_df, radius=4.0
+        move_df, radius=4.0, inplace=True
     )
     expected = DataFrame(
         data=[

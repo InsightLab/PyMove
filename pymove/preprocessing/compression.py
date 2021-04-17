@@ -98,7 +98,7 @@ def compress_segment_stop_to_point(
 
     if (label_segment not in move_data) & (label_stop not in move_data):
         create_or_update_move_stop_by_dist_time(
-            move_data, dist_radius, time_radius, label_id
+            move_data, dist_radius, time_radius, label_id, inplace=True
         )
 
     logger.debug('...setting mean to lat and lon...')

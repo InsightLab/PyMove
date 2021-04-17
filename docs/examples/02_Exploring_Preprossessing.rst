@@ -10,18 +10,18 @@ Load data from file
 The dataset used in this tutorial is GeoLife GPS Trajectories. Available
 in https://www.microsoft.com/en-us/download/details.aspx?id=52367
 
-.. code:: python
+.. code:: ipython3
 
     from pymove import read_csv
 
-.. code:: python
+.. code:: ipython3
 
-    mdf = read_csv('geolife_sample.csv')
+    df_move = read_csv('geolife_sample.csv')
 
-.. code:: python
+.. code:: ipython3
 
-    mdf.show_trajectories_info()
-    mdf.head()
+    df_move.show_trajectories_info()
+    df_move.head()
 
 
 .. parsed-literal::
@@ -120,16 +120,15 @@ filtering.
 
 Importing the module:
 
-.. code:: python
+.. code:: ipython3
 
     from pymove import filters
-    df_move = mdf.copy()
 
 A bounding box (usually shortened to bbox) is an area defined by two
 longitudes and two latitudes. The function by_bbox, filters points of
 the trajectories according to a chosen bounding box.
 
-.. code:: python
+.. code:: ipython3
 
     bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
     filt_df = filters.by_bbox(df_move, bbox)
@@ -209,7 +208,7 @@ the trajectories according to a chosen bounding box.
 by_datetime function filters point trajectories according to the time
 specified by the parameters: start_datetime and end_datetime.
 
-.. code:: python
+.. code:: ipython3
 
     filters.by_datetime(df_move, start_datetime = "2009-03-19 05:45:37", end_datetime = "2009-03-19 05:46:17")
 
@@ -315,7 +314,7 @@ specified by the parameters: start_datetime and end_datetime.
 by label function filters trajectories points according to specified
 value and column label, set by value and label_name respectively.
 
-.. code:: python
+.. code:: ipython3
 
     filters.by_label(df_move, value = 116.327219, label_name = "lon").head()
 
@@ -393,7 +392,7 @@ value and column label, set by value and label_name respectively.
 by_id function filters trajectories points according to selected
 trajectory id.
 
-.. code:: python
+.. code:: ipython3
 
     filters.by_id(df_move, id_=5).head()
 
@@ -472,7 +471,7 @@ A tid is the result of concatenation between the id and date of a
 trajectory. The by_tid function filters trajectory points according to
 the tid specified by the tid\_ parameter.
 
-.. code:: python
+.. code:: ipython3
 
     df_move.generate_tid_based_on_id_datetime()
     filters.by_tid(df_move, "12008102305").head()
@@ -554,120 +553,12 @@ the tid specified by the tid\_ parameter.
 
 
 
-outliers function filters trajectories points that are outliers.
-
-.. code:: python
-
-    outliers_points = filters.outliers(df_move)
-    outliers_points.head()
-
-
-
-.. parsed-literal::
-
-    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
-
-
-
-
-.. raw:: html
-
-    <div>
-    <style scoped>
-        .dataframe tbody tr th:only-of-type {
-            vertical-align: middle;
-        }
-
-        .dataframe tbody tr th {
-            vertical-align: top;
-        }
-
-        .dataframe thead th {
-            text-align: right;
-        }
-    </style>
-    <table border="1" class="dataframe">
-      <thead>
-        <tr style="text-align: right;">
-          <th></th>
-          <th>id</th>
-          <th>lat</th>
-          <th>lon</th>
-          <th>datetime</th>
-          <th>tid</th>
-          <th>dist_to_prev</th>
-          <th>dist_to_next</th>
-          <th>dist_prev_to_next</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>148</th>
-          <td>1</td>
-          <td>39.970511</td>
-          <td>116.341455</td>
-          <td>2008-10-23 10:32:53</td>
-          <td>12008102310</td>
-          <td>1452.319115</td>
-          <td>1470.641291</td>
-          <td>71.088460</td>
-        </tr>
-        <tr>
-          <th>338</th>
-          <td>1</td>
-          <td>39.995042</td>
-          <td>116.326465</td>
-          <td>2008-10-23 10:44:24</td>
-          <td>12008102310</td>
-          <td>10.801860</td>
-          <td>10.274331</td>
-          <td>1.465144</td>
-        </tr>
-        <tr>
-          <th>8133</th>
-          <td>1</td>
-          <td>39.991075</td>
-          <td>116.188395</td>
-          <td>2008-10-25 08:20:19</td>
-          <td>12008102508</td>
-          <td>5.090766</td>
-          <td>6.247860</td>
-          <td>1.295191</td>
-        </tr>
-        <tr>
-          <th>10175</th>
-          <td>1</td>
-          <td>40.015169</td>
-          <td>116.311045</td>
-          <td>2008-10-25 23:40:12</td>
-          <td>12008102523</td>
-          <td>23.454754</td>
-          <td>24.899678</td>
-          <td>3.766959</td>
-        </tr>
-        <tr>
-          <th>13849</th>
-          <td>1</td>
-          <td>39.977157</td>
-          <td>116.327151</td>
-          <td>2008-10-26 08:13:53</td>
-          <td>12008102608</td>
-          <td>11.212682</td>
-          <td>10.221164</td>
-          <td>1.004375</td>
-        </tr>
-      </tbody>
-    </table>
-    </div>
-
-
-
 clean_consecutive_duplicates function removes consecutives duplicate
 rows of the Dataframe. Optionally only certaind columns can be consider,
 this is defined by the parameter subset, in this example only the lat
 column is considered.
 
-.. code:: python
+.. code:: ipython3
 
     filtered_df = filters.clean_consecutive_duplicates(df_move, subset = ["lat"])
     len(filtered_df)
@@ -684,9 +575,15 @@ column is considered.
 clean_gps_jumps_by_distance function removes from the dataframe the
 trajectories points that are outliers.
 
-.. code:: python
+.. code:: ipython3
 
     filters.clean_gps_jumps_by_distance(df_move)
+
+
+
+.. parsed-literal::
+
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
 
@@ -854,9 +751,15 @@ clean_gps_nearby_points_by_distances function removes points from the
 trajectories when the distance between them and the point before is
 smaller than the parameter radius_area.
 
-.. code:: python
+.. code:: ipython3
 
     filters.clean_gps_nearby_points_by_distances(df_move, radius_area=10)
+
+
+
+.. parsed-literal::
+
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
 
@@ -1024,7 +927,7 @@ clean_gps_nearby_points_by_speed function removes points from the
 trajectories when the speed of travel between them and the point before
 is smaller than the value set by the parameter speed_radius.
 
-.. code:: python
+.. code:: ipython3
 
     filters.clean_gps_nearby_points_by_speed(df_move, speed_radius=40.0)
 
@@ -1063,8 +966,6 @@ is smaller than the value set by the parameter speed_radius.
           <th>datetime</th>
           <th>tid</th>
           <th>dist_to_prev</th>
-          <th>dist_to_next</th>
-          <th>dist_prev_to_next</th>
           <th>time_to_prev</th>
           <th>speed_to_prev</th>
         </tr>
@@ -1078,8 +979,6 @@ is smaller than the value set by the parameter speed_radius.
           <td>2008-10-23 05:53:05</td>
           <td>12008102305</td>
           <td>NaN</td>
-          <td>13.690153</td>
-          <td>NaN</td>
           <td>NaN</td>
           <td>NaN</td>
         </tr>
@@ -1091,8 +990,6 @@ is smaller than the value set by the parameter speed_radius.
           <td>2008-10-23 10:33:00</td>
           <td>12008102310</td>
           <td>1470.641291</td>
-          <td>6.919839</td>
-          <td>1467.436502</td>
           <td>7.0</td>
           <td>210.091613</td>
         </tr>
@@ -1104,8 +1001,6 @@ is smaller than the value set by the parameter speed_radius.
           <td>2008-10-23 10:56:54</td>
           <td>12008102310</td>
           <td>47.020950</td>
-          <td>65.222058</td>
-          <td>112.001912</td>
           <td>1.0</td>
           <td>47.020950</td>
         </tr>
@@ -1117,8 +1012,6 @@ is smaller than the value set by the parameter speed_radius.
           <td>2008-10-23 10:56:55</td>
           <td>12008102310</td>
           <td>65.222058</td>
-          <td>35.598360</td>
-          <td>100.606304</td>
           <td>1.0</td>
           <td>65.222058</td>
         </tr>
@@ -1130,15 +1023,11 @@ is smaller than the value set by the parameter speed_radius.
           <td>2008-10-24 00:04:29</td>
           <td>12008102400</td>
           <td>40.942759</td>
-          <td>42.052617</td>
-          <td>82.726749</td>
           <td>1.0</td>
           <td>40.942759</td>
         </tr>
         <tr>
           <th>...</th>
-          <td>...</td>
-          <td>...</td>
           <td>...</td>
           <td>...</td>
           <td>...</td>
@@ -1156,8 +1045,6 @@ is smaller than the value set by the parameter speed_radius.
           <td>2009-02-28 03:52:45</td>
           <td>52009022803</td>
           <td>333.656648</td>
-          <td>28.500246</td>
-          <td>361.959915</td>
           <td>5.0</td>
           <td>66.731330</td>
         </tr>
@@ -1169,8 +1056,6 @@ is smaller than the value set by the parameter speed_radius.
           <td>2009-03-19 04:36:02</td>
           <td>52009031904</td>
           <td>556.947064</td>
-          <td>264.212540</td>
-          <td>820.900139</td>
           <td>5.0</td>
           <td>111.389413</td>
         </tr>
@@ -1182,8 +1067,6 @@ is smaller than the value set by the parameter speed_radius.
           <td>2009-03-19 04:36:07</td>
           <td>52009031904</td>
           <td>264.212540</td>
-          <td>85.254214</td>
-          <td>218.221539</td>
           <td>5.0</td>
           <td>52.842508</td>
         </tr>
@@ -1195,8 +1078,6 @@ is smaller than the value set by the parameter speed_radius.
           <td>2009-03-19 04:40:52</td>
           <td>52009031904</td>
           <td>267.350055</td>
-          <td>127.347571</td>
-          <td>394.695354</td>
           <td>5.0</td>
           <td>53.470011</td>
         </tr>
@@ -1208,14 +1089,12 @@ is smaller than the value set by the parameter speed_radius.
           <td>2009-03-19 04:49:47</td>
           <td>52009031904</td>
           <td>436.405009</td>
-          <td>119.920027</td>
-          <td>555.775352</td>
           <td>5.0</td>
           <td>87.281002</td>
         </tr>
       </tbody>
     </table>
-    <p>281 rows × 10 columns</p>
+    <p>281 rows × 8 columns</p>
     </div>
 
 
@@ -1223,7 +1102,7 @@ is smaller than the value set by the parameter speed_radius.
 clean_gps_speed_max_radius function recursively removes trajectories
 points with speed higher than the value set by the user.
 
-.. code:: python
+.. code:: ipython3
 
     filters.clean_gps_speed_max_radius(df_move)
 
@@ -1262,8 +1141,6 @@ points with speed higher than the value set by the user.
           <th>datetime</th>
           <th>tid</th>
           <th>dist_to_prev</th>
-          <th>dist_to_next</th>
-          <th>dist_prev_to_next</th>
           <th>time_to_prev</th>
           <th>speed_to_prev</th>
         </tr>
@@ -1277,8 +1154,6 @@ points with speed higher than the value set by the user.
           <td>2008-10-23 05:53:05</td>
           <td>12008102305</td>
           <td>NaN</td>
-          <td>13.690153</td>
-          <td>NaN</td>
           <td>NaN</td>
           <td>NaN</td>
         </tr>
@@ -1290,8 +1165,6 @@ points with speed higher than the value set by the user.
           <td>2008-10-23 05:53:06</td>
           <td>12008102305</td>
           <td>13.690153</td>
-          <td>7.403788</td>
-          <td>20.223428</td>
           <td>1.0</td>
           <td>13.690153</td>
         </tr>
@@ -1303,8 +1176,6 @@ points with speed higher than the value set by the user.
           <td>2008-10-23 05:53:11</td>
           <td>12008102305</td>
           <td>7.403788</td>
-          <td>1.821083</td>
-          <td>5.888579</td>
           <td>5.0</td>
           <td>1.480758</td>
         </tr>
@@ -1316,8 +1187,6 @@ points with speed higher than the value set by the user.
           <td>2008-10-23 05:53:16</td>
           <td>12008102305</td>
           <td>1.821083</td>
-          <td>2.889671</td>
-          <td>1.873356</td>
           <td>5.0</td>
           <td>0.364217</td>
         </tr>
@@ -1329,15 +1198,11 @@ points with speed higher than the value set by the user.
           <td>2008-10-23 05:53:21</td>
           <td>12008102305</td>
           <td>2.889671</td>
-          <td>66.555997</td>
-          <td>68.727260</td>
           <td>5.0</td>
           <td>0.577934</td>
         </tr>
         <tr>
           <th>...</th>
-          <td>...</td>
-          <td>...</td>
           <td>...</td>
           <td>...</td>
           <td>...</td>
@@ -1355,8 +1220,6 @@ points with speed higher than the value set by the user.
           <td>2009-03-19 05:46:02</td>
           <td>52009031905</td>
           <td>7.198855</td>
-          <td>5.291709</td>
-          <td>12.214590</td>
           <td>5.0</td>
           <td>1.439771</td>
         </tr>
@@ -1368,8 +1231,6 @@ points with speed higher than the value set by the user.
           <td>2009-03-19 05:46:07</td>
           <td>52009031905</td>
           <td>5.291709</td>
-          <td>6.241949</td>
-          <td>10.400206</td>
           <td>5.0</td>
           <td>1.058342</td>
         </tr>
@@ -1381,8 +1242,6 @@ points with speed higher than the value set by the user.
           <td>2009-03-19 05:46:12</td>
           <td>52009031905</td>
           <td>6.241949</td>
-          <td>8.462920</td>
-          <td>14.628012</td>
           <td>5.0</td>
           <td>1.248390</td>
         </tr>
@@ -1394,8 +1253,6 @@ points with speed higher than the value set by the user.
           <td>2009-03-19 05:46:17</td>
           <td>52009031905</td>
           <td>8.462920</td>
-          <td>4.713399</td>
-          <td>6.713456</td>
           <td>5.0</td>
           <td>1.692584</td>
         </tr>
@@ -1407,14 +1264,12 @@ points with speed higher than the value set by the user.
           <td>2009-03-19 05:46:37</td>
           <td>52009031905</td>
           <td>4.713399</td>
-          <td>NaN</td>
-          <td>NaN</td>
           <td>20.0</td>
           <td>0.235670</td>
         </tr>
       </tbody>
     </table>
-    <p>217304 rows × 10 columns</p>
+    <p>217304 rows × 8 columns</p>
     </div>
 
 
@@ -1423,7 +1278,7 @@ clean_trajectories_with_few_points function removes from the given
 dataframe, trajectories with fewer points than was specified by the
 parameter min_points_per_trajectory.
 
-.. code:: python
+.. code:: ipython3
 
     filters.clean_trajectories_with_few_points(df_move)
 
@@ -1450,71 +1305,53 @@ parameter min_points_per_trajectory.
       <thead>
         <tr style="text-align: right;">
           <th></th>
-          <th>id</th>
           <th>lat</th>
           <th>lon</th>
           <th>datetime</th>
+          <th>id</th>
           <th>tid</th>
-          <th>dist_to_prev</th>
-          <th>dist_to_next</th>
-          <th>dist_prev_to_next</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <th>0</th>
-          <td>1</td>
           <td>39.984094</td>
           <td>116.319236</td>
           <td>2008-10-23 05:53:05</td>
+          <td>1</td>
           <td>12008102305</td>
-          <td>NaN</td>
-          <td>13.690153</td>
-          <td>NaN</td>
         </tr>
         <tr>
           <th>1</th>
-          <td>1</td>
           <td>39.984198</td>
           <td>116.319322</td>
           <td>2008-10-23 05:53:06</td>
+          <td>1</td>
           <td>12008102305</td>
-          <td>13.690153</td>
-          <td>7.403788</td>
-          <td>20.223428</td>
         </tr>
         <tr>
           <th>2</th>
-          <td>1</td>
           <td>39.984224</td>
           <td>116.319402</td>
           <td>2008-10-23 05:53:11</td>
+          <td>1</td>
           <td>12008102305</td>
-          <td>7.403788</td>
-          <td>1.821083</td>
-          <td>5.888579</td>
         </tr>
         <tr>
           <th>3</th>
-          <td>1</td>
           <td>39.984211</td>
           <td>116.319389</td>
           <td>2008-10-23 05:53:16</td>
+          <td>1</td>
           <td>12008102305</td>
-          <td>1.821083</td>
-          <td>2.889671</td>
-          <td>1.873356</td>
         </tr>
         <tr>
           <th>4</th>
-          <td>1</td>
           <td>39.984217</td>
           <td>116.319422</td>
           <td>2008-10-23 05:53:21</td>
+          <td>1</td>
           <td>12008102305</td>
-          <td>2.889671</td>
-          <td>66.555997</td>
-          <td>68.727260</td>
         </tr>
         <tr>
           <th>...</th>
@@ -1523,68 +1360,50 @@ parameter min_points_per_trajectory.
           <td>...</td>
           <td>...</td>
           <td>...</td>
-          <td>...</td>
-          <td>...</td>
-          <td>...</td>
         </tr>
         <tr>
           <th>217648</th>
-          <td>5</td>
           <td>39.999896</td>
           <td>116.327290</td>
           <td>2009-03-19 05:46:02</td>
+          <td>5</td>
           <td>52009031905</td>
-          <td>7.198855</td>
-          <td>5.291709</td>
-          <td>12.214590</td>
         </tr>
         <tr>
           <th>217649</th>
-          <td>5</td>
           <td>39.999899</td>
           <td>116.327352</td>
           <td>2009-03-19 05:46:07</td>
+          <td>5</td>
           <td>52009031905</td>
-          <td>5.291709</td>
-          <td>6.241949</td>
-          <td>10.400206</td>
         </tr>
         <tr>
           <th>217650</th>
-          <td>5</td>
           <td>39.999945</td>
           <td>116.327394</td>
           <td>2009-03-19 05:46:12</td>
+          <td>5</td>
           <td>52009031905</td>
-          <td>6.241949</td>
-          <td>8.462920</td>
-          <td>14.628012</td>
         </tr>
         <tr>
           <th>217651</th>
-          <td>5</td>
           <td>40.000015</td>
           <td>116.327433</td>
           <td>2009-03-19 05:46:17</td>
+          <td>5</td>
           <td>52009031905</td>
-          <td>8.462920</td>
-          <td>4.713399</td>
-          <td>6.713456</td>
         </tr>
         <tr>
           <th>217652</th>
-          <td>5</td>
           <td>39.999978</td>
           <td>116.327460</td>
           <td>2009-03-19 05:46:37</td>
+          <td>5</td>
           <td>52009031905</td>
-          <td>4.713399</td>
-          <td>NaN</td>
-          <td>NaN</td>
         </tr>
       </tbody>
     </table>
-    <p>217649 rows × 8 columns</p>
+    <p>217649 rows × 5 columns</p>
     </div>
 
 
@@ -1597,15 +1416,14 @@ different parameters.
 
 Importing the module:
 
-.. code:: python
+.. code:: ipython3
 
     from pymove import segmentation
-    df_move = mdf.copy()
 
 bbox_split function splits the bounding box in grids of the same size.
 The number of grids is defined by the parameter number_grids.
 
-.. code:: python
+.. code:: ipython3
 
     bbox = (22.147577, 113.54884299999999, 41.132062, 121.156224)
     segmentation.bbox_split(bbox, number_grids=4)
@@ -1677,7 +1495,7 @@ The number of grids is defined by the parameter number_grids.
 by_dist_time_speed functions segments the trajectories into clusters
 based on distance, time and speed.
 
-.. code:: python
+.. code:: ipython3
 
     segmentation.by_dist_time_speed(
         df_move,
@@ -1685,7 +1503,6 @@ based on distance, time and speed.
         max_time_between_adj_points=800,
         max_speed_between_adj_points=60.0
     )
-    df_move.head()
 
 
 
@@ -1732,6 +1549,7 @@ based on distance, time and speed.
           <th>lat</th>
           <th>lon</th>
           <th>datetime</th>
+          <th>tid</th>
           <th>dist_to_prev</th>
           <th>time_to_prev</th>
           <th>speed_to_prev</th>
@@ -1745,6 +1563,7 @@ based on distance, time and speed.
           <td>39.984094</td>
           <td>116.319236</td>
           <td>2008-10-23 05:53:05</td>
+          <td>12008102305</td>
           <td>NaN</td>
           <td>NaN</td>
           <td>NaN</td>
@@ -1756,6 +1575,7 @@ based on distance, time and speed.
           <td>39.984198</td>
           <td>116.319322</td>
           <td>2008-10-23 05:53:06</td>
+          <td>12008102305</td>
           <td>13.690153</td>
           <td>1.0</td>
           <td>13.690153</td>
@@ -1767,6 +1587,7 @@ based on distance, time and speed.
           <td>39.984224</td>
           <td>116.319402</td>
           <td>2008-10-23 05:53:11</td>
+          <td>12008102305</td>
           <td>7.403788</td>
           <td>5.0</td>
           <td>1.480758</td>
@@ -1778,6 +1599,7 @@ based on distance, time and speed.
           <td>39.984211</td>
           <td>116.319389</td>
           <td>2008-10-23 05:53:16</td>
+          <td>12008102305</td>
           <td>1.821083</td>
           <td>5.0</td>
           <td>0.364217</td>
@@ -1789,13 +1611,87 @@ based on distance, time and speed.
           <td>39.984217</td>
           <td>116.319422</td>
           <td>2008-10-23 05:53:21</td>
+          <td>12008102305</td>
           <td>2.889671</td>
           <td>5.0</td>
           <td>0.577934</td>
           <td>1</td>
         </tr>
+        <tr>
+          <th>...</th>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <th>217648</th>
+          <td>5</td>
+          <td>39.999896</td>
+          <td>116.327290</td>
+          <td>2009-03-19 05:46:02</td>
+          <td>52009031905</td>
+          <td>7.198855</td>
+          <td>5.0</td>
+          <td>1.439771</td>
+          <td>515</td>
+        </tr>
+        <tr>
+          <th>217649</th>
+          <td>5</td>
+          <td>39.999899</td>
+          <td>116.327352</td>
+          <td>2009-03-19 05:46:07</td>
+          <td>52009031905</td>
+          <td>5.291709</td>
+          <td>5.0</td>
+          <td>1.058342</td>
+          <td>515</td>
+        </tr>
+        <tr>
+          <th>217650</th>
+          <td>5</td>
+          <td>39.999945</td>
+          <td>116.327394</td>
+          <td>2009-03-19 05:46:12</td>
+          <td>52009031905</td>
+          <td>6.241949</td>
+          <td>5.0</td>
+          <td>1.248390</td>
+          <td>515</td>
+        </tr>
+        <tr>
+          <th>217651</th>
+          <td>5</td>
+          <td>40.000015</td>
+          <td>116.327433</td>
+          <td>2009-03-19 05:46:17</td>
+          <td>52009031905</td>
+          <td>8.462920</td>
+          <td>5.0</td>
+          <td>1.692584</td>
+          <td>515</td>
+        </tr>
+        <tr>
+          <th>217652</th>
+          <td>5</td>
+          <td>39.999978</td>
+          <td>116.327460</td>
+          <td>2009-03-19 05:46:37</td>
+          <td>52009031905</td>
+          <td>4.713399</td>
+          <td>20.0</td>
+          <td>0.235670</td>
+          <td>515</td>
+        </tr>
       </tbody>
     </table>
+    <p>217653 rows × 9 columns</p>
     </div>
 
 
@@ -1803,10 +1699,15 @@ based on distance, time and speed.
 by_max_dist function segments the trajectories into clusters based on
 distance.
 
-.. code:: python
+.. code:: ipython3
 
     segmentation.by_max_dist(df_move, max_dist_between_adj_points=4000)
-    df_move.head()
+
+
+
+.. parsed-literal::
+
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
 
@@ -1847,10 +1748,10 @@ distance.
           <th>lat</th>
           <th>lon</th>
           <th>datetime</th>
+          <th>tid</th>
           <th>dist_to_prev</th>
           <th>time_to_prev</th>
           <th>speed_to_prev</th>
-          <th>tid_part</th>
           <th>tid_dist</th>
         </tr>
       </thead>
@@ -1861,10 +1762,10 @@ distance.
           <td>39.984094</td>
           <td>116.319236</td>
           <td>2008-10-23 05:53:05</td>
+          <td>12008102305</td>
           <td>NaN</td>
           <td>NaN</td>
           <td>NaN</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -1873,10 +1774,10 @@ distance.
           <td>39.984198</td>
           <td>116.319322</td>
           <td>2008-10-23 05:53:06</td>
+          <td>12008102305</td>
           <td>13.690153</td>
           <td>1.0</td>
           <td>13.690153</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -1885,10 +1786,10 @@ distance.
           <td>39.984224</td>
           <td>116.319402</td>
           <td>2008-10-23 05:53:11</td>
+          <td>12008102305</td>
           <td>7.403788</td>
           <td>5.0</td>
           <td>1.480758</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -1897,10 +1798,10 @@ distance.
           <td>39.984211</td>
           <td>116.319389</td>
           <td>2008-10-23 05:53:16</td>
+          <td>12008102305</td>
           <td>1.821083</td>
           <td>5.0</td>
           <td>0.364217</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -1909,14 +1810,87 @@ distance.
           <td>39.984217</td>
           <td>116.319422</td>
           <td>2008-10-23 05:53:21</td>
+          <td>12008102305</td>
           <td>2.889671</td>
           <td>5.0</td>
           <td>0.577934</td>
           <td>1</td>
-          <td>1</td>
+        </tr>
+        <tr>
+          <th>...</th>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <th>217648</th>
+          <td>5</td>
+          <td>39.999896</td>
+          <td>116.327290</td>
+          <td>2009-03-19 05:46:02</td>
+          <td>52009031905</td>
+          <td>7.198855</td>
+          <td>5.0</td>
+          <td>1.439771</td>
+          <td>20</td>
+        </tr>
+        <tr>
+          <th>217649</th>
+          <td>5</td>
+          <td>39.999899</td>
+          <td>116.327352</td>
+          <td>2009-03-19 05:46:07</td>
+          <td>52009031905</td>
+          <td>5.291709</td>
+          <td>5.0</td>
+          <td>1.058342</td>
+          <td>20</td>
+        </tr>
+        <tr>
+          <th>217650</th>
+          <td>5</td>
+          <td>39.999945</td>
+          <td>116.327394</td>
+          <td>2009-03-19 05:46:12</td>
+          <td>52009031905</td>
+          <td>6.241949</td>
+          <td>5.0</td>
+          <td>1.248390</td>
+          <td>20</td>
+        </tr>
+        <tr>
+          <th>217651</th>
+          <td>5</td>
+          <td>40.000015</td>
+          <td>116.327433</td>
+          <td>2009-03-19 05:46:17</td>
+          <td>52009031905</td>
+          <td>8.462920</td>
+          <td>5.0</td>
+          <td>1.692584</td>
+          <td>20</td>
+        </tr>
+        <tr>
+          <th>217652</th>
+          <td>5</td>
+          <td>39.999978</td>
+          <td>116.327460</td>
+          <td>2009-03-19 05:46:37</td>
+          <td>52009031905</td>
+          <td>4.713399</td>
+          <td>20.0</td>
+          <td>0.235670</td>
+          <td>20</td>
         </tr>
       </tbody>
     </table>
+    <p>217653 rows × 9 columns</p>
     </div>
 
 
@@ -1924,10 +1898,15 @@ distance.
 by_max_time function segments the trajectories into clusters based on
 time.
 
-.. code:: python
+.. code:: ipython3
 
     segmentation.by_max_time(df_move, max_time_between_adj_points=1000)
-    df_move.head()
+
+
+
+.. parsed-literal::
+
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
 
@@ -1968,11 +1947,10 @@ time.
           <th>lat</th>
           <th>lon</th>
           <th>datetime</th>
+          <th>tid</th>
           <th>dist_to_prev</th>
           <th>time_to_prev</th>
           <th>speed_to_prev</th>
-          <th>tid_part</th>
-          <th>tid_dist</th>
           <th>tid_time</th>
         </tr>
       </thead>
@@ -1983,11 +1961,10 @@ time.
           <td>39.984094</td>
           <td>116.319236</td>
           <td>2008-10-23 05:53:05</td>
+          <td>12008102305</td>
           <td>NaN</td>
           <td>NaN</td>
           <td>NaN</td>
-          <td>1</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -1996,11 +1973,10 @@ time.
           <td>39.984198</td>
           <td>116.319322</td>
           <td>2008-10-23 05:53:06</td>
+          <td>12008102305</td>
           <td>13.690153</td>
           <td>1.0</td>
           <td>13.690153</td>
-          <td>1</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -2009,11 +1985,10 @@ time.
           <td>39.984224</td>
           <td>116.319402</td>
           <td>2008-10-23 05:53:11</td>
+          <td>12008102305</td>
           <td>7.403788</td>
           <td>5.0</td>
           <td>1.480758</td>
-          <td>1</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -2022,11 +1997,10 @@ time.
           <td>39.984211</td>
           <td>116.319389</td>
           <td>2008-10-23 05:53:16</td>
+          <td>12008102305</td>
           <td>1.821083</td>
           <td>5.0</td>
           <td>0.364217</td>
-          <td>1</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -2035,15 +2009,87 @@ time.
           <td>39.984217</td>
           <td>116.319422</td>
           <td>2008-10-23 05:53:21</td>
+          <td>12008102305</td>
           <td>2.889671</td>
           <td>5.0</td>
           <td>0.577934</td>
           <td>1</td>
-          <td>1</td>
-          <td>1</td>
+        </tr>
+        <tr>
+          <th>...</th>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <th>217648</th>
+          <td>5</td>
+          <td>39.999896</td>
+          <td>116.327290</td>
+          <td>2009-03-19 05:46:02</td>
+          <td>52009031905</td>
+          <td>7.198855</td>
+          <td>5.0</td>
+          <td>1.439771</td>
+          <td>353</td>
+        </tr>
+        <tr>
+          <th>217649</th>
+          <td>5</td>
+          <td>39.999899</td>
+          <td>116.327352</td>
+          <td>2009-03-19 05:46:07</td>
+          <td>52009031905</td>
+          <td>5.291709</td>
+          <td>5.0</td>
+          <td>1.058342</td>
+          <td>353</td>
+        </tr>
+        <tr>
+          <th>217650</th>
+          <td>5</td>
+          <td>39.999945</td>
+          <td>116.327394</td>
+          <td>2009-03-19 05:46:12</td>
+          <td>52009031905</td>
+          <td>6.241949</td>
+          <td>5.0</td>
+          <td>1.248390</td>
+          <td>353</td>
+        </tr>
+        <tr>
+          <th>217651</th>
+          <td>5</td>
+          <td>40.000015</td>
+          <td>116.327433</td>
+          <td>2009-03-19 05:46:17</td>
+          <td>52009031905</td>
+          <td>8.462920</td>
+          <td>5.0</td>
+          <td>1.692584</td>
+          <td>353</td>
+        </tr>
+        <tr>
+          <th>217652</th>
+          <td>5</td>
+          <td>39.999978</td>
+          <td>116.327460</td>
+          <td>2009-03-19 05:46:37</td>
+          <td>52009031905</td>
+          <td>4.713399</td>
+          <td>20.0</td>
+          <td>0.235670</td>
+          <td>353</td>
         </tr>
       </tbody>
     </table>
+    <p>217653 rows × 9 columns</p>
     </div>
 
 
@@ -2051,10 +2097,15 @@ time.
 by_max_speed function segments the trajectories into clusters based on
 speed.
 
-.. code:: python
+.. code:: ipython3
 
     segmentation.by_max_speed(df_move, max_speed_between_adj_points=70.0)
-    df_move.head()
+
+
+
+.. parsed-literal::
+
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
 
@@ -2095,12 +2146,10 @@ speed.
           <th>lat</th>
           <th>lon</th>
           <th>datetime</th>
+          <th>tid</th>
           <th>dist_to_prev</th>
           <th>time_to_prev</th>
           <th>speed_to_prev</th>
-          <th>tid_part</th>
-          <th>tid_dist</th>
-          <th>tid_time</th>
           <th>tid_speed</th>
         </tr>
       </thead>
@@ -2111,12 +2160,10 @@ speed.
           <td>39.984094</td>
           <td>116.319236</td>
           <td>2008-10-23 05:53:05</td>
+          <td>12008102305</td>
           <td>NaN</td>
           <td>NaN</td>
           <td>NaN</td>
-          <td>1</td>
-          <td>1</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -2125,12 +2172,10 @@ speed.
           <td>39.984198</td>
           <td>116.319322</td>
           <td>2008-10-23 05:53:06</td>
+          <td>12008102305</td>
           <td>13.690153</td>
           <td>1.0</td>
           <td>13.690153</td>
-          <td>1</td>
-          <td>1</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -2139,12 +2184,10 @@ speed.
           <td>39.984224</td>
           <td>116.319402</td>
           <td>2008-10-23 05:53:11</td>
+          <td>12008102305</td>
           <td>7.403788</td>
           <td>5.0</td>
           <td>1.480758</td>
-          <td>1</td>
-          <td>1</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -2153,12 +2196,10 @@ speed.
           <td>39.984211</td>
           <td>116.319389</td>
           <td>2008-10-23 05:53:16</td>
+          <td>12008102305</td>
           <td>1.821083</td>
           <td>5.0</td>
           <td>0.364217</td>
-          <td>1</td>
-          <td>1</td>
-          <td>1</td>
           <td>1</td>
         </tr>
         <tr>
@@ -2167,16 +2208,87 @@ speed.
           <td>39.984217</td>
           <td>116.319422</td>
           <td>2008-10-23 05:53:21</td>
+          <td>12008102305</td>
           <td>2.889671</td>
           <td>5.0</td>
           <td>0.577934</td>
           <td>1</td>
-          <td>1</td>
-          <td>1</td>
-          <td>1</td>
+        </tr>
+        <tr>
+          <th>...</th>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <th>217648</th>
+          <td>5</td>
+          <td>39.999896</td>
+          <td>116.327290</td>
+          <td>2009-03-19 05:46:02</td>
+          <td>52009031905</td>
+          <td>7.198855</td>
+          <td>5.0</td>
+          <td>1.439771</td>
+          <td>86</td>
+        </tr>
+        <tr>
+          <th>217649</th>
+          <td>5</td>
+          <td>39.999899</td>
+          <td>116.327352</td>
+          <td>2009-03-19 05:46:07</td>
+          <td>52009031905</td>
+          <td>5.291709</td>
+          <td>5.0</td>
+          <td>1.058342</td>
+          <td>86</td>
+        </tr>
+        <tr>
+          <th>217650</th>
+          <td>5</td>
+          <td>39.999945</td>
+          <td>116.327394</td>
+          <td>2009-03-19 05:46:12</td>
+          <td>52009031905</td>
+          <td>6.241949</td>
+          <td>5.0</td>
+          <td>1.248390</td>
+          <td>86</td>
+        </tr>
+        <tr>
+          <th>217651</th>
+          <td>5</td>
+          <td>40.000015</td>
+          <td>116.327433</td>
+          <td>2009-03-19 05:46:17</td>
+          <td>52009031905</td>
+          <td>8.462920</td>
+          <td>5.0</td>
+          <td>1.692584</td>
+          <td>86</td>
+        </tr>
+        <tr>
+          <th>217652</th>
+          <td>5</td>
+          <td>39.999978</td>
+          <td>116.327460</td>
+          <td>2009-03-19 05:46:37</td>
+          <td>52009031905</td>
+          <td>4.713399</td>
+          <td>20.0</td>
+          <td>0.235670</td>
+          <td>86</td>
         </tr>
       </tbody>
     </table>
+    <p>217653 rows × 9 columns</p>
     </div>
 
 
@@ -2190,18 +2302,16 @@ places such: a restaurant, a school, a work place.
 
 Importing the module:
 
-.. code:: python
+.. code:: ipython3
 
     from pymove import stay_point_detection
-    df_move = mdf.copy()
 
 create_or_update_move_stop_by_dist_time function creates or updates the
 stay points of the trajectories, based on distance and time metrics.
 
-.. code:: python
+.. code:: ipython3
 
     stay_point_detection.create_or_update_move_stop_by_dist_time(df_move, dist_radius=40, time_radius=1000)
-    df_move.head()
 
 
 
@@ -2255,8 +2365,7 @@ stay points of the trajectories, based on distance and time metrics.
           <th>lat</th>
           <th>lon</th>
           <th>datetime</th>
-          <th>hour_sin</th>
-          <th>hour_cos</th>
+          <th>tid</th>
           <th>dist_to_prev</th>
           <th>time_to_prev</th>
           <th>speed_to_prev</th>
@@ -2271,8 +2380,7 @@ stay points of the trajectories, based on distance and time metrics.
           <td>39.984094</td>
           <td>116.319236</td>
           <td>2008-10-23 05:53:05</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>NaN</td>
           <td>NaN</td>
           <td>NaN</td>
@@ -2285,8 +2393,7 @@ stay points of the trajectories, based on distance and time metrics.
           <td>39.984198</td>
           <td>116.319322</td>
           <td>2008-10-23 05:53:06</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>13.690153</td>
           <td>1.0</td>
           <td>13.690153</td>
@@ -2299,8 +2406,7 @@ stay points of the trajectories, based on distance and time metrics.
           <td>39.984224</td>
           <td>116.319402</td>
           <td>2008-10-23 05:53:11</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>7.403788</td>
           <td>5.0</td>
           <td>1.480758</td>
@@ -2313,8 +2419,7 @@ stay points of the trajectories, based on distance and time metrics.
           <td>39.984211</td>
           <td>116.319389</td>
           <td>2008-10-23 05:53:16</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>1.821083</td>
           <td>5.0</td>
           <td>0.364217</td>
@@ -2327,15 +2432,93 @@ stay points of the trajectories, based on distance and time metrics.
           <td>39.984217</td>
           <td>116.319422</td>
           <td>2008-10-23 05:53:21</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>2.889671</td>
           <td>5.0</td>
           <td>0.577934</td>
           <td>False</td>
         </tr>
+        <tr>
+          <th>...</th>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <th>217648</th>
+          <td>3512</td>
+          <td>5</td>
+          <td>39.999896</td>
+          <td>116.327290</td>
+          <td>2009-03-19 05:46:02</td>
+          <td>52009031905</td>
+          <td>7.198855</td>
+          <td>5.0</td>
+          <td>1.439771</td>
+          <td>False</td>
+        </tr>
+        <tr>
+          <th>217649</th>
+          <td>3512</td>
+          <td>5</td>
+          <td>39.999899</td>
+          <td>116.327352</td>
+          <td>2009-03-19 05:46:07</td>
+          <td>52009031905</td>
+          <td>5.291709</td>
+          <td>5.0</td>
+          <td>1.058342</td>
+          <td>False</td>
+        </tr>
+        <tr>
+          <th>217650</th>
+          <td>3512</td>
+          <td>5</td>
+          <td>39.999945</td>
+          <td>116.327394</td>
+          <td>2009-03-19 05:46:12</td>
+          <td>52009031905</td>
+          <td>6.241949</td>
+          <td>5.0</td>
+          <td>1.248390</td>
+          <td>False</td>
+        </tr>
+        <tr>
+          <th>217651</th>
+          <td>3512</td>
+          <td>5</td>
+          <td>40.000015</td>
+          <td>116.327433</td>
+          <td>2009-03-19 05:46:17</td>
+          <td>52009031905</td>
+          <td>8.462920</td>
+          <td>5.0</td>
+          <td>1.692584</td>
+          <td>False</td>
+        </tr>
+        <tr>
+          <th>217652</th>
+          <td>3512</td>
+          <td>5</td>
+          <td>39.999978</td>
+          <td>116.327460</td>
+          <td>2009-03-19 05:46:37</td>
+          <td>52009031905</td>
+          <td>4.713399</td>
+          <td>20.0</td>
+          <td>0.235670</td>
+          <td>False</td>
+        </tr>
       </tbody>
     </table>
+    <p>217653 rows × 10 columns</p>
     </div>
 
 
@@ -2343,10 +2526,15 @@ stay points of the trajectories, based on distance and time metrics.
 create_or_update_move_and_stop_by_radius function creates or updates the
 stay points of the trajectories, based on distance.
 
-.. code:: python
+.. code:: ipython3
 
     stay_point_detection.create_or_update_move_and_stop_by_radius(df_move, radius=2)
-    df_move.head()
+
+
+
+.. parsed-literal::
+
+    VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
 
@@ -2371,17 +2559,14 @@ stay points of the trajectories, based on distance.
       <thead>
         <tr style="text-align: right;">
           <th></th>
-          <th>segment_stop</th>
           <th>id</th>
           <th>lat</th>
           <th>lon</th>
           <th>datetime</th>
-          <th>hour_sin</th>
-          <th>hour_cos</th>
+          <th>tid</th>
           <th>dist_to_prev</th>
-          <th>time_to_prev</th>
-          <th>speed_to_prev</th>
-          <th>stop</th>
+          <th>dist_to_next</th>
+          <th>dist_prev_to_next</th>
           <th>situation</th>
         </tr>
       </thead>
@@ -2389,80 +2574,138 @@ stay points of the trajectories, based on distance.
         <tr>
           <th>0</th>
           <td>1</td>
-          <td>1</td>
           <td>39.984094</td>
           <td>116.319236</td>
           <td>2008-10-23 05:53:05</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>NaN</td>
+          <td>13.690153</td>
           <td>NaN</td>
-          <td>NaN</td>
-          <td>False</td>
           <td>nan</td>
         </tr>
         <tr>
           <th>1</th>
           <td>1</td>
-          <td>1</td>
           <td>39.984198</td>
           <td>116.319322</td>
           <td>2008-10-23 05:53:06</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>13.690153</td>
-          <td>1.0</td>
-          <td>13.690153</td>
-          <td>False</td>
+          <td>7.403788</td>
+          <td>20.223428</td>
           <td>move</td>
         </tr>
         <tr>
           <th>2</th>
           <td>1</td>
-          <td>1</td>
           <td>39.984224</td>
           <td>116.319402</td>
           <td>2008-10-23 05:53:11</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>7.403788</td>
-          <td>5.0</td>
-          <td>1.480758</td>
-          <td>False</td>
+          <td>1.821083</td>
+          <td>5.888579</td>
           <td>move</td>
         </tr>
         <tr>
           <th>3</th>
           <td>1</td>
-          <td>1</td>
           <td>39.984211</td>
           <td>116.319389</td>
           <td>2008-10-23 05:53:16</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>1.821083</td>
-          <td>5.0</td>
-          <td>0.364217</td>
-          <td>False</td>
+          <td>2.889671</td>
+          <td>1.873356</td>
           <td>stop</td>
         </tr>
         <tr>
           <th>4</th>
           <td>1</td>
-          <td>1</td>
           <td>39.984217</td>
           <td>116.319422</td>
           <td>2008-10-23 05:53:21</td>
-          <td>0.979084</td>
-          <td>0.203456</td>
+          <td>12008102305</td>
           <td>2.889671</td>
-          <td>5.0</td>
-          <td>0.577934</td>
-          <td>False</td>
+          <td>66.555997</td>
+          <td>68.727260</td>
+          <td>move</td>
+        </tr>
+        <tr>
+          <th>...</th>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <th>217648</th>
+          <td>5</td>
+          <td>39.999896</td>
+          <td>116.327290</td>
+          <td>2009-03-19 05:46:02</td>
+          <td>52009031905</td>
+          <td>7.198855</td>
+          <td>5.291709</td>
+          <td>12.214590</td>
+          <td>move</td>
+        </tr>
+        <tr>
+          <th>217649</th>
+          <td>5</td>
+          <td>39.999899</td>
+          <td>116.327352</td>
+          <td>2009-03-19 05:46:07</td>
+          <td>52009031905</td>
+          <td>5.291709</td>
+          <td>6.241949</td>
+          <td>10.400206</td>
+          <td>move</td>
+        </tr>
+        <tr>
+          <th>217650</th>
+          <td>5</td>
+          <td>39.999945</td>
+          <td>116.327394</td>
+          <td>2009-03-19 05:46:12</td>
+          <td>52009031905</td>
+          <td>6.241949</td>
+          <td>8.462920</td>
+          <td>14.628012</td>
+          <td>move</td>
+        </tr>
+        <tr>
+          <th>217651</th>
+          <td>5</td>
+          <td>40.000015</td>
+          <td>116.327433</td>
+          <td>2009-03-19 05:46:17</td>
+          <td>52009031905</td>
+          <td>8.462920</td>
+          <td>4.713399</td>
+          <td>6.713456</td>
+          <td>move</td>
+        </tr>
+        <tr>
+          <th>217652</th>
+          <td>5</td>
+          <td>39.999978</td>
+          <td>116.327460</td>
+          <td>2009-03-19 05:46:37</td>
+          <td>52009031905</td>
+          <td>4.713399</td>
+          <td>NaN</td>
+          <td>NaN</td>
           <td>move</td>
         </tr>
       </tbody>
     </table>
+    <p>217653 rows × 9 columns</p>
     </div>
 
 
@@ -2472,15 +2715,14 @@ Compression
 
 Importing the module:
 
-.. code:: python
+.. code:: ipython3
 
     from pymove import compression
-    df_move = mdf.copy()
 
 The function below is used to reduce the size of the trajectory, the
 stop points are used to make the compression.
 
-.. code:: python
+.. code:: ipython3
 
     df_compressed = compression.compress_segment_stop_to_point(df_move)
     len(df_move), len(df_compressed)

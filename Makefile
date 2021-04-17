@@ -25,7 +25,9 @@ lint: clean
 	flake8
 
 docs: clean
+	cp docs/examples/notebooks.rst docs
 	rm -rf docs/api docs/examples
 	sphinx-apidoc -f -o docs/api pymove pymove/tests/
-	jupyter nbconvert --to rst --output-dir docs/examples examples/[0-9]*.ipynb
+	jupyter nbconvert --to rst --output-dir docs/examples notebooks/[0-9]*.ipynb
+	mv docs/notebooks.rst docs/examples
 	make -C docs html

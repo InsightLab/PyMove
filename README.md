@@ -219,7 +219,7 @@ If you installed from `pip` or `github`, you may encounter an error related to
 
 ## Examples
 
-You can access examples of how to use PyMove [here](https://github.com/InsightLab/PyMove/tree/master/examples)
+You can see examples of how to use PyMove [here](https://github.com/InsightLab/PyMove/tree/master/notebooks)
 ---
 
 ## Papers
@@ -240,7 +240,7 @@ You can access examples of how to use PyMove [here](https://github.com/InsightLa
 
 
 ## Mapping PyMove methods with the Paradigms of Trajectory Data Mining
-![](.mapping.svg)
+
 ![](.mapping.png)
 [ZHENG 2015](https://www.microsoft.com/en-us/research/publication/trajectory-data-mining-an-overview/).
 

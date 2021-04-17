@@ -297,7 +297,7 @@ def geometry_points_to_lat_and_lon(
     move_data: DataFrame,
     geometry_label: Optional[Text] = GEOMETRY,
     drop_geometry: Optional[bool] = True,
-    inplace: Optional[bool] = True
+    inplace: Optional[bool] = False
 ) -> DataFrame:
     """
     Converts the geometry column to latitude and longitude columns(named 'lat' and 'lon').
@@ -313,7 +313,7 @@ def geometry_points_to_lat_and_lon(
     drop_geometry: bool, optional
         Option to drop the geometry column, by default True
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -322,7 +322,7 @@ def geometry_points_to_lat_and_lon(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     move_data = move_data[
         move_data[geometry_label].map(type) == Point
@@ -379,7 +379,7 @@ def ms_to_kmh(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_speed: Optional[Text] = SPEED_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[bool] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in ms, in label_speed column to kmh.
@@ -393,7 +393,7 @@ def ms_to_kmh(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -402,7 +402,8 @@ def ms_to_kmh(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_speed not in move_data:
         move_data.generate_dist_time_speed_features()
     move_data[label_speed] = move_data[label_speed].apply(
@@ -418,7 +419,7 @@ def kmh_to_ms(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_speed: Optional[Text] = SPEED_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in kmh, in label_speed column to ms.
@@ -432,7 +433,7 @@ def kmh_to_ms(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -441,7 +442,8 @@ def kmh_to_ms(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_speed not in move_data:
         move_data.generate_dist_time_speed_features()
         ms_to_kmh(move_data, label_speed)
@@ -458,7 +460,7 @@ def meters_to_kilometers(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_distance: Optional[Text] = DIST_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in meters, in label_distance column to kilometers.
@@ -472,7 +474,7 @@ def meters_to_kilometers(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -482,7 +484,8 @@ def meters_to_kilometers(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_distance not in move_data:
         move_data.generate_dist_time_speed_features()
     move_data[label_distance] = move_data[label_distance].apply(
@@ -498,7 +501,7 @@ def kilometers_to_meters(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_distance: Optional[Text] = DIST_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in kilometers, in label_distance column to meters.
@@ -512,7 +515,7 @@ def kilometers_to_meters(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -521,7 +524,8 @@ def kilometers_to_meters(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_distance not in move_data:
         move_data.generate_dist_time_speed_features()
         meters_to_kilometers(move_data, label_distance)
@@ -538,7 +542,7 @@ def seconds_to_minutes(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_time: Optional[Text] = TIME_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in seconds, in label_distance column to minutes.
@@ -552,7 +556,7 @@ def seconds_to_minutes(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -561,7 +565,8 @@ def seconds_to_minutes(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_time not in move_data:
         move_data.generate_dist_time_speed_features()
     move_data[label_time] = move_data[label_time].apply(
@@ -577,7 +582,7 @@ def minute_to_seconds(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_time: Optional[Text] = TIME_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in minutes, in label_distance column to seconds.
@@ -591,7 +596,7 @@ def minute_to_seconds(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -600,7 +605,8 @@ def minute_to_seconds(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_time not in move_data:
         move_data.generate_dist_time_speed_features()
         seconds_to_minutes(move_data, label_time)
@@ -617,7 +623,7 @@ def minute_to_hours(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_time: Optional[Text] = TIME_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in minutes, in label_distance column to hours.
@@ -631,7 +637,7 @@ def minute_to_hours(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -640,7 +646,8 @@ def minute_to_hours(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_time not in move_data:
         move_data.generate_dist_time_speed_features()
         seconds_to_minutes(move_data, label_time)
@@ -657,7 +664,7 @@ def hours_to_minute(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_time: Optional[Text] = TIME_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in hours, in label_distance column to minute.
@@ -671,7 +678,7 @@ def hours_to_minute(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -680,7 +687,8 @@ def hours_to_minute(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_time not in move_data:
         move_data.generate_dist_time_speed_features()
         seconds_to_hours(move_data, label_time)
@@ -697,7 +705,7 @@ def seconds_to_hours(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_time: Optional[Text] = TIME_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in seconds, in label_distance column to hours.
@@ -711,7 +719,7 @@ def seconds_to_hours(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -720,7 +728,8 @@ def seconds_to_hours(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_time not in move_data:
         move_data.generate_dist_time_speed_features()
     move_data[label_time] = move_data[label_time].apply(
@@ -736,7 +745,7 @@ def hours_to_seconds(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_time: Optional[Text] = TIME_TO_PREV,
     new_label: Optional[Text] = None,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Convert values, in hours, in label_distance column to seconds.
@@ -750,7 +759,7 @@ def hours_to_seconds(
     new_label: str, optional
         Represents a new column that will contain the conversion result, by default None
     inplace: bool, optional
-        Whether the operation will be done in the original dataframe, by default True
+        Whether the operation will be done in the original dataframe, by default False
 
     Returns
     -------
@@ -759,7 +768,8 @@ def hours_to_seconds(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
+
     if label_time not in move_data:
         move_data.generate_dist_time_speed_features()
         seconds_to_hours(move_data, label_time)
