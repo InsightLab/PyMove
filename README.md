@@ -265,7 +265,6 @@ You can see examples of how to use PyMove [here](https://github.com/InsightLab/P
     -   `clean_trajectories_with_few_points`
     -   `clean_trajectories_short_and_few_points`
     -   `clean_id_by_time_max`
-    -   `outliers`
 -   5: **Compression** &rarr; `pymove.preprocessing.compression`
     -   `compress_segment_stop_to_point`
 -   6: **Segmentation** &rarr; `pymove.preprocessing.segmentation`
@@ -290,6 +289,7 @@ You can see examples of how to use PyMove [here](https://github.com/InsightLab/P
 -   15: **Periodic Patterns**
 -   16: **Trajectory Classification**
 -   17: **Trajectory Outlier / Anomaly Detection** &rarr; `pymove.semantic.semantic`
+    -   `outliers`
     -   `create_or_update_out_of_the_bbox`
     -   `create_or_update_gps_deactivated_signal`
     -   `create_or_update_gps_jump`
