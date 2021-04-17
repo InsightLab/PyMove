@@ -220,24 +220,8 @@ If you installed from `pip` or `github`, you may encounter an error related to
 ## Examples
 
 You can see examples of how to use PyMove [here](https://github.com/InsightLab/PyMove/tree/master/notebooks)
----
-
-## Papers
-
-(list of publications using/with Pymove)
 
 ---
-
-## Useful list of related libraries and links
-
--   [Handling GPS Data with Python](https://github.com/FlorianWilhelm/gps_data_with_python/tree/master/notebooks)
--   [mplleaflet - Easily convert matplotlib plots from Python into interactive Leaflet web maps](https://github.com/jwass/mplleaflet)
--   [Pykalman](https://github.com/pykalman/pykalman)
--   [Ramer-Douglas-Peucker algorithm](https://github.com/fhirschmann/rdp)
--   [Knee point detection in Python](https://github.com/arvkevi/kneed)
--   [TrajSuite Java Library](https://github.com/lukehb/TrajSuite)
--   [GraphHopper Map-Matching Java Library](https://github.com/graphhopper/map-matching)
-
 
 ## Mapping PyMove methods with the Paradigms of Trajectory Data Mining
 
@@ -298,3 +282,21 @@ You can see examples of how to use PyMove [here](https://github.com/InsightLab/P
     -   `filter_block_signal_by_repeated_amount_of_points`
     -   `filter_block_signal_by_time`
     -   `filter_longer_time_to_stop_segment_by_id`
+
+---
+
+## Papers
+
+(list of publications using/with Pymove)
+
+---
+
+## Useful list of related libraries and links
+
+-   [Handling GPS Data with Python](https://github.com/FlorianWilhelm/gps_data_with_python/tree/master/notebooks)
+-   [mplleaflet - Easily convert matplotlib plots from Python into interactive Leaflet web maps](https://github.com/jwass/mplleaflet)
+-   [Pykalman](https://github.com/pykalman/pykalman)
+-   [Ramer-Douglas-Peucker algorithm](https://github.com/fhirschmann/rdp)
+-   [Knee point detection in Python](https://github.com/arvkevi/kneed)
+-   [TrajSuite Java Library](https://github.com/lukehb/TrajSuite)
+-   [GraphHopper Map-Matching Java Library](https://github.com/graphhopper/map-matching)
