@@ -1,7 +1,6 @@
 """
 Stop point detection operations.
 
-create_or_update_datetime_in_format_cyclical,
 create_or_update_move_stop_by_dist_time,
 create_or_update_move_and_stop_by_radius
 
@@ -10,7 +9,6 @@ create_or_update_move_and_stop_by_radius
 from typing import TYPE_CHECKING, Optional, Text, Union
 
 import numpy as np
-from pandas.core.frame import DataFrame
 
 from pymove.preprocessing.segmentation import by_max_dist
 from pymove.utils.constants import (
@@ -32,52 +30,6 @@ if TYPE_CHECKING:
     from pymove.core.pandas import PandasMoveDataFrame
 
 
-def create_or_update_datetime_in_format_cyclical(
-    move_data: DataFrame,
-    label_datetime: Optional[Text] = DATETIME,
-    inplace: Optional[bool] = True
-) -> Optional[DataFrame]:
-    """
-    Converts the time data into a cyclical format.
-
-    Parameters
-    ----------
-    move_data : dataframe
-       The input trajectory data
-    label_datetime : str, optional
-        Indicates the column with the data to be converted, by default DATETIME
-    inplace : bool, optional
-        if set to true the original dataframe will be altered to
-        contain the result of the filtering,
-        otherwise a copy will be returned, by default True
-
-    Returns
-    -------
-    DataFrame
-        DataFrame with 2 aditional features: hour_sin and hour_cos.
-
-    Notes
-    -----
-    https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
-    https://www.avanwyk.com/encoding-cyclical-features-for-deep-learning/
-
-    """
-    if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
-
-    logger.debug('Encoding cyclical continuous features - 24-hour time')
-    if label_datetime in move_data:
-        hours = move_df[label_datetime].dt.hour
-        move_df[HOUR_SIN] = np.sin(2 * np.pi * hours / 23.0)
-        move_df[HOUR_COS] = np.cos(2 * np.pi * hours / 23.0)
-        logger.debug('...hour_sin and  hour_cos features were created...\n')
-
-    if not inplace:
-        return move_df
-
-
 @timer_decorator
 def create_or_update_move_stop_by_dist_time(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
@@ -85,7 +37,7 @@ def create_or_update_move_stop_by_dist_time(
     time_radius: Optional[float] = 900,
     label_id: Optional[Text] = TRAJ_ID,
     new_label: Optional[Text] = SEGMENT_STOP,
-    inplace: Optional[bool] = True
+    inplace: Optional[bool] = False
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Determines the stops and moves points of the dataframe.
@@ -114,7 +66,7 @@ def create_or_update_move_stop_by_dist_time(
     inplace : bool, optional
         if set to true the original dataframe will be altered to
         contain the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -125,18 +77,17 @@ def create_or_update_move_stop_by_dist_time(
 
     """
     if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
+        move_data = move_data.copy()
 
     by_max_dist(
-        move_df,
+        move_data,
         label_id=label_id,
         max_dist_between_adj_points=dist_radius,
         label_new_tid=new_label,
+        inplace=True
     )
 
-    move_df.generate_dist_time_speed_features(
+    move_data.generate_dist_time_speed_features(
         label_id=new_label
     )
 
@@ -145,21 +96,21 @@ def create_or_update_move_stop_by_dist_time(
         '...Creating stop features as True or False using %s to time in seconds'
         % time_radius
     )
-    move_df[STOP] = False
+    move_data[STOP] = False
     move_dataagg_tid = (
-        move_df.groupby(by=new_label)
+        move_data.groupby(by=new_label)
         .agg({TIME_TO_PREV: 'sum'})
         .query('%s > %s' % (TIME_TO_PREV, time_radius))
         .index
     )
-    idx = move_df[
-        move_df[new_label].isin(move_dataagg_tid)
+    idx = move_data[
+        move_data[new_label].isin(move_dataagg_tid)
     ].index
-    move_df.at[idx, STOP] = True
-    logger.debug(move_df[STOP].value_counts())
+    move_data.at[idx, STOP] = True
+    logger.debug(move_data[STOP].value_counts())
 
     if not inplace:
-        return move_df
+        return move_data
 
 
 @timer_decorator
@@ -168,7 +119,7 @@ def create_or_update_move_and_stop_by_radius(
     radius: Optional[float] = 0,
     target_label: Optional[Text] = DIST_TO_PREV,
     new_label: Optional[Text] = SITUATION,
-    inplace: Optional[bool] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Finds the stops and moves points of the dataframe.
@@ -192,7 +143,7 @@ def create_or_update_move_and_stop_by_radius(
     inplace : bool, optional
         if set to true the original dataframe will be altered to
         contain the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -205,24 +156,22 @@ def create_or_update_move_and_stop_by_radius(
     logger.debug('\nCreating or updating features MOVE and STOPS...\n')
 
     if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
+        move_data = move_data.copy()
 
-    if DIST_TO_PREV not in move_df:
-        move_df.generate_dist_features()
+    if DIST_TO_PREV not in move_data:
+        move_data.generate_dist_features()
 
     conditions = (
-        (move_df[target_label] > radius),
-        (move_df[target_label] <= radius),
+        (move_data[target_label] > radius),
+        (move_data[target_label] <= radius),
     )
     choices = [MOVE, STOP]
 
-    move_df[new_label] = np.select(conditions, choices, np.nan)
+    move_data[new_label] = np.select(conditions, choices, np.nan)
     logger.debug(
         '\n....There are %s stops to this parameters\n'
-        % (move_df[move_df[new_label] == STOP].shape[0])
+        % (move_data[move_data[new_label] == STOP].shape[0])
     )
 
     if not inplace:
-        return move_df
+        return move_data

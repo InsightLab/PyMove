@@ -237,7 +237,7 @@ def test_create_time_slot_in_minute():
         'id': {0: 1, 1: 1, 2: 1, 3: 1},
         'time_slot': {0: 22, 1: 23, 2: 23, 3: 24}
     })
-    datetime.create_time_slot_in_minute(df)
+    datetime.create_time_slot_in_minute(df, inplace=True)
     assert_frame_equal(df, expected)
 
 
@@ -316,5 +316,5 @@ def test_threshold_time_statistics():
         index=[0, 1, 2, 3]
     )
 
-    datetime.threshold_time_statistics(statistics)
+    datetime.threshold_time_statistics(statistics, inplace=True)
     assert_frame_equal(statistics, expected)

@@ -169,15 +169,15 @@ Requirements: Anaconda Python distribution installed and accessible
  you want to call your environment, and replace `x.x` with the Python version
  you wish to use. (To see a list of available python versions first,
  type conda search "^python$" and press enter.)
-    -   `conda create -n <env_name> python=x.x`
+    -   ``conda create -n <env_name> python=x.x``
 
-    -   Press y to proceed. This will install the Python version and all the
+    -   `Press y to proceed. This will install the Python version and all the`
  associated anaconda packaged libraries at `path_to_your_anaconda_location/anaconda/envs/env_name`
 
 2.  Activate your virtual environment. To activate or switch into your
  virtual environment, simply type the following where yourenvname is the
  name you gave to your environment at creation.
-    -   `conda activate <env_name>`
+    -   ``conda activate <env_name>``
 
 3.  Now install the package from either `conda`, `pip` or `github`
 
@@ -196,19 +196,19 @@ Requirements: Anaconda Python distribution installed and accessible
 ## [Github](https://github.com/InsightLab/PyMove) installation
 
 1.  Clone this repository
-    -   `git clone https://github.com/InsightLab/PyMove`
+    -   ``git clone https://github.com/InsightLab/PyMove``
 
 2.  Switch to folder PyMove
-    -   `cd PyMove`
+    -   ``cd PyMove``
 
 3.  Switch to a new branch
-    -   `git checkout -b developer`
+    -   ``git checkout -b developer``
 
 4.  Make a pull of branch
-    -   `git pull origin developer`
+    -   ``git pull origin developer``
 
 5.  Install pymove in developer mode
-    -   `make dev`
+    -   ``make dev``
 
 ### For windows users
 
@@ -219,7 +219,70 @@ If you installed from `pip` or `github`, you may encounter an error related to
 
 ## Examples
 
-You can access examples of how to use PyMove [here](https://github.com/InsightLab/PyMove/tree/master/examples)
+You can see examples of how to use PyMove [here](https://github.com/InsightLab/PyMove/tree/master/notebooks)
+
+---
+
+## Mapping PyMove methods with the Paradigms of Trajectory Data Mining
+
+![](.mapping.png)
+[ZHENG 2015](https://www.microsoft.com/en-us/research/publication/trajectory-data-mining-an-overview/).
+
+-   1: **Spatial Trajectories** &rarr; `pymove.core`
+    -   `MoveDataFrame`
+    -   `DiscreteMoveDataFrame`
+-   2: **Stay Point Detection** &rarr; `pymove.preprocessing.stay_point_detection`
+    -   `create_or_update_move_stop_by_dist_time`
+    -   `create_or_update_move_and_stop_by_radius`
+-   3: **Map-Matching** &rarr; `pymove-osmnx`
+-   4: **Noise Filtering** &rarr; `pymove.preprocessing.filters`
+    -   `by_bbox`
+    -   `by_datetime`
+    -   `by_label`
+    -   `by_id`
+    -   `by_tid`
+    -   `clean_consecutive_duplicates`
+    -   `clean_gps_jumps_by_distance`
+    -   `clean_gps_nearby_points_by_distances`
+    -   `clean_gps_nearby_points_by_speed`
+    -   `clean_gps_speed_max_radius`
+    -   `clean_trajectories_with_few_points`
+    -   `clean_trajectories_short_and_few_points`
+    -   `clean_id_by_time_max`
+-   5: **Compression** &rarr; `pymove.preprocessing.compression`
+    -   `compress_segment_stop_to_point`
+-   6: **Segmentation** &rarr; `pymove.preprocessing.segmentation`
+    -   `bbox_split`
+    -   `by_dist_time_speed`
+    -   `by_max_dist`
+    -   `by_max_time`
+    -   `by_max_speed`
+-   7: **Distance of Trajectory** &rarr; `pymove.query.query`
+    -   `range_query`
+    -   `knn_query`
+-   8: **Query Historical Trajectories**
+-   9: **Managing Recent Trajectories**
+-   10: **Privacy Preserving**
+-   11: **Reducing Uncertainty**
+-   12: **Moving Together Patterns**
+-   13: **Clustering** &rarr; `pymove.models.pattern_mining.clustering`
+    -   `elbow_method`
+    -   `gap_statistics`
+    -   `dbscan_clustering`
+-   14: **Freq. Seq. Patterns**
+-   15: **Periodic Patterns**
+-   16: **Trajectory Classification**
+-   17: **Trajectory Outlier / Anomaly Detection** &rarr; `pymove.semantic.semantic`
+    -   `outliers`
+    -   `create_or_update_out_of_the_bbox`
+    -   `create_or_update_gps_deactivated_signal`
+    -   `create_or_update_gps_jump`
+    -   `create_or_update_short_trajectory`
+    -   `create_or_update_gps_block_signal`
+    -   `filter_block_signal_by_repeated_amount_of_points`
+    -   `filter_block_signal_by_time`
+    -   `filter_longer_time_to_stop_segment_by_id`
+
 ---
 
 ## Papers

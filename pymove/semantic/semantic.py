@@ -1,6 +1,7 @@
 """
 Semantic operations.
 
+outliers
 create_or_update_out_of_the_bbox,
 create_or_update_gps_deactivated_signal,
 create_or_update_gps_jump,
@@ -21,9 +22,12 @@ from pymove.preprocessing import filters, segmentation, stay_point_detection
 from pymove.utils.constants import (
     BLOCK,
     DEACTIVATED,
+    DIST_PREV_TO_NEXT,
+    DIST_TO_NEXT,
     DIST_TO_PREV,
     JUMP,
     OUT_BBOX,
+    OUTLIER,
     SEGMENT_STOP,
     SHORT,
     TID_PART,
@@ -103,11 +107,75 @@ def _process_simple_filter(
 
 
 @timer_decorator
+def outliers(
+    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    jump_coefficient: Optional[float] = 3.0,
+    threshold: Optional[float] = 1,
+    new_label: Optional[Text] = OUTLIER,
+    inplace: Optional[bool] = False
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+    """
+    Create or update a boolean feature to detect outliers.
+
+    Parameters
+    ----------
+    move_data : dataframe
+        The input trajectory data
+    jump_coefficient : float, optional
+        by default 3
+    threshold : float, optional
+        Minimum value that the distance features must have
+        in order to be considered outliers, by default 1
+    new_label: string, optional
+        The name of the new feature with detected points out of the bbox,
+        by default OUTLIER
+    inplace : bool, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
+
+    Returns
+    -------
+    DataFrame
+        Returns a dataframe with the trajectories outliers or None
+
+    """
+    if not inplace:
+        move_data = move_data.copy()
+
+    if DIST_TO_PREV not in move_data:
+        move_data.generate_dist_features()
+
+    if move_data.index.name is not None:
+        logger.debug('...Reset index for filtering\n')
+        move_data.reset_index(inplace=True)
+
+    if (
+        DIST_TO_PREV in move_data
+        and DIST_TO_NEXT
+        and DIST_PREV_TO_NEXT in move_data
+    ):
+        jump = jump_coefficient * move_data[DIST_PREV_TO_NEXT]
+        filter_ = (
+            (move_data[DIST_TO_NEXT] > threshold)
+            & (move_data[DIST_TO_PREV] > threshold)
+            & (move_data[DIST_PREV_TO_NEXT] > threshold)
+            & (jump < move_data[DIST_TO_NEXT])
+            & (jump < move_data[DIST_TO_PREV])
+        )
+        move_data[new_label] = filter_
+    else:
+        logger.warning('...Distances features were not created')
+
+    if not inplace:
+        return move_data
+
+
+@timer_decorator
 def create_or_update_out_of_the_bbox(
     move_data: DataFrame,
     bbox: Tuple[int, int, int, int],
     new_label: Optional[Text] = OUT_BBOX,
-    inplace: Optional[bool] = True
+    inplace: Optional[bool] = False
 ) -> Optional[DataFrame]:
     """
     Create or update a boolean feature to detect points out of the bbox.
@@ -125,7 +193,7 @@ def create_or_update_out_of_the_bbox(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -135,7 +203,7 @@ def create_or_update_out_of_the_bbox(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     logger.debug('\nCreate or update boolean feature to detect points out of the bbox')
     filtered_ = filters.by_bbox(move_data, bbox, filter_out=True)
@@ -156,7 +224,7 @@ def create_or_update_gps_deactivated_signal(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     max_time_between_adj_points: Optional[float] = 7200,
     new_label: Optional[Text] = DEACTIVATED,
-    inplace: Optional[bool] = True
+    inplace: Optional[bool] = False
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Creates a new feature that inform if point invalid.
@@ -176,7 +244,7 @@ def create_or_update_gps_deactivated_signal(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -186,7 +254,7 @@ def create_or_update_gps_deactivated_signal(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     message = 'Create or update deactivated signal if time max > %s seconds\n'
     logger.debug(message % max_time_between_adj_points)
@@ -206,7 +274,7 @@ def create_or_update_gps_jump(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     max_dist_between_adj_points: Optional[float] = 3000,
     new_label: Optional[Text] = JUMP,
-    inplace: Optional[bool] = True
+    inplace: Optional[bool] = False
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Creates a new feature that inform if point is a gps jump.
@@ -225,7 +293,7 @@ def create_or_update_gps_jump(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -235,7 +303,7 @@ def create_or_update_gps_jump(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     message = 'Create or update jump if dist max > %s meters\n'
     logger.debug(message % max_dist_between_adj_points)
@@ -259,7 +327,7 @@ def create_or_update_short_trajectory(
     k_segment_max: Optional[int] = 50,
     label_tid: Optional[Text] = TID_PART,
     new_label: Optional[Text] = SHORT,
-    inplace: Optional[bool] = True
+    inplace: Optional[bool] = False
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Creates a new feature that inform if point belongs to a short trajectory.
@@ -285,7 +353,7 @@ def create_or_update_short_trajectory(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -295,7 +363,7 @@ def create_or_update_short_trajectory(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     logger.debug('\nCreate or update short trajectories...')
 
@@ -304,7 +372,8 @@ def create_or_update_short_trajectory(
         max_dist_between_adj_points=max_dist_between_adj_points,
         max_time_between_adj_points=max_time_between_adj_points,
         max_speed_between_adj_points=max_speed_between_adj_points,
-        label_new_tid=label_tid
+        label_new_tid=label_tid,
+        inplace=True
     )
     move_data[new_label] = False
 
@@ -324,10 +393,10 @@ def create_or_update_gps_block_signal(
     max_time_stop: Optional[float] = 7200,
     new_label: Optional[Text] = BLOCK,
     label_tid: Optional[Text] = TID_PART,
-    inplace: Optional[bool] = True
+    inplace: Optional[bool] = False
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
-    Creates a new feature that inform points with speed = 0.
+    Creates a new feature that inform segments with periods without moving.
 
     Parameters
     ----------
@@ -344,7 +413,7 @@ def create_or_update_gps_block_signal(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -355,12 +424,15 @@ def create_or_update_gps_block_signal(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     message = 'Create or update block_signal if max time stop > %s seconds\n'
     logger.debug(message % max_time_stop)
     segmentation.by_max_dist(
-        move_data, max_dist_between_adj_points=0.0, label_new_tid=label_tid
+        move_data,
+        max_dist_between_adj_points=0.0,
+        label_new_tid=label_tid,
+        inplace=True
     )
 
     logger.debug('Updating dist time speed values')
@@ -368,7 +440,6 @@ def create_or_update_gps_block_signal(
 
     move_data[new_label] = False
 
-    # SUM the segment block to detect the id that has or more time stopped
     df_agg_tid = move_data.groupby(by=label_tid).agg({TIME_TO_PREV: 'sum'})
     filter_ = df_agg_tid[TIME_TO_PREV] >= max_time_stop
     idx = df_agg_tid[filter_].index
@@ -408,7 +479,7 @@ def filter_block_signal_by_repeated_amount_of_points(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -419,11 +490,11 @@ def filter_block_signal_by_repeated_amount_of_points(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     if BLOCK not in move_data:
         create_or_update_gps_block_signal(
-            move_data, max_time_stop, label_tid=label_tid
+            move_data, max_time_stop, label_tid=label_tid, inplace=True
         )
 
     df_count_tid = move_data.groupby(by=[label_tid]).sum()
@@ -466,7 +537,7 @@ def filter_block_signal_by_time(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -481,7 +552,7 @@ def filter_block_signal_by_time(
 
     if BLOCK not in move_data:
         create_or_update_gps_block_signal(
-            move_data, max_time_stop, label_tid=label_tid
+            move_data, max_time_stop, label_tid=label_tid, inplace=True
         )
 
     df_agg_tid = move_data.groupby(by=label_tid).agg(
@@ -534,7 +605,7 @@ def filter_longer_time_to_stop_segment_by_id(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to contain
         the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -549,7 +620,7 @@ def filter_longer_time_to_stop_segment_by_id(
 
     if label_segment_stop not in move_data:
         stay_point_detection.create_or_update_move_stop_by_dist_time(
-            move_data, dist_radius, time_radius
+            move_data, dist_radius, time_radius, inplace=True
         )
 
     df_agg_id_stop = move_data.groupby(

@@ -303,7 +303,7 @@ class Grid:
         )
         lat_init = self.lat_min_y
         cell_size = self.cell_size_by_degree
-        for i in progress_bar(range(self.grid_size_lat_y)):
+        for i in progress_bar(range(self.grid_size_lat_y), desc='Creating polygons'):
             lon_init = self.lon_min_x
             for j in range(self.grid_size_lon_x):
                 # Cria o polygon da célula

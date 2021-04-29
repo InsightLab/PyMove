@@ -7,7 +7,6 @@ by_datetime,
 by_label,
 by_id,
 by_tid,
-outliers,
 clean_consecutive_duplicates,
 clean_gps_jumps_by_distance,
 clean_gps_nearby_points_by_distances,
@@ -24,13 +23,13 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Text, Tup
 import numpy as np
 from pandas import DataFrame
 
+from pymove.semantic.semantic import outliers
 from pymove.utils.constants import (
     DATETIME,
-    DIST_PREV_TO_NEXT,
-    DIST_TO_NEXT,
     DIST_TO_PREV,
     LATITUDE,
     LONGITUDE,
+    OUTLIER,
     SPEED_TO_PREV,
     TID,
     TIME_TO_PREV,
@@ -285,72 +284,6 @@ def by_tid(
     return by_label(move_data, tid_, TID, filter_out, inplace)
 
 
-def outliers(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    jump_coefficient: Optional[float] = 3.0,
-    threshold: Optional[float] = 1,
-    filter_out: Optional[bool] = False,
-    inplace: Optional[bool] = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
-    """
-    Filters trajectories points that are outliers.
-
-    Parameters
-    ----------
-    move_data : dataframe
-        The input trajectory data
-    jump_coefficient : float, optional
-        by default 3
-    threshold : float, optional
-        Minimum value that the distance features must have
-        in order to be considered outliers, by default 1
-    filter_out : bool, optional
-        If set to true, the function will return the points of
-        the trajectories with timestamp outside the time range.
-        The points whithin the time range will be return if filter_out is False.
-        by default False
-    inplace : bool, optional
-        if set to true the original dataframe will be altered to contain
-        the result of the filtering, otherwise a copy will be returned, by default False
-
-    Returns
-    -------
-    DataFrame
-        Returns a dataframe with the trajectories outliers or None
-
-    """
-    if DIST_TO_PREV not in move_data:
-        move_data.generate_dist_features()
-
-    if move_data.index.name is not None:
-        logger.debug('...Reset index for filtering\n')
-        move_data.reset_index(inplace=True)
-
-    if (
-        DIST_TO_PREV in move_data
-        and DIST_TO_NEXT
-        and DIST_PREV_TO_NEXT in move_data
-    ):
-        jump = jump_coefficient * move_data[DIST_PREV_TO_NEXT]
-        filter_ = (
-            (move_data[DIST_TO_NEXT] > threshold)
-            & (move_data[DIST_TO_PREV] > threshold)
-            & (move_data[DIST_PREV_TO_NEXT] > threshold)
-            & (jump < move_data[DIST_TO_NEXT])
-            & (jump < move_data[DIST_TO_PREV])
-        )
-
-        if filter_out:
-            filter_ = ~filter_
-
-        logger.debug('...Filtering jumps \n')
-        return move_data.drop(index=move_data[~filter_].index, inplace=inplace)
-
-    else:
-        logger.warning('...Distances features were not created')
-        return move_data
-
-
 def clean_consecutive_duplicates(
     move_data: DataFrame,
     subset: Optional[Union[int, Text]] = None,
@@ -475,6 +408,7 @@ def _filter_data(move_data: DataFrame, f: callable, kwargs: Dict):
             threshold=kwargs['arg2'],
             inplace=False
         )
+        filter_data_points = filter_data_points[filter_data_points[OUTLIER]]
     else:
         filter_data_points = f(
             move_data,
@@ -566,13 +500,10 @@ def clean_gps_jumps_by_distance(
 
     """
     if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
-    # sum_drop = 0
+        move_data = move_data.copy()
 
-    if DIST_TO_PREV not in move_df:
-        move_df.generate_dist_features(
+    if DIST_TO_PREV not in move_data:
+        move_data.generate_dist_features(
             label_id=label_id, label_dtype=label_dtype
         )
 
@@ -580,16 +511,16 @@ def clean_gps_jumps_by_distance(
         '\nCleaning gps jumps by distance to jump_coefficient %s...\n'
         % jump_coefficient
     )
-
-    move_df = _clean_gps(
-        move_df,
+    move_data = _clean_gps(
+        move_data,
         outliers,
         arg1=jump_coefficient,
         arg2=threshold,
         outliers=True
     )
+
     if not inplace:
-        return move_df
+        return move_data
 
 
 def clean_gps_nearby_points_by_distances(
@@ -624,13 +555,10 @@ def clean_gps_nearby_points_by_distances(
 
     """
     if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
-    # sum_drop = 0
+        move_data = move_data.copy()
 
-    if DIST_TO_PREV not in move_df:
-        move_df.generate_dist_features(
+    if DIST_TO_PREV not in move_data:
+        move_data.generate_dist_features(
             label_id=label_id, label_dtype=label_dtype
         )
 
@@ -639,15 +567,15 @@ def clean_gps_nearby_points_by_distances(
         % radius_area
     )
 
-    move_df = _clean_gps(
-        move_df,
+    move_data = _clean_gps(
+        move_data,
         _filter_single_by_max,
         arg1=DIST_TO_PREV,
         arg2=radius_area,
         outliers=False
     )
     if not inplace:
-        return move_df
+        return move_data
 
 
 def clean_gps_nearby_points_by_speed(
@@ -682,12 +610,10 @@ def clean_gps_nearby_points_by_speed(
 
     """
     if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
+        move_data = move_data.copy()
 
-    if SPEED_TO_PREV not in move_df:
-        move_df.generate_dist_time_speed_features(
+    if SPEED_TO_PREV not in move_data:
+        move_data.generate_dist_time_speed_features(
             label_id=label_id, label_dtype=label_dtype
         )
 
@@ -696,15 +622,15 @@ def clean_gps_nearby_points_by_speed(
         % speed_radius
     )
 
-    move_df = _clean_gps(
-        move_df,
+    move_data = _clean_gps(
+        move_data,
         _filter_single_by_max,
         arg1=SPEED_TO_PREV,
         arg2=speed_radius,
         outliers=False
     )
     if not inplace:
-        return move_df
+        return move_data
 
 
 def clean_gps_speed_max_radius(
@@ -748,12 +674,10 @@ def clean_gps_speed_max_radius(
 
     """
     if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
+        move_data = move_data.copy()
 
-    if SPEED_TO_PREV not in move_df:
-        move_df.generate_dist_time_speed_features(
+    if SPEED_TO_PREV not in move_data:
+        move_data.generate_dist_time_speed_features(
             label_id=label_id, label_dtype=label_dtype
         )
 
@@ -762,15 +686,15 @@ def clean_gps_speed_max_radius(
         % speed_max
     )
 
-    move_df = _clean_gps(
-        move_df,
+    move_data = _clean_gps(
+        move_data,
         _filter_speed_max_radius,
         arg1=SPEED_TO_PREV,
         arg2=speed_max,
         outliers=False
     )
     if not inplace:
-        return move_df
+        return move_data
 
 
 def clean_trajectories_with_few_points(
@@ -807,11 +731,9 @@ def clean_trajectories_with_few_points(
 
     """
     if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
+        move_data = move_data.copy()
 
-    if label_tid not in move_df:
+    if label_tid not in move_data:
         raise KeyError('%s not in dataframe' % label_tid)
 
     logger.debug(
@@ -819,15 +741,15 @@ def clean_trajectories_with_few_points(
         % min_points_per_trajectory
     )
 
-    if move_df.index.name is not None:
+    if move_data.index.name is not None:
         logger.debug('\n...Reset index for filtering\n')
-        move_df.reset_index(inplace=True)
+        move_data.reset_index(inplace=True)
 
-    move_datacount_tid = move_df.groupby(by=label_tid).size()
+    move_datacount_tid = move_data.groupby(by=label_tid).size()
     filter_ = move_datacount_tid < min_points_per_trajectory
     tids_with_few_points = move_datacount_tid[filter_].index
-    shape_before_drop = move_df.shape
-    idx = move_df[move_df[label_tid].isin(tids_with_few_points)].index
+    shape_before_drop = move_data.shape
+    idx = move_data[move_data[label_tid].isin(tids_with_few_points)].index
 
     if idx.shape[0] > 0:
         logger.debug(
@@ -836,20 +758,20 @@ def clean_trajectories_with_few_points(
         )
         logger.debug(
             '\n...Tids before drop: %s'
-            % move_df[label_tid].unique().shape[0]
+            % move_data[label_tid].unique().shape[0]
         )
-        move_df.drop(index=idx, inplace=True)
+        move_data.drop(index=idx, inplace=True)
         logger.debug(
             '\n...Tids after drop: %s'
-            % move_df[label_tid].unique().shape[0]
+            % move_data[label_tid].unique().shape[0]
         )
         logger.debug(
             '\n...Shape - before drop: %s - after drop: %s'
-            % (shape_before_drop, move_df.shape)
+            % (shape_before_drop, move_data.shape)
         )
 
     if not inplace:
-        return move_df
+        return move_data
 
 
 def clean_trajectories_short_and_few_points(
@@ -892,27 +814,25 @@ def clean_trajectories_short_and_few_points(
 
     """
     if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
+        move_data = move_data.copy()
 
     logger.debug('\nRemove short trajectories...')
     clean_trajectories_with_few_points(
-        move_df, label_id, min_points_per_trajectory, inplace=True
+        move_data, label_id, min_points_per_trajectory, inplace=True
     )
 
-    if DIST_TO_PREV not in move_df:
-        move_df.generate_dist_features(
+    if DIST_TO_PREV not in move_data:
+        move_data.generate_dist_features(
             label_id=label_id, label_dtype=label_dtype
         )
 
     logger.debug('\n...Dropping unnecessary trajectories...')
 
-    if move_df.index.name is not None:
+    if move_data.index.name is not None:
         logger.debug('reseting index')
-        move_df.reset_index(inplace=True)
+        move_data.reset_index(inplace=True)
 
-    move_dataagg_tid = move_df.groupby(by=label_id).agg(
+    move_dataagg_tid = move_data.groupby(by=label_id).agg(
         {DIST_TO_PREV: 'sum'}
     )
     filter_ = move_dataagg_tid[DIST_TO_PREV] < min_trajectory_distance
@@ -923,23 +843,23 @@ def clean_trajectories_short_and_few_points(
         % (move_dataagg_tid.shape[0], min_trajectory_distance)
     )
     logger.debug('\n...There are %s tid do drop' % tid_selection.shape[0])
-    shape_before_drop = move_df.shape
+    shape_before_drop = move_data.shape
 
-    idx = move_df[move_df[label_id].isin(tid_selection)].index
+    idx = move_data[move_data[label_id].isin(tid_selection)].index
     if idx.shape[0] > 0:
-        tids_before_drop = move_df[label_id].unique().shape[0]
+        tids_before_drop = move_data[label_id].unique().shape[0]
         logger.debug(
             '\n...Tids - before drop: %s - after drop: %s'
-            % (tids_before_drop, move_df[label_id].unique().shape[0])
+            % (tids_before_drop, move_data[label_id].unique().shape[0])
         )
-        move_df.drop(index=idx, inplace=True)
+        move_data.drop(index=idx, inplace=True)
         logger.debug(
             '\n...Shape - before drop: %s - after drop: %s'
-            % (shape_before_drop, move_df.shape)
+            % (shape_before_drop, move_data.shape)
         )
 
     if not inplace:
-        return move_df
+        return move_data
 
 
 def clean_id_by_time_max(
@@ -975,12 +895,10 @@ def clean_id_by_time_max(
 
     """
     if not inplace:
-        move_df = move_data[:]
-    else:
-        move_df = move_data
+        move_data = move_data.copy()
 
-    if TIME_TO_PREV not in move_df:
-        move_df.generate_dist_time_speed_features(
+    if TIME_TO_PREV not in move_data:
+        move_data.generate_dist_time_speed_features(
             label_id=label_id, label_dtype=label_dtype
         )
 
@@ -989,26 +907,26 @@ def clean_id_by_time_max(
         % time_max
     )
     move_dataid_drop = (
-        move_df.groupby([label_id], as_index=False)
+        move_data.groupby([label_id], as_index=False)
         .agg({TIME_TO_PREV: 'sum'})
         .query('%s < %s' % (TIME_TO_PREV, time_max))
     )
     logger.debug(
         '...Ids total: %s\nIds to drop:%s'
         % (
-            move_df[label_id].nunique(),
+            move_data[label_id].nunique(),
             move_dataid_drop[label_id].nunique()
         )
     )
     if move_dataid_drop.shape[0] > 0:
-        before_drop = move_df.shape[0]
-        filter_ = move_df[label_id].isin(move_dataid_drop[label_id])
-        idx = move_df[filter_].index
-        move_df.drop(idx, inplace=True)
+        before_drop = move_data.shape[0]
+        filter_ = move_data[label_id].isin(move_dataid_drop[label_id])
+        idx = move_data[filter_].index
+        move_data.drop(idx, inplace=True)
         logger.debug(
             '...Rows before drop: %s\n Rows after drop: %s'
-            % (before_drop, move_df.shape[0])
+            % (before_drop, move_data.shape[0])
         )
 
     if not inplace:
-        return move_df
+        return move_data

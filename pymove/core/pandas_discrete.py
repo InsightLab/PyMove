@@ -237,7 +237,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
                 )
             else:
                 statistics = generate_time_statistics(data_, local_label=local_label)
-                threshold_time_statistics(statistics, mean_coef, std_coef)
+                threshold_time_statistics(statistics, mean_coef, std_coef, inplace=True)
 
         clean_trajectories_with_few_points(
             data_, label_tid=label_id, min_points_per_trajectory=2, inplace=True

@@ -405,7 +405,7 @@ def create_time_slot_in_minute(
     initial_slot: Optional[int] = 0,
     label_datetime: Optional[Text] = DATETIME,
     label_time_slot: Optional[Text] = TIME_SLOT,
-    inplace: Optional[bool] = True
+    inplace: Optional[bool] = False
 ) -> Optional[DataFrame]:
     """
     Partitions the time in slot windows.
@@ -423,7 +423,8 @@ def create_time_slot_in_minute(
     label_time_slot : str, optional
         name of the time slot column, by default TIME_SLOT
     inplace : boolean, optional
-        wether the operation will be done in the original dataframe
+        wether the operation will be done in the original dataframe,
+        by default False
 
     Returns
     -------
@@ -451,7 +452,7 @@ def create_time_slot_in_minute(
     if data.dtypes[label_datetime] != 'datetime64[ns]':
         raise ValueError('{} colum must be of type datetime'.format(label_datetime))
     if not inplace:
-        data = data[:]
+        data = data.copy()
     minute_day = data[label_datetime].dt.hour * 60 + data[label_datetime].dt.minute
     data[label_time_slot] = minute_day // slot_interval + initial_slot
     if not inplace:
@@ -523,7 +524,7 @@ def threshold_time_statistics(
     df_statistics: DataFrame,
     mean_coef: Optional[float] = 1.0,
     std_coef: Optional[float] = 1.0,
-    inplace: Optional[bool] = True
+    inplace: Optional[bool] = False
 ) -> Optional[DataFrame]:
     """
     Calculates and creates the threshold column.
@@ -538,6 +539,9 @@ def threshold_time_statistics(
         Multiplication coefficient of the mean time for the segment, by default 1.0
     std_coef : float
         Multiplication coefficient of sdt time for the segment, by default 1.0
+    inplace : boolean, optional
+        wether the operation will be done in the original dataframe,
+        by default False
 
     Return
     ------
@@ -547,7 +551,7 @@ def threshold_time_statistics(
 
     """
     if not inplace:
-        df_statistics = df_statistics[:]
+        df_statistics = df_statistics.copy()
     df_statistics[THRESHOLD] = df_statistics.apply(
         lambda x: _calc_time_threshold(x[MEAN] * mean_coef, x[STD] * std_coef), axis=1
     )

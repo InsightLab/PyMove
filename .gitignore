@@ -339,9 +339,9 @@ $RECYCLE.BIN/
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
 
 developing/
-examples/*
-!examples/geolife_sample.csv
-!examples/atlantic.csv
-!examples/README.md
-!examples/[0-9]*.ipynb
-!examples/extracao_geolife.ipynb
+notebooks/*
+!notebooks/geolife_sample.csv
+!notebooks/atlantic.csv
+!notebooks/README.md
+!notebooks/[0-9]*.ipynb
+!notebooks/extracao_geolife.ipynb

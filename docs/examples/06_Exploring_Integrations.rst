@@ -16,7 +16,7 @@ to be installed
 1. Imports
 ----------
 
-.. code:: python
+.. code:: ipython3
 
     import pymove as pm
     from pymove.utils import integration as it
@@ -28,7 +28,7 @@ to be installed
 2. Load Data
 ------------
 
-.. code:: python
+.. code:: ipython3
 
     move_df = pm.read_csv('geolife_sample.csv', nrows=5000)
     move_df.head()
@@ -104,7 +104,7 @@ to be installed
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Tamanho
     move_df.shape[0]
@@ -121,7 +121,7 @@ to be installed
 Visualization
 ~~~~~~~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     folium.plot_trajectories_with_folium(move_df)
 
@@ -137,7 +137,7 @@ Visualization
 3. Loading points of interest
 -----------------------------
 
-.. code:: python
+.. code:: ipython3
 
     bbox = move_df.get_bbox()
     folium.plot_bbox(bbox, color='blue')
@@ -151,14 +151,14 @@ Visualization
 
 
 
-.. code:: python
+.. code:: ipython3
 
     import osmnx as ox
 
     tags = {'amenity':True}
     POIs = ox.geometries_from_bbox(north=bbox[0], south=bbox[2], east=bbox[3], west=bbox[1], tags=tags)
 
-.. code:: python
+.. code:: ipython3
 
     POIs.head()
 
@@ -344,7 +344,7 @@ Visualization
 
 Removing unrated (null) points of interest
 
-.. code:: python
+.. code:: ipython3
 
     POIs = POIs.dropna(subset=["amenity"], inplace=False)
 
@@ -358,7 +358,7 @@ Removing unrated (null) points of interest
 Adapting to the format needed for integration (With labels ‘lat’ and
 ‘lon’ referring to latitude and longitude, respectively)
 
-.. code:: python
+.. code:: ipython3
 
     POIs = POIs[POIs['geometry'].type == 'Point']
     POIs['lon'] = POIs['geometry'].x
@@ -374,7 +374,7 @@ Adapting to the format needed for integration (With labels ‘lat’ and
 Visualization
 ~~~~~~~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     m = folium.plot_trajectories_with_folium(move_df)
     folium.plot_poi_folium(POIs, slice_tags=['amenity'], base_map=m, poi_point='blue')
@@ -391,7 +391,7 @@ Visualization
 4. Integrating Points of Interest into the DataSet
 --------------------------------------------------
 
-.. code:: python
+.. code:: ipython3
 
     df_4 = move_df.copy()
     it.join_with_pois(df_4, POIs, label_id='osmid', label_poi_name='name')
@@ -411,7 +411,7 @@ Visualization
 
 Result
 
-.. code:: python
+.. code:: ipython3
 
     df_4.head()
 
@@ -506,7 +506,7 @@ Result
 
 Point of interest closest to each point of the trajectory
 
-.. code:: python
+.. code:: ipython3
 
     df_4['name_poi'].unique()
 
@@ -537,13 +537,13 @@ Point of interest closest to each point of the trajectory
 
 Selecting data
 
-.. code:: python
+.. code:: ipython3
 
     POIs_5 = POIs[0:10].copy()
     POIs_5['type_poi'] = POIs_5['amenity']
     df_5 = move_df.copy()
 
-.. code:: python
+.. code:: ipython3
 
     POIs_5['type_poi'].unique()
 
@@ -559,7 +559,7 @@ Selecting data
 
 Executing the function
 
-.. code:: python
+.. code:: ipython3
 
     it.join_with_pois_optimizer(df_5, POIs_5, label_id='osmid', label_poi_name='name', dist_poi=np.array([100,9,1,50,50,10,20]))
 
@@ -575,7 +575,7 @@ Executing the function
     <__array_function__ internals>:5: DeprecationWarning: Calling nonzero on 0d arrays is deprecated, as it behaves surprisingly. Use `atleast_1d(cond).nonzero()` if the old behavior was intended. If the context of this warning is of the form `arr[nonzero(cond)]`, just use `arr[cond]`.
 
 
-.. code:: python
+.. code:: ipython3
 
     df_5.head()
 
@@ -671,7 +671,7 @@ Executing the function
 6. Integrating Points of Interest into the Category-Based DataSet
 -----------------------------------------------------------------
 
-.. code:: python
+.. code:: ipython3
 
     df_6 = move_df.copy()
     it.join_with_pois_by_category(df_6, POIs_5, label_category='amenity', label_id='id')
@@ -731,7 +731,7 @@ Executing the function
     VBox(children=(HTML(value=''), IntProgress(value=0, max=5000)))
 
 
-.. code:: python
+.. code:: ipython3
 
     df_6.head(10)
 
@@ -1026,7 +1026,7 @@ also has a label referring to the datetime in which the event occurred.
 In this example, we will assign random date and time values to some POIs
 to simulate an operation.
 
-.. code:: python
+.. code:: ipython3
 
     indexOfPois = np.arange(0, POIs.shape[0], POIs.shape[0]/20, dtype=np.int64)
     POIs_events = POIs.iloc[indexOfPois].copy()
@@ -1038,20 +1038,20 @@ to simulate an operation.
       and should_run_async(code)
 
 
-.. code:: python
+.. code:: ipython3
 
     randomIndexOfMoveDf = np.arange(0, move_df.shape[0], move_df.shape[0]/20, dtype=np.int64)
     randomMoveDfSlice = move_df.iloc[randomIndexOfMoveDf].copy()
 
-.. code:: python
+.. code:: ipython3
 
     POIs_events['datetime'] = randomMoveDfSlice['datetime'].copy()
 
-.. code:: python
+.. code:: ipython3
 
     df_7 = move_df.copy()
 
-.. code:: python
+.. code:: ipython3
 
     it.join_with_poi_datetime(
         df_7, POIs_events,
@@ -1066,7 +1066,7 @@ to simulate an operation.
     VBox(children=(HTML(value=''), IntProgress(value=0, max=5000)))
 
 
-.. code:: python
+.. code:: ipython3
 
     df_7.head()
 
@@ -1162,7 +1162,7 @@ to simulate an operation.
 8. Optimized Integrating events (points of interest with timestamp) to the DataSet
 ----------------------------------------------------------------------------------
 
-.. code:: python
+.. code:: ipython3
 
     df_8 = move_df.copy()
     POIs_events["event_id"] = POIs_events["osmid"]
@@ -1187,7 +1187,7 @@ to simulate an operation.
     <__array_function__ internals>:5: DeprecationWarning: Calling nonzero on 0d arrays is deprecated, as it behaves surprisingly. Use `atleast_1d(cond).nonzero()` if the old behavior was intended. If the context of this warning is of the form `arr[nonzero(cond)]`, just use `arr[cond]`.
 
 
-.. code:: python
+.. code:: ipython3
 
     df_8.head()
 
@@ -1288,7 +1288,7 @@ address and city labels.
 
 Creating a home point
 
-.. code:: python
+.. code:: ipython3
 
     df_9 = move_df.copy()
     home_df = df_9.iloc[300:302].copy()
@@ -1304,7 +1304,7 @@ Creating a home point
 
 Using the function
 
-.. code:: python
+.. code:: ipython3
 
     it.join_with_home_by_id(df_9, home_df, label_id='id')
 
@@ -1315,7 +1315,7 @@ Using the function
     VBox(children=(HTML(value=''), IntProgress(value=0, max=1)))
 
 
-.. code:: python
+.. code:: ipython3
 
     df_9.head()
 
@@ -1419,7 +1419,7 @@ Using the function
 
 Integration
 
-.. code:: python
+.. code:: ipython3
 
     it.join_with_pois(df_9, POIs, label_id='osmid', label_poi_name='name')
 
@@ -1436,11 +1436,11 @@ Integration
     VBox(children=(HTML(value=''), IntProgress(value=0, max=5000)))
 
 
-.. code:: python
+.. code:: ipython3
 
     it.merge_home_with_poi(df_9)
 
-.. code:: python
+.. code:: ipython3
 
     df_9.head()
 
@@ -1557,7 +1557,7 @@ Union of Banks
 Converts POIs of the types “bank_filials”, “bank_agencies”,
 “bank_posts”, “bank_PAE” and “bank” to a single type: “banks”
 
-.. code:: python
+.. code:: ipython3
 
     df_banks = move_df.copy()
 
@@ -1652,7 +1652,7 @@ Converts POIs of the types “bank_filials”, “bank_agencies”,
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Join with POIs
     it.join_with_pois(df_banks, banks_pois, label_id='id', label_poi_name='type_poi')
@@ -1670,7 +1670,7 @@ Converts POIs of the types “bank_filials”, “bank_agencies”,
     VBox(children=(HTML(value=''), IntProgress(value=0, max=5000)))
 
 
-.. code:: python
+.. code:: ipython3
 
     #Result
     df_banks.head(10)
@@ -1814,7 +1814,7 @@ Converts POIs of the types “bank_filials”, “bank_agencies”,
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Checking the amount of each point assigned to each type of poi
     bancos_filiais = df_banks.loc[df_banks['name_poi'] == 'bancos_filiais']
@@ -1847,7 +1847,7 @@ Converts POIs of the types “bank_filials”, “bank_agencies”,
       and should_run_async(code)
 
 
-.. code:: python
+.. code:: ipython3
 
     #Finally, the Union
     it.union_poi_bank(df_banks, label_poi="name_poi")
@@ -1944,7 +1944,7 @@ Converts POIs of the types “bank_filials”, “bank_agencies”,
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Checking
     df_banks.loc[df_banks['name_poi'] == 'banks'].shape[0]
@@ -1970,7 +1970,7 @@ Union of Bus Stations
 Converts “transit_station” and “bus_points” POIs to a single type:
 “bus_station”
 
-.. code:: python
+.. code:: ipython3
 
     df_bus = move_df.copy()
 
@@ -2061,7 +2061,7 @@ Converts “transit_station” and “bus_points” POIs to a single type:
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Integration
     it.join_with_pois(df_bus, bus_pois, label_id='id', label_poi_name='name_poi')
@@ -2079,7 +2079,7 @@ Converts “transit_station” and “bus_points” POIs to a single type:
     VBox(children=(HTML(value=''), IntProgress(value=0, max=5000)))
 
 
-.. code:: python
+.. code:: ipython3
 
     #Result
     df_bus.head()
@@ -2173,7 +2173,7 @@ Converts “transit_station” and “bus_points” POIs to a single type:
 
 
 
-.. code:: python
+.. code:: ipython3
 
     transit_station = df_bus.loc[df_bus['name_poi'] == 'transit_station']
     pontos_de_onibus = df_bus.loc[df_bus['name_poi'] == 'pontos_de_onibus']
@@ -2194,7 +2194,7 @@ Converts “transit_station” and “bus_points” POIs to a single type:
       and should_run_async(code)
 
 
-.. code:: python
+.. code:: ipython3
 
     #The union function
     it.union_poi_bus_station(df_bus, label_poi="name_poi")
@@ -2290,7 +2290,7 @@ Converts “transit_station” and “bus_points” POIs to a single type:
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Checking
 
@@ -2316,7 +2316,7 @@ Union of Bars and Restaurants
 
 Converts “bar” and “restaurant” POIs to a single type: “bar-restaurant”
 
-.. code:: python
+.. code:: ipython3
 
     df_bar = move_df.copy()
 
@@ -2397,7 +2397,7 @@ Converts “bar” and “restaurant” POIs to a single type: “bar-restaurant
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Integration
     it.join_with_pois(df_bar, br_POIs, label_id='id', label_poi_name='name_poi')
@@ -2415,7 +2415,7 @@ Converts “bar” and “restaurant” POIs to a single type: “bar-restaurant
     VBox(children=(HTML(value=''), IntProgress(value=0, max=5000)))
 
 
-.. code:: python
+.. code:: ipython3
 
     #Result
     df_bar.head()
@@ -2509,7 +2509,7 @@ Converts “bar” and “restaurant” POIs to a single type: “bar-restaurant
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Number of points close to each type
     bar = df_bar.loc[df_bar['name_poi'] == 'bar']
@@ -2531,7 +2531,7 @@ Converts “bar” and “restaurant” POIs to a single type: “bar-restaurant
       and should_run_async(code)
 
 
-.. code:: python
+.. code:: ipython3
 
     #Union of the two types of POIs into a single
     it.union_poi_bar_restaurant(df_bar, label_poi="name_poi")
@@ -2628,7 +2628,7 @@ Converts “bar” and “restaurant” POIs to a single type: “bar-restaurant
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Checking
     df_bar.loc[df_bar['name_poi'] == 'bar-restaurant'].shape[0]
@@ -2653,7 +2653,7 @@ Union of Parks
 
 Converts “pracas_e_parques” and “park” POIs to a single type: “parks”
 
-.. code:: python
+.. code:: ipython3
 
     df_parks = move_df.copy()
 
@@ -2734,7 +2734,7 @@ Converts “pracas_e_parques” and “park” POIs to a single type: “parks�
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Integration
     it.join_with_pois(df_parks, p_POIs, label_id='id', label_poi_name='name_poi')
@@ -2843,7 +2843,7 @@ Converts “pracas_e_parques” and “park” POIs to a single type: “parks�
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Number of points close to each type of POI
     pracas_e_parques = df_parks.loc[df_parks['name_poi'] == 'pracas_e_parques']
@@ -2865,7 +2865,7 @@ Converts “pracas_e_parques” and “park” POIs to a single type: “parks�
       and should_run_async(code)
 
 
-.. code:: python
+.. code:: ipython3
 
     #Union function
     it.union_poi_parks(df_parks, label_poi="name_poi")
@@ -2961,7 +2961,7 @@ Converts “pracas_e_parques” and “park” POIs to a single type: “parks�
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Checking the new quantity
     df_parks.loc[df_parks['name_poi'] == 'parks'].shape[0]
@@ -2984,7 +2984,7 @@ Converts “pracas_e_parques” and “park” POIs to a single type: “parks�
 Union of police points
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. code:: ipython3
 
     df_police = move_df.copy()
 
@@ -3065,7 +3065,7 @@ Union of police points
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Integration
     it.join_with_pois(df_police, pol_POIs, label_id='id', label_poi_name='name_poi')
@@ -3173,7 +3173,7 @@ Union of police points
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Quantity of points closest to each type of point
     distritos_policiais = df_police.loc[df_police['name_poi'] == 'distritos_policiais']
@@ -3192,12 +3192,12 @@ Union of police points
       and should_run_async(code)
 
 
-.. code:: python
+.. code:: ipython3
 
     #Union funcion
     it.union_poi_police(df_police, label_poi="name_poi")
 
-.. code:: python
+.. code:: ipython3
 
     #Result
     df_police.head()
@@ -3291,7 +3291,7 @@ Union of police points
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Checking
     df_police.loc[df_police['name_poi'] == 'police'].shape[0]
@@ -3314,7 +3314,7 @@ Union of police points
 12. Integração entre trajetórias e áreas coletivas
 --------------------------------------------------
 
-.. code:: python
+.. code:: ipython3
 
     df_pd = pd.read_csv('geolife_sample.csv')
     df_12 = df_pd[0:2000]
@@ -3398,7 +3398,7 @@ Union of police points
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Creating collective areas
     indexes_ac = np.linspace(0, gdf.shape[0], 5)
@@ -3480,7 +3480,7 @@ Union of police points
 
 
 
-.. code:: python
+.. code:: ipython3
 
     #Integration
     it.join_collective_areas(gdf, area_c)
@@ -3498,7 +3498,7 @@ Union of police points
     VBox(children=(HTML(value=''), IntProgress(value=0, max=4)))
 
 
-.. code:: python
+.. code:: ipython3
 
     gdf.head()
 
@@ -3590,7 +3590,7 @@ Viewing points on the map
 
 Collective Area points
 
-.. code:: python
+.. code:: ipython3
 
     folium.plot_markers(area_c)
 
@@ -3611,7 +3611,7 @@ Collective Area points
 
 Corresponding points
 
-.. code:: python
+.. code:: ipython3
 
     folium.plot_markers(gdf.loc[gdf['violating'] == True])
 
