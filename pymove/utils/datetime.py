@@ -58,6 +58,19 @@ def date_to_str(dt: datetime) -> Text:
     str
         Represents the date in string format
 
+    Example
+    -------
+    import datatime
+    dt = datetime.datetime.now()
+
+    print(df)
+    >>> 2021-04-29 11:01:29.909340
+    print(type(df))
+    >>> <class 'datetime.datetime'>
+
+    data_to_str(df)
+    >>> 2021-04-29
+
     """
     return dt.strftime('%Y-%m-%d')
 
@@ -75,6 +88,16 @@ def str_to_datetime(dt_str: Text) -> datetime:
     -------
     datetime
         Represents a datetime in datetime format
+
+    Example
+    -------
+    import datetime
+
+    time_now =  datetime.datetime.now()
+    print(type(time_now))
+    >>> <class 'datetime.datetime'>
+    print(data_to_str(time_now), type(data_to_str(time_now)))
+    >>> 2021-04-30 <class 'str'>
 
     """
     if len(dt_str) == 10:
@@ -97,6 +120,19 @@ def to_str(dt: datetime) -> Text:
     str
         Represents a datetime in string format "%Y-%m-%d %H:%M:%S".
 
+    Example:
+    -------
+    import datetime
+    time_now = datetime.datetime.now()
+
+    print(time_now)
+    >>> 2021-04-29 14:15:29.708113
+    print(type(time_now))
+    >>> <class 'datetime.datetime'>
+
+    data_to_str(df)
+    >>> 2021-04-29 14:15:29
+
     """
     return dt.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -116,6 +152,16 @@ def to_min(dt: datetime) -> int:
     -------
     int
         Represents minutes from
+
+    Example
+    -------
+    import datetime
+
+    time_now = datetime.datetime.now()
+    print(type(to_min(time_now)))
+    >>> <class 'int'>
+    to_min(time_now)
+    >>> 26996497
 
     """
     # get an integer time slot from a datetime
@@ -140,6 +186,15 @@ def min_to_datetime(minutes: int) -> datetime:
     datetime
         Represents minutes in datetime format
 
+    Example
+    -------
+    from datetime import datetime
+
+    print(min_to_datetime(26996497))
+    >>> 2021-04-30 13:37:00
+    print(type(min_to_datetime(26996497)))
+    >>> <class 'datetime.datetime'>
+
     """
     return datetime.utcfromtimestamp(minutes * 60)
 
@@ -157,6 +212,16 @@ def to_day_of_week_int(dt: datetime) -> int:
     -------
     int
         Represents day of week.
+
+    Example
+    -------
+    import datetime
+
+    time_now = datetime.datetime.now()
+    print(time_now)
+    >>> 2021-04-30 16:34:42.483519
+    print(to_day_of_week_int(time_now))
+    >>> 4
 
     """
     return dt.weekday()
@@ -374,6 +439,25 @@ def elapsed_time_dt(start_time: datetime) -> int:
         Represents the time elapsed from the start time to the current time
         (when the function was called).
 
+    Examples
+    --------
+    import datetime
+    time_now = datetime.datetime.now()
+    from datetime import datetime
+
+    time_1 = '2020-06-29'
+    time_2 = '2020-06-29 12:45:59'
+
+    - You need to use 'str_to_time' module to work with 'datetime.datetime' object
+    -  to so have your start time
+
+    start_time_1 = str_to_datetime(time_1)
+    start_time_2 = str_to_datetime(time_2)
+
+    print(elapsed_time_dt(start_time_1))
+    >>> 26411808666
+    print(elapsed_time_dt(start_time_2))
+    >>> 26365849667
     """
     return diff_time(start_time, datetime.now())
 
@@ -395,6 +479,18 @@ def diff_time(start_time: datetime, end_time: datetime) -> int:
         Represents the time elapsed from the start time to the current time
         (when the function was called).
 
+    Examples
+    --------
+    - You need to use 'str_to_time' module to work with 'datetime.datetime' object
+    -  to so have your start time
+    print(start_time_1)
+    >>> 2020-06-29 00:00:00
+    print(start_time_2)
+    >>>  2020-06-29 12:45:59
+    print(diff_time(start_time_1, time_now))
+    >>> 26411808665
+    print(diff_time(start_time_2, time_now))
+    >>> 26365849665
     """
     return int((end_time - start_time).total_seconds() * 1000)
 
@@ -513,6 +609,15 @@ def _calc_time_threshold(seg_mean: float, seg_std: float) -> float:
     float
         The threshold based on the mean and standard deviation
         of transition time for the segment.
+
+    Examples
+    --------
+    print(_calc_time_threshold(12.3,2.1))
+    >>> 14.4
+    print(_calc_time_threshold(1,1.5))
+    >>> 2.5
+    print(_calc_time_threshold(-2,2))
+    >>> 0.0
 
     """
     threshold = seg_std + seg_mean
