@@ -61,15 +61,15 @@ def date_to_str(dt: datetime) -> Text:
     Example
     -------
     import datatime
-    dt = datetime.datetime.now()
+    time_now = datetime.datetime.now()
 
-    print(df)
+    print(time_now)
     >>> 2021-04-29 11:01:29.909340
-    print(type(df))
+    print(type(time_now))
     >>> <class 'datetime.datetime'>
 
-    data_to_str(df)
-    >>> 2021-04-29
+    print(date_to_str(time_now), type(time_now))
+    >>> 2021-04-29  <class 'str'>
 
     """
     return dt.strftime('%Y-%m-%d')
@@ -91,13 +91,18 @@ def str_to_datetime(dt_str: Text) -> datetime:
 
     Example
     -------
-    import datetime
+    from datetime import datetime
 
-    time_now =  datetime.datetime.now()
-    print(type(time_now))
-    >>> <class 'datetime.datetime'>
-    print(data_to_str(time_now), type(data_to_str(time_now)))
-    >>> 2021-04-30 <class 'str'>
+    time_1 = '2020-06-29'
+    time_2 = '2020-06-29 12:45:59'
+
+    print(type(time_1), type(time_2))
+    >>>  <class 'str'> <class 'str'>
+    print( str_to_datetime(time_1), type(str_to_datetime(time_1)))
+    >>> 2020-06-29 00:00:00 <class 'datetime.datetime'>
+    print(str_to_datetime(time_2), type(str_to_datetime(time_2)))
+    >>> 2020-06-29 12:45:59 <class 'datetime.datetime'>
+
 
     """
     if len(dt_str) == 10:
@@ -106,7 +111,7 @@ def str_to_datetime(dt_str: Text) -> datetime:
         return datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
 
-def to_str(dt: datetime) -> Text:
+def datetime_to_str(dt: datetime) -> Text:
     """
     Converts a date in datetime format to string format.
 
@@ -130,14 +135,14 @@ def to_str(dt: datetime) -> Text:
     print(type(time_now))
     >>> <class 'datetime.datetime'>
 
-    data_to_str(df)
-    >>> 2021-04-29 14:15:29
+    print(data_to_str(time_now), type(data_to_str(time_now)))
+    >>> 2021-04-29 14:15:29  <class 'str' >
 
     """
     return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 
-def to_min(dt: datetime) -> int:
+def datetime_to_min(dt: datetime) -> int:
     """
     Converts a datetime to an int representation in minutes.
 
@@ -190,10 +195,8 @@ def min_to_datetime(minutes: int) -> datetime:
     -------
     from datetime import datetime
 
-    print(min_to_datetime(26996497))
-    >>> 2021-04-30 13:37:00
-    print(type(min_to_datetime(26996497)))
-    >>> <class 'datetime.datetime'>
+    print(min_to_datetime(26996497), type(min_to_datetime(26996497)))
+    >>> 2021-04-30 13:37:00 <class 'datetime.datetime'>
 
     """
     return datetime.utcfromtimestamp(minutes * 60)
@@ -220,8 +223,8 @@ def to_day_of_week_int(dt: datetime) -> int:
     time_now = datetime.datetime.now()
     print(time_now)
     >>> 2021-04-30 16:34:42.483519
-    print(to_day_of_week_int(time_now))
-    >>> 4
+    print(to_day_of_week_int(time_now), type(to_day_of_week_int(time_now)))
+    >>> 4 < class 'int' >
 
     """
     return dt.weekday()
@@ -249,6 +252,19 @@ def working_day(
     boolean
         if true, means that the day informed by the user is a working day.
         if false, means that the day is not a working day.
+
+    Examples
+    --------
+    from datetime import datetime
+    from typing import Optional, Text, Union
+    import holidays
+
+    day_now = datetime.now()
+
+    print(working_day(day_now), type(working_day(day_now)))
+    >>> False <class 'bool'>
+    print(working_day(5), type(working_day(5)))
+    >>> False <class 'bool'>
 
     References
     ----------
@@ -289,7 +305,7 @@ def now_str() -> Text:
     "2019-09-02 13:54:16"
 
     """
-    return to_str(datetime.now())
+    return datetime_to_str(datetime.now())
 
 
 def deltatime_str(deltatime_seconds: float) -> Text:
@@ -441,10 +457,13 @@ def elapsed_time_dt(start_time: datetime) -> int:
 
     Examples
     --------
-    import datetime
-    time_now = datetime.datetime.now()
     from datetime import datetime
 
+    # Do You need use str_to_datetime function to obtain the start time
+    # how the class 'datetime.datetime'.
+    # Do you need use diff_time module
+
+    time_now = datetime.now()
     time_1 = '2020-06-29'
     time_2 = '2020-06-29 12:45:59'
 
