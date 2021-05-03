@@ -65,7 +65,7 @@ def test_str_to_datetime():
     assert(converted_date_time == expected_date_time)
 
 
-def test_to_str():
+def test_datetime_to_min():
 
     expected = str_date_time_default
 
@@ -76,7 +76,7 @@ def test_to_str():
     assert(str_date_time == expected)
 
 
-def test_to_min():
+def test_datetime_to_min():
 
     expected = 25347608
 
