@@ -63,13 +63,12 @@ def date_to_str(dt: datetime) -> Text:
     import datatime
     time_now = datetime.datetime.now()
 
-    print(time_now)
-    >>> 2021-04-29 11:01:29.909340
-    print(type(time_now))
-    >>> <class 'datetime.datetime'>
-
-    print(date_to_str(time_now), type(time_now))
-    >>> 2021-04-29  <class 'str'>
+    >>> print(time_now)
+    2021-04-29 11:01:29.909340
+    >>> print(type(time_now))
+    <class 'datetime.datetime'>
+    >>> print(date_to_str(time_now), type(time_now))
+    2021-04-29  <class 'str'>
 
     """
     return dt.strftime('%Y-%m-%d')
@@ -94,12 +93,12 @@ def str_to_datetime(dt_str: Text) -> datetime:
     time_1 = '2020-06-29'
     time_2 = '2020-06-29 12:45:59'
 
-    print(type(time_1), type(time_2))
-    >>>  <class 'str'> <class 'str'>
-    print( str_to_datetime(time_1), type(str_to_datetime(time_1)))
-    >>> 2020-06-29 00:00:00 <class 'datetime.datetime'>
-    print(str_to_datetime(time_2), type(str_to_datetime(time_2)))
-    >>> 2020-06-29 12:45:59 <class 'datetime.datetime'>
+    >>> print(type(time_1), type(time_2))
+    <class 'str'> <class 'str'>
+    >>> print( str_to_datetime(time_1), type(str_to_datetime(time_1)))
+    2020-06-29 00:00:00 <class 'datetime.datetime'>
+    >>> print(str_to_datetime(time_2), type(str_to_datetime(time_2)))
+    2020-06-29 12:45:59 <class 'datetime.datetime'>
 
 
     """
@@ -128,13 +127,13 @@ def datetime_to_str(dt: datetime) -> Text:
     import datetime
     time_now = datetime.datetime.now()
 
-    print(time_now)
-    >>> 2021-04-29 14:15:29.708113
-    print(type(time_now))
-    >>> <class 'datetime.datetime'>
+    >>> print(time_now)
+    2021-04-29 14:15:29.708113
+    >>> print(type(time_now))
+    <class 'datetime.datetime'>
 
-    print(data_to_str(time_now), type(data_to_str(time_now)))
-    >>> 2021-04-29 14:15:29  <class 'str' >
+    >>> print(data_to_str(time_now), type(data_to_str(time_now)))
+    2021-04-29 14:15:29  <class 'str' >
 
     """
     return dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -161,10 +160,10 @@ def datetime_to_min(dt: datetime) -> int:
     import datetime
 
     time_now = datetime.datetime.now()
-    print(type(to_min(time_now)))
-    >>> <class 'int'>
-    to_min(time_now)
-    >>> 26996497
+    >>> print(type(to_min(time_now)))
+    <class 'int'>
+    >>> to_min(time_now)
+    26996497
 
     """
     # get an integer time slot from a datetime
@@ -191,8 +190,8 @@ def min_to_datetime(minutes: int) -> datetime:
 
     Example
     -------
-    print(min_to_datetime(26996497), type(min_to_datetime(26996497)))
-    >>> 2021-04-30 13:37:00 <class 'datetime.datetime'>
+    >>> print(min_to_datetime(26996497), type(min_to_datetime(26996497)))
+    2021-04-30 13:37:00 <class 'datetime.datetime'>
 
     """
     return datetime.utcfromtimestamp(minutes * 60)
@@ -219,10 +218,10 @@ def to_day_of_week_int(dt: datetime) -> int:
     monday = str_to_datetime('2021-05-3 12:00:01')
     friday = str_to_datetime('2021-05-7 12:00:01')
 
-    print(to_day_of_week_int(monday), type(to_day_of_week_int(monday)))
-    >>> 0 <class 'int'>
-    print(to_day_of_week_int(friday), type(to_day_of_week_int(friday)))
-    >>> 4 <class 'int'>
+    >>> print(to_day_of_week_int(monday), type(to_day_of_week_int(monday)))
+    0 <class 'int'>
+    >>> print(to_day_of_week_int(friday), type(to_day_of_week_int(friday)))
+    4 <class 'int'>
 
     """
     return dt.weekday()
@@ -260,10 +259,14 @@ def working_day(
     next_day = str_to_datetime('2021-09-8 12:00:01')
     # In Brazil this day is a Wednesday and isn't a holiday
 
-    print(working_day(independence_day, 'BR'), type(working_day(independence_day, 'BR')))
-    >>> False <class 'bool'>
-    print(working_day(next_day, 'BR'), type(working_day(next_day, 'BR')))
-    >>> True <class 'bool'>
+    >>> print(working_day(independence_day, 'BR'))
+    False
+    >>> print(type(working_day(independence_day, 'BR')))
+    <class 'bool'>
+    >>> print(working_day(next_day, 'BR'))
+    True
+    >>> print(type(working_day(next_day, 'BR')))
+    <class 'bool'>
 
     References
     ----------
@@ -462,10 +465,10 @@ def elapsed_time_dt(start_time: datetime) -> int:
     start_time_1 = datetime(2020, 6, 29, 0, 0)
     start_time_2 = str_to_datetime('2020-06-29 12:45:59')
 
-    print(elapsed_time_dt(start_time_1))
-    >>> 26411808666
-    print(elapsed_time_dt(start_time_2))
-    >>> 26365849667
+    >>> print(elapsed_time_dt(start_time_1))
+    26411808666
+    >>> print(elapsed_time_dt(start_time_2))
+    26365849667
     """
     return diff_time(start_time, datetime.now())
 
@@ -496,10 +499,10 @@ def diff_time(start_time: datetime, end_time: datetime) -> int:
     start_time_1 = datetime(2020, 6, 29, 0, 0)
     start_time_2 = str_to_datetime('2020-06-29 12:45:59')
 
-    print(diff_time(start_time_1, time_now))
-    >>> 26411808665
-    print(diff_time(start_time_2, time_now))
-    >>> 26365849665
+    >>> print(diff_time(start_time_1, time_now))
+    26411808665
+    >>> print(diff_time(start_time_2, time_now))
+    26365849665
     """
     return int((end_time - start_time).total_seconds() * 1000)
 
@@ -588,16 +591,16 @@ def generate_time_statistics(
 
     Example
     -------
-    df
-    >>> local_label	     prev_local	  time_to_prev	id
+    >>> df
+      local_label	     prev_local	  time_to_prev	id
     0	house	            None	     NaN	    1
     1	market	           house	    720.0	    1
     2	market	           market	     5.0	    1
     3	market	           market	     1.0	    1
     4	school	           market	    844.0	    1
 
-    generate_time_statistics(df)
-    >>> local_label	 prev_local	   mean	    std	        min	    max	     sum	  count
+    >>> generate_time_statistics(df)
+      local_label	 prev_local	   mean	    std	        min	    max	     sum	  count
     0	 house	       market	   844.0	0.000000	844.0	844.0	844.0	   1
     1	 market	        house	   720.0	0.000000	720.0	720.0	720.0	   1
     2	 market	       market	    3.0	    2.828427	1.0	     5.0	6.0	       2
@@ -636,12 +639,12 @@ def _calc_time_threshold(seg_mean: float, seg_std: float) -> float:
 
     Examples
     --------
-    print(_calc_time_threshold(12.3,2.1))
-    >>> 14.4
-    print(_calc_time_threshold(1,1.5))
-    >>> 2.5
-    print(_calc_time_threshold(-2,2))
-    >>> 0.0
+    >>> print(_calc_time_threshold(12.3,2.1))
+    14.4
+    >>> print(_calc_time_threshold(1,1.5))
+    2.5
+    >>> print(_calc_time_threshold(-2,2))
+    0.0
 
     """
     threshold = seg_std + seg_mean
@@ -682,23 +685,23 @@ def threshold_time_statistics(
     -------
     from pymove.utils.datetime import generate_time_statistics, _calc_time_threshold
 
-    df
-    >>> local_label	     prev_local	  time_to_prev	id
+    >>> df
+      local_label	     prev_local	  time_to_prev	id
     0	house	            None	     NaN	    1
     1	market	           house	    720.0	    1
     2	market	           market	     5.0	    1
     3	market	           market	     1.0	    1
     4	school	           market	    844.0	    1
 
-    statistics = generate_time_statistics(df)
-    statistics
-    >>> local_label	 prev_local	   mean	    std	        min	    max	     sum	  count
+    >>> statistics = generate_time_statistics(df)
+    >>> statistics
+      local_label	 prev_local	   mean	    std	        min	    max	     sum	  count
     0	 house	       market	   844.0	0.000000	844.0	844.0	844.0	   1
     1	 market	        house	   720.0	0.000000	720.0	720.0	720.0	   1
     2	 market	       market	    3.0	    2.828427	1.0	     5.0	6.0	       2
 
-    threshold_time_statistics(statistics)
-    >>> local_label	 prev_local	   mean	    std	        min	    max	     sum	  count
+    >>> threshold_time_statistics(statistics)
+      local_label	 prev_local	   mean	    std	        min	    max	     sum	  count
     0	 house	       market	   844.0	0.000000	844.0	844.0	844.0	   1
     1	 market	        house	   720.0	0.000000	720.0	720.0	720.0	   1
     2	 market	       market	    3.0	    2.828427	1.0	     5.0	6.0	       2
