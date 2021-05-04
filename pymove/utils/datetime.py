@@ -219,12 +219,15 @@ def to_day_of_week_int(dt: datetime) -> int:
     Example
     -------
     import datetime
+    from pymove.utils.datetime import str_to_datetime
 
-    time_now = datetime.datetime.now()
-    print(time_now)
-    >>> 2021-04-30 16:34:42.483519
-    print(to_day_of_week_int(time_now), type(to_day_of_week_int(time_now)))
-    >>> 4 < class 'int' >
+    monday = str_to_datetime('2021-05-3 12:00:01')
+    friday = str_to_datetime('2021-05-7 12:00:01')
+
+    print(to_day_of_week_int(monday), type(to_day_of_week_int(monday)))
+    >>> 0 <class 'int'>
+    print(to_day_of_week_int(friday), type(to_day_of_week_int(friday)))
+    >>> 4 <class 'int'>
 
     """
     return dt.weekday()
@@ -257,14 +260,18 @@ def working_day(
     --------
     from datetime import datetime
     from typing import Optional, Text, Union
+    from pymove.utils.datetime import str_to_datetime
     import holidays
 
-    day_now = datetime.now()
+    independence_day = str_to_datetime('2021-09-7 12:00:01')
+    # In Brazil this day is a holiday
+    next_day = str_to_datetime('2021-09-8 12:00:01')
+    # In Brazil this day is a Wednesday and isn't a holiday
 
-    print(working_day(day_now), type(working_day(day_now)))
+    print(working_day(independence_day, 'BR'), type(working_day(independence_day, 'BR')))
     >>> False <class 'bool'>
-    print(working_day(5), type(working_day(5)))
-    >>> False <class 'bool'>
+    print(working_day(next_day, 'BR'), type(working_day(next_day, 'BR')))
+    >>> True <class 'bool'>
 
     References
     ----------
@@ -458,20 +465,10 @@ def elapsed_time_dt(start_time: datetime) -> int:
     Examples
     --------
     from datetime import datetime
+    from pymove.utils.datetime import str_to_datetime
 
-    # Do You need use str_to_datetime function to obtain the start time
-    # how the class 'datetime.datetime'.
-    # Do you need use diff_time module
-
-    time_now = datetime.now()
-    time_1 = '2020-06-29'
-    time_2 = '2020-06-29 12:45:59'
-
-    - You need to use 'str_to_time' module to work with 'datetime.datetime' object
-    -  to so have your start time
-
-    start_time_1 = str_to_datetime(time_1)
-    start_time_2 = str_to_datetime(time_2)
+    start_time_1 = datetime(2020, 6, 29, 0, 0)
+    start_time_2 = str_to_datetime('2020-06-29 12:45:59')
 
     print(elapsed_time_dt(start_time_1))
     >>> 26411808666
@@ -500,12 +497,13 @@ def diff_time(start_time: datetime, end_time: datetime) -> int:
 
     Examples
     --------
-    - You need to use 'str_to_time' module to work with 'datetime.datetime' object
-    -  to so have your start time
-    print(start_time_1)
-    >>> 2020-06-29 00:00:00
-    print(start_time_2)
-    >>>  2020-06-29 12:45:59
+    from datetime import datetime
+    from pymove.utils.datetime import str_to_datetime
+
+    time_now = datetime.now()
+    start_time_1 = datetime(2020, 6, 29, 0, 0)
+    start_time_2 = str_to_datetime('2020-06-29 12:45:59')
+
     print(diff_time(start_time_1, time_now))
     >>> 26411808665
     print(diff_time(start_time_2, time_now))
@@ -596,6 +594,28 @@ def generate_time_statistics(
     DataFrame
         Statistics infomations of the pairwise local labels
 
+    Example
+    -------
+    from typing import Optional, Text
+    from pymove.utils.constants import (COUNT, LOCAL_LABEL, MAX, MEAN, MIN,
+     PREV_LOCAL, STD, SUM, TIME_TO_PREV,)
+
+    >>> df
+      local_label  prev_local    time_to_prev
+    0   261          NaN             NaN
+    1   580         261.0           252.0
+    2   376         580.0           91.0
+    3   386         376.0          17449.0
+    4   644         386.0          21824.0
+
+    >>> generate_time_statistics(df)
+       local_label  prev_local   mean    std   min     max       sum    count
+    0     376        580.0      91.0     0.0   91.0	   91.0	     91.0     1
+    1     386        376.0     17449.0   0.0  17449.0  17449.0  17449.0   1
+    2     580        261.0     252.0     0.0   252.0   252.0    252.0     1
+    3     644        386.0     21824.0   0.0  21824.0  21824.0  21824.0   1
+
+
     """
     df_statistics = data.groupby(
         [local_label, PREV_LOCAL]
@@ -673,6 +693,44 @@ def threshold_time_statistics(
         DataFrame of time statistics with the aditional feature: threshold,
         which indicates the time limit of the trajectory segment, or None
 
+    Example
+    -------
+    from pandas import DataFrame
+    from typing import Optional, Text
+    from pymove.utils.datetime import generate_time_statistics, _calc_time_threshold
+    from pymove.utils.constants import (COUNT, LOCAL_LABEL, MAX, MEAN, MIN,
+     PREV_LOCAL, STD, SUM, TIME_TO_PREV,THRESHOLD)
+
+        >>> df
+      local_label  prev_local    time_to_prev
+    0   261          NaN             NaN
+    1   580         261.0           252.0
+    2   376         580.0           91.0
+    3   386         376.0          17449.0
+    4   644         386.0          21824.0
+
+    >>> statistics = generate_time_statistics(df)
+    statistics
+       local_label  prev_local   mean    std   min     max       sum    count
+    0     376        580.0      91.0     0.0   91.0	   91.0	     91.0     1
+    1     386        376.0     17449.0   0.0  17449.0  17449.0  17449.0   1
+    2     580        261.0     252.0     0.0   252.0   252.0    252.0     1
+    3     644        386.0     21824.0   0.0  21824.0  21824.0  21824.0   1
+
+
+    >>> threshold_time_statistics(statistics)
+
+       local_label  prev_local   mean    std   min     max
+    0     376        580.0      91.0     0.0   91.0	   91.0
+    1     386        376.0     17449.0   0.0  17449.0  17449.0
+    2     580        261.0     252.0     0.0   252.0   252.0
+    3     644        386.0     21824.0   0.0  21824.0  21824.0
+
+       sum    count     threshold
+    0  91.0     1           91.0
+    1  17449.0   1         17449.0
+    2  252.0     1           52.0
+    3  21824.0   1         21824.0
     """
     if not inplace:
         df_statistics = df_statistics.copy()
