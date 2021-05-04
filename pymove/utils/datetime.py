@@ -720,17 +720,17 @@ def threshold_time_statistics(
 
     >>> threshold_time_statistics(statistics)
 
-       local_label  prev_local   mean    std   min     max
-    0     376        580.0      91.0     0.0   91.0	   91.0
-    1     386        376.0     17449.0   0.0  17449.0  17449.0
-    2     580        261.0     252.0     0.0   252.0   252.0
-    3     644        386.0     21824.0   0.0  21824.0  21824.0
+       local_label  prev_local   mean    std   min     max         sum    count
+    0     376        580.0      91.0     0.0   91.0	   91.0        91.0     1
+    1     386        376.0     17449.0   0.0  17449.0  17449.0    17449.0   1
+    2     580        261.0     252.0     0.0   252.0   252.0       252.0    1
+    3     644        386.0     21824.0   0.0  21824.0  21824.0    21824.0   1
 
-       sum    count     threshold
-    0  91.0     1           91.0
-    1  17449.0   1         17449.0
-    2  252.0     1           52.0
-    3  21824.0   1         21824.0
+       threshold
+    0    91.0
+    1   17449.0
+    2    52.0
+    3   21824.0
     """
     if not inplace:
         df_statistics = df_statistics.copy()
