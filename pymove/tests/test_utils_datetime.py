@@ -145,7 +145,7 @@ def test_working_day():
 
 def test_now_str():
 
-    expected = datetime.to_str(dt.datetime.now())
+    expected = datetime.datetime_to_str(dt.datetime.now())
 
     time_now = datetime.now_str()
 
