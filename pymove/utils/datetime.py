@@ -91,8 +91,6 @@ def str_to_datetime(dt_str: Text) -> datetime:
 
     Example
     -------
-    from datetime import datetime
-
     time_1 = '2020-06-29'
     time_2 = '2020-06-29 12:45:59'
 
@@ -193,8 +191,6 @@ def min_to_datetime(minutes: int) -> datetime:
 
     Example
     -------
-    from datetime import datetime
-
     print(min_to_datetime(26996497), type(min_to_datetime(26996497)))
     >>> 2021-04-30 13:37:00 <class 'datetime.datetime'>
 
@@ -218,7 +214,6 @@ def to_day_of_week_int(dt: datetime) -> int:
 
     Example
     -------
-    import datetime
     from pymove.utils.datetime import str_to_datetime
 
     monday = str_to_datetime('2021-05-3 12:00:01')
@@ -258,10 +253,7 @@ def working_day(
 
     Examples
     --------
-    from datetime import datetime
-    from typing import Optional, Text, Union
     from pymove.utils.datetime import str_to_datetime
-    import holidays
 
     independence_day = str_to_datetime('2021-09-7 12:00:01')
     # In Brazil this day is a holiday
@@ -596,26 +588,19 @@ def generate_time_statistics(
 
     Example
     -------
-    from typing import Optional, Text
-    from pymove.utils.constants import (COUNT, LOCAL_LABEL, MAX, MEAN, MIN,
-     PREV_LOCAL, STD, SUM, TIME_TO_PREV,)
+    df
+    >>> local_label	     prev_local	  time_to_prev	id
+    0	house	            None	     NaN	    1
+    1	market	           house	    720.0	    1
+    2	market	           market	     5.0	    1
+    3	market	           market	     1.0	    1
+    4	school	           market	    844.0	    1
 
-    >>> df
-      local_label  prev_local    time_to_prev
-    0   261          NaN             NaN
-    1   580         261.0           252.0
-    2   376         580.0           91.0
-    3   386         376.0          17449.0
-    4   644         386.0          21824.0
-
-    >>> generate_time_statistics(df)
-       local_label  prev_local   mean    std   min     max       sum    count
-    0     376        580.0      91.0     0.0   91.0	   91.0	     91.0     1
-    1     386        376.0     17449.0   0.0  17449.0  17449.0  17449.0   1
-    2     580        261.0     252.0     0.0   252.0   252.0    252.0     1
-    3     644        386.0     21824.0   0.0  21824.0  21824.0  21824.0   1
-
-
+    generate_time_statistics(df)
+    >>> local_label	 prev_local	   mean	    std	        min	    max	     sum	  count
+    0	 house	       market	   844.0	0.000000	844.0	844.0	844.0	   1
+    1	 market	        house	   720.0	0.000000	720.0	720.0	720.0	   1
+    2	 market	       market	    3.0	    2.828427	1.0	     5.0	6.0	       2
     """
     df_statistics = data.groupby(
         [local_label, PREV_LOCAL]
@@ -695,42 +680,33 @@ def threshold_time_statistics(
 
     Example
     -------
-    from pandas import DataFrame
-    from typing import Optional, Text
     from pymove.utils.datetime import generate_time_statistics, _calc_time_threshold
-    from pymove.utils.constants import (COUNT, LOCAL_LABEL, MAX, MEAN, MIN,
-     PREV_LOCAL, STD, SUM, TIME_TO_PREV,THRESHOLD)
 
-        >>> df
-      local_label  prev_local    time_to_prev
-    0   261          NaN             NaN
-    1   580         261.0           252.0
-    2   376         580.0           91.0
-    3   386         376.0          17449.0
-    4   644         386.0          21824.0
+    df
+    >>> local_label	     prev_local	  time_to_prev	id
+    0	house	            None	     NaN	    1
+    1	market	           house	    720.0	    1
+    2	market	           market	     5.0	    1
+    3	market	           market	     1.0	    1
+    4	school	           market	    844.0	    1
 
-    >>> statistics = generate_time_statistics(df)
+    statistics = generate_time_statistics(df)
     statistics
-       local_label  prev_local   mean    std   min     max       sum    count
-    0     376        580.0      91.0     0.0   91.0	   91.0	     91.0     1
-    1     386        376.0     17449.0   0.0  17449.0  17449.0  17449.0   1
-    2     580        261.0     252.0     0.0   252.0   252.0    252.0     1
-    3     644        386.0     21824.0   0.0  21824.0  21824.0  21824.0   1
+    >>> local_label	 prev_local	   mean	    std	        min	    max	     sum	  count
+    0	 house	       market	   844.0	0.000000	844.0	844.0	844.0	   1
+    1	 market	        house	   720.0	0.000000	720.0	720.0	720.0	   1
+    2	 market	       market	    3.0	    2.828427	1.0	     5.0	6.0	       2
 
-
-    >>> threshold_time_statistics(statistics)
-
-       local_label  prev_local   mean    std   min     max         sum    count
-    0     376        580.0      91.0     0.0   91.0	   91.0        91.0     1
-    1     386        376.0     17449.0   0.0  17449.0  17449.0    17449.0   1
-    2     580        261.0     252.0     0.0   252.0   252.0       252.0    1
-    3     644        386.0     21824.0   0.0  21824.0  21824.0    21824.0   1
+    threshold_time_statistics(statistics)
+    >>> local_label	 prev_local	   mean	    std	        min	    max	     sum	  count
+    0	 house	       market	   844.0	0.000000	844.0	844.0	844.0	   1
+    1	 market	        house	   720.0	0.000000	720.0	720.0	720.0	   1
+    2	 market	       market	    3.0	    2.828427	1.0	     5.0	6.0	       2
 
        threshold
-    0    91.0
-    1   17449.0
-    2    52.0
-    3   21824.0
+    0    844.0
+    1    720.0
+    2    5.8
     """
     if not inplace:
         df_statistics = df_statistics.copy()
