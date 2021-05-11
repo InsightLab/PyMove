@@ -247,8 +247,8 @@ def working_day(
     Examples
     --------
     >>> from pymove.utils.datetime import str_to_datetime
-    >>> independence_day = str_to_datetime('2021-09-7 12:00:01') # In Brazil this day is a holiday
-    >>> next_day = str_to_datetime('2021-09-8 12:00:01') # In Brazil this day is a Wednesday and isn't a holiday
+    >>> independence_day = str_to_datetime('2021-09-7 12:00:01') # Holiday in Brazil
+    >>> next_day = str_to_datetime('2021-09-8 12:00:01') # Not a Holiday in Brazil
     >>> print(working_day(independence_day, 'BR'))
     False
     >>> print(type(working_day(independence_day, 'BR')))
@@ -523,17 +523,17 @@ def create_time_slot_in_minute(
     --------
     >>> from pymove import datetime
     >>> data
-    '        lat         lon             datetime  id'
-    '0  39.984094  116.319236 2008-10-23 05:44:05   1'
-    '1  39.984198  116.319322 2008-10-23 05:56:06   1'
-    '2  39.984224  116.319402 2008-10-23 05:56:11   1'
-    '3  39.984224  116.319402 2008-10-23 06:10:15   1'
+            lat         lon             datetime  id
+    0  39.984094  116.319236 2008-10-23 05:44:05   1
+    1  39.984198  116.319322 2008-10-23 05:56:06   1
+    2  39.984224  116.319402 2008-10-23 05:56:11   1
+    3  39.984224  116.319402 2008-10-23 06:10:15   1
     >>> datetime.create_time_slot_in_minute(data, inplace=False)
-    '         lat         lon            datetime  id  time_slot'
-    '0  39.984094  116.319236 2008-10-23 05:44:05   1         22'
-    '1  39.984198  116.319322 2008-10-23 05:56:06   1         23'
-    '2  39.984224  116.319402 2008-10-23 05:56:11   1         23'
-    '3  39.984224  116.319402 2008-10-23 06:10:15   1         24'
+             lat         lon            datetime  id  time_slot
+    0  39.984094  116.319236 2008-10-23 05:44:05   1         22
+    1  39.984198  116.319322 2008-10-23 05:56:06   1         23
+    2  39.984224  116.319402 2008-10-23 05:56:11   1         23
+    3  39.984224  116.319402 2008-10-23 06:10:15   1         24
 
     """
     if data.dtypes[label_datetime] != 'datetime64[ns]':
@@ -571,18 +571,21 @@ def generate_time_statistics(
     Example
     -------
     >>> df
-    '    local_label     prev_local  time_to_prev    id'
-    '0         house            NaN           NaN     1'
-    '1        market          house         720.0     1'
-    '2        market         market           5.0     1'
-    '3        market         market           1.0     1'
-    '4        school         market         844.0     1'
-
+        local_label     prev_local  time_to_prev    id
+    0         house            NaN           NaN     1
+    1        market          house         720.0     1
+    2        market         market           5.0     1
+    3        market         market           1.0     1
+    4        school         market         844.0     1
     >>> generate_time_statistics(df)
-    '    local_label     prev_local	    mean         std      min      max        sum   count'
-    '0         house         market	   844.0    0.000000    844.0    844.0      844.0       1'
-    '1        market          house	   720.0    0.000000    720.0    720.0      720.0       1'
-    '2        market         market	     3.0    2.828427      1.0      5.0        6.0       2'
+        local_label     prev_local      mean         std      min      max\
+            sum   count
+    0         house         market     844.0    0.000000    844.0    844.0\
+          844.0       1
+    1        market          house     720.0    0.000000    720.0    720.0\
+          720.0       1
+    2        market         market       3.0    2.828427      1.0      5.0\
+            6.0       2
     """
     df_statistics = data.groupby(
         [local_label, PREV_LOCAL]
@@ -663,26 +666,32 @@ def threshold_time_statistics(
     Example
     -------
     >>> from pymove.utils.datetime import generate_time_statistics
-
     >>> df
-    '    local_label     prev_local  time_to_prev    id'
-    '0         house            NaN           NaN     1'
-    '1        market          house         720.0     1'
-    '2        market         market           5.0     1'
-    '3        market         market           1.0     1'
-    '4        school         market         844.0     1'
-
+        local_label     prev_local  time_to_prev    id
+    0         house            NaN           NaN     1
+    1        market          house         720.0     1
+    2        market         market           5.0     1
+    3        market         market           1.0     1
+    4        school         market         844.0     1
     >>> statistics = generate_time_statistics(df)
     >>> statistics
-    '    local_label     prev_local	    mean         std      min      max        sum   count'
-    '0         house         market	   844.0    0.000000    844.0    844.0      844.0       1'
-    '1        market          house	   720.0    0.000000    720.0    720.0      720.0       1'
-    '2        market         market	     3.0    2.828427      1.0      5.0        6.0       2'
+        local_label     prev_local	    mean         std      min      max\
+            sum   count
+    0         house         market	   844.0    0.000000    844.0    844.0\
+          844.0       1
+    1        market          house	   720.0    0.000000    720.0    720.0\
+          720.0       1
+    2        market         market	     3.0    2.828427      1.0      5.0\
+            6.0       2
     >>> threshold_time_statistics(statistics)
-    '    local_label     prev_local	    mean         std      min      max        sum   count   threshold'
-    '0         house         market	   844.0    0.000000    844.0    844.0      844.0       1       844.0'
-    '1        market          house	   720.0    0.000000    720.0    720.0      720.0       1       720.0'
-    '2        market         market	     3.0    2.828427      1.0      5.0        6.0       2         5.8'
+        local_label     prev_local	    mean         std      min      max\
+            sum   count   threshold
+    0         house         market	   844.0    0.000000    844.0    844.0\
+           844.0       1       844.0
+    1        market          house	   720.0    0.000000    720.0    720.0\
+           720.0       1       720.0
+    2        market         market	     3.0    2.828427      1.0      5.0\
+             6.0       2         5.8
 
     """
     if not inplace:
