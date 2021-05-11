@@ -64,11 +64,10 @@ def lat_meters(lat: float) -> float:
 
     Examples
     --------
-    Latitude in Fortaleza: -3.8162973555
+    Latitude in Fortaleza: -3.71839
     >>> from pymove.utils.conversions import lat_meters
-    >>> lat_meters(-3.8162973555)
-        110826.6722516857
-
+    >>> lat_meters(-3.71839)
+    110832.75545918777
     """
     rlat = float(lat) * math.pi / 180
     # meter per degree Latitude
@@ -98,6 +97,13 @@ def meters_to_eps(
     -------
     float
         radius in eps
+
+    Example
+    -------
+    >>> from pymove.utils.conversions import meters_to_eps
+    >>> earth_radius = 6371000
+    >>> meters_to_eps(earth_radius)
+    1000.0
     """
     return radius_meters / earth_radius
 
@@ -119,6 +125,12 @@ def list_to_str(input_list: List, delimiter: Optional[Text] = ',') -> Text:
         Returns a string, resulting from concatenation of list elements,
         separeted by the delimiter.
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import list_to_str
+    >>> list = [1,2,3,4,5]
+    >>> print(list_to_str(list, 'x'), type(list_to_str(list)))
+    1x2x3x4x5 <class 'str'>
     """
     return delimiter.join(
         [x if isinstance(x, str) else repr(x) for x in input_list]
@@ -143,10 +155,9 @@ def list_to_csv_str(input_list: List) -> Text:
     Example
     -------
     >>> from pymove import conversions
-    >>> a = [1, 2, 3, 4, 5]
-    >>> conversions.list_to_csv_str(a)
-    '1 1:2 2:3 3:4 4:5'
-
+    >>> list = [1,2,3,4,5]
+    >>> print(list_to_csv_str(list), type(list_to_csv_str(list)))
+    1,2,3,4,5 <class 'str'>
     """
     return list_to_str(input_list)
 
@@ -169,10 +180,9 @@ def list_to_svm_line(original_list: List) -> Text:
     Example
     -------
     >>> from pymove import conversions
-    >>> a = [1, 2, 3, 4, 5]
-    >>> conversions.list_to_svm_line(a)
-    '1 1:2 2:3 3:4 4:5'
-
+    >>> list = [1,2,3,4,5]
+    >>> print(list_to_svm_line(list), type(list_to_svm_line(list)))
+    1 1:2 2:3 3:4 4:5 <class 'str'>
     """
     list_size = len(original_list)
     svm_line = '%s ' % original_list[0]
@@ -197,9 +207,11 @@ def lon_to_x_spherical(lon: float) -> float:
 
     Examples
     --------
-    >>> from pymove import conversions
-    >>> conversions.lon_to_x_spherical(-38.501597 )
-    -4285978.17
+    >>> from pymove.utils.conversions import lon_to_x_spherical
+    >>> lon_fortaleza = -38.5434
+    >>> for_x = lon_to_x_spherical(lon_fortaleza)
+    >>> print(x_for, type(x_for))
+    -4290631.66144146 <class 'numpy.float64'>
 
     References
     ----------
@@ -225,9 +237,11 @@ def lat_to_y_spherical(lat: float) -> float:
 
     Examples
     --------
-    >>> from pymove import conversions
-    >>> conversions.lat_to_y_spherical(-3.797864)
-    -423086.2213610324
+    >>> from pymove.utils.conversions import lat_to_y_spherical
+    >>> lat_fortaleza = -3.71839
+    >>> for_y = lat_to_y_spherical(lat_fortaleza)
+    >>> print(y_for, type(y_for))
+    -414220.15015607665 <class 'numpy.float64'>
 
     References
     ----------
@@ -253,9 +267,10 @@ def x_to_lon_spherical(x: float) -> float:
 
     Examples
     --------
-    >>> from pymove import conversions
-    >>> conversions.x_to_lon_spherical(-4285978.17)
-    -38.501597
+    >>> from pymove.utils.conversions import x_to_lon_spherical
+    >>> for_x = -4290631.66144146
+    >>> print(x_to_lon_spherical(for_x), type(x_to_lon_spherical(for_x)))
+    -38.5434 <class 'numpy.float64'>
 
     References
     ----------
@@ -281,9 +296,10 @@ def y_to_lat_spherical(y: float) -> float:
 
     Examples
     --------
-    >>> from pymove import conversions
-    >>> conversions.y2_lat_spherical(-423086.22)
-    -3.797864
+    >>> from pymove.utils.conversions import y_to_lat_spherical
+    >>> for_y = -414220.15015607665
+    >>> print(y_to_lat_spherical(y_for), type(y_to_lat_spherical(y_for)))
+    -3.7183900000000096 <class 'numpy.float64'>
 
     References
     ----------
@@ -320,6 +336,15 @@ def geometry_points_to_lat_and_lon(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import geometry_points_to_lat_and_lon
+    >>> geom_points_df
+       id                     geometry
+    0	1	POINT (116.36184 39.77529)
+    1	2	POINT (116.36298 39.77564)
+    2	3	POINT (116.33767 39.83148)
+    #missing...
     """
     if not inplace:
         move_data = move_data.copy()
@@ -359,6 +384,19 @@ def lat_and_lon_decimal_degrees_to_decimal(
     DataFrame
         A new dataframe with the converted feature
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import lat_and_lon_decimal_degrees_to_decimal
+    >>> lat_and_lon_df
+       id     lat     lon
+    0	0	28.0N	94.8W
+    1	1	41.3N	50.4W
+    2	1	40.8N	47.5W
+    >>> lat_and_lon_decimal_degrees_to_decimal(lat_and_lon_df)
+       id    lat      lon
+    0	0	28.0	-94.8
+    1	1	41.3	-50.4
+    2	1	40.8	-47.5
     """
     def _decimal_degree_to_decimal(row):
         if (row[latitude][-1:] == 'N'):
@@ -400,6 +438,47 @@ def ms_to_kmh(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import ms_to_kmh
+    >>> geo_life_df
+              lat          lon             datetime   id
+    0	39.984094   116.319236  2008-10-23 05:53:05    1
+    1	39.984198	116.319322	2008-10-23 05:53:06    1
+    2	39.984224	116.319402	2008-10-23 05:53:11    1
+    3	39.984211	116.319389	2008-10-23 05:53:16    1
+    4	39.984217	116.319422	2008-10-23 05:53:21    1
+    >>> geo_life.generate_dist_time_speed_features()
+    # Creating three columns: dist_to_prev, time_to_prev, speed_to_prev
+
+       id         lat          lon             datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     13.690153
+    2	     7.403788	          5.0	      1.480758
+    3        1.821083	          5.0	      0.364217
+    4        2.889671	          5.0	      0.577934
+    >>> ms_to_kmh(geo_life, inplace = True)
+    >>> geo_life_df
+       id         lat          lon             datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     49.284551
+    2	     7.403788	          5.0	      5.330727
+    3        1.821083	          5.0	      1.311180
+    4        2.889671	          5.0	      2.080563
     """
     if not inplace:
         move_data = move_data.copy()
@@ -440,6 +519,38 @@ def kmh_to_ms(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import kmh_to_ms
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     49.284551
+    2	     7.403788	          5.0	      5.330727
+    3        1.821083	          5.0	      1.311180
+    4        2.889671	          5.0	      2.080563
+    >>> kmh_to_ms(geo_life, inplace = True)
+    >>> geo_life
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     13.690153
+    2	     7.403788	          5.0	      1.480758
+    3        1.821083	          5.0	      0.364217
+    4        2.889671	          5.0	      0.577934
     """
     if not inplace:
         move_data = move_data.copy()
@@ -481,7 +592,38 @@ def meters_to_kilometers(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import meters_to_kilometers
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
 
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     13.690153
+    2	     7.403788	          5.0	      1.480758
+    3        1.821083	          5.0	      0.364217
+    4        2.889671	          5.0	      0.577934
+    >>> meters_to_kilometers(geo_life, inplace=True)
+    >>> geo_life
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1        0.013690	          1.0	     13.690153
+    2	     0.007404	          5.0	      1.480758
+    3        0.001821		      5.0	      0.364217
+    4        0.002890	          5.0	      0.577934
     """
     if not inplace:
         move_data = move_data.copy()
@@ -522,6 +664,38 @@ def kilometers_to_meters(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import kilometers_to_meters
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1        0.013690	          1.0	     13.690153
+    2	     0.007404	          5.0	      1.480758
+    3        0.001821		      5.0	      0.364217
+    4        0.002890	          5.0	      0.577934
+    >>> kilometers_to_meters(geo_life, inplace = True)
+    >>> geo_life
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     13.690153
+    2	     7.403788	          5.0	      1.480758
+    3        1.821083	          5.0	      0.364217
+    4        2.889671	          5.0	      0.577934
     """
     if not inplace:
         move_data = move_data.copy()
@@ -563,6 +737,38 @@ def seconds_to_minutes(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import seconds_to_minutes
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     13.690153
+    2	     7.403788	          5.0	      1.480758
+    3        1.821083	          5.0	      0.364217
+    4        2.889671	          5.0	      0.577934
+    >>> seconds_to_minutes(geo_life, inplace=True)
+    >>> geo_life
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	     0.016667	     13.690153
+    2	     7.403788	     0.083333	      1.480758
+    3        1.821083	     0.083333	      0.364217
+    4        2.889671	     0.083333	      0.577934
     """
     if not inplace:
         move_data = move_data.copy()
@@ -603,6 +809,38 @@ def minute_to_seconds(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import minute_to_seconds
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	     0.016667	     13.690153
+    2	     7.403788	     0.083333	      1.480758
+    3        1.821083	     0.083333	      0.364217
+    4        2.889671	     0.083333	      0.577934
+    >>> minute_to_seconds(geo_life, inplace=True)
+    >>> geo_life
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     13.690153
+    2	     7.403788	          5.0	      1.480758
+    3        1.821083	          5.0	      0.364217
+    4        2.889671	          5.0	      0.577934
     """
     if not inplace:
         move_data = move_data.copy()
@@ -644,6 +882,39 @@ def minute_to_hours(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import minute_to_hours, seconds_to_minutes
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     13.690153
+    2	     7.403788	          5.0	      1.480758
+    3        1.821083	          5.0	      0.364217
+    4        2.889671	          5.0	      0.577934
+    >>> seconds_to_minutes(geo_life, inplace=True)
+    >>> minute_to_hours(geo_life, inplace=True)
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	     0.000278	     13.690153
+    2	     7.403788	     0.001389	      1.480758
+    3        1.821083	     0.001389	      0.364217
+    4        2.889671	     0.001389	      0.577934
     """
     if not inplace:
         move_data = move_data.copy()
@@ -685,6 +956,38 @@ def hours_to_minute(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import hours_to_minute
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	     0.000278	     13.690153
+    2	     7.403788	     0.001389	      1.480758
+    3        1.821083	     0.001389	      0.364217
+    4        2.889671	     0.001389	      0.577934
+    >>> hours_to_minute(geo_life, inplace = True)
+    >>> geo_life
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	     0.016667	     13.690153
+    2	     7.403788	     0.083333	      1.480758
+    3        1.821083	     0.083333	      0.364217
+    4        2.889671	     0.083333	      0.577934
     """
     if not inplace:
         move_data = move_data.copy()
@@ -726,6 +1029,39 @@ def seconds_to_hours(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import minute_to_seconds, seconds_to_hours
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	     0.016667	     13.690153
+    2	     7.403788	     0.083333	      1.480758
+    3        1.821083	     0.083333	      0.364217
+    4        2.889671	     0.083333	      0.577934
+    >>> minute_to_seconds(geo_life, inplace = True)
+    >>> seconds_to_hours(geo_life, inplace = True)
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	     0.000278	     13.690153
+    2	     7.403788	     0.001389	      1.480758
+    3        1.821083	     0.001389	      0.364217
+    4        2.889671	     0.001389	      0.577934
     """
     if not inplace:
         move_data = move_data.copy()
@@ -766,6 +1102,38 @@ def hours_to_seconds(
     DataFrame
         A new dataframe with the converted feature or None
 
+    Example
+    -------
+    >>> from pymove.utils.conversions import hours_to_seconds
+    >>> geo_life_df
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	     0.000278	     13.690153
+    2	     7.403788	     0.001389	      1.480758
+    3        1.821083	     0.001389	      0.364217
+    4        2.889671	     0.001389	      0.577934
+    >>> hours_to_seconds(geo_life, inplace = True)
+    >>> geo_life
+       id	      lat	       lon	           datetime
+    0	1	39.984094	116.319236	2008-10-23 05:53:05
+    1	1	39.984198	116.319322	2008-10-23 05:53:06
+    2	1	39.984224	116.319402	2008-10-23 05:53:11
+    3	1	39.984211	116.319389	2008-10-23 05:53:16
+    4	1	39.984217	116.319422	2008-10-23 05:53:21
+
+         dist_to_prev    time_to_prev    speed_to_prev
+    0             NaN	          NaN	           NaN
+    1       13.690153	          1.0	     13.690153
+    2	     7.403788	          5.0	      1.480758
+    3        1.821083	          5.0	      0.364217
+    4        2.889671	          5.0	      0.577934
     """
     if not inplace:
         move_data = move_data.copy()
