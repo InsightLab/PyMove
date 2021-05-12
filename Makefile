@@ -18,6 +18,9 @@ clean:
 	rm -f .coverage
 
 test: clean
+	pytest
+
+coverage: clean
 	coverage run -m pytest
 	coverage report
 

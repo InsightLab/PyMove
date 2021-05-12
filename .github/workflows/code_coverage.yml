@@ -21,7 +21,7 @@ jobs:
         pip install pytest coverage geopandas .
     - name: Coverage
       run: |
-        coverage run -m pytest
+        make coverage
         coverage xml -o "coverage.xml"
     - name: Codacy Coverage Reporter
       uses: codacy/codacy-coverage-reporter-action@master
