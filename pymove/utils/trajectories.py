@@ -7,6 +7,7 @@ flatten_dict,
 flatten_columns,
 shift,
 fill_list_with_new_values,
+split_trajectory,
 object_for_array,
 column_to_array
 
@@ -17,6 +18,7 @@ from itertools import chain
 from typing import Any, Dict, List, Optional, Text, Union
 
 import numpy as np
+import pandas as pd
 from numpy import ndarray
 from pandas import DataFrame, Series
 from pandas import read_csv as _read_csv
@@ -257,6 +259,52 @@ def fill_list_with_new_values(original_list: List, new_list_values: List):
     """
     n = len(new_list_values)
     original_list[:n] = new_list_values
+
+
+def split_trajectory(
+    row: Series,
+    size_window: Optional[int] = 6,
+    size_jump: Optional[int] = 3,
+    columns: Optional[List] = None
+) -> Series:
+    """
+    It breaks the trajectory in stretches.
+
+    Extracts all possible sub-trajectories, according to the specified
+    window size and jump.
+
+    Parameters
+    ----------
+    row: pandas.core.frame.Series
+        Line of the trajectory dataframe.
+
+    size_window: Number, optional, default 6
+        Sliding window size.
+
+    size_jump: Number, optional, default 3
+        Size of the jump in the trajectory.
+
+    columns: List, optional, default None
+        Columns to which the split will be applied.
+
+    Return
+    ------
+    pandas.core.frame.Series
+        Series with the stretches recovered from the observed trajectory.
+    """
+    if columns is None:
+        columns = row.index
+
+    sequence = row[columns[0]]
+    for i in range(0, len(sequence), size_jump):
+        row_ = row.copy()
+        for col in columns:
+            row_ = row_.append(
+                pd.Series({
+                    'window_' + col: row_[col][i:i + size_window]
+                })
+            )
+        yield row_
 
 
 def object_for_array(object_: Text) -> ndarray:
