@@ -246,8 +246,8 @@ def working_day(
     Examples
     --------
     >>> from pymove.utils.datetime import str_to_datetime
-    >>> independence_day = str_to_datetime('2021-09-7 12:00:01') # In Brazil this day is a holiday
-    >>> next_day = str_to_datetime('2021-09-8 12:00:01') # In Brazil this day is a Wednesday and isn't a holiday
+    >>> independence_day = str_to_datetime('2021-09-7 12:00:01') # Holiday in Brazil
+    >>> next_day = str_to_datetime('2021-09-8 12:00:01') # Not a Holiday in Brazil
     >>> print(working_day(independence_day, 'BR'))
     False
     >>> print(type(working_day(independence_day, 'BR')))
@@ -535,7 +535,6 @@ def create_time_slot_in_minute(
         1   39.984198   116.319322   2008-10-23 05:56:06   1          23
         2   39.984224   116.319402   2008-10-23 05:56:11   1          23
         3   39.984224   116.319402   2008-10-23 06:10:15   1          24
-
     """
     if data.dtypes[label_datetime] != 'datetime64[ns]':
         raise ValueError('{} colum must be of type datetime'.format(label_datetime))
@@ -665,7 +664,6 @@ def threshold_time_statistics(
     Example
     -------
     >>> from pymove.utils.datetime import generate_time_statistics
-
     >>> df
             local_label   prev_local   time_to_prev   id
         0         house          NaN            NaN    1
@@ -680,11 +678,14 @@ def threshold_time_statistics(
         1        market        house   720.0   0.000000   720.0   720.0   720.0       1
         2        market       market     3.0   2.828427     1.0     5.0     6.0       2
     >>> threshold_time_statistics(statistics)
-            local_label   prev_local    mean        std     min     max     sum   count   threshold
-        0         house       market   844.0   0.000000   844.0   844.0   844.0       1       844.0
-        1        market        house   720.0   0.000000   720.0   720.0   720.0       1       720.0
-        2        market       market     3.0   2.828427     1.0     5.0     6.0       2         5.8
-
+            local_label   prev_local    mean        std     min     max     sum   count
+        0         house       market   844.0   0.000000   844.0   844.0   844.0       1
+        1        market        house   720.0   0.000000   720.0   720.0   720.0       1
+        2        market       market     3.0   2.828427     1.0     5.0     6.0       2
+            threshold
+        0       844.0
+        1       720.0
+        2         5.8
     """
     if not inplace:
         df_statistics = df_statistics.copy()
