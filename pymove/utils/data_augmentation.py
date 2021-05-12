@@ -8,7 +8,8 @@ generate_destiny_feature,
 split_crossover,
 augmentation_trajectories_df,
 insert_points_in_df,
-instance_crossover_augmentation
+instance_crossover_augmentation,
+sliding_window
 
 """
 
@@ -21,6 +22,7 @@ from pandas.core.series import Series
 
 from pymove.utils.constants import DESTINY, START, TID, TRAJECTORY
 from pymove.utils.log import progress_bar
+from pymove.utils.trajectories import split_trajectory
 
 if TYPE_CHECKING:
     from pymove.core.dask import DaskMoveDataFrame
@@ -368,3 +370,55 @@ def instance_crossover_augmentation(
         traj_df, restriction=restriction, frac=frac
     )
     insert_points_in_df(data, aug_df)
+
+
+def sliding_window(
+    data: DataFrame,
+    size_window: Optional[int] = 6,
+    size_jump: Optional[int] = 3,
+    columns: Optional[List] = None,
+) -> DataFrame:
+    """
+    Sliding window technique.
+
+    Performs an increase in the trajectory data by sliding a window
+    Over each sequence to a specified size n, skipping m points.
+    This process inserts sub-trajectories in the data set.
+
+    Parameters
+    ----------
+    data: pandas.core.frame.DataFrame
+        Trajectory data in sequence format.
+
+    size_window: number, optional, default 6
+        Sliding window size.
+
+    size_jump: number, optional, default 3
+        Size of the jump in the trajectory.
+
+    columns: list, optional, default None
+        Columns to which the split will be applied.
+
+    Return
+    ------
+    pandas.core.frame.DataFrame
+        Increased data set.
+    """
+    if columns is None:
+        columns = data.columns
+
+    frames = {}
+    desc = 'Sliding Window'
+    for idx, row in progress_bar(data.iterrows(), desc=desc, total=data.shape[0]):
+        frames[idx] = pd.DataFrame(
+            [serie for serie in split_trajectory(
+                row, size_window, size_jump, columns
+            )]
+        )
+
+    data_ = pd.concat(
+        [frames[i] for i in range(len(frames))],
+        ignore_index=True
+    )
+
+    return data_
