@@ -312,11 +312,11 @@ def y_to_lat_spherical(y: float) -> float:
 def geometry_points_to_lat_and_lon(
     move_data: DataFrame,
     geometry_label: Optional[Text] = GEOMETRY,
-    drop_geometry: Optional[bool] = True,
+    drop_geometry: Optional[bool] = False,
     inplace: Optional[bool] = False
 ) -> DataFrame:
     """
-    Converts the geometry column to latitude and longitude columns(named 'lat' and 'lon').
+    Creates lat and lon columns from Points in geometry column.
 
     Removes geometries that are not of the Point type.
 
@@ -327,7 +327,7 @@ def geometry_points_to_lat_and_lon(
     geometry: str, optional
         Represents column name of the geometry column, by default GEOMETRY
     drop_geometry: bool, optional
-        Option to drop the geometry column, by default True
+        Option to drop the geometry column, by default False
     inplace: bool, optional
         Whether the operation will be done in the original dataframe, by default False
 
@@ -340,11 +340,15 @@ def geometry_points_to_lat_and_lon(
     -------
     >>> from pymove.utils.conversions import geometry_points_to_lat_and_lon
     >>> geom_points_df
-       id                     geometry
-    0	1	POINT (116.36184 39.77529)
-    1	2	POINT (116.36298 39.77564)
-    2	3	POINT (116.33767 39.83148)
-    #missing...
+            id                     geometry
+        0	 1   POINT (116.36184 39.77529)
+        1	 2	 POINT (116.36298 39.77564)
+        2	 3	 POINT (116.33767 39.83148)
+    >>> geometry_points_to_lat_and_lon(geom_points_df)
+            id                     geometry        lon       lat
+        0    1   POINT (116.36184 39.77529)  116.36184  39.77529
+        1    2   POINT (116.36298 39.77564)  116.36298  39.77564
+        2    3   POINT (116.33767 39.83148)  116.33767  39.83148
     """
     if not inplace:
         move_data = move_data.copy()
