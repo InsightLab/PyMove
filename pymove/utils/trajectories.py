@@ -14,18 +14,29 @@ column_to_array
 """
 
 
+import random
+import uuid
 from itertools import chain
 from typing import Any, Dict, List, Optional, Text, Union
 
+import networkx as nx
 import numpy as np
 import pandas as pd
+from networkx.classes.digraph import DiGraph
 from numpy import ndarray
 from pandas import DataFrame, Series
 from pandas import read_csv as _read_csv
 from pandas._typing import FilePathOrBuffer
 
 from pymove.core.dataframe import MoveDataFrame
-from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID, TYPE_PANDAS
+from pymove.utils.constants import (
+    DATETIME,
+    LATITUDE,
+    LONGITUDE,
+    TID_STAT,
+    TRAJ_ID,
+    TYPE_PANDAS,
+)
 from pymove.utils.math import is_number
 
 
@@ -259,6 +270,70 @@ def fill_list_with_new_values(original_list: List, new_list_values: List):
     """
     n = len(new_list_values)
     original_list[:n] = new_list_values
+
+
+def append_trajectory(
+    data: DataFrame, trajectory: List, graph: DiGraph,
+    label_tid: Optional[Text] = TID_STAT
+):
+    """
+    Inserts a trajectory in the data set.
+
+    Inserts the trajectory retrieved from the
+    transition graph in the trajectory data set.
+
+    Parameters
+    ----------
+    data: pandas.core.frame.DataFrame
+        Trajectory data in sequence format.
+
+    trajectory: list
+        Trajectory recovered from the transition graph.
+
+    graph: networkx.classes.digraph.DiGraph
+        Transition graph constructed from trajectory data.
+
+    label_tid: String, optional, default 'tid_stat'
+        Column name for trajectory IDs.
+    """
+    rd = random.Random()
+
+    datetimes, lats, lons = [], [], []
+    node = trajectory[0]
+
+    datetimes.append(
+        np.random.choice(
+            nx.get_node_attributes(graph, 'datetime')[node]
+        )
+    )
+    coords = nx.get_node_attributes(graph, 'coords')
+
+    lats.append(coords[node][0])
+    lons.append(coords[node][1])
+
+    for i in range(1, len(trajectory)):
+        edge = (trajectory[i - 1], trajectory[i])
+        mean_times = nx.get_edge_attributes(graph, 'mean_times')[edge]
+
+        datetimes.append(datetimes[i - 1] + pd.Timedelta(mean_times))
+        lats.append(coords[trajectory[i]][0])
+        lons.append(coords[trajectory[i]][1])
+
+    prev_tid = data.loc[data.shape[0] - 1, label_tid][0]
+    tids = np.full(len(trajectory), prev_tid + 1, dtype=np.int32).tolist()
+
+    rd.seed(tids[0])
+    ids = np.full(
+        len(trajectory),
+        uuid.UUID(int=rd.getrandbits(128)).hex,
+        dtype=np.object).tolist()
+
+    path = np.array(trajectory, dtype=np.float32).tolist()
+
+    prev_locals = [np.nan]
+    prev_locals.extend(path[:-1])
+
+    data.loc[data.shape[0], :] = [datetimes, ids, path, lats, lons, prev_locals, tids]
 
 
 def split_trajectory(
