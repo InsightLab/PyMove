@@ -13,15 +13,18 @@ sliding_window
 
 """
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Text, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Text, Tuple, Union
 
+import networkx as nx
 import numpy as np
 import pandas as pd
+from networkx.classes.digraph import DiGraph
 from pandas.core.frame import DataFrame
 from pandas.core.series import Series
 
-from pymove.utils.constants import DESTINY, START, TID, TRAJECTORY
+from pymove.utils.constants import DESTINY, LOCAL_LABEL, START, TID, TID_STAT, TRAJECTORY
 from pymove.utils.log import progress_bar
+from pymove.utils.networkx import _all_shortest_paths, _all_simple_paths
 from pymove.utils.trajectories import split_trajectory
 
 if TYPE_CHECKING:
@@ -422,3 +425,80 @@ def sliding_window(
     )
 
     return data_
+
+
+def generate_all_paths(
+    data: DataFrame, graph: DiGraph,
+    source: Any, target: Any,
+    min_path_size: Optional[int] = 3,
+    max_path_size: Optional[int] = 6,
+    max_sampling_source: Optional[int] = 10,
+    max_sampling_target: Optional[int] = 10,
+    label_local: Optional[Text] = LOCAL_LABEL,
+    label_tid: Optional[Text] = TID_STAT,
+    simple_paths: Optional[bool] = False
+):
+    """
+    Generate All Paths.
+
+    Retrieves all paths in the graph between the past source and
+    destination, if any. The number of paths returned is limited
+    by the max_sampling_source and max_sampling_target
+    parameters, and the path size is limited by the
+    min_path_size and max_path_size parameters.
+
+    Parameters
+    ----------
+    data: pandas.core.frame.DataFrame
+        Trajectory data in sequence format.
+
+    graph: networkx.classes.digraph.DiGraph
+        Transition graph constructed from trajectory data.
+
+    source: Node
+        Sequence source node.
+
+    target: Node
+        Sequence destination node.
+
+    min_path_size: Number, optional, default 3
+        Minimum number of points for the trajectory.
+
+    max_path_size: Number, optional, default 6
+        Maximum number of points for the trajectory.
+
+    max_sampling_source: Number, optional, default 10
+        Maximum number of paths to be returned, considering the observed origin.
+
+    max_sampling_target: Number, optional, default 10
+        Maximum number of paths to be returned, considering the observed destination.
+
+    label_local: String, optional, default 'local_label'
+        Name of the column referring to the trajectories.
+
+    label_tid: String, optional, default 'tid_stat'
+        Column name for trajectory IDs.
+
+    simple_paths: Boolean, optional, default False
+        If true, use the paths with the most used sections.
+        Otherwise, use paths with less used sections.
+
+    """
+    if not nx.has_path(graph, source, target):
+        return []
+
+    if simple_paths:
+        _all_simple_paths(
+            data, graph, source, target,
+            min_path_size, max_path_size - 1,
+            max_sampling_source, max_sampling_target,
+            label_local=label_local, label_tid=label_tid
+        )
+
+    else:
+        _all_shortest_paths(
+            data, graph, source, target,
+            min_path_size, max_path_size,
+            max_sampling_source, max_sampling_target,
+            label_local=label_local, label_tid=label_tid
+        )
