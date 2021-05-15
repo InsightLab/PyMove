@@ -1,4 +1,5 @@
-"""Semantic operations.
+"""
+Semantic operations.
 
 outliers
 create_or_update_out_of_the_bbox,

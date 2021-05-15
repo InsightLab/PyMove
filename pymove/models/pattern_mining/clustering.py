@@ -1,4 +1,5 @@
-"""Clustering operations.
+"""
+Clustering operations.
 
 elbow_method,
 gap_statistic,

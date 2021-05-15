@@ -1,4 +1,5 @@
-"""Distances operations.
+"""
+Distances operations.
 
 haversine,
 euclidean_distance_in_meters,

@@ -1,4 +1,5 @@
-"""Folium operations.
+"""
+Folium operations.
 
 save_map,
 create_base_map,

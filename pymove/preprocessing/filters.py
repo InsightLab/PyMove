@@ -1,4 +1,5 @@
-"""Filtering operations.
+"""
+Filtering operations.
 
 get_bbox_by_radius,
 by_bbox,

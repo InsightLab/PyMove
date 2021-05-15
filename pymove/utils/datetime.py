@@ -1,4 +1,5 @@
-"""Datetime operations.
+"""
+Datetime operations.
 
 date_to_str,
 str_to_datetime,

@@ -1,4 +1,5 @@
-"""Query operations.
+"""
+Query operations.
 
 range_query,
 knn_query

@@ -1,4 +1,5 @@
-"""Logging operations.
+"""
+Logging operations.
 
 progress_bar
 set_verbosity

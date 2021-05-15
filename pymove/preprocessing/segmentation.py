@@ -1,4 +1,5 @@
-"""Compression operations.
+"""
+Compression operations.
 
 bbox_split,
 by_dist_time_speed,
