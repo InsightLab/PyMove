@@ -1,12 +1,11 @@
--e .
-pre-commit
 bump2version
+coverage
 flake8
-pep8-naming
 flake8-bugbear
 flake8-docstrings
-pytest
-coverage
 geopandas
+pep8-naming
+pre-commit
+pytest
 sphinx
 sphinx_rtd_theme
