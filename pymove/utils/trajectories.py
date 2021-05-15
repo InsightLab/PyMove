@@ -1,5 +1,4 @@
-"""
-Data operations.
+"""Data operations.
 
 read_csv,
 invert_dict,

@@ -1,5 +1,4 @@
-"""
-Geo operations.
+"""Geo operations.
 
 v_color,
 plot_coords,

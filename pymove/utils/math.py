@@ -1,5 +1,4 @@
-"""
-Math operations.
+"""Math operations.
 
 is_number,
 std,

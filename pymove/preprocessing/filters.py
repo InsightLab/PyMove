@@ -1,5 +1,4 @@
-"""
-Filtering operations.
+"""Filtering operations.
 
 get_bbox_by_radius,
 by_bbox,
@@ -299,7 +298,7 @@ def clean_consecutive_duplicates(
     ----------
     move_data : dataframe
         The input trajectory data
-    subset : Array of strs, optional
+    subset : Array of str, optional
         Specifies  Column label or sequence of labels, considered for
         identifying duplicates, by default None
     keep : 'first', 'last', optional

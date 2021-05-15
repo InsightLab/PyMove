@@ -1,5 +1,4 @@
-"""
-Matplolib operations.
+"""Matplolib operations.
 
 show_object_id_by_date,
 plot_trajectories,

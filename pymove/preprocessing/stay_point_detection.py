@@ -1,5 +1,4 @@
-"""
-Stop point detection operations.
+"""Stop point detection operations.
 
 create_or_update_move_stop_by_dist_time,
 create_or_update_move_and_stop_by_radius
@@ -12,10 +11,7 @@ import numpy as np
 
 from pymove.preprocessing.segmentation import by_max_dist
 from pymove.utils.constants import (
-    DATETIME,
     DIST_TO_PREV,
-    HOUR_COS,
-    HOUR_SIN,
     MOVE,
     SEGMENT_STOP,
     SITUATION,

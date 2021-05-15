@@ -1,5 +1,4 @@
-"""
-Integration operations.
+"""Integration operations.
 
 union_poi_bank,
 union_poi_bus_station,

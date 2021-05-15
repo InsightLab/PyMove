@@ -1,5 +1,4 @@
-"""
-Memory  operations.
+"""Memory  operations.
 
 reduce_mem_usage_automatic,
 total_size,

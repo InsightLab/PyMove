@@ -1,5 +1,4 @@
-"""
-Compression operations.
+"""Compression operations.
 
 compress_segment_stop_to_point
 

@@ -1,5 +1,4 @@
-"""
-Data augmentation operations.
+"""Data augmentation operations.
 
 append_row,
 generate_trajectories_df,

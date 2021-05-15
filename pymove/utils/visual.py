@@ -1,5 +1,4 @@
-"""
-Visualization auxiliary operations.
+"""Visualization auxiliary operations.
 
 add_map_legend,
 generate_color,
