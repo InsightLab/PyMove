@@ -1,17 +1,6 @@
 """PandasMoveDataFrame class."""
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Text,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Text, Tuple, Union
 
 import numpy as np
 from pandas import DataFrame, DateOffset, Series, Timedelta
