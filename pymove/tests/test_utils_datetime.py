@@ -65,24 +65,24 @@ def test_str_to_datetime():
     assert(converted_date_time == expected_date_time)
 
 
-def test_to_str():
+def test_datetime_to_str():
 
     expected = str_date_time_default
 
     data = default_date_time
 
-    str_date_time = datetime.to_str(data)
+    str_date_time = datetime.datetime_to_str(data)
 
     assert(str_date_time == expected)
 
 
-def test_to_min():
+def test_datetime_to_min():
 
     expected = 25347608
 
     data = default_date_time
 
-    date_to_min = datetime.to_min(data)
+    date_to_min = datetime.datetime_to_min(data)
 
     assert(date_to_min == expected)
 
@@ -145,7 +145,7 @@ def test_working_day():
 
 def test_now_str():
 
-    expected = datetime.to_str(dt.datetime.now())
+    expected = datetime.datetime_to_str(dt.datetime.now())
 
     time_now = datetime.now_str()
 

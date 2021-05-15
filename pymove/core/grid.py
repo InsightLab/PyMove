@@ -51,11 +51,11 @@ class Grid:
             Represents grid cell size, by default None
         meters_by_degree : float, optional
             Represents the corresponding meters of lat by degree,
-                by default lat_meters(-3.8162973555)
+                by default lat_meters(-3.71839)
         """
         self.last_operation = None
         if meters_by_degree is None:
-            meters_by_degree = lat_meters(-3.8162973555)
+            meters_by_degree = lat_meters(-3.71839)
         if isinstance(data, dict):
             self._grid_from_dict(data)
         else:
@@ -126,7 +126,6 @@ class Grid:
         bbox = data.get_bbox()
         logger.debug('\nCreating a virtual grid without polygons')
 
-        # Latitude in Fortaleza: -3.8162973555
         cell_size_by_degree = cell_size / meters_by_degree
         logger.debug('...cell size by degree: %s' % cell_size_by_degree)
 

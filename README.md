@@ -231,10 +231,13 @@ You can see examples of how to use PyMove [here](https://github.com/InsightLab/P
 -   1: **Spatial Trajectories** &rarr; `pymove.core`
     -   `MoveDataFrame`
     -   `DiscreteMoveDataFrame`
+
 -   2: **Stay Point Detection** &rarr; `pymove.preprocessing.stay_point_detection`
     -   `create_or_update_move_stop_by_dist_time`
     -   `create_or_update_move_and_stop_by_radius`
+
 -   3: **Map-Matching** &rarr; `pymove-osmnx`
+
 -   4: **Noise Filtering** &rarr; `pymove.preprocessing.filters`
     -   `by_bbox`
     -   `by_datetime`
@@ -249,29 +252,42 @@ You can see examples of how to use PyMove [here](https://github.com/InsightLab/P
     -   `clean_trajectories_with_few_points`
     -   `clean_trajectories_short_and_few_points`
     -   `clean_id_by_time_max`
+
 -   5: **Compression** &rarr; `pymove.preprocessing.compression`
     -   `compress_segment_stop_to_point`
+
 -   6: **Segmentation** &rarr; `pymove.preprocessing.segmentation`
     -   `bbox_split`
     -   `by_dist_time_speed`
     -   `by_max_dist`
     -   `by_max_time`
     -   `by_max_speed`
+
 -   7: **Distance of Trajectory** &rarr; `pymove.query.query`
     -   `range_query`
     -   `knn_query`
+
 -   8: **Query Historical Trajectories**
+
 -   9: **Managing Recent Trajectories**
+
 -   10: **Privacy Preserving**
+
 -   11: **Reducing Uncertainty**
+
 -   12: **Moving Together Patterns**
+
 -   13: **Clustering** &rarr; `pymove.models.pattern_mining.clustering`
     -   `elbow_method`
     -   `gap_statistics`
     -   `dbscan_clustering`
+
 -   14: **Freq. Seq. Patterns**
+
 -   15: **Periodic Patterns**
+
 -   16: **Trajectory Classification**
+
 -   17: **Trajectory Outlier / Anomaly Detection** &rarr; `pymove.semantic.semantic`
     -   `outliers`
     -   `create_or_update_out_of_the_bbox`
