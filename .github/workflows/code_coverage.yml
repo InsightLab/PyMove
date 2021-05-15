@@ -17,7 +17,8 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
-        make env
+        python -m pip install --upgrade pip
+        make dev
     - name: Coverage
       run: |
         make coverage

@@ -6,12 +6,9 @@ help:
 	@echo " - lint   : checks code style"
 	@echo " - docs   : creates documentation in html"
 
-env:
-	python -m pip install --upgrade pip
+dev:
 	pip install -r requirements-dev.txt
-
-dev: env
-	pip install .
+	pip install -e .
 	pre-commit install
 
 clean:

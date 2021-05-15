@@ -13,7 +13,8 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
-        make env
+        python -m pip install --upgrade pip
+        make dev
     - name: Lint
       working-directory: ${{ github.workspace }}
       run: |
@@ -29,7 +30,8 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
-        make env
+        python -m pip install --upgrade pip
+        make dev
     - name: Test
       working-directory: ${{ github.workspace }}
       run: |
