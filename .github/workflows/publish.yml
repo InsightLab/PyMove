@@ -17,7 +17,7 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
-        make ci
+        make env
     - name: Lint and Test
       run: |
         make lint
