@@ -12,7 +12,7 @@ read_graph_json
 
 import json
 import os
-from typing import Any, Dict, List, Optional, Text
+from typing import Any, Dict, Optional, Text
 
 import networkx as nx
 import pandas as pd
@@ -26,7 +26,9 @@ from pymove.utils.trajectories import append_trajectory
 
 
 def _populate_graph(
-    raw: Series, nodes: Dict, edges: Dict,
+    raw: Series,
+    nodes: Dict,
+    edges: Dict,
     label_local: Optional[Text] = LOCAL_LABEL
 ):
     """
@@ -41,62 +43,65 @@ def _populate_graph(
     ----------
     row: pandas.core.frame.Series
         Line of the trajectory dataframe.
-
     nodes: Dict
         Attributes of the transition graph nodes.
-
     edges: Dict
         Attributes of the transition graph edges.
-
     label_local: String, optional, default 'local_label'
         Name of the column referring to the trajectories.
+
     """
     traj = raw[label_local]
 
     for index, local in enumerate(traj):
+
+        local_curr = str(local)
+
         dt = [str(raw[DATETIME][index])]
         fs = (index == 0)
         ft = (index == len(traj) - 1)
 
         if local in nodes['datetime']:
-            dt.extend(nodes['datetime'][local])
-            fs += nodes['freq_source'][local]
-            ft += nodes['freq_target'][local]
+            dt.extend(nodes['datetime'][local_curr])
+            fs += nodes['freq_source'][local_curr]
+            ft += nodes['freq_target'][local_curr]
 
-        nodes['datetime'][local] = dt
-        nodes['freq_source'][local] = fs
-        nodes['freq_target'][local] = ft
-        nodes['coords'][local] = (raw[LATITUDE][index], raw[LONGITUDE][index])
+        nodes['datetime'][local_curr] = dt
+        nodes['freq_source'][local_curr] = fs
+        nodes['freq_target'][local_curr] = ft
+        nodes['coords'][local_curr] = (raw[LATITUDE][index], raw[LONGITUDE][index])
 
         if index == len(traj) - 1:
             break
+
+        next_local = str(traj[index + 1])
 
         weight = 1
         mean_times = pd.Timestamp(
             raw[DATETIME][index + 1]
         ) - pd.Timestamp(raw[DATETIME][index])
 
-        if local not in edges:
-            edges[local] = {traj[index + 1]: {}}
-            edges[local][traj[index + 1]] = {
+        if local_curr not in edges:
+            edges[local_curr] = {next_local: {}}
+            edges[local_curr][next_local] = {
                 'weight': 1,
                 'mean_times': str(mean_times)
             }
 
-        elif traj[index + 1] not in edges[local]:
-            edges[local] = {**edges[local], **{traj[index + 1]: {}}}
-            edges[local][traj[index + 1]] = {
+        elif next_local not in edges[local_curr]:
+            edges[local_curr] = {**edges[local_curr], **{next_local: {}}}
+            edges[local_curr][next_local] = {
                 'weight': 1,
                 'mean_times': str(mean_times)
             }
         else:
-            weight += edges[local][traj[index + 1]]['weight']
+            weight += edges[local_curr][next_local]['weight']
             mean_times = (
-                mean_times + pd.Timedelta(edges[local][traj[index + 1]]['mean_times'])
+                mean_times + pd.Timedelta(edges[local_curr][next_local]['mean_times'])
             ) / 2
 
-            edges[local][traj[index + 1]]['weight'] = weight
-            edges[local][traj[index + 1]]['mean_times'] = str(mean_times)
+            edges[local_curr][next_local]['weight'] = weight
+            edges[local_curr][next_local]['mean_times'] = str(mean_times)
 
 
 def build_transition_graph_from_dict(dict_graph: Dict) -> DiGraph:
@@ -157,8 +162,10 @@ def build_transition_graph_from_df(data: DataFrame) -> DiGraph:
 
 
 def get_all_paths(
-    data: DataFrame, graph: DiGraph,
-    source: Any, target: Any,
+    data: DataFrame,
+    graph: DiGraph,
+    source: Any,
+    target: Any,
     min_path_size: Optional[int] = 3,
     max_path_size: Optional[int] = 6,
     max_sampling_source: Optional[int] = 100,
@@ -203,6 +210,11 @@ def get_all_paths(
         Otherwise, use paths with less used sections.
 
     """
+    source = str(source)
+    target = str(target)
+
+    print(source)
+
     if not nx.has_path(graph, source, target):
         return []
 
@@ -239,7 +251,7 @@ def get_all_paths(
                 graph.add_node(target, freq_target=freq_target)
 
 
-def graph_to_dict(graph: DiGraph, att_nodes: List) -> Dict:
+def graph_to_dict(graph: DiGraph) -> Dict:
     """
     Graph to Dict.
 
@@ -251,9 +263,6 @@ def graph_to_dict(graph: DiGraph, att_nodes: List) -> Dict:
     graph: networkx.classes.digraph.DiGraph
         Transition graph constructed from trajectory data.
 
-    att_nodes: List
-        List of attributes names in nodes.
-
     Return
     ------
     Dict
@@ -261,18 +270,17 @@ def graph_to_dict(graph: DiGraph, att_nodes: List) -> Dict:
     """
     dict_graph = {'nodes': {}, 'edges': {}}
 
-    for att in att_nodes:
-        dict_graph['nodes'][att] = nx.get_node_attributes(graph, att)
-
+    dict_graph['nodes']['datetime'] = nx.get_node_attributes(graph, 'datetime')
+    dict_graph['nodes']['coords'] = nx.get_node_attributes(graph, 'coords')
+    dict_graph['nodes']['freq_source'] = nx.get_node_attributes(graph, 'freq_source')
+    dict_graph['nodes']['freq_target'] = nx.get_node_attributes(graph, 'freq_target')
     dict_graph['edges'] = nx.to_dict_of_dicts(graph)
 
     return dict_graph
 
 
 def save_graph_as_json(
-    graph: DiGraph,
-    att_nodes: List,
-    filename: Optional[Text] = 'graph.json'
+    graph: DiGraph, filename: Optional[Text] = 'graph.json'
 ):
     """
     Save Graph as JSON.
@@ -284,14 +292,11 @@ def save_graph_as_json(
     ----------
     graph: networkx.classes.digraph.DiGraph
         Transition graph constructed from trajectory data.
-
-    att_nodes: List
-        List of attributes names in nodes.
-
     filename: String, Optional, default 'graph.json'
         File name that will be saved with transition graph data.
+
     """
-    dict_graph = graph_to_dict(graph, att_nodes)
+    dict_graph = graph_to_dict(graph)
 
     ext = os.path.basename(filename).split('.')[-1]
 

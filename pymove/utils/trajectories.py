@@ -277,7 +277,9 @@ def fill_list_with_new_values(original_list: List, new_list_values: List):
 
 
 def append_trajectory(
-    data: DataFrame, trajectory: List, graph: DiGraph,
+    data: DataFrame,
+    trajectory: List,
+    graph: DiGraph,
     label_tid: Optional[Text] = TID_STAT
 ):
     """
@@ -290,15 +292,13 @@ def append_trajectory(
     ----------
     data: pandas.core.frame.DataFrame
         Trajectory data in sequence format.
-
     trajectory: list
         Trajectory recovered from the transition graph.
-
     graph: networkx.classes.digraph.DiGraph
         Transition graph constructed from trajectory data.
-
     label_tid: String, optional, default 'tid_stat'
         Column name for trajectory IDs.
+
     """
     rd = random.Random()
 
@@ -360,20 +360,18 @@ def split_trajectory(
     ----------
     row: pandas.core.frame.Series
         Line of the trajectory dataframe.
-
     size_window: Number, optional, default 6
         Sliding window size.
-
     size_jump: Number, optional, default 3
         Size of the jump in the trajectory.
-
     columns: List, optional, default None
         Columns to which the split will be applied.
 
     Return
     ------
-    pandas.core.frame.Series
+    Series
         Series with the stretches recovered from the observed trajectory.
+
     """
     if columns is None:
         columns = row.index
@@ -403,6 +401,7 @@ def object_for_array(object_: Text) -> ndarray:
     -------
     array
         object converted to a list
+
     """
     if object_ is None:
         return object_
@@ -423,9 +422,9 @@ def column_to_array(data: DataFrame, column: Text):
     ----------
     data : dataframe
         The input trajectory data
-
     column : str
         Label of data referring to the column for conversion
+
     """
     data = data.copy()
     if column not in data:
