@@ -7,6 +7,7 @@ flatten_dict,
 flatten_columns,
 shift,
 fill_list_with_new_values,
+append_trajectory,
 split_trajectory,
 object_for_array,
 column_to_array
@@ -24,15 +25,18 @@ import numpy as np
 import pandas as pd
 from networkx.classes.digraph import DiGraph
 from numpy import ndarray
-from pandas import DataFrame, Series
 from pandas import read_csv as _read_csv
 from pandas._typing import FilePathOrBuffer
+from pandas.core.frame import DataFrame
+from pandas.core.series import Series
 
 from pymove.core.dataframe import MoveDataFrame
 from pymove.utils.constants import (
     DATETIME,
     LATITUDE,
+    LOCAL_LABEL,
     LONGITUDE,
+    PREV_LOCAL,
     TID_STAT,
     TRAJ_ID,
     TYPE_PANDAS,
@@ -315,7 +319,9 @@ def append_trajectory(
         edge = (trajectory[i - 1], trajectory[i])
         mean_times = nx.get_edge_attributes(graph, 'mean_times')[edge]
 
-        datetimes.append(datetimes[i - 1] + pd.Timedelta(mean_times))
+        dt_curr = pd.Timestamp(str(datetimes[i - 1])) + pd.Timedelta(mean_times)
+        datetimes.append(str(dt_curr))
+
         lats.append(coords[trajectory[i]][0])
         lons.append(coords[trajectory[i]][1])
 
@@ -333,7 +339,9 @@ def append_trajectory(
     prev_locals = [np.nan]
     prev_locals.extend(path[:-1])
 
-    data.loc[data.shape[0], :] = [datetimes, ids, path, lats, lons, prev_locals, tids]
+    data.loc[data.shape[0], [
+        DATETIME, TRAJ_ID, LOCAL_LABEL, LATITUDE, LONGITUDE, PREV_LOCAL, label_tid
+    ]] = [datetimes, ids, path, lats, lons, prev_locals, tids]
 
 
 def split_trajectory(

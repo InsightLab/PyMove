@@ -9,13 +9,13 @@ split_crossover,
 augmentation_trajectories_df,
 insert_points_in_df,
 instance_crossover_augmentation,
-sliding_window
+sliding_window,
+transition_graph_augmentation_all_vertex
 
 """
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Text, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Text, Tuple, Union
 
-import networkx as nx
 import numpy as np
 import pandas as pd
 from networkx.classes.digraph import DiGraph
@@ -24,7 +24,7 @@ from pandas.core.series import Series
 
 from pymove.utils.constants import DESTINY, LOCAL_LABEL, START, TID, TID_STAT, TRAJECTORY
 from pymove.utils.log import progress_bar
-from pymove.utils.networkx import _all_shortest_paths, _all_simple_paths
+from pymove.utils.networkx import build_transition_graph_from_df, get_all_paths
 from pymove.utils.trajectories import split_trajectory
 
 if TYPE_CHECKING:
@@ -137,7 +137,7 @@ def generate_destiny_feature(
     ----------
     data : DataFrame
         The input trajectory data.
-    label_trajectory : str, optional
+    label_trajectory : String, Optional
         Label of the points sequences, by default 'trajectory'
 
     """
@@ -155,11 +155,11 @@ def split_crossover(
 
     Parameters
     ----------
-    sequence_a : list or ndarray
+    sequence_a : List or ndarray
         Array any
-    sequence_b : list or ndarray
+    sequence_b : List or ndarray
         Array any
-    frac : float, optional
+    frac : Float, Optional
         Represents the percentage to be exchanged, by default 0.5
 
     Returns
@@ -183,7 +183,10 @@ def split_crossover(
     return sequence_a, sequence_b
 
 
-def _augmentation(data: DataFrame, aug_df: DataFrame, frac: Optional[float] = 0.5):
+def _augmentation(
+    data: DataFrame, aug_df: DataFrame,
+    frac: Optional[float] = 0.5
+):
     """
     Generates new data with unobserved trajectories.
 
@@ -392,19 +395,16 @@ def sliding_window(
     ----------
     data: pandas.core.frame.DataFrame
         Trajectory data in sequence format.
-
     size_window: number, optional, default 6
         Sliding window size.
-
     size_jump: number, optional, default 3
         Size of the jump in the trajectory.
-
     columns: list, optional, default None
         Columns to which the split will be applied.
 
     Return
     ------
-    pandas.core.frame.DataFrame
+    DataFrame
         Increased data set.
     """
     if columns is None:
@@ -427,78 +427,68 @@ def sliding_window(
     return data_
 
 
-def generate_all_paths(
-    data: DataFrame, graph: DiGraph,
-    source: Any, target: Any,
+def transition_graph_augmentation_all_vertex(
+    data: DataFrame,
+    graph: Optional[DiGraph] = None,
     min_path_size: Optional[int] = 3,
     max_path_size: Optional[int] = 6,
     max_sampling_source: Optional[int] = 10,
     max_sampling_target: Optional[int] = 10,
+    source: Optional[Dict] = None,
+    target: Optional[Dict] = None,
     label_local: Optional[Text] = LOCAL_LABEL,
     label_tid: Optional[Text] = TID_STAT,
     simple_paths: Optional[bool] = False
 ):
     """
-    Generate All Paths.
+    Transition Graph Data Augmentation.
 
-    Retrieves all paths in the graph between the past source and
-    destination, if any. The number of paths returned is limited
-    by the max_sampling_source and max_sampling_target
-    parameters, and the path size is limited by the
-    min_path_size and max_path_size parameters.
+    Performs the data increase from the transition graph.
 
     Parameters
     ----------
-    data: pandas.core.frame.DataFrame
-        Trajectory data in sequence format.
-
     graph: networkx.classes.digraph.DiGraph
         Transition graph constructed from trajectory data.
-
-    source: Node
-        Sequence source node.
-
-    target: Node
-        Sequence destination node.
-
     min_path_size: Number, optional, default 3
         Minimum number of points for the trajectory.
-
     max_path_size: Number, optional, default 6
         Maximum number of points for the trajectory.
-
     max_sampling_source: Number, optional, default 10
         Maximum number of paths to be returned, considering the observed origin.
-
     max_sampling_target: Number, optional, default 10
         Maximum number of paths to be returned, considering the observed destination.
-
+    source: dict, optional, default None
+        Degree of entry of each node in the graph.
+        Example: {node: degree-of-entry}
+    target: Dict, optional, default None
+        Degree of output of each node in the graph.
+        Example: {node: degree-of-output}
     label_local: String, optional, default 'local_label'
         Name of the column referring to the trajectories.
-
     label_tid: String, optional, default 'tid_stat'
         Column name for trajectory IDs.
-
     simple_paths: Boolean, optional, default False
         If true, use the paths with the most used sections.
         Otherwise, use paths with less used sections.
 
     """
-    if not nx.has_path(graph, source, target):
-        return []
+    if graph is None:
+        graph = build_transition_graph_from_df(data)
 
-    if simple_paths:
-        _all_simple_paths(
-            data, graph, source, target,
-            min_path_size, max_path_size - 1,
-            max_sampling_source, max_sampling_target,
-            label_local=label_local, label_tid=label_tid
-        )
+    if source is None:
+        source = dict(graph.nodes)
+        source = {key: value['freq_source'] for key, value in source.items()}
 
-    else:
-        _all_shortest_paths(
-            data, graph, source, target,
-            min_path_size, max_path_size,
-            max_sampling_source, max_sampling_target,
-            label_local=label_local, label_tid=label_tid
-        )
+    if target is None:
+        target = dict(graph.nodes)
+        target = {key: value['freq_source'] for key, value in target.items()}
+
+    targets = sorted(target, key=target.get, reverse=True)
+    desc = 'Trajectory OverSampling'
+    for t in progress_bar(targets, desc=desc, total=len(targets)):
+        for s in sorted(source, key=source.get, reverse=True):
+            get_all_paths(
+                data, graph, s, t, min_path_size, max_path_size,
+                max_sampling_source, max_sampling_target,
+                label_local, label_tid, simple_paths
+            )
