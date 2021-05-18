@@ -268,8 +268,8 @@ def graph_to_dict(graph: DiGraph) -> Dict:
     """
     dict_graph = {'nodes': {}, 'edges': {}}
 
-    dict_graph['nodes']['datetime'] = nx.get_node_attributes(graph, 'datetime')
     dict_graph['nodes']['coords'] = nx.get_node_attributes(graph, 'coords')
+    dict_graph['nodes']['datetime'] = nx.get_node_attributes(graph, 'datetime')
     dict_graph['nodes']['freq_source'] = nx.get_node_attributes(graph, 'freq_source')
     dict_graph['nodes']['freq_target'] = nx.get_node_attributes(graph, 'freq_target')
     dict_graph['edges'] = nx.to_dict_of_dicts(graph)
