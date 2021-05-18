@@ -213,8 +213,6 @@ def get_all_paths(
     source = str(source)
     target = str(target)
 
-    print(source)
-
     if not nx.has_path(graph, source, target):
         return []
 
