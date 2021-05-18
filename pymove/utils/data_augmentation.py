@@ -183,10 +183,7 @@ def split_crossover(
     return sequence_a, sequence_b
 
 
-def _augmentation(
-    data: DataFrame, aug_df: DataFrame,
-    frac: Optional[float] = 0.5
-):
+def _augmentation(data: DataFrame, aug_df: DataFrame, frac: Optional[float] = 0.5):
     """
     Generates new data with unobserved trajectories.
 
