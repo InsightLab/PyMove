@@ -290,13 +290,13 @@ def append_trajectory(
 
     Parameters
     ----------
-    data: pandas.core.frame.DataFrame
+    data: DataFrame
         Trajectory data in sequence format.
     trajectory: list
         Trajectory recovered from the transition graph.
-    graph: networkx.classes.digraph.DiGraph
+    graph: DiGraph
         Transition graph constructed from trajectory data.
-    label_tid: String, optional, default 'tid_stat'
+    label_tid: str, optional, default 'tid_stat'
         Column name for trajectory IDs.
 
     """
@@ -358,13 +358,13 @@ def split_trajectory(
 
     Parameters
     ----------
-    row: pandas.core.frame.Series
+    row: Series
         Line of the trajectory dataframe.
-    size_window: Number, optional, default 6
+    size_window: number, optional, default 6
         Sliding window size.
-    size_jump: Number, optional, default 3
+    size_jump: number, optional, default 3
         Size of the jump in the trajectory.
-    columns: List, optional, default None
+    columns: list, optional, default None
         Columns to which the split will be applied.
 
     Return
@@ -420,7 +420,7 @@ def column_to_array(data: DataFrame, column: Text):
 
     Parameters
     ----------
-    data : dataframe
+    data : DataFrame
         The input trajectory data
     column : str
         Label of data referring to the column for conversion

@@ -137,7 +137,7 @@ def generate_destiny_feature(
     ----------
     data : DataFrame
         The input trajectory data.
-    label_trajectory : String, Optional
+    label_trajectory : str, optional
         Label of the points sequences, by default 'trajectory'
 
     """
@@ -155,16 +155,16 @@ def split_crossover(
 
     Parameters
     ----------
-    sequence_a : List or ndarray
+    sequence_a : list or ndarray
         Array any
-    sequence_b : List or ndarray
+    sequence_b : list or ndarray
         Array any
-    frac : Float, Optional
+    frac : float, optional
         Represents the percentage to be exchanged, by default 0.5
 
     Returns
     -------
-    Tuple[List, List]
+    tuple(list, list)
         Arrays with the halves exchanged.
 
     """
@@ -390,7 +390,7 @@ def sliding_window(
 
     Parameters
     ----------
-    data: pandas.core.frame.DataFrame
+    data: DataFrame
         Trajectory data in sequence format.
     size_window: number, optional, default 6
         Sliding window size.
@@ -435,8 +435,9 @@ def transition_graph_augmentation_all_vertex(
     target: Optional[Dict] = None,
     label_local: Optional[Text] = LOCAL_LABEL,
     label_tid: Optional[Text] = TID_STAT,
-    simple_paths: Optional[bool] = False
-):
+    simple_paths: Optional[bool] = False,
+    inplace: Optional[bool] = True
+) -> DataFrame:
     """
     Transition Graph Data Augmentation.
 
@@ -444,31 +445,43 @@ def transition_graph_augmentation_all_vertex(
 
     Parameters
     ----------
-    graph: networkx.classes.digraph.DiGraph
+    graph: DiGraph
         Transition graph constructed from trajectory data.
-    min_path_size: Number, optional, default 3
+    min_path_size: number, optional, default 3
         Minimum number of points for the trajectory.
-    max_path_size: Number, optional, default 6
+    max_path_size: number, optional, default 6
         Maximum number of points for the trajectory.
-    max_sampling_source: Number, optional, default 10
+    max_sampling_source: number, optional, default 10
         Maximum number of paths to be returned, considering the observed origin.
-    max_sampling_target: Number, optional, default 10
+    max_sampling_target: number, optional, default 10
         Maximum number of paths to be returned, considering the observed destination.
     source: dict, optional, default None
         Degree of entry of each node in the graph.
         Example: {node: degree-of-entry}
-    target: Dict, optional, default None
+    target: dict, optional, default None
         Degree of output of each node in the graph.
         Example: {node: degree-of-output}
-    label_local: String, optional, default 'local_label'
+    label_local: str, optional, default 'local_label'
         Name of the column referring to the trajectories.
-    label_tid: String, optional, default 'tid_stat'
+    label_tid: str, optional, default 'tid_stat'
         Column name for trajectory IDs.
-    simple_paths: Boolean, optional, default False
+    simple_paths: bool, optional, default False
         If true, use the paths with the most used sections.
         Otherwise, use paths with less used sections.
+    inplace : bool, optional, default True
+        if set to true the original dataframe will be altered to contain
+        the result of the augmentation, otherwise a copy will be returned.
 
+    Return
+    ------
+    DataFrame
+        Increased data set.
     """
+    if inplace:
+        data_ = data
+    else:
+        data_ = data.copy()
+
     if graph is None:
         graph = build_transition_graph_from_df(data)
 
@@ -485,7 +498,11 @@ def transition_graph_augmentation_all_vertex(
     for t in progress_bar(targets, desc=desc, total=len(targets)):
         for s in sorted(source, key=source.get, reverse=True):
             get_all_paths(
-                data, graph, s, t, min_path_size, max_path_size,
-                max_sampling_source, max_sampling_target,
-                label_local, label_tid, simple_paths
+                data=data, graph=graph, source=s, target=t, min_path_size=min_path_size,
+                max_path_size=max_path_size, max_sampling_source=max_sampling_source,
+                max_sampling_target=max_sampling_target, label_local=label_local,
+                label_tid=label_tid, simple_paths=simple_paths
             )
+
+    if not inplace:
+        return data_

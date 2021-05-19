@@ -26,7 +26,7 @@ from pymove.utils.trajectories import append_trajectory
 
 
 def _populate_graph(
-    raw: Series,
+    row: Series,
     nodes: Dict,
     edges: Dict,
     label_local: Optional[Text] = LOCAL_LABEL
@@ -41,23 +41,23 @@ def _populate_graph(
 
     Parameters
     ----------
-    row: pandas.core.frame.Series
+    row: Series
         Line of the trajectory dataframe.
-    nodes: Dict
+    nodes: dict
         Attributes of the transition graph nodes.
-    edges: Dict
+    edges: dict
         Attributes of the transition graph edges.
-    label_local: String, optional, default 'local_label'
+    label_local: str, optional, default 'local_label'
         Name of the column referring to the trajectories.
 
     """
-    traj = raw[label_local]
+    traj = row[label_local]
 
     for index, local in enumerate(traj):
 
         local_curr = str(local)
 
-        dt = [str(raw[DATETIME][index])]
+        dt = [str(row[DATETIME][index])]
         fs = (index == 0)
         ft = (index == len(traj) - 1)
 
@@ -69,7 +69,7 @@ def _populate_graph(
         nodes['datetime'][local_curr] = dt
         nodes['freq_source'][local_curr] = fs
         nodes['freq_target'][local_curr] = ft
-        nodes['coords'][local_curr] = (raw[LATITUDE][index], raw[LONGITUDE][index])
+        nodes['coords'][local_curr] = (row[LATITUDE][index], row[LONGITUDE][index])
 
         if index == len(traj) - 1:
             break
@@ -78,8 +78,8 @@ def _populate_graph(
 
         weight = 1
         mean_times = pd.Timestamp(
-            raw[DATETIME][index + 1]
-        ) - pd.Timestamp(raw[DATETIME][index])
+            row[DATETIME][index + 1]
+        ) - pd.Timestamp(row[DATETIME][index])
 
         if local_curr not in edges:
             edges[local_curr] = {next_local: {}}
@@ -114,12 +114,12 @@ def build_transition_graph_from_dict(dict_graph: Dict) -> DiGraph:
 
     Parameters
     ----------
-    dict_graph: Dict
+    dict_graph: dict
         Dictionary with the attributes of nodes and edges.
 
     Return
     ------
-    graph: networkx.classes.digraph.DiGraph
+    graph: DiGraph
         Transition graph constructed from trajectory data.
     """
     graph = nx.DiGraph(dict_graph['edges'])
@@ -141,20 +141,20 @@ def build_transition_graph_from_df(data: DataFrame) -> DiGraph:
 
     Parameters
     ----------
-    data: pandas.core.frame.DataFrame
+    data: DataFrame
         Trajectory data in sequence format.
 
     Return
     ------
-    graph: networkx.classes.digraph.DiGraph
+    graph: DiGraph
         Transition graph constructed from trajectory data.
     """
     nodes = {'datetime': {}, 'coords': {}, 'freq_source': {}, 'freq_target': {}}
     edges = {}
 
     desc = 'Building Transition Graph...'
-    for _, raw in progress_bar(data.iterrows(), desc=desc, total=data.shape[0]):
-        _populate_graph(raw, nodes, edges)
+    for _, row in progress_bar(data.iterrows(), desc=desc, total=data.shape[0]):
+        _populate_graph(row, nodes, edges)
 
     return build_transition_graph_from_dict(
         {'nodes': nodes, 'edges': edges}
@@ -185,27 +185,27 @@ def get_all_paths(
 
     Parameters
     ----------
-    data: pandas.core.frame.DataFrame
+    data: DataFrame
         Trajectory data in sequence format.
-    graph: networkx.classes.digraph.DiGraph
+    graph: DiGraph
         Transition graph constructed from trajectory data.
-    source: Node
+    source: node
         Sequence source node.
-    target: Node
+    target: node
         Sequence destination node.
-    min_path_size: Number, optional, default 3
+    min_path_size: number, optional, default 3
         Minimum number of points for the trajectory.
-    max_path_size: Number, optional, default 6
+    max_path_size: number, optional, default 6
         Maximum number of points for the trajectory.
-    max_sampling_source: Number, optional, default 10
+    max_sampling_source: number, optional, default 10
         Maximum number of paths to be returned, considering the observed origin.
-    max_sampling_target: Number, optional, default 10
+    max_sampling_target: number, optional, default 10
         Maximum number of paths to be returned, considering the observed destination.
-    label_local: String, optional, default 'local_label'
+    label_local: str, optional, default 'local_label'
         Name of the column referring to the trajectories.
-    label_tid: String, optional, default 'tid_stat'
+    label_tid: str, optional, default 'tid_stat'
         Column name for trajectory IDs.
-    simple_paths: Boolean, optional, default False
+    simple_paths: bool, optional, default False
         If true, use the paths with the most used sections.
         Otherwise, use paths with less used sections.
 
@@ -258,12 +258,12 @@ def graph_to_dict(graph: DiGraph) -> Dict:
 
     Parameters
     ----------
-    graph: networkx.classes.digraph.DiGraph
+    graph: DiGraph
         Transition graph constructed from trajectory data.
 
     Return
     ------
-    Dict
+    dict
         Dictionary with the attributes of nodes and edges.
     """
     dict_graph = {'nodes': {}, 'edges': {}}
@@ -288,10 +288,10 @@ def save_graph_as_json(
 
     Parameters
     ----------
-    graph: networkx.classes.digraph.DiGraph
+    graph: DiGraph
         Transition graph constructed from trajectory data.
-    filename: String, Optional, default 'graph.json'
-        File name that will be saved with transition graph data.
+    filename: str or Path, optional
+        File name that will be saved with transition graph data, by default 'graph.json'.
 
     """
     dict_graph = graph_to_dict(graph)
@@ -316,12 +316,12 @@ def read_graph_json(filename: Text):
 
     Parameters
     ----------
-    filename: String
+    filename: str or Path
         Name of the JSON file to be read.
 
     Return
     ------
-    Dict
+    dict
         Dictionary with the attributes of nodes and edges.
     """
     ext = os.path.basename(filename).split('.')[-1]
