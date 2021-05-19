@@ -322,22 +322,21 @@ def create_geohash_df(data: DataFrame, precision: Optional[float] = 15):
     -------
     >>> from pymove.utils.geoutils import create_geohash_df, _reset_and_create_arrays_none
     >>> geoLife_df
-                  lat          lon
-        0   39.984094   116.319236
-        1   39.984198   116.319322
-        2   39.984224   116.319402
-        3   39.984211   116.319389
-        4   39.984217   116.319422
+              lat          lon
+    0   39.984094   116.319236
+    1   39.984198   116.319322
+    2   39.984224   116.319402
+    3   39.984211   116.319389
+    4   39.984217   116.319422
     >>> print(type (create_geohash_df(geoLife_df)))
     >>> geoLife_df
     <class 'NoneType'>
-
-                  lat          lon           geohash
-        0   39.984094   116.319236   wx4eqyvh4xkg0xs
-        1   39.984198   116.319322   wx4eqyvhudszsev
-        2   39.984224   116.319402   wx4eqyvhyx8d9wc
-        3   39.984211   116.319389   wx4eqyvhyjnv5m7
-        4   39.984217   116.319422   wx4eqyvhyyr2yy8
+              lat          lon           geohash
+    0   39.984094   116.319236   wx4eqyvh4xkg0xs
+    1   39.984198   116.319322   wx4eqyvhudszsev
+    2   39.984224   116.319402   wx4eqyvhyx8d9wc
+    3   39.984211   116.319389   wx4eqyvhyjnv5m7
+    4   39.984217   116.319422   wx4eqyvhyyr2yy8
     """
     _, _, geohash, _ = _reset_and_create_arrays_none(data)
 
@@ -368,21 +367,21 @@ def create_bin_geohash_df(data: DataFrame, precision: Optional[float] = 15):
     -------
     >>> from pymove.utils.geoutils import create_bin_geohash_df
     >>> geoLife_df
-                  lat          lon
-        0   39.984094   116.319236
-        1   39.984198   116.319322
-        2   39.984224   116.319402
-        3   39.984211   116.319389
-        4   39.984217   116.319422
+             lat          lon
+    0   39.984094   116.319236
+    1   39.984198   116.319322
+    2   39.984224   116.319402
+    3   39.984211   116.319389
+    4   39.984217   116.319422
     >>> print(type(create_bin_geohash_df(geoLife_df)))
     >>> geoLife_df
     <class 'NoneType'>
-                  lat         lon                                    bin_geohash
-        0   39.984094   116.319236	[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
-        1   39.984198   116.319322	[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
-        2   39.984224   116.319402	[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
-        3   39.984211   116.319389	[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
-        4   39.984217   116.319422	[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
+              lat         lon                                         bin_geohash
+    0   39.984094   116.319236  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
+    1   39.984198   116.319322  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
+    2   39.984224   116.319402  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
+    3   39.984211   116.319389  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
+    4   39.984217   116.319422  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
     """
     _, _, _, bin_geohash = _reset_and_create_arrays_none(data)
 
@@ -419,21 +418,21 @@ def decode_geohash_to_latlon(
     -------
     >>> from pymove.utils.geoutils import decode_geohash_to_latlon
     >>> geoLife_df
-                  lat          lon           geohash
-        0   39.984094   116.319236   wx4eqyvh4xkg0xs
-        1   39.984198   116.319322   wx4eqyvhudszsev
-        2   39.984224   116.319402   wx4eqyvhyx8d9wc
-        3   39.984211   116.319389   wx4eqyvhyjnv5m7
-        4   39.984217   116.319422   wx4eqyvhyyr2yy8
+              lat          lon           geohash
+    0   39.984094   116.319236   wx4eqyvh4xkg0xs
+    1   39.984198   116.319322   wx4eqyvhudszsev
+    2   39.984224   116.319402   wx4eqyvhyx8d9wc
+    3   39.984211   116.319389   wx4eqyvhyjnv5m7
+    4   39.984217   116.319422   wx4eqyvhyyr2yy8
     >>> print(type(decode_geohash_to_latlon(geoLife_df)))
     >>> geoLife_df
     <class 'NoneType'>
-                  lat          lon           geohash  lat_decode   lon_decode
-        0   39.984094   116.319236   wx4eqyvh4xkg0xs   39.984094   116.319236
-        1   39.984198   116.319322   wx4eqyvhudszsev   39.984198   116.319322
-        2   39.984224   116.319402   wx4eqyvhyx8d9wc   39.984224   116.319402
-        3   39.984211   116.319389   wx4eqyvhyjnv5m7   39.984211   116.319389
-        4   39.984217   116.319422   wx4eqyvhyyr2yy8   39.984217   116.319422
+              lat          lon           geohash  lat_decode   lon_decode
+    0   39.984094   116.319236   wx4eqyvh4xkg0xs   39.984094   116.319236
+    1   39.984198   116.319322   wx4eqyvhudszsev   39.984198   116.319322
+    2   39.984224   116.319402   wx4eqyvhyx8d9wc   39.984224   116.319402
+    3   39.984211   116.319389   wx4eqyvhyjnv5m7   39.984211   116.319389
+    4   39.984217   116.319422   wx4eqyvhyyr2yy8   39.984217   116.319422
     """
     if label_geohash not in data:
         raise ValueError('feature {} not in df'.format(label_geohash))
