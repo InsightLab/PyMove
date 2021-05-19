@@ -445,6 +445,8 @@ def transition_graph_augmentation_all_vertex(
 
     Parameters
     ----------
+    data: DataFrame
+        Trajectory data in sequence format.
     graph: DiGraph
         Transition graph constructed from trajectory data.
     min_path_size: number, optional, default 3
