@@ -1,8 +1,4 @@
-import os
-
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_equal
 from pandas import DataFrame
 from pandas.testing import assert_frame_equal
@@ -28,75 +24,6 @@ def test_v_color():
 
     assert_equal(expected_1, geoutils.v_color(line_1))
     assert_equal(expected_2, geoutils.v_color(line_2))
-
-
-def test_plot_coords(tmpdir):
-    d = tmpdir.mkdir('preprocessing')
-
-    file_write_default = d.join('plot_coords.png')
-
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    coords = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
-
-    fig, ax = plt.subplots(figsize=(21, 9))
-    geoutils.plot_coords(ax, coords)
-    plt.savefig(filename_write_default, dpi=100)
-
-    test_dir = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(test_dir, 'baseline/plot_coords.png')
-
-    compare_images(
-        data_dir, filename_write_default, 0.0001, in_decorator=False
-    )
-
-
-def test_plot_bounds(tmpdir):
-    d = tmpdir.mkdir('preprocessing')
-
-    file_write_default = d.join('plot_bounds.png')
-
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    bounds = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
-
-    fig, ax = plt.subplots(figsize=(21, 9))
-    geoutils.plot_bounds(ax, bounds)
-    plt.savefig(filename_write_default, dpi=100)
-
-    test_dir = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(test_dir, 'baseline/plot_bounds.png')
-
-    compare_images(
-        data_dir, filename_write_default, 0.0001, in_decorator=False
-    )
-
-
-def test_plot_line(tmpdir):
-    d = tmpdir.mkdir('preprocessing')
-
-    file_write_default = d.join('plot_line.png')
-
-    filename_write_default = os.path.join(
-        file_write_default.dirname, file_write_default.basename
-    )
-
-    line = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
-
-    fig, ax = plt.subplots(figsize=(21, 9))
-    geoutils.plot_line(ax, line)
-    plt.savefig(filename_write_default, dpi=100)
-
-    test_dir = os.path.abspath(os.path.dirname(__file__))
-    data_dir = os.path.join(test_dir, 'baseline/plot_line.png')
-
-    compare_images(
-        data_dir, filename_write_default, 0.0001, in_decorator=False
-    )
 
 
 def test_encode():

@@ -1,6 +1,8 @@
 import os
 
+import matplotlib.pyplot as plt
 from matplotlib.testing.compare import compare_images
+from shapely.geometry import LineString
 
 import pymove.visualization.matplotlib as mpl
 from pymove import MoveDataFrame
@@ -156,3 +158,72 @@ def test_plot_trajectories(tmpdir):
                    filename_write_default,
                    0.0001,
                    in_decorator=False)
+
+
+def test_plot_coords(tmpdir):
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('plot_coords.png')
+
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    coords = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+
+    _, ax = plt.subplots(figsize=(21, 9))
+    mpl.plot_coords(ax, coords)
+    plt.savefig(filename_write_default, dpi=100)
+
+    test_dir = os.path.abspath(os.path.dirname(__file__))
+    data_dir = os.path.join(test_dir, 'baseline/plot_coords.png')
+
+    compare_images(
+        data_dir, filename_write_default, 0.0001, in_decorator=False
+    )
+
+
+def test_plot_bounds(tmpdir):
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('plot_bounds.png')
+
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    bounds = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+
+    _, ax = plt.subplots(figsize=(21, 9))
+    mpl.plot_bounds(ax, bounds)
+    plt.savefig(filename_write_default, dpi=100)
+
+    test_dir = os.path.abspath(os.path.dirname(__file__))
+    data_dir = os.path.join(test_dir, 'baseline/plot_bounds.png')
+
+    compare_images(
+        data_dir, filename_write_default, 0.0001, in_decorator=False
+    )
+
+
+def test_plot_line(tmpdir):
+    d = tmpdir.mkdir('visualization')
+
+    file_write_default = d.join('plot_line.png')
+
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+
+    line = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+
+    _, ax = plt.subplots(figsize=(21, 9))
+    mpl.plot_line(ax, line)
+    plt.savefig(filename_write_default, dpi=100)
+
+    test_dir = os.path.abspath(os.path.dirname(__file__))
+    data_dir = os.path.join(test_dir, 'baseline/plot_line.png')
+
+    compare_images(
+        data_dir, filename_write_default, 0.0001, in_decorator=False
+    )

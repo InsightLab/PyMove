@@ -5,14 +5,19 @@ show_object_id_by_date,
 plot_trajectories,
 plot_traj_by_id,
 plot_all_features
+plot_coords,
+plot_bounds,
+plot_line,
 
 """
 
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Text, Tuple, Union
 
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
+from matplotlib.pyplot import axes, figure
 from pandas.core.frame import DataFrame
+from shapely.geometry import LineString, MultiLineString
+from shapely.geometry.base import BaseGeometry
 
 from pymove.utils.constants import (
     DATE,
@@ -319,3 +324,83 @@ def plot_all_features(
 
     if return_fig:
         return fig
+
+
+def plot_coords(ax: axes, ob: BaseGeometry, color: Optional[Text] = 'r'):
+    """
+    Plot the coordinates of each point of the object in a 2D chart.
+
+    Parameters
+    ----------
+    ax : axes
+        Single axes object
+    ob : geometry object
+        Any geometric object
+    color : str, optional
+        Sets the geometric object color, by default 'r'
+
+    Example
+    -------
+    """
+    x, y = ob.xy
+    ax.plot(x, y, 'o', color=color, zorder=1)
+
+
+def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
+    """
+    Plot the limites of geometric object.
+
+    Parameters
+    ----------
+    ax : axes
+        Single axes object
+    ob : LineString or MultiLineString
+        Geometric object formed by lines.
+    color : str, optional
+        Sets the geometric object color, by default 'b'
+
+    Example
+    -------
+
+    """
+    x, y = zip(*list((p.x, p.y) for p in ob.boundary))
+    ax.plot(x, y, '-', color=color, zorder=1)
+
+
+def plot_line(
+    ax: axes,
+    ob: LineString,
+    color: Optional[Text] = 'r',
+    alpha: Optional[float] = 0.7,
+    linewidth: Optional[float] = 3,
+    solid_capstyle: Optional[Text] = 'round',
+    zorder: Optional[float] = 2
+):
+    """
+    Plot a LineString.
+
+    Parameters
+    ----------
+    ax : axes
+        Single axes object
+    ob : LineString
+        Sequence of points.
+    color : str, optional
+        Sets the line color, by default 'r'
+    alpha : float, optional
+        Defines the opacity of the line, by default 0.7
+    linewidth : float, optional
+        Defines the line thickness, by default 3
+    solid_capstyle : str, optional
+        Defines the style of the ends of the line, by default 'round'
+    zorder : float, optional
+        Determines the default drawing order for the axes, by default 2
+
+    Example
+    -------
+    """
+    x, y = ob.xy
+    ax.plot(
+        x, y, color=color, alpha=alpha, linewidth=linewidth,
+        solid_capstyle=solid_capstyle, zorder=zorder
+    )
