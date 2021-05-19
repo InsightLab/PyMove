@@ -15,6 +15,7 @@ import os
 from typing import Any, Dict, Optional, Text
 
 import networkx as nx
+import numpy as np
 import pandas as pd
 from networkx.classes.digraph import DiGraph
 from pandas.core.frame import DataFrame
@@ -238,7 +239,8 @@ def get_all_paths(
             break
 
         if len(path) >= min_path_size:
-            if path not in data[label_local].values.tolist():
+            path_ = np.array(path, dtype='float32').tolist()
+            if path_ not in data[label_local].values.tolist():
 
                 append_trajectory(data, path, graph, label_tid)
 
