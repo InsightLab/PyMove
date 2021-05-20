@@ -12,11 +12,7 @@ read_graph_json
 
 import json
 from pathlib import Path
-<<<<<<< HEAD
-from typing import Any, Dict, NewType, Optional, Text
-=======
-from typing import Any, Dict, Optional, Text, Union
->>>>>>> 65b5400d00a9c0f91ae1b91cfcfbde26e0362a74
+from typing import Any, Dict, NewType, Optional, Text, Union
 
 import networkx as nx
 import numpy as np
