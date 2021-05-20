@@ -1,27 +1,25 @@
-import numpy as np
-import pandas as pd
-
 from unittest import TestCase
 
-from pandas.testing import assert_frame_equal
-
+import numpy as np
+import pandas as pd
 from networkx.classes.digraph import DiGraph
 from networkx.testing import assert_graphs_equal
 
-from pymove.utils.networkx import _populate_graph
-from pymove.utils.networkx import build_transition_graph_from_dict
-from pymove.utils.networkx import build_transition_graph_from_df
-from pymove.utils.networkx import graph_to_dict
-from pymove.utils.networkx import get_all_paths
-
 from pymove.utils.constants import (
-    DATETIME, 
-    LATITUDE, 
-    LONGITUDE, 
-    LOCAL_LABEL, 
+    DATETIME,
+    LATITUDE,
+    LOCAL_LABEL,
+    LONGITUDE,
     PREV_LOCAL,
     TID_STAT,
-    TRAJ_ID
+    TRAJ_ID,
+)
+from pymove.utils.networkx import (
+    _populate_graph,
+    build_transition_graph_from_df,
+    build_transition_graph_from_dict,
+    get_all_paths,
+    graph_to_dict,
 )
 
 dict_graph = {
@@ -39,7 +37,7 @@ dict_graph = {
         'freq_source': {
             '2': 1, '4': 0, '6': 0, '8': 0, '9': 0},
         'freq_target': {
-            '2': 0, '4': 0, '6': 0, '8': 0, '9': 1}}, 
+            '2': 0, '4': 0, '6': 0, '8': 0, '9': 1}},
     'edges': {
         '2': {'4': {'weight': 1, 'mean_times': '0 days 00:05:30'}},
         '4': {'6': {'weight': 1, 'mean_times': '0 days 00:09:45'}},
@@ -166,36 +164,3 @@ def test_graph_to_dict():
     dict_graph = graph_to_dict(graph)
 
     TestCase().assertDictEqual(expected_dict, dict_graph)
-
-
-def test_get_all_paths():
-    data = pd.DataFrame(list_data1)
-    graph = build_transition_graph_from_df(data)
-
-    expected = pd.DataFrame({
-        TRAJ_ID: [['d95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
-                   'd95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
-                   'd95bafc8f2a4d27bdcf4bb99f4bea973'],
-                  ['216363698b529b4a97b750923ceb3ffd', '216363698b529b4a97b750923ceb3ffd',
-                   '216363698b529b4a97b750923ceb3ffd', '216363698b529b4a97b750923ceb3ffd']],
-        LOCAL_LABEL: [[2, 4, 6, 8, 9], [2.0, 4.0, 6.0, 8.0]],
-        DATETIME: [[pd.Timestamp('2020-01-01 09:10:15'), pd.Timestamp('2020-01-01 09:15:45'),
-                    pd.Timestamp('2020-01-01 09:25:30'), pd.Timestamp('2020-01-01 09:30:17'),
-                    pd.Timestamp('2020-01-01 09:45:16')],
-                   [pd.Timestamp('2020-01-01 09:10:15'), pd.Timestamp('2020-01-01 09:15:45'),
-                    pd.Timestamp('2020-01-01 09:25:30'), pd.Timestamp('2020-01-01 09:30:17')]],
-        LATITUDE: [[3.1234567165374756, 3.1234567165374756, 3.1234567165374756,
-                    3.1234567165374756, 3.1234567165374756],
-                   [3.1234567165374756, 3.1234567165374756, 3.1234567165374756,
-                    3.1234567165374756]],
-        LONGITUDE: [[38.12345504760742, 38.12345504760742, 38.12345504760742,
-                     38.12345504760742, 38.12345504760742],
-                    [38.12345504760742, 38.12345504760742, 38.12345504760742,
-                     38.12345504760742]],
-        PREV_LOCAL: [[np.nan, 2, 4, 6, 8], [np.nan, 2.0, 4.0, 6.0]],
-        TID_STAT: [[2, 2, 2, 2, 2], [3, 3, 3, 3]]
-    })
-
-    get_all_paths(data, graph, 2, 8)
-
-    assert_frame_equal(expected, data)

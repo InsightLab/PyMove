@@ -10,8 +10,10 @@ from pymove.utils.constants import (
     LATITUDE,
     LOCAL_LABEL,
     LONGITUDE,
+    PREV_LOCAL,
     START,
     TID,
+    TID_STAT,
     TRAJ_ID,
 )
 from pymove.utils.data_augmentation import (
@@ -20,9 +22,11 @@ from pymove.utils.data_augmentation import (
     augmentation_trajectories_df,
     generate_destiny_feature,
     generate_start_feature,
+    get_all_paths,
     insert_points_in_df,
     instance_crossover_augmentation,
     split_crossover,
+    transition_graph_augmentation_all_vertex,
 )
 
 list_data1 = [['abc-0000', 1, 3.1234567, 38.1234567,
@@ -72,6 +76,26 @@ list_data2 = {
           ['def-11112020010109', 'def-11112020010109',
            'abc-00002020010106', 'abc-00002020010106',
            'abc-00002020010106']]}
+
+
+list_data3 = {
+    TRAJ_ID: [['d95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
+               'd95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
+               'd95bafc8f2a4d27bdcf4bb99f4bea973']],
+    LOCAL_LABEL: [[2, 4, 6, 8, 9]],
+    DATETIME: [[pd.Timestamp('2020-01-01 09:10:15'),
+                pd.Timestamp('2020-01-01 09:15:45'),
+                pd.Timestamp('2020-01-01 09:25:30'),
+                pd.Timestamp('2020-01-01 09:30:17'),
+                pd.Timestamp('2020-01-01 09:45:16')]],
+    LATITUDE: [[3.1234567165374756, 3.1234567165374756,
+                3.1234567165374756, 3.1234567165374756,
+                3.1234567165374756]],
+    LONGITUDE: [[38.12345504760742, 38.12345504760742,
+                 38.12345504760742, 38.12345504760742,
+                 38.12345504760742]],
+    PREV_LOCAL: [[np.nan, 2, 4, 6, 8]],
+    TID_STAT: [[2, 2, 2, 2, 2]]}
 
 
 def test_append_row():
@@ -412,8 +436,41 @@ def test_sliding_window():
     assert_frame_equal(expected, data_aug)
 
 
+def test_get_all_paths():
+    data = pd.DataFrame(list_data3)
+    graph = build_transition_graph_from_df(data)
+
+    expected = pd.DataFrame({
+        TRAJ_ID: [['d95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
+                   'd95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
+                   'd95bafc8f2a4d27bdcf4bb99f4bea973'],
+                  ['216363698b529b4a97b750923ceb3ffd', '216363698b529b4a97b750923ceb3ffd',
+                   '216363698b529b4a97b750923ceb3ffd', '216363698b529b4a97b750923ceb3ffd']],
+        LOCAL_LABEL: [[2, 4, 6, 8, 9], [2.0, 4.0, 6.0, 8.0]],
+        DATETIME: [[pd.Timestamp('2020-01-01 09:10:15'), pd.Timestamp('2020-01-01 09:15:45'),
+                    pd.Timestamp('2020-01-01 09:25:30'), pd.Timestamp('2020-01-01 09:30:17'),
+                    pd.Timestamp('2020-01-01 09:45:16')],
+                   [pd.Timestamp('2020-01-01 09:10:15'), pd.Timestamp('2020-01-01 09:15:45'),
+                    pd.Timestamp('2020-01-01 09:25:30'), pd.Timestamp('2020-01-01 09:30:17')]],
+        LATITUDE: [[3.1234567165374756, 3.1234567165374756, 3.1234567165374756,
+                    3.1234567165374756, 3.1234567165374756],
+                   [3.1234567165374756, 3.1234567165374756, 3.1234567165374756,
+                    3.1234567165374756]],
+        LONGITUDE: [[38.12345504760742, 38.12345504760742, 38.12345504760742,
+                     38.12345504760742, 38.12345504760742],
+                    [38.12345504760742, 38.12345504760742, 38.12345504760742,
+                     38.12345504760742]],
+        PREV_LOCAL: [[np.nan, 2, 4, 6, 8], [np.nan, 2.0, 4.0, 6.0]],
+        TID_STAT: [[2, 2, 2, 2, 2], [3, 3, 3, 3]]
+    })
+
+    get_all_paths(data, graph, 2, 8)
+
+    assert_frame_equal(expected, data)
+
+
 def test_transition_graph_augmentation_all_vertex():
-    data = pd.DataFrame(list_data1)
+    data = pd.DataFrame(list_data3)
 
     expected = pd.DataFrame({
         TRAJ_ID: [['d95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',

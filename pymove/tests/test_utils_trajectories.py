@@ -10,17 +10,16 @@ from pymove import DaskMoveDataFrame, MoveDataFrame, PandasMoveDataFrame, trajec
 from pymove.utils.constants import (
     DATETIME,
     LATITUDE,
+    LOCAL_LABEL,
     LONGITUDE,
+    PREV_LOCAL,
+    TID_STAT,
     TRAJ_ID,
     TYPE_DASK,
     TYPE_PANDAS,
-    LOCAL_LABEL,
-    PREV_LOCAL,
-    TID_STAT
 )
 from pymove.utils.networkx import build_transition_graph_from_df
-from pymove.utils.trajectories import append_trajectory
-from pymove.utils.trajectories import split_trajectory
+from pymove.utils.trajectories import append_trajectory, split_trajectory
 
 list_data = [
     [39.984094, 116.319236, '2008-10-23 05:53:05', 1],

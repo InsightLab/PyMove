@@ -3,7 +3,6 @@ Graph operations.
 
 build_transition_graph_from_dict,
 build_transition_graph_from_df,
-get_all_paths,
 graph_to_dict,
 save_graph_as_json,
 read_graph_json
@@ -12,20 +11,16 @@ read_graph_json
 
 import json
 from pathlib import Path
-from typing import Any, Dict, NewType, Optional, Text, Union
+from typing import Dict, Optional, Text, Union
 
 import networkx as nx
-import numpy as np
 import pandas as pd
 from networkx.classes.digraph import DiGraph
 from pandas.core.frame import DataFrame
 from pandas.core.series import Series
 
-from pymove.utils.constants import DATETIME, LATITUDE, LOCAL_LABEL, LONGITUDE, TID_STAT
+from pymove.utils.constants import DATETIME, LATITUDE, LOCAL_LABEL, LONGITUDE
 from pymove.utils.log import progress_bar
-from pymove.utils.trajectories import append_trajectory
-
-Node = NewType('Node', Any)
 
 
 def _populate_graph(
@@ -162,97 +157,6 @@ def build_transition_graph_from_df(data: DataFrame) -> DiGraph:
     return build_transition_graph_from_dict(
         {'nodes': nodes, 'edges': edges}
     )
-
-
-def get_all_paths(
-    data: DataFrame,
-    graph: DiGraph,
-    source: Node,
-    target: Node,
-    min_path_size: Optional[int] = 3,
-    max_path_size: Optional[int] = 6,
-    max_sampling_source: Optional[int] = 100,
-    max_sampling_target: Optional[int] = 100,
-    label_local: Optional[Text] = LOCAL_LABEL,
-    label_tid: Optional[Text] = TID_STAT,
-    simple_paths: Optional[bool] = False
-):
-    """
-    Generate All Paths.
-
-    Retrieves all paths in the graph between the past source and
-    destination, if any. The number of paths returned is limited
-    by the max_sampling_source and max_sampling_target
-    parameters, and the path size is limited by the
-    min_path_size and max_path_size parameters.
-
-    Parameters
-    ----------
-    data: DataFrame
-        Trajectory data in sequence format.
-    graph: DiGraph
-        Transition graph constructed from trajectory data.
-    source: Node
-        Sequence source node.
-    target: Node
-        Sequence destination node.
-    min_path_size: int, optional
-        Minimum number of points for the trajectory, by default 3
-    max_path_size: number, optional
-        Maximum number of points for the trajectory, by default 6
-    max_sampling_source: number, optional
-        Maximum number of paths to be returned,
-        considering the observed origin, by default 10
-    max_sampling_target: number, optional
-        Maximum number of paths to be returned,
-        considering the observed destination, by default 10
-    label_local: str, optional
-        Name of the column referring to the trajectories, by default 'local_label'
-    label_tid: str, optional
-        Column name for trajectory IDs, by default 'tid_stat'
-    simple_paths: bool, optional
-        If true, use the paths with the most used sections
-        Otherwise, use paths with less used sections, by default False
-
-    """
-    source = str(source)
-    target = str(target)
-
-    if not nx.has_path(graph, source, target):
-        return []
-
-    if simple_paths:
-        all_paths = nx.all_simple_paths
-        param = max_path_size - 1
-
-    else:
-        all_paths = nx.shortest_simple_paths
-        param = None
-
-    for path in all_paths(graph, source, target, param):
-        freq_source = nx.get_node_attributes(graph, 'freq_source')[source]
-        freq_target = nx.get_node_attributes(graph, 'freq_target')[target]
-
-        if freq_source >= max_sampling_source:
-            break
-
-        if freq_target >= max_sampling_target:
-            break
-
-        if len(path) > max_path_size and simple_paths is False:
-            break
-
-        if len(path) >= min_path_size:
-            path_ = np.array(path, dtype='float32').tolist()
-            if path_ not in data[label_local].values.tolist():
-
-                append_trajectory(data, path, graph, label_tid)
-
-                freq_source += 1
-                freq_target += 1
-
-                graph.add_node(source, freq_source=freq_source)
-                graph.add_node(target, freq_target=freq_target)
 
 
 def graph_to_dict(graph: DiGraph) -> Dict:
