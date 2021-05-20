@@ -26,9 +26,11 @@ from pymove.utils.data_augmentation import (
     insert_points_in_df,
     instance_crossover_augmentation,
     split_crossover,
+    sliding_window,
     get_all_paths,
     transition_graph_augmentation_all_vertex,
 )
+from pymove.utils.networkx import build_transition_graph_from_df
 
 list_data1 = [['abc-0000', 1, 3.1234567, 38.1234567,
                pd.Timestamp('2020-01-01 06:08:15'), 'abc-00002020010106'],
