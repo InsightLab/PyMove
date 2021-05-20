@@ -20,7 +20,6 @@ import uuid
 from itertools import chain
 from typing import Any, Dict, Generator, List, Optional, Text, Union
 
-import networkx as nx
 import numpy as np
 import pandas as pd
 from networkx.classes.digraph import DiGraph
@@ -42,6 +41,7 @@ from pymove.utils.constants import (
     TYPE_PANDAS,
 )
 from pymove.utils.math import is_number
+from pymove.utils.networkx import graph_to_dict
 
 
 def read_csv(
@@ -300,53 +300,47 @@ def append_trajectory(
         Column name for trajectory IDs, by default 'tid_stat'
 
     """
-    rd = random.Random()
+    source = trajectory[0]
+    dict_graph = graph_to_dict(graph)
 
-    datetimes, lats, lons = [], [], []
-    node = trajectory[0]
+    dt = np.random.choice(dict_graph['nodes']['datetime'][source])
+    datetimes = [pd.Timestamp(str(dt))]
 
-    datetimes.append(
-        np.random.choice(
-            nx.get_node_attributes(graph, 'datetime')[node]
-        )
-    )
-    coords = nx.get_node_attributes(graph, 'coords')
+    coords = dict_graph['nodes']['coords']
+    lats, lons = [coords[source][0]], [coords[source][1]]
 
-    lats.append(coords[node][0])
-    lons.append(coords[node][1])
+    for idx, edge in enumerate(zip(trajectory[:-1], trajectory[1:])):
+        u, v = edge
+        mean_times = dict_graph['edges'][u][v]['mean_times']
 
-    for i in range(1, len(trajectory)):
-        edge = (trajectory[i - 1], trajectory[i])
-        mean_times = nx.get_edge_attributes(graph, 'mean_times')[edge]
+        datetime = pd.Timestamp(str(datetimes[idx])) + pd.Timedelta(mean_times)
+        datetimes.append(datetime)
 
-        dt_curr = pd.Timestamp(str(datetimes[i - 1])) + pd.Timedelta(mean_times)
-        datetimes.append(str(dt_curr))
-
-        lats.append(coords[trajectory[i]][0])
-        lons.append(coords[trajectory[i]][1])
+        lats.append(coords[v][0])
+        lons.append(coords[v][1])
 
     prev_tid = data.loc[data.shape[0] - 1, label_tid][0]
     tids = np.full(len(trajectory), prev_tid + 1, dtype=np.int32).tolist()
 
+    rd = random.Random()
     rd.seed(tids[0])
-    ids = np.full(len(trajectory),
-                  uuid.UUID(int=rd.getrandbits(128)).hex,
-                  dtype=np.object).tolist()
+    traj_ids = np.full(len(trajectory),
+                       uuid.UUID(int=rd.getrandbits(128)).hex,
+                       dtype=np.object).tolist()
 
     path = np.array(trajectory, dtype=np.float32).tolist()
-
-    prev_locals = [np.nan]
-    prev_locals.extend(path[:-1])
+    prev_locals = [np.nan] + path[:-1]
 
     data.loc[data.shape[0], [
         DATETIME, TRAJ_ID, LOCAL_LABEL, LATITUDE, LONGITUDE, PREV_LOCAL, label_tid
-    ]] = [datetimes, ids, path, lats, lons, prev_locals, tids]
+    ]] = [datetimes, traj_ids, path, lats, lons, prev_locals, tids]
 
 
 def split_trajectory(
     row: Series,
     size_window: Optional[int] = 6,
     size_jump: Optional[int] = 3,
+    label_local: Optional[Text] = LOCAL_LABEL,
     columns: Optional[List] = None
 ) -> Generator:
     """
@@ -363,6 +357,8 @@ def split_trajectory(
         Sliding window size, by default 6
     size_jump: int, optional
         Size of the jump in the trajectory, by default 3
+    label_local: str, optional
+        Name of the column referring to the trajectories, by default 'local_label'
     columns: list, optional
         Columns to which the split will be applied, by default None
 
@@ -375,16 +371,11 @@ def split_trajectory(
     if columns is None:
         columns = row.index
 
-    sequence = row[columns[0]]
-    for i in range(0, len(sequence), size_jump):
-        row_ = row.copy()
-        for col in columns:
-            row_ = row_.append(
-                pd.Series({
-                    'window_' + col: row_[col][i:i + size_window]
-                })
-            )
-        yield row_
+    return pd.concat(
+        [pd.Series(
+            {col: row[col][i:i + size_window] for col in columns}
+        ) for i in range(0, len(row[label_local]), size_jump)], axis=1
+    ).T
 
 
 def object_for_array(object_: Text) -> ndarray:

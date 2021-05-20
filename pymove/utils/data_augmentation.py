@@ -379,6 +379,7 @@ def sliding_window(
     data: DataFrame,
     size_window: Optional[int] = 6,
     size_jump: Optional[int] = 3,
+    label_local: Optional[Text] = LOCAL_LABEL,
     columns: Optional[List] = None,
 ) -> DataFrame:
     """
@@ -396,6 +397,8 @@ def sliding_window(
         Sliding window size, by default 6
     size_jump: int, optional
         Size of the jump in the trajectory, by default 3
+    label_local: str, optional
+        Name of the column referring to the trajectories, by default 'local_label'
     columns: list, optional
         Columns to which the split will be applied, by default None
 
@@ -408,20 +411,14 @@ def sliding_window(
         columns = data.columns
 
     frames = {}
-    desc = 'Sliding Window'
+    desc = 'Sliding Window...'
     for idx, row in progress_bar(data.iterrows(), desc=desc, total=data.shape[0]):
-        frames[idx] = pd.DataFrame(
-            [serie for serie in split_trajectory(
-                row, size_window, size_jump, columns
-            )]
-        )
+        frames[idx] = split_trajectory(row, size_window, size_jump, label_local, columns)
 
-    data_ = pd.concat(
-        [frames[i] for i in range(len(frames))],
+    return pd.concat(
+        [frame for frame in frames.values()],
         ignore_index=True
     )
-
-    return data_
 
 
 def transition_graph_augmentation_all_vertex(

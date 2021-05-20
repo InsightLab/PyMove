@@ -13,7 +13,7 @@ read_graph_json
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Text
+from typing import Any, Dict, NewType, Optional, Text
 
 import networkx as nx
 import numpy as np
@@ -25,6 +25,8 @@ from pandas.core.series import Series
 from pymove.utils.constants import DATETIME, LATITUDE, LOCAL_LABEL, LONGITUDE, TID_STAT
 from pymove.utils.log import progress_bar
 from pymove.utils.trajectories import append_trajectory
+
+Node = NewType('Node', Any)
 
 
 def _populate_graph(
@@ -166,8 +168,8 @@ def build_transition_graph_from_df(data: DataFrame) -> DiGraph:
 def get_all_paths(
     data: DataFrame,
     graph: DiGraph,
-    source: Any,
-    target: Any,
+    source: Node,
+    target: Node,
     min_path_size: Optional[int] = 3,
     max_path_size: Optional[int] = 6,
     max_sampling_source: Optional[int] = 100,
@@ -191,9 +193,9 @@ def get_all_paths(
         Trajectory data in sequence format.
     graph: DiGraph
         Transition graph constructed from trajectory data.
-    source: node
+    source: Node
         Sequence source node.
-    target: node
+    target: Node
         Sequence destination node.
     min_path_size: int, optional
         Minimum number of points for the trajectory, by default 3
