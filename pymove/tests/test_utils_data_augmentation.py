@@ -25,9 +25,8 @@ from pymove.utils.data_augmentation import (
     get_all_paths,
     insert_points_in_df,
     instance_crossover_augmentation,
-    split_crossover,
     sliding_window,
-    get_all_paths,
+    split_crossover,
     transition_graph_augmentation_all_vertex,
 )
 from pymove.utils.networkx import build_transition_graph_from_df
@@ -54,7 +53,9 @@ list_data1 = [['abc-0000', 1, 3.1234567, 38.1234567,
                pd.Timestamp('2020-01-01 09:52:53'), 'def-11112020010109']]
 
 list_data2 = {
-    TRAJ_ID: ['abc-0000', 'def-1111'],
+    TRAJ_ID: [['abc-0000', 'abc-0000', 'abc-0000'],
+              ['def-1111', 'def-1111', 'def-1111',
+               'def-1111', 'def-1111']],
     LOCAL_LABEL: [[5, 7, 9], [2, 4, 6, 8, 9]],
     DATETIME: [[pd.Timestamp('2020-01-01 06:08:15'),
                 pd.Timestamp('2020-01-01 06:16:51'),
@@ -78,7 +79,8 @@ list_data2 = {
            'abc-00002020010106'],
           ['def-11112020010109', 'def-11112020010109',
            'abc-00002020010106', 'abc-00002020010106',
-           'abc-00002020010106']]}
+           'abc-00002020010106']]
+}
 
 
 list_data3 = {
