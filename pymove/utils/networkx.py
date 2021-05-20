@@ -12,6 +12,7 @@ read_graph_json
 
 import json
 import os
+from pathlib import Path
 from typing import Any, Dict, Optional, Text
 
 import networkx as nx
@@ -48,8 +49,8 @@ def _populate_graph(
         Attributes of the transition graph nodes.
     edges: dict
         Attributes of the transition graph edges.
-    label_local: str, optional, default 'local_label'
-        Name of the column referring to the trajectories.
+    label_local: str, optional
+        Name of the column referring to the trajectories, by default 'local_label'
 
     """
     traj = row[label_local]
@@ -194,21 +195,23 @@ def get_all_paths(
         Sequence source node.
     target: node
         Sequence destination node.
-    min_path_size: number, optional, default 3
-        Minimum number of points for the trajectory.
-    max_path_size: number, optional, default 6
-        Maximum number of points for the trajectory.
-    max_sampling_source: number, optional, default 10
-        Maximum number of paths to be returned, considering the observed origin.
-    max_sampling_target: number, optional, default 10
-        Maximum number of paths to be returned, considering the observed destination.
-    label_local: str, optional, default 'local_label'
-        Name of the column referring to the trajectories.
-    label_tid: str, optional, default 'tid_stat'
-        Column name for trajectory IDs.
-    simple_paths: bool, optional, default False
-        If true, use the paths with the most used sections.
-        Otherwise, use paths with less used sections.
+    min_path_size: int, optional
+        Minimum number of points for the trajectory, by default 3
+    max_path_size: number, optional
+        Maximum number of points for the trajectory, by default 6
+    max_sampling_source: number, optional
+        Maximum number of paths to be returned,
+        considering the observed origin, by default 10
+    max_sampling_target: number, optional
+        Maximum number of paths to be returned,
+        considering the observed destination, by default 10
+    label_local: str, optional
+        Name of the column referring to the trajectories, by default 'local_label'
+    label_tid: str, optional
+        Column name for trajectory IDs, by default 'tid_stat'
+    simple_paths: bool, optional
+        If true, use the paths with the most used sections
+        Otherwise, use paths with less used sections, by default False
 
     """
     source = str(source)
@@ -280,7 +283,7 @@ def graph_to_dict(graph: DiGraph) -> Dict:
 
 
 def save_graph_as_json(
-    graph: DiGraph, filename: Optional[Text] = 'graph.json'
+    graph: DiGraph, filename: Optional[Path] = 'graph.json'
 ):
     """
     Save Graph as JSON.
@@ -292,7 +295,7 @@ def save_graph_as_json(
     ----------
     graph: DiGraph
         Transition graph constructed from trajectory data.
-    filename: str or Path, optional
+    filename: str or path, optional
         File name that will be saved with transition graph data, by default 'graph.json'.
 
     """
@@ -310,7 +313,7 @@ def save_graph_as_json(
         json.dump(dict_graph, f)
 
 
-def read_graph_json(filename: Text):
+def read_graph_json(filename: Path):
     """
     Read Graph from JSON file.
 
@@ -318,13 +321,13 @@ def read_graph_json(filename: Text):
 
     Parameters
     ----------
-    filename: str or Path
-        Name of the JSON file to be read.
+    filename: str or path
+        Name of the JSON file to be read
 
     Return
     ------
     dict
-        Dictionary with the attributes of nodes and edges.
+        Dictionary with the attributes of nodes and edges
     """
     ext = os.path.basename(filename).split('.')[-1]
 

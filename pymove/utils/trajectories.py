@@ -18,7 +18,7 @@ column_to_array
 import random
 import uuid
 from itertools import chain
-from typing import Any, Dict, List, Optional, Text, Union
+from typing import Any, Dict, Generator, List, Optional, Text, Union
 
 import networkx as nx
 import numpy as np
@@ -291,13 +291,13 @@ def append_trajectory(
     Parameters
     ----------
     data: DataFrame
-        Trajectory data in sequence format.
+        Trajectory data in sequence format
     trajectory: list
-        Trajectory recovered from the transition graph.
+        Trajectory recovered from the transition graph
     graph: DiGraph
-        Transition graph constructed from trajectory data.
-    label_tid: str, optional, default 'tid_stat'
-        Column name for trajectory IDs.
+        Transition graph constructed from trajectory data
+    label_tid: str, optional
+        Column name for trajectory IDs, by default 'tid_stat'
 
     """
     rd = random.Random()
@@ -329,10 +329,9 @@ def append_trajectory(
     tids = np.full(len(trajectory), prev_tid + 1, dtype=np.int32).tolist()
 
     rd.seed(tids[0])
-    ids = np.full(
-        len(trajectory),
-        uuid.UUID(int=rd.getrandbits(128)).hex,
-        dtype=np.object).tolist()
+    ids = np.full(len(trajectory),
+                  uuid.UUID(int=rd.getrandbits(128)).hex,
+                  dtype=np.object).tolist()
 
     path = np.array(trajectory, dtype=np.float32).tolist()
 
@@ -349,7 +348,7 @@ def split_trajectory(
     size_window: Optional[int] = 6,
     size_jump: Optional[int] = 3,
     columns: Optional[List] = None
-) -> Series:
+) -> Generator:
     """
     It breaks the trajectory in stretches.
 
@@ -359,13 +358,13 @@ def split_trajectory(
     Parameters
     ----------
     row: Series
-        Line of the trajectory dataframe.
-    size_window: number, optional, default 6
-        Sliding window size.
-    size_jump: number, optional, default 3
-        Size of the jump in the trajectory.
-    columns: list, optional, default None
-        Columns to which the split will be applied.
+        Line of the trajectory dataframe
+    size_window: int, optional
+        Sliding window size, by default 6
+    size_jump: int, optional
+        Size of the jump in the trajectory, by default 3
+    columns: list, optional
+        Columns to which the split will be applied, by default None
 
     Return
     ------

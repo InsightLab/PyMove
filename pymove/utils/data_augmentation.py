@@ -118,7 +118,7 @@ def generate_start_feature(
     data : DataFrame
         The input trajectory data.
     label_trajectory : str, optional
-        Label of the points sequences, by default TRAJECTORY
+        Label of the points sequences, by default 'trajectory'
 
     """
     if START not in data:
@@ -193,7 +193,7 @@ def _augmentation(data: DataFrame, aug_df: DataFrame, frac: Optional[float] = 0.
         The input trajectories data.
     aug_df : DataFrame
         The dataframe with new trajectories
-    frac : number, optional
+    frac : float, optional
         Represents the percentage to be exchanged, by default 0.5
 
     """
@@ -260,11 +260,11 @@ def augmentation_trajectories_df(
     restriction : str, optional
         Constraint used to generate new data, by default 'destination only'
     label_trajectory : str, optional
-        Label of the points sequences, by default TRAJECTORY
+        Label of the points sequences, by default 'trajectory'
     insert_at_df : boolean, optional
         Whether to return a new DataFrame, by default False
         If True then value of copy is ignored.
-    frac : number, optional
+    frac : float, optional
         Represents the percentage to be exchanged, by default 0.5
 
     Returns
@@ -358,7 +358,7 @@ def instance_crossover_augmentation(
         Constraint used to generate new data, by default 'destination only'
     label_trajectory : str, optional
         Label of the points sequences, by default 'trajectory'
-    frac : number, optional
+    frac : float, optional
         Represents the percentage to be exchanged, by default 0.5
 
     """
@@ -391,13 +391,13 @@ def sliding_window(
     Parameters
     ----------
     data: DataFrame
-        Trajectory data in sequence format.
-    size_window: number, optional, default 6
-        Sliding window size.
-    size_jump: number, optional, default 3
-        Size of the jump in the trajectory.
-    columns: list, optional, default None
-        Columns to which the split will be applied.
+        Trajectory data in sequence format
+    size_window: int, optional
+        Sliding window size, by default 6
+    size_jump: int, optional
+        Size of the jump in the trajectory, by default 3
+    columns: list, optional
+        Columns to which the split will be applied, by default None
 
     Return
     ------
@@ -446,33 +446,35 @@ def transition_graph_augmentation_all_vertex(
     Parameters
     ----------
     data: DataFrame
-        Trajectory data in sequence format.
+        Trajectory data in sequence format
     graph: DiGraph
-        Transition graph constructed from trajectory data.
-    min_path_size: number, optional, default 3
-        Minimum number of points for the trajectory.
-    max_path_size: number, optional, default 6
-        Maximum number of points for the trajectory.
-    max_sampling_source: number, optional, default 10
-        Maximum number of paths to be returned, considering the observed origin.
-    max_sampling_target: number, optional, default 10
-        Maximum number of paths to be returned, considering the observed destination.
-    source: dict, optional, default None
-        Degree of entry of each node in the graph.
+        Transition graph constructed from trajectory data
+    min_path_size: int, optional
+        Minimum number of points for the trajectory, by default 3
+    max_path_size: int, optional
+        Maximum number of points for the trajectory, by default 6
+    max_sampling_source: int, optional
+        Maximum number of paths to be returned,
+        considering the observed origin, by default 10
+    max_sampling_target: int, optional
+        Maximum number of paths to be returned,
+        considering the observed destination, by default 10
+    source: dict, optional
+        Degree of entry of each node in the graph, by default None
         Example: {node: degree-of-entry}
-    target: dict, optional, default None
-        Degree of output of each node in the graph.
+    target: dict, optional
+        Degree of output of each node in the graph, by default None
         Example: {node: degree-of-output}
-    label_local: str, optional, default 'local_label'
-        Name of the column referring to the trajectories.
-    label_tid: str, optional, default 'tid_stat'
-        Column name for trajectory IDs.
-    simple_paths: bool, optional, default False
-        If true, use the paths with the most used sections.
-        Otherwise, use paths with less used sections.
-    inplace : bool, optional, default True
-        if set to true the original dataframe will be altered to contain
-        the result of the augmentation, otherwise a copy will be returned.
+    label_local: str, optional
+        Name of the column referring to the trajectories, by default 'local_label'
+    label_tid: str, optional
+        Column name for trajectory IDs, by default 'tid_stat'
+    simple_paths: boolean, optional
+        If true, use the paths with the most used sections
+        Otherwise, use paths with less used sections, by default False
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain the result
+        of the augmentation, otherwise a copy will be returned, by default True
 
     Return
     ------
