@@ -118,7 +118,7 @@ def generate_start_feature(
     data : DataFrame
         The input trajectory data.
     label_trajectory : str, optional
-        Label of the points sequences, by default 'trajectory'
+        Label of the points sequences, by default TRAJECTORY
 
     """
     if START not in data:
@@ -138,7 +138,7 @@ def generate_destiny_feature(
     data : DataFrame
         The input trajectory data.
     label_trajectory : str, optional
-        Label of the points sequences, by default 'trajectory'
+        Label of the points sequences, by default TRAJECTORY
 
     """
     if DESTINY not in data:
@@ -260,7 +260,7 @@ def augmentation_trajectories_df(
     restriction : str, optional
         Constraint used to generate new data, by default 'destination only'
     label_trajectory : str, optional
-        Label of the points sequences, by default 'trajectory'
+        Label of the points sequences, by default TRAJECTORY
     insert_at_df : boolean, optional
         Whether to return a new DataFrame, by default False
         If True then value of copy is ignored.
@@ -357,7 +357,7 @@ def instance_crossover_augmentation(
     restriction : str, optional
         Constraint used to generate new data, by default 'destination only'
     label_trajectory : str, optional
-        Label of the points sequences, by default 'trajectory'
+        Label of the points sequences, by default TRAJECTORY
     frac : float, optional
         Represents the percentage to be exchanged, by default 0.5
 
@@ -463,9 +463,9 @@ def transition_graph_augmentation_all_vertex(
         Degree of output of each node in the graph, by default None
         Example: {node: degree-of-output}
     label_local: str, optional
-        Name of the column referring to the trajectories, by default 'local_label'
+        Name of the column referring to the trajectories, by default LOCAL_LABEL
     label_tid: str, optional
-        Column name for trajectory IDs, by default 'tid_stat'
+        Column name for trajectory IDs, by default TID_STAT
     simple_paths: boolean, optional
         If true, use the paths with the most used sections
         Otherwise, use paths with less used sections, by default False

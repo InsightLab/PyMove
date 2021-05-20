@@ -11,9 +11,12 @@ read_graph_json
 """
 
 import json
-import os
 from pathlib import Path
+<<<<<<< HEAD
 from typing import Any, Dict, NewType, Optional, Text
+=======
+from typing import Any, Dict, Optional, Text, Union
+>>>>>>> 65b5400d00a9c0f91ae1b91cfcfbde26e0362a74
 
 import networkx as nx
 import numpy as np
@@ -285,7 +288,7 @@ def graph_to_dict(graph: DiGraph) -> Dict:
 
 
 def save_graph_as_json(
-    graph: DiGraph, filename: Optional[Path] = 'graph.json'
+    graph: DiGraph, file_path: Optional[Union[Path, Text]] = 'graph.json'
 ):
     """
     Save Graph as JSON.
@@ -297,25 +300,25 @@ def save_graph_as_json(
     ----------
     graph: DiGraph
         Transition graph constructed from trajectory data.
-    filename: str or path, optional
+    file_path: str or path, optional
         File name that will be saved with transition graph data, by default 'graph.json'.
 
     """
     dict_graph = graph_to_dict(graph)
 
-    ext = os.path.basename(filename).split('.')[-1]
+    path = Path(file_path)
 
-    if ext != 'json':
+    if path.suffix != '.json':
         raise ValueError(
-            f'Unsupported file extension! Past extension = {ext}, '
+            f'Unsupported file extension {path.suffix},'
             f'Expected extension = json'
         )
 
-    with open(filename, 'w') as f:
+    with open(path, 'w') as f:
         json.dump(dict_graph, f)
 
 
-def read_graph_json(filename: Path):
+def read_graph_json(file_path: Optional[Union[Path, Text]]):
     """
     Read Graph from JSON file.
 
@@ -323,7 +326,7 @@ def read_graph_json(filename: Path):
 
     Parameters
     ----------
-    filename: str or path
+    file_path: str or path
         Name of the JSON file to be read
 
     Return
@@ -331,15 +334,15 @@ def read_graph_json(filename: Path):
     dict
         Dictionary with the attributes of nodes and edges
     """
-    ext = os.path.basename(filename).split('.')[-1]
+    path = Path(file_path)
 
-    if ext != 'json':
+    if path.suffix != '.json':
         raise ValueError(
-            f'Unsupported file extension! Past extension = {ext}, '
+            f'Unsupported file extension {path.suffix},'
             f'Expected extension = json'
         )
 
-    with open(filename, 'r') as f:
+    with open(file_path, 'r') as f:
         dict_graph = json.load(f)
 
     return dict_graph
