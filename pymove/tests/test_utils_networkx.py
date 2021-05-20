@@ -18,7 +18,6 @@ from pymove.utils.networkx import (
     _populate_graph,
     build_transition_graph_from_df,
     build_transition_graph_from_dict,
-    get_all_paths,
     graph_to_dict,
 )
 

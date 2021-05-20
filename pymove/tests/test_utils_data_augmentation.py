@@ -26,6 +26,7 @@ from pymove.utils.data_augmentation import (
     insert_points_in_df,
     instance_crossover_augmentation,
     split_crossover,
+    get_all_paths,
     transition_graph_augmentation_all_vertex,
 )
 

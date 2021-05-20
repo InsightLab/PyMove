@@ -10,6 +10,7 @@ augmentation_trajectories_df,
 insert_points_in_df,
 instance_crossover_augmentation,
 sliding_window,
+get_all_paths,
 transition_graph_augmentation_all_vertex
 
 """
