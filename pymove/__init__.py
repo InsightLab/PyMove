@@ -24,6 +24,7 @@ from .utils import (
     integration,
     math,
     mem,
+    networkx,
     trajectories,
     visual,
 )

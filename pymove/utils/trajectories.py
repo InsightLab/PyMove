@@ -348,7 +348,7 @@ def split_trajectory(
     size_window: Optional[int] = 6,
     size_jump: Optional[int] = 3,
     columns: Optional[List] = None
-) -> Generator:
+) -> Generator[Series, None, None]:
     """
     It breaks the trajectory in stretches.
 
@@ -368,7 +368,7 @@ def split_trajectory(
 
     Return
     ------
-    Series
+    Generator of Series
         Series with the stretches recovered from the observed trajectory.
 
     """
