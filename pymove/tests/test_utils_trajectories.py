@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import pandas as pd
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_equal
 from pandas import DataFrame
 from pandas.testing import assert_frame_equal
@@ -13,7 +14,13 @@ from pymove.utils.constants import (
     TRAJ_ID,
     TYPE_DASK,
     TYPE_PANDAS,
+    LOCAL_LABEL,
+    PREV_LOCAL,
+    TID_STAT
 )
+from pymove.utils.networkx import build_transition_graph_from_df
+from pymove.utils.trajectories import append_trajectory
+from pymove.utils.trajectories import split_trajectory
 
 list_data = [
     [39.984094, 116.319236, '2008-10-23 05:53:05', 1],
@@ -154,7 +161,7 @@ def test_fill_list_with_new_values():
 
 
 def test_append_trajectory():
-    data = pd.DataFrame(list_data1)
+    data = pd.DataFrame(list_data2)
     graph = build_transition_graph_from_df(data)
 
     expected = pd.DataFrame({
