@@ -1,9 +1,8 @@
-from unittest import TestCase
-
 import numpy as np
 import pandas as pd
 from networkx.classes.digraph import DiGraph
 from networkx.testing import assert_graphs_equal
+from numpy.testing import assert_equal
 
 from pymove.utils.constants import (
     DATETIME,
@@ -109,10 +108,9 @@ def test_populate_graph():
         '8': {'9': {'weight': 1, 'mean_times': '0 days 00:14:59'}}}
 
     _populate_graph(row, nodes, edges)
-    nodes, edges
 
-    TestCase().assertDictEqual(expected_nodes, nodes)
-    TestCase().assertDictEqual(expected_edges, edges)
+    assert_equal(expected_nodes, nodes)
+    assert_equal(expected_edges, edges)
 
 
 def test_build_transition_graph_from_dict():
@@ -162,4 +160,4 @@ def test_graph_to_dict():
 
     dict_graph = graph_to_dict(graph)
 
-    TestCase().assertDictEqual(expected_dict, dict_graph)
+    assert_equal(expected_dict, dict_graph)

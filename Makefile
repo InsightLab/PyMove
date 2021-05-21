@@ -17,12 +17,15 @@ clean:
 	rm -rf docs/_build
 	rm -f .coverage
 
-test: clean
+coverage: clean
 	coverage run -m pytest
 	coverage report
 
 lint: clean
 	flake8
+
+test: clean
+	pytest
 
 docs: clean
 	rm -rf docs/api docs/examples
