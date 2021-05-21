@@ -84,7 +84,7 @@ def _transition_graph():
     return expected_graph
 
 
-def test__populate_graph():
+def test_populate_graph():
     row = pd.DataFrame(list_data1).loc[0]
 
     nodes = {'datetime': {}, 'coords': {}, 'freq_source': {}, 'freq_target': {}}

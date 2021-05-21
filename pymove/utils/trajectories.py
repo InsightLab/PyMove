@@ -68,15 +68,15 @@ def read_csv(
         By file-like object, we refer to objects with a read() method,
         such as a file handle (e.g. via builtin open function) or StringIO.
     latitude : str, optional
-        Represents the column name of feature latitude, by default 'lat'
+        Represents the column name of feature latitude, by default LATITUDE
     longitude : str, optional
-        Represents the column name of feature longitude, by default 'lon'
+        Represents the column name of feature longitude, by default LONGITUDE
     datetime : str, optional
-        Represents the column name of feature datetime, by default 'datetime'
+        Represents the column name of feature datetime, by default DATETIME
     traj_id : str, optional
-        Represents the column name of feature id trajectory, by default 'id'
+        Represents the column name of feature id trajectory, by default TRAJ_ID
     type_ : str, optional
-        Represents the type of the MoveDataFrame, by default 'pandas'
+        Represents the type of the MoveDataFrame, by default TYPE_PANDAS
     n_partitions : int, optional
         Represents number of partitions for DaskMoveDataFrame, by default 1
     **kwargs : Pandas read_csv arguments
@@ -297,7 +297,7 @@ def append_trajectory(
     graph: DiGraph
         Transition graph constructed from trajectory data
     label_tid: str, optional
-        Column name for trajectory IDs, by default 'tid_stat'
+        Column name for trajectory IDs, by default TID_STAT
 
     """
     source = trajectory[0]
@@ -358,7 +358,7 @@ def split_trajectory(
     size_jump: int, optional
         Size of the jump in the trajectory, by default 3
     label_local: str, optional
-        Name of the column referring to the trajectories, by default 'local_label'
+        Name of the column referring to the trajectories, by default LOCAL_LABEL
     columns: list, optional
         Columns to which the split will be applied, by default None
 

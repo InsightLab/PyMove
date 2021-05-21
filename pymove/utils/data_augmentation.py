@@ -29,11 +29,11 @@ from pymove.utils.log import progress_bar
 from pymove.utils.networkx import build_transition_graph_from_df
 from pymove.utils.trajectories import append_trajectory, split_trajectory
 
-Node = NewType('Node', Any)
-
 if TYPE_CHECKING:
     from pymove.core.dask import DaskMoveDataFrame
     from pymove.core.pandas import PandasMoveDataFrame
+
+Node = NewType('Node', Any)
 
 
 def append_row(
@@ -142,7 +142,7 @@ def generate_destiny_feature(
     data : DataFrame
         The input trajectory data.
     label_trajectory : str, optional
-        Label of the points sequences, by default 'trajectory'
+        Label of the points sequences, by default TRAJECTORY
 
     """
     if DESTINY not in data:
@@ -361,7 +361,7 @@ def instance_crossover_augmentation(
     restriction : str, optional
         Constraint used to generate new data, by default 'destination only'
     label_trajectory : str, optional
-        Label of the points sequences, by default 'trajectory'
+        Label of the points sequences, by default TRAJECTORY
     frac : float, optional
         Represents the percentage to be exchanged, by default 0.5
 
@@ -402,7 +402,7 @@ def sliding_window(
     size_jump: int, optional
         Size of the jump in the trajectory, by default 3
     label_local: str, optional
-        Name of the column referring to the trajectories, by default 'local_label'
+        Name of the column referring to the trajectories, by default LOCAL_LABEL
     columns: list, optional
         Columns to which the split will be applied, by default None
 
@@ -468,9 +468,9 @@ def get_all_paths(
         Maximum number of paths to be returned,
         considering the observed destination, by default 10
     label_local: str, optional
-        Name of the column referring to the trajectories, by default 'local_label'
+        Name of the column referring to the trajectories, by default LOCAL_LABEL
     label_tid: str, optional
-        Column name for trajectory IDs, by default 'tid_stat'
+        Column name for trajectory IDs, by default TID_STAT
     simple_paths: bool, optional
         If true, use the paths with the most used sections
         Otherwise, use paths with less used sections, by default False
@@ -558,9 +558,9 @@ def transition_graph_augmentation_all_vertex(
         Degree of output of each node in the graph, by default None
         Example: {node: degree-of-output}
     label_local: str, optional
-        Name of the column referring to the trajectories, by default 'local_label'
+        Name of the column referring to the trajectories, by default LOCAL_LABEL
     label_tid: str, optional
-        Column name for trajectory IDs, by default 'tid_stat'
+        Column name for trajectory IDs, by default TID_STAT
     simple_paths: boolean, optional
         If true, use the paths with the most used sections
         Otherwise, use paths with less used sections, by default False

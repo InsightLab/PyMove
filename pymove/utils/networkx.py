@@ -46,7 +46,7 @@ def _populate_graph(
     edges: dict
         Attributes of the transition graph edges.
     label_local: str, optional
-        Name of the column referring to the trajectories, by default 'local_label'
+        Name of the column referring to the trajectories, by default LOCAL_LABEL
 
     """
     traj = row[label_local]

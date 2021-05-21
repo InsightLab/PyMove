@@ -135,7 +135,7 @@ def test_append_row():
     assert_frame_equal(expected, traj_df)
 
 
-def test__augmentation():
+def test_augmentation():
     traj_df = pd.DataFrame(list_data2)
 
     expected = pd.DataFrame({

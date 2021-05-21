@@ -72,7 +72,7 @@ def test_read_csv(tmpdir):
 
     expected = _default_move_df()
 
-    d = tmpdir.mkdir('prepossessing')
+    d = tmpdir.mkdir('utils')
 
     file_default_columns = d.join('test_read_default.csv')
     file_default_columns.write(str_data_default)
