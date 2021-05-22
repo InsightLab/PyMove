@@ -30,14 +30,6 @@
 </td>
 </tr>
 <tr>
-  <td>Build Status</td>
-  <td>
-    <a href="https://travis-ci.org/InsightLab/PyMove/">
-      <img src="https://img.shields.io/travis/InsightLab/pymove/master?style=for-the-badge" alt="Travis build status" />
-    </a>
-  </td>
-</tr>
-<tr>
   <td>Platforms</td>
   <td>
     <a href="https://anaconda.org/conda-forge/pymove">
@@ -301,9 +293,33 @@ You can see examples of how to use PyMove [here](https://github.com/InsightLab/P
 
 ---
 
-## Papers
+## Cite
 
-(list of publications using/with Pymove)
+The library was originally created during the bachelor's thesis of 2 students from the Federal University of Ceará, so you can cite using both works.
+
+```
+@mastersthesis{arina2019,
+	title        = {Uma Arquitetura E Implementação Do Módulo De Pré-processamento Para Biblioteca Pymove},
+	author       = {Arina De Jesus Amador Monteiro Sanches},
+	year         = 2019,
+	school       = {Universidade Federal Do Ceará},
+	type         = {Bachelor's thesis}
+}
+@mastersthesis{andreza2019,
+	title        = {Uma Arquitetura E Implementação Do Módulo De Visualizaçãopara Biblioteca Pymove},
+	author       = {Andreza Fernandes De Oliveira},
+	year         = 2019,
+	school       = {Universidade Federal Do Ceará},
+	type         = {Bachelor's thesis}
+}
+```
+
+---
+
+## Publications
+
+- [Uma Arquitetura E Implementação Do Módulo De Pré-processamento Para Biblioteca Pymove](http://repositorio.ufc.br/handle/riufc/58551)
+- [Uma Arquitetura E Implementação Do Módulo De Visualizaçãopara Biblioteca Pymove](http://repositorio.ufc.br/handle/riufc/58550)
 
 ---
 
