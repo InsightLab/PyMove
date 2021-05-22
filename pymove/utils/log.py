@@ -147,10 +147,10 @@ def progress_bar(
 
     Return
     ------
-    >>> from pymove.utils.log import _log_progress_bar, progress_bar
-    >>> for i in progress_bar(range(1,101), desc='tests', total = 100):
+    >>> from pymove.utils.log import progress_bar
+    >>> for i in progress_bar(range(1,101), desc='Print 1 to 100'):
     >>>    print(i)
-    # A progress bar that walks the range
+    # A bar that shows the progress of the iterations
     """
     if logger.level > logging.INFO:
         return sequence
