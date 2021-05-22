@@ -7,5 +7,3 @@ geopandas
 pep8-naming
 pre-commit
 pytest
-sphinx
-sphinx_rtd_theme
