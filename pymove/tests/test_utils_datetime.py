@@ -65,24 +65,24 @@ def test_str_to_datetime():
     assert(converted_date_time == expected_date_time)
 
 
-def test_to_str():
+def test_datetime_to_str():
 
     expected = str_date_time_default
 
     data = default_date_time
 
-    str_date_time = datetime.to_str(data)
+    str_date_time = datetime.datetime_to_str(data)
 
     assert(str_date_time == expected)
 
 
-def test_to_min():
+def test_datetime_to_min():
 
     expected = 25347608
 
     data = default_date_time
 
-    date_to_min = datetime.to_min(data)
+    date_to_min = datetime.datetime_to_min(data)
 
     assert(date_to_min == expected)
 
@@ -145,7 +145,7 @@ def test_working_day():
 
 def test_now_str():
 
-    expected = datetime.to_str(dt.datetime.now())
+    expected = datetime.datetime_to_str(dt.datetime.now())
 
     time_now = datetime.now_str()
 
@@ -237,7 +237,7 @@ def test_create_time_slot_in_minute():
         'id': {0: 1, 1: 1, 2: 1, 3: 1},
         'time_slot': {0: 22, 1: 23, 2: 23, 3: 24}
     })
-    datetime.create_time_slot_in_minute(df)
+    datetime.create_time_slot_in_minute(df, inplace=True)
     assert_frame_equal(df, expected)
 
 
@@ -316,5 +316,5 @@ def test_threshold_time_statistics():
         index=[0, 1, 2, 3]
     )
 
-    datetime.threshold_time_statistics(statistics)
+    datetime.threshold_time_statistics(statistics, inplace=True)
     assert_frame_equal(statistics, expected)

@@ -18,11 +18,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pep8-naming pytest geopandas .
+        make dev
     - name: Lint and Test
       run: |
-        flake8
-        pytest
+        make lint
+        make test
     - name: Build
       run: |
         pip install setuptools wheel twine

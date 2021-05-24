@@ -130,7 +130,7 @@ def test_generate_prev_local_features():
     )
 
     discrete_df.generate_prev_local_features()
-    print(discrete_df)
+
     assert_frame_equal(discrete_df, expected)
 
 
@@ -201,6 +201,5 @@ def test_generate_tid_based_statistics():
     )
 
     discrete_df.generate_tid_based_statistics()
-    print(discrete_df)
-    print(expected)
+
     assert_frame_equal(discrete_df, expected)

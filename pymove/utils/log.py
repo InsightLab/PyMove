@@ -145,6 +145,12 @@ def progress_bar(
     miniters : int, optional
         Represents the steps in which the bar will be updated, by default None.
 
+    Return
+    ------
+    >>> from pymove.utils.log import progress_bar
+    >>> for i in progress_bar(range(1,101), desc='Print 1 to 100'):
+    >>>    print(i)
+    # A bar that shows the progress of the iterations
     """
     if logger.level > logging.INFO:
         return sequence

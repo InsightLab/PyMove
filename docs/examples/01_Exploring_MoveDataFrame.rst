@@ -804,7 +804,7 @@ c. DataFrames
 
 .. parsed-literal::
 
-    {'name': 'to_grid', 'time in seconds': 0.021413803100585938, 'memory': '0.0 B'}
+    {'name': 'to_grid', 'time in seconds': 0.004861116409301758, 'memory': '0.0 B'}
 
 
 
