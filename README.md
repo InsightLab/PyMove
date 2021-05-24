@@ -297,7 +297,7 @@ You can see examples of how to use PyMove [here](https://github.com/InsightLab/P
 
 The library was originally created during the bachelor's thesis of 2 students from the Federal University of Ceará, so you can cite using both works.
 
-```
+```txt
 @mastersthesis{arina2019,
 	title        = {Uma Arquitetura E Implementação Do Módulo De Pré-processamento Para Biblioteca Pymove},
 	author       = {Arina De Jesus Amador Monteiro Sanches},
@@ -318,8 +318,8 @@ The library was originally created during the bachelor's thesis of 2 students fr
 
 ## Publications
 
-- [Uma Arquitetura E Implementação Do Módulo De Pré-processamento Para Biblioteca Pymove](http://repositorio.ufc.br/handle/riufc/58551)
-- [Uma Arquitetura E Implementação Do Módulo De Visualizaçãopara Biblioteca Pymove](http://repositorio.ufc.br/handle/riufc/58550)
+-   [Uma Arquitetura E Implementação Do Módulo De Pré-processamento Para Biblioteca Pymove](http://repositorio.ufc.br/handle/riufc/58551)
+-   [Uma Arquitetura E Implementação Do Módulo De Visualizaçãopara Biblioteca Pymove](http://repositorio.ufc.br/handle/riufc/58550)
 
 ---
 
