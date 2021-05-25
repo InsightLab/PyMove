@@ -32,11 +32,11 @@ def is_number(value: Union[int, float, str]):
     Examples
     --------
     >>> from pymove.utils.math import is_number
-    >>> a,b,c,d = 50,22.5,'11.25','house'
+    >>> a, b, c, d = 50, 22.5, '11.25', 'house'
     >>> print(is_number(a), type(is_number(a)))
     True <class 'bool'>
     >>> print(is_number(b), type(is_number(b)))
-    True <class 'bool'>-
+    True <class 'bool'>
     >>> print(is_number(c), type(is_number(c)))
     True <class 'bool'>
     >>> print(is_number(d), type(is_number(d)))
@@ -71,7 +71,7 @@ def std(values_array: List[float]) -> float:
     Example
     -------
     >>> from pymove.utils.math import std
-    >>> list = [7.8,9.7,6.4,5.6, 10]
+    >>> list = [7.8, 9.7, 6.4, 5.6, 10]
     >>> print(std(list), type(std(list)))
     1.7435595774162693 <class 'float'>
     """
@@ -101,7 +101,7 @@ def avg_std(values_array: List[float]) -> Tuple[float, float]:
     Example
     -------
     >>> from pymove.utils.math import avg_std
-    >>> list = [7.8,9.7,6.4,5.6, 10]
+    >>> list = [7.8, 9.7, 6.4, 5.6, 10]
     >>> print(avg_std(list), type(avg_std(list)))
     1.9493588689617927 <class 'float'>
     """
@@ -126,7 +126,7 @@ def std_sample(values_array: List[float]) -> float:
     Example
     -------
     >>> from pymove.utils.math import std_sample
-    >>> list = [7.8,9.7,6.4,5.6, 10]
+    >>> list = [7.8, 9.7, 6.4, 5.6, 10]
     >>> print(std_sample(list), type(std_sample(list)))
     1.9493588689617927 <class 'float'>
     """
@@ -153,7 +153,7 @@ def avg_std_sample(values_array: List[float]) -> Tuple[float, float]:
     Example
     -------
     >>> from pymove.utils.math import avg_std_sample
-    >>> list = [7.8,9.7,6.4,5.6, 10]
+    >>> list = [7.8, 9.7, 6.4, 5.6, 10]
     >>> print(avg_std_sample(list), type(avg_std_sample(list)))
     (7.9, 1.9493588689617927) <class 'tuple'>
     """
@@ -183,13 +183,16 @@ def arrays_avg(
     Examples
     --------
     >>> from pymove.utils.math import arrays_avg
-    >>> list = [7.8,9.7,6.4,5.6, 10]
-    >>> weights = [0.1,0.3,0.15,0.15,0.3]
+    >>> list = [7.8, 9.7, 6.4, 5.6, 10]
+    >>> weights = [0.1, 0.3, 0.15, 0.15, 0.3]
     >>> print('standard average', arrays_avg(list), type(arrays_avg(list)))
-    standard average 7.9 <class 'float'>
-    >>> print('weighted average: ', arrays_avg(list, weights),
-     type(arrays_avg(list, weights)))
-    weighted average:  1.6979999999999997 <class 'float'>
+    'standard average 7.9 <class 'float'>'
+    >>> print(
+    >>>    'weighted average: ',
+    >>>     arrays_avg(list, weights),
+    >>>     type(arrays_avg(list, weights))
+    >>> )
+    'weighted average:  1.6979999999999997 <class 'float'>'
     """
     n = len(values_array)
 
@@ -231,7 +234,7 @@ def array_stats(values_array: List[float]) -> Tuple[float, float, int]:
     Example
     -------
     >>> from pymove.utils.math import array_stats
-    >>> list = [7.8,9.7,6.4,5.6, 10]
+    >>> list = [7.8, 9.7, 6.4, 5.6, 10]
     >>> print(array_stats(list), type(array_stats(list)))
     (39.5, 327.25, 5) <class 'tuple'>
     """
@@ -270,7 +273,7 @@ def interpolation(x0: float, y0: float, x1: float, y1: float, x: float) -> float
     Example
     -------
     >>> from pymove.utils.math import interpolation
-    >>> x0,y0,x1,y1,x = 2,4,3,6,3.5
+    >>> x0, y0, x1, y1, x = 2, 4, 3, 6, 3.5
     >>> print(interpolation(x0,y0,x1,y1,x), type(interpolation(x0,y0,x1,y1,x)))
     7.0 <class 'float'>
     """
