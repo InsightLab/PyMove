@@ -1,3 +1,5 @@
+import os
+import json
 import numpy as np
 import pandas as pd
 from networkx.classes.digraph import DiGraph
@@ -18,6 +20,8 @@ from pymove.utils.networkx import (
     build_transition_graph_from_df,
     build_transition_graph_from_dict,
     graph_to_dict,
+    save_graph_as_json,
+    read_graph_json
 )
 
 dict_graph = {
@@ -161,3 +165,82 @@ def test_graph_to_dict():
     dict_graph = graph_to_dict(graph)
 
     assert_equal(expected_dict, dict_graph)
+
+
+def test_save_graph_as_json(tmpdir):
+    
+    expected = {
+        'nodes': {
+            'coords': {
+                '2': (3.1234567165374756, 38.12345504760742),
+                '4': (3.1234567165374756, 38.12345504760742),
+                '6': (3.1234567165374756, 38.12345504760742),
+                '8': (3.1234567165374756, 38.12345504760742),
+                '9': (3.1234567165374756, 38.12345504760742)},
+            'datetime': {
+                '2': ['2020-01-01 09:10:15'], '4': ['2020-01-01 09:15:45'],
+                '6': ['2020-01-01 09:25:30'], '8': ['2020-01-01 09:30:17'],
+                '9': ['2020-01-01 09:45:16']},
+            'freq_source': {'2': 1, '4': 0, '6': 0, '8': 0, '9': 0},
+            'freq_target': {'2': 0, '4': 0, '6': 0, '8': 0, '9': 1}},
+         'edges': {
+             '2': {'4': {'weight': 1, 'mean_times': '0 days 00:05:30'}},
+             '4': {'6': {'weight': 1, 'mean_times': '0 days 00:09:45'}},
+             '6': {'8': {'weight': 1, 'mean_times': '0 days 00:04:47'}},
+             '8': {'9': {'weight': 1, 'mean_times': '0 days 00:14:59'}},
+             '9': {}}}
+    
+    d = tmpdir.mkdir('utils')
+    
+    file_write_default = d.join('test_save_graph.json')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+    
+    graph = _transition_graph()
+
+    save_graph_as_json(graph, filename_write_default)
+    
+    saved_graph = read_graph_json(filename_write_default)
+    
+    assert_equal(saved_graph, expected)
+    
+
+def test_read_graph_json(tmpdir):
+    
+    expected = {
+        'nodes': {
+            'coords': {
+                '2': (3.1234567165374756, 38.12345504760742),
+                '4': (3.1234567165374756, 38.12345504760742),
+                '6': (3.1234567165374756, 38.12345504760742),
+                '8': (3.1234567165374756, 38.12345504760742),
+                '9': (3.1234567165374756, 38.12345504760742)},
+            'datetime': {
+                '2': ['2020-01-01 09:10:15'], '4': ['2020-01-01 09:15:45'],
+                '6': ['2020-01-01 09:25:30'], '8': ['2020-01-01 09:30:17'],
+                '9': ['2020-01-01 09:45:16']},
+            'freq_source': {'2': 1, '4': 0, '6': 0, '8': 0, '9': 0},
+            'freq_target': {'2': 0, '4': 0, '6': 0, '8': 0, '9': 1}},
+         'edges': {
+             '2': {'4': {'weight': 1, 'mean_times': '0 days 00:05:30'}},
+             '4': {'6': {'weight': 1, 'mean_times': '0 days 00:09:45'}},
+             '6': {'8': {'weight': 1, 'mean_times': '0 days 00:04:47'}},
+             '8': {'9': {'weight': 1, 'mean_times': '0 days 00:14:59'}},
+             '9': {}}}
+    
+    d = tmpdir.mkdir('utils')
+    
+    file_write_default = d.join('test_read_graph.json')
+    filename_write_default = os.path.join(
+        file_write_default.dirname, file_write_default.basename
+    )
+    
+    graph = _transition_graph()
+    
+    with open(filename_write_default, 'w') as f:
+        json.dump(graph_to_dict(graph), f)
+
+    saved_graph = read_graph_json(filename_write_default)    
+    
+    assert_equal(saved_graph, expected)
