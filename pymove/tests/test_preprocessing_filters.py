@@ -612,101 +612,11 @@ def test_by_tid():
     assert move_df.len() == 2
 
 
-def test_outliers():
-    move_df, cols = _prepare_df_with_distances()
-
-    outliers = filters.outliers(move_data=move_df, jump_coefficient=1)
-    expected = DataFrame(
-        data=[
-            [
-                1,
-                38.984211,
-                115.319389,
-                Timestamp('2008-10-23 05:53:11'),
-                140454.64510608764,
-                140460.97747220137,
-                7.563335999941849,
-            ],
-        ],
-        columns=cols,
-        index=[2],
-    )
-    assert_frame_equal(outliers, expected)
-    assert move_df.len() == 5
-
-    not_outliers = filters.outliers(
-        move_data=move_df, jump_coefficient=1, filter_out=True
-    )
-    expected = DataFrame(
-        data=[
-            [
-                1,
-                39.984093,
-                116.319237,
-                Timestamp('2008-10-23 05:53:05'),
-                nan,
-                13.884481484192932,
-                nan,
-            ],
-            [
-                1,
-                39.9842,
-                116.319321,
-                Timestamp('2008-10-23 05:53:06'),
-                13.884481484192932,
-                140454.64510608764,
-                140440.86267282354,
-            ],
-            [
-                1,
-                39.984222,
-                116.319405,
-                Timestamp('2008-10-23 05:53:16'),
-                140460.97747220137,
-                1.3208180727070074,
-                140461.50100279532,
-            ],
-            [
-                1,
-                39.984219,
-                116.31942,
-                Timestamp('2008-10-23 05:53:21'),
-                1.3208180727070074,
-                nan,
-                nan,
-            ],
-        ],
-        columns=cols,
-        index=[0, 1, 3, 4],
-    )
-    assert_frame_equal(not_outliers, expected)
-    assert move_df.len() == 5
-
-    filters.outliers(move_data=move_df, jump_coefficient=1, inplace=True)
-    expected = DataFrame(
-        data=[
-            [
-                1,
-                38.984211,
-                115.319389,
-                Timestamp('2008-10-23 05:53:11'),
-                140454.64510608764,
-                140460.97747220137,
-                7.563335999941849,
-            ]
-        ],
-        columns=cols,
-        index=[2],
-    )
-    assert_frame_equal(move_df, expected)
-    assert move_df.len() == 1
-
-
 def test_clean_gps_jumps_by_distance():
     move_df, cols = _prepare_df_with_distances()
 
     not_jumps = filters.clean_gps_jumps_by_distance(
-        move_data=move_df, jump_coefficient=1
+        move_data=move_df, jump_coefficient=1, inplace=False
     )
     expected = DataFrame(
         data=[

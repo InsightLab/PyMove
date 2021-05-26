@@ -95,6 +95,7 @@ POLYGON = 'polygon'
 LAT_MEAN = 'lat_mean'
 LON_MEAN = 'lon_mean'
 
+OUTLIER = 'outlier'
 OUT_BBOX = 'out_bbox'
 DEACTIVATED = 'deactivated_signal'
 JUMP = 'gps_jump'

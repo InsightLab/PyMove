@@ -7,6 +7,9 @@ from pymove import MoveDataFrame, semantic
 from pymove.utils.constants import (
     BLOCK,
     DATETIME,
+    DIST_PREV_TO_NEXT,
+    DIST_TO_NEXT,
+    DIST_TO_PREV,
     LATITUDE,
     LONGITUDE,
     SEGMENT_STOP,
@@ -50,6 +53,52 @@ def _default_move_df(data=None):
         datetime=DATETIME,
         traj_id=TRAJ_ID,
     )
+
+
+def _prepare_df_with_distances():
+    move_df = MoveDataFrame(
+        data=[
+            [39.984093, 116.319237, '2008-10-23 05:53:05', 1],
+            [39.984200, 116.319321, '2008-10-23 05:53:06', 1],
+            [38.984211, 115.319389, '2008-10-23 05:53:11', 1],
+            [39.984222, 116.319405, '2008-10-23 05:53:16', 1],
+            [39.984219, 116.319420, '2008-10-23 05:53:21', 1],
+        ],
+        latitude=LATITUDE,
+        longitude=LONGITUDE,
+        datetime=DATETIME,
+    )
+    move_df[DIST_TO_PREV] = [
+        nan,
+        13.884481484192932,
+        140454.64510608764,
+        140460.97747220137,
+        1.3208180727070074,
+    ]
+    move_df[DIST_TO_NEXT] = [
+        13.884481484192932,
+        140454.64510608764,
+        140460.97747220137,
+        1.3208180727070074,
+        nan,
+    ]
+    move_df[DIST_PREV_TO_NEXT] = [
+        nan,
+        140440.86267282354,
+        7.563335999941849,
+        140461.50100279532,
+        nan,
+    ]
+    cols = [
+        'id',
+        'lat',
+        'lon',
+        'datetime',
+        'dist_to_prev',
+        'dist_to_next',
+        'dist_prev_to_next',
+    ]
+    return move_df[cols], cols
 
 
 def test_end_create_operation():
@@ -118,6 +167,52 @@ def test_process_simple_filter():
     assert_frame_equal(move_df, expected)
 
 
+def test_outliers():
+    move_df, cols = _prepare_df_with_distances()
+
+    outliers = semantic.outliers(move_data=move_df, jump_coefficient=1, inplace=False)
+    outliers = outliers[outliers['outlier']]
+    expected = DataFrame(
+        data=[
+            [
+                1,
+                38.984211,
+                115.319389,
+                Timestamp('2008-10-23 05:53:11'),
+                140454.64510608764,
+                140460.97747220137,
+                7.563335999941849,
+                True
+            ],
+        ],
+        columns=cols + ['outlier'],
+        index=[2],
+    )
+    assert_frame_equal(outliers, expected)
+    assert move_df.len() == 5
+
+    semantic.outliers(move_data=move_df, jump_coefficient=1, inplace=True)
+    move_df = move_df[move_df['outlier']]
+    expected = DataFrame(
+        data=[
+            [
+                1,
+                38.984211,
+                115.319389,
+                Timestamp('2008-10-23 05:53:11'),
+                140454.64510608764,
+                140460.97747220137,
+                7.563335999941849,
+                True
+            ]
+        ],
+        columns=cols + ['outlier'],
+        index=[2],
+    )
+    assert_frame_equal(move_df, expected)
+    assert move_df.len() == 1
+
+
 def test_create_or_update_out_of_the_bbox():
     bbox = (39.984217, 116.319236, 39.98471, 116.319865)
     move_df = _default_move_df()
@@ -139,7 +234,7 @@ def test_create_or_update_out_of_the_bbox():
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     )
 
-    semantic.create_or_update_out_of_the_bbox(move_df, bbox)
+    semantic.create_or_update_out_of_the_bbox(move_df, bbox, inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -187,7 +282,8 @@ def test_create_or_update_gps_deactivated_signal():
     assert_frame_equal(new_move_df, expected)
 
     semantic.create_or_update_gps_deactivated_signal(move_df,
-                                                     max_time_between_adj_points=5.0)
+                                                     max_time_between_adj_points=5.0,
+                                                     inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -235,7 +331,8 @@ def test_create_or_update_gps_jump():
 
     assert_frame_equal(new_move_df, expected)
 
-    semantic.create_or_update_gps_jump(move_df, max_dist_between_adj_points=5.0)
+    semantic.create_or_update_gps_jump(move_df, max_dist_between_adj_points=5.0,
+                                       inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -287,7 +384,8 @@ def test_create_or_update_short_trajectory():
 
     assert ('short_traj' not in move_df)
 
-    semantic.create_or_update_short_trajectory(move_df, k_segment_max=4)
+    semantic.create_or_update_short_trajectory(move_df, k_segment_max=4,
+                                               inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -331,7 +429,8 @@ def test_create_or_update_gps_block_signal():
 
     assert BLOCK not in move_df
 
-    semantic.create_or_update_gps_block_signal(move_df, max_time_stop=15)
+    semantic.create_or_update_gps_block_signal(move_df, max_time_stop=15,
+                                               inplace=True)
 
     assert_frame_equal(move_df, expected)
 
@@ -433,6 +532,7 @@ def test_filter_block_signal_by_time():
 
 
 def test_filter_longer_time_to_stop_segment_by_id():
+
     move_df = _default_move_df(list_data_2)
     cols = [
         'segment_stop', 'id', 'lat', 'lon', 'datetime',

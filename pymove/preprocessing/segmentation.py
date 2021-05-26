@@ -336,11 +336,11 @@ def by_dist_time_speed(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
     max_dist_between_adj_points: Optional[float] = 3000,
-    max_time_between_adj_points: Optional[float] = 7200,
+    max_time_between_adj_points: Optional[float] = 900,
     max_speed_between_adj_points: Optional[float] = 50.0,
     drop_single_points: Optional[bool] = True,
     label_new_tid: Optional[Text] = TID_PART,
-    inplace: Optional[bool] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Splits the trajectories into segments based on distance, time and speed.
@@ -355,7 +355,7 @@ def by_dist_time_speed(
         Specify the maximum distance a point should have from
         the previous point, in order not to be dropped, by default 3000
     max_time_between_adj_points : float, optional
-        Specify the maximum travel time between two adjacent points, by default 7200
+        Specify the maximum travel time between two adjacent points, by default 900
     max_speed_between_adj_points : float, optional
         Specify the maximum speed of travel between two adjacent points, by default 50
     drop_single_points : boolean, optional
@@ -366,7 +366,7 @@ def by_dist_time_speed(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to
         contain the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -381,7 +381,7 @@ def by_dist_time_speed(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     logger.debug('\nSplit trajectories')
     logger.debug('...max_dist_between_adj_points: {}'.format(
@@ -415,10 +415,10 @@ def by_dist_time_speed(
 def by_max_dist(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Optional[Text] = TRAJ_ID,
-    max_dist_between_adj_points: Optional[float] = 7200,
+    max_dist_between_adj_points: Optional[float] = 3000,
     drop_single_points: Optional[bool] = True,
     label_new_tid: Optional[Text] = TID_DIST,
-    inplace: Optional[bool] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Segments the trajectories based on distance.
@@ -430,7 +430,7 @@ def by_max_dist(
     label_id : str, optional
          Indicates the label of the id column in the user dataframe, by default TRAJ_ID
     max_dist_between_adj_points : float, optional
-        Specify the maximum dist between two adjacent points, by default 7200
+        Specify the maximum dist between two adjacent points, by default 3000
     drop_single_points : boolean, optional
         If set to True, drops the trajectories with only one point, by default True
     label_new_tid : str, optional
@@ -440,7 +440,7 @@ def by_max_dist(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to
         contain the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -454,7 +454,7 @@ def by_max_dist(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     logger.debug(
         'Split trajectories by max distance between adjacent points: {}'.format(
@@ -485,7 +485,7 @@ def by_max_time(
     max_time_between_adj_points: Optional[float] = 900.0,
     drop_single_points: Optional[bool] = True,
     label_new_tid: Optional[Text] = TID_TIME,
-    inplace: Optional[Text] = True,
+    inplace: Optional[bool] = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Splits the trajectories into segments based on a maximum.
@@ -507,7 +507,7 @@ def by_max_time(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to
         contain the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
 
     Returns
@@ -522,7 +522,7 @@ def by_max_time(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     logger.debug(
         'Split trajectories by max_time_between_adj_points: {}'.format(
@@ -553,7 +553,7 @@ def by_max_speed(
     max_speed_between_adj_points: Optional[float] = 50.0,
     drop_single_points: Optional[bool] = True,
     label_new_tid: Optional[Text] = TID_SPEED,
-    inplace: Optional[bool] = True,
+    inplace: Optional[bool] = False,
 ) -> Union['PandasMoveDataFrame', 'DaskMoveDataFrame']:
     """
     Splits the trajectories into segments based on a maximum speed.
@@ -575,7 +575,7 @@ def by_max_speed(
     inplace : boolean, optional
         if set to true the original dataframe will be altered to
         contain the result of the filtering, otherwise a copy will be returned,
-        by default True
+        by default False
 
     Returns
     -------
@@ -589,7 +589,7 @@ def by_max_speed(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     logger.debug(
         'Split trajectories by max_speed_between_adj_points: {}'.format(

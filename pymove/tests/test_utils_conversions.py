@@ -204,6 +204,7 @@ def test_ms_to_kmh():
 
 def test_kmh_to_ms():
     move_df = _default_move_df()
+    conversions.ms_to_kmh(move_df, inplace=True)
 
     expected = DataFrame(
         data=[
@@ -252,7 +253,6 @@ def test_kmh_to_ms():
                  SPEED_TO_PREV],
         index=[0, 1, 2, 3],
     )
-
     new_move_df = conversions.kmh_to_ms(move_df, inplace=False)
 
     assert_frame_equal(new_move_df, expected)
@@ -330,6 +330,7 @@ def test_meters_to_kilometers():
 
 def test_kilometers_to_meters():
     move_df = _default_move_df()
+    conversions.meters_to_kilometers(move_df, inplace=True)
 
     expected = DataFrame(
         data=[
@@ -456,6 +457,7 @@ def test_seconds_to_minutes():
 
 def test_minute_to_seconds():
     move_df = _default_move_df()
+    conversions.seconds_to_minutes(move_df, inplace=True)
 
     expected = DataFrame(
         data=[
@@ -518,7 +520,7 @@ def test_minute_to_seconds():
 
 def test_minute_to_hours():
     move_df = _default_move_df()
-
+    conversions.seconds_to_minutes(move_df, inplace=True)
     expected = DataFrame(
         data=[
             [
@@ -580,6 +582,7 @@ def test_minute_to_hours():
 
 def test_hours_to_minute():
     move_df = _default_move_df()
+    conversions.seconds_to_hours(move_df, inplace=True)
 
     expected = DataFrame(
         data=[
@@ -704,6 +707,7 @@ def test_seconds_to_hours():
 
 def test_hours_to_seconds():
     move_df = _default_move_df()
+    conversions.seconds_to_hours(move_df, inplace=True)
 
     expected = DataFrame(
         data=[

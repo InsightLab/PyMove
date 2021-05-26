@@ -1,17 +1,6 @@
 """PandasMoveDataFrame class."""
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Text,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Text, Tuple, Union
 
 import numpy as np
 from pandas import DataFrame, DateOffset, Series, Timedelta
@@ -375,7 +364,7 @@ class PandasMoveDataFrame(DataFrame):
 
         meters_by_degree : float, optional
             Represents the corresponding meters of lat by degree,
-            by default lat_meters(-3.8162973555)
+            by default lat_meters(-3.71839)
 
         Returns
         -------
@@ -385,7 +374,7 @@ class PandasMoveDataFrame(DataFrame):
         """
         operation = begin_operation('to_grid')
         if meters_by_degree is None:
-            meters_by_degree = lat_meters(-3.8162973555)
+            meters_by_degree = lat_meters(-3.71839)
         grid_ = Grid(
             data=self, cell_size=cell_size, meters_by_degree=meters_by_degree
         )

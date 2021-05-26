@@ -16,13 +16,6 @@ Imports
     import pymove.utils as utils
     import pymove as pm
 
-Load data
----------
-
-.. code:: ipython3
-
-    move_data = pm.read_csv("geolife_sample.csv")
-
 Conversions
 -----------
 
@@ -155,12 +148,11 @@ To convert Y EPSG:3857 WGS 84/Pseudo-Mercator to latitude, you can use
 
 
 
-To convert values, in ms, in label_speed column to kmh, you can use
-**ms_to_kmh**
-
 .. code:: ipython3
 
-    utils.conversions.ms_to_kmh(move_data)
+    move_data = pm.read_csv("geolife_sample.csv")
+    move_data.generate_dist_time_speed_features()
+    move_data.head()
 
 
 
@@ -169,8 +161,100 @@ To convert values, in ms, in label_speed column to kmh, you can use
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>id</th>
+          <th>lat</th>
+          <th>lon</th>
+          <th>datetime</th>
+          <th>dist_to_prev</th>
+          <th>time_to_prev</th>
+          <th>speed_to_prev</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>1</td>
+          <td>39.984094</td>
+          <td>116.319236</td>
+          <td>2008-10-23 05:53:05</td>
+          <td>NaN</td>
+          <td>NaN</td>
+          <td>NaN</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>1</td>
+          <td>39.984198</td>
+          <td>116.319322</td>
+          <td>2008-10-23 05:53:06</td>
+          <td>13.690153</td>
+          <td>1.0</td>
+          <td>13.690153</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>1</td>
+          <td>39.984224</td>
+          <td>116.319402</td>
+          <td>2008-10-23 05:53:11</td>
+          <td>7.403788</td>
+          <td>5.0</td>
+          <td>1.480758</td>
+        </tr>
+        <tr>
+          <th>3</th>
+          <td>1</td>
+          <td>39.984211</td>
+          <td>116.319389</td>
+          <td>2008-10-23 05:53:16</td>
+          <td>1.821083</td>
+          <td>5.0</td>
+          <td>0.364217</td>
+        </tr>
+        <tr>
+          <th>4</th>
+          <td>1</td>
+          <td>39.984217</td>
+          <td>116.319422</td>
+          <td>2008-10-23 05:53:21</td>
+          <td>2.889671</td>
+          <td>5.0</td>
+          <td>0.577934</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+
+
+To convert values, in ms, in label_speed column to kmh, you can use
+**ms_to_kmh**
+
 .. code:: ipython3
 
+    utils.conversions.ms_to_kmh(move_data, inplace=True)
     move_data.head()
 
 
@@ -267,10 +351,7 @@ To convert values, in kmh, in label_speed column to ms, you can use
 
 .. code:: ipython3
 
-    utils.conversions.kmh_to_ms(move_data)
-
-.. code:: ipython3
-
+    utils.conversions.kmh_to_ms(move_data, inplace=True)
     move_data.head()
 
 
@@ -367,10 +448,7 @@ can use **meters_to_kilometers**
 
 .. code:: ipython3
 
-    utils.conversions.meters_to_kilometers(move_data)
-
-.. code:: ipython3
-
+    utils.conversions.meters_to_kilometers(move_data, inplace=True)
     move_data.head()
 
 
@@ -467,10 +545,7 @@ you can use **kilometers_to_meters**
 
 .. code:: ipython3
 
-    utils.conversions.kilometers_to_meters(move_data)
-
-.. code:: ipython3
-
+    utils.conversions.kilometers_to_meters(move_data, inplace=True)
     move_data.head()
 
 
@@ -567,10 +642,7 @@ can use **seconds_to_minutes**
 
 .. code:: ipython3
 
-    utils.conversions.seconds_to_minutes(move_data)
-
-.. code:: ipython3
-
+    utils.conversions.seconds_to_minutes(move_data, inplace=True)
     move_data.head()
 
 
@@ -667,10 +739,7 @@ can use **minute_to_seconds**
 
 .. code:: ipython3
 
-    utils.conversions.minute_to_seconds(move_data)
-
-.. code:: ipython3
-
+    utils.conversions.minute_to_seconds(move_data, inplace=True)
     move_data.head()
 
 
@@ -767,14 +836,8 @@ To convert in minutes, in label_distance column to hours, you can use
 
 .. code:: ipython3
 
-    utils.conversions.seconds_to_minutes(move_data)
-
-.. code:: ipython3
-
-    utils.conversions.minute_to_hours(move_data)
-
-.. code:: ipython3
-
+    utils.conversions.seconds_to_minutes(move_data, inplace=True)
+    utils.conversions.minute_to_hours(move_data, inplace=True)
     move_data.head()
 
 
@@ -867,14 +930,11 @@ To convert in minutes, in label_distance column to hours, you can use
 
 
 To convert in hours, in label_distance column to minute, you can use
-**hours_to_minute**
+**hours_to_minutes**
 
 .. code:: ipython3
 
-    utils.conversions.hours_to_minute(move_data)
-
-.. code:: ipython3
-
+    utils.conversions.hours_to_minute(move_data, inplace=True)
     move_data.head()
 
 
@@ -971,14 +1031,8 @@ To convert in seconds, in label_distance column to hours, you can use
 
 .. code:: ipython3
 
-    utils.conversions.minute_to_seconds(move_data)
-
-.. code:: ipython3
-
-    utils.conversions.seconds_to_hours(move_data)
-
-.. code:: ipython3
-
+    utils.conversions.minute_to_seconds(move_data, inplace=True)
+    utils.conversions.seconds_to_hours(move_data, inplace=True)
     move_data.head()
 
 
@@ -1075,10 +1129,7 @@ To convert in seconds, in label_distance column to hours, you can use
 
 .. code:: ipython3
 
-    utils.conversions.hours_to_seconds(move_data)
-
-.. code:: ipython3
-
+    utils.conversions.hours_to_seconds(move_data, inplace=True)
     move_data.head()
 
 
@@ -1309,7 +1360,7 @@ To get datetime of now, you can use **now_str**.
 
 .. parsed-literal::
 
-    '2021-04-03 17:52:30'
+    '2021-04-16 22:35:04'
 
 
 
@@ -1405,7 +1456,7 @@ the function is called, you can use **elapsed_time_dt**.
 
 .. parsed-literal::
 
-    3826432350891
+    3827572504825
 
 
 
@@ -1441,6 +1492,22 @@ you can use **haversine**.
 .. parsed-literal::
 
     9.757976024363016
+
+
+
+To calculate the euclidean distance between two points on the earth, you
+can use **euclidean_distance_in_meters**.
+
+.. code:: ipython3
+
+    utils.distances.euclidean_distance_in_meters(-3.797864,-38.501597,-3.797890, -38.501681)
+
+
+
+
+.. parsed-literal::
+
+    9.790407710249447
 
 
 
@@ -1693,9 +1760,9 @@ To flatten a dataframe with dict as row values
           <th>lon</th>
           <th>datetime</th>
           <th>id</th>
-          <th>dict_column_c</th>
           <th>dict_column_a</th>
           <th>dict_column_b</th>
+          <th>dict_column_c</th>
         </tr>
       </thead>
       <tbody>
@@ -1705,8 +1772,8 @@ To flatten a dataframe with dict as row values
           <td>116.319236</td>
           <td>2008-10-23 05:53:05</td>
           <td>1</td>
-          <td>NaN</td>
           <td>1.0</td>
+          <td>NaN</td>
           <td>NaN</td>
         </tr>
         <tr>
@@ -1716,8 +1783,8 @@ To flatten a dataframe with dict as row values
           <td>2008-10-23 05:53:06</td>
           <td>1</td>
           <td>NaN</td>
-          <td>NaN</td>
           <td>2.0</td>
+          <td>NaN</td>
         </tr>
         <tr>
           <th>2</th>
@@ -1725,9 +1792,9 @@ To flatten a dataframe with dict as row values
           <td>116.319402</td>
           <td>2008-10-23 05:53:11</td>
           <td>1</td>
+          <td>NaN</td>
+          <td>NaN</td>
           <td>3.0</td>
-          <td>NaN</td>
-          <td>NaN</td>
         </tr>
       </tbody>
     </table>
@@ -2079,12 +2146,6 @@ By default, the berbosity level is set to ``INFO``
     VBox(children=(HTML(value=''), IntProgress(value=0, max=2)))
 
 
-.. parsed-literal::
-
-    ...Reset index...
-
-
-
 
 
 .. raw:: html
@@ -2376,7 +2437,7 @@ Create a dataframe with the variables with largest memory footpring
         <tr>
           <th>5</th>
           <td>In</td>
-          <td>776.0 B</td>
+          <td>648.0 B</td>
         </tr>
         <tr>
           <th>6</th>
@@ -2385,17 +2446,17 @@ Create a dataframe with the variables with largest memory footpring
         </tr>
         <tr>
           <th>7</th>
-          <td>matplotlib</td>
+          <td>utils</td>
           <td>72.0 B</td>
         </tr>
         <tr>
           <th>8</th>
-          <td>sys</td>
+          <td>pm</td>
           <td>72.0 B</td>
         </tr>
         <tr>
           <th>9</th>
-          <td>os</td>
+          <td>datetime</td>
           <td>72.0 B</td>
         </tr>
       </tbody>

@@ -21,64 +21,6 @@ list_data_test = [
 ]
 
 
-def _prepare_default_df():
-    move_df = MoveDataFrame(
-        data=list_data,
-        latitude=LATITUDE,
-        longitude=LONGITUDE,
-        datetime=DATETIME,
-        traj_id=TRAJ_ID,
-    )
-    cols = ['lat', 'lon', 'datetime', 'id']
-    return move_df, cols
-
-
-def test_create_or_update_datetime_in_format_cyclical():
-    move_df, cols = _prepare_default_df()
-
-    stay_point_detection.create_or_update_datetime_in_format_cyclical(move_df)
-
-    expected = DataFrame(
-        data=[
-            [
-                39.984094,
-                116.319236,
-                Timestamp('2008-10-23 05:53:05'),
-                1,
-                0.979084,
-                0.203456,
-            ],
-            [
-                39.984198,
-                116.319322,
-                Timestamp('2008-10-23 05:53:06'),
-                1,
-                0.979084,
-                0.203456,
-            ],
-            [
-                39.984224,
-                116.319402,
-                Timestamp('2008-10-23 05:53:11'),
-                2,
-                0.979084,
-                0.203456,
-            ],
-            [
-                39.984224,
-                116.319402,
-                Timestamp('2008-10-23 05:53:15'),
-                2,
-                0.979084,
-                0.203456,
-            ],
-        ],
-        columns=cols + ['hour_sin', 'hour_cos'],
-        index=[0, 1, 2, 3],
-    )
-    assert_frame_equal(move_df, expected)
-
-
 def test_create_or_update_move_stop_by_dist_time():
     move_df = MoveDataFrame(
         data=list_data,
@@ -176,7 +118,7 @@ def test_create_or_update_move_and_stop_by_radius():
     ]
 
     stay_point_detection.create_or_update_move_and_stop_by_radius(
-        move_df, radius=4.0
+        move_df, radius=4.0, inplace=True
     )
     expected = DataFrame(
         data=[
