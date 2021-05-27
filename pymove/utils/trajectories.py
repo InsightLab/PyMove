@@ -70,6 +70,17 @@ def read_csv(
     MoveDataFrameAbstract subclass
         Trajectory data
 
+    Examples
+    --------
+    >>> from pymove.utils.trajectories import read_csv
+    >>> move_df = read_csv('...geolife_sample.csv')
+    >>> move_df.head()
+                  lat          lon              datetime  id
+        0   39.984094   116.319236   2008-10-23 05:53:05   1
+        1   39.984198   116.319322	 2008-10-23 05:53:06   1
+        2   39.984224   116.319402	 2008-10-23 05:53:11   1
+        3   39.984211   116.319389	 2008-10-23 05:53:16   1
+        4   39.984217   116.319422	 2008-10-23 05:53:21   1
     """
     data = _read_csv(
         filepath_or_buffer,
@@ -95,6 +106,12 @@ def invert_dict(d: Dict) -> Dict:
     dict
         inverted dict
 
+    Examples
+    --------
+    >>> from pymove.utils.trajectories import invert_dict
+    >>> traj_dict = {'lat':39.984094, 'lon':116.319236}
+    >>> invert_dict(traj_dict)
+    {39.984094: 'lat', 116.319236: 'lon'} <class 'dict'>
     """
     return {v: k for k, v in d.items()}
 
@@ -125,10 +142,10 @@ def flatten_dict(
 
     Examples
     --------
-    >>> d = { 'a': 1, 'b': { 'c': 2, 'd': 3}}
-    >>> flatten_dict(d)
-    { 'a': 1, 'b_c': 2, 'b_d': 3 }
-
+    >>> from pymove.utils.trajectories import flatten_dict
+    >>> traj_dict = {'lat':39.984094, 'lon':116.319236}
+    >>> flatten_dict(traj_dict, 'x')
+    {'x_lat': 39.984094, 'x_lon': 116.319236} <class 'dict'>
     """
     if not isinstance(d, dict):
         return {parent_key: d}
@@ -164,12 +181,28 @@ def flatten_columns(data: DataFrame, columns: List) -> DataFrame:
 
     Examples
     --------
-    >>> d = {'a': 1, 'b': {'c': 2, 'd': 3}}
-    >>>> data = pd.DataFrame({'col1': [1], 'col2': [d]})
-    >>>> flatten_columns(data, ['col2'])
-       col1  col2_b_d  col2_a  col2_b_c
-    0     1         3       1         2
+    >>> from pymove.utils.trajectories import flatten_columns
+    >>> move_df
+                  lat          lon              datetime  id   dict_column
+        0   39.984094   116.319236   2008-10-23 05:53:05   1      {'a': 1}
+        1   39.984198   116.319322	 2008-10-23 05:53:06   1      {'b': 2}
+        2   39.984224   116.319402	 2008-10-23 05:53:11   1      {'c': 3}
+        3   39.984211   116.319389	 2008-10-23 05:53:16   1      {'d': 4}
+        4   39.984217   116.319422	 2008-10-23 05:53:21   1      {'e': 5}
+    >>> flatten_columns(moveDf, columns = 'dict_column')
+                  lat          lon             datetime   id
+        0   39.984094   116.319236  2008-10-23 05:53:05    1
+        1   39.984198   116.319322  2008-10-23 05:53:06    1
+        2   39.984224   116.319402  2008-10-23 05:53:11    1
+        3   39.984211   116.319389  2008-10-23 05:53:16    1
+        4   39.984217   116.319422  2008-10-23 05:53:21    1
 
+            dict_column_b   dict_column_d   dict_column_e   dict_column_a   dict_column_c
+        0             NaN             NaN             NaN             1.0             NaN
+        1             2.0             NaN             NaN             NaN             NaN
+        2             NaN             NaN             NaN             NaN             3.0
+        3             NaN             4.0             NaN             NaN             NaN
+        4             NaN             NaN             5.0             NaN             NaN
     """
     data = data.copy()
     if not isinstance(columns, list):
@@ -218,6 +251,16 @@ def shift(
     ----------
     https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
 
+    Examples
+    --------
+    >>> from pymove.utils.trajectories import shift
+    >>> array = [1,2,3,4,5,6,7]
+    >>> print(shift(array, 1), type(shift(array, 1)))
+    [0 1 2 3 4 5 6] <class 'numpy.ndarray'>
+    >>> print(shift(array, 2), type(shift(array, 2)))
+    [0 0 1 2 3 4 5] <class 'numpy.ndarray'>
+    >>> print(shift(array, 3), type(shift(array, 3)))
+    [0 0 0 1 2 3 4] <class 'numpy.ndarray'>
     """
     result = np.empty_like(arr)
     if fill_value is None:
@@ -254,6 +297,18 @@ def fill_list_with_new_values(original_list: List, new_list_values: List):
     new_list_values : list.
         The list from which elements will be copied
 
+    Returns
+    -------
+    The original list with the content of a secondary list
+
+    Example
+    -------
+    >>> from pymove.utils.trajectories import fill_list_with_new_values
+    >>> original_list = [4,3,2,1,0]
+    >>> new_list = [9,8,7,6,5]
+    >>> fill_list_with_new_values(original_list, new_list)
+    >>> print(original_list, type(original_list))
+    ['oveD'] <class 'numpy.ndarray'>[9, 8, 7, 6, 5] <class 'list'>
     """
     n = len(new_list_values)
     original_list[:n] = new_list_values
@@ -272,6 +327,16 @@ def object_for_array(object_: Text) -> ndarray:
     -------
     array
         object converted to a list
+
+    Examples
+    --------
+    >>> from pymove.utils.trajectories import object_for_array
+    >>> print(object_for_array('lat'), type(object_for_array('lat')))
+    ['a'] <class 'numpy.ndarray'>
+    >>> print(object_for_array('move'), type(object_for_array('move')))
+    ['ov'] <class 'numpy.ndarray'>
+    >>> print(object_for_array('moveDf'), type(object_for_array('moveDf')))
+    ['oveD'] <class 'numpy.ndarray'>
     """
     if object_ is None:
         return object_
@@ -295,6 +360,29 @@ def column_to_array(data: DataFrame, column: Text):
 
     column : str
         Label of data referring to the column for conversion
+
+    Returns
+    -------
+    dataframe
+        Dataframe with the new column...
+
+    Example
+    -------
+    >>> from pymove.utils.trajectories import column_to_array
+    >>> move_df
+                  lat          lon              datetime  id   list_column
+        0   39.984094   116.319236   2008-10-23 05:53:05   1         [1,2]
+        1   39.984198   116.319322	 2008-10-23 05:53:06   1         [3,4]
+        2   39.984224   116.319402	 2008-10-23 05:53:11   1         [5,6]
+        3   39.984211   116.319389	 2008-10-23 05:53:16   1         [7,8]
+        4   39.984217   116.319422	 2008-10-23 05:53:21   1         [9,10]
+    >>> column_to_array(moveDf, column = 'list_column')
+                  lat          lon              datetime  id   list_column
+        0   39.984094   116.319236   2008-10-23 05:53:05   1     [1.0,2.0]
+        1   39.984198   116.319322	 2008-10-23 05:53:06   1     [3.0,4.0]
+        2   39.984224   116.319402	 2008-10-23 05:53:11   1     [5.0,6.0]
+        3   39.984211   116.319389	 2008-10-23 05:53:16   1     [7.0,8.0]
+        4   39.984217   116.319422	 2008-10-23 05:53:21   1     [9.0,10.0]
     """
     data = data.copy()
     if column not in data:
