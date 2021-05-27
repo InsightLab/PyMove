@@ -23,11 +23,6 @@ from pandas import DataFrame
 
 from pymove.utils.log import logger
 
-try:
-    pass
-except ImportError:
-    pass
-
 
 def reduce_mem_usage_automatic(df: DataFrame):
     """
@@ -40,22 +35,20 @@ def reduce_mem_usage_automatic(df: DataFrame):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> import pandas as pd
     >>> from pymove.utils.mem import reduce_mem_usage_automatic
-    >>> df
-                  lat          lon              datetime  id
-        0   39.984094   116.319236   2008-10-23 05:53:05   1
-        1   39.984198   116.319322   2008-10-23 05:53:06   1
-        2   39.984224   116.319402   2008-10-23 05:53:11   1
-        3   39.984211   116.319389   2008-10-23 05:53:16   1
-        4   39.984217   116.319422   2008-10-23 05:53:21   1
-        5   39.984710   116.319865   2008-10-23 05:53:23   1
-        6   39.984674   116.319810   2008-10-23 05:53:28   1
-        7   39.984623   116.319773   2008-10-23 05:53:33   1
-        8   39.984606   116.319732   2008-10-23 05:53:38   1
+    >>> df = pd.DataFrame({'col_1': np.arange(10000, dtype=np.float64)})
+    >>> df.dtytes
+    col_1    float64
+    dtype: object
     >>> reduce_mem_usage_automatic(df)
-    Memory usage of dataframe is 0.00 MB
-    Memory usage after optimization is: 0.00 MB
-    Decreased by 26.0 %
+    'Memory usage of dataframe is 0.08 MB'
+    'Memory usage after optimization is: 0.02 MB'
+    'Decreased by 74.9 %'
+    >>> df.dtytes
+    col_1    float16
+    dtype: object
     """
     start_mem = df.memory_usage().sum() / 1024 ** 2
     logger.info('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
@@ -158,20 +151,12 @@ def total_size(
 
     Examples
     --------
+    >>> import numpy as np
     >>> from pymove.utils.mem import total_size
-    >>> df
-                  lat          lon              datetime  id
-        0   39.984094   116.319236   2008-10-23 05:53:05   1
-        1   39.984198   116.319322   2008-10-23 05:53:06   1
-        2   39.984224   116.319402   2008-10-23 05:53:11   1
-        3   39.984211   116.319389   2008-10-23 05:53:16   1
-        4   39.984217   116.319422   2008-10-23 05:53:21   1
-        5   39.984710   116.319865   2008-10-23 05:53:23   1
-        6   39.984674   116.319810   2008-10-23 05:53:28   1
-        7   39.984623   116.319773   2008-10-23 05:53:33   1
-        8   39.984606   116.319732   2008-10-23 05:53:38   1
-    >>> total_size(df)
-    Size in bytes: 432, Type: <class 'pandas.core.frame.DataFrame'>
+    >>> arr = np.arange(10000, dtype=np.float64)
+    >>> sz = total_size(arr)
+    'Size in bytes: 80104, Type: <class 'numpy.ndarray'>'
+    >>> sz
     432
     """
     if handlers is None:
@@ -232,16 +217,14 @@ def begin_operation(name: Text) -> Dict:
     Examples
     --------
     >>> from pymove.utils.mem import begin_operation
-    >>> print(begin_operation('move_data'), type(begin_operation('move_data')))
-    {'process': psutil.Process(pid=103401, name='python',
-     status='running', started='21:48:11'),
-     'init': 293732352, 'start': 1622082973.8825781, 'name': 'move_data'}
-    <class 'dict'>
-    >>> print(begin_operation('mdf'), type(begin_operation('mdf')))
-    {'process': psutil.Process(pid=103401, name='python',
-     status='running', started='21:48:11'),
-     'init': 293732352, 'start': 1622082973.8850513, 'name': 'mdf'}
-    <class 'dict'>
+    >>> operation = begin_operation('operation')
+    >>> operation
+    {
+        'process': psutil.Process(
+            pid=103401, name='python', status='running', started='21:48:11'
+        ),
+        'init': 293732352, 'start': 1622082973.8825781, 'name': 'operation'
+    }
     """
     process = psutil.Process(os.getpid())
     init = process.memory_info()[0]
@@ -265,15 +248,14 @@ def end_operation(operation: Dict) -> Dict:
 
     Examples
     --------
-    >>> from pymove.utils.mem import end_operation
-    >>> stats = {'process': psutil.Process(pid=103401, name='python',
-     status='running', started='21:48:11'),
-     'init': 293732352,
-     'start': 1622083075.4811873,
-     'name': 'move_data'}
-    >>> print(end_operation(stats), type(end_operation(stats)))
-    {'name': 'move_data', 'time in seconds': 0.0014350414276123047,
-     'memory': '0.0 B'} <class 'dict'>
+    >>> import numpy as np
+    >>> import time
+    >>> from pymove.utils.mem import begin_operation, end_operation
+    >>> operation = begin_operation('create_arr')
+    >>> arr = np.arange(100000, dtype=np.float64)
+    >>> time.sleep(1.2)
+    >>> end_operation(operation)
+    {'name': 'create_arr', 'time in seconds': 1.2022554874420166, 'memory': '752.0 KiB'}
     """
     finish = operation['process'].memory_info()[0]
     last_operation_name = operation['name']
@@ -305,8 +287,10 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
     Examples
     --------
     >>> from pymove.utils.mem import sizeof_fmt
-    >>> print(sizeof_fmt(6.64,'MB'), type(sizeof_fmt(6.64,'MB')))
-    6.6 MB <class 'str'>
+    >>> sizeof_fmt(1024)
+    1.0 KiB
+    >>> sizeof_fmt(2e6)
+    1.9 MiB
     """
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(mem_usage) < 1024.0:
@@ -316,15 +300,15 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
 
 
 def top_mem_vars(
-    variables: Optional[Callable] = None, n: Optional[int] = 10, hide_private=True
+    variables: Callable, n: Optional[int] = 10, hide_private=True
 ) -> DataFrame:
     """
     Shows the sizes of the active variables.
 
     Parameters
     ----------
-    variables: locals() or globals(), optional
-        Whether to shows local or global variables, by default globals()
+    variables: locals() or globals()
+        Whether to shows local or global variables
     n: int, optional
         number of variables to show, by default
     hide_private: bool, optional
@@ -336,23 +320,18 @@ def top_mem_vars(
         dataframe with variables names and sizes
     Examples
     --------
+    >>> import numpy as np
     >>> from pymove.utils.mem import top_mem_vars
-    >>> print(top_mem_vars(globals()), type(top_mem_vars(globals())))
-                                   var       mem
-        0                          Out   1.1 KiB
-        1                           In   776.0 B
-        2                          df2   432.0 B
-        3                           df   304.0 B
-        4                        stats   232.0 B
-        5   reduce_mem_usage_automatic   136.0 B
-        6                   total_size   136.0 B
-        7              begin_operation   136.0 B
-        8                end_operation   136.0 B
-        9                   sizeof_fmt   136.0 B
-    <class 'pandas.core.frame.DataFrame'>
+    >>> arr = np.arange(100000, dtype=np.float64)
+    >>> long_string = 'Hello World!' * 100
+    >>> top_mem_vars(locals())
+                var        mem
+    0           arr  781.4 KiB
+    1   long_string    1.2 KiB
+    2         local    416.0 B
+    3  top_mem_vars    136.0 B
+    4            np     72.0 B
     """
-    if variables is None:
-        variables = globals()
     vars_ = ((name, getsizeof(value)) for name, value in variables.items())
     if hide_private:
         vars_ = filter(lambda x: not x[0].startswith('_'), vars_)
