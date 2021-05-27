@@ -23,11 +23,6 @@ from pandas import DataFrame
 
 from pymove.utils.log import logger
 
-try:
-    pass
-except ImportError:
-    pass
-
 
 def reduce_mem_usage_automatic(df: DataFrame):
     """
@@ -38,6 +33,22 @@ def reduce_mem_usage_automatic(df: DataFrame):
     df : dataframe
         The input data to which the operation will be performed.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from pymove.utils.mem import reduce_mem_usage_automatic
+    >>> df = pd.DataFrame({'col_1': np.arange(10000, dtype=np.float64)})
+    >>> df.dtytes
+    col_1    float64
+    dtype: object
+    >>> reduce_mem_usage_automatic(df)
+    'Memory usage of dataframe is 0.08 MB'
+    'Memory usage after optimization is: 0.02 MB'
+    'Decreased by 74.9 %'
+    >>> df.dtytes
+    col_1    float16
+    dtype: object
     """
     start_mem = df.memory_usage().sum() / 1024 ** 2
     logger.info('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
@@ -138,6 +149,15 @@ def total_size(
     float
         The memory used by the given object
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from pymove.utils.mem import total_size
+    >>> arr = np.arange(10000, dtype=np.float64)
+    >>> sz = total_size(arr)
+    'Size in bytes: 80104, Type: <class 'numpy.ndarray'>'
+    >>> sz
+    432
     """
     if handlers is None:
         handlers = {}
@@ -194,7 +214,17 @@ def begin_operation(name: Text) -> Dict:
     -------
     dict
         dictionary with the operation stats
-
+    Examples
+    --------
+    >>> from pymove.utils.mem import begin_operation
+    >>> operation = begin_operation('operation')
+    >>> operation
+    {
+        'process': psutil.Process(
+            pid=103401, name='python', status='running', started='21:48:11'
+        ),
+        'init': 293732352, 'start': 1622082973.8825781, 'name': 'operation'
+    }
     """
     process = psutil.Process(os.getpid())
     init = process.memory_info()[0]
@@ -216,6 +246,16 @@ def end_operation(operation: Dict) -> Dict:
     dict
         dictionary with the operation execution stats
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import time
+    >>> from pymove.utils.mem import begin_operation, end_operation
+    >>> operation = begin_operation('create_arr')
+    >>> arr = np.arange(100000, dtype=np.float64)
+    >>> time.sleep(1.2)
+    >>> end_operation(operation)
+    {'name': 'create_arr', 'time in seconds': 1.2022554874420166, 'memory': '752.0 KiB'}
     """
     finish = operation['process'].memory_info()[0]
     last_operation_name = operation['name']
@@ -244,7 +284,13 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
     -------
     str
         A string of the memory usage in a more readable format
-
+    Examples
+    --------
+    >>> from pymove.utils.mem import sizeof_fmt
+    >>> sizeof_fmt(1024)
+    1.0 KiB
+    >>> sizeof_fmt(2e6)
+    1.9 MiB
     """
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(mem_usage) < 1024.0:
@@ -254,15 +300,15 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
 
 
 def top_mem_vars(
-    variables: Optional[Callable] = None, n: Optional[int] = 10, hide_private=True
+    variables: Callable, n: Optional[int] = 10, hide_private=True
 ) -> DataFrame:
     """
     Shows the sizes of the active variables.
 
     Parameters
     ----------
-    variables: locals() or globals(), optional
-        Whether to shows local or global variables, by default globals()
+    variables: locals() or globals()
+        Whether to shows local or global variables
     n: int, optional
         number of variables to show, by default
     hide_private: bool, optional
@@ -272,10 +318,20 @@ def top_mem_vars(
     -------
     DataFrame
         dataframe with variables names and sizes
-
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from pymove.utils.mem import top_mem_vars
+    >>> arr = np.arange(100000, dtype=np.float64)
+    >>> long_string = 'Hello World!' * 100
+    >>> top_mem_vars(locals())
+                var        mem
+    0           arr  781.4 KiB
+    1   long_string    1.2 KiB
+    2         local    416.0 B
+    3  top_mem_vars    136.0 B
+    4            np     72.0 B
     """
-    if variables is None:
-        variables = globals()
     vars_ = ((name, getsizeof(value)) for name, value in variables.items())
     if hide_private:
         vars_ = filter(lambda x: not x[0].startswith('_'), vars_)
