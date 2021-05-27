@@ -3,7 +3,7 @@ help:
 	@echo " - dev      : install dev environment"
 	@echo " - clean    : clean temporary folders and files"
 	@echo " - lint     : checks code style"
-  @echo " - test     : runs all unit tests"
+	@echo " - test     : runs all unit tests"
 	@echo " - coverage : checks code coverage"
 	@echo " - docs     : creates documentation in html"
 
