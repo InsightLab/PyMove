@@ -38,6 +38,24 @@ def reduce_mem_usage_automatic(df: DataFrame):
     df : dataframe
         The input data to which the operation will be performed.
 
+    Examples
+    --------
+    >>> from pymove.utils.mem import reduce_mem_usage_automatic
+    >>> df
+                  lat          lon              datetime  id
+        0   39.984094   116.319236   2008-10-23 05:53:05   1
+        1   39.984198   116.319322   2008-10-23 05:53:06   1
+        2   39.984224   116.319402   2008-10-23 05:53:11   1
+        3   39.984211   116.319389   2008-10-23 05:53:16   1
+        4   39.984217   116.319422   2008-10-23 05:53:21   1
+        5   39.984710   116.319865   2008-10-23 05:53:23   1
+        6   39.984674   116.319810   2008-10-23 05:53:28   1
+        7   39.984623   116.319773   2008-10-23 05:53:33   1
+        8   39.984606   116.319732   2008-10-23 05:53:38   1
+    >>> reduce_mem_usage_automatic(df)
+    Memory usage of dataframe is 0.00 MB
+    Memory usage after optimization is: 0.00 MB
+    Decreased by 26.0 %
     """
     start_mem = df.memory_usage().sum() / 1024 ** 2
     logger.info('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
@@ -138,6 +156,23 @@ def total_size(
     float
         The memory used by the given object
 
+    Examples
+    --------
+    >>> from pymove.utils.mem import total_size
+    >>> df
+                  lat          lon              datetime  id
+        0   39.984094   116.319236   2008-10-23 05:53:05   1
+        1   39.984198   116.319322   2008-10-23 05:53:06   1
+        2   39.984224   116.319402   2008-10-23 05:53:11   1
+        3   39.984211   116.319389   2008-10-23 05:53:16   1
+        4   39.984217   116.319422   2008-10-23 05:53:21   1
+        5   39.984710   116.319865   2008-10-23 05:53:23   1
+        6   39.984674   116.319810   2008-10-23 05:53:28   1
+        7   39.984623   116.319773   2008-10-23 05:53:33   1
+        8   39.984606   116.319732   2008-10-23 05:53:38   1
+    >>> total_size(df)
+    Size in bytes: 432, Type: <class 'pandas.core.frame.DataFrame'>
+    432
     """
     if handlers is None:
         handlers = {}
@@ -194,7 +229,19 @@ def begin_operation(name: Text) -> Dict:
     -------
     dict
         dictionary with the operation stats
-
+    Examples
+    --------
+    >>> from pymove.utils.mem import begin_operation
+    >>> print(begin_operation('move_data'), type(begin_operation('move_data')))
+    {'process': psutil.Process(pid=103401, name='python',
+     status='running', started='21:48:11'),
+     'init': 293732352, 'start': 1622082973.8825781, 'name': 'move_data'}
+    <class 'dict'>
+    >>> print(begin_operation('mdf'), type(begin_operation('mdf')))
+    {'process': psutil.Process(pid=103401, name='python',
+     status='running', started='21:48:11'),
+     'init': 293732352, 'start': 1622082973.8850513, 'name': 'mdf'}
+    <class 'dict'>
     """
     process = psutil.Process(os.getpid())
     init = process.memory_info()[0]
@@ -216,6 +263,17 @@ def end_operation(operation: Dict) -> Dict:
     dict
         dictionary with the operation execution stats
 
+    Examples
+    --------
+    >>> from pymove.utils.mem import end_operation
+    >>> stats = {'process': psutil.Process(pid=103401, name='python',
+     status='running', started='21:48:11'),
+     'init': 293732352,
+     'start': 1622083075.4811873,
+     'name': 'move_data'}
+    >>> print(end_operation(stats), type(end_operation(stats)))
+    {'name': 'move_data', 'time in seconds': 0.0014350414276123047,
+     'memory': '0.0 B'} <class 'dict'>
     """
     finish = operation['process'].memory_info()[0]
     last_operation_name = operation['name']
@@ -244,7 +302,11 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
     -------
     str
         A string of the memory usage in a more readable format
-
+    Examples
+    --------
+    >>> from pymove.utils.mem import sizeof_fmt
+    >>> print(sizeof_fmt(6.64,'MB'), type(sizeof_fmt(6.64,'MB')))
+    6.6 MB <class 'str'>
     """
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(mem_usage) < 1024.0:
@@ -272,7 +334,22 @@ def top_mem_vars(
     -------
     DataFrame
         dataframe with variables names and sizes
-
+    Examples
+    --------
+    >>> from pymove.utils.mem import top_mem_vars
+    >>> print(top_mem_vars(globals()), type(top_mem_vars(globals())))
+                                   var       mem
+        0                          Out   1.1 KiB
+        1                           In   776.0 B
+        2                          df2   432.0 B
+        3                           df   304.0 B
+        4                        stats   232.0 B
+        5   reduce_mem_usage_automatic   136.0 B
+        6                   total_size   136.0 B
+        7              begin_operation   136.0 B
+        8                end_operation   136.0 B
+        9                   sizeof_fmt   136.0 B
+    <class 'pandas.core.frame.DataFrame'>
     """
     if variables is None:
         variables = globals()
