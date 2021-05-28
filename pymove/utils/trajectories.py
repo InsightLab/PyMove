@@ -73,7 +73,7 @@ def read_csv(
     Examples
     --------
     >>> from pymove.utils.trajectories import read_csv
-    >>> move_df = read_csv('...geolife_sample.csv')
+    >>> move_df = read_csv('geolife_sample.csv')
     >>> move_df.head()
                   lat          lon              datetime  id
         0   39.984094   116.319236   2008-10-23 05:53:05   1
@@ -109,9 +109,9 @@ def invert_dict(d: Dict) -> Dict:
     Examples
     --------
     >>> from pymove.utils.trajectories import invert_dict
-    >>> traj_dict = {'lat':39.984094, 'lon':116.319236}
+    >>> traj_dict = {'a': 1, 'b': 2}
     >>> invert_dict(traj_dict)
-    {39.984094: 'lat', 116.319236: 'lon'} <class 'dict'>
+    {1: 'a, 2: 'b}
     """
     return {v: k for k, v in d.items()}
 
@@ -143,9 +143,9 @@ def flatten_dict(
     Examples
     --------
     >>> from pymove.utils.trajectories import flatten_dict
-    >>> traj_dict = {'lat':39.984094, 'lon':116.319236}
+    >>> d = {'a': 1, 'b': {'c': 2, 'd': 3}}
     >>> flatten_dict(traj_dict, 'x')
-    {'x_lat': 39.984094, 'x_lon': 116.319236} <class 'dict'>
+    {'x_a': 1, 'x_b_c': 2, 'x_b_d': 3}
     """
     if not isinstance(d, dict):
         return {parent_key: d}
@@ -257,10 +257,10 @@ def shift(
     >>> array = [1,2,3,4,5,6,7]
     >>> print(shift(array, 1), type(shift(array, 1)))
     [0 1 2 3 4 5 6] <class 'numpy.ndarray'>
-    >>> print(shift(array, 2), type(shift(array, 2)))
-    [0 0 1 2 3 4 5] <class 'numpy.ndarray'>
-    >>> print(shift(array, 3), type(shift(array, 3)))
-    [0 0 0 1 2 3 4] <class 'numpy.ndarray'>
+    >>> print(shift(array, 0), type(shift(array, 0)))
+    [1, 2, 3, 4, 5, 6, 7] <class 'list'>
+    >>> print(shift(array, -1), type(shift(array, -1)))
+    [2 3 4 5 6 7 0] <class 'numpy.ndarray'>
     """
     result = np.empty_like(arr)
     if fill_value is None:
@@ -304,11 +304,10 @@ def fill_list_with_new_values(original_list: List, new_list_values: List):
     Example
     -------
     >>> from pymove.utils.trajectories import fill_list_with_new_values
-    >>> original_list = [4,3,2,1,0]
-    >>> new_list = [9,8,7,6,5]
-    >>> fill_list_with_new_values(original_list, new_list)
-    >>> print(original_list, type(original_list))
-    ['oveD'] <class 'numpy.ndarray'>[9, 8, 7, 6, 5] <class 'list'>
+    >>> lt = [1, 2, 3, 4]
+    >>> fill_list_with_new_values(lt, ['a','b'])
+    >>> print(lt, type(lt))
+    ['a', 'b', 3, 4] <class 'list'>
     """
     n = len(new_list_values)
     original_list[:n] = new_list_values
@@ -331,12 +330,11 @@ def object_for_array(object_: Text) -> ndarray:
     Examples
     --------
     >>> from pymove.utils.trajectories import object_for_array
-    >>> print(object_for_array('lat'), type(object_for_array('lat')))
-    ['a'] <class 'numpy.ndarray'>
-    >>> print(object_for_array('move'), type(object_for_array('move')))
-    ['ov'] <class 'numpy.ndarray'>
-    >>> print(object_for_array('moveDf'), type(object_for_array('moveDf')))
-    ['oveD'] <class 'numpy.ndarray'>
+    >>> list_str = '[1,2,3,4,5]'
+    >>> object_for_array(list_str)
+    array([1., 2., 3., 4., 5.], dtype=float32)
+    >>> print(type(object_for_array(list_str)))
+    <class 'numpy.ndarray'>
     """
     if object_ is None:
         return object_
@@ -364,7 +362,7 @@ def column_to_array(data: DataFrame, column: Text):
     Returns
     -------
     dataframe
-        Dataframe with the new column...
+        Dataframe with the selected column converted to list
 
     Example
     -------
