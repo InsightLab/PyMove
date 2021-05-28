@@ -144,8 +144,8 @@ def flatten_dict(
     --------
     >>> from pymove.utils.trajectories import flatten_dict
     >>> d = {'a': 1, 'b': {'c': 2, 'd': 3}}
-    >>> d
-    {'a': 1, 'b': {'c': 2, 'd': 3}}
+    >>> flatten_dict(d)
+    {'a': 1, 'b_c': 2, 'b_d': 3}
     """
     if not isinstance(d, dict):
         return {parent_key: d}
