@@ -36,7 +36,7 @@ def read_csv(
     type_: Optional[Text] = TYPE_PANDAS,
     n_partitions: Optional[int] = 1,
     **kwargs
-):
+) -> MoveDataFrame:
     """
     Reads a `csv` file and structures the data.
 
@@ -349,7 +349,7 @@ def object_for_array(object_: Text) -> ndarray:
         return conv.astype('object_')
 
 
-def column_to_array(data: DataFrame, column: Text):
+def column_to_array(data: DataFrame, column: Text) -> DataFrame:
     """
     Transforms all columns values to list.
 
@@ -377,12 +377,12 @@ def column_to_array(data: DataFrame, column: Text):
         3   39.984211   116.319389	 2008-10-23 05:53:16   1         [7,8]
         4   39.984217   116.319422	 2008-10-23 05:53:21   1         [9,10]
     >>> column_to_array(moveDf, column = 'list_column')
-                  lat          lon              datetime  id   list_column
-        0   39.984094   116.319236   2008-10-23 05:53:05   1     [1.0,2.0]
-        1   39.984198   116.319322	 2008-10-23 05:53:06   1     [3.0,4.0]
-        2   39.984224   116.319402	 2008-10-23 05:53:11   1     [5.0,6.0]
-        3   39.984211   116.319389	 2008-10-23 05:53:16   1     [7.0,8.0]
-        4   39.984217   116.319422	 2008-10-23 05:53:21   1     [9.0,10.0]
+              lat          lon              datetime  id    list_column
+    0   39.984094   116.319236   2008-10-23 05:53:05   1      [1.0,2.0]
+    1   39.984198   116.319322	 2008-10-23 05:53:06   1      [3.0,4.0]
+    2   39.984224   116.319402	 2008-10-23 05:53:11   1      [5.0,6.0]
+    3   39.984211   116.319389	 2008-10-23 05:53:16   1      [7.0,8.0]
+    4   39.984217   116.319422	 2008-10-23 05:53:21   1     [9.0,10.0]
     """
     data = data.copy()
     if column not in data:
