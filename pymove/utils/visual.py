@@ -146,6 +146,14 @@ def generate_color() -> Text:
     Returns
     -------
         Random HEX color
+
+    Examples
+    --------
+    >>> from pymove.utils.visual import  generate_color
+    >>> print(generate_color(), type(generate_color()))
+    #E0FFFF <class 'str'>
+    >>> print(generate_color(), type(generate_color()))
+    #808000 <class 'str'>
     """
     return COLORS[randint(0, len(COLORS))]
 
@@ -167,9 +175,11 @@ def rgb(rgb_colors: Tuple[float, float, float]) -> Tuple[int, int, int]:
 
     Examples
     --------
-    >>> from pymove.visualization.visualization import rgb
-    >>> rgb([0.6,0.2,0.2])
-        (51, 51, 153)
+    >>> from pymove.utils.visual import  rgb
+    >>> print(rgb((0.1,0.2,0.7)), type(rgb((0.1,0.2,0.7))))
+    (51, 178, 25) <class 'tuple'>
+    >>> print(rgb((0.5,0.4,0.1)), type(rgb((0.5,0.4,0.1))))
+    (102, 25, 127) <class 'tuple'>
     """
     blue = rgb_colors[0]
     red = rgb_colors[1]
@@ -194,9 +204,11 @@ def hex_rgb(rgb_colors: Tuple[float, float, float]) -> Text:
 
     Examples
     --------
-    >>> from pymove.visualization.visualization import hex_rgb
-    >>> hex_rgb([0.6,0.2,0.2])
-    '#333399'
+    >>> from pymove.utils.visual import hex_rgb
+    >>> print(hex_rgb((0.1,0.2,0.7)), type(hex_rgb((0.1,0.2,0.7))))
+    #33B219 <class 'str'>
+    >>> print(hex_rgb((0.5,0.4,0.1)), type(hex_rgb((0.5,0.4,0.1))))
+    #66197F <class 'str'>
     """
     return '#%02X%02X%02X' % rgb(rgb_colors)
 
@@ -216,6 +228,16 @@ def cmap_hex_color(cmap: ListedColormap, i: int) -> Text:
     -------
     str
         Represents corresponding hex str
+
+    Examples
+    --------
+    >>> from pymove.utils.visual import  cmap_hex_color
+    >>> # import matplotlib.pyplot as plt
+    >>> # jet = plt.get_cmap('jet') // It comand generates a Linear Segmented Colormap
+    >>> print(cmap_hex_color(jet,0), type(cmap_hex_color(jet,0)))
+    #000080 <class 'str'>
+    >>> print(cmap_hex_color(jet,1), type(cmap_hex_color(jet,1)))
+    #000084 <class 'str'>
     """
     return rgb2hex(cmap(i))
 
@@ -233,6 +255,13 @@ def get_cmap(cmap: Text) -> Colormap:
     -------
     Colormap
         matplotlib colormap
+
+    Examples
+    --------
+    >>> from pymove.utils.visual import  get_cmap
+    >>> print(get_cmap('Greys'), type(get_cmap('Greys')))
+    <matplotlib.colors.LinearSegmentedColormap object at 0x7f743fc04bb0>
+     <class 'matplotlib.colors.LinearSegmentedColormap'>
     """
     return _get_cmap(cmap)
 
@@ -252,6 +281,21 @@ def save_wkt(
     label_id : str
         Represents column name of trajectory id
 
+    Returns
+    -------
+        File: A file.wkt that contains geometric points that build a map visualization
+
+    Examples
+    --------
+    >>> from pymove.utils.visual import save_wkt
+    >>> df.head()
+              lat          lon              datetime  id
+    0   39.984094   116.319236   2008-10-23 05:53:05   1
+    1   39.984198   116.319322   2008-10-23 05:53:06   1
+    2   39.984224   116.319402   2008-10-23 05:53:11   1
+    3   39.984211   116.319389   2008-10-23 05:53:16   1
+    4   39.984217   116.319422   2008-10-23 05:53:21   1
+    >>> save_wkt(df, 'test', 'id')
     """
     str_ = '%s;linestring\n' % label_id
     ids = move_data[label_id].unique()
