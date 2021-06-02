@@ -623,11 +623,11 @@ def _calc_time_threshold(seg_mean: float, seg_std: float) -> float:
     Examples
     --------
     >>> from pymove.utils.datetime import _calc_time_threshold
-    >>> print(_calc_time_threshold(12.3,2.1))
+    >>> print(_calc_time_threshold(12.3, 2.1))
     14.4
-    >>> print(_calc_time_threshold(1,1.5))
+    >>> print(_calc_time_threshold(1, 1.5))
     2.5
-    >>> print(_calc_time_threshold(-2,2))
+    >>> print(_calc_time_threshold(-2, 2))
     0.0
     """
     threshold = seg_std + seg_mean
