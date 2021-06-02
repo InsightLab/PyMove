@@ -234,10 +234,10 @@ def cmap_hex_color(cmap: ListedColormap, i: int) -> Text:
     >>> from pymove.utils.visual import  cmap_hex_color
     >>> # import matplotlib.pyplot as plt
     >>> # jet = plt.get_cmap('jet') // This comand generates a Linear Segmented Colormap
-    >>> print(cmap_hex_color(jet,0), type(cmap_hex_color(jet,0)))
-    '#000080' <class 'str'>
-    >>> print(cmap_hex_color(jet,1), type(cmap_hex_color(jet,1)))
-    '#000084' <class 'str'>
+    >>> print(cmap_hex_color(jet,0))
+    '#000080'
+    >>> print(cmap_hex_color(jet,1))
+    '#000084'
     """
     return rgb2hex(cmap(i))
 
