@@ -149,11 +149,11 @@ def generate_color() -> Text:
 
     Examples
     --------
-    >>> from pymove.utils.visual import  generate_color
+    >>> from pymove.utils.visual import generate_color
     >>> print(generate_color(), type(generate_color()))
-    #E0FFFF <class 'str'>
+    '#E0FFFF' <class 'str'>
     >>> print(generate_color(), type(generate_color()))
-    #808000 <class 'str'>
+    '#808000' <class 'str'>
     """
     return COLORS[randint(0, len(COLORS))]
 
@@ -175,10 +175,10 @@ def rgb(rgb_colors: Tuple[float, float, float]) -> Tuple[int, int, int]:
 
     Examples
     --------
-    >>> from pymove.utils.visual import  rgb
-    >>> print(rgb((0.1,0.2,0.7)), type(rgb((0.1,0.2,0.7))))
+    >>> from pymove.utils.visual import rgb
+    >>> print(rgb((0.1, 0.2, 0.7)), type(rgb((0.1, 0.2, 0.7))))
     (51, 178, 25) <class 'tuple'>
-    >>> print(rgb((0.5,0.4,0.1)), type(rgb((0.5,0.4,0.1))))
+    >>> print(rgb((0.5, 0.4, 0.1)), type(rgb((0.5, 0.4, 0.1))))
     (102, 25, 127) <class 'tuple'>
     """
     blue = rgb_colors[0]
@@ -205,10 +205,10 @@ def hex_rgb(rgb_colors: Tuple[float, float, float]) -> Text:
     Examples
     --------
     >>> from pymove.utils.visual import hex_rgb
-    >>> print(hex_rgb((0.1,0.2,0.7)), type(hex_rgb((0.1,0.2,0.7))))
-    #33B219 <class 'str'>
-    >>> print(hex_rgb((0.5,0.4,0.1)), type(hex_rgb((0.5,0.4,0.1))))
-    #66197F <class 'str'>
+    >>> print(hex_rgb((0.1, 0.2, 0.7)), type(hex_rgb((0.1, 0.2, 0.7))))
+    '#33B219' <class 'str'>
+    >>> print(hex_rgb((0.5, 0.4, 0.1)), type(hex_rgb((0.5, 0.4, 0.1))))
+    '#66197F' <class 'str'>
     """
     return '#%02X%02X%02X' % rgb(rgb_colors)
 
@@ -233,11 +233,11 @@ def cmap_hex_color(cmap: ListedColormap, i: int) -> Text:
     --------
     >>> from pymove.utils.visual import  cmap_hex_color
     >>> # import matplotlib.pyplot as plt
-    >>> # jet = plt.get_cmap('jet') // It comand generates a Linear Segmented Colormap
+    >>> # jet = plt.get_cmap('jet') // This comand generates a Linear Segmented Colormap
     >>> print(cmap_hex_color(jet,0), type(cmap_hex_color(jet,0)))
-    #000080 <class 'str'>
+    '#000080' <class 'str'>
     >>> print(cmap_hex_color(jet,1), type(cmap_hex_color(jet,1)))
-    #000084 <class 'str'>
+    '#000084' <class 'str'>
     """
     return rgb2hex(cmap(i))
 
@@ -295,7 +295,7 @@ def save_wkt(
     2   39.984224   116.319402   2008-10-23 05:53:11   1
     3   39.984211   116.319389   2008-10-23 05:53:16   1
     4   39.984217   116.319422   2008-10-23 05:53:21   1
-    >>> save_wkt(df, 'test', 'id')
+    >>> save_wkt(df, 'test.wkt', 'id')
     """
     str_ = '%s;linestring\n' % label_id
     ids = move_data[label_id].unique()
