@@ -3,22 +3,21 @@ Query operations.
 
 range_query,
 knn_query,
-query_all_points_by_range, 
+query_all_points_by_range,
 
 """
 
+from datetime import timedelta
 from typing import Optional, Text
 
 import numpy as np
 import pandas as pd
+from IPython.display import clear_output
 from pandas import DataFrame
 
 from pymove.utils import distances
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, MEDP, MEDT, TRAJ_ID
 from pymove.utils.log import logger, progress_bar
-
-from datetime import timedelta
-from IPython.display import clear_output
 
 
 def range_query(
@@ -185,10 +184,12 @@ def knn_query(
 
 def _datetime_filter(row, move_df, minimum_distance):
     """
+    Returns all the points of the DataFrame which are in a temporal distance.
+
     Given a row referencing to a point, a DataFrame with
     multiple points and a minimum distance, it returns
     all the points of the DataFrame which are in a temporal
-    distance equal or smaller than the minimum distance 
+    distance equal or smaller than the minimum distance
     parameter.
 
     Parameters
@@ -207,25 +208,30 @@ def _datetime_filter(row, move_df, minimum_distance):
         a temporal distance equal or smaller than the minimum
         distance parameter.
     """
-    datetime = row['datetime'];
-    move_df['temporal_distance'] = (move_df['datetime'] - datetime).abs();
-    filtered = move_df[(move_df['temporal_distance'] < minimum_distance) & (move_df['temporal_distance'] > -minimum_distance)];
-    
+    datetime = row['datetime']
+    move_df['temporal_distance'] = (move_df['datetime'] - datetime).abs()
+    filtered = move_df[
+        (move_df['temporal_distance'] < minimum_distance)
+        & (move_df['temporal_distance'] > -minimum_distance)
+    ]
+
     if (filtered.shape[0] > 0):
         filtered['target_id'] = row['id']
         filtered['target_lat'] = row['lat']
         filtered['target_lon'] = row['lon']
         filtered['target_datetime'] = row['datetime']
-        
+
     return filtered
 
 
 def _meters_filter(row, move_df, minimum_distance):
     """
+    Returns all the points of the DataFrame which are in a spatial distance.
+
     Given a row referencing to a point, a DataFrame with
     multiple points and a minimum distance, it returns
     all the points of the DataFrame which are in a spatial
-    distance (in meters) equal or smaller than the minimum distance 
+    distance (in meters) equal or smaller than the minimum distance
     parameter.
 
     Parameters
@@ -236,8 +242,9 @@ def _meters_filter(row, move_df, minimum_distance):
         The input trajectory data.
     minimum_distance: float
         the minimum spatial distance between the points in meters.
+
     Returns
-    ------- 
+    -------
     DataFrame
         dataframe with all the points of move_df which are in
         a spatial distance equal or smaller than the minimum
@@ -245,22 +252,32 @@ def _meters_filter(row, move_df, minimum_distance):
     """
     lat = row['lat']
     lon = row['lon']
-    move_df['spatial_distance'] = distances.euclidean_distance_in_meters(lat1=lat, lon1=lon, lat2=move_df['lat'], lon2=move_df['lon'])
+    move_df['spatial_distance'] = distances.euclidean_distance_in_meters(
+        lat1=lat, lon1=lon, lat2=move_df['lat'], lon2=move_df['lon']
+    )
     filtered = move_df[move_df['spatial_distance'] < minimum_distance]
-    
+
     if (filtered.shape[0] > 0):
         filtered['target_id'] = row['id']
         filtered['target_lat'] = row['lat']
         filtered['target_lon'] = row['lon']
         filtered['target_datetime'] = row['datetime']
-    
+
     return filtered
 
 
-def query_all_points_by_range(traj1, move_df, minimum_meters=100, minimum_time=timedelta(minutes=2), datetime_label=DATETIME):
+def query_all_points_by_range(
+    traj1,
+    move_df,
+    minimum_meters=100,
+    minimum_time=None,
+    datetime_label=DATETIME
+):
     """
-    Selects only the points between two Move Dataframes 
-    that have the closest point within a spatial range 
+    Queries closest point within a spatial range based on meters and a temporal range.
+
+    Selects only the points between two Move Dataframes
+    that have the closest point within a spatial range
     based on meters and a temporal range.
 
     Parameters
@@ -283,21 +300,24 @@ def query_all_points_by_range(traj1, move_df, minimum_meters=100, minimum_time=t
         a spatial distance and temporal distance equal or smaller
         than the minimum distance parameters.
     """
-    result = pd.DataFrame([]);
+    if minimum_time is None:
+        minimum_time = timedelta(minutes=2)
+
+    result = pd.DataFrame([])
     total = traj1.shape[0]
     count = 0
-    for index, row in traj1.iterrows():
+    for _, row in traj1.iterrows():
         clear_output(wait=True)
-        print("{} de {}".format(count, total))
-        print("{:.2f}%".format((count*100/total)))
+        print('{} de {}'.format(count, total))
+        print('{:.2f}%'.format((count * 100 / total)))
         coinc_points = _meters_filter(row, move_df, minimum_meters)
         coinc_points = _datetime_filter(row, coinc_points, minimum_time)
         result = coinc_points.append(result)
-        
+
         count += 1
-    
+
     clear_output(wait=True)
-    print("{} de {}".format(count, total))
-    print("{:.2f}%".format((count*100/total)))
+    print('{} de {}'.format(count, total))
+    print('{:.2f}%'.format((count * 100 / total)))
 
     return result

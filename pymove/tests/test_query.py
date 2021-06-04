@@ -1,11 +1,11 @@
-from pandas import DataFrame, Timestamp, Timedelta
+from datetime import timedelta
+
+from pandas import DataFrame, Timedelta, Timestamp
 from pandas.testing import assert_frame_equal
 
 from pymove import MoveDataFrame
 from pymove.query import query
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
-
-from datetime import timedelta
 
 traj_example = [[16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
                 '            GONZALO'],
@@ -527,7 +527,7 @@ def test_knn_query():
     medt_move_df = query.knn_query(traj_df, move_df, k=2, distance='MEDT')
     assert_frame_equal(medt_move_df, expected_medt)
 
-def test__datetime_filter(): 
+def test__datetime_filter():
     traj_df = _default_traj_df()
     firstpoint = traj_df.iloc[0]
     move_df = _default_move_df()
@@ -543,7 +543,7 @@ def test__datetime_filter():
     assert_frame_equal(result, expected)
 
 
-def test__meters_filter(): 
+def test__meters_filter():
     traj_df = _default_traj_df()
     firstpoint = traj_df.iloc[0]
     move_df = _default_move_df()
@@ -571,6 +571,3 @@ def test_query_all_points_by_range():
 
     result = query.query_all_points_by_range(traj_df, move_df, minimum_meters=1900000, minimum_time=timedelta(hours=19000))
     assert_frame_equal(result, expected)
-
-
-   
