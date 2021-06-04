@@ -5,6 +5,7 @@ from pymove import MoveDataFrame
 from pymove.query import query
 from pymove.utils.constants import DATETIME, LATITUDE, LONGITUDE, TRAJ_ID
 
+
 traj_example = [[16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
                 '            GONZALO'],
                 [16.4, -55.9, Timestamp('2014-10-12 00:00:00'),
