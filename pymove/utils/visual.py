@@ -11,7 +11,7 @@ save_wkt
 
 """
 
-from typing import List, Text, Tuple
+from typing import Sequence, Text, Tuple, Union
 
 from branca.element import MacroElement, Template
 from folium import Map
@@ -23,7 +23,7 @@ from pandas import DataFrame
 from pymove.utils.constants import COLORS, LATITUDE, LONGITUDE, TRAJ_ID
 
 
-def add_map_legend(m: Map, title: Text, items: List[Tuple]):
+def add_map_legend(m: Map, title: Text, items: Union[Tuple, Sequence[Tuple]]):
     """
     Adds a legend for a folium map.
 

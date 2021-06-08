@@ -77,7 +77,7 @@ def get_bbox_by_radius(
     lonmin = lon - delta_lon
     lonmax = lon + delta_lon
 
-    return tuple(np.rad2deg([latmin, lonmin, latmax, lonmax]))
+    return tuple(np.rad2deg([latmin, lonmin, latmax, lonmax]))  # type: ignore
 
 
 def by_bbox(
@@ -378,7 +378,7 @@ def _filter_speed_max_radius(move_data: DataFrame, **kwargs):
     return move_data[filter_]
 
 
-def _filter_data(move_data: DataFrame, f: callable, kwargs: Dict):
+def _filter_data(move_data: DataFrame, f: Callable, kwargs: Dict):
     """
     Filter the dataframe using condition from given function.
 
@@ -420,7 +420,7 @@ def _filter_data(move_data: DataFrame, f: callable, kwargs: Dict):
     return filter_data_points, rows_to_drop
 
 
-def _clean_gps(move_data: DataFrame, f: callable, **kwargs):
+def _clean_gps(move_data: DataFrame, f: Callable, **kwargs):
     """
     Cleans gps points from a dataframe using condition from given function.
 
@@ -470,7 +470,7 @@ def clean_gps_jumps_by_distance(
     label_id: Text = TRAJ_ID,
     jump_coefficient: float = 3.0,
     threshold: float = 1,
-    label_dtype: callable = np.float64,
+    label_dtype: Callable = np.float64,
     inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
@@ -527,7 +527,7 @@ def clean_gps_nearby_points_by_distances(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     label_id: Text = TRAJ_ID,
     radius_area: float = 10.0,
-    label_dtype: callable = np.float64,
+    label_dtype: Callable = np.float64,
     inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
