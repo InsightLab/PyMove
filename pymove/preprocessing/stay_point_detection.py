@@ -30,11 +30,11 @@ if TYPE_CHECKING:
 @timer_decorator
 def create_or_update_move_stop_by_dist_time(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    dist_radius: Optional[float] = 30,
-    time_radius: Optional[float] = 900,
-    label_id: Optional[Text] = TRAJ_ID,
-    new_label: Optional[Text] = SEGMENT_STOP,
-    inplace: Optional[bool] = False
+    dist_radius: float = 30,
+    time_radius: float = 900,
+    label_id: Text = TRAJ_ID,
+    new_label: Text = SEGMENT_STOP,
+    inplace: bool = False
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Determines the stops and moves points of the dataframe.
@@ -113,10 +113,10 @@ def create_or_update_move_stop_by_dist_time(
 @timer_decorator
 def create_or_update_move_and_stop_by_radius(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    radius: Optional[float] = 0,
-    target_label: Optional[Text] = DIST_TO_PREV,
-    new_label: Optional[Text] = SITUATION,
-    inplace: Optional[bool] = False,
+    radius: float = 0,
+    target_label: Text = DIST_TO_PREV,
+    new_label: Text = SITUATION,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Finds the stops and moves points of the dataframe.

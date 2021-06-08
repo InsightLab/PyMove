@@ -209,7 +209,7 @@ def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: T
 
 def _update_curr_tid_count(
     filter_: ndarray, move_data: DataFrame, idx: int,
-    label_new_tid: Text, curr_tid: float, count: int
+    label_new_tid: Text, curr_tid: int, count: int
 ) -> Tuple[int, int]:
     """
     Updates the tid.
@@ -334,13 +334,13 @@ def _filter_by(
 @timer_decorator
 def by_dist_time_speed(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TRAJ_ID,
-    max_dist_between_adj_points: Optional[float] = 3000,
-    max_time_between_adj_points: Optional[float] = 900,
-    max_speed_between_adj_points: Optional[float] = 50.0,
-    drop_single_points: Optional[bool] = True,
-    label_new_tid: Optional[Text] = TID_PART,
-    inplace: Optional[bool] = False,
+    label_id: Text = TRAJ_ID,
+    max_dist_between_adj_points: float = 3000,
+    max_time_between_adj_points: float = 900,
+    max_speed_between_adj_points: float = 50.0,
+    drop_single_points: bool = True,
+    label_new_tid: Text = TID_PART,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Splits the trajectories into segments based on distance, time and speed.
@@ -414,11 +414,11 @@ def by_dist_time_speed(
 @timer_decorator
 def by_max_dist(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TRAJ_ID,
-    max_dist_between_adj_points: Optional[float] = 3000,
-    drop_single_points: Optional[bool] = True,
-    label_new_tid: Optional[Text] = TID_DIST,
-    inplace: Optional[bool] = False,
+    label_id: Text = TRAJ_ID,
+    max_dist_between_adj_points: float = 3000,
+    drop_single_points: bool = True,
+    label_new_tid: Text = TID_DIST,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Segments the trajectories based on distance.
@@ -481,11 +481,11 @@ def by_max_dist(
 @timer_decorator
 def by_max_time(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TRAJ_ID,
-    max_time_between_adj_points: Optional[float] = 900.0,
-    drop_single_points: Optional[bool] = True,
-    label_new_tid: Optional[Text] = TID_TIME,
-    inplace: Optional[bool] = False,
+    label_id: Text = TRAJ_ID,
+    max_time_between_adj_points: float = 900.0,
+    drop_single_points: bool = True,
+    label_new_tid: Text = TID_TIME,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Splits the trajectories into segments based on a maximum.
@@ -549,12 +549,12 @@ def by_max_time(
 @timer_decorator
 def by_max_speed(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TRAJ_ID,
-    max_speed_between_adj_points: Optional[float] = 50.0,
-    drop_single_points: Optional[bool] = True,
-    label_new_tid: Optional[Text] = TID_SPEED,
-    inplace: Optional[bool] = False,
-) -> Union['PandasMoveDataFrame', 'DaskMoveDataFrame']:
+    label_id: Text = TRAJ_ID,
+    max_speed_between_adj_points: float = 50.0,
+    drop_single_points: bool = True,
+    label_new_tid: Text = TID_SPEED,
+    inplace: bool = False,
+) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Splits the trajectories into segments based on a maximum speed.
 

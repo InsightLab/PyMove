@@ -47,19 +47,26 @@ class Grid:
                 'grid_size_lat_y': lat y size of grid,
                 'grid_size_lon_x': lon x size of grid,
                 'cell_size_by_degree': cell size in radians,
-        cell_size : float, optional
+        cell_size : float
             Represents grid cell size, by default None
         meters_by_degree : float, optional
             Represents the corresponding meters of lat by degree,
                 by default lat_meters(-3.71839)
+
+        Raises
+        ------
+        ValueError
+            If one of data or cell grid is not provided
         """
-        self.last_operation = None
+        self.last_operation: Dict = dict()
         if meters_by_degree is None:
             meters_by_degree = lat_meters(-3.71839)
         if isinstance(data, dict):
             self._grid_from_dict(data)
-        else:
+        elif cell_size is not None:
             self._create_virtual_grid(data, cell_size, meters_by_degree)
+        else:
+            raise ValueError('Must pass either data or cell size.')
         self.grid_polygon = None
 
     def get_grid(self) -> Dict:
@@ -170,9 +177,9 @@ class Grid:
     def create_update_index_grid_feature(
         self,
         data: DataFrame,
-        unique_index: Optional[bool] = True,
-        label_dtype: Optional[Callable] = np.int64,
-        sort: Optional[bool] = True
+        unique_index: bool = True,
+        label_dtype: Callable = np.int64,
+        sort: bool = True
     ):
         """
         Create or update index grid feature.
@@ -185,7 +192,7 @@ class Grid:
             Represents the dataset with contains lat, long and datetime.
         unique_index: bool, optional
             How to index the grid, by default True
-        label_dtype : Optional[Callable], optional
+        label_dtype : Callable, optional
             Represents the type of a value of new column in dataframe, by default np.int64
         sort : bool, optional
             Represents if needs to sort the dataframe, by default True
@@ -211,8 +218,8 @@ class Grid:
     def convert_two_index_grid_to_one(
         self,
         data: DataFrame,
-        label_grid_lat: Optional[Text] = INDEX_GRID_LAT,
-        label_grid_lon: Optional[Text] = INDEX_GRID_LON,
+        label_grid_lat: Text = INDEX_GRID_LAT,
+        label_grid_lon: Text = INDEX_GRID_LON,
     ):
         """
         Converts grid lat-lon ids to unique values.
@@ -234,7 +241,7 @@ class Grid:
     def convert_one_index_grid_to_two(
         self,
         data: DataFrame,
-        label_grid_index: Optional[Text] = INDEX_GRID,
+        label_grid_index: Text = INDEX_GRID,
     ):
         """
         Converts grid lat-lon ids to unique values.
@@ -427,12 +434,12 @@ class Grid:
     def show_grid_polygons(
         self,
         data: DataFrame,
-        markersize: Optional[float] = 10,
-        linewidth: Optional[float] = 2,
-        figsize: Optional[Tuple[int, int]] = (10, 10),
-        return_fig: Optional[bool] = True,
-        save_fig: Optional[bool] = False,
-        name: Optional[Text] = 'grid.png',
+        markersize: float = 10,
+        linewidth: float = 2,
+        figsize: Tuple[int, int] = (10, 10),
+        return_fig: bool = True,
+        save_fig: bool = False,
+        name: Text = 'grid.png',
     ) -> Optional[figure]:
         """
         Generate a visualization with grid polygons.
@@ -457,7 +464,7 @@ class Grid:
 
         Returns
         -------
-        Optional[figure]
+        figure
             The generated picture or None
 
         Raises

@@ -8,7 +8,7 @@ decode_geohash_to_latlon,
 
 """
 
-from typing import Optional, Text, Tuple
+from typing import Text, Tuple
 
 import geohash2 as gh
 import numpy as np
@@ -69,7 +69,7 @@ def v_color(ob: BaseGeometry) -> Text:
     return COLORS[ob.is_simple + 33]
 
 
-def _encode(lat: float, lon: float, precision: Optional[float] = 15) -> Text:
+def _encode(lat: float, lon: float, precision: float = 15) -> Text:
     """
     Encodes latitude/longitude to geohash.
 
@@ -131,7 +131,7 @@ def _decode(geohash: Text) -> Tuple[float, float]:
     return gh.decode(geohash)
 
 
-def _bin_geohash(lat: float, lon: float, precision: Optional[float] = 15) -> ndarray:
+def _bin_geohash(lat: float, lon: float, precision: float = 15) -> ndarray:
     """
     Transforms a point's geohash into a binary array.
 
@@ -168,7 +168,7 @@ def _bin_geohash(lat: float, lon: float, precision: Optional[float] = 15) -> nda
 
 
 def _reset_and_create_arrays_none(
-    data: DataFrame, reset_index: Optional[bool] = True
+    data: DataFrame, reset_index: bool = True
 ) -> Tuple[ndarray, ndarray, ndarray, ndarray]:
     """
     Reset the df index and create arrays of none values.
@@ -218,7 +218,7 @@ def _reset_and_create_arrays_none(
     return latitudes, longitudes, geohash, bin_geohash
 
 
-def create_geohash_df(data: DataFrame, precision: Optional[float] = 15):
+def create_geohash_df(data: DataFrame, precision: float = 15):
     """
     Create geohash from geographic coordinates and integrate with df.
 
@@ -263,7 +263,7 @@ def create_geohash_df(data: DataFrame, precision: Optional[float] = 15):
     data[GEOHASH] = geohash
 
 
-def create_bin_geohash_df(data: DataFrame, precision: Optional[float] = 15):
+def create_bin_geohash_df(data: DataFrame, precision: float = 15):
     """
     Create trajectory geohash binaries and integrate with df.
 
@@ -310,8 +310,8 @@ def create_bin_geohash_df(data: DataFrame, precision: Optional[float] = 15):
 
 def decode_geohash_to_latlon(
     data: DataFrame,
-    label_geohash: Optional[Text] = GEOHASH,
-    reset_index: Optional[bool] = True
+    label_geohash: Text = GEOHASH,
+    reset_index: bool = True
 ):
     """
     Decode feature with hash of trajectories back to geographic coordinates.

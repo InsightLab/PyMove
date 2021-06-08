@@ -19,14 +19,15 @@ clean:
 	rm -f .coverage
 
 test: clean
-	pytest
+	pytest pymove
 
 coverage: clean
-	coverage run -m pytest
+	coverage run -m pytest pymove
 	coverage report
 
 lint: clean
-	flake8
+	flake8 pymove
+	mypy pymove
 
 docs: clean
 	cp docs/examples/notebooks.rst docs

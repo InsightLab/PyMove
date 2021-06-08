@@ -14,7 +14,7 @@ column_to_array
 
 
 from itertools import chain
-from typing import Any, Dict, List, Optional, Text, Union
+from typing import Any, Dict, List, Optional, Text, Tuple, Union
 
 import numpy as np
 from numpy import ndarray
@@ -29,12 +29,12 @@ from pymove.utils.math import is_number
 
 def read_csv(
     filepath_or_buffer: FilePathOrBuffer,
-    latitude: Optional[Text] = LATITUDE,
-    longitude: Optional[Text] = LONGITUDE,
-    datetime: Optional[Text] = DATETIME,
-    traj_id: Optional[Text] = TRAJ_ID,
-    type_: Optional[Text] = TYPE_PANDAS,
-    n_partitions: Optional[int] = 1,
+    latitude: Text = LATITUDE,
+    longitude: Text = LONGITUDE,
+    datetime: Text = DATETIME,
+    traj_id: Text = TRAJ_ID,
+    type_: Text = TYPE_PANDAS,
+    n_partitions: int = 1,
     **kwargs
 ) -> MoveDataFrame:
     """
@@ -119,7 +119,9 @@ def invert_dict(d: Dict) -> Dict:
 
 
 def flatten_dict(
-    d: Dict, parent_key: Optional[Text] = '', sep: Optional[Text] = '_'
+    d: Dict,
+    parent_key: Text = '',
+    sep: Text = '_'
 ) -> Dict:
     """
     Flattens a nested dictionary.
@@ -151,9 +153,9 @@ def flatten_dict(
     """
     if not isinstance(d, dict):
         return {parent_key: d}
-    items = []
+    items: List[Tuple[Text, Any]] = []
     for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
+        new_key = f'{parent_key}{sep}{k}' if parent_key else k
         if isinstance(v, dict):
             items.extend(flatten_dict(v, new_key, sep=sep).items())
         else:
@@ -264,6 +266,8 @@ def shift(
     [2 3 4 5 6 7 0]
     """
     result = np.empty_like(arr)
+    arr = np.array(arr)
+
     if fill_value is None:
         dtype = result.dtype
         if np.issubdtype(dtype, np.bool_):

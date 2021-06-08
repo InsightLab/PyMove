@@ -34,7 +34,7 @@ def set_verbosity(level):
     shell_handler.setLevel(level)
 
 
-def timer_decorator(func: Callable) -> wraps:
+def timer_decorator(func: Callable) -> Callable:
     """A decorator that prints how long a function took to run."""
 
     @wraps(func)
@@ -75,7 +75,7 @@ def _log_progress(
     is_iterator = False
     if total is None:
         try:
-            total = len(sequence)
+            total = len(sequence)  # type: ignore
         except TypeError:
             is_iterator = True
     if total is not None:
