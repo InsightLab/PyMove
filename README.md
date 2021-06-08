@@ -255,8 +255,8 @@ You can see examples of how to use PyMove [here](https://github.com/InsightLab/P
     -   `by_max_time`
     -   `by_max_speed`
 
--   7: **Distance Measures** &rarr; `pymove.distance`
-    -   `medp
+-   7: **Distance Measures** &rarr; `pymove.distances`
+    -   `medp`
     -   `medt`
     -   `euclidean_distance_in_meters`
     -   `haversine`
