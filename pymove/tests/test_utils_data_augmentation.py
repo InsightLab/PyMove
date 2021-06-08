@@ -352,7 +352,7 @@ def test_augmentation_trajectories_df():
 
 
 def test_instance_crossover_augmentation():
-    move_df = pd.DataFrame(
+    df = pd.DataFrame(
         list_data1,
         columns=[TRAJ_ID, LOCAL_LABEL, LATITUDE, LONGITUDE, DATETIME, TID]
     )
@@ -413,8 +413,8 @@ def test_instance_crossover_augmentation():
         }
     )
 
-    instance_crossover_augmentation(move_df, label_trajectory=LOCAL_LABEL)
-    assert_frame_equal(move_df, expected)
+    instance_crossover_augmentation(df, label_trajectory=LOCAL_LABEL)
+    assert_frame_equal(df, expected)
 
 
 def test_sliding_window():
