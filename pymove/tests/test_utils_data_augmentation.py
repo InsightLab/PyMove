@@ -414,7 +414,7 @@ def test_instance_crossover_augmentation():
     )
 
     instance_crossover_augmentation(df, label_trajectory=LOCAL_LABEL)
-    assert_frame_equal(expected, expected)
+    assert_frame_equal(df, expected)
 
 
 def test_sliding_window():
