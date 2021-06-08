@@ -48,6 +48,40 @@ def _populate_graph(
     label_local: str, optional
         Name of the column referring to the trajectories, by default LOCAL_LABEL
 
+    Example
+    -------
+    >>> import pandas as pd
+    >>> from pymove.utils.log import progress_bar
+    >>> from pymove.utils.networkx import _populate_graph
+    >>> from pymove.utils.augmentation import generate_trajectories_df
+    >>>
+    >>> data = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, '12017090221'],
+    ...         [1, '2017-09-02 22:00:27',  85, -3.8347478, -38.5921890, '12017090222'],
+    ...         [1, '2017-09-02 22:01:36', 673, -3.8235834, -38.5903890, '12017090222'],
+    ...         [1, '2017-09-02 22:03:08', 394, -3.8138890, -38.5904445, '12017090222'],
+    ...         [1, '2017-09-02 22:03:46', 263, -3.9067654, -38.5907723, '12017090222'],
+    ...         [1, '2017-09-02 22:07:19', 224, -3.8857223, -38.5928892, '12017090222'],
+    ...         [1, '2017-09-02 22:07:40', 623, -3.8828723, -38.5929789, '12017090222']]
+    >>>
+    >>> df = pd.DataFrame(
+    ...     data,
+    ...     columns=['id', 'datetime', 'local_label', 'lat', 'lon', 'tid']
+    ... )
+    >>>
+    >>> traj_df = generate_trajectories_df(df)
+    >>>
+    >>> nodes = {'datetime': {}, 'coords': {}, 'freq_source': {}, 'freq_target': {}}
+    >>> edges = {}
+    >>>
+    >>> for _, row in progress_bar(traj_df.iterrows(), total=traj_df.shape[0]):
+    >>>     _populate_graph(row, nodes, edges)
+    >>>
+    >>> edges
+    {'85': {'673': {'weight': 1, 'mean_times': '0 days 00:01:09'}},
+     '673': {'394': {'weight': 1, 'mean_times': '0 days 00:01:32'}},
+     '394': {'263': {'weight': 1, 'mean_times': '0 days 00:00:38'}},
+     '263': {'224': {'weight': 1, 'mean_times': '0 days 00:03:33'}},
+     '224': {'623': {'weight': 1, 'mean_times': '0 days 00:00:21'}}}
     """
     traj = row[label_local]
 
@@ -119,6 +153,37 @@ def build_transition_graph_from_dict(dict_graph: Dict) -> DiGraph:
     ------
     graph: DiGraph
         Transition graph constructed from trajectory data.
+
+    Example
+    -------
+    >>> from pymove.utils.networkx import build_transition_graph_from_dict
+    >>>
+    >>> dict_graph = {
+    ...     'nodes': {
+    ...         'datetime': {
+    ...             '85': ['2017-09-02 22:00:27'], '673': ['2017-09-02 22:01:36'],
+    ...             '394': ['2017-09-02 22:03:08'], '263': ['2017-09-02 22:03:46'],
+    ...             '224': ['2017-09-02 22:07:19'], '623': ['2017-09-02 22:07:40']},
+    ...         'coords': {
+    ...             '85': (-3.8347478, -38.592189), '673': (-3.8235834, -38.590389),
+    ...             '394': (-3.813889, -38.5904445), '263': (-3.9067654, -38.5907723),
+    ...             '224': (-3.8857223, -38.5928892), '623': (-3.8828723, -38.5929789)},
+    ...         'freq_source': {
+    ...             '85': 1, '673': 0, '394': 0, '263': 0, '224': 0, '623': 0},
+    ...         'freq_target': {
+    ...             '85': 0, '673': 0, '394': 0, '263': 0, '224': 0, '623': 1}},
+    ...     'edges': {
+    ...         '85': {'673': {'weight': 1, 'mean_times': '0 days 00:01:09'}},
+    ...         '673': {'394': {'weight': 1, 'mean_times': '0 days 00:01:32'}},
+    ...         '394': {'263': {'weight': 1, 'mean_times': '0 days 00:00:38'}},
+    ...         '263': {'224': {'weight': 1, 'mean_times': '0 days 00:03:33'}},
+    ...         '224': {'623': {'weight': 1, 'mean_times': '0 days 00:00:21'}}}
+    ... }
+    >>>
+    >>> graph = build_transition_graph_from_dict(dict_graph)
+    >>> graph.edges
+    OutEdgeView([('85', '673'), ('673', '394'), ('394', '263'),
+                 ('263', '224'), ('224', '623')])
     """
     graph = nx.DiGraph(dict_graph['edges'])
 
@@ -146,6 +211,30 @@ def build_transition_graph_from_df(data: DataFrame) -> DiGraph:
     ------
     graph: DiGraph
         Transition graph constructed from trajectory data.
+
+    Example
+    -------
+    >>> import pandas as pd
+    >>> from pymove.utils.data_augmentation import generate_trajectories_df
+    >>> from pymove.utils.networkx import build_transition_graph_from_df
+    >>>
+    >>> data = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, '12017090221'],
+    ...         [1, '2017-09-02 22:00:27',  85, -3.8347478, -38.5921890, '12017090222'],
+    ...         [1, '2017-09-02 22:01:36', 673, -3.8235834, -38.5903890, '12017090222'],
+    ...         [1, '2017-09-02 22:03:08', 394, -3.8138890, -38.5904445, '12017090222'],
+    ...         [1, '2017-09-02 22:03:46', 263, -3.9067654, -38.5907723, '12017090222'],
+    ...         [1, '2017-09-02 22:07:19', 224, -3.8857223, -38.5928892, '12017090222'],
+    ...         [1, '2017-09-02 22:07:40', 623, -3.8828723, -38.5929789, '12017090222']]
+    >>>
+    >>> df = pd.DataFrame(
+    ...     data,
+    ...     columns=['id', 'datetime', 'local_label', 'lat', 'lon', 'tid']
+    ... )
+    >>>
+    >>> traj_df = generate_trajectories_df(df)
+    >>> graph = build_transition_graph_from_df(traj_df)
+    >>> graph.nodes
+    NodeView(('85', '673', '394', '263', '224', '623'))
     """
     nodes = {'datetime': {}, 'coords': {}, 'freq_source': {}, 'freq_target': {}}
     edges = {}
@@ -175,6 +264,50 @@ def graph_to_dict(graph: DiGraph) -> Dict:
     ------
     dict
         Dictionary with the attributes of nodes and edges.
+
+    Example
+    -------
+    >>> import pandas as pd
+    >>> from pymove.utils.data_augmentation import generate_trajectories_df
+    >>> from pymove.utils.networkx import build_transition_graph_from_df
+    >>> from pymove.utils.networkx import graph_to_dict
+    >>>
+    >>> data = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, '12017090221'],
+    ...         [1, '2017-09-02 22:00:27',  85, -3.8347478, -38.5921890, '12017090222'],
+    ...         [1, '2017-09-02 22:01:36', 673, -3.8235834, -38.5903890, '12017090222'],
+    ...         [1, '2017-09-02 22:03:08', 394, -3.8138890, -38.5904445, '12017090222'],
+    ...         [1, '2017-09-02 22:03:46', 263, -3.9067654, -38.5907723, '12017090222'],
+    ...         [1, '2017-09-02 22:07:19', 224, -3.8857223, -38.5928892, '12017090222'],
+    ...         [1, '2017-09-02 22:07:40', 623, -3.8828723, -38.5929789, '12017090222']]
+    >>>
+    >>> df = pd.DataFrame(
+    ...     data,
+    ...     columns=['id', 'datetime', 'local_label', 'lat', 'lon', 'tid']
+    ... )
+    >>>
+    >>> traj_df = generate_trajectories_df(df)
+    >>> graph = build_transition_graph_from_df(traj_df)
+    >>>
+    >>> dict_graph = graph_to_dict(graph)
+    >>> dict_graph
+    {'nodes': {
+        'coords': {
+            '85': (-3.8347478, -38.592189), '673': (-3.8235834, -38.590389),
+            '394': (-3.813889, -38.5904445), '263': (-3.9067654, -38.5907723),
+            '224': (-3.8857223, -38.5928892), '623': (-3.8828723, -38.5929789)},
+        'datetime': {
+            '85': ['2017-09-02 22:00:27'], '673': ['2017-09-02 22:01:36'],
+            '394': ['2017-09-02 22:03:08'], '263': ['2017-09-02 22:03:46'],
+            '224': ['2017-09-02 22:07:19'], '623': ['2017-09-02 22:07:40']},
+        'freq_source': {'85': 1, '673': 0, '394': 0, '263': 0, '224': 0, '623': 0},
+        'freq_target': {'85': 0, '673': 0, '394': 0, '263': 0, '224': 0, '623': 1}},
+    'edges': {
+        '85': {'673': {'weight': 1, 'mean_times': '0 days 00:01:09'}},
+        '673': {'394': {'weight': 1, 'mean_times': '0 days 00:01:32'}},
+        '394': {'263': {'weight': 1, 'mean_times': '0 days 00:00:38'}},
+        '263': {'224': {'weight': 1, 'mean_times': '0 days 00:03:33'}},
+        '224': {'623': {'weight': 1, 'mean_times': '0 days 00:00:21'}},
+        '623': {}}}
     """
     dict_graph = {'nodes': {}, 'edges': {}}
 

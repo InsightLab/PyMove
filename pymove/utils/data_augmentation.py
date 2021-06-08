@@ -63,52 +63,67 @@ def append_row(
 
 
 def generate_trajectories_df(
-    data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame']
+    data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    label_tid: Optional[Text] = TID,
+    min_points_traj: Optional[int] = 3
 ) -> DataFrame:
     """
     Generates a dataframe with the sequence of location points of a trajectory.
 
     Parameters
     ----------
-    data : DataFrame
+    data: DataFrame
         The input trajectory data.
+    label_tid: string, optional
+        Label referente ao ID das trajetórias, by default TID
+    min_points_traj: number, optional
+        Mínimo de pontos por trajetória, by default 3
 
     Return
     ------
     DataFrame
         DataFrame of the trajectories
 
+    Example
+    -------
+    >>> import pandas as pd
+    >>> from pymove.utils.data_augmentation import generate_trajectories_df
+    >>>
+    >>> data = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, '12017090221'],
+    ...         [1, '2017-09-02 22:00:27',  85, -3.8347478, -38.5921890, '12017090222'],
+    ...         [1, '2017-09-02 22:01:36', 673, -3.8235834, -38.5903890, '12017090222'],
+    ...         [1, '2017-09-02 22:03:08', 394, -3.8138890, -38.5904445, '12017090222'],
+    ...         [1, '2017-09-02 22:03:46', 263, -3.9067654, -38.5907723, '12017090222'],
+    ...         [1, '2017-09-02 22:07:19', 224, -3.8857223, -38.5928892, '12017090222'],
+    ...         [1, '2017-09-02 22:07:40', 623, -3.8828723, -38.5929789, '12017090222']]
+    >>>
+    >>> df = pd.DataFrame(
+    ...     data,
+    ...     columns=['id', 'datetime', 'local_label', 'lat', 'lon', 'tid']
+    ... )
+    >>>
+    >>> traj_df = generate_trajectories_df(df)
+    >>> traj_df
+               id   ...             local_label   ...                          tid
+    0   [1, 1, 1,   ...     [85, 673, 394, 263,   ...   [12017090222, 12017090222,
+    .    1, 1, 1]   ...               224, 623]   ...       12017090222, 120170...
     """
-    if TID not in data:
-        data.generate_tid_based_on_id_datetime()
-        data.reset_index(drop=True, inplace=True)
+    if label_tid not in data:
+        raise ValueError(
+            '{} not in DataFrame'.format(label_tid)
+        )
 
-    tids = data[TID].unique()
-    new_df = pd.DataFrame(
-        columns=data.columns
-    )
+    frames = []
+    tids = data[label_tid].unique()
 
-    for tid in progress_bar(tids, total=len(tids)):
-        filter_ = data[data[TID] == tid]
-        filter_.reset_index(drop=True, inplace=True)
+    desc = 'Gererating Trajectories DataFrame'
+    for tid in progress_bar(tids, desc=desc, total=len(tids)):
+        frame = data[data[label_tid] == tid]
 
-        if filter_.shape[0] > 4:
+        if frame.shape[0] >= min_points_traj:
+            frames.append(frame.T.values.tolist())
 
-            values = []
-            for col in filter_.columns:
-                if filter_[col].nunique() == 1:
-                    values.append(filter_.at[0, col])
-                else:
-                    values.append(
-                        np.array(
-                            filter_[col], dtype=type(filter_.at[0, col])
-                        ).tolist()
-                    )
-
-            row = pd.Series(values, filter_.columns)
-            append_row(new_df, row=row)
-
-    return new_df
+    return pd.DataFrame(frames, columns=data.columns)
 
 
 def generate_start_feature(
@@ -410,6 +425,28 @@ def sliding_window(
     ------
     DataFrame
         Increased data set.
+
+    Example
+    -------
+    >>> data = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, '12017090221'],
+    ...         [1, '2017-09-02 22:00:27',  85, -3.8347478, -38.5921890, '12017090222'],
+    ...         [1, '2017-09-02 22:01:36', 673, -3.8235834, -38.5903890, '12017090222'],
+    ...         [1, '2017-09-02 22:03:08', 394, -3.8138890, -38.5904445, '12017090222'],
+    ...         [1, '2017-09-02 22:03:46', 263, -3.9067654, -38.5907723, '12017090222'],
+    ...         [1, '2017-09-02 22:07:19', 224, -3.8857223, -38.5928892, '12017090222'],
+    ...         [1, '2017-09-02 22:07:40', 623, -3.8828723, -38.5929789, '12017090222']]
+    >>>
+    >>> df = pd.DataFrame(
+    ...     data, columns=['id', 'datetime', 'local_label', 'lat', 'lon', 'tid']
+    ... )
+    >>>
+    >>> traj_df = generate_trajectories_df(df)
+    >>>
+    >>> aug_df = sliding_window(traj_df)
+    >>> aug_df
+               id   ...             local_label   ...                          tid
+    0   [1, 1, 1,   ...     [85, 673, 394, 263,   ...   [12017090222, 12017090222,
+    .    1, 1, 1]   ...               224, 623]   ...       12017090222, 120170...
     """
     if columns is None:
         columns = data.columns
@@ -459,12 +496,12 @@ def get_all_paths(
         Sequence destination node.
     min_path_size: int, optional
         Minimum number of points for the trajectory, by default 3
-    max_path_size: number, optional
+    max_path_size: int, optional
         Maximum number of points for the trajectory, by default 6
-    max_sampling_source: number, optional
+    max_sampling_source: int, optional
         Maximum number of paths to be returned,
         considering the observed origin, by default 10
-    max_sampling_target: number, optional
+    max_sampling_target: int, optional
         Maximum number of paths to be returned,
         considering the observed destination, by default 10
     label_local: str, optional

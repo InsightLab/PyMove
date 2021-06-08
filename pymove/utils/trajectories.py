@@ -299,6 +299,33 @@ def append_trajectory(
     label_tid: str, optional
         Column name for trajectory IDs, by default TID_STAT
 
+    Example
+    -------
+    >>> data = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, np.nan, 517],
+    ...         [1, '2017-09-02 22:00:27',  85, -3.8347478, -38.5921890,    162, 517],
+    ...         [1, '2017-09-02 22:01:36', 673, -3.8235834, -38.5903890,     85, 517],
+    ...         [1, '2017-09-02 22:03:08', 394, -3.8138890, -38.5904445,    673, 517],
+    ...         [1, '2017-09-02 22:03:46', 263, -3.9067654, -38.5907723,    394, 517],
+    ...         [1, '2017-09-02 22:07:19', 224, -3.8857223, -38.5928892,    263, 517],
+    ...         [1, '2017-09-02 22:07:40', 623, -3.8828723, -38.5929789,    224, 517]]
+    >>>
+    >>> df = pd.DataFrame(
+    ...     data,
+    ...     columns=['id', 'datetime', 'local_label',
+    ...              'lat', 'lon', 'prev_local', 'tid_stat']
+    ... )
+    >>> traj_df = generate_trajectories_df(df, 'tid_stat')
+    >>>
+    >>> traj = [85, 673, 394, 263]
+    >>> graph = build_transition_graph_from_df(traj_df)
+    >>>
+    >>> append_trajectory(traj_df, traj, graph)
+    >>> traj_df
+                                      id ...         local_label ...             tid_stat
+    0                       [1, 1, 1, 1, ... [162, 85, 673, 394, ... [517, 517, 517, 517,
+    .                           1, 1, 1] ...      263, 224, 623] ...       517, 517, 517]
+    1 [5f28190fd32d8e1afecabecef06920db, ...       [85.0, 673.0, ...           [518, 518,
+    .                     5f28190fd32... ...       394.0, 263.0] ...            518, 518]
     """
     source = trajectory[0]
     dict_graph = graph_to_dict(graph)
@@ -366,6 +393,19 @@ def split_trajectory(
     ------
     Generator of Series
         Series with the stretches recovered from the observed trajectory.
+
+    Example
+    -------
+    >>> import pandas as pd
+    >>> from pymove.utils.trajectories import split_trajectories
+    >>>
+    >>> traj = pd.Series([[162, 85, 673, 394, 263, 224, 623]], index=['local_label'])
+    >>>
+    >>> split_trajectory(traj)
+                        local_label
+    0  [162, 85, 673, 394, 263, 224]
+    1           [394, 263, 224, 623]
+    2                          [623]
 
     """
     if columns is None:

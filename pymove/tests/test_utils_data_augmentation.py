@@ -103,6 +103,32 @@ list_data3 = {
     TID_STAT: [[2, 2, 2, 2, 2]]}
 
 
+def test_generate_trajectories_df():
+    df = pd.DataFrame(
+        list_data0,
+        columns=[TRAJ_ID, DATETIME, LOCAL_LABEL, LATITUDE, LONGITUDE, TID]
+    )
+
+    expected = pd.DataFrame(
+        [[[1, 1, 1, 1, 1, 1],
+          ['2017-09-02 22:00:27', '2017-09-02 22:01:36',
+           '2017-09-02 22:03:08', '2017-09-02 22:03:46',
+           '2017-09-02 22:07:19', '2017-09-02 22:07:40'],
+          [85, 673, 394, 263, 224, 623],
+          [-3.8347478, -3.8235834, -3.813889,
+           -3.9067654, -3.8857223, -3.8828723],
+          [-38.592189, -38.590389, -38.5904445,
+           -38.5907723, -38.5928892, -38.5929789],
+          ['12017090222', '12017090222', '12017090222',
+           '12017090222', '12017090222', '12017090222']]],
+        columns=[TRAJ_ID, DATETIME, LOCAL_LABEL, LATITUDE, LONGITUDE, TID]
+    )
+
+    traj_df = generate_trajectories_df(df)
+
+    assert_frame_equal(traj_df, expected)
+
+
 def test_append_row():
     traj_df = pd.DataFrame(
         data={

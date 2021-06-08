@@ -1,5 +1,6 @@
-import os
 import json
+import os
+
 import numpy as np
 import pandas as pd
 from networkx.classes.digraph import DiGraph
@@ -20,8 +21,8 @@ from pymove.utils.networkx import (
     build_transition_graph_from_df,
     build_transition_graph_from_dict,
     graph_to_dict,
+    read_graph_json,
     save_graph_as_json,
-    read_graph_json
 )
 
 dict_graph = {
@@ -168,7 +169,7 @@ def test_graph_to_dict():
 
 
 def test_save_graph_as_json(tmpdir):
-    
+
     expected = {
         'nodes': {
             'coords': {
@@ -189,25 +190,25 @@ def test_save_graph_as_json(tmpdir):
              '6': {'8': {'weight': 1, 'mean_times': '0 days 00:04:47'}},
              '8': {'9': {'weight': 1, 'mean_times': '0 days 00:14:59'}},
              '9': {}}}
-    
+
     d = tmpdir.mkdir('utils')
-    
+
     file_write_default = d.join('test_save_graph.json')
     filename_write_default = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
-    
+
     graph = _transition_graph()
 
     save_graph_as_json(graph, filename_write_default)
-    
+
     saved_graph = read_graph_json(filename_write_default)
-    
+
     assert_equal(saved_graph, expected)
-    
+
 
 def test_read_graph_json(tmpdir):
-    
+
     expected = {
         'nodes': {
             'coords': {
@@ -228,19 +229,19 @@ def test_read_graph_json(tmpdir):
              '6': {'8': {'weight': 1, 'mean_times': '0 days 00:04:47'}},
              '8': {'9': {'weight': 1, 'mean_times': '0 days 00:14:59'}},
              '9': {}}}
-    
+
     d = tmpdir.mkdir('utils')
-    
+
     file_write_default = d.join('test_read_graph.json')
     filename_write_default = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
-    
+
     graph = _transition_graph()
-    
+
     with open(filename_write_default, 'w') as f:
         json.dump(graph_to_dict(graph), f)
 
-    saved_graph = read_graph_json(filename_write_default)    
-    
+    saved_graph = read_graph_json(filename_write_default)
+
     assert_equal(saved_graph, expected)
