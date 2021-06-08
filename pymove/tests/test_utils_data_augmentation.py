@@ -29,6 +29,7 @@ from pymove.utils.data_augmentation import (
     split_crossover,
     transition_graph_augmentation_all_vertex,
 )
+from pymove.utils.data_augmentation import generate_trajectories_df
 from pymove.utils.networkx import build_transition_graph_from_df
 
 list_data0 = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, '12017090221'], 
