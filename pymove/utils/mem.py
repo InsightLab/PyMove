@@ -11,11 +11,12 @@ top_mem_vars
 """
 
 import os
+import re
 import time
 from collections import deque
 from itertools import chain
 from sys import getsizeof
-from typing import Callable, Dict, Optional, Text
+from typing import Dict, Text
 
 import numpy as np
 import psutil
@@ -55,7 +56,7 @@ def reduce_mem_usage_automatic(df: DataFrame):
 
     for col in df.columns:
         col_type = df[col].dtype
-        if str(col_type) == 'int':
+        if re.match('int', str(col_type)):
             c_min = df[col].min()
             c_max = df[col].max()
             if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
@@ -95,7 +96,7 @@ def reduce_mem_usage_automatic(df: DataFrame):
                 and c_max < np.iinfo(np.uint64).max
             ):
                 df[col] = df[col].astype(np.uint64)
-        elif col_type == np.float:
+        elif re.match('float', str(col_type)):
             c_min = df[col].min()
             c_max = df[col].max()
             if (
@@ -119,7 +120,7 @@ def reduce_mem_usage_automatic(df: DataFrame):
 
 
 def total_size(
-    o: object, handlers: Dict = None, verbose: Optional[bool] = True
+    o: object, handlers: Dict = None, verbose: bool = True
 ) -> float:
     """
     Calculates the approximate memory footprint of an given object.
@@ -268,13 +269,13 @@ def end_operation(operation: Dict) -> Dict:
     }
 
 
-def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
+def sizeof_fmt(mem_usage: float, suffix: Text = 'B') -> Text:
     """
     Returns the memory usage calculation of the last function.
 
     Parameters
     ----------
-    mem_usage : int
+    mem_usage : float
         memory usage in bytes
 
     suffix: string, optional
@@ -300,7 +301,7 @@ def sizeof_fmt(mem_usage: int, suffix: Optional[Text] = 'B') -> Text:
 
 
 def top_mem_vars(
-    variables: Callable, n: Optional[int] = 10, hide_private=True
+    variables: Dict, n: int = 10, hide_private=True
 ) -> DataFrame:
     """
     Shows the sizes of the active variables.
@@ -332,7 +333,7 @@ def top_mem_vars(
     3  top_mem_vars    136.0 B
     4            np     72.0 B
     """
-    vars_ = ((name, getsizeof(value)) for name, value in variables.items())
+    vars_ = iter([(name, getsizeof(value)) for name, value in variables.items()])
     if hide_private:
         vars_ = filter(lambda x: not x[0].startswith('_'), vars_)
     top_vars = DataFrame(

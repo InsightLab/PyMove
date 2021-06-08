@@ -11,7 +11,7 @@ save_wkt
 
 """
 
-from typing import List, Optional, Text, Tuple
+from typing import List, Text, Tuple
 
 from branca.element import MacroElement, Template
 from folium import Map
@@ -329,7 +329,7 @@ def get_cmap(cmap: Text) -> Colormap:
 
 
 def save_wkt(
-    move_data: DataFrame, filename: Text, label_id: Optional[Text] = TRAJ_ID
+    move_data: DataFrame, filename: Text, label_id: Text = TRAJ_ID
 ):
     """
     Save a visualization in a map in a new file .wkt.

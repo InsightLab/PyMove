@@ -18,7 +18,7 @@ clean_id_by_time_max
 
 """
 
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Text, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Text, Tuple, Union
 
 import numpy as np
 from pandas import DataFrame
@@ -43,8 +43,8 @@ if TYPE_CHECKING:
 
 
 def get_bbox_by_radius(
-    coordinates: Tuple[float, float], radius: Optional[float] = 1000
-) -> List:
+    coordinates: Tuple[float, float], radius: float = 1000
+) -> Tuple[float, float, float, float]:
     """
     Defines minimum and maximum coordinates, given a distance radius from a point.
 
@@ -77,14 +77,14 @@ def get_bbox_by_radius(
     lonmin = lon - delta_lon
     lonmax = lon + delta_lon
 
-    return np.rad2deg([latmin, lonmin, latmax, lonmax])
+    return tuple(np.rad2deg([latmin, lonmin, latmax, lonmax]))
 
 
 def by_bbox(
     move_data: DataFrame,
-    bbox: Tuple[int, int, int, int],
-    filter_out: Optional[bool] = False,
-    inplace: Optional[bool] = False
+    bbox: Tuple[float, float, float, float],
+    filter_out: bool = False,
+    inplace: bool = False
 ) -> Optional[DataFrame]:
     """
     Filters points of the trajectories according to specified bounding box.
@@ -125,8 +125,8 @@ def by_datetime(
     move_data: DataFrame,
     start_datetime: Optional[Text] = None,
     end_datetime: Optional[Text] = None,
-    filter_out: Optional[bool] = False,
-    inplace: Optional[bool] = False,
+    filter_out: bool = False,
+    inplace: bool = False,
 ) -> Optional[DataFrame]:
     """
     Filters trajectories points according to specified time range.
@@ -174,8 +174,8 @@ def by_label(
     move_data: DataFrame,
     value: Any,
     label_name: Text,
-    filter_out: Optional[bool] = False,
-    inplace: Optional[bool] = False
+    filter_out: bool = False,
+    inplace: bool = False
 ) -> Optional[DataFrame]:
     """
     Filters trajectories points according to specified value and column label.
@@ -213,9 +213,9 @@ def by_label(
 def by_id(
     move_data: DataFrame,
     id_: Optional[int] = None,
-    label_id: Optional[Text] = TRAJ_ID,
-    filter_out: Optional[bool] = False,
-    inplace: Optional[bool] = False
+    label_id: Text = TRAJ_ID,
+    filter_out: bool = False,
+    inplace: bool = False
 ) -> Optional[DataFrame]:
     """
     Filters trajectories points according to specified trajectory id.
@@ -251,8 +251,8 @@ def by_id(
 def by_tid(
     move_data: DataFrame,
     tid_: Optional[Text] = None,
-    filter_out: Optional[bool] = False,
-    inplace: Optional[bool] = False
+    filter_out: bool = False,
+    inplace: bool = False
 ) -> Optional[DataFrame]:
     """
     Filters trajectories points according to a specified  trajectory tid.
@@ -287,8 +287,8 @@ def by_tid(
 def clean_consecutive_duplicates(
     move_data: DataFrame,
     subset: Optional[Union[int, Text]] = None,
-    keep: Optional[Union[Text, bool]] = 'first',
-    inplace: Optional[bool] = False
+    keep: Union[Text, bool] = 'first',
+    inplace: bool = False
 ) -> Optional[DataFrame]:
     """
     Removes consecutive duplicate rows of the Dataframe.
@@ -467,11 +467,11 @@ def _clean_gps(move_data: DataFrame, f: callable, **kwargs):
 
 def clean_gps_jumps_by_distance(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TRAJ_ID,
-    jump_coefficient: Optional[float] = 3.0,
-    threshold: Optional[float] = 1,
-    label_dtype: Optional[callable] = np.float64,
-    inplace: Optional[bool] = False,
+    label_id: Text = TRAJ_ID,
+    jump_coefficient: float = 3.0,
+    threshold: float = 1,
+    label_dtype: callable = np.float64,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Removes the trajectories points that are outliers from the dataframe.
@@ -525,10 +525,10 @@ def clean_gps_jumps_by_distance(
 
 def clean_gps_nearby_points_by_distances(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TRAJ_ID,
-    radius_area: Optional[float] = 10.0,
-    label_dtype: Optional[callable] = np.float64,
-    inplace: Optional[bool] = False,
+    label_id: Text = TRAJ_ID,
+    radius_area: float = 10.0,
+    label_dtype: callable = np.float64,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Removes points from the trajectories with smaller distance from the point before.
@@ -580,10 +580,10 @@ def clean_gps_nearby_points_by_distances(
 
 def clean_gps_nearby_points_by_speed(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TRAJ_ID,
-    speed_radius: Optional[float] = 0.0,
-    label_dtype: Optional[Callable] = np.float64,
-    inplace: Optional[bool] = False,
+    label_id: Text = TRAJ_ID,
+    speed_radius: float = 0.0,
+    label_dtype: Callable = np.float64,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Removes points from the trajectories with smaller speed of travel.
@@ -635,10 +635,10 @@ def clean_gps_nearby_points_by_speed(
 
 def clean_gps_speed_max_radius(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TRAJ_ID,
-    speed_max: Optional[float] = 50.0,
-    label_dtype: Optional[Callable] = np.float64,
-    inplace: Optional[bool] = False,
+    label_id: Text = TRAJ_ID,
+    speed_max: float = 50.0,
+    label_dtype: Callable = np.float64,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Removes trajectories points with higher speed.
@@ -699,9 +699,9 @@ def clean_gps_speed_max_radius(
 
 def clean_trajectories_with_few_points(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_tid: Optional[Text] = TID,
-    min_points_per_trajectory: Optional[int] = 2,
-    inplace: Optional[bool] = False
+    label_tid: Text = TID,
+    min_points_per_trajectory: int = 2,
+    inplace: bool = False
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Removes from the given dataframe, trajectories with fewer points.
@@ -776,11 +776,11 @@ def clean_trajectories_with_few_points(
 
 def clean_trajectories_short_and_few_points(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TID,
-    min_trajectory_distance: Optional[float] = 100,
-    min_points_per_trajectory: Optional[int] = 2,
-    label_dtype: Optional[Callable] = np.float64,
-    inplace: Optional[bool] = False,
+    label_id: Text = TID,
+    min_trajectory_distance: float = 100,
+    min_points_per_trajectory: int = 2,
+    label_dtype: Callable = np.float64,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Eliminates from the given dataframe trajectories with fewer points and shorter length.
@@ -864,10 +864,10 @@ def clean_trajectories_short_and_few_points(
 
 def clean_id_by_time_max(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Optional[Text] = TRAJ_ID,
-    time_max: Optional[float] = 3600,
-    label_dtype: Optional[Callable] = np.float64,
-    inplace: Optional[bool] = False,
+    label_id: Text = TRAJ_ID,
+    time_max: float = 3600,
+    label_dtype: Callable = np.float64,
+    inplace: bool = False,
 ) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
     """
     Clears GPS points with time by ID greater than a user-defined limit.
