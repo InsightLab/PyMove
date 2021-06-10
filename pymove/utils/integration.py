@@ -49,7 +49,12 @@ from pymove.utils.distances import haversine
 from pymove.utils.log import logger, progress_bar
 
 
-def union_poi_bank(data: DataFrame, label_poi: Text = TYPE_POI):
+def union_poi_bank(
+    data: DataFrame,
+    label_poi: Text = TYPE_POI,
+    banks: Optional[List[Text]] = None,
+    inplace: bool = False
+) -> Optional[DataFrame]:
     """
     Performs the union between the different bank categories.
 
@@ -61,6 +66,23 @@ def union_poi_bank(data: DataFrame, label_poi: Text = TYPE_POI):
         Input points of interest data
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
+    banks : list of str, optional
+        Names of poi refering to banks, by default
+            banks = [
+            'bancos_filiais',
+            'bancos_agencias',
+            'bancos_postos',
+            'bancos_PAE',
+            'bank',
+        ]
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
+
+    Returns
+    -------
+    DataFrame
+        data with poi or None
 
     Examples
     --------
@@ -90,20 +112,30 @@ def union_poi_bank(data: DataFrame, label_poi: Text = TYPE_POI):
     8   39.984606   116.319732    9         banks
     9   39.984555   116.319728   10         banks
     """
+    if not inplace:
+        data = data.copy()
     logger.debug('union bank categories to one category')
     logger.debug('... There are {} -- {}'.format(data[label_poi].nunique(), label_poi))
-    banks = [
-        'bancos_filiais',
-        'bancos_agencias',
-        'bancos_postos',
-        'bancos_PAE',
-        'bank',
-    ]
+    if banks is None:
+        banks = [
+            'bancos_filiais',
+            'bancos_agencias',
+            'bancos_postos',
+            'bancos_PAE',
+            'bank',
+        ]
     filter_bank = data[label_poi].isin(banks)
     data.at[data[filter_bank].index, label_poi] = 'banks'
+    if not inplace:
+        return data
 
 
-def union_poi_bus_station(data: DataFrame, label_poi: Text = TYPE_POI):
+def union_poi_bus_station(
+    data: DataFrame,
+    label_poi: Text = TYPE_POI,
+    bus_stations: Optional[List[Text]] = None,
+    inplace: bool = False
+) -> Optional[DataFrame]:
     """
     Performs the union between the different bus station categories.
 
@@ -115,6 +147,20 @@ def union_poi_bus_station(data: DataFrame, label_poi: Text = TYPE_POI):
         Input points of interest data
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
+    bus_stations : list of str, optional
+        Names of poi refering to bus_stations, by default
+            bus_stations = [
+                'transit_station',
+                'pontos_de_onibus'
+            ]
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
+
+    Returns
+    -------
+    DataFrame
+        data with poi or None
 
     Examples
     --------
@@ -130,7 +176,6 @@ def union_poi_bus_station(data: DataFrame, label_poi: Text = TYPE_POI):
     6   39.984674   116.319810   7        bus_station
     7   39.984623   116.319773   8        bus_station
     >>> union_poi_bus_station(pois_df)
-    >>> pois_df
               lat          lon  id           type_poi
     0   39.984094   116.319236   1        bus_station
     1   39.984198   116.319322   2        randomvalue
@@ -141,14 +186,28 @@ def union_poi_bus_station(data: DataFrame, label_poi: Text = TYPE_POI):
     6   39.984674   116.319810   7        bus_station
     7   39.984623   116.319773   8        bus_station
     """
+    if not inplace:
+        data = data.copy()
     logger.debug('union bus station categories to one category')
+    if bus_stations is None:
+        bus_stations = [
+            'transit_station',
+            'pontos_de_onibus'
+        ]
     filter_bus_station = data[label_poi].isin(
-        ['transit_station', 'pontos_de_onibus']
+        bus_stations
     )
     data.at[data[filter_bus_station].index, label_poi] = 'bus_station'
+    if not inplace:
+        return data
 
 
-def union_poi_bar_restaurant(data: DataFrame, label_poi: Text = TYPE_POI):
+def union_poi_bar_restaurant(
+    data: DataFrame,
+    label_poi: Text = TYPE_POI,
+    bar_restaurant: Optional[List[Text]] = None,
+    inplace: bool = False
+) -> Optional[DataFrame]:
     """
     Performs the union between bar and restaurant categories.
 
@@ -160,6 +219,20 @@ def union_poi_bar_restaurant(data: DataFrame, label_poi: Text = TYPE_POI):
         Input points of interest data
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
+    bar_restaurant : list of str, optional
+        Names of poi refering to bars or restaurants, by default
+         bar_restaurant = [
+            'restaurant',
+            'bar'
+        ]
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
+
+    Returns
+    -------
+    DataFrame
+        data with poi or None
 
     Examples
     --------
@@ -175,7 +248,6 @@ def union_poi_bar_restaurant(data: DataFrame, label_poi: Text = TYPE_POI):
     6   39.984674   116.319810    7        random123
     7   39.984623   116.319773    8              123
     >>> union_poi_bar_restaurant(pois_df)
-    >>> pois_df
               lat          lon   id         type_poi
     0   39.984094   116.319236    1   bar-restaurant
     1   39.984198   116.319322    2   bar-restaurant
@@ -186,12 +258,23 @@ def union_poi_bar_restaurant(data: DataFrame, label_poi: Text = TYPE_POI):
     6   39.984674   116.319810    7        random123
     7   39.984623   116.319773    8              123
     """
+    if not inplace:
+        data = data.copy()
     logger.debug('union restaurant and bar categories to one category')
-    filter_bar_restaurant = data[label_poi].isin(['restaurant', 'bar'])
+    if bar_restaurant is None:
+        bar_restaurant = ['restaurant', 'bar']
+    filter_bar_restaurant = data[label_poi].isin(bar_restaurant)
     data.at[data[filter_bar_restaurant].index, label_poi] = 'bar-restaurant'
+    if not inplace:
+        return data
 
 
-def union_poi_parks(data: DataFrame, label_poi: Text = TYPE_POI):
+def union_poi_parks(
+    data: DataFrame,
+    label_poi: Text = TYPE_POI,
+    parks: Optional[List[Text]] = None,
+    inplace: bool = False
+) -> Optional[DataFrame]:
     """
     Performs the union between park categories.
 
@@ -203,6 +286,20 @@ def union_poi_parks(data: DataFrame, label_poi: Text = TYPE_POI):
         Input points of interest data
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
+    parks : list of str, optional
+        Names of poi refering to parks, by default
+            parks = [
+                'pracas_e_parques',
+                'park'
+            ]
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
+
+    Returns
+    -------
+    DataFrame
+        data with poi or None
 
     Examples
     --------
@@ -228,12 +325,23 @@ def union_poi_parks(data: DataFrame, label_poi: Text = TYPE_POI):
     6   39.984674   116.319810    7              parks
     7   39.984623   116.319773    8              parks
     """
+    if not inplace:
+        data = data.copy()
     logger.debug('union parks categories to one category')
-    filter_parks = data[label_poi].isin(['pracas_e_parques', 'park'])
+    if parks is None:
+        parks = ['pracas_e_parques', 'park']
+    filter_parks = data[label_poi].isin(parks)
     data.at[data[filter_parks].index, label_poi] = 'parks'
+    if not inplace:
+        return data
 
 
-def union_poi_police(data: DataFrame, label_poi: Text = TYPE_POI):
+def union_poi_police(
+    data: DataFrame,
+    label_poi: Text = TYPE_POI,
+    police: Optional[List[Text]] = None,
+    inplace: bool = False
+) -> Optional[DataFrame]:
     """
     Performs the union between police categories.
 
@@ -245,6 +353,20 @@ def union_poi_police(data: DataFrame, label_poi: Text = TYPE_POI):
         Input points of interest data
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
+    police : list of str, optional
+        Names of poi refering to police stations, by default
+            police = [
+                'distritos_policiais',
+                'delegacia'
+            ]
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
+
+    Returns
+    -------
+    DataFrame
+        data with poi or None
 
     Examples
     --------
@@ -260,7 +382,6 @@ def union_poi_police(data: DataFrame, label_poi: Text = TYPE_POI):
     6   39.984674   116.319810    7                   123
     7   39.984623   116.319773    8           bus_station
     >>> union_poi_police(pois_df)
-    >>> pois_df
               lat          lon   id              type_poi
     0   39.984094   116.319236    1                police
     1   39.984198   116.319322    2                police
@@ -271,14 +392,23 @@ def union_poi_police(data: DataFrame, label_poi: Text = TYPE_POI):
     6   39.984674   116.319810    7                   123
     7   39.984623   116.319773    8           bus_station
     """
+    if not inplace:
+        data = data.copy()
     logger.debug('union distritos policies and police categories')
-    filter_police = data[label_poi] == 'distritos_policiais'
+    if police is None:
+        police = ['distritos_policiais', 'delegacia']
+    filter_police = data[label_poi].isin(police)
     data.at[data[filter_police].index, label_poi] = 'police'
+    if not inplace:
+        return data
 
 
 def join_collective_areas(
-    gdf_: DataFrame, gdf_rules_: DataFrame, label_geometry: Text = GEOMETRY
-):
+    data: DataFrame,
+    areas: DataFrame,
+    label_geometry: Text = GEOMETRY,
+    inplace: bool = False
+) -> Optional[DataFrame]:
     """
     Performs the integration between trajectories and collective areas.
 
@@ -287,17 +417,25 @@ def join_collective_areas(
 
     Parameters
     ----------
-    gdf_ : geopandas.GeoDataFrame
+    data : geopandas.GeoDataFrame
         The input trajectory data
-    gdf_rules_ : geopandas.GeoDataFrame
+    areas : geopandas.GeoDataFrame
         The input coletive areas data
     label_geometry : str, optional
         Label referring to the Point of Interest category, by default GEOMETRY
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
+
+    Returns
+    -------
+    DataFrame
+        data with joined geometries or None
 
     Examples
     --------
     >>> from pymove.utils.integration import join_collective_areas
-    >>> gdf.head()
+    >>> data
               lat          lon              datetime   id                     geometry
     0   39.984094   116.319236   2008-10-23 05:53:05    1   POINT (116.31924 39.98409)
     1   39.984198   116.319322   2008-10-23 05:53:06    1   POINT (116.31932 39.98420)
@@ -314,8 +452,8 @@ def join_collective_areas(
            POINT (116.30616 40.01412)
     1500                39.979009   116.326873   2008-10-24 00:11:29    1\
            POINT (116.32687 39.97901)
-    >>> join_collective_areas(gdf, area_c)
-    >>> gdf.head()
+    >>> join_collective_areas(data, area_c)
+
                                lat          lon              datetime   id\
                           geometry    violating
     0                    39.984094   116.319236   2008-10-23 05:53:05    1\
@@ -329,15 +467,19 @@ def join_collective_areas(
     4                    39.984217   116.319422   2008-10-23 05:53:21    1\
         POINT (116.31942 39.98422)        False
     """
+    if not inplace:
+        data = data.copy()
     logger.debug('Integration between trajectories and collectives areas')
 
-    polygons = gdf_rules_[label_geometry].unique()
-    gdf_[VIOLATING] = False
+    polygons = areas[label_geometry].unique()
+    data[VIOLATING] = False
     for p in progress_bar(polygons, desc='Joining trajectories and areas'):
-        # intersects = gdf_[label_geometry].apply(lambda x: x.intersects(p))
-        intersects = gdf_[label_geometry].intersects(p)
-        index = gdf_[intersects].index
-        gdf_.at[index, VIOLATING] = True
+        # intersects = data[label_geometry].apply(lambda x: x.intersects(p))
+        intersects = data[label_geometry].intersects(p)
+        index = data[intersects].index
+        data.at[index, VIOLATING] = True
+    if not inplace:
+        return data
 
 
 def _reset_and_creates_id_and_lat_lon(
