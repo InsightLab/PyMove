@@ -136,7 +136,7 @@ def test_union_poi_bank():
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     )
 
-    integration.union_poi_bank(pois_df, TYPE_POI)
+    integration.union_poi_bank(pois_df, TYPE_POI, inplace=True)
 
     assert_frame_equal(pois_df, expected)
 
@@ -163,7 +163,7 @@ def test_union_poi_bus_station():
         index=[0, 1, 2, 3, 4, 5, 6, 7]
     )
 
-    integration.union_poi_bus_station(pois_df, TYPE_POI)
+    integration.union_poi_bus_station(pois_df, TYPE_POI, inplace=True)
 
     assert_frame_equal(pois_df, expected)
 
@@ -190,7 +190,7 @@ def test_union_poi_bar_restaurant():
         index=[0, 1, 2, 3, 4, 5, 6, 7]
     )
 
-    integration.union_poi_bar_restaurant(pois_df, TYPE_POI)
+    integration.union_poi_bar_restaurant(pois_df, TYPE_POI, inplace=True)
 
     assert_frame_equal(pois_df, expected)
 
@@ -217,7 +217,7 @@ def test_union_poi_parks():
         index=[0, 1, 2, 3, 4, 5, 6, 7]
     )
 
-    integration.union_poi_parks(pois_df, TYPE_POI)
+    integration.union_poi_parks(pois_df, TYPE_POI, inplace=True)
 
     assert_frame_equal(pois_df, expected)
 
@@ -244,38 +244,35 @@ def test_union_poi_police():
         index=[0, 1, 2, 3, 4, 5, 6, 7]
     )
 
-    integration.union_poi_police(pois_df, TYPE_POI)
+    integration.union_poi_police(pois_df, TYPE_POI, inplace=True)
 
     assert_frame_equal(pois_df, expected)
 
 
-# Testes de Joins
 def test_join_colletive_areas():
     move_df = DataFrame(
         data=list_move,
-        columns=[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID])
-    gdf = geopandas.GeoDataFrame(
+        columns=[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
+    )
+    move_df = geopandas.GeoDataFrame(
         move_df, geometry=geopandas.points_from_xy(
             move_df.lon, move_df.lat
         )
     )
 
-    indexes_ac = np.linspace(0, gdf.shape[0], 5)
-    area_c = gdf[gdf.index.isin(indexes_ac)].copy()
+    indexes_ac = np.linspace(0, move_df.shape[0], 5)
+    area_c = move_df[move_df.index.isin(indexes_ac)].copy()
 
-    integration.join_collective_areas(gdf, area_c)
+    integration.join_collective_areas(move_df, area_c, inplace=True)
 
-    expected_df = DataFrame(
-        data=list_move,
-        columns=[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID])
     expected = geopandas.GeoDataFrame(
         move_df, geometry=geopandas.points_from_xy(
             move_df.lon, move_df.lat
         )
     )
-
     expected[VIOLATING] = [True, False, True, False, True, False, True, False, False]
-    assert_frame_equal(gdf, expected)
+
+    assert_frame_equal(move_df, expected)
 
 
 def test__reset_and_creates_id_and_lat_lon():
