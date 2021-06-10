@@ -834,14 +834,14 @@ def join_with_pois_by_category(
     label_id: Optional[Text] = TRAJ_ID
 ):
     """
-    Performs the integration between trajectories of interest points.
+    Performs the integration between trajectories and points of interest.
 
     Generating new columns referring to the
     category and distance from the nearest point of interest
     that has this category at each point of the trajectory.
 
-    Examples
-    --------
+    Parameters
+    ----------
     data : DataFrame
         The input trajectory data.
     df_pois : DataFrame
@@ -851,8 +851,8 @@ def join_with_pois_by_category(
     label_id : str, optional
         Label of df_pois referring to the point of interest id, by default TRAJ_ID
 
-    Returns
-    -------
+    Examples
+    --------
     >>> from pymove.utils.integration import join_with_pois_by_category
     >>> POIs.head()
                       unique_id          osmid   element_type     amenity   fee/
