@@ -5,7 +5,7 @@ compress_segment_stop_to_point
 
 """
 
-from typing import Optional, Text
+from typing import Text
 
 import numpy as np
 from pandas import DataFrame
@@ -28,14 +28,14 @@ from pymove.utils.log import logger, progress_bar, timer_decorator
 @timer_decorator
 def compress_segment_stop_to_point(
     move_data: DataFrame,
-    label_segment: Optional[Text] = SEGMENT_STOP,
-    label_stop: Optional[Text] = STOP,
-    point_mean: Optional[Text] = 'default',
-    drop_moves: Optional[bool] = False,
-    label_id: Optional[Text] = TRAJ_ID,
-    dist_radius: Optional[float] = 30,
-    time_radius: Optional[float] = 900,
-    inplace: Optional[bool] = False,
+    label_segment: Text = SEGMENT_STOP,
+    label_stop: Text = STOP,
+    point_mean: Text = 'default',
+    drop_moves: bool = False,
+    label_id: Text = TRAJ_ID,
+    dist_radius: float = 30,
+    time_radius: float = 900,
+    inplace: bool = False,
 ) -> DataFrame:
     """
     Compress the trajectories using the stop points in the dataframe.

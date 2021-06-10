@@ -8,12 +8,8 @@ help:
 
 dev:
 	pip install -r requirements-dev.txt
+	pip install -e .
 	pre-commit install
-
-ci:
-	python -m pip install --upgrade pip
-	pip install flake8 pep8-naming flake8-bugbear flake8-docstrings pytest coverage geopandas
-	pip install .
 
 clean:
 	rm -rf `find . -type d -name .pytest_cache`
@@ -23,14 +19,15 @@ clean:
 	rm -f .coverage
 
 test: clean
-	pytest
+	pytest pymove
 
 coverage: clean
-	coverage run -m pytest
+	coverage run -m pytest pymove
 	coverage report
 
 lint: clean
-	flake8
+	flake8 pymove
+	mypy pymove
 
 docs: clean
 	cp docs/examples/notebooks.rst docs

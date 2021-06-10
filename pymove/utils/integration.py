@@ -49,7 +49,7 @@ from pymove.utils.distances import haversine
 from pymove.utils.log import logger, progress_bar
 
 
-def union_poi_bank(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
+def union_poi_bank(data: DataFrame, label_poi: Text = TYPE_POI):
     """
     Performs the union between the different bank categories.
 
@@ -103,7 +103,7 @@ def union_poi_bank(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
     data.at[data[filter_bank].index, label_poi] = 'banks'
 
 
-def union_poi_bus_station(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
+def union_poi_bus_station(data: DataFrame, label_poi: Text = TYPE_POI):
     """
     Performs the union between the different bus station categories.
 
@@ -148,7 +148,7 @@ def union_poi_bus_station(data: DataFrame, label_poi: Optional[Text] = TYPE_POI)
     data.at[data[filter_bus_station].index, label_poi] = 'bus_station'
 
 
-def union_poi_bar_restaurant(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
+def union_poi_bar_restaurant(data: DataFrame, label_poi: Text = TYPE_POI):
     """
     Performs the union between bar and restaurant categories.
 
@@ -191,7 +191,7 @@ def union_poi_bar_restaurant(data: DataFrame, label_poi: Optional[Text] = TYPE_P
     data.at[data[filter_bar_restaurant].index, label_poi] = 'bar-restaurant'
 
 
-def union_poi_parks(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
+def union_poi_parks(data: DataFrame, label_poi: Text = TYPE_POI):
     """
     Performs the union between park categories.
 
@@ -233,7 +233,7 @@ def union_poi_parks(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
     data.at[data[filter_parks].index, label_poi] = 'parks'
 
 
-def union_poi_police(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
+def union_poi_police(data: DataFrame, label_poi: Text = TYPE_POI):
     """
     Performs the union between police categories.
 
@@ -277,7 +277,7 @@ def union_poi_police(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
 
 
 def join_collective_areas(
-    gdf_: DataFrame, gdf_rules_: DataFrame, label_geometry: Optional[Text] = GEOMETRY
+    gdf_: DataFrame, gdf_rules_: DataFrame, label_geometry: Text = GEOMETRY
 ):
     """
     Performs the integration between trajectories and collective areas.
@@ -343,9 +343,9 @@ def join_collective_areas(
 def _reset_and_creates_id_and_lat_lon(
     data: DataFrame,
     df_pois: DataFrame,
-    lat_lon_poi: Optional[bool] = True,
-    reset_index: Optional[bool] = True
-) -> Tuple[ndarray, ndarray, ndarray, ndarray]:
+    lat_lon_poi: bool = True,
+    reset_index: bool = True
+) -> Tuple[ndarray, ndarray, ndarray, ndarray, ndarray]:
     """
     Resets the indexes of the dataframes.
 
@@ -512,7 +512,7 @@ def _reset_set_window__and_creates_event_id_type(
 
 
 def _reset_set_window_and_creates_event_id_type_all(
-    data: DataFrame, df_events: DataFrame, label_date: Text, time_window: int
+    data: DataFrame, df_events: DataFrame, label_date: Text, time_window: float
 ) -> Tuple[Series, Series, ndarray, ndarray, ndarray]:
     """
     Resets the indexes of the dataframes.
@@ -529,7 +529,7 @@ def _reset_set_window_and_creates_event_id_type_all(
         The input event point of interest data.
     label_date : str
         Label of data referring to the datetime.
-    time_window : Int
+    time_window : float
         Number of seconds of the time window.
 
     Returns
@@ -606,9 +606,9 @@ def _reset_set_window_and_creates_event_id_type_all(
 def join_with_pois(
     data: DataFrame,
     df_pois: DataFrame,
-    label_id: Optional[Text] = TRAJ_ID,
-    label_poi_name: Optional[Text] = NAME_POI,
-    reset_index: Optional[Text] = True
+    label_id: Text = TRAJ_ID,
+    label_poi_name: Text = NAME_POI,
+    reset_index: bool = True
 ):
     """
     Performs the integration between trajectories and points of interest.
@@ -709,10 +709,10 @@ def join_with_pois(
 def join_with_pois_optimizer(
     data,
     df_pois: DataFrame,
-    label_id: Optional[Text] = TRAJ_ID,
-    label_poi_name: Optional[Text] = NAME_POI,
+    label_id: Text = TRAJ_ID,
+    label_poi_name: Text = NAME_POI,
     dist_poi: Optional[List] = None,
-    reset_index: Optional[Text] = True
+    reset_index: bool = True
 ):
     """
     Performs the integration between trajectories and points of interest.
@@ -770,6 +770,8 @@ def join_with_pois_optimizer(
      label_poi_name='name', dist_poi=np.array([100,9,1,50,50,10,20]))
     'the size of the dist_poi is different from the size of pois'
     """
+    if dist_poi is None:
+        dist_poi = []
     if len(df_pois[label_poi_name].unique()) == len(dist_poi):
         values = _reset_and_creates_id_and_lat_lon(data, df_pois, False, reset_index)
         minimum_distances, ids_pois, tag_pois, lat_poi, lon_poi = values
@@ -788,7 +790,7 @@ def join_with_pois_optimizer(
 
             # First iteration is minimum distances
             if idx == 0:
-                minimum_distances = np.float64(
+                minimum_distances = np.array(
                     haversine(
                         lat_poi,
                         lon_poi,
@@ -830,8 +832,8 @@ def join_with_pois_optimizer(
 def join_with_pois_by_category(
     data: DataFrame,
     df_pois: DataFrame,
-    label_category: Optional[Text] = TYPE_POI,
-    label_id: Optional[Text] = TRAJ_ID
+    label_category: Text = TYPE_POI,
+    label_id: Text = TRAJ_ID
 ):
     """
     Performs the integration between trajectories and points of interest.
@@ -945,10 +947,10 @@ def join_with_pois_by_category(
 def join_with_poi_datetime(
     data: DataFrame,
     df_events: DataFrame,
-    label_date: Optional[Text] = DATETIME,
-    time_window: Optional[int] = 900,
-    label_event_id: Optional[Text] = EVENT_ID,
-    label_event_type: Optional[Text] = EVENT_TYPE
+    label_date: Text = DATETIME,
+    time_window: int = 900,
+    label_event_id: Text = EVENT_ID,
+    label_event_type: Text = EVENT_TYPE
 ):
     """
     Performs the integration between trajectories and points of interest.
@@ -1013,6 +1015,12 @@ def join_with_poi_datetime(
         269492188   4436.297310              toilets
     4   39.984217   116.319422   2008-10-23 05:53:21   1\
         269492188   4439.154806              toilets
+
+    Raises
+    ------
+    ValueError
+        If feature generation fails
+
     """
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, label_date, time_window
@@ -1024,6 +1032,10 @@ def join_with_poi_datetime(
         df_filtered = filters.by_datetime(
             df_events, window_starts[idx], window_ends[idx]
         )
+
+        if df_filtered is None:
+            raise ValueError('Filter datetime failed!')
+
         size_filter = df_filtered.shape[0]
 
         if size_filter > 0:
@@ -1060,10 +1072,10 @@ def join_with_poi_datetime(
 def join_with_poi_datetime_optimizer(
     data: DataFrame,
     df_events: DataFrame,
-    label_date: Optional[Text] = DATETIME,
-    time_window: Optional[int] = 900,
-    label_event_id: Optional[Text] = EVENT_ID,
-    label_event_type: Optional[Text] = EVENT_TYPE
+    label_date: Text = DATETIME,
+    time_window: int = 900,
+    label_event_id: Text = EVENT_ID,
+    label_event_type: Text = EVENT_TYPE
 ):
     """
     Performs a optimized integration between trajectories and points of events.
@@ -1127,6 +1139,12 @@ def join_with_poi_datetime_optimizer(
         269492188   4436.297310              toilets
     4   39.984217   116.319422   2008-10-23 05:53:21   1\
         269492188   4439.154806              toilets
+
+    Raises
+    ------
+    ValueError
+        If feature generation fails
+
     """
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, label_date, time_window
@@ -1149,6 +1167,9 @@ def join_with_poi_datetime_optimizer(
         df_filtered = filters.by_datetime(
             data, window_starts[idx], window_ends[idx]
         )
+
+        if df_filtered is None:
+            raise ValueError('Filtering datetime failed!')
 
         size_filter = df_filtered.shape[0]
 
@@ -1196,11 +1217,11 @@ def join_with_poi_datetime_optimizer(
 def join_with_pois_by_dist_and_datetime(
     data: DataFrame,
     df_pois: DataFrame,
-    label_date: Optional[Text] = DATETIME,
-    label_event_id: Optional[Text] = EVENT_ID,
-    label_event_type: Optional[Text] = EVENT_TYPE,
-    time_window: Optional[float] = 3600,
-    radius: Optional[float] = 1000,
+    label_date: Text = DATETIME,
+    label_event_id: Text = EVENT_ID,
+    label_event_type: Text = EVENT_TYPE,
+    time_window: float = 3600,
+    radius: float = 1000,
 ):
     """
     Performs the integration between trajectories and points of interest.
@@ -1265,6 +1286,12 @@ def join_with_pois_by_dist_and_datetime(
              None         None                  None
     4   39.984217   116.319422   2008-10-23 05:53:21   1\
              None         None                  None
+
+    Raises
+    ------
+    ValueError
+        If feature generation fails
+
     """
     if label_date not in df_pois:
         raise KeyError("POI's DataFrame must contain a %s column" % label_date)
@@ -1285,8 +1312,11 @@ def join_with_pois_by_dist_and_datetime(
 
         # filter event by radius
         df_filtered = filters.by_bbox(
-            df_pois, bbox
+            df_pois, bbox, inplace=False
         )
+
+        if df_filtered is None:
+            raise ValueError('Filtering bbox failed')
 
         # filter event by datetime
         filters.by_datetime(
@@ -1332,10 +1362,10 @@ def join_with_pois_by_dist_and_datetime(
 def join_with_home_by_id(
     data: DataFrame,
     df_home: DataFrame,
-    label_id: Optional[Text] = TRAJ_ID,
-    label_address: Optional[Text] = ADDRESS,
-    label_city: Optional[Text] = CITY,
-    drop_id_without_home: Optional[bool] = False,
+    label_id: Text = TRAJ_ID,
+    label_address: Text = ADDRESS,
+    label_city: Text = CITY,
+    drop_id_without_home: bool = False,
 ):
     """
     Performs the integration between trajectories and home points.
@@ -1437,12 +1467,12 @@ def join_with_home_by_id(
 
 def merge_home_with_poi(
     data: DataFrame,
-    label_dist_poi: Optional[Text] = DIST_POI,
-    label_name_poi: Optional[Text] = NAME_POI,
-    label_id_poi: Optional[Text] = ID_POI,
-    label_home: Optional[Text] = HOME,
-    label_dist_home: Optional[Text] = DIST_HOME,
-    drop_columns: Optional[bool] = True,
+    label_dist_poi: Text = DIST_POI,
+    label_name_poi: Text = NAME_POI,
+    label_id_poi: Text = ID_POI,
+    label_home: Text = HOME,
+    label_dist_home: Text = DIST_HOME,
+    drop_columns: bool = True,
 ):
     """
     Performs or merges the points of interest and the trajectories.

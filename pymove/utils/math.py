@@ -203,7 +203,7 @@ def arrays_avg(
             'values_array and qt_array must have the same number of rows'
         )
 
-    result = 0
+    result = 0.
 
     for i, j in zip(values_array, weights_array):
         result += i * j
@@ -238,8 +238,8 @@ def array_stats(values_array: List[float]) -> Tuple[float, float, int]:
     >>> print(array_stats(list), type(array_stats(list)))
     (39.5, 327.25, 5) <class 'tuple'>
     """
-    sum_ = 0
-    sum_sq = 0
+    sum_ = 0.
+    sum_sq = 0.
     n = 0
     for item in values_array:
         sum_ += item

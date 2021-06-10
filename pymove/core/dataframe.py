@@ -1,6 +1,6 @@
 """MoveDataFrame class."""
 
-from typing import Dict, List, Optional, Text, Union
+from typing import Dict, List, Text, Union
 
 from dateutil.parser._parser import ParserError
 from pandas.core.frame import DataFrame
@@ -22,12 +22,12 @@ class MoveDataFrame:
     def __new__(
         self,
         data: Union[DataFrame, Dict, List],
-        latitude: Optional[Text] = LATITUDE,
-        longitude: Optional[Text] = LONGITUDE,
-        datetime: Optional[Text] = DATETIME,
-        traj_id: Optional[Text] = TRAJ_ID,
-        type_: Optional[Text] = TYPE_PANDAS,
-        n_partitions: Optional[int] = 1,
+        latitude: Text = LATITUDE,
+        longitude: Text = LONGITUDE,
+        datetime: Text = DATETIME,
+        traj_id: Text = TRAJ_ID,
+        type_: Text = TYPE_PANDAS,
+        n_partitions: int = 1,
     ):
         """
         Creates the PyMove dataframe, which must contain latitude, longitude and datetime.
@@ -48,7 +48,7 @@ class MoveDataFrame:
             Represents column name trajectory id, by default TRAJ_ID
         type_ : str, optional
             Number of partitions of the dask dataframe, by default TYPE_PANDAS
-        n_partitions : Optional[int], optional
+        n_partitions : int, optional
             Amount of partitions for dask dataframe, by default 1
 
         Raises
