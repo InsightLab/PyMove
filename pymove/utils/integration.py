@@ -62,6 +62,33 @@ def union_poi_bank(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import union_poi_bank
+    >>> pois_df
+              lat          lon   id          type_poi
+    0   39.984094   116.319236    1              bank
+    1   39.984198   116.319322    2       randomvalue
+    2   39.984224   116.319402    3     bancos_postos
+    3   39.984211   116.319389    4       randomvalue
+    4   39.984217   116.319422    5        bancos_PAE
+    5   39.984710   116.319865    6     bancos_postos
+    6   39.984674   116.319810    7   bancos_agencias
+    7   39.984623   116.319773    8    bancos_filiais
+    8   39.984606   116.319732    9             banks
+    9   39.984555   116.319728   10             banks
+    >>> union_poi_bank(pois_df)
+              lat          lon   id      type_poi
+    0   39.984094   116.319236    1         banks
+    1   39.984198   116.319322    2   randomvalue
+    2   39.984224   116.319402    3         banks
+    3   39.984211   116.319389    4   randomvalue
+    4   39.984217   116.319422    5         banks
+    5   39.984710   116.319865    6         banks
+    6   39.984674   116.319810    7         banks
+    7   39.984623   116.319773    8         banks
+    8   39.984606   116.319732    9         banks
+    9   39.984555   116.319728   10         banks
     """
     logger.debug('union bank categories to one category')
     logger.debug('... There are {} -- {}'.format(data[label_poi].nunique(), label_poi))
@@ -89,6 +116,30 @@ def union_poi_bus_station(data: DataFrame, label_poi: Optional[Text] = TYPE_POI)
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import union_poi_bus_station
+    >>> pois_df
+              lat          lon  id           type_poi
+    0   39.984094   116.319236   1    transit_station
+    1   39.984198   116.319322   2        randomvalue
+    2   39.984224   116.319402   3    transit_station
+    3   39.984211   116.319389   4   pontos_de_onibus
+    4   39.984217   116.319422   5    transit_station
+    5   39.984710   116.319865   6        randomvalue
+    6   39.984674   116.319810   7        bus_station
+    7   39.984623   116.319773   8        bus_station
+    >>> union_poi_bus_station(pois_df)
+    >>> pois_df
+              lat          lon  id           type_poi
+    0   39.984094   116.319236   1        bus_station
+    1   39.984198   116.319322   2        randomvalue
+    2   39.984224   116.319402   3        bus_station
+    3   39.984211   116.319389   4        bus_station
+    4   39.984217   116.319422   5        bus_station
+    5   39.984710   116.319865   6        randomvalue
+    6   39.984674   116.319810   7        bus_station
+    7   39.984623   116.319773   8        bus_station
     """
     logger.debug('union bus station categories to one category')
     filter_bus_station = data[label_poi].isin(
@@ -110,6 +161,30 @@ def union_poi_bar_restaurant(data: DataFrame, label_poi: Optional[Text] = TYPE_P
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import union_poi_bar_restaurant
+    >>> pois_df
+              lat          lon   id         type_poi
+    0   39.984094   116.319236    1       restaurant
+    1   39.984198   116.319322    2       restaurant
+    2   39.984224   116.319402    3      randomvalue
+    3   39.984211   116.319389    4              bar
+    4   39.984217   116.319422    5              bar
+    5   39.984710   116.319865    6   bar-restaurant
+    6   39.984674   116.319810    7        random123
+    7   39.984623   116.319773    8              123
+    >>> union_poi_bar_restaurant(pois_df)
+    >>> pois_df
+              lat          lon   id         type_poi
+    0   39.984094   116.319236    1   bar-restaurant
+    1   39.984198   116.319322    2   bar-restaurant
+    2   39.984224   116.319402    3      randomvalue
+    3   39.984211   116.319389    4   bar-restaurant
+    4   39.984217   116.319422    5   bar-restaurant
+    5   39.984710   116.319865    6   bar-restaurant
+    6   39.984674   116.319810    7        random123
+    7   39.984623   116.319773    8              123
     """
     logger.debug('union restaurant and bar categories to one category')
     filter_bar_restaurant = data[label_poi].isin(['restaurant', 'bar'])
@@ -129,6 +204,29 @@ def union_poi_parks(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import union_poi_parks
+    >>> pois_df
+              lat          lon   id           type_poi
+    0   39.984094   116.319236    1   pracas_e_parques
+    1   39.984198   116.319322    2               park
+    2   39.984224   116.319402    3              parks
+    3   39.984211   116.319389    4             random
+    4   39.984217   116.319422    5                123
+    5   39.984710   116.319865    6               park
+    6   39.984674   116.319810    7              parks
+    7   39.984623   116.319773    8   pracas_e_parques
+    >>> union_poi_parks(pois_df)
+              lat          lon   id           type_poi
+    0   39.984094   116.319236    1              parks
+    1   39.984198   116.319322    2              parks
+    2   39.984224   116.319402    3              parks
+    3   39.984211   116.319389    4             random
+    4   39.984217   116.319422    5                123
+    5   39.984710   116.319865    6              parks
+    6   39.984674   116.319810    7              parks
+    7   39.984623   116.319773    8              parks
     """
     logger.debug('union parks categories to one category')
     filter_parks = data[label_poi].isin(['pracas_e_parques', 'park'])
@@ -148,6 +246,30 @@ def union_poi_police(data: DataFrame, label_poi: Optional[Text] = TYPE_POI):
     label_poi : str, optional
         Label referring to the Point of Interest category, by default TYPE_POI
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import union_poi_police
+    >>> pois_df
+              lat          lon   id              type_poi
+    0   39.984094   116.319236    1   distritos_policiais
+    1   39.984198   116.319322    2                police
+    2   39.984224   116.319402    3                police
+    3   39.984211   116.319389    4   distritos_policiais
+    4   39.984217   116.319422    5                random
+    5   39.984710   116.319865    6           randomvalue
+    6   39.984674   116.319810    7                   123
+    7   39.984623   116.319773    8           bus_station
+    >>> union_poi_police(pois_df)
+    >>> pois_df
+              lat          lon   id              type_poi
+    0   39.984094   116.319236    1                police
+    1   39.984198   116.319322    2                police
+    2   39.984224   116.319402    3                police
+    3   39.984211   116.319389    4                police
+    4   39.984217   116.319422    5                random
+    5   39.984710   116.319865    6           randomvalue
+    6   39.984674   116.319810    7                   123
+    7   39.984623   116.319773    8           bus_station
     """
     logger.debug('union distritos policies and police categories')
     filter_police = data[label_poi] == 'distritos_policiais'
@@ -172,6 +294,40 @@ def join_collective_areas(
     label_geometry : str, optional
         Label referring to the Point of Interest category, by default GEOMETRY
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import join_collective_areas
+    >>> gdf.head()
+              lat          lon              datetime   id                     geometry
+    0   39.984094   116.319236   2008-10-23 05:53:05    1   POINT (116.31924 39.98409)
+    1   39.984198   116.319322   2008-10-23 05:53:06    1   POINT (116.31932 39.98420)
+    2   39.984224   116.319402   2008-10-23 05:53:11    1   POINT (116.31940 39.98422)
+    3   39.984211   116.319389   2008-10-23 05:53:16    1   POINT (116.31939 39.98421)
+    4   39.984217   116.319422   2008-10-23 05:53:21    1   POINT (116.31942 39.98422)
+    >>> area_c
+                              lat          lon              datetime   id    geometry\
+    0                   39.984094   116.319236   2008-10-23 05:53:05    1\
+           POINT (116.31924 39.98409)
+    500                 40.006436   116.317701   2008-10-23 10:53:31    1\
+           POINT (116.31770 40.00644)
+    1000                40.014125   116.306159   2008-10-23 23:43:56    1\
+           POINT (116.30616 40.01412)
+    1500                39.979009   116.326873   2008-10-24 00:11:29    1\
+           POINT (116.32687 39.97901)
+    >>> join_collective_areas(gdf, area_c)
+    >>> gdf.head()
+                               lat          lon              datetime   id\
+                          geometry    violating
+    0                    39.984094   116.319236   2008-10-23 05:53:05    1\
+        POINT (116.31924 39.98409)         True
+    1                    39.984198   116.319322   2008-10-23 05:53:06    1\
+        POINT (116.31932 39.98420)        False
+    2                    39.984224   116.319402   2008-10-23 05:53:11    1\
+        POINT (116.31940 39.98422)        False
+    3                    39.984211   116.319389   2008-10-23 05:53:16    1\
+        POINT (116.31939 39.98421)        False
+    4                    39.984217   116.319422   2008-10-23 05:53:21    1\
+        POINT (116.31942 39.98422)        False
     """
     logger.debug('Integration between trajectories and collectives areas')
 
@@ -214,6 +370,31 @@ def _reset_and_creates_id_and_lat_lon(
     -------
     distances, ids, tags, lat, lon: arrays with default values for join operation
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import _reset_and_creates_id_and_lat_lon
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984559   116.326696   2008-10-23 10:37:26    1
+    2   40.002899   116.321520   2008-10-23 10:50:16    1
+    3   40.016238   116.307691   2008-10-23 11:03:06    1
+    4   40.013814   116.306525   2008-10-23 11:58:33    2
+    >>> pois.head()
+              lat          lon   id     type_poi                  name_poi
+    0   39.984094   116.319236    1      policia            distrito_pol_1
+    1   39.991013   116.326384    2      policia           policia_federal
+    2   40.010000   116.312615    3     comercio       supermercado_aroldo
+    3   40.013821   116.306531    4   show forro_               tropykalia
+    4   40.008099   116.317711    5   risca-faca   rinha_de_galo_world_cup
+    >>> _reset_and_creates_id_and_lat_lon(move_df, pois)
+    (array([inf, inf, inf, inf, inf, inf, inf, inf, inf]),
+    array(['', '', '', '', '', '', '', '', ''], dtype=object),
+    array(['', '', '', '', '', '', '', '', ''], dtype=object),
+    array([inf, inf, inf, inf, inf, inf, inf]),
+    array([inf, inf, inf, inf, inf, inf, inf]))
+    >>> print(type(_reset_and_creates_id_and_lat_lon(move_df, pois)))
+    <class 'tuple'>
     """
     if reset_index:
         logger.debug('... Resetting index to operation...')
@@ -264,6 +445,53 @@ def _reset_set_window__and_creates_event_id_type(
     -------
     window_starts, window_ends, current_distances, event_id, event_type
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import
+    _reset_set_window__and_creates_event_id_type
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984559   116.326696   2008-10-23 10:37:26    1
+    2   40.002899   116.321520   2008-10-23 10:50:16    1
+    3   40.016238   116.307691   2008-10-23 11:03:06    1
+    4   40.013814   116.306525   2008-10-23 11:58:33    2
+    >>> pois_df
+                       lat          lon   event_id              datetime\
+                event_type
+    0            39.984094   116.319236          1   2008-10-24 01:57:57\
+        show do tropykalia
+    1            39.991013   116.326384          2   2008-10-24 00:22:01\
+      evento da prefeitura
+    2            40.010000   116.312615          3   2008-10-25 00:21:01\
+          show do seu joao
+    3            40.013821   116.306531          4   2008-10-26 00:22:01\
+                     missa
+    >>> _reset_set_window__and_creates_event_id_type(move_df, pois,
+     'datetime', 600)
+        (0   2008-10-23 05:43:05
+    1   2008-10-23 10:27:26
+    2   2008-10-23 10:40:16
+    3   2008-10-23 10:53:06
+    4   2008-10-23 11:48:33
+    5   2008-10-23 23:40:45
+    6   2008-10-23 23:52:14
+    7   2008-10-24 00:12:01
+    8   2008-10-24 01:47:57
+    Name: datetime, dtype: datetime64[ns],
+    0   2008-10-23 06:03:05
+    1   2008-10-23 10:47:26
+    2   2008-10-23 11:00:16
+    3   2008-10-23 11:13:06
+    4   2008-10-23 12:08:33
+    5   2008-10-24 00:00:45
+    6   2008-10-24 00:12:14
+    7   2008-10-24 00:32:01
+    8   2008-10-24 02:07:57
+    Name: datetime, dtype: datetime64[ns],
+    array([inf, inf, inf, inf, inf, inf, inf, inf, inf]),
+    array(['', '', '', '', '', '', '', '', ''], dtype=object),
+    array(['', '', '', '', '', '', '', '', ''], dtype=object))
     """
     # get a vector with windows time to each point
     data.reset_index(drop=True, inplace=True)
@@ -308,6 +536,54 @@ def _reset_set_window_and_creates_event_id_type_all(
     -------
     window_starts, window_ends, current_distances, event_id, event_type
         arrays with default values for join operation
+
+    Examples
+    --------
+    >>> from pymove.utils.integration import
+    _reset_set_window_and_creates_event_id_type_all
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984559   116.326696   2008-10-23 10:37:26    1
+    2   40.002899   116.321520   2008-10-23 10:50:16    1
+    3   40.016238   116.307691   2008-10-23 11:03:06    1
+    4   40.013814   116.306525   2008-10-23 11:58:33    2
+    >>> pois_df
+                       lat          lon   event_id              datetime\
+                event_type
+    0            39.984094   116.319236          1   2008-10-24 01:57:57\
+        show do tropykalia
+    1            39.991013   116.326384          2   2008-10-24 00:22:01\
+      evento da prefeitura
+    2            40.010000   116.312615          3   2008-10-25 00:21:01\
+          show do seu joao
+    3            40.013821   116.306531          4   2008-10-26 00:22:01\
+                     missa
+    >>> _reset_set_window_and_creates_event_id_type_all(move_df, pois,
+     'datetime', 600)
+        (0   2008-10-23 05:43:05
+    1   2008-10-23 10:27:26
+    2   2008-10-23 10:40:16
+    3   2008-10-23 10:53:06
+    4   2008-10-23 11:48:33
+    5   2008-10-23 23:40:45
+    6   2008-10-23 23:52:14
+    7   2008-10-24 00:12:01
+    8   2008-10-24 01:47:57
+    Name: datetime, dtype: datetime64[ns],
+    0   2008-10-23 06:03:05
+    1   2008-10-23 10:47:26
+    2   2008-10-23 11:00:16
+    3   2008-10-23 11:13:06
+    4   2008-10-23 12:08:33
+    5   2008-10-24 00:00:45
+    6   2008-10-24 00:12:14
+    7   2008-10-24 00:32:01
+    8   2008-10-24 02:07:57
+    Name: datetime, dtype: datetime64[ns],
+    array([None, None, None, None, None, None, None, None, None], dtype=object),
+    array([None, None, None, None, None, None, None, None, None], dtype=object),
+    array([None, None, None, None, None, None, None, None, None], dtype=object))
     """
     # get a vector with windows time to each point
     data.reset_index(drop=True, inplace=True)
@@ -355,6 +631,45 @@ def join_with_pois(
         Flag for reset index of the df_pois and data dataframes before the join,
         by default True
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import join_with_pois
+    >>>  POIs.head()
+                      unique_id          osmid   element_type     amenity   fee\
+                          geometry
+    0               node/269492188   269492188           node     toilets    no\
+        POINT (116.26750 39.98087)
+    1               node/274942287   274942287           node     toilets   NaN\
+        POINT (116.27358 39.99664)
+    2               node/276320137   276320137           node   fast_food   NaN\
+        POINT (116.33756 39.97541)
+    3               node/276320142   276320142           node     massage   NaN\
+        POINT (116.33751 39.97546)
+    4               node/286242547   286242547           node     toilets   NaN\
+        POINT (116.19982 40.00670)
+    ....
+    >>> move_df.head()
+              lat          lon              datetime  id
+    0   39.984094   116.319236   2008-10-23 05:53:05   1
+    1   39.984198   116.319322   2008-10-23 05:53:06   1
+    2   39.984224   116.319402   2008-10-23 05:53:11   1
+    3   39.984211   116.319389   2008-10-23 05:53:16   1
+    4   39.984217   116.319422   2008-10-23 05:53:21   1
+    ...
+    >>> join_with_pois(move_df, POIs, label_id='osmid', label_poi_name='name')
+    >>> move_df.head()
+              lat          lon              datetime  id\
+           id_poi      dist_poi             name_poi
+    0   39.984094   116.319236   2008-10-23 05:53:05   1\
+       5572452688   116.862844     太平洋影城(中关村店)
+    1   39.984198   116.319322   2008-10-23 05:53:06   1\
+       5572452688   119.142692     太平洋影城(中关村店)
+    2   39.984224   116.319402   2008-10-23 05:53:11   1\
+       5572452688   116.595117     太平洋影城(中关村店)
+    3   39.984211   116.319389   2008-10-23 05:53:16   1\
+       5572452688   116.257378     太平洋影城(中关村店)
+    4   39.984217   116.319422   2008-10-23 05:53:21   1\
+       5572452688   114.886759     太平洋影城(中关村店)
     """
     values = _reset_and_creates_id_and_lat_lon(data, df_pois, True, reset_index)
     current_distances, ids_pois, tag_pois, lat_user, lon_user = values
@@ -425,6 +740,35 @@ def join_with_pois_optimizer(
         Flag for reset index of the df_pois and data dataframes before the join,
         by default True
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import join_with_pois_optimizer
+    >>> from pymove.utils.integration import join_with_pois
+    >>>  POIs.head()
+                      unique_id          osmid   element_type     amenity   fee\
+                          geometry
+    0               node/269492188   269492188           node     toilets    no\
+        POINT (116.26750 39.98087)
+    1               node/274942287   274942287           node     toilets   NaN\
+        POINT (116.27358 39.99664)
+    2               node/276320137   276320137           node   fast_food   NaN\
+        POINT (116.33756 39.97541)
+    3               node/276320142   276320142           node     massage   NaN\
+        POINT (116.33751 39.97546)
+    4               node/286242547   286242547           node     toilets   NaN\
+        POINT (116.19982 40.00670)
+    ....
+    >>> move_df.head()
+              lat          lon              datetime  id
+    0   39.984094   116.319236   2008-10-23 05:53:05   1
+    1   39.984198   116.319322   2008-10-23 05:53:06   1
+    2   39.984224   116.319402   2008-10-23 05:53:11   1
+    3   39.984211   116.319389   2008-10-23 05:53:16   1
+    4   39.984217   116.319422   2008-10-23 05:53:21   1
+    ...
+    >>> join_with_pois_optimizer(move_df, POIs, label_id='osmid',
+     label_poi_name='name', dist_poi=np.array([100,9,1,50,50,10,20]))
+    'the size of the dist_poi is different from the size of pois'
     """
     if len(df_pois[label_poi_name].unique()) == len(dist_poi):
         values = _reset_and_creates_id_and_lat_lon(data, df_pois, False, reset_index)
@@ -490,14 +834,14 @@ def join_with_pois_by_category(
     label_id: Optional[Text] = TRAJ_ID
 ):
     """
-    Performs the integration between trajectories and points of interest.
+    Performs the integration between trajectories of interest points.
 
     Generating new columns referring to the
     category and distance from the nearest point of interest
     that has this category at each point of the trajectory.
 
-    Parameters
-    ----------
+    Examples
+    --------
     data : DataFrame
         The input trajectory data.
     df_pois : DataFrame
@@ -507,6 +851,46 @@ def join_with_pois_by_category(
     label_id : str, optional
         Label of df_pois referring to the point of interest id, by default TRAJ_ID
 
+    Returns
+    -------
+    >>> from pymove.utils.integration import join_with_pois_by_category
+    >>> POIs.head()
+                      unique_id          osmid   element_type     amenity   fee/
+                          geometry
+    0               node/269492188   269492188           node     toilets    no/
+        POINT (116.26750 39.98087)
+    1               node/274942287   274942287           node     toilets   NaN/
+        POINT (116.27358 39.99664)
+    2               node/276320137   276320137           node   fast_food   NaN/
+        POINT (116.33756 39.97541)
+    3               node/276320142   276320142           node     massage   NaN/
+        POINT (116.33751 39.97546)
+    4               node/286242547   286242547           node     toilets   NaN/
+        POINT (116.19982 40.00670)
+    ....
+    >>> move_df.head()
+              lat          lon              datetime  id
+    0   39.984094   116.319236   2008-10-23 05:53:05   1
+    1   39.984198   116.319322   2008-10-23 05:53:06   1
+    2   39.984224   116.319402   2008-10-23 05:53:11   1
+    3   39.984211   116.319389   2008-10-23 05:53:16   1
+    4   39.984217   116.319422   2008-10-23 05:53:21   1
+    ...
+    >>> join_with_pois_by_category(move_df, POIs,
+     label_category='amenity', label_id='osmid')
+    >>> move_df.head()
+                lat          lon               datetime   id/
+        id_toilets   dist_toilets          id_fast_food ...
+    0    39.984094     116.319236   2008-10-23 05:53:05   1/
+         274942287    4132.229067             276320137 ...
+    1    39.984198     116.319322   2008-10-23 05:53:06   1/
+         274942287    4135.240296             276320137 ...
+    2    39.984224     116.319402   2008-10-23 05:53:11   1/
+         274942287    4140.698090             276320137 ...
+    3    39.984211     116.319389   2008-10-23 05:53:16   1/
+         274942287    4140.136625             276320137 ...
+    4    39.984217     116.319422   2008-10-23 05:53:21   1/
+         274942287    4142.564150             276320137 ...
     """
     logger.debug('Integration with POIs...')
 
@@ -591,6 +975,44 @@ def join_with_poi_datetime(
     label_event_type : str, optional
         Label of df_events referring to the type of the event, by default EVENT_TYPE
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import join_with_poi_datetime
+    >>> POIs_events
+              unique_id        osmid   element_type        amenity\
+                    fee
+    0    node/269492188    269492188           node        toilets\
+                     no...
+    1    node/931686797    931686797           node    post_office\
+                    NaN...
+    2    node/992592626    992592626           node        parking\
+                    NaN...
+    3   node/1423043074   1423043074           node       car_wash\
+                    NaN...
+    4   node/1803755348   1803755348           node      telephone\
+                    NaN...
+    >>> move_df.head()
+              lat          lon              datetime  id
+    0   39.984094   116.319236   2008-10-23 05:53:05   1
+    1   39.984198   116.319322   2008-10-23 05:53:06   1
+    2   39.984224   116.319402   2008-10-23 05:53:11   1
+    3   39.984211   116.319389   2008-10-23 05:53:16   1
+    4   39.984217   116.319422   2008-10-23 05:53:21   1
+    >>> join_with_poi_datetime(df_7, POIs_events, label_date='datetime',
+     time_window=900, label_event_id='osmid', label_event_type='amenity')
+    >>> move_df.head()
+              lat          lon              datetime  id\
+            osmid   dist_event               amenity
+    0   39.984094   116.319236   2008-10-23 05:53:05   1\
+        269492188   4422.237186              toilets
+    1   39.984198   116.319322   2008-10-23 05:53:06   1\
+        269492188   4430.488277              toilets
+    2   39.984224   116.319402   2008-10-23 05:53:11   1\
+        269492188   4437.521909              toilets
+    3   39.984211   116.319389   2008-10-23 05:53:16   1\
+        269492188   4436.297310              toilets
+    4   39.984217   116.319422   2008-10-23 05:53:21   1\
+        269492188   4439.154806              toilets
     """
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, label_date, time_window
@@ -668,6 +1090,43 @@ def join_with_poi_datetime_optimizer(
     label_event_type : str, optional
         Label of df_events referring to the type of the event, by default EVENT_TYPE
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import join_with_poi_datetime_optimizer
+    >>> POIs_events
+              unique_id     event_id   element_type     event_type\
+                    fee
+    0    node/269492188    269492188           node        toilets\
+                     no...
+    1    node/931686797    931686797           node    post_office\
+                    NaN...
+    2    node/992592626    992592626           node        parking\
+                    NaN...
+    3   node/1423043074   1423043074           node       car_wash\
+                    NaN...
+    4   node/1803755348   1803755348           node      telephone\
+                    NaN...
+    >>> move_df.head()
+              lat          lon              datetime  id
+    0   39.984094   116.319236   2008-10-23 05:53:05   1
+    1   39.984198   116.319322   2008-10-23 05:53:06   1
+    2   39.984224   116.319402   2008-10-23 05:53:11   1
+    3   39.984211   116.319389   2008-10-23 05:53:16   1
+    4   39.984217   116.319422   2008-10-23 05:53:21   1
+    >>> join_with_poi_datetime_optimizer(df_8, POIs_events)
+    >>> move_df.head()
+              lat          lon              datetime  id\
+         event_id   dist_event            event_type
+    0   39.984094   116.319236   2008-10-23 05:53:05   1\
+        269492188   4422.237186              toilets
+    1   39.984198   116.319322   2008-10-23 05:53:06   1\
+        269492188   4430.488277              toilets
+    2   39.984224   116.319402   2008-10-23 05:53:11   1\
+        269492188   4437.521909              toilets
+    3   39.984211   116.319389   2008-10-23 05:53:16   1\
+        269492188   4436.297310              toilets
+    4   39.984217   116.319422   2008-10-23 05:53:21   1\
+        269492188   4439.154806              toilets
     """
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, label_date, time_window
@@ -769,6 +1228,43 @@ def join_with_pois_by_dist_and_datetime(
     radius: float, optional
         maximum radius of pois, by default 1000
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import join_with_pois_by_dist_and_datetime
+    >>> POIs_events
+              unique_id     event_id   element_type     event_type\
+                    fee
+    0    node/269492188    269492188           node        toilets\
+                     no...
+    1    node/931686797    931686797           node    post_office\
+                    NaN...
+    2    node/992592626    992592626           node        parking\
+                    NaN...
+    3   node/1423043074   1423043074           node       car_wash\
+                    NaN...
+    4   node/1803755348   1803755348           node      telephone\
+                    NaN...
+    >>> move_df.head()
+              lat          lon              datetime  id
+    0   39.984094   116.319236   2008-10-23 05:53:05   1
+    1   39.984198   116.319322   2008-10-23 05:53:06   1
+    2   39.984224   116.319402   2008-10-23 05:53:11   1
+    3   39.984211   116.319389   2008-10-23 05:53:16   1
+    4   39.984217   116.319422   2008-10-23 05:53:21   1
+    >>> join_with_poi_datetime_optimizer(df_8, POIs_events)
+    >>> move_df.head()
+              lat          lon              datetime  id\
+         event_id   dist_event            event_type
+    0   39.984094   116.319236   2008-10-23 05:53:05   1\
+             None         None                  None
+    1   39.984198   116.319322   2008-10-23 05:53:06   1\
+             None         None                  None
+    2   39.984224   116.319402   2008-10-23 05:53:11   1\
+             None         None                  None
+    3   39.984211   116.319389   2008-10-23 05:53:16   1\
+             None         None                  None
+    4   39.984217   116.319422   2008-10-23 05:53:21   1\
+             None         None                  None
     """
     if label_date not in df_pois:
         raise KeyError("POI's DataFrame must contain a %s column" % label_date)
@@ -862,6 +1358,34 @@ def join_with_home_by_id(
     drop_id_without_home : bool, optional
         flag as an option to drop id's that don't have houses, by default FALSE
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import join_with_home_by_id
+    >>> move_df.head()
+              lat          lon              datetime  id
+    0   39.984094   116.319236   2008-10-23 05:53:05   1
+    1   39.984198   116.319322   2008-10-23 05:53:06   1
+    2   39.984224   116.319402   2008-10-23 05:53:11   1
+    3   39.984211   116.319389   2008-10-23 05:53:16   1
+    4   39.984217   116.319422   2008-10-23 05:53:21   1
+    >>> home_df.head()
+                lat          lon              datetime  id   formatted_address        city
+    300   39.991574   116.326394   2008-10-23 10:42:03   1           Rua1, n02   ChinaTown
+    301   39.991652   116.326414   2008-10-23 10:42:08   1           Rua2, n03   ChinaTown
+    >>> join_with_home_by_id(move_df, home_df, label_id='id')
+    >>> move_df.head()
+              lat          lon              datetime  id\
+        dist_home         home                  city
+    0   39.984094   116.319236   2008-10-23 05:53:05   1\
+      1031.348370    Rua1, n02             ChinaTown
+    1   39.984198   116.319322   2008-10-23 05:53:06   1\
+      1017.690147    Rua1, n02             ChinaTown
+    2   39.984224   116.319402   2008-10-23 05:53:11   1\
+      1011.332141    Rua1, n02             ChinaTown
+    3   39.984211   116.319389   2008-10-23 05:53:16   1\
+      1013.152700    Rua1, n02             ChinaTown
+    4   39.984217   116.319422   2008-10-23 05:53:21   1\
+      1010.959220    Rua1, n02             ChinaTown
     """
     ids_without_home = []
 
@@ -948,6 +1472,50 @@ def merge_home_with_poi(
         Flag that controls the deletion of the columns referring to the
         id and the distance from the home point, by default True
 
+    Examples
+    --------
+    >>> from pymove.utils.integration import merge_home_with_poi
+    >>> move_df.head()
+              lat          lon              datetime  id\
+        dist_home         home                  city
+    0   39.984094   116.319236   2008-10-23 05:53:05   1\
+      1031.348370    Rua1, n02             ChinaTown
+    1   39.984198   116.319322   2008-10-23 05:53:06   1\
+      1017.690147    Rua1, n02             ChinaTown
+    2   39.984224   116.319402   2008-10-23 05:53:11   1\
+      1011.332141    Rua1, n02             ChinaTown
+    3   39.984211   116.319389   2008-10-23 05:53:16   1\
+      1013.152700    Rua1, n02             ChinaTown
+    4   39.984217   116.319422   2008-10-23 05:53:21   1\
+      1010.959220    Rua1, n02             ChinaTown
+    >>> POIs.head()
+                      unique_id          osmid   element_type     amenity   fee\
+                          geometry
+    0               node/269492188   269492188           node     toilets    no\
+        POINT (116.26750 39.98087)
+    1               node/274942287   274942287           node     toilets   NaN\
+        POINT (116.27358 39.99664)
+    2               node/276320137   276320137           node   fast_food   NaN\
+        POINT (116.33756 39.97541)
+    3               node/276320142   276320142           node     massage   NaN\
+        POINT (116.33751 39.97546)
+    4               node/286242547   286242547           node     toilets   NaN\
+        POINT (116.19982 40.00670)
+    ....
+    >>> join_with_pois(move_df, POIs, label_id='osmid', label_poi_name='name')
+    >>> move_df.head()
+               id          lat          lon              datetime\
+             city       id_poi     dist_poi             name_poi
+    0           1    39.984094   116.319236   2008-10-23 05:53:05\
+        ChinaTown   557245268    116.862844    太平洋影城(中关村店)
+    1           1    39.984198   116.319322   2008-10-23 05:53:06\
+        ChinaTown   5572452688   119.142692    太平洋影城(中关村店)
+    2           1    39.984224   116.319402   2008-10-23 05:53:11\
+        ChinaTown   5572452688   116.595117    太平洋影城(中关村店)
+    3           1    39.984211   116.319389   2008-10-23 05:53:16\
+        ChinaTown   5572452688   116.257378    太平洋影城(中关村店)
+    4           1    39.984217   116.319422   2008-10-23 05:53:21\
+        ChinaTown   5572452688   114.886759    太平洋影城(中关村店)
     """
     logger.debug('merge home with POI using shortest distance')
     idx = data[data[label_dist_home] <= data[label_dist_poi]].index
