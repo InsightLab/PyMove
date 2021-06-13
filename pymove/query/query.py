@@ -12,7 +12,6 @@ from typing import Optional, Text
 
 import numpy as np
 import pandas as pd
-from IPython.display import clear_output
 from pandas import DataFrame
 
 from pymove.utils import distances
