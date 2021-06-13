@@ -309,7 +309,8 @@ def query_all_points_by_range(
     move_df: DataFrame, 
     minimum_meters: Optional[float] = 100, 
     minimum_time: Optional[timedelta] =timedelta(minutes=2), 
-    datetime_label: Optional[Text] = DATETIME):
+    datetime_label: Optional[Text] = DATETIME
+):
     """
     Queries closest point within a spatial range based on meters and a temporal range.
 
@@ -360,18 +361,13 @@ def query_all_points_by_range(
     result = pd.DataFrame([])
     total = traj1.shape[0]
     count = 0
-    for _, row in traj1.iterrows():
-        clear_output(wait=True)
-        print('{} de {}'.format(count, total))
-        print('{:.2f}%'.format((count * 100 / total)))
+    for _, row in progress_bar(
+        traj1.iterrows(), desc="Querying all points by temporal and spatial distance", total=traj1.shape[0]
+    ):
         coinc_points = _meters_filter(row, move_df, minimum_meters)
         coinc_points = _datetime_filter(row, coinc_points, minimum_time)
         result = coinc_points.append(result)
 
         count += 1
-
-    clear_output(wait=True)
-    print('{} de {}'.format(count, total))
-    print('{:.2f}%'.format((count * 100 / total)))
 
     return result
