@@ -183,7 +183,11 @@ def knn_query(
     return result
 
 
-def _datetime_filter(row, move_df, minimum_distance):
+def _datetime_filter(
+    row: DataFrame,
+    move_df: DataFrame, 
+    minimum_distance: TimeDelta
+):
     """
     Given a row referencing to a point, a DataFrame with
     multiple points and a minimum distance, it returns
@@ -220,7 +224,10 @@ def _datetime_filter(row, move_df, minimum_distance):
     return filtered
 
 
-def _meters_filter(row, move_df, minimum_distance):
+def _meters_filter(
+    row: DataFrame, 
+    move_df: DataFrame, 
+    minimum_distance: float):
     """
     Given a row referencing to a point, a DataFrame with
     multiple points and a minimum distance, it returns
@@ -257,7 +264,12 @@ def _meters_filter(row, move_df, minimum_distance):
     return filtered
 
 
-def query_all_points_by_range(traj1, move_df, minimum_meters=100, minimum_time=timedelta(minutes=2), datetime_label=DATETIME):
+def query_all_points_by_range(
+    traj1: DataFrame,
+    move_df: DataFrame, 
+    minimum_meters: Optional[float] = 100, 
+    minimum_time: Optional[TimeDelta] =timedelta(minutes=2), 
+    datetime_label: Optional[Text] = DATETIME):
     """
     Selects only the points between two Move Dataframes 
     that have the closest point within a spatial range 
