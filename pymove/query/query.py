@@ -185,7 +185,7 @@ def knn_query(
 def _datetime_filter(
     row: DataFrame,
     move_df: DataFrame, 
-    minimum_distance: TimeDelta
+    minimum_distance: timedelta
 ):
     """
     Returns all the points of the DataFrame which are in a temporal distance.
@@ -211,6 +211,22 @@ def _datetime_filter(
         dataframe with all the points of move_df which are in
         a temporal distance equal or smaller than the minimum
         distance parameter.
+
+    Examples
+    --------
+    >>> from pymove.query.query import _datetime_filter
+    >>> point
+              lat          lon              datetime  id
+    0        16.4        -54.9   2014-10-11 18:00:00   1
+    >>> move_df
+              lat          lon              datetime  id
+    0        33.1        -77.0   2012-05-19 00:00:00   2
+    1        32.8        -77.1   2012-05-19 06:00:00   3 
+    2        32.5        -77.3   2012-05-19 12:00:00   4
+    >>> _datetime_filter(point, move_df, timedelta(hours=21010)) 
+              lat          lon              datetime  id   temporal_distance   target_id	  target_lat	target_lon	      target_datetime
+    0        32.5	     -77.3	 2012-05-19 12:00:00   4   875 days 06:00:00	       1	        16.4	     -54.9	  2014-10-11 18:00:00	
+
     """
     datetime = row['datetime']
     move_df['temporal_distance'] = (move_df['datetime'] - datetime).abs()
@@ -256,6 +272,21 @@ def _meters_filter(
         dataframe with all the points of move_df which are in
         a spatial distance equal or smaller than the minimum
         distance parameter.
+    
+    Examples
+    --------
+    >>> from pymove.query.query import _meters_filter
+    >>> point
+              lat          lon              datetime  id
+    0        16.4        -54.9   2014-10-11 18:00:00   1
+    >>> move_df
+              lat          lon              datetime  id
+    0        33.1        -77.0   2012-05-19 00:00:00   2
+    1        32.8        -77.1   2012-05-19 06:00:00   3 
+    2        32.5        -77.3   2012-05-19 12:00:00   4
+    >>> _meters_filter(firstpoint, move_df, 3190000) 
+              lat          lon              datetime  id    spatial_distance	   target_id	  target_lat	target_lon	      target_datetime
+    0        32.5	     -77.3	 2012-05-19 12:00:00   4        3.182834e+06	           1	        16.4	     -54.9	  2014-10-11 18:00:00
     """
     lat = row['lat']
     lon = row['lon']
@@ -277,7 +308,7 @@ def query_all_points_by_range(
     traj1: DataFrame,
     move_df: DataFrame, 
     minimum_meters: Optional[float] = 100, 
-    minimum_time: Optional[TimeDelta] =timedelta(minutes=2), 
+    minimum_time: Optional[timedelta] =timedelta(minutes=2), 
     datetime_label: Optional[Text] = DATETIME):
     """
     Queries closest point within a spatial range based on meters and a temporal range.
@@ -305,6 +336,23 @@ def query_all_points_by_range(
         dataframe with all the points of move_df which are in
         a spatial distance and temporal distance equal or smaller
         than the minimum distance parameters.
+
+    Examples
+    --------
+    >>> from pymove.query.query import query_all_points_by_range
+    >>> traj_df
+              lat          lon              datetime  id
+    0        16.4        -54.9   2014-10-11 18:00:00   1
+    1	     16.4	     -55.9	 2014-10-12 00:00:00   1
+    2	     16.4	     -56.9	 2014-10-12 06:00:00   1
+    >>> move_df
+              lat          lon              datetime  id
+    0        33.1        -77.0   2012-05-19 00:00:00   2
+    1        32.8        -77.1   2012-05-19 06:00:00   3 
+    2        32.5        -77.3   2012-05-19 12:00:00   4
+    >>> query_all_points_by_range(traj_df, move_df, minimum_meters=3190000, minimum_time=timedelta(hours=21010)) 
+              lat          lon              datetime  id    spatial_distance	   target_id	  target_lat	target_lon	      target_datetime   temporal_distance
+    0        32.5	     -77.3	 2012-05-19 12:00:00   4        3.182834e+06	           1	        16.4	     -54.9	  2014-10-11 18:00:00   875 days 06:00:00
     """
     if minimum_time is None:
         minimum_time = timedelta(minutes=2)
