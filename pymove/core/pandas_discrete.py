@@ -38,11 +38,11 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
     def __init__(
         self,
         data: Union[DataFrame, List, Dict],
-        latitude: Optional[Text] = LATITUDE,
-        longitude: Optional[Text] = LONGITUDE,
-        datetime: Optional[Text] = DATETIME,
-        traj_id: Optional[Text] = TRAJ_ID,
-        local_label: Optional[Text] = LOCAL_LABEL
+        latitude: Text = LATITUDE,
+        longitude: Text = LONGITUDE,
+        datetime: Text = DATETIME,
+        traj_id: Text = TRAJ_ID,
+        local_label: Text = LOCAL_LABEL
     ):
         """
         Creates a dataframe using local_label as a discrete feature for localization.
@@ -82,7 +82,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
                 '{} column not in dataframe'.format(local_label)
             )
 
-    def discretize_based_grid(self, region_size: Optional[int] = 1000):
+    def discretize_based_grid(self, region_size: int = 1000):
         """
         Discrete space in cells of the same size, assigning a unique id to each cell.
 
@@ -100,10 +100,10 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
     def generate_prev_local_features(
         self,
-        label_id: Optional[Text] = TRAJ_ID,
-        local_label: Optional[Text] = LOCAL_LABEL,
-        sort: Optional[bool] = True,
-        inplace: Optional[bool] = True
+        label_id: Text = TRAJ_ID,
+        local_label: Text = LOCAL_LABEL,
+        sort: bool = True,
+        inplace: bool = True
     ) -> Optional['PandasDiscreteMoveDataFrame']:
         """
         Create a feature prev_local with the label of previous local to current point.
@@ -162,19 +162,20 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         data_.reset_index(inplace=True)
         data_.last_operation = end_operation(operation)
+
         if not inplace:
             return data_
 
     def generate_tid_based_statistics(
         self,
-        label_id: Optional[Text] = TRAJ_ID,
-        local_label: Optional[Text] = LOCAL_LABEL,
-        mean_coef: Optional[float] = 1.0,
-        std_coef: Optional[float] = 1.0,
+        label_id: Text = TRAJ_ID,
+        local_label: Text = LOCAL_LABEL,
+        mean_coef: float = 1.0,
+        std_coef: float = 1.0,
         statistics: Optional[DataFrame] = None,
-        label_tid_stat: Optional[Text] = TID_STAT,
-        drop_single_points: Optional[bool] = False,
-        inplace: Optional[bool] = True,
+        label_tid_stat: Text = TID_STAT,
+        drop_single_points: bool = False,
+        inplace: bool = True,
     ) -> Optional['PandasDiscreteMoveDataFrame']:
         """
         Splits the trajectories into segments based on time statistics for segments.
@@ -190,7 +191,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
             Multiplication coefficient of the mean time for the segment, by default 1.0
         std_coef : float, optional
             Multiplication coefficient of sdt time for the segment, by default 1.0
-        statistics : Optional[DataFrame], optional
+        statistics : DataFrame, optional
             Time Statistics of the pairwise local labels, by default None
         label_tid_stat : str, optional
             The label of the column containing the ids of the formed segments.
@@ -260,9 +261,10 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
                 filter_.append(row[TIME_TO_PREV] > threshold)
 
-            filter_ = np.array(filter_)
+            filter_arr = np.array(filter_)
             current_tid, count = _update_curr_tid_count(
-                filter_, data_, idx, label_tid_stat, current_tid, count)
+                filter_arr, data_, idx, label_tid_stat, current_tid, count
+            )
 
         if label_id == TID_STAT:
             self.reset_index(drop=True, inplace=True)
@@ -275,5 +277,6 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         if drop_single_points:
             _drop_single_point(data_, TID_STAT, label_id)
             self.generate_dist_time_speed_features()
+
         if not inplace:
             return data_

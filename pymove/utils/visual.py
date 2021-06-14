@@ -11,7 +11,7 @@ save_wkt
 
 """
 
-from typing import List, Optional, Text, Tuple
+from typing import Sequence, Text, Tuple, Union
 
 from branca.element import MacroElement, Template
 from folium import Map
@@ -23,7 +23,7 @@ from pandas import DataFrame
 from pymove.utils.constants import COLORS, LATITUDE, LONGITUDE, TRAJ_ID
 
 
-def add_map_legend(m: Map, title: Text, items: List[Tuple]):
+def add_map_legend(m: Map, title: Text, items: Union[Tuple, Sequence[Tuple]]):
     """
     Adds a legend for a folium map.
 
@@ -329,7 +329,7 @@ def get_cmap(cmap: Text) -> Colormap:
 
 
 def save_wkt(
-    move_data: DataFrame, filename: Text, label_id: Optional[Text] = TRAJ_ID
+    move_data: DataFrame, filename: Text, label_id: Text = TRAJ_ID
 ):
     """
     Save a visualization in a map in a new file .wkt.

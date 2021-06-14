@@ -279,7 +279,7 @@ class MoveDataFrameAbstractModel(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def convert_to(self):
+    def convert_to(self, new_type: str):
         pass
 
     @abc.abstractmethod

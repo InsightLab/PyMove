@@ -28,7 +28,9 @@ if TYPE_CHECKING:
 
 
 def append_row(
-    data: DataFrame, row: Optional[Series] = None, columns: Optional[Dict] = None
+    data: DataFrame,
+    row: Optional[Series] = None,
+    columns: Optional[Dict] = None
 ):
     """
     Insert a new line in the dataframe with the information passed by parameter.
@@ -103,7 +105,7 @@ def generate_trajectories_df(
 
 
 def generate_start_feature(
-    data: DataFrame, label_trajectory: Optional[Text] = TRAJECTORY
+    data: DataFrame, label_trajectory: Text = TRAJECTORY
 ):
     """
     Removes the last point from the trajectory and adds it in a new column 'destiny'.
@@ -123,7 +125,7 @@ def generate_start_feature(
 
 
 def generate_destiny_feature(
-    data: DataFrame, label_trajectory: Optional[Text] = TRAJECTORY
+    data: DataFrame, label_trajectory: Text = TRAJECTORY
 ):
     """
     Removes the first point from the trajectory and adds it in a new column 'start'.
@@ -143,7 +145,7 @@ def generate_destiny_feature(
 
 
 def split_crossover(
-    sequence_a: List, sequence_b: List, frac: Optional[float] = 0.5
+    sequence_a: List, sequence_b: List, frac: float = 0.5
 ) -> Tuple[List, List]:
     """
     Divides two arrays in the indicated ratio and exchange their halves.
@@ -178,7 +180,7 @@ def split_crossover(
     return sequence_a, sequence_b
 
 
-def _augmentation(data: DataFrame, aug_df: DataFrame, frac: Optional[float] = 0.5):
+def _augmentation(data: DataFrame, aug_df: DataFrame, frac: float = 0.5):
     """
     Generates new data with unobserved trajectories.
 
@@ -223,8 +225,8 @@ def _augmentation(data: DataFrame, aug_df: DataFrame, frac: Optional[float] = 0.
                     value2 = data.at[idx_, col]
 
                     if isinstance(value1, str) and isinstance(value2, str):
-                        sequences1.append(value1 + '_' + value2)
-                        sequences2.append(value2 + '_' + value1)
+                        sequences1.append(value1 + '_' + value2)  # type: ignore
+                        sequences2.append(value2 + '_' + value1)  # type: ignore
                     else:
                         sequences1.append(value1)
                         sequences2.append(value2)
@@ -238,10 +240,10 @@ def _augmentation(data: DataFrame, aug_df: DataFrame, frac: Optional[float] = 0.
 
 def augmentation_trajectories_df(
     data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    restriction: Optional[Text] = 'destination only',
-    label_trajectory: Optional[Text] = TRAJECTORY,
-    insert_at_df: Optional[bool] = False,
-    frac: Optional[float] = 0.5,
+    restriction: Text = 'destination only',
+    label_trajectory: Text = TRAJECTORY,
+    insert_at_df: bool = False,
+    frac: float = 0.5,
 ) -> DataFrame:
     """
     Generates new data from unobserved trajectories, given a specific restriction.
@@ -334,9 +336,9 @@ def insert_points_in_df(data: DataFrame, aug_df: DataFrame):
 
 def instance_crossover_augmentation(
     data: DataFrame,
-    restriction: Optional[Text] = 'destination only',
-    label_trajectory: Optional[Text] = TRAJECTORY,
-    frac: Optional[float] = 0.5
+    restriction: Text = 'destination only',
+    label_trajectory: Text = TRAJECTORY,
+    frac: float = 0.5
 ):
     """
     Generates new data from unobserved trajectories, with a specific restriction.

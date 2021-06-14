@@ -22,7 +22,7 @@ threshold_time_statistics
 
 """
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import Optional, Text, Union
 
 import holidays
@@ -222,7 +222,7 @@ def to_day_of_week_int(dt: datetime) -> int:
 
 def working_day(
     dt: Union[Text, datetime],
-    country: Optional[Text] = 'BR',
+    country: Text = 'BR',
     state: Optional[Text] = None
 ) -> bool:
     """
@@ -267,7 +267,7 @@ def working_day(
         dt = str_to_datetime(dt)
 
     if isinstance(dt, datetime):
-        dt = date(dt.year, dt.month, dt.day)
+        dt = datetime(dt.year, dt.month, dt.day)
 
     if dt in holidays.CountryHoliday(country=country, prov=None, state=state):
         result = False
@@ -489,11 +489,11 @@ def diff_time(start_time: datetime, end_time: datetime) -> int:
 
 def create_time_slot_in_minute(
     data: DataFrame,
-    slot_interval: Optional[int] = 15,
-    initial_slot: Optional[int] = 0,
-    label_datetime: Optional[Text] = DATETIME,
-    label_time_slot: Optional[Text] = TIME_SLOT,
-    inplace: Optional[bool] = False
+    slot_interval: int = 15,
+    initial_slot: int = 0,
+    label_datetime: Text = DATETIME,
+    label_time_slot: Text = TIME_SLOT,
+    inplace: bool = False
 ) -> Optional[DataFrame]:
     """
     Partitions the time in slot windows.
@@ -548,7 +548,7 @@ def create_time_slot_in_minute(
 
 def generate_time_statistics(
     data: DataFrame,
-    local_label: Optional[Text] = LOCAL_LABEL
+    local_label: Text = LOCAL_LABEL
 ):
     """
     Calculates time statistics of the pairwise local labels.
@@ -637,9 +637,9 @@ def _calc_time_threshold(seg_mean: float, seg_std: float) -> float:
 
 def threshold_time_statistics(
     df_statistics: DataFrame,
-    mean_coef: Optional[float] = 1.0,
-    std_coef: Optional[float] = 1.0,
-    inplace: Optional[bool] = False
+    mean_coef: float = 1.0,
+    std_coef: float = 1.0,
+    inplace: bool = False
 ) -> Optional[DataFrame]:
     """
     Calculates and creates the threshold column.

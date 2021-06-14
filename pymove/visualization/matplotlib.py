@@ -37,12 +37,12 @@ if TYPE_CHECKING:
 
 def show_object_id_by_date(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    create_features: Optional[bool] = True,
+    create_features: bool = True,
     kind: Optional[List] = None,
-    figsize: Optional[Tuple[float, float]] = (21, 9),
-    return_fig: Optional[bool] = True,
-    save_fig: Optional[bool] = True,
-    name: Optional[Text] = 'shot_points_by_date.png',
+    figsize: Tuple[float, float] = (21, 9),
+    return_fig: bool = True,
+    save_fig: bool = True,
+    name: Text = 'shot_points_by_date.png',
 ) -> Optional[figure]:
     """
     Generates four visualizations based on datetime feature.
@@ -120,12 +120,12 @@ def show_object_id_by_date(
 
 def plot_trajectories(
     move_data: DataFrame,
-    markers: Optional[Text] = 'o',
-    markersize: Optional[float] = 12,
-    figsize: Optional[Tuple[float, float]] = (10, 10),
-    return_fig: Optional[bool] = True,
-    save_fig: Optional[bool] = True,
-    name: Optional[Text] = 'trajectories.png',
+    markers: Text = 'o',
+    markersize: float = 12,
+    figsize: Tuple[float, float] = (10, 10),
+    return_fig: bool = True,
+    save_fig: bool = True,
+    name: Text = 'trajectories.png',
 ) -> Optional[figure]:
     """
     Generate a visualization that show trajectories.
@@ -174,14 +174,14 @@ def plot_trajectories(
 def plot_traj_by_id(
     move_data: DataFrame,
     id_: Union[int, Text],
-    label: Optional[Text] = TID,
+    label: Text = TID,
     feature: Optional[Text] = None,
     value: Optional[Any] = None,
-    linewidth: Optional[float] = 3,
-    markersize: Optional[float] = 20,
-    figsize: Optional[Tuple[float, float]] = (10, 10),
-    return_fig: Optional[bool] = True,
-    save_fig: Optional[bool] = True,
+    linewidth: float = 3,
+    markersize: float = 20,
+    figsize: Tuple[float, float] = (10, 10),
+    return_fig: bool = True,
+    save_fig: bool = True,
     name: Optional[Text] = None,
 ) -> Optional[figure]:
     """
@@ -272,11 +272,11 @@ def plot_traj_by_id(
 
 def plot_all_features(
     move_data: DataFrame,
-    dtype: Optional[Callable] = float,
-    figsize: Optional[Tuple[float, float]] = (21, 15),
-    return_fig: Optional[bool] = True,
-    save_fig: Optional[bool] = True,
-    name: Optional[Text] = 'features.png',
+    dtype: Callable = float,
+    figsize: Tuple[float, float] = (21, 15),
+    return_fig: bool = True,
+    save_fig: bool = True,
+    name: Text = 'features.png',
 ) -> Optional[figure]:
     """
     Generate a visualization for each columns that type is equal dtype.
@@ -326,7 +326,7 @@ def plot_all_features(
         return fig
 
 
-def plot_coords(ax: axes, ob: BaseGeometry, color: Optional[Text] = 'r'):
+def plot_coords(ax: axes, ob: BaseGeometry, color: Text = 'r'):
     """
     Plot the coordinates of each point of the object in a 2D chart.
 
@@ -370,11 +370,11 @@ def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
 def plot_line(
     ax: axes,
     ob: LineString,
-    color: Optional[Text] = 'r',
-    alpha: Optional[float] = 0.7,
-    linewidth: Optional[float] = 3,
-    solid_capstyle: Optional[Text] = 'round',
-    zorder: Optional[float] = 2
+    color: Text = 'r',
+    alpha: float = 0.7,
+    linewidth: float = 3,
+    solid_capstyle: Text = 'round',
+    zorder: float = 2
 ):
     """
     Plot a LineString.

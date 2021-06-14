@@ -21,9 +21,9 @@ from pymove.utils.log import logger, progress_bar, timer_decorator
 @timer_decorator
 def elbow_method(
     move_data: DataFrame,
-    k_initial: Optional[int] = 1,
-    max_clusters: Optional[int] = 15,
-    k_iteration: Optional[int] = 1,
+    k_initial: int = 1,
+    max_clusters: int = 15,
+    k_iteration: int = 1,
     random_state: Optional[int] = None
 ) -> Dict:
     """
@@ -80,10 +80,10 @@ def elbow_method(
 @timer_decorator
 def gap_statistic(
     move_data: DataFrame,
-    nrefs: Optional[int] = 3,
-    k_initial: Optional[int] = 1,
-    max_clusters: Optional[int] = 15,
-    k_iteration: Optional[int] = 1,
+    nrefs: int = 3,
+    k_initial: int = 1,
+    max_clusters: int = 15,
+    k_iteration: int = 1,
     random_state: Optional[int] = None
 ) -> Dict:
     """
@@ -152,11 +152,11 @@ def gap_statistic(
 def dbscan_clustering(
     move_data: DataFrame,
     cluster_by: Text,
-    meters: Optional[int] = 10,
-    min_sample: Optional[float] = 1680 / 2,
-    earth_radius: Optional[float] = EARTH_RADIUS,
-    metric: Optional[Union[Text, Callable]] = 'euclidean',
-    inplace: Optional[bool] = False
+    meters: int = 10,
+    min_sample: float = 1680 / 2,
+    earth_radius: float = EARTH_RADIUS,
+    metric: Union[Text, Callable] = 'euclidean',
+    inplace: bool = False
 ) -> Optional[DataFrame]:
     """
     Performs density based clustering on the move_dataframe according to cluster_by.
