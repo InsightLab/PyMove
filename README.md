@@ -6,17 +6,17 @@
 
 |||
 |--- |--- |
-|Package Status|![https://pypi.org/project/pymove/](https://img.shields.io/pypi/status/pymove?style=for-the-badge)|
-|License|![https://github.com/InsightLab/PyMove/blob/master/LICENSE](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)|
-|Python Version|![https://www.python.org/doc/versions/](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-blue?style=for-the-badge)|
-|Platforms|![https://anaconda.org/conda-forge/pymove](https://img.shields.io/conda/pn/conda-forge/pymove?style=for-the-badge)|
-|Build Status|![https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=9753&branchName=master](https://img.shields.io/azure-devops/build/conda-forge/84710dde-1620-425b-80d0-4cf5baca359d/9753/master?style=for-the-badge)|
-|PyPi version|![https://pypi.org/project/pymove/#history](https://img.shields.io/pypi/v/pymove?style=for-the-badge)|
-|PyPi Downloads|![https://pypi.org/project/pymove/#files](https://img.shields.io/pypi/dm/pymove?style=for-the-badge)|
-|Conda version|![https://anaconda.org/conda-forge/pymove](https://img.shields.io/conda/vn/conda-forge/pymove?style=for-the-badge)|
-|Conda Downloads|![https://anaconda.org/conda-forge/pymove](https://img.shields.io/conda/dn/conda-forge/pymove?style=for-the-badge)|
-|Code Quality|![https://www.codacy.com/gh/InsightLab/PyMove?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=InsightLab/PyMove&amp;utm_campaign=Badge_Grade](https://img.shields.io/codacy/grade/26c581fbe1ee42e78a9adc50b7372ceb?style=for-the-badge)|
-|Code Coverage|![https://www.codacy.com/gh/InsightLab/PyMove?utm_source=github.com&utm_medium=referral&utm_content=InsightLab/PyMove&utm_campaign=Badge_Coverage](https://img.shields.io/codacy/coverage/26c581fbe1ee42e78a9adc50b7372ceb?style=for-the-badge)|
+|Package Status|[<img src="https://img.shields.io/pypi/status/pymove?style=for-the-badge" />](https://pypi.org/project/pymove/)|
+|License|[<img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" />](https://github.com/InsightLab/PyMove/blob/master/LICENSE)|
+|Python Version|[<img src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-blue?style=for-the-badge" />](https://www.python.org/doc/versions/)|
+|Platforms|[<img src="https://img.shields.io/conda/pn/conda-forge/pymove?style=for-the-badge" />](https://anaconda.org/conda-forge/pymove)|
+|Build Status|[<img src="https://img.shields.io/azure-devops/build/conda-forge/84710dde-1620-425b-80d0-4cf5baca359d/9753/master?style=for-the-badge" />](https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=9753&branchName=master)|
+|PyPi version|[<img src="https://img.shields.io/pypi/v/pymove?style=for-the-badge" />](https://pypi.org/project/pymove/#history)|
+|PyPi Downloads|[<img src="https://img.shields.io/pypi/dm/pymove?style=for-the-badge" />](https://pypi.org/project/pymove/#files)|
+|Conda version|[<img src="https://img.shields.io/conda/vn/conda-forge/pymove?style=for-the-badge" />](https://anaconda.org/conda-forge/pymove)|
+|Conda Downloads|[<img src="https://img.shields.io/conda/dn/conda-forge/pymove?style=for-the-badge" />](https://anaconda.org/conda-forge/pymove/files)|
+|Code Quality|[<img src="https://img.shields.io/codacy/grade/26c581fbe1ee42e78a9adc50b7372ceb?style=for-the-badge" />](https://app.codacy.com/gh/InsightLab/PyMove/dashboard)|
+|Code Coverage|[<img src="https://img.shields.io/codacy/coverage/26c581fbe1ee42e78a9adc50b7372ceb?style=for-the-badge" />](https://app.codacy.com/gh/InsightLab/PyMove/files)|
 
 ---
 
