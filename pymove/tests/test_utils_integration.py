@@ -371,7 +371,7 @@ def test__reset_set_window__and_creates_event_id_type():
 
     window_starts, window_ends, current_distances, event_id, event_type = (
         integration._reset_set_window__and_creates_event_id_type(
-            move_df, pois, DATETIME, 45000
+            move_df, pois, 45000, DATETIME
         )
     )
 
@@ -440,7 +440,7 @@ def test_reset_set_window_and_creates_event_id_type_all():
 
     window_starts, window_ends, current_distances, event_id, event_type = (
         integration._reset_set_window_and_creates_event_id_type_all(
-            move_df, pois, DATETIME, 7200
+            move_df, pois, 7200, DATETIME
         )
     )
 

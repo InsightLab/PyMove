@@ -520,25 +520,17 @@ def _reset_and_creates_id_and_lat_lon(
     >>> move_df.head()
               lat          lon              datetime   id
     0   39.984094   116.319236   2008-10-23 05:53:05    1
-    1   39.984559   116.326696   2008-10-23 10:37:26    1
-    2   40.002899   116.321520   2008-10-23 10:50:16    1
-    3   40.016238   116.307691   2008-10-23 11:03:06    1
-    4   40.013814   116.306525   2008-10-23 11:58:33    2
     >>> pois.head()
               lat          lon   id     type_poi                  name_poi
     0   39.984094   116.319236    1      policia            distrito_pol_1
-    1   39.991013   116.326384    2      policia           policia_federal
-    2   40.010000   116.312615    3     comercio       supermercado_aroldo
-    3   40.013821   116.306531    4   show forro_               tropykalia
-    4   40.008099   116.317711    5   risca-faca   rinha_de_galo_world_cup
     >>> _reset_and_creates_id_and_lat_lon(move_df, pois)
-    (array([inf, inf, inf, inf, inf, inf, inf, inf, inf]),
-    array(['', '', '', '', '', '', '', '', ''], dtype=object),
-    array(['', '', '', '', '', '', '', '', ''], dtype=object),
-    array([inf, inf, inf, inf, inf, inf, inf]),
-    array([inf, inf, inf, inf, inf, inf, inf]))
-    >>> print(type(_reset_and_creates_id_and_lat_lon(move_df, pois)))
-    <class 'tuple'>
+    (
+        array([inf]),
+        array([''], dtype=object),
+        array([''], dtype=object),
+        array([inf]),
+        array([inf])
+    )
     """
     if reset_index:
         logger.debug('... Resetting index to operation...')
@@ -565,7 +557,7 @@ def _reset_and_creates_id_and_lat_lon(
 
 
 def _reset_set_window__and_creates_event_id_type(
-    data: DataFrame, df_events: DataFrame, label_date: Text, time_window: int
+    data: DataFrame, df_events: DataFrame, time_window: float, label_date: Text = DATETIME
 ) -> Tuple[Series, Series, ndarray, ndarray, ndarray]:
     """
     Resets the indexes of the dataframes.
@@ -580,10 +572,10 @@ def _reset_set_window__and_creates_event_id_type(
         The input trajectory data.
     df_events : DataFrame
         The input event point of interest data.
-    label_date : str
-        Label of data referring to the datetime.
-    time_window : int
+    time_window : float
         Number of seconds of the time window.
+    label_date : str, optional
+        Label of data referring to the datetime, by default DATETIME
 
     Returns
     -------
@@ -596,46 +588,19 @@ def _reset_set_window__and_creates_event_id_type(
     >>> move_df.head()
               lat          lon              datetime   id
     0   39.984094   116.319236   2008-10-23 05:53:05    1
-    1   39.984559   116.326696   2008-10-23 10:37:26    1
-    2   40.002899   116.321520   2008-10-23 10:50:16    1
-    3   40.016238   116.307691   2008-10-23 11:03:06    1
-    4   40.013814   116.306525   2008-10-23 11:58:33    2
     >>> pois_df
-                       lat          lon   event_id              datetime\
-                event_type
-    0            39.984094   116.319236          1   2008-10-24 01:57:57\
-        show do tropykalia
-    1            39.991013   116.326384          2   2008-10-24 00:22:01\
-      evento da prefeitura
-    2            40.010000   116.312615          3   2008-10-25 00:21:01\
-          show do seu joao
-    3            40.013821   116.306531          4   2008-10-26 00:22:01\
-                     missa
-    >>> _reset_set_window__and_creates_event_id_type(move_df, pois,
-     'datetime', 600)
-        (0   2008-10-23 05:43:05
-    1   2008-10-23 10:27:26
-    2   2008-10-23 10:40:16
-    3   2008-10-23 10:53:06
-    4   2008-10-23 11:48:33
-    5   2008-10-23 23:40:45
-    6   2008-10-23 23:52:14
-    7   2008-10-24 00:12:01
-    8   2008-10-24 01:47:57
-    Name: datetime, dtype: datetime64[ns],
-    0   2008-10-23 06:03:05
-    1   2008-10-23 10:47:26
-    2   2008-10-23 11:00:16
-    3   2008-10-23 11:13:06
-    4   2008-10-23 12:08:33
-    5   2008-10-24 00:00:45
-    6   2008-10-24 00:12:14
-    7   2008-10-24 00:32:01
-    8   2008-10-24 02:07:57
-    Name: datetime, dtype: datetime64[ns],
-    array([inf, inf, inf, inf, inf, inf, inf, inf, inf]),
-    array(['', '', '', '', '', '', '', '', ''], dtype=object),
-    array(['', '', '', '', '', '', '', '', ''], dtype=object))
+              lat          lon   event_id              datetime             event_type
+    0   39.984094   116.319236          1   2008-10-24 01:57:57     show do tropykalia
+    >>> _reset_set_window__and_creates_event_id_type(move_df, pois, 600)
+    (
+        0   2008-10-23 05:43:05
+        Name: datetime, dtype: datetime64[ns],
+        0   2008-10-23 06:03:05
+        Name: datetime, dtype: datetime64[ns],
+        array([inf]),
+        array([''], dtype=object),
+        array([''], dtype=object)
+    )
     """
     # get a vector with windows time to each point
     data.reset_index(drop=True, inplace=True)
@@ -656,7 +621,7 @@ def _reset_set_window__and_creates_event_id_type(
 
 
 def _reset_set_window_and_creates_event_id_type_all(
-    data: DataFrame, df_events: DataFrame, label_date: Text, time_window: float
+    data: DataFrame, df_events: DataFrame, time_window: float, label_date: Text = DATETIME
 ) -> Tuple[Series, Series, ndarray, ndarray, ndarray]:
     """
     Resets the indexes of the dataframes.
@@ -671,10 +636,10 @@ def _reset_set_window_and_creates_event_id_type_all(
         The input trajectory data.
     df_events : DataFrame
         The input event point of interest data.
-    label_date : str
-        Label of data referring to the datetime.
     time_window : float
         Number of seconds of the time window.
+    label_date : str
+        Label of data referring to the datetime.
 
     Returns
     -------
@@ -683,51 +648,23 @@ def _reset_set_window_and_creates_event_id_type_all(
 
     Examples
     --------
-    >>> from pymove.utils.integration import
-    _reset_set_window_and_creates_event_id_type_all
+    >>> from pymove.utils.integration import _reset_set_window_and_creates_event_id_type_all  # noqa
     >>> move_df.head()
               lat          lon              datetime   id
     0   39.984094   116.319236   2008-10-23 05:53:05    1
-    1   39.984559   116.326696   2008-10-23 10:37:26    1
-    2   40.002899   116.321520   2008-10-23 10:50:16    1
-    3   40.016238   116.307691   2008-10-23 11:03:06    1
-    4   40.013814   116.306525   2008-10-23 11:58:33    2
     >>> pois_df
-                       lat          lon   event_id              datetime\
-                event_type
-    0            39.984094   116.319236          1   2008-10-24 01:57:57\
-        show do tropykalia
-    1            39.991013   116.326384          2   2008-10-24 00:22:01\
-      evento da prefeitura
-    2            40.010000   116.312615          3   2008-10-25 00:21:01\
-          show do seu joao
-    3            40.013821   116.306531          4   2008-10-26 00:22:01\
-                     missa
-    >>> _reset_set_window_and_creates_event_id_type_all(move_df, pois,
-     'datetime', 600)
-        (0   2008-10-23 05:43:05
-    1   2008-10-23 10:27:26
-    2   2008-10-23 10:40:16
-    3   2008-10-23 10:53:06
-    4   2008-10-23 11:48:33
-    5   2008-10-23 23:40:45
-    6   2008-10-23 23:52:14
-    7   2008-10-24 00:12:01
-    8   2008-10-24 01:47:57
-    Name: datetime, dtype: datetime64[ns],
-    0   2008-10-23 06:03:05
-    1   2008-10-23 10:47:26
-    2   2008-10-23 11:00:16
-    3   2008-10-23 11:13:06
-    4   2008-10-23 12:08:33
-    5   2008-10-24 00:00:45
-    6   2008-10-24 00:12:14
-    7   2008-10-24 00:32:01
-    8   2008-10-24 02:07:57
-    Name: datetime, dtype: datetime64[ns],
-    array([None, None, None, None, None, None, None, None, None], dtype=object),
-    array([None, None, None, None, None, None, None, None, None], dtype=object),
-    array([None, None, None, None, None, None, None, None, None], dtype=object))
+              lat          lon   event_id              datetime             event_type
+    0   39.984094   116.319236          1   2008-10-24 01:57:57     show do tropykalia
+    >>> _reset_set_window_and_creates_event_id_type_all(move_df, pois, 600)
+    (
+        0   2008-10-23 05:43:05
+        Name: datetime, dtype: datetime64[ns],
+        0   2008-10-23 06:03:05
+        Name: datetime, dtype: datetime64[ns],
+        array([None], dtype=object),
+        array([None], dtype=object),
+        array([None], dtype=object)
+    )
     """
     # get a vector with windows time to each point
     data.reset_index(drop=True, inplace=True)
@@ -1167,7 +1104,7 @@ def join_with_poi_datetime(
 
     """
     values = _reset_set_window__and_creates_event_id_type(
-        data, df_events, label_date, time_window
+        data, df_events, time_window, label_date
     )
     window_starts, window_ends, current_distances, event_id, event_type = values
 
@@ -1291,7 +1228,7 @@ def join_with_poi_datetime_optimizer(
 
     """
     values = _reset_set_window__and_creates_event_id_type(
-        data, df_events, label_date, time_window
+        data, df_events, time_window, label_date
     )
     window_starts, window_ends, current_distances, event_id, event_type = values
 
@@ -1441,7 +1378,7 @@ def join_with_pois_by_dist_and_datetime(
         raise KeyError("POI's DataFrame must contain a %s column" % label_date)
 
     values = _reset_set_window_and_creates_event_id_type_all(
-        data, df_pois, label_date, time_window
+        data, df_pois, time_window, label_date
     )
 
     window_start, window_end, current_distances, event_id, event_type = values
