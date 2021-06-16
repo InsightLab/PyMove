@@ -1,10 +1,10 @@
-import geopandas
 import numpy as np
 import pandas as pd
 from numpy import inf, nan
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 from pandas import DataFrame, Series, Timestamp
 from pandas.testing import assert_frame_equal, assert_series_equal
+from shapely.geometry.point import Point
 
 from pymove import MoveDataFrame
 from pymove.utils import integration
@@ -250,26 +250,17 @@ def test_union_poi_police():
 
 
 def test_join_colletive_areas():
-    move_df = DataFrame(
+    move_df = MoveDataFrame(
         data=list_move,
-        columns=[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID]
     )
-    move_df = geopandas.GeoDataFrame(
-        move_df, geometry=geopandas.points_from_xy(
-            move_df.lon, move_df.lat
-        )
-    )
+    move_df['geometry'] = move_df.apply(lambda x: Point(x['lon'], x['lat']), axis=1)
+    expected = move_df.copy()
 
-    indexes_ac = np.linspace(0, move_df.shape[0], 5)
+    indexes_ac = np.linspace(0, move_df.shape[0], 5, dtype=int)
     area_c = move_df[move_df.index.isin(indexes_ac)].copy()
 
     integration.join_collective_areas(move_df, area_c, inplace=True)
 
-    expected = geopandas.GeoDataFrame(
-        move_df, geometry=geopandas.points_from_xy(
-            move_df.lon, move_df.lat
-        )
-    )
     expected[VIOLATING] = [True, False, True, False, True, False, True, False, False]
 
     assert_frame_equal(move_df, expected)

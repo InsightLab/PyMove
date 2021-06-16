@@ -18,6 +18,7 @@ merge_home_with_poi
 
 """
 
+from collections import namedtuple
 from typing import List, Optional, Text, Tuple
 
 import numpy as np
@@ -436,47 +437,47 @@ def join_collective_areas(
     --------
     >>> from pymove.utils.integration import join_collective_areas
     >>> data
-              lat          lon              datetime   id                     geometry
-    0   39.984094   116.319236   2008-10-23 05:53:05    1   POINT (116.31924 39.98409)
-    1   39.984198   116.319322   2008-10-23 05:53:06    1   POINT (116.31932 39.98420)
-    2   39.984224   116.319402   2008-10-23 05:53:11    1   POINT (116.31940 39.98422)
-    3   39.984211   116.319389   2008-10-23 05:53:16    1   POINT (116.31939 39.98421)
-    4   39.984217   116.319422   2008-10-23 05:53:21    1   POINT (116.31942 39.98422)
+              lat          lon              datetime   id                      geometry
+    0   39.984094   116.319236   2008-10-23 05:53:05    1    POINT (116.31924 39.98409)
+    1   39.984198   116.319322   2008-10-23 05:53:06    1    POINT (116.31932 39.98420)
+    2   39.984224   116.319402   2008-10-23 05:53:11    1    POINT (116.31940 39.98422)
+    3   39.984211   116.319389   2008-10-23 05:53:16    1    POINT (116.31939 39.98421)
+    4   39.984217   116.319422   2008-10-23 05:53:21    1    POINT (116.31942 39.98422)
     >>> area_c
-                               lat          lon              datetime   id\
-                          geometry
-    0                    39.984094   116.319236   2008-10-23 05:53:05    1\
-        POINT (116.31924 39.98409)
-    1                    40.006436   116.317701   2008-10-23 10:53:31    1\
-        POINT (116.31770 40.00644)
-    2                    40.014125   116.306159   2008-10-23 23:43:56    1\
-        POINT (116.30616 40.01412)
-    3                   39.979009    116.326873   2008-10-24 00:11:29    1\
+             lat         lon               datetime  id                         geometry
+    0  39.984094  116.319236    2008-10-23 05:53:05   1     POINT (116.319236 39.984094)
+    1  40.006436  116.317701    2008-10-23 10:53:31   1     POINT (116.317701 40.006436)
+    2  40.014125  116.306159    2008-10-23 23:43:56   1     POINT (116.306159 40.014125)
+    3  39.984211  116.319389    2008-10-23 05:53:16   1     POINT (116.319389 39.984211)
         POINT (116.32687 39.97901)
     >>> join_collective_areas(gdf, area_c)
     >>> gdf.head()
-                               lat          lon              datetime   id\
-                          geometry    violating
-    0                    39.984094   116.319236   2008-10-23 05:53:05    1\
-        POINT (116.31924 39.98409)         True
-    1                    39.984198   116.319322   2008-10-23 05:53:06    1\
-        POINT (116.31932 39.98420)        False
-    2                    39.984224   116.319402   2008-10-23 05:53:11    1\
-        POINT (116.31940 39.98422)        False
-    3                    39.984211   116.319389   2008-10-23 05:53:16    1\
-        POINT (116.31939 39.98421)        False
-    4                    39.984217   116.319422   2008-10-23 05:53:21    1\
-        POINT (116.31942 39.98422)        False
+             lat         lon                datetime  id \
+                            geometry    violating
+    0  39.984094  116.319236    2008-10-23 05:53:05   1 \
+        POINT (116.319236 39.984094)         True
+    1  39.984198  116.319322    2008-10-23 05:53:06   1 \
+        POINT (116.319322 39.984198)        False
+    2  39.984224  116.319402    2008-10-23 05:53:11   1 \
+        POINT (116.319402 39.984224)        False
+    3  39.984211  116.319389    2008-10-23 05:53:16   1 \
+        POINT (116.319389 39.984211)         True
+    4  39.984217  116.319422    2008-10-23 05:53:21   1 \
+        POINT (116.319422 39.984217)        False
+
     """
     if not inplace:
         data = data.copy()
     logger.debug('Integration between trajectories and collectives areas')
+    Geometry = namedtuple('Geometry', 'geom coordinates')
 
-    polygons = areas[label_geometry].unique()
+    polygons = areas[label_geometry].apply(
+        lambda g: Geometry(g.__class__, g.__geo_interface__.get('coordinates'))
+    ).unique()
+    polygons = [p.geom(p.coordinates) for p in polygons]
     data[VIOLATING] = False
     for p in progress_bar(polygons, desc='Joining trajectories and areas'):
-        # intersects = data[label_geometry].apply(lambda x: x.intersects(p))
-        intersects = data[label_geometry].intersects(p)
+        intersects = data[label_geometry].apply(lambda x: x.intersects(p))
         index = data[intersects].index
         data.at[index, VIOLATING] = True
     if not inplace:
