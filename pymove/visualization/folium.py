@@ -35,6 +35,7 @@ from folium import Map, plugins
 from folium.plugins import FastMarkerCluster, HeatMap, HeatMapWithTime, MarkerCluster
 from pandas import DataFrame
 
+from pymove import PandasMoveDataFrame
 from pymove.preprocessing import filters
 from pymove.utils import distances
 from pymove.utils.constants import (
@@ -925,7 +926,7 @@ def plot_trajectory_by_id_folium(
 
 
 def plot_trajectory_by_period(
-    move_data: DataFrame,
+    move_data: PandasMoveDataFrame,
     period: Text,
     id_: Optional[int] = None,
     n_rows: Optional[int] = None,
@@ -1016,7 +1017,7 @@ def plot_trajectory_by_period(
 
 
 def plot_trajectory_by_day_week(
-    move_data: DataFrame,
+    move_data: PandasMoveDataFrame,
     day_week: Text,
     id_: Optional[int] = None,
     n_rows: Optional[int] = None,
@@ -1107,7 +1108,7 @@ def plot_trajectory_by_day_week(
 
 
 def plot_trajectory_by_date(
-    move_data: DataFrame,
+    move_data: PandasMoveDataFrame,
     start_date: Union[Text, date],
     end_date: Union[Text, date],
     id_: Optional[int] = None,
@@ -1207,7 +1208,7 @@ def plot_trajectory_by_date(
 
 
 def plot_trajectory_by_hour(
-    move_data: DataFrame,
+    move_data: PandasMoveDataFrame,
     start_hour: Text,
     end_hour: Text,
     id_: Optional[int] = None,
@@ -1301,7 +1302,7 @@ def plot_trajectory_by_hour(
 
 
 def plot_stops(
-    move_data: DataFrame,
+    move_data: PandasMoveDataFrame,
     radius: float = 0,
     weight: float = 3,
     id_: Optional[int] = None,
