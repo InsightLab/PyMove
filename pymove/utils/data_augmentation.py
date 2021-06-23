@@ -3,10 +3,7 @@ Data augmentation operations.
 
 append_row,
 generate_trajectories_df,
-generate_start_feature,
-generate_destiny_feature,
 split_crossover,
-augmentation_trajectories_df,
 insert_points_in_df,
 instance_crossover_augmentation,
 sliding_window,
@@ -24,7 +21,7 @@ from networkx.classes.digraph import DiGraph
 from pandas.core.frame import DataFrame
 from pandas.core.series import Series
 
-from pymove.utils.constants import DESTINY, LOCAL_LABEL, START, TID, TID_STAT, TRAJECTORY
+from pymove.utils.constants import DESTINY, LOCAL_LABEL, START, TID, TID_STAT
 from pymove.utils.log import progress_bar
 from pymove.utils.networkx import build_transition_graph_from_df
 from pymove.utils.trajectories import append_trajectory, split_trajectory
@@ -37,7 +34,9 @@ Node = NewType('Node', Any)
 
 
 def append_row(
-    data: DataFrame, row: Optional[Series] = None, columns: Optional[Dict] = None
+    data: DataFrame,
+    row: Optional[Series] = None,
+    columns: Optional[Dict] = None
 ):
     """
     Insert a new line in the dataframe with the information passed by parameter.
@@ -51,6 +50,40 @@ def append_row(
     columns : dict, optional
         Dictionary containing the values to be added, by default None
 
+    Example
+    -------
+    >>> from pymove.utils.data_augmentation import append_row
+    >>>
+    >>> df
+         id               datetime  local           lat            lon            tid
+    0   [1,   2017-09-02 22:00:27,   [ 85,  [-3.8347478,  [-38.5921890,  [12017090222,
+    .    1,   2017-09-02 22:01:36,    673,   -3.8235834,   -38.5903890,   12017090222,
+    .    1,   2017-09-02 22:03:08,    394,   -3.8138890,   -38.5904445,   12017090222,
+    .    1,   2017-09-02 22:03:46,    263,   -3.9067654,   -38.5907723,   12017090222,
+    .    1,   2017-09-02 22:07:19,    224,   -3.8857223,   -38.5928892,   12017090222,
+    .    1]   2017-09-02 22:07:40]    623]   -3.8828723]   -38.5929789]   12017090222]
+    >>>
+    >>> row
+    id                                                                   [2, 2, 2]
+    local_label                                                    [673, 263, 623]
+    datetime       [2017-09-03 14:10:15, 2017-09-03 14:20:30, 2017-09-03 14:30:45]
+    lat                                       [-3.8235834, -3.9067654, -3.8828723]
+    lon                                     [-38.590389, -38.5907723, -38.5929789]
+    tid                                    [22017090314, 22017090314, 22017090314]
+    dtype: object
+    >>>
+    >>> append_row(df, row)
+    >>> df
+         id               datetime  local           lat            lon            tid
+    0   [1,  [2017-09-02 22:00:27,   [ 85,  [-3.8347478,  [-38.5921890,  [12017090222,
+    .    1,   2017-09-02 22:01:36,    673,   -3.8235834,   -38.5903890,   12017090222,
+    .    1,   2017-09-02 22:03:08,    394,   -3.8138890,   -38.5904445,   12017090222,
+    .    1,   2017-09-02 22:03:46,    263,   -3.9067654,   -38.5907723,   12017090222,
+    .    1,   2017-09-02 22:07:19,    224,   -3.8857223,   -38.5928892,   12017090222,
+    .    1]   2017-09-02 22:07:40]    623]   -3.8828723]   -38.5929789]   12017090222]
+    1   [2,  [2017-09-03 14:10:15,   [673,  [-3.8235834,  [-38.5903890,  [22017090314,
+    .    2,   2017-09-03 14:20:30,    263,   -3.9067654,   -38.5907723,   22017090314,
+    .    2]   2017-09-03 14:30:45]    623]   -3.8828723]   -38.5929789]   22017090314]
     """
     if row is not None:
         keys = row.index.tolist()
@@ -86,27 +119,27 @@ def generate_trajectories_df(
 
     Example
     -------
-    >>> import pandas as pd
     >>> from pymove.utils.data_augmentation import generate_trajectories_df
     >>>
-    >>> data = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, '12017090221'],
-    ...         [1, '2017-09-02 22:00:27',  85, -3.8347478, -38.5921890, '12017090222'],
-    ...         [1, '2017-09-02 22:01:36', 673, -3.8235834, -38.5903890, '12017090222'],
-    ...         [1, '2017-09-02 22:03:08', 394, -3.8138890, -38.5904445, '12017090222'],
-    ...         [1, '2017-09-02 22:03:46', 263, -3.9067654, -38.5907723, '12017090222'],
-    ...         [1, '2017-09-02 22:07:19', 224, -3.8857223, -38.5928892, '12017090222'],
-    ...         [1, '2017-09-02 22:07:40', 623, -3.8828723, -38.5929789, '12017090222']]
-    >>>
-    >>> df = pd.DataFrame(
-    ...     data,
-    ...     columns=['id', 'datetime', 'local_label', 'lat', 'lon', 'tid']
-    ... )
+    >>> df
+      id             datetime  local_label         lat          lon          tid
+    0  1  2017-09-02 21:59:34          162  -3.8431323  -38.5933142  12017090221
+    1  1  2017-09-02 22:00:27           85  -3.8347478  -38.5921890  12017090222
+    2  1  2017-09-02 22:01:36          673  -3.8235834  -38.5903890  12017090222
+    3  1  2017-09-02 22:03:08          394  -3.8138890  -38.5904445  12017090222
+    4  1  2017-09-02 22:03:46          263  -3.9067654  -38.5907723  12017090222
+    5  1  2017-09-02 22:07:19          224  -3.8857223  -38.5928892  12017090222
+    6  1  2017-09-02 22:07:40          623  -3.8828723  -38.5929789  12017090222
     >>>
     >>> traj_df = generate_trajectories_df(df)
     >>> traj_df
-               id   ...             local_label   ...                          tid
-    0   [1, 1, 1,   ...     [85, 673, 394, 263,   ...   [12017090222, 12017090222,
-    .    1, 1, 1]   ...               224, 623]   ...       12017090222, 120170...
+         id               datetime  local           lat            lon            tid
+    0   [1,   2017-09-02 22:00:27,   [ 85,  [-3.8347478,  [-38.5921890,  [12017090222,
+    .    1,   2017-09-02 22:01:36,    673,   -3.8235834,   -38.5903890,   12017090222,
+    .    1,   2017-09-02 22:03:08,    394,   -3.8138890,   -38.5904445,   12017090222,
+    .    1,   2017-09-02 22:03:46,    263,   -3.9067654,   -38.5907723,   12017090222,
+    .    1,   2017-09-02 22:07:19,    224,   -3.8857223,   -38.5928892,   12017090222,
+    .    1]   2017-09-02 22:07:40]    623]   -3.8828723]   -38.5929789]   12017090222]
     """
     if label_tid not in data:
         raise ValueError(
@@ -126,48 +159,10 @@ def generate_trajectories_df(
     return pd.DataFrame(frames, columns=data.columns)
 
 
-def generate_start_feature(
-    data: DataFrame, label_trajectory: Optional[Text] = TRAJECTORY
-):
-    """
-    Removes the last point from the trajectory and adds it in a new column 'destiny'.
-
-    Parameters
-    ----------
-    data : DataFrame
-        The input trajectory data.
-    label_trajectory : str, optional
-        Label of the points sequences, by default TRAJECTORY
-
-    """
-    if START not in data:
-        data[START] = data[label_trajectory].apply(
-            lambda x: np.int64(x[0])
-        )
-
-
-def generate_destiny_feature(
-    data: DataFrame, label_trajectory: Optional[Text] = TRAJECTORY
-):
-    """
-    Removes the first point from the trajectory and adds it in a new column 'start'.
-
-    Parameters
-    ----------
-    data : DataFrame
-        The input trajectory data.
-    label_trajectory : str, optional
-        Label of the points sequences, by default TRAJECTORY
-
-    """
-    if DESTINY not in data:
-        data[DESTINY] = data[label_trajectory].apply(
-            lambda x: np.int64(x[-1])
-        )
-
-
 def split_crossover(
-    sequence_a: List, sequence_b: List, frac: Optional[float] = 0.5
+    sequence_a: List,
+    sequence_b: List,
+    frac: Optional[float] = 0.5
 ) -> Tuple[List, List]:
     """
     Divides two arrays in the indicated ratio and exchange their halves.
@@ -186,6 +181,16 @@ def split_crossover(
     tuple(list, list)
         Arrays with the halves exchanged.
 
+    Example
+    -------
+    >>> from pymove.utils.data_augmentation import split_crossover
+    >>>
+    >>> sequence_a, sequence_a
+    ([0, 2, 4, 6, 8], [1, 3, 5, 7, 9])
+    >>>
+    >>> sequence_a, sequence_b = split_crossover(sequence_a, sequence_b)
+    >>> sequence_a, sequence_b
+    ([0, 2, 5, 7, 9], [1, 3, 4, 6, 8])
     """
     size_a = int(len(sequence_a) * frac)
     size_b = int(len(sequence_b) * frac)
@@ -202,165 +207,125 @@ def split_crossover(
     return sequence_a, sequence_b
 
 
-def _augmentation(data: DataFrame, aug_df: DataFrame, frac: Optional[float] = 0.5):
+def _augmentation(
+    traj_df: DataFrame,
+    frac: Optional[float] = 0.5
+) -> DataFrame:
     """
     Generates new data with unobserved trajectories.
 
     Parameters
     ----------
-    data : DataFrame
+    traj_df : DataFrame
         The input trajectories data.
-    aug_df : DataFrame
-        The dataframe with new trajectories
     frac : float, optional
         Represents the percentage to be exchanged, by default 0.5
 
-    """
-    data.reset_index(drop=True, inplace=True)
-
-    for idx in range(data.shape[0] - 1):
-        for idx_ in range(idx + 1, data.shape[0]):
-            sequences1 = []
-            sequences2 = []
-
-            columns = data.columns
-
-            for col in columns:
-                if (isinstance(
-                    data.at[idx, col], list
-                ) or isinstance(
-                    data.at[idx, col], np.ndarray
-                )) and (isinstance(
-                    data.at[idx_, col], list
-                ) or isinstance(
-                    data.at[idx_, col], np.ndarray
-                )):
-                    seq1, seq2 = split_crossover(
-                        data.at[idx, col],
-                        data.at[idx_, col],
-                        frac=frac
-                    )
-                    sequences1.append(seq1)
-                    sequences2.append(seq2)
-                else:
-                    value1 = data.at[idx, col]
-                    value2 = data.at[idx_, col]
-
-                    if isinstance(value1, str) and isinstance(value2, str):
-                        sequences1.append(value1 + '_' + value2)
-                        sequences2.append(value2 + '_' + value1)
-                    else:
-                        sequences1.append(value1)
-                        sequences2.append(value2)
-
-            row = pd.Series(sequences1, index=columns)
-            append_row(aug_df, row=row)
-
-            row = pd.Series(sequences2, index=columns)
-            append_row(aug_df, row=row)
-
-
-def augmentation_trajectories_df(
-    data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    restriction: Optional[Text] = 'destination only',
-    label_trajectory: Optional[Text] = TRAJECTORY,
-    insert_at_df: Optional[bool] = False,
-    frac: Optional[float] = 0.5,
-) -> DataFrame:
-    """
-    Generates new data from unobserved trajectories, given a specific restriction.
-
-    By default, the algorithm uses the same route destination constraint.
-
-    Parameters
-    ----------
-    data : DataFrame
-        The input trajectories data.
-    restriction : str, optional
-        Constraint used to generate new data, by default 'destination only'
-    label_trajectory : str, optional
-        Label of the points sequences, by default TRAJECTORY
-    insert_at_df : boolean, optional
-        Whether to return a new DataFrame, by default False
-        If True then value of copy is ignored.
-    frac : float, optional
-        Represents the percentage to be exchanged, by default 0.5
-
-    Returns
-    -------
+    Return
+    ------
     DataFrame
-        Dataframe with the new data generated
+        Increased data set.
 
+    Example
+    -------
+    >>> traj_df
+        id               datetime  local_label           lat           lon             tid
+    0  [1,  [2017-09-02 22:00:27,        [ 85,  [-3.8347478,  [-38.5921890,  [12017090222,
+    .   1,   2017-09-02 22:01:36,         673,   -3.8235834,   -38.5903890,   12017090222,
+    .   1]   2017-09-02 22:03:08]         394]   -3.8138890]   -38.5904445]   12017090222]
+    .  [2,  [2017-09-02 23:03:46,        [263,  [-3.9067654,  [-38.5907723,  [22017090223,
+    .   2,   2017-09-02 23:07:19,         224,   -3.8857223,   -38.5928892,   22017090223,
+    .   2,   2017-09-02 23:07:40,         623,   -3.8828723,   -38.5929789,   22017090223,
+    .   2]   2017-09-02 23:09:10]         515]   -3.9939834]   -38.7040900]   22017090223]
+    >>>
+    >>> aug_df = _augmentation(traj_df, frac=0.5)
+    >>> aug_df
+        id               datetime  local_label           lat           lon             tid
+    0  [1,  [2017-09-02 22:00:27,        [ 85,  [-3.8347478,  [-38.5921890,  [12017090222,
+    .   1,   2017-09-02 22:01:36,         673,   -3.8235834,   -38.5903890,   12017090222,
+    .   1]   2017-09-02 22:03:08]         394]   -3.8138890]   -38.5904445]   12017090222]
+    .  [2,  [2017-09-02 23:03:46,        [263,  [-3.9067654,  [-38.5907723,  [22017090223,
+    .   2,   2017-09-02 23:07:19,         224,   -3.8857223,   -38.5928892,   22017090223,
+    .   2,   2017-09-02 23:07:40,         623,   -3.8828723,   -38.5929789,   22017090223,
+    .   2]   2017-09-02 23:09:10]         515]   -3.9939834]   -38.7040900]   22017090223]
+    .  [1,  [2017-09-02 22:00:27,        [ 85,  [-3.8347478,  [-38.5921890,  [12017090222,
+    .   2,   2017-09-02 23:07:40,         623,   -3.8828723,   -38.5929789,   22017090223,
+    .   2]   2017-09-02 23:09:10]         515]   -3.9939834]   -38.7040900]   22017090223]
+    .  [2,  [2017-09-02 23:03:46,        [263,  [-3.9067654,  [-38.5907723,  [22017090223,
+    .   2,   2017-09-02 23:07:19,         224,   -3.8857223,   -38.5928892,   22017090223,
+    .   1,   2017-09-02 22:01:36,         673,   -3.8235834,   -38.5903890,   12017090222,
+    .   1]   2017-09-02 22:03:08]         394]   -3.8138890]   -38.5904445]   12017090222]
     """
-    if DESTINY not in data:
-        generate_destiny_feature(data, label_trajectory=label_trajectory)
+    traj_df.reset_index(drop=True, inplace=True)
 
-    if restriction == 'departure and destination':
-        generate_start_feature(data)
+    frames = {}
+    for idx, row in traj_df.iterrows():
+        if idx + 1 < traj_df.shape[0]:
+            series = {}
+            for column in traj_df.columns:
+                series[column] = pd.Series(
+                    traj_df[idx + 1:][column].apply(
+                        lambda x: split_crossover(row[column], x, frac)
+                    ).values[0], name=column,
+                )
+            frames[idx] = pd.concat([series[col] for col in traj_df.columns], axis=1)
 
-    if insert_at_df:
-        aug_df = data
-    else:
-        aug_df = pd.DataFrame(columns=data.columns)
+    aug_df = pd.concat([frames[i] for i in range(len(frames))], axis=1)
 
-    destinations = data[DESTINY].unique()
-    for dest in progress_bar(destinations, total=len(destinations)):
-        filter_ = data[data[DESTINY] == dest]
-
-        if restriction == 'departure and destination':
-            starts = filter_[START].unique()
-
-            for st in progress_bar(starts, total=len(starts)):
-                f_filter_ = filter_[filter_[START] == st]
-
-                if f_filter_.shape[0] >= 2:
-                    _augmentation(f_filter_, aug_df, frac=frac)
-
-        else:
-            if filter_.shape[0] >= 2:
-                _augmentation(filter_, aug_df, frac=frac)
-
-    return aug_df
+    return pd.concat([traj_df, aug_df], ignore_index=True)
 
 
-def insert_points_in_df(data: DataFrame, aug_df: DataFrame):
+def flatten_trajectories_dataframe(traj_df: DataFrame) -> DataFrame:
     """
-    Inserts the points of the generated trajectories to the original data sets.
+    Extracts information from trajectories.
 
     Parameters
     ----------
     data : DataFrame
         The input trajectories data
-    aug_df : DataFrame
-        The data of unobserved trajectories
 
+    Return
+    ------
+    DataFrames
+        Flat trajectories.
+
+    Example
+    -------
+    >>> from pymove.utils.data_augmentation import flatten_trajectories_dataframe
+    >>>
+    >>> traj_df
+        id               datetime  local_label           lat           lon             tid
+    0  [1,  [2017-09-02 22:00:27,        [ 85,  [-3.8347478,  [-38.5921890,  [12017090222,
+    .   1,   2017-09-02 22:01:36,         673,   -3.8235834,   -38.5903890,   12017090222,
+    .   1]   2017-09-02 22:03:08]         394]   -3.8138890]   -38.5904445]   12017090222]
+    1  [2,  [2017-09-02 23:03:46,        [263,  [-3.9067654,  [-38.5907723,  [22017090223,
+    .   2,   2017-09-02 23:07:19,         224,   -3.8857223,   -38.5928892,   22017090223,
+    .   2,   2017-09-02 23:07:40,         623,   -3.8828723,   -38.5929789,   22017090223,
+    .   2]   2017-09-02 23:09:10]         515]   -3.9939834]   -38.7040900]   22017090223]
+    >>>
+    >>> df = flatten_trajectories_dataframe(traj_df)
+    >>> df
+       id             datetime  local_label         lat          lon          tid
+    0   1  2017-09-02 22:00:27           85  -3.8347478  -38.5921890  12017090222
+    1   1  2017-09-02 22:01:36          673  -3.8235834  -38.5903890  12017090222
+    2   1  2017-09-02 22:03:08          394  -3.8138890  -38.5904445  12017090222
+    3   2  2017-09-02 23:03:46          263  -3.9067654  -38.5907723  22017090223
+    4   2  2017-09-02 23:07:19          224  -3.8857223  -38.5928892  22017090223
+    5   2  2017-09-02 23:07:40          623  -3.8828723  -38.5929789  22017090223
+    6   2  2017-09-02 23:09:10          515  -3.9939834  -38.7040900  22017090223
     """
-    for _, row in progress_bar(aug_df.iterrows(), total=aug_df.shape[0]):
+    frames = {}
+    for idx, row in progress_bar(traj_df.iterrows(), total=traj_df.shape[0]):
+        frames[idx] = pd.DataFrame(row.to_dict())
 
-        keys = row.index.tolist()
-        values = row.values.tolist()
-
-        row_df = pd.DataFrame()
-
-        for k, v in zip(keys, values):
-            if k in data:
-                if isinstance(v, list) or isinstance(v, np.ndarray):
-                    row_df[k] = v
-
-        for k, v in zip(keys, values):
-            if k in data:
-                if not isinstance(v, list) and not isinstance(v, np.ndarray):
-                    row_df[k] = v
-
-        for _, row_ in row_df.iterrows():
-            append_row(data, row=row_)
+    return pd.concat([frames[i] for i in range(len(frames))], ignore_index=True)
 
 
 def instance_crossover_augmentation(
     data: DataFrame,
     restriction: Optional[Text] = 'destination only',
-    label_trajectory: Optional[Text] = TRAJECTORY,
-    frac: Optional[float] = 0.5
+    label_trajectory: Optional[Text] = LOCAL_LABEL,
+    frac: Optional[float] = 0.5,
 ):
     """
     Generates new data from unobserved trajectories, with a specific restriction.
@@ -376,22 +341,33 @@ def instance_crossover_augmentation(
     restriction : str, optional
         Constraint used to generate new data, by default 'destination only'
     label_trajectory : str, optional
-        Label of the points sequences, by default TRAJECTORY
+        Label of the points sequences, by default LOCAL_LABEL
     frac : float, optional
         Represents the percentage to be exchanged, by default 0.5
-
     """
-    traj_df = generate_trajectories_df(data)
+    df = data.copy()
 
-    generate_destiny_feature(traj_df, label_trajectory=label_trajectory)
+    df[DESTINY] = df[label_trajectory].apply(lambda x: x[-1])
+    df[START] = df[label_trajectory].apply(lambda x: x[0])
 
-    if restriction == 'departure and destination':
-        generate_start_feature(traj_df, label_trajectory=label_trajectory)
+    frames = {}
+    destinations = df[DESTINY].unique()
+    for idx, dest in progress_bar(enumerate(destinations), total=len(destinations)):
+        filter_ = df[df[DESTINY] == dest]
 
-    aug_df = augmentation_trajectories_df(
-        traj_df, restriction=restriction, frac=frac
-    )
-    insert_points_in_df(data, aug_df)
+        if restriction == 'departure and destination':
+            starts = filter_[START].unique()
+
+            for st in progress_bar(starts, total=len(starts)):
+                filter_ = filter_[filter_[START] == st]
+
+                if filter_.shape[0] >= 2:
+                    frames[idx] = _augmentation(filter_.iloc[:, :-2], frac=frac)
+        else:
+            if filter_.shape[0] >= 2:
+                frames[idx] = _augmentation(filter_.iloc[:, :-2], frac=frac)
+
+    return pd.concat([frames[i] for i in range(len(frames))], axis=0, ignore_index=True)
 
 
 def sliding_window(
@@ -428,25 +404,29 @@ def sliding_window(
 
     Example
     -------
-    >>> data = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, '12017090221'],
-    ...         [1, '2017-09-02 22:00:27',  85, -3.8347478, -38.5921890, '12017090222'],
-    ...         [1, '2017-09-02 22:01:36', 673, -3.8235834, -38.5903890, '12017090222'],
-    ...         [1, '2017-09-02 22:03:08', 394, -3.8138890, -38.5904445, '12017090222'],
-    ...         [1, '2017-09-02 22:03:46', 263, -3.9067654, -38.5907723, '12017090222'],
-    ...         [1, '2017-09-02 22:07:19', 224, -3.8857223, -38.5928892, '12017090222'],
-    ...         [1, '2017-09-02 22:07:40', 623, -3.8828723, -38.5929789, '12017090222']]
+    >>> from pymove.utils.data_augmentation import sliding_window
     >>>
-    >>> df = pd.DataFrame(
-    ...     data, columns=['id', 'datetime', 'local_label', 'lat', 'lon', 'tid']
-    ... )
-    >>>
-    >>> traj_df = generate_trajectories_df(df)
+    >>> traj_df
+         id               datetime  local           lat            lon            tid
+    0   [1,  [2017-09-02 22:00:27,   [ 85,  [-3.8347478,  [-38.5921890,  [12017090222,
+    .    1,   2017-09-02 22:01:36,    673,   -3.8235834,   -38.5903890,   12017090222,
+    .    1,   2017-09-02 22:03:08,    394,   -3.8138890,   -38.5904445,   12017090222,
+    .    1,   2017-09-02 22:03:46,    263,   -3.9067654,   -38.5907723,   12017090222,
+    .    1,   2017-09-02 22:07:19,    224,   -3.8857223,   -38.5928892,   12017090222,
+    .    1]   2017-09-02 22:07:40]    623]   -3.8828723]   -38.5929789]   12017090222]
     >>>
     >>> aug_df = sliding_window(traj_df)
     >>> aug_df
-               id   ...             local_label   ...                          tid
-    0   [1, 1, 1,   ...     [85, 673, 394, 263,   ...   [12017090222, 12017090222,
-    .    1, 1, 1]   ...               224, 623]   ...       12017090222, 120170...
+        id               datetime  local           lat            lon            tid
+    0  [1,  [2017-09-02 22:00:27,   [ 85,  [-3.8347478,  [-38.5921890,  [12017090222,
+    .   1,   2017-09-02 22:01:36,    673,   -3.8235834,   -38.5903890,   12017090222,
+    .   1,   2017-09-02 22:03:08,    394,   -3.8138890,   -38.5904445,   12017090222,
+    .   1,   2017-09-02 22:03:46,    263,   -3.9067654,   -38.5907723,   12017090222,
+    .   1,   2017-09-02 22:07:19,    224,   -3.8857223,   -38.5928892,   12017090222,
+    .   1]   2017-09-02 22:07:40]    623]   -3.8828723]   -38.5929789]   12017090222]
+    1  [1,  [2017-09-02 22:03:46,   [263,  [-3.9067654,  [-38.5907723,  [12017090222,
+    .   1,   2017-09-02 22:07:19,    224,   -3.8857223,   -38.5928892,   12017090222,
+    .   1]   2017-09-02 22:07:40]    623]   -3.8828723]   -38.5929789]   12017090222]
     """
     if columns is None:
         columns = data.columns
@@ -463,7 +443,7 @@ def sliding_window(
 
 
 def get_all_paths(
-    data: DataFrame,
+    traj_df: DataFrame,
     graph: DiGraph,
     source: Node,
     target: Node,
@@ -486,7 +466,7 @@ def get_all_paths(
 
     Parameters
     ----------
-    data: DataFrame
+    traj_df: DataFrame
         Trajectory data in sequence format.
     graph: DiGraph
         Transition graph constructed from trajectory data.
@@ -512,6 +492,33 @@ def get_all_paths(
         If true, use the paths with the most used sections
         Otherwise, use paths with less used sections, by default False
 
+    Example
+    -------
+    >>> from pymove.utils.data_augmentation import get_all_paths
+    >>>
+    >>> traj_df
+        id               datetime    local           lat            lon     prev  tid_stat
+    0  [1,  [2017-09-02 22:00:27,    [ 85,  [-3.8347478,  [-38.5921890,    [nan,       [1,
+    .   1,   2017-09-02 22:01:36,     673,   -3.8235834,   -38.5903890,      85,        1,
+    .   1]   2017-09-02 22:03:08]     394]   -3.8138890]   -38.5904445]     673]        1]
+    1  [2,  [2017-09-02 23:03:46,    [263,  [-3.9067654,  [-38.5907723,    [nan,       [2,
+    .   2,   2017-09-02 23:07:19,     224,   -3.8857223,   -38.5928892,     263,        2,
+    .   2,   2017-09-02 23:07:40,     623,   -3.8828723,   -38.5929789,     224,        2,
+    .   2]   2017-09-02 23:09:10]     394]   -3.9939834]   -38.7040900,     623]        2]
+    >>>
+    >>> get_all_paths(traj_df, graph, 224, 394)
+    >>> traj_df
+        id               datetime    local           lat            lon     prev  tid_stat
+    0  [1,  [2017-09-02 22:00:27,    [ 85,  [-3.8347478,  [-38.5921890,    [nan,       [1,
+    .   1,   2017-09-02 22:01:36,     673,   -3.8235834,   -38.5903890,      85,        1,
+    .   1]   2017-09-02 22:03:08]     394]   -3.8138890]   -38.5904445]     673]        1]
+    1  [2,  [2017-09-02 23:03:46,    [263,  [-3.9067654,  [-38.5907723,    [nan,       [2,
+    .   2,   2017-09-02 23:07:19,     224,   -3.8857223,   -38.5928892,     263,        2,
+    .   2,   2017-09-02 23:07:40,     623,   -3.8828723,   -38.5929789,     224,        2,
+    .   2]   2017-09-02 23:09:10]     394]   -3.9939834]   -38.7040900,     623]        2]
+    2  [3,  [2017-09-02 23:07:19,  [224.0,  [-3.8857223,  [-38.5928892,  [  nan,       [3,
+    .   3,   2017-09-02 23:07:40,   623.0,   -3.8828723,   -38.5929789,   224.0,        3,
+    .   3],  2017-09-02 23:09:10]   394.0]   -3.9939834]   -38.7040900]   623.0]        3]
     """
     source = str(source)
     target = str(target)
@@ -542,9 +549,9 @@ def get_all_paths(
 
         if len(path) >= min_path_size:
             path_ = np.array(path, dtype='float32').tolist()
-            if path_ not in data[label_local].values.tolist():
+            if path_ not in traj_df[label_local].values.tolist():
 
-                append_trajectory(data, path, graph, label_tid)
+                append_trajectory(traj_df, path, graph, label_tid)
 
                 freq_source += 1
                 freq_target += 1
@@ -554,7 +561,7 @@ def get_all_paths(
 
 
 def transition_graph_augmentation_all_vertex(
-    data: DataFrame,
+    traj_df: DataFrame,
     graph: Optional[DiGraph] = None,
     min_path_size: Optional[int] = 3,
     max_path_size: Optional[int] = 6,
@@ -574,7 +581,7 @@ def transition_graph_augmentation_all_vertex(
 
     Parameters
     ----------
-    data: DataFrame
+    traj_df: DataFrame
         Trajectory data in sequence format
     graph: DiGraph
         Transition graph constructed from trajectory data
@@ -609,14 +616,47 @@ def transition_graph_augmentation_all_vertex(
     ------
     DataFrame
         Increased data set.
+
+    Example
+    -------
+    >>> from pymove.utils.data_augmentation import (
+            transition_graph_augmentation_all_vertex
+        )
+    >>>
+    >>> traj_df
+        id               datetime    local           lat            lon     prev  tid_stat
+    0  [1,  [2017-09-02 22:00:27,    [ 85,  [-3.8347478,  [-38.5921890,    [nan,       [1,
+    .   1,   2017-09-02 22:01:36,     673,   -3.8235834,   -38.5903890,      85,        1,
+    .   1]   2017-09-02 22:03:08]     394]   -3.8138890]   -38.5904445]     673]        1]
+    1  [2,  [2017-09-02 23:03:46,    [263,  [-3.9067654,  [-38.5907723,    [nan,       [2,
+    .   2,   2017-09-02 23:07:19,     224,   -3.8857223,   -38.5928892,     263,        2,
+    .   2,   2017-09-02 23:07:40,     623,   -3.8828723,   -38.5929789,     224,        2,
+    .   2]   2017-09-02 23:09:10]     394]   -3.9939834]   -38.7040900,     623]        2]
+    >>>
+    >>> transition_graph_augmentation_all_vertex(traj_df)
+    >>> traj_df
+        id               datetime    local           lat            lon     prev  tid_stat
+    0  [1,  [2017-09-02 22:00:27,    [ 85,  [-3.8347478,  [-38.5921890,    [nan,       [1,
+    .   1,   2017-09-02 22:01:36,     673,   -3.8235834,   -38.5903890,      85,        1,
+    .   1]   2017-09-02 22:03:08]     394]   -3.8138890]   -38.5904445]     673]        1]
+    1  [2,  [2017-09-02 23:03:46,    [263,  [-3.9067654,  [-38.5907723,    [nan,       [2,
+    .   2,   2017-09-02 23:07:19,     224,   -3.8857223,   -38.5928892,     263,        2,
+    .   2,   2017-09-02 23:07:40,     623,   -3.8828723,   -38.5929789,     224,        2,
+    .   2]   2017-09-02 23:09:10]     394]   -3.9939834]   -38.7040900,     623]        2]
+    2  [3,  [2017-09-02 23:03:46,  [263.0,  [-3.9067654,  [-38.5907723,  [  nan,       [3,
+    .   3,   2017-09-02 23:07:19,   224.0,   -3.8857223,   -38.5928892,   263.0,        3,
+    .   3]   2017-09-02 23:07:40]   623.0]   -3.8828723]   -38.5929789]   224.0]        3]
+    3  [4,  [2017-09-02 23:07:19,  [224.0,  [-3.8857223,  [-38.5928892,  [  nan,       [4,
+    .   4,   2017-09-02 23:07:40,   623.0,   -3.8828723,   -38.5929789,   224.0,        4,
+    .   4]   2017-09-02 23:09:10]   394.0]   -3.9939834]   -38.7040900]   623.0]        4]
     """
     if inplace:
-        data_ = data
+        traj_df_ = traj_df
     else:
-        data_ = data.copy()
+        traj_df_ = traj_df.copy()
 
     if graph is None:
-        graph = build_transition_graph_from_df(data)
+        graph = build_transition_graph_from_df(traj_df_)
 
     if source is None:
         source = dict(graph.nodes)
@@ -631,11 +671,13 @@ def transition_graph_augmentation_all_vertex(
     for t in progress_bar(targets, desc=desc, total=len(targets)):
         for s in sorted(source, key=source.get, reverse=True):
             get_all_paths(
-                data=data, graph=graph, source=s, target=t, min_path_size=min_path_size,
-                max_path_size=max_path_size, max_sampling_source=max_sampling_source,
-                max_sampling_target=max_sampling_target, label_local=label_local,
-                label_tid=label_tid, simple_paths=simple_paths
+                traj_df=traj_df_, graph=graph, source=s, target=t,
+                min_path_size=min_path_size, max_path_size=max_path_size,
+                max_sampling_source=max_sampling_source,
+                max_sampling_target=max_sampling_target,
+                label_local=label_local, label_tid=label_tid,
+                simple_paths=simple_paths
             )
 
     if not inplace:
-        return data_
+        return traj_df_

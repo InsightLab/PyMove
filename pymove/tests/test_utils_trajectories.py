@@ -30,23 +30,21 @@ list_data = [
 ]
 
 list_data2 = {
-    TRAJ_ID: [['d95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
-               'd95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
-               'd95bafc8f2a4d27bdcf4bb99f4bea973']],
-    LOCAL_LABEL: [[2, 4, 6, 8, 9]],
-    DATETIME: [[pd.Timestamp('2020-01-01 09:10:15'),
-                pd.Timestamp('2020-01-01 09:15:45'),
-                pd.Timestamp('2020-01-01 09:25:30'),
-                pd.Timestamp('2020-01-01 09:30:17'),
-                pd.Timestamp('2020-01-01 09:45:16')]],
-    LATITUDE: [[3.1234567165374756, 3.1234567165374756,
-                3.1234567165374756, 3.1234567165374756,
-                3.1234567165374756]],
-    LONGITUDE: [[38.12345504760742, 38.12345504760742,
-                 38.12345504760742, 38.12345504760742,
-                 38.12345504760742]],
-    PREV_LOCAL: [[np.nan, 2, 4, 6, 8]],
-    TID_STAT: [[2, 2, 2, 2, 2]]}
+    TRAJ_ID: [[1, 1, 1, 1, 1, 1]],
+    DATETIME: [[pd.Timestamp('2017-09-02 22:00:27'),
+                pd.Timestamp('2017-09-02 22:01:36'),
+                pd.Timestamp('2017-09-02 22:03:08'),
+                pd.Timestamp('2017-09-02 22:03:46'),
+                pd.Timestamp('2017-09-02 22:07:19'),
+                pd.Timestamp('2017-09-02 22:07:40')]],
+    LOCAL_LABEL: [[85, 673, 394, 263, 224, 623]],
+    LATITUDE: [[-3.8347478, -3.8235834, -3.813889,
+                -3.9067654, -3.8857223, -3.8828723]],
+    LONGITUDE: [[-38.592189, -38.590389, -38.5904445,
+                 -38.5907723, -38.5928892, -38.5929789]],
+    TID: [['12017090222', '12017090222', '12017090222',
+           '12017090222', '12017090222', '12017090222']]
+}
 
 str_data_default = """
 lat,lon,datetime,id
@@ -160,118 +158,92 @@ def test_fill_list_with_new_values():
 
 
 def test_append_trajectory():
-    data = pd.DataFrame(list_data2)
-    graph = build_transition_graph_from_df(data)
+    traj_df = pd.DataFrame(list_data4)
+    graph = build_transition_graph_from_df(traj_df)
 
     expected = pd.DataFrame({
-        TRAJ_ID: [['d95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
-                   'd95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
-                   'd95bafc8f2a4d27bdcf4bb99f4bea973'],
-                  ['216363698b529b4a97b750923ceb3ffd', '216363698b529b4a97b750923ceb3ffd',
+        TRAJ_ID: [[1, 1, 1], [2, 2, 2, 2],
+                  ['216363698b529b4a97b750923ceb3ffd',
+                   '216363698b529b4a97b750923ceb3ffd',
                    '216363698b529b4a97b750923ceb3ffd']],
-        LOCAL_LABEL: [[2, 4, 6, 8, 9], [2.0, 4.0, 6.0]],
-        DATETIME: [[pd.Timestamp('2020-01-01 09:10:15'), pd.Timestamp('2020-01-01 09:15:45'),
-                    pd.Timestamp('2020-01-01 09:25:30'), pd.Timestamp('2020-01-01 09:30:17'),
-                    pd.Timestamp('2020-01-01 09:45:16')],
-                   [pd.Timestamp('2020-01-01 09:10:15'), pd.Timestamp('2020-01-01 09:15:45'),
-                    pd.Timestamp('2020-01-01 09:25:30')]],
-        LATITUDE: [[3.1234567165374756, 3.1234567165374756, 3.1234567165374756,
-                    3.1234567165374756, 3.1234567165374756],
-                   [3.1234567165374756, 3.1234567165374756, 3.1234567165374756]],
-        LONGITUDE: [[38.12345504760742, 38.12345504760742, 38.12345504760742,
-                     38.12345504760742, 38.12345504760742],
-                    [38.12345504760742, 38.12345504760742, 38.12345504760742]],
-        PREV_LOCAL: [[np.nan, 2, 4, 6, 8], [np.nan, 2.0, 4.0]],
-        TID_STAT: [[2, 2, 2, 2, 2], [3, 3, 3]]
+        DATETIME: [[pd.Timestamp('2017-09-02 22:00:27'), pd.Timestamp('2017-09-02 22:01:36'),
+                    pd.Timestamp('2017-09-02 22:03:08')],
+                   [pd.Timestamp('2017-09-02 23:03:46'), pd.Timestamp('2017-09-02 23:07:19'),
+                    pd.Timestamp('2017-09-02 23:07:40'), pd.Timestamp('2017-09-02 23:09:10')],
+                   [pd.Timestamp('2017-09-02 23:07:19'), pd.Timestamp('2017-09-02 23:07:40'),
+                    pd.Timestamp('2017-09-02 23:09:10')]],
+        LOCAL_LABEL: [[85, 673, 394], [263, 224, 623, 394], [224.0, 623.0, 394.0]],
+        LATITUDE: [[-3.8347478, -3.8235834, -3.813889],
+                   [-3.9067654, -3.8857223, -3.8828723, -3.9939834],
+                   [-3.8857223, -3.8828723, -3.9939834]],
+        LONGITUDE: [[-38.592189, -38.590389, -38.5904445],
+                    [-38.5907723, -38.5928892, -38.5929789, -38.70409],
+                    [-38.5928892, -38.5929789, -38.70409]],
+        PREV_LOCAL: [[np.nan, 85, 673], [np.nan, 263, 224, 623], [np.nan, 224.0, 623.0]],
+        TID_STAT: [[1, 1, 1], [2, 2, 2, 2], [3, 3, 3]]
     })
 
-    trajectory = ['2', '4', '6']
-    append_trajectory(data, trajectory, graph)
-
-    assert_frame_equal(expected, data)
+    trajectory = [224, 623, 394]
+    append_trajectory(traj_df, trajectory, graph)
+    assert_frame_equal(traj_df, expected)
 
 
 def test_split_trajectory():
-    row = pd.DataFrame(list_data2).loc[0]
+    trajectory = pd.DataFrame(list_data2).loc[0]
 
     expected = pd.DataFrame({
-        TRAJ_ID: [['d95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
-                   'd95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973',
-                   'd95bafc8f2a4d27bdcf4bb99f4bea973'],
-                  ['d95bafc8f2a4d27bdcf4bb99f4bea973', 'd95bafc8f2a4d27bdcf4bb99f4bea973']],
-        LOCAL_LABEL: [[2, 4, 6, 8, 9], [8, 9]],
-        DATETIME: [[pd.Timestamp('2020-01-01 09:10:15'),
-                    pd.Timestamp('2020-01-01 09:15:45'),
-                    pd.Timestamp('2020-01-01 09:25:30'),
-                    pd.Timestamp('2020-01-01 09:30:17'),
-                    pd.Timestamp('2020-01-01 09:45:16')],
-                   [pd.Timestamp('2020-01-01 09:30:17'),
-                    pd.Timestamp('2020-01-01 09:45:16')]],
-        LATITUDE: [[3.1234567165374756, 3.1234567165374756,
-                    3.1234567165374756, 3.1234567165374756,
-                    3.1234567165374756],
-                   [3.1234567165374756, 3.1234567165374756]],
-        LONGITUDE: [[38.12345504760742, 38.12345504760742,
-                     38.12345504760742, 38.12345504760742,
-                     38.12345504760742],
-                    [38.12345504760742, 38.12345504760742]],
-        PREV_LOCAL: [[np.nan, 2, 4, 6, 8], [6, 8]],
-        TID_STAT: [[2, 2, 2, 2, 2], [2, 2]]}
-    )
+        TRAJ_ID: [[1, 1, 1, 1, 1, 1], [1, 1, 1]],
+        DATETIME: [[pd.Timestamp('2017-09-02 22:00:27'), pd.Timestamp('2017-09-02 22:01:36'),
+                    pd.Timestamp('2017-09-02 22:03:08'), pd.Timestamp('2017-09-02 22:03:46'),
+                    pd.Timestamp('2017-09-02 22:07:19'), pd.Timestamp('2017-09-02 22:07:40')],
+                   [pd.Timestamp('2017-09-02 22:03:46'), pd.Timestamp('2017-09-02 22:07:19'),
+                    pd.Timestamp('2017-09-02 22:07:40')]],
+        LOCAL_LABEL: [[85, 673, 394, 263, 224, 623], [263, 224, 623]],
+        LATITUDE: [[-3.8347478, -3.8235834, -3.813889,
+                    -3.9067654, -3.8857223, -3.8828723],
+                   [-3.9067654, -3.8857223, -3.8828723]],
+        LONGITUDE: [[-38.592189, -38.590389, -38.5904445,
+                     -38.5907723, -38.5928892, -38.5929789],
+                    [-38.5907723, -38.5928892, -38.5929789]],
+        TID: [['12017090222', '12017090222', '12017090222',
+               '12017090222', '12017090222', '12017090222'],
+              ['12017090222', '12017090222', '12017090222']]
+    })
 
-    split = split_trajectory(row)
-
-    assert_frame_equal(expected, split)
+    split = split_trajectory(trajectory)
+    assert_frame_equal(split, expected)
 
 
 def test_object_for_array():
     data_1 = '[1, 2, 3]'
     data_2 = '[1.5, 2.5, 3.5]'
-    data_3 = '[event, event]'
+    data_3 = "['event', 'event']"
 
     expected_data_1 = np.array([1., 2., 3.], dtype=np.float32)
     expected_data_2 = np.array([1.5, 2.5, 3.5], dtype=np.float32)
     expected_data_3 = np.array(['event', 'event'], dtype='object_')
 
-    assert_array_almost_equal(trajectories.object_for_array(data_1), expected_data_1)
-    assert_array_almost_equal(trajectories.object_for_array(data_2), expected_data_2)
-    assert_array_equal(trajectories.object_for_array(data_3), expected_data_3)
+    assert_array_almost_equal(object_for_array(data_1), expected_data_1)
+    assert_array_almost_equal(object_for_array(data_2), expected_data_2)
+    assert_array_equal(object_for_array(data_3), expected_data_3)
 
 
-def test_column_to_array():
-    list_data_1 = [
-        '[1, 2, 3]',
-        '[5, 8]',
-        '[13, 21, 34, 55]',
-        '[89, 144]'
-    ]
+def test_columns_to_array():
+    df = DataFrame({
+        'ids': ['[1, 1, 1]', '[2, 2, 2]', '[3, 3, 3, 3]', '[4, 4]'],
+        'descritions': ["['event', 'event', 'event']", "['bike', 'bike', 'bike']",
+                        "['car', 'car', 'car', 'car']", "['house', 'house']"],
+        'price': ['[10.5, 20.5, 13.5]', '[50.2, 33.4, 90.0]',
+                  '[1.0, 2.9, 3.4, 8.4]', '[100.4, 150.5]']
+    })
 
-    list_data_2 = [
-        '[event]',
-        '[missa, culto]',
-        '[festa da cidade]'
-    ]
+    expected = DataFrame({
+        'ids': [[1, 1, 1], [2, 2, 2], [3, 3, 3, 3], [4, 4]],
+        'descritions': [['event', 'event', 'event'], ['bike', 'bike', 'bike'],
+                        ['car', 'car', 'car', 'car'], ['house', 'house']],
+        'price': [[10.5, 20.5, 13.5], [50.2, 33.4, 90.0],
+                  [1.0, 2.9, 3.4, 8.4], [100.4, 150.5]]
+    })
 
-    df_1 = DataFrame(list_data_1, columns=['label'])
-    df_2 = DataFrame(list_data_2, columns=['label'])
-
-    expected_data_1 = DataFrame(
-        data={'label': [[1, 2, 3],
-                        [5, 8],
-                        [13, 21, 34, 55],
-                        [89, 144]]},
-        index=[0, 1, 2, 3]
-    )
-
-    expected_data_2 = DataFrame(
-        data={'label': [['event'],
-                        ['missa', 'culto'],
-                        ['festa da cidade']]},
-        index=[0, 1, 2]
-    )
-
-    df_1 = trajectories.column_to_array(df_1, 'label')
-    df_2 = trajectories.column_to_array(df_2, 'label')
-
-    assert_frame_equal(df_1, expected_data_1)
-    assert_frame_equal(df_2, expected_data_2)
+    column_to_array(df)
+    assert_frame_equal(df, expected)

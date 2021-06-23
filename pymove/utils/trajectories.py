@@ -40,7 +40,6 @@ from pymove.utils.constants import (
     TRAJ_ID,
     TYPE_PANDAS,
 )
-from pymove.utils.math import is_number
 from pymove.utils.networkx import graph_to_dict
 
 
@@ -301,33 +300,33 @@ def append_trajectory(
 
     Example
     -------
-    >>> data = [[1, '2017-09-02 21:59:34', 162, -3.8431323, -38.5933142, np.nan, 517],
-    ...         [1, '2017-09-02 22:00:27',  85, -3.8347478, -38.5921890,    162, 517],
-    ...         [1, '2017-09-02 22:01:36', 673, -3.8235834, -38.5903890,     85, 517],
-    ...         [1, '2017-09-02 22:03:08', 394, -3.8138890, -38.5904445,    673, 517],
-    ...         [1, '2017-09-02 22:03:46', 263, -3.9067654, -38.5907723,    394, 517],
-    ...         [1, '2017-09-02 22:07:19', 224, -3.8857223, -38.5928892,    263, 517],
-    ...         [1, '2017-09-02 22:07:40', 623, -3.8828723, -38.5929789,    224, 517]]
-    >>>
-    >>> df = pd.DataFrame(
-    ...     data,
-    ...     columns=['id', 'datetime', 'local_label',
-    ...              'lat', 'lon', 'prev_local', 'tid_stat']
-    ... )
-    >>> traj_df = generate_trajectories_df(df, 'tid_stat')
-    >>>
-    >>> traj = [85, 673, 394, 263]
-    >>> graph = build_transition_graph_from_df(traj_df)
-    >>>
-    >>> append_trajectory(traj_df, traj, graph)
+    >>> from pymove.utils.data_augmentation import append_trajectory
     >>> traj_df
-                                      id ...         local_label ...             tid_stat
-    0                       [1, 1, 1, 1, ... [162, 85, 673, 394, ... [517, 517, 517, 517,
-    .                           1, 1, 1] ...      263, 224, 623] ...       517, 517, 517]
-    1 [5f28190fd32d8e1afecabecef06920db, ...       [85.0, 673.0, ...           [518, 518,
-    .                     5f28190fd32... ...       394.0, 263.0] ...            518, 518]
+        id               datetime    local           lat            lon    prev  tid_stat
+    0  [1,  [2017-09-02 22:00:27,    [ 85,  [-3.8347478,  [-38.5921890,   [nan,       [1,
+    .   1,   2017-09-02 22:01:36,     673,   -3.8235834,   -38.5903890,     85,        1,
+    .   1]   2017-09-02 22:03:08]     394]   -3.8138890]   -38.5904445]    673]        1]
+    1  [2,  [2017-09-02 23:03:46,    [263,  [-3.9067654,  [-38.5907723,   [nan,       [2,
+    .   2,   2017-09-02 23:07:19,     224,   -3.8857223,   -38.5928892,    263,        2,
+    .   2,   2017-09-02 23:07:40,     623,   -3.8828723,   -38.5929789,    224,        2,
+    .   2]   2017-09-02 23:09:10]     394]   -3.9939834]   -38.7040900,    623]        2]
+    >>>
+    >>> trajectory = [263, 224, 623]
+    >>> append_trajectory(traj_df, trajectory, graph)
+    >>> traj_df
+        id               datetime    local           lat            lon    prev  tid_stat
+    0  [1,  [2017-09-02 22:00:27,    [ 85,  [-3.8347478,  [-38.5921890,   [nan,       [1,
+    .   1,   2017-09-02 22:01:36,     673,   -3.8235834,   -38.5903890,     85,        1,
+    .   1]   2017-09-02 22:03:08]     394]   -3.8138890]   -38.5904445]    673]        1]
+    1  [2,  [2017-09-02 23:03:46,    [263,  [-3.9067654,  [-38.5907723,   [nan,       [2,
+    .   2,   2017-09-02 23:07:19,     224,   -3.8857223,   -38.5928892,    263,        2,
+    .   2,   2017-09-02 23:07:40,     623,   -3.8828723,   -38.5929789,    224,        2,
+    .   2]   2017-09-02 23:09:10]     394]   -3.9939834]   -38.7040900,    623]        2]
+    2  [3,  [2017-09-02 23:07:19,  [224.0,  [-3.8857223,  [-38.5928892,   [nan,       [3,
+    .   3,   2017-09-02 23:07:40,   623.0,   -3.8828723,   -38.5929789,  224.0,        3,
+    .   3]   2017-09-02 23:09:10]   394.0]   -3.9939834]   -38.7040900]  623.0]        3]
     """
-    source = trajectory[0]
+    source = str(trajectory[0])
     dict_graph = graph_to_dict(graph)
 
     dt = np.random.choice(dict_graph['nodes']['datetime'][source])
@@ -337,7 +336,7 @@ def append_trajectory(
     lats, lons = [coords[source][0]], [coords[source][1]]
 
     for idx, edge in enumerate(zip(trajectory[:-1], trajectory[1:])):
-        u, v = edge
+        u, v = str(edge[0]), str(edge[1])
         mean_times = dict_graph['edges'][u][v]['mean_times']
 
         datetime = pd.Timestamp(str(datetimes[idx])) + pd.Timedelta(mean_times)
@@ -396,17 +395,35 @@ def split_trajectory(
 
     Example
     -------
-    >>> import pandas as pd
     >>> from pymove.utils.trajectories import split_trajectories
     >>>
-    >>> traj = pd.Series([[162, 85, 673, 394, 263, 224, 623]], index=['local_label'])
+    >>> trajectory
+    id                                     [1, 1, 1, 1, 1, 1]
+    datetime       [2017-09-02 22:00:27, 2017-09-02 22:01:36, \
+                    2017-09-02 22:03:08, 2017-09-02 22:03:46, \
+                    2017-09-02 22:07:19, 2017-09-02 22:07:40]
+    local_label                 [85, 673, 394, 263, 224, 623]
+    lat                  [-3.8347478, -3.8235834, -3.8138890, \
+                          -3.9067654, -3.8857223, -3.8828723]
+    lon               [-38.5921890, -38.5903890, -38.5904445, \
+                       -38.5907723, -38.5928892, -38.5929789]
+    tid               [12017090222, 12017090222, 12017090222, \
+                       12017090222, 12017090222, 12017090222]
+    Name: 0, dtype: object
+    dtype: object
     >>>
-    >>> split_trajectory(traj)
-                        local_label
-    0  [162, 85, 673, 394, 263, 224]
-    1           [394, 263, 224, 623]
-    2                          [623]
-
+    >>> split = split_trajectory(trajectory)
+    >>> split
+        id               datetime  local           lat            lon             tid
+    0  [1,  [2017-09-02 22:00:27,   [ 85,  [-3.8347478,   [-38.5921890,  [12017090222,
+    .   1,   2017-09-02 22:01:36,    673,   -3.8235834,    -38.5903890,   12017090222,
+    .   1,   2017-09-02 22:03:08,    394,   -3.8138890,    -38.5904445,   12017090222,
+    .   1,   2017-09-02 22:03:46,    263,   -3.9067654,    -38.5907723,   12017090222,
+    .   1,   2017-09-02 22:07:19,    224,   -3.8857223,    -38.5928892,   12017090222,
+    .   1]   2017-09-02 22:07:40]    623]   -3.8828723]    -38.5929789]   12017090222]
+    1  [1,  [2017-09-02 22:03:46,   [263,  [-3.9067654,   [-38.5907723,  [12017090222,
+    .   1,   2017-09-02 22:07:19,    224,   -3.8857223,    -38.5928892,   12017090222,
+    .   1]   2017-09-02 22:07:40]    623]   -3.8828723]    -38.5929789]   12017090222]
     """
     if columns is None:
         columns = row.index
@@ -424,7 +441,7 @@ def object_for_array(object_: Text) -> ndarray:
 
     Parameters
     ----------
-    object : str
+    object_ : str
         object representing a list of integers or strings
 
     Returns
@@ -432,35 +449,61 @@ def object_for_array(object_: Text) -> ndarray:
     array
         object converted to a list
 
+    Example
+    -------
+    >>> from pymove.utils.trajectories import object_for_array
+    >>>
+    >>> object_1, object_2, object_3
+    ('[1, 2, 3]', '[1.5, 2.5, 3.5]', '[event, event]')
+    >>>
+    >>> object_for_array(object_1)
+    [1, 2, 3]
+    >>> object_for_array(object_2)
+    [1.5, 2.5, 3.5]
+    >>> object_for_array(object_3)
+    [event, event]
     """
     if object_ is None:
         return object_
 
-    conv = np.array([*map(str.strip, object_[1:-1].split(','))])
-
-    if is_number(conv[0]):
-        return conv.astype(np.float32)
-    else:
-        return conv.astype('object_')
+    return eval('[' + object_ + ']', {'nan': np.nan})[0]
 
 
-def column_to_array(data: DataFrame, column: Text):
+def columns_to_array(
+    traj_df: DataFrame,
+    columns: Optional[List] = None
+):
     """
     Transforms all columns values to list.
 
     Parameters
     ----------
-    data : DataFrame
-        The input trajectory data
-    column : str
-        Label of data referring to the column for conversion
+    traj_df : DataFrame
+        The input trajectory data.
+    columns : list, optional
+        List of the columns for conversion.
 
+    Example
+    -------
+    >>> from pymove.utils.trajectories import columns_to_array
+    >>>
+    >>> traj_df
+                  ids                     descritions                   price
+    0     '[1, 1, 1]'   "['event', 'event', 'event']"    '[10.5, 20.5, 13.5]'
+    1     '[2, 2, 2]'      "['bike', 'bike', 'bike']"    '[50.2, 33.4, 90.0]'
+    2  '[3, 3, 3, 3]'  "['car', 'car', 'car', 'car']"  '[1.0, 2.9, 3.4, 8.4]'
+    3        '[4, 4]'            "['house', 'house']"        '[100.4, 150.5]'
+    >>>
+    >>> columns_to_array(traj_df)
+    >>> traj_df
+                ids            descritions                 price
+    0     [1, 1, 1]  [event, event, event]    [10.5, 20.5, 13.5]
+    1     [2, 2, 2]     [bike, bike, bike]    [50.2, 33.4, 90.0]
+    2  [3, 3, 3, 3]   [car, car, car, car]  [1.0, 2.9, 3.4, 8.4]
+    3        [4, 4]         [house, house]        [100.4, 150.5]
     """
-    data = data.copy()
-    if column not in data:
-        raise KeyError(
-            'Dataframe must contain a %s column' % column
-        )
+    if columns is None:
+        columns = list(traj_df.columns)
 
-    data[column] = data[column].apply(object_for_array)
-    return data
+    f = {col: object_for_array for col in columns}
+    traj_df[columns] = traj_df[columns].agg(f)
