@@ -1504,7 +1504,6 @@ def _circle_maker(
     user_lon: str.
         Longitude column name.
     slice_tags: list or iterable
-
     user_point: str.
         Point color.
     radius: float.
@@ -1732,20 +1731,22 @@ def show_trajs_with_event(
     line_color: Text = LINE_COLOR,
     slice_event_show: Optional[List] = None,
     slice_subject_show: Optional[List] = None,
-) -> List[Map]:
+) -> List[Tuple[Map, DataFrame]]:
     """
     Plot a trajectory, including your user_points lat lon and your tags.
+
+    For each event, shows users that are in range of time and space.
 
     Parameters
     ----------
     move_data: DataFrame.
         Trajectory input data.
     window_time_subject: float.
-        The subject time window.
+        The subject time window in seconds.
     window_time_event: float.
-        The event time window.
+        The event time window in seconds.
     radius: float.
-        The radius to use.
+        The radius to use in meters.
     event_lat: str, optional
         Event latitude column name, by default LATITUDE.
     event_lon: str, optional
@@ -1845,10 +1846,10 @@ def show_trajs_with_event(
                 user_datetime
             )
 
-            move_data = df_event[df_event[event_id] == e_id]
+            event_data = df_event[df_event[event_id] == e_id]
 
             base_map = plot_event_folium(
-                move_data,
+                event_data,
                 event_lat=event_lat,
                 event_lon=event_lon,
                 event_point=event_point,
