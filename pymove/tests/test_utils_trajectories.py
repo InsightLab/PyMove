@@ -20,7 +20,12 @@ from pymove.utils.constants import (
     TYPE_PANDAS,
 )
 from pymove.utils.networkx import build_transition_graph_from_df
-from pymove.utils.trajectories import append_trajectory, split_trajectory
+from pymove.utils.trajectories import (
+    append_trajectory, 
+    split_trajectory,
+    object_for_array,
+    columns_to_array
+)
 
 list_data = [
     [39.984094, 116.319236, '2008-10-23 05:53:05', 1],
