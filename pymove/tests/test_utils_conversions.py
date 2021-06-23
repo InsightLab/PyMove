@@ -1,5 +1,6 @@
 from numpy import nan
 from pandas import DataFrame, Timestamp
+from numpy.testing import assert_equal
 from pandas.testing import assert_frame_equal
 from shapely.geometry import Point
 
@@ -77,7 +78,7 @@ def test_lat_to_y_spherical():
 
     expected = -423086.2213610324
 
-    assert(conversions.lat_to_y_spherical(-3.797864) == expected)
+    assert_equal(conversions.lat_to_y_spherical(-3.797864), expected)
 
 
 def test_y_to_lat_spherical():
