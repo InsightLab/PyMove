@@ -75,7 +75,7 @@ def test_lat_to_y_spherical():
 
 def test_lat_to_y_spherical():
 
-    expected = -423086.22136103245
+    expected = -423086.2213610324
 
     assert(conversions.lat_to_y_spherical(-3.797864) == expected)
 
