@@ -73,11 +73,11 @@ def test_lat_to_y_spherical():
     assert(conversions.lat_to_y_spherical(-3.797864) == expected)
 
 
-def test_x_to_lon_spherical():
+def test_lat_to_y_spherical():
 
-    expected = -38.50159697513617
+    expected = -423086.2213610324
 
-    assert(conversions.x_to_lon_spherical(-4285978.17) == expected)
+    assert(conversions.lat_to_y_spherical(-3.797864) == expected)
 
 
 def test_y_to_lat_spherical():
