@@ -13,6 +13,7 @@ from pymove.utils.constants import (
     LOCAL_LABEL,
     LONGITUDE,
     PREV_LOCAL,
+    TID,
     TID_STAT,
     TRAJ_ID,
     TYPE_DASK,
