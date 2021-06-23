@@ -19,8 +19,6 @@ from pymove.utils.constants import (
 from pymove.utils.data_augmentation import (
     _augmentation,
     append_row,
-    generate_destiny_feature,
-    generate_start_feature,
     generate_trajectories_df,
     get_all_paths,
     flatten_trajectories_dataframe,
