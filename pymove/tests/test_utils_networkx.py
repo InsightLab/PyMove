@@ -12,7 +12,7 @@ from pymove.utils.constants import (
     LOCAL_LABEL,
     LONGITUDE,
     PREV_LOCAL,
-    TID_STAT,
+    TID,
     TRAJ_ID,
 )
 from pymove.utils.networkx import (
