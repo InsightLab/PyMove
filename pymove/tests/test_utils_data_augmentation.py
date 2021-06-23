@@ -19,12 +19,11 @@ from pymove.utils.constants import (
 from pymove.utils.data_augmentation import (
     _augmentation,
     append_row,
-    augmentation_trajectories_df,
     generate_destiny_feature,
     generate_start_feature,
     generate_trajectories_df,
     get_all_paths,
-    insert_points_in_df,
+    flatten_trajectories_dataframe,
     instance_crossover_augmentation,
     sliding_window,
     split_crossover,
