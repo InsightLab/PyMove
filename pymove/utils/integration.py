@@ -8,11 +8,9 @@ union_poi_parks,
 union_poi_police,
 join_collective_areas,
 join_with_pois,
-join_with_pois_optimizer,
 join_with_pois_by_category,
-join_with_poi_datetime,
-join_with_poi_datetime_optimizer,
-join_with_pois_by_dist_and_datetime,
+join_with_events,
+join_with_event_by_dist_and_time,
 join_with_home_by_id,
 merge_home_with_poi
 
@@ -689,10 +687,11 @@ def join_with_pois(
     df_pois: DataFrame,
     label_id: Text = TRAJ_ID,
     label_poi_name: Text = NAME_POI,
-    reset_index: bool = True
+    reset_index: bool = True,
+    inplace: bool = False
 ):
     """
-    Performs the integration between trajectories and points of interest.
+    Performs the integration between trajectories and the closest point of interest.
 
     Generating two new columns referring to the
     name and the distance from the point of interest closest
@@ -711,6 +710,9 @@ def join_with_pois(
     reset_index : bool, optional
         Flag for reset index of the df_pois and data dataframes before the join,
         by default True
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
 
     Examples
     --------
@@ -729,86 +731,24 @@ def join_with_pois(
     1   39.991013   116.326384    2    policia       policia_federal
     2   40.010000   116.312615    3   comercio   supermercado_aroldo
     >>> join_with_pois(move_df, pois)
-    >>> move_df
-              lat	       lon	            datetime   id   id_poi     dist_poi	              name_poi
-    0   39.984094   116.319236   2008-10-23 05:53:05    1        1      0.000000        distrito_pol_1
-    1   39.984559   116.326696   2008-10-23 10:37:26    1        1    637.690216        distrito_pol_1
-    2   40.002899   116.321520   2008-10-23 10:50:16    1        3   1094.860663   supermercado_aroldo
-    3   40.016238   116.307691   2008-10-23 11:03:06    1        3    810.542998   supermercado_aroldo
-    4   40.013814   116.306525   2008-10-23 11:58:33    2        3    669.973155   supermercado_aroldo
-    5   40.009735   116.315069   2008-10-23 23:50:45	2        3    211.069129   supermercado_aroldo
+              lat          lon              datetime   id   id_poi \
+           dist_poi              name_poi
+    0   39.984094   116.319236   2008-10-23 05:53:05    1        1 \
+           0.000000        distrito_pol_1
+    1   39.984559   116.326696   2008-10-23 10:37:26    1        1 \
+         637.690216        distrito_pol_1
+    2   40.002899   116.321520   2008-10-23 10:50:16    1        3 \
+        1094.860663   supermercado_aroldo
+    3   40.016238   116.307691   2008-10-23 11:03:06    1        3 \
+         810.542998   supermercado_aroldo
+    4   40.013814   116.306525   2008-10-23 11:58:33    2        3 \
+         669.973155   supermercado_aroldo
+    5   40.009735   116.315069   2008-10-23 23:50:45    2        3 \
+         211.069129   supermercado_aroldo
     """
-    values = _reset_and_creates_id_and_lat_lon(data, df_pois, True, reset_index)
-    current_distances, ids_pois, tag_pois, lat_user, lon_user = values
-
-    for idx, row in progress_bar(
-        data.iterrows(), total=len(data), desc='Integration with POIs'
-    ):
-        # create a vector to each lat
-        lat_user.fill(row[LATITUDE])
-        lon_user.fill(row[LONGITUDE])
-
-        # computing distances to idx
-        distances = np.float64(
-            haversine(
-                lat_user,
-                lon_user,
-                df_pois[LATITUDE].values,
-                df_pois[LONGITUDE].values,
-            )
-        )
-
-        # get index to arg_min and min distance
-        index_min = np.argmin(distances)
-        current_distances[idx] = np.min(distances)
-
-        # setting data for a single object movement
-        ids_pois[idx] = df_pois.at[index_min, label_id]
-        tag_pois[idx] = df_pois.at[index_min, label_poi_name]
-
-    data[ID_POI] = ids_pois
-    data[DIST_POI] = current_distances
-    data[NAME_POI] = tag_pois
-
-    logger.debug('Integration with POI was finalized')
-
-
-def join_with_pois_optimizer(
-    data,
-    df_pois: DataFrame,
-    label_id: Text = TRAJ_ID,
-    label_poi_name: Text = NAME_POI,
-    dist_poi: Optional[List] = None,
-    reset_index: bool = True
-):
-    """
-    Performs the integration between trajectories and points of interest.
-
-    Generating two new columns referring to the
-    name and distance from the nearest point of interest,
-    within the limit of distance determined by the parameter 'dist_poi',
-    of each point in the trajectory.
-
-    Parameters
-    ----------
-    data : DataFrame
-        The input trajectory data.
-    df_pois : DataFrame
-        The input point of interest data.
-    label_id : str, optional
-        Label of df_pois referring to the Point of Interest id, by default TRAJ_ID
-    label_poi_name : str, optional
-        Label of df_pois referring to the Point of Interest name, by default NAME_POI
-    dist_poi : list, optional
-        List containing the minimum distance limit between each type of
-        point of interest and each point of the trajectory to classify the
-        point of interest closest to each point of the trajectory, by default None
-    reset_index : bool, optional
-        Flag for reset index of the df_pois and data dataframes before the join,
-        by default True
-    """
-    if dist_poi is None:
-        dist_poi = []
+    if not inplace:
+        data = data.copy()
+        df_pois = df_pois.copy()
 
     values = _reset_and_creates_id_and_lat_lon(data, df_pois, False, reset_index)
     minimum_distances, ids_pois, tag_pois, lat_poi, lon_poi = values
@@ -859,15 +799,19 @@ def join_with_pois_optimizer(
     data[NAME_POI] = tag_pois
     logger.debug('Integration with POI was finalized')
 
+    if not inplace:
+        return data
+
 
 def join_with_pois_by_category(
     data: DataFrame,
     df_pois: DataFrame,
     label_category: Text = TYPE_POI,
-    label_id: Text = TRAJ_ID
+    label_id: Text = TRAJ_ID,
+    inplace: bool = False
 ):
     """
-    Performs the integration between trajectories and points of interest.
+    Performs the integration between trajectories and each type of points of interest.
 
     Generating new columns referring to the
     category and distance from the nearest point of interest
@@ -883,6 +827,9 @@ def join_with_pois_by_category(
         Label of df_pois referring to the point of interest category, by default TYPE_POI
     label_id : str, optional
         Label of df_pois referring to the point of interest id, by default TRAJ_ID
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
 
     Examples
     --------
@@ -901,14 +848,25 @@ def join_with_pois_by_category(
     1   39.991013   116.326384    2    policia       policia_federal
     2   40.010000   116.312615    3   comercio   supermercado_aroldo
     >>> join_with_pois_by_category(move_df, pois)
-              lat          lon              datetime   id    id_policia   dist_policia   id_comercio   dist_comercio
-    0   39.984094   116.319236   2008-10-23 05:53:05    1             1       0.000000             3     2935.310277
-    1   39.984559   116.326696   2008-10-23 10:37:26    1             1     637.690216             3     3072.696379
-    2   40.002899   116.321520   2008-10-23 10:50:16    1             2    1385.087181             3     1094.860663
-    3   40.016238   116.307691   2008-10-23 11:03:06    1             2    3225.288831             3      810.542998
-    4   40.013814   116.306525   2008-10-23 11:58:33    2             2    3047.838222             3      669.973155
-    5   40.009735   116.315069   2008-10-23 23:50:45    2             2    2294.075820             3      211.069129
+              lat          lon              datetime   id \
+            id_policia   dist_policia   id_comercio   dist_comercio
+    0   39.984094   116.319236   2008-10-23 05:53:05    1 \
+                     1       0.000000             3     2935.310277
+    1   39.984559   116.326696   2008-10-23 10:37:26    1 \
+                     1     637.690216             3     3072.696379
+    2   40.002899   116.321520   2008-10-23 10:50:16    1 \
+                     2    1385.087181             3     1094.860663
+    3   40.016238   116.307691   2008-10-23 11:03:06    1 \
+                     2    3225.288831             3      810.542998
+    4   40.013814   116.306525   2008-10-23 11:58:33    2 \
+                     2    3047.838222             3      669.973155
+    5   40.009735   116.315069   2008-10-23 23:50:45    2 \
+                     2    2294.075820             3      211.069129
     """
+    if not inplace:
+        data = data.copy()
+        df_pois = df_pois.copy()
+
     logger.debug('Integration with POIs...')
 
     # get a vector with windows time to each point
@@ -958,17 +916,21 @@ def join_with_pois_by_category(
         data['dist_%s' % c] = current_distances
     logger.debug('Integration with POI was finalized')
 
+    if not inplace:
+        return data
 
-def join_with_poi_datetime(
+
+def join_with_events(
     data: DataFrame,
     df_events: DataFrame,
     label_date: Text = DATETIME,
     time_window: int = 900,
     label_event_id: Text = EVENT_ID,
-    label_event_type: Text = EVENT_TYPE
+    label_event_type: Text = EVENT_TYPE,
+    inplace: bool = False
 ):
     """
-    Performs the integration between trajectories and points of interest.
+    Performs the integration between trajectories and the closest event in time window.
 
     Generating new columns referring to the
     category of the point of interest, the distance from the
@@ -985,38 +947,44 @@ def join_with_poi_datetime(
         Label of data referring to the datetime of the input trajectory data,
         by default DATETIME
     time_window : float, optional
-        tolerable length of time range for assigning the event's
+        tolerable length of time range in `seconds` for assigning the event's
         point of interest to the trajectory point, by default 900
     label_event_id : str, optional
         Label of df_events referring to the id of the event, by default EVENT_ID
     label_event_type : str, optional
         Label of df_events referring to the type of the event, by default EVENT_TYPE
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
 
     Examples
     --------
-    >>> from pymove.utils.integration import join_with_poi_datetime
+    >>> from pymove.utils.integration import join_with_events
     >>>  move_df
-              lat          lon              datetime   id
-    0   39.984094   116.319236   2008-10-23 05:53:05    1
-    1   39.984559   116.326696   2008-10-23 10:37:26    1
-    2   40.002899   116.321520   2008-10-23 10:50:16    1
-    3   40.016238   116.307691   2008-10-23 11:03:06    1
-    4   40.013814   116.306525   2008-10-23 11:58:33    2
-    5   40.009735   116.315069   2008-10-23 23:50:45    2
-    >>> pois
-              lat          lon   event_id               datetime             event_type
-    0   39.984094   116.319236          1    2008-10-24 01:57:57     show do tropykalia
-    1   39.991013   116.326384          2    2008-10-24 00:22:01   evento da prefeitura
-    2   40.010000   116.312615          3    2008-10-25 00:21:01       show do seu joao
-    >>> join_with_poi_datetime(move_df, pois)
-    >>> move_df
-              lat          lon              datetime   id   event_id   dist_event   event_type
-    0   39.984094   116.319236   2008-10-23 05:53:05    1                     inf 
-    1   39.984559   116.326696   2008-10-23 10:37:26    1                     inf 
-    2   40.002899   116.321520   2008-10-23 10:50:16    1                     inf 
-    3   40.016238   116.307691   2008-10-23 11:03:06    1                     inf 
-    4   40.013814   116.306525   2008-10-23 11:58:33    2                     inf 
-    5   40.009735   116.315069   2008-10-23 23:50:45    2                     inf 
+             lat         lon            datetime  id
+    0  39.984094  116.319236 2008-10-23 05:53:05   1
+    1  39.984559  116.326696 2008-10-23 10:37:26   1
+    2  39.993527  116.326483 2008-10-24 00:02:14   2
+    3  39.978575  116.326975 2008-10-24 00:22:01   3
+    4  39.981668  116.310769 2008-10-24 01:57:57   3
+    >>> events
+             lat         lon  id            datetime  event_type             event_id
+    0  39.984094  116.319236   1 2008-10-23 05:53:05        show     forro_tropykalia
+    1  39.991013  116.326384   2 2008-10-23 10:37:26        show     dia_do_municipio
+    2  40.010000  116.312615   3 2008-10-24 01:57:57        feira   adocao_de_animais
+    >>> join_with_events(move_df, events)
+             lat         lon            datetime  id \
+               event_type   dist_event             event_id
+    0  39.984094  116.319236 2008-10-23 05:53:05   1 \
+                     show     0.000000     forro_tropykalia
+    1  39.984559  116.326696 2008-10-23 10:37:26   1 \
+                     show   718.144152     dia_do_municipio
+    2  39.993527  116.326483 2008-10-24 00:02:14   2 \
+                                   inf
+    3  39.978575  116.326975 2008-10-24 00:22:01   3 \
+                                   inf
+    4  39.981668  116.310769 2008-10-24 01:57:57   3 \
+                    feira  3154.296880    adocao_de_animais
 
     Raises
     ------
@@ -1024,92 +992,10 @@ def join_with_poi_datetime(
         If feature generation fails
 
     """
-    values = _reset_set_window__and_creates_event_id_type(
-        data, df_events, time_window, label_date
-    )
-    window_starts, window_ends, current_distances, event_id, event_type = values
+    if not inplace:
+        data = data.copy()
+        df_events = df_events.copy()
 
-    for idx in progress_bar(data.index, total=len(data), desc='Integration with Events'):
-        # filter event by datetime
-        df_filtered = filters.by_datetime(
-            df_events, window_starts[idx], window_ends[idx]
-        )
-
-        if df_filtered is None:
-            raise ValueError('Filter datetime failed!')
-
-        size_filter = df_filtered.shape[0]
-
-        if size_filter > 0:
-            df_filtered.reset_index(drop=True, inplace=True)
-            lat_user = np.full(
-                size_filter, data.at[idx, LATITUDE], dtype=np.float64
-            )
-            lon_user = np.full(
-                size_filter, data.at[idx, LONGITUDE], dtype=np.float64
-            )
-
-            # compute dist to poi filtered
-            distances = haversine(
-                lat_user,
-                lon_user,
-                df_filtered[LATITUDE].values,
-                df_filtered[LONGITUDE].values,
-            )
-            # get index to arg_min
-            index_arg_min = np.argmin(distances)
-            # get min distances
-            min_distance = np.min(distances)
-            # store data
-            current_distances[idx] = min_distance
-            event_type[idx] = df_filtered.at[index_arg_min, label_event_type]
-            event_id[idx] = df_filtered.at[index_arg_min, label_event_id]
-
-    data[label_event_id] = event_id
-    data[DIST_EVENT] = current_distances
-    data[label_event_type] = event_type
-    logger.debug('Integration with event was completed')
-
-
-def join_with_poi_datetime_optimizer(
-    data: DataFrame,
-    df_events: DataFrame,
-    label_date: Text = DATETIME,
-    time_window: int = 900,
-    label_event_id: Text = EVENT_ID,
-    label_event_type: Text = EVENT_TYPE
-):
-    """
-    Performs a optimized integration between trajectories and points of events.
-
-    Generating new columns referring to
-    the category of the event, the distance from the nearest
-    event and the time when the event happened at each point of
-    the trajectories.
-
-    Parameters
-    ----------
-    data : DataFrame
-        The input trajectory data.
-    df_events : DataFrame
-        The input events points of interest data.
-    label_date : str, optional
-        Label of data referring to the datetime of the input trajectory data,
-        by default DATETIME
-    time_window : float, optional
-        tolerable length of time range for assigning the event's
-        point of interest to the trajectory point, by default 900
-    label_event_id : str, optional
-        Label of df_events referring to the id of the event, by default EVENT_ID
-    label_event_type : str, optional
-        Label of df_events referring to the type of the event, by default EVENT_TYPE
-        
-    Raises
-    ------
-    ValueError
-        If feature generation fails
-
-    """
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, time_window, label_date
     )
@@ -1166,12 +1052,9 @@ def join_with_poi_datetime_optimizer(
                     df_filtered[LONGITUDE].values,
                 )
                 compare = current_distances < minimum_distances
-
                 minimum_distances = np.minimum(
                     current_distances, minimum_distances
                 )
-                # compare = np.argmin(current_distances)
-
                 event_id[compare] = row[label_event_id]
                 event_type[compare] = row[label_event_type]
 
@@ -1180,18 +1063,22 @@ def join_with_poi_datetime_optimizer(
     data[label_event_type] = event_type
     logger.debug('Integration with events was completed')
 
+    if not inplace:
+        return data
 
-def join_with_pois_by_dist_and_datetime(
+
+def join_with_event_by_dist_and_time(
     data: DataFrame,
-    df_pois: DataFrame,
+    df_events: DataFrame,
     label_date: Text = DATETIME,
     label_event_id: Text = EVENT_ID,
     label_event_type: Text = EVENT_TYPE,
     time_window: float = 3600,
     radius: float = 1000,
+    inplace: bool = False
 ):
     """
-    Performs the integration between trajectories and points of interest.
+    Performs the integration between trajectories and events on windows.
 
     Generating new columns referring to the category of the point of interest,
     the distance between the location of the user and location of the poi
@@ -1211,48 +1098,60 @@ def join_with_pois_by_dist_and_datetime(
     label_event_type : str, optional
         Label of df_events referring to the type of the event, by default EVENT_TYPE
     time_window : float, optional
-        tolerable length of time range for assigning the event's
+        tolerable length of time range in `seconds`for assigning the event's
         point of interest to the trajectory point, by default 3600
     radius: float, optional
-        maximum radius of pois, by default 1000
+        maximum radius of pois in `meters`, by default 1000
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
 
     Examples
     --------
     >>> from pymove.utils.integration import join_with_pois_by_dist_and_datetime
     >>>  move_df
-              lat          lon              datetime   id
-    0   39.984094   116.319236   2008-10-23 05:53:05    1
-    1   39.984559   116.326696   2008-10-23 10:37:26    1
-    2   40.002899   116.321520   2008-10-23 10:50:16    1
-    3   40.016238   116.307691   2008-10-23 11:03:06    1
-    4   40.013814   116.306525   2008-10-23 11:58:33    2
-    5   40.009735   116.315069   2008-10-23 23:50:45    2
-    >>> pois
-              lat          lon   event_id               datetime             event_type
-    0   39.984094   116.319236          1    2008-10-24 01:57:57     show do tropykalia
-    1   39.991013   116.326384          2    2008-10-24 00:22:01   evento da prefeitura
-    2   40.010000   116.312615          3    2008-10-25 00:21:01       show do seu joao
+             lat         lon            datetime  id
+    0  39.984094  116.319236 2008-10-23 05:53:05   1
+    1  39.984559  116.326696 2008-10-23 10:37:26   1
+    2  39.993527  116.326483 2008-10-24 00:02:14   2
+    3  39.978575  116.326975 2008-10-24 00:22:01   3
+    4  39.981668  116.310769 2008-10-24 01:57:57   3
+    >>> events
+             lat         lon  id            datetime type_poi           name_poi
+    0  39.984094  116.319236   1 2008-10-23 05:53:05     show   forro_tropykalia
+    1  39.991013  116.326384   2 2008-10-23 10:27:26  corrida   racha_de_jumento
+    2  39.990013  116.316384   2 2008-10-23 10:37:26     show   dia_do_municipio
+    3  40.010000  116.312615   3 2008-10-24 01:57:57    feira  adocao_de_animais
     >>> join_with_pois_by_dist_and_datetime(move_df, pois)
     >>> move_df
-              lat          lon              datetime   id   event_id   dist_event   event_type
-    0   39.984094   116.319236   2008-10-23 05:53:05    1       None         None	      None
-    1   39.984559   116.326696   2008-10-23 10:37:26    1       None         None	      None
-    2   40.002899   116.321520   2008-10-23 10:50:16    1       None         None	      None
-    3   40.016238   116.307691   2008-10-23 11:03:06    1       None         None	      None
-    4   40.013814   116.306525   2008-10-23 11:58:33    2       None         None	      None
-    5   40.009735   116.315069   2008-10-23 23:50:45    2       None         None	      None
-    
+             lat         lon            datetime  id \
+               type_poi          dist_event                              name_poi
+    0  39.984094  116.319236 2008-10-23 05:53:05   1 \
+                 [show]               [0.0]                    [forro_tropykalia]
+    1  39.984559  116.326696 2008-10-23 10:37:26   1 \
+        [corrida, show]  [718.144, 1067.53]  [racha_de_jumento, dia_do_municipio]
+    2  39.993527  116.326483 2008-10-24 00:02:14   2 \
+                  None                 None                                  None
+    3  39.978575  116.326975 2008-10-24 00:22:01   3 \
+                  None                 None                                  None
+    4  39.981668  116.310769 2008-10-24 01:57:57   3 \
+                  None                 None                                  None
+
     Raises
     ------
     ValueError
         If feature generation fails
 
     """
-    if label_date not in df_pois:
+    if label_date not in df_events:
         raise KeyError("POI's DataFrame must contain a %s column" % label_date)
 
+    if not inplace:
+        data = data.copy()
+        df_events = df_events.copy()
+
     values = _reset_set_window_and_creates_event_id_type_all(
-        data, df_pois, time_window, label_date
+        data, df_events, time_window, label_date
     )
 
     window_start, window_end, current_distances, event_id, event_type = values
@@ -1267,7 +1166,7 @@ def join_with_pois_by_dist_and_datetime(
 
         # filter event by radius
         df_filtered = filters.by_bbox(
-            df_pois, bbox, inplace=False
+            df_events, bbox, inplace=False
         )
 
         if df_filtered is None:
@@ -1313,6 +1212,9 @@ def join_with_pois_by_dist_and_datetime(
     data[label_event_type] = event_type
     logger.debug('Integration with event was completed')
 
+    if not inplace:
+        return data
+
 
 def join_with_home_by_id(
     data: DataFrame,
@@ -1321,6 +1223,7 @@ def join_with_home_by_id(
     label_address: Text = ADDRESS,
     label_city: Text = CITY,
     drop_id_without_home: bool = False,
+    inplace: bool = False
 ):
     """
     Performs the integration between trajectories and home points.
@@ -1341,7 +1244,10 @@ def join_with_home_by_id(
     label_city : str, optional
         Label of df_home referring to the point city, by default CITY
     drop_id_without_home : bool, optional
-        flag as an option to drop id's that don't have houses, by default FALSE
+        flag as an option to drop id's that don't have houses, by default False
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
 
     Examples
     --------
@@ -1360,14 +1266,25 @@ def join_with_home_by_id(
     1   40.013821   116.306531    2      rua da familia   quixeramoling
     >>> join_with_home_by_id(move_df, home_df)
     >>> move_df
-        id         lat          lon              datetime     dist_home             home            city
-    0    1   39.984094   116.319236   2008-10-23 05:53:05      0.000000       rua da mae       quixiling
-    1    1   39.984559   116.326696   2008-10-23 10:37:26    637.690216       rua da mae       quixiling
-    2    1   40.002899   116.321520   2008-10-23 10:50:16   2100.053501       rua da mae       quixiling
-    3    1   40.016238   116.307691   2008-10-23 11:03:06   3707.066732       rua da mae       quixiling
-    4    2   40.013814   116.306525   2008-10-23 11:58:33      0.931101   rua da familia   quixeramoling
-    5    2   40.009735   116.315069   2008-10-23 23:50:45    857.417540   rua da familia   quixeramoling
+        id         lat          lon              datetime     dist_home \
+                  home                city
+    0    1   39.984094   116.319236   2008-10-23 05:53:05      0.000000 \
+            rua da mae           quixiling
+    1    1   39.984559   116.326696   2008-10-23 10:37:26    637.690216 \
+            rua da mae           quixiling
+    2    1   40.002899   116.321520   2008-10-23 10:50:16   2100.053501 \
+            rua da mae           quixiling
+    3    1   40.016238   116.307691   2008-10-23 11:03:06   3707.066732 \
+            rua da mae           quixiling
+    4    2   40.013814   116.306525   2008-10-23 11:58:33      0.931101 \
+        rua da familia       quixeramoling
+    5    2   40.009735   116.315069   2008-10-23 23:50:45    857.417540 \
+        rua da familia       quixeramoling
     """
+    if not inplace:
+        data = data.copy()
+        df_home = df_home.copy()
+
     ids_without_home = []
 
     if data.index.name is None:
@@ -1415,6 +1332,9 @@ def join_with_home_by_id(
     if drop_id_without_home:
         data.drop(data.loc[data[TRAJ_ID].isin(ids_without_home)].index, inplace=True)
 
+    if not inplace:
+        return data
+
 
 def merge_home_with_poi(
     data: DataFrame,
@@ -1424,6 +1344,7 @@ def merge_home_with_poi(
     label_home: Text = HOME,
     label_dist_home: Text = DIST_HOME,
     drop_columns: bool = True,
+    inplace: bool = False
 ):
     """
     Performs or merges the points of interest and the trajectories.
@@ -1451,71 +1372,71 @@ def merge_home_with_poi(
         by default DIST_HOME
     drop_columns : bool, optional
         Flag that controls the deletion of the columns referring to the
-        id and the distance from the home point, by default True
+        id and the distance from the home point, by default
+    inplace : boolean, optional
+        if set to true the original dataframe will be altered to contain
+        the result of the filtering, otherwise a copy will be returned, by default False
 
     Examples
     --------
-    >>> from pymove.utils.integration import merge_home_with_poi, join_with_pois,
-    join_with_home_by_id
+    >>> from pymove.utils.integration import (
+    >>>    merge_home_with_poi,
+    >>>    join_with_home_by_id
+    >>> )
     >>> move_df
-               lat          lon              datetime   id
-    0   39.984094   116.319236   2008-10-23 05:53:05    1
-    1   39.984559   116.326696   2008-10-23 10:37:26    1
-    2   40.002899   116.321520   2008-10-23 10:50:16    1
-    3   40.016238   116.307691   2008-10-23 11:03:06    1
-    4   40.013814   116.306525   2008-10-23 11:58:33    2
-    5   40.009735   116.315069   2008-10-23 23:50:45    2
-    >>> pois
-              lat          lon   id   type_poi              name_poi
-    0   39.984094   116.319236    1    policia        distrito_pol_1
-    1   39.991013   116.326384    2    policia       policia_federal
-    >>> join_with_pois(move_df, pois)
-    >>> move_df
-              lat          lon              datetime   id   id_poi       dist_poi          name_poi
-    0   39.984094   116.319236   2008-10-23 05:53:05    1        1       0.000000    distrito_pol_1
-    1   39.984559   116.326696   2008-10-23 10:37:26    1        1     637.690216    distrito_pol_1
-    2   40.002899   116.321520   2008-10-23 10:50:16    1        2    1385.087181   policia_federal
-    3   40.016238   116.307691   2008-10-23 11:03:06    1        2    3225.288831   policia_federal
-    4   40.013814   116.306525   2008-10-23 11:58:33    2        2    3047.838222   policia_federal
-    5   40.009735   116.315069   2008-10-23 23:50:45    2        2    2294.075820   policia_federal
+              lat          lon              datetime   id \
+                   id_poi       dist_poi          name_poi
+    0   39.984094   116.319236   2008-10-23 05:53:05    1 \
+                        1       0.000000    distrito_pol_1
+    1   39.984559   116.326696   2008-10-23 10:37:26    1 \
+                        1     637.690216    distrito_pol_1
+    2   40.002899   116.321520   2008-10-23 10:50:16    1 \
+                        2    1385.087181   policia_federal
+    3   40.016238   116.307691   2008-10-23 11:03:06    1 \
+                        2    3225.288831   policia_federal
+    4   40.013814   116.306525   2008-10-23 11:58:33    2 \
+                        2    3047.838222   policia_federal
+    5   40.009735   116.315069   2008-10-23 23:50:45    2 \
+                        2    2294.075820   policia_federal
     >>> home_df
                lat          lon   id   formatted_address            city
     0   39.984094   116.319236    1          rua da mae       quixiling
     1   40.013821   116.306531    2      rua da familia   quixeramoling
-    >>> join_with_home_by_id(move, home_df)
+    >>> join_with_home_by_id(move, home_df, inplace=True)
     >>> move_df
-        id         lat          lon              datetime   id_poi      dist_poi\
+        id         lat          lon              datetime   id_poi      dist_poi \
                name_poi    dist_home         home                city
-    0    1   39.984094   116.319236   2008-10-23 05:53:05        1      0.000000\ 
+    0    1   39.984094   116.319236   2008-10-23 05:53:05        1      0.000000 \
          distrito_pol_1     0.000000        rua da mae       quixiling
-    1    1   39.984559   116.326696   2008-10-23 10:37:26        1    637.690216\ 
+    1    1   39.984559   116.326696   2008-10-23 10:37:26        1    637.690216 \
          distrito_pol_1   637.690216        rua da mae       quixiling
-    2    1   40.002899   116.321520   2008-10-23 10:50:16        2   1385.087181\ 
+    2    1   40.002899   116.321520   2008-10-23 10:50:16        2   1385.087181 \
         policia_federal  2100.053501        rua da mae       quixiling
-    3    1   40.016238    16.307691   2008-10-23 11:03:06        2   3225.288831\ 
+    3    1   40.016238    16.307691   2008-10-23 11:03:06        2   3225.288831 \
         policia_federal  3707.066732        rua da mae       quixiling
-    4    2   40.013814   116.306525   2008-10-23 11:58:33        2   3047.838222\ 
+    4    2   40.013814   116.306525   2008-10-23 11:58:33        2   3047.838222 \
         policia_federal     0.931101    rua da familia   quixeramoling
-    5    2   40.009735   116.315069   2008-10-23 23:50:45        2   2294.075820\ 
+    5    2   40.009735   116.315069   2008-10-23 23:50:45        2   2294.075820 \
         policia_federal   857.417540    rua da familia   quixeramoling
-    >>> merge_home_with_poi(move_df) # MAIN FUNCTION
-        id         lat          lon              datetime           id_poi\ 
+    >>> merge_home_with_poi(move_df)
+        id         lat          lon              datetime           id_poi \
           dist_poi           name_poi            city
-    0    1   39.984094   116.319236   2008-10-23 05:53:05       rua da mae\ 
+    0    1   39.984094   116.319236   2008-10-23 05:53:05       rua da mae \
           0.000000               home       quixiling
-    1    1   39.984559   116.326696   2008-10-23 10:37:26       rua da mae\ 
+    1    1   39.984559   116.326696   2008-10-23 10:37:26       rua da mae \
         637.690216               home       quixiling
-    2    1   40.002899   116.321520   2008-10-23 10:50:16                2\ 
+    2    1   40.002899   116.321520   2008-10-23 10:50:16                2 \
        1385.087181    policia_federal       quixiling
-    3    1   40.016238   116.307691   2008-10-23 11:03:06                2\ 
+    3    1   40.016238   116.307691   2008-10-23 11:03:06                2 \
        3225.288831    policia_federal       quixiling
-    4    2   40.013814   116.306525   2008-10-23 11:58:33   rua da familia\ 
+    4    2   40.013814   116.306525   2008-10-23 11:58:33   rua da familia \
           0.931101               home   quixeramoling
-    5    2   40.009735   116.315069   2008-10-23 23:50:45   rua da familia\ 
+    5    2   40.009735   116.315069   2008-10-23 23:50:45   rua da familia \
         857.417540               home   quixeramoling
-
-    
     """
+    if not inplace:
+        data = data.copy()
+
     logger.debug('merge home with POI using shortest distance')
     idx = data[data[label_dist_home] <= data[label_dist_poi]].index
 
@@ -1525,3 +1446,6 @@ def merge_home_with_poi(
 
     if(drop_columns):
         data.drop(columns=[label_dist_home, label_home], inplace=True)
+
+    if not inplace:
+        return data

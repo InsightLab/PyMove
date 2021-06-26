@@ -485,45 +485,7 @@ def test_join_with_pois():
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8]
     )
 
-    integration.join_with_pois(move_df, pois)
-    assert_frame_equal(move_df, expected, check_dtype=False)
-
-
-def test_join_with_pois_optimizer():
-    move_df = MoveDataFrame(list_move)
-
-    pois = DataFrame(
-        data=list_pois,
-        columns=[LATITUDE, LONGITUDE, TRAJ_ID, TYPE_POI, NAME_POI],
-        index=[0, 1, 2, 3, 4, 5, 6]
-    )
-
-    expected = DataFrame(
-        data=[
-            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 1,
-             0.0, 'distrito_pol_1'],
-            [39.984559000000004, 116.326696, Timestamp('2008-10-23 10:37:26'),
-             1, 6, 128.24869775642176, 'adocao_de_animais'],
-            [40.002899, 116.32151999999999, Timestamp('2008-10-23 10:50:16'),
-             1, 5, 663.0104596559174, 'rinha_de_galo_world_cup'],
-            [40.016238, 116.30769099999999, Timestamp('2008-10-23 11:03:06'),
-             1, 4, 286.3387434682031, 'forro_tropykalia'],
-            [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'), 2, 4,
-             0.9311014399622559, 'forro_tropykalia'],
-            [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'), 2, 3,
-             211.06912863495492, 'supermercado_aroldo'],
-            [39.993527, 116.32648300000001, Timestamp('2008-10-24 00:02:14'),
-             2, 2, 279.6712398549538, 'policia_federal'],
-            [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'), 3, 6,
-             792.7526066105717, 'adocao_de_animais'],
-            [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'), 3, 7,
-             270.7018856738821, 'dia_do_municipio']
-        ],
-        columns=[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, ID_POI, DIST_POI, NAME_POI],
-        index=[0, 1, 2, 3, 4, 5, 6, 7, 8]
-    )
-
-    integration.join_with_pois_optimizer(move_df, pois)
+    integration.join_with_pois(move_df, pois, inplace=True)
     assert_frame_equal(move_df, expected, check_dtype=False)
 
 
@@ -572,11 +534,11 @@ def test_join_with_pois_by_category():
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8]
     )
 
-    integration.join_with_pois_by_category(move_df, pois)
+    integration.join_with_pois_by_category(move_df, pois, inplace=True)
     assert_frame_equal(move_df, expected, check_dtype=False)
 
 
-def test_join_with_poi_datetime():
+def test_join_with_events():
     list_events = [
         [39.984094, 116.319236, 1,
          Timestamp('2008-10-24 01:57:57'), 'show do tropykalia'],
@@ -620,59 +582,11 @@ def test_join_with_poi_datetime():
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8]
     )
 
-    integration.join_with_poi_datetime(move_df, pois, time_window=45000)
+    integration.join_with_events(move_df, pois, time_window=45000, inplace=True)
     assert_frame_equal(move_df, expected, check_dtype=False)
 
 
-def test_join_with_poi_datetime_optimizer():
-    list_events = [
-        [39.984094, 116.319236, 1,
-         Timestamp('2008-10-24 01:57:57'), 'show do tropykalia'],
-        [39.991013, 116.326384, 2,
-         Timestamp('2008-10-24 00:22:01'), 'evento da prefeitura'],
-        [40.01, 116.312615, 3,
-         Timestamp('2008-10-25 00:21:01'), 'show do seu joao'],
-        [40.013821, 116.306531, 4,
-         Timestamp('2008-10-26 00:22:01'), 'missa']
-    ]
-    move_df = MoveDataFrame(list_move)
-    pois = DataFrame(
-        data=list_events,
-        columns=[LATITUDE, LONGITUDE, EVENT_ID, DATETIME, EVENT_TYPE],
-        index=[0, 1, 2, 3]
-    )
-    expected = DataFrame(
-        data=[
-            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1,
-             '', inf, ''],
-            [39.984559000000004, 116.326696, Timestamp('2008-10-23 10:37:26'),
-             1, '', inf, ''],
-            [40.002899, 116.32151999999999, Timestamp('2008-10-23 10:50:16'),
-             1, '', inf, ''],
-            [40.016238, 116.30769099999999, Timestamp('2008-10-23 11:03:06'),
-             1, '', inf, ''],
-            [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'), 2, 2,
-             3047.8382223981853, 'evento da prefeitura'],
-            [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'), 2, 2,
-             2294.0758201547073, 'evento da prefeitura'],
-            [39.993527, 116.32648300000001, Timestamp('2008-10-24 00:02:14'),
-             2, 2, 279.6712398549538, 'evento da prefeitura'],
-            [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'), 3, 1,
-             900.7798955139455, 'show do tropykalia'],
-            [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'), 3, 1,
-             770.188754517813, 'show do tropykalia']
-        ],
-        columns=[
-            LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, EVENT_ID, DIST_EVENT, EVENT_TYPE
-        ],
-        index=[0, 1, 2, 3, 4, 5, 6, 7, 8]
-    )
-
-    integration.join_with_poi_datetime_optimizer(move_df, pois, time_window=45000)
-    assert_frame_equal(move_df, expected, check_dtype=False)
-
-
-def test_join_with_pois_by_dist_and_datetime():
+def test_join_with_event_by_dist_and_time():
     list_move = [
         [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
         [39.984559000000004, 116.326696, Timestamp('2008-10-23 10:37:26'), 1],
@@ -737,8 +651,8 @@ def test_join_with_pois_by_dist_and_datetime():
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8]
     )
 
-    integration.join_with_pois_by_dist_and_datetime(
-        move_df, pois, radius=3000, time_window=7200
+    integration.join_with_event_by_dist_and_time(
+        move_df, pois, radius=3000, time_window=7200, inplace=True
     )
 
     assert_frame_equal(move_df, expected, check_dtype=False)
@@ -782,11 +696,13 @@ def test_join_with_home_by_id():
         columns=[TRAJ_ID, LATITUDE, LONGITUDE, DATETIME, DIST_HOME, HOME, CITY]
     )
 
-    integration.join_with_home_by_id(move_df, home_df)
+    integration.join_with_home_by_id(move_df, home_df, inplace=True)
     assert_frame_equal(move_df, expected, check_dtype=False)
 
     move_df = MoveDataFrame(list_move)
-    integration.join_with_home_by_id(move_df, home_df, drop_id_without_home=True)
+    integration.join_with_home_by_id(
+        move_df, home_df, drop_id_without_home=True, inplace=True
+    )
     expected = DataFrame(
         data=[
             [1, 39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 0.0,
@@ -829,7 +745,7 @@ def test_merge_home_with_poi():
         columns=[LATITUDE, LONGITUDE, TRAJ_ID, TYPE_POI, NAME_POI],
         index=[0, 1, 2, 3, 4, 5, 6]
     )
-    integration.join_with_pois(move_df, pois)
+    integration.join_with_pois(move_df, pois, inplace=True)
 
     list_home = [
         [39.984094, 116.319236, 1, 'rua da mae', 'quixiling'],
@@ -840,7 +756,7 @@ def test_merge_home_with_poi():
         columns=[LATITUDE, LONGITUDE, TRAJ_ID, ADDRESS, CITY],
         index=[0, 1]
     )
-    integration.join_with_home_by_id(move_df, home_df)
+    integration.join_with_home_by_id(move_df, home_df, inplace=True)
 
     expected = DataFrame(
         data=[
@@ -868,5 +784,5 @@ def test_merge_home_with_poi():
         ],
         index=[0, 1, 2, 3, 4, 5, 6]
     )
-    integration.merge_home_with_poi(move_df)
+    integration.merge_home_with_poi(move_df, inplace=True)
     assert_frame_equal(move_df, expected, check_dtype=False)
