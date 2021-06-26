@@ -31,7 +31,7 @@ def haversine(
     """
     Calculates the great circle distance between two points on the earth.
 
-    (specified in decimal degrees or in radians). All (lat, lon) coordinates
+    Specified in decimal degrees or in radians. All (lat, lon) coordinates
     must have numeric dtypes and be of equal length. Result in meters. Use 3956
     in earth radius for miles.
 

@@ -1144,7 +1144,7 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_move_and_stop_by_radius(
         self,
-        radius: int = 0,
+        radius: float = 0,
         target_label: Text = DIST_TO_PREV,
         inplace: bool = True
     ):
@@ -1153,7 +1153,7 @@ class PandasMoveDataFrame(DataFrame):
 
         Parameters
         ----------
-        radius : int, optional
+        radius : float, optional
             Represents radius, by default 0
         target_label : str, optional
             Represents column to compute, by default DIST_TO_PREV
