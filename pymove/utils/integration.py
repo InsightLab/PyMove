@@ -853,61 +853,55 @@ def join_with_pois_optimizer(
     """
     if dist_poi is None:
         dist_poi = []
-    if len(df_pois[label_poi_name].unique()) == len(dist_poi):
-        values = _reset_and_creates_id_and_lat_lon(data, df_pois, False, reset_index)
-        minimum_distances, ids_pois, tag_pois, lat_poi, lon_poi = values
 
-        df_pois.rename(
-            columns={label_id: TRAJ_ID, label_poi_name: NAME_POI},
-            inplace=True
-        )
+    values = _reset_and_creates_id_and_lat_lon(data, df_pois, False, reset_index)
+    minimum_distances, ids_pois, tag_pois, lat_poi, lon_poi = values
 
-        for idx, row in progress_bar(
-            df_pois.iterrows(), total=len(df_pois), desc='Optimized integration with POIs'
-        ):
-            # update lat and lon of current index
-            lat_poi.fill(row[LATITUDE])
-            lon_poi.fill(row[LONGITUDE])
+    df_pois.rename(
+        columns={label_id: TRAJ_ID, label_poi_name: NAME_POI},
+        inplace=True
+    )
 
-            # First iteration is minimum distances
-            if idx == 0:
-                minimum_distances = np.array(
-                    haversine(
-                        lat_poi,
-                        lon_poi,
-                        data[LATITUDE].values,
-                        data[LONGITUDE].values
-                    )
+    for idx, row in progress_bar(
+        df_pois.iterrows(), total=len(df_pois), desc='Optimized integration with POIs'
+    ):
+        # update lat and lon of current index
+        lat_poi.fill(row[LATITUDE])
+        lon_poi.fill(row[LONGITUDE])
+
+        # First iteration is minimum distances
+        if idx == 0:
+            minimum_distances = np.array(
+                haversine(
+                    lat_poi,
+                    lon_poi,
+                    data[LATITUDE].values,
+                    data[LONGITUDE].values
                 )
-                ids_pois.fill(row.id)
-                tag_pois.fill(row.type_poi)
-            else:
-                # compute dist between a POI and ALL
-                logger.debug(data[LONGITUDE].values)
-                current_distances = np.float64(
-                    haversine(
-                        lat_poi,
-                        lon_poi,
-                        data[LATITUDE].values,
-                        data[LONGITUDE].values
-                    )
+            )
+            ids_pois.fill(row[label_id])
+            tag_pois.fill(row[label_poi_name])
+        else:
+            # compute dist between a POI and ALL
+            current_distances = np.float64(
+                haversine(
+                    lat_poi,
+                    lon_poi,
+                    data[LATITUDE].values,
+                    data[LONGITUDE].values
                 )
-                compare = current_distances < minimum_distances
-                index_true = np.where(compare is True)[0]
-                minimum_distances = np.minimum(
-                    current_distances, minimum_distances, dtype=np.float64
-                )
+            )
+            compare = current_distances < minimum_distances
+            minimum_distances = np.minimum(
+                current_distances, minimum_distances, dtype=np.float64
+            )
+            ids_pois[compare] = row[label_id]
+            tag_pois[compare] = row[label_poi_name]
 
-                if index_true.shape[0] > 0:
-                    ids_pois[index_true] = row.id
-                    tag_pois[index_true] = row.type_poi
-
-        data[ID_POI] = ids_pois
-        data[DIST_POI] = minimum_distances
-        data[NAME_POI] = tag_pois
-        logger.debug('Integration with POI was finalized')
-    else:
-        logger.warning('the size of the dist_poi is different from the size of pois')
+    data[ID_POI] = ids_pois
+    data[DIST_POI] = minimum_distances
+    data[NAME_POI] = tag_pois
+    logger.debug('Integration with POI was finalized')
 
 
 def join_with_pois_by_category(
@@ -1230,7 +1224,10 @@ def join_with_poi_datetime_optimizer(
     values = _reset_set_window__and_creates_event_id_type(
         data, df_events, time_window, label_date
     )
-    window_starts, window_ends, current_distances, event_id, event_type = values
+    *_, current_distances, event_id, event_type = values
+    window_starts, window_ends, *_ = _reset_set_window__and_creates_event_id_type(
+        df_events, data, time_window, label_date
+    )
 
     minimum_distances = np.full(
         data.shape[0], np.Infinity, dtype=np.float64
@@ -1248,7 +1245,6 @@ def join_with_poi_datetime_optimizer(
         df_filtered = filters.by_datetime(
             data, window_starts[idx], window_ends[idx]
         )
-
         if df_filtered is None:
             raise ValueError('Filtering datetime failed!')
 
@@ -1271,8 +1267,8 @@ def join_with_poi_datetime_optimizer(
                     df_filtered[LATITUDE].values,
                     df_filtered[LONGITUDE].values,
                 )
-                event_id[indexes] = row.event_id
-                event_type[indexes] = row.event_type
+                event_id[indexes] = row[label_event_id]
+                event_type[indexes] = row[label_event_type]
             else:
                 current_distances[indexes] = haversine(
                     lat_event,
@@ -1281,13 +1277,14 @@ def join_with_poi_datetime_optimizer(
                     df_filtered[LONGITUDE].values,
                 )
                 compare = current_distances < minimum_distances
-                index_true = np.where(compare is True)[0]
 
                 minimum_distances = np.minimum(
                     current_distances, minimum_distances
                 )
-                event_id[index_true] = row.event_id
-                event_type[index_true] = row.event_type
+                # compare = np.argmin(current_distances)
+
+                event_id[compare] = row[label_event_id]
+                event_type[compare] = row[label_event_type]
 
     data[label_event_id] = event_id
     data[DIST_EVENT] = minimum_distances

@@ -488,76 +488,42 @@ def test_join_with_pois():
     integration.join_with_pois(move_df, pois)
     assert_frame_equal(move_df, expected, check_dtype=False)
 
-    move_df = MoveDataFrame(list_move)
-    integration.join_with_pois(move_df, pois)
-    assert_frame_equal(move_df, expected, check_dtype=False)
-
 
 def test_join_with_pois_optimizer():
     move_df = MoveDataFrame(list_move)
+
     pois = DataFrame(
         data=list_pois,
         columns=[LATITUDE, LONGITUDE, TRAJ_ID, TYPE_POI, NAME_POI],
         index=[0, 1, 2, 3, 4, 5, 6]
     )
-    expected = DataFrame(
-        data=[
-            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 1,
-             0.0, 'policia'],
-            [39.984559000000004, 116.326696, Timestamp('2008-10-23 10:37:26'),
-             1, 1, 128.24869775642176, 'policia'],
-            [40.002899, 116.32151999999999, Timestamp('2008-10-23 10:50:16'),
-             1, 1, 663.0104596559174, 'policia'],
-            [40.016238, 116.30769099999999, Timestamp('2008-10-23 11:03:06'),
-             1, 1, 286.3387434682031, 'policia'],
-            [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'), 2, 1,
-             0.9311014399622559, 'policia'],
-            [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'), 2, 1,
-             211.06912863495492, 'policia'],
-            [39.993527, 116.32648300000001, Timestamp('2008-10-24 00:02:14'),
-             2, 1, 279.6712398549538, 'policia'],
-            [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'), 3, 1,
-             792.7526066105717, 'policia'],
-            [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'), 3, 1,
-             270.7018856738821, 'policia']
-        ],
-        columns=[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, ID_POI, DIST_POI, NAME_POI],
-        index=[0, 1, 2, 3, 4, 5, 6, 7, 8]
-    )
-    expected = MoveDataFrame(expected)
-    integration.join_with_pois_optimizer(
-        move_df, pois, dist_poi=[100, 50, 100, 50, 100, 200, 1000]
-    )
-    assert_frame_equal(move_df, expected, check_dtype=False)
 
-    move_df = MoveDataFrame(list_move)
-    integration.join_with_pois_optimizer(
-        move_df, pois, dist_poi=[100, 50, 100, 50, 100, 200, 1000], reset_index=False
-    )
     expected = DataFrame(
         data=[
             [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 1,
-             0.0, 'policia'],
+             0.0, 'distrito_pol_1'],
             [39.984559000000004, 116.326696, Timestamp('2008-10-23 10:37:26'),
-             1, 1, 128.24869775642176, 'policia'],
+             1, 6, 128.24869775642176, 'adocao_de_animais'],
             [40.002899, 116.32151999999999, Timestamp('2008-10-23 10:50:16'),
-             1, 1, 663.0104596559174, 'policia'],
+             1, 5, 663.0104596559174, 'rinha_de_galo_world_cup'],
             [40.016238, 116.30769099999999, Timestamp('2008-10-23 11:03:06'),
-             1, 1, 286.3387434682031, 'policia'],
-            [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'), 2, 1,
-             0.9311014399622559, 'policia'],
-            [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'), 2, 1,
-             211.06912863495492, 'policia'],
+             1, 4, 286.3387434682031, 'forro_tropykalia'],
+            [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'), 2, 4,
+             0.9311014399622559, 'forro_tropykalia'],
+            [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'), 2, 3,
+             211.06912863495492, 'supermercado_aroldo'],
             [39.993527, 116.32648300000001, Timestamp('2008-10-24 00:02:14'),
-             2, 1, 279.6712398549538, 'policia'],
-            [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'), 3, 1,
-             792.7526066105717, 'policia'],
-            [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'), 3, 1,
-             270.7018856738821, 'policia']
+             2, 2, 279.6712398549538, 'policia_federal'],
+            [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'), 3, 6,
+             792.7526066105717, 'adocao_de_animais'],
+            [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'), 3, 7,
+             270.7018856738821, 'dia_do_municipio']
         ],
         columns=[LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, ID_POI, DIST_POI, NAME_POI],
         index=[0, 1, 2, 3, 4, 5, 6, 7, 8]
     )
+
+    integration.join_with_pois_optimizer(move_df, pois)
     assert_frame_equal(move_df, expected, check_dtype=False)
 
 
@@ -677,24 +643,24 @@ def test_join_with_poi_datetime_optimizer():
     )
     expected = DataFrame(
         data=[
-            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1, 1,
-             0.0, 'show do tropykalia'],
+            [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1,
+             '', inf, ''],
             [39.984559000000004, 116.326696, Timestamp('2008-10-23 10:37:26'),
-             1, 1, 637.6902157810676, 'show do tropykalia'],
+             1, '', inf, ''],
             [40.002899, 116.32151999999999, Timestamp('2008-10-23 10:50:16'),
-             1, 1, 1094.8606633486436, 'show do tropykalia'],
+             1, '', inf, ''],
             [40.016238, 116.30769099999999, Timestamp('2008-10-23 11:03:06'),
-             1, 1, 286.3387434682031, 'show do tropykalia'],
-            [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'), 2, 1,
-             0.9311014399622559, 'show do tropykalia'],
-            [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'), 2,
-             '', inf, ''],
+             1, '', inf, ''],
+            [40.013814, 116.306525, Timestamp('2008-10-23 11:58:33'), 2, 2,
+             3047.8382223981853, 'evento da prefeitura'],
+            [40.009735, 116.315069, Timestamp('2008-10-23 23:50:45'), 2, 2,
+             2294.0758201547073, 'evento da prefeitura'],
             [39.993527, 116.32648300000001, Timestamp('2008-10-24 00:02:14'),
-             2, '', inf, ''],
-            [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'), 3,
-             '', inf, ''],
-            [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'), 3,
-             '', inf, '']
+             2, 2, 279.6712398549538, 'evento da prefeitura'],
+            [39.978575, 116.326975, Timestamp('2008-10-24 00:22:01'), 3, 1,
+             900.7798955139455, 'show do tropykalia'],
+            [39.981668, 116.310769, Timestamp('2008-10-24 01:57:57'), 3, 1,
+             770.188754517813, 'show do tropykalia']
         ],
         columns=[
             LATITUDE, LONGITUDE, DATETIME, TRAJ_ID, EVENT_ID, DIST_EVENT, EVENT_TYPE
