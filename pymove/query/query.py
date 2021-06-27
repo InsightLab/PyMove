@@ -65,6 +65,25 @@ def range_query(
     ------
         ValueError: if distance measure is invalid
 
+    Examples
+    --------
+    >>> from pymove.query.query import range_query
+    >>> traj_df
+         lat      lon              datetime  id
+    0   16.4    -54.9   2014-10-11 18:00:00   1
+    1   16.4    -55.9   2014-10-12 00:00:00   1
+    2   16.4    -56.9   2014-10-12 06:00:00   1
+    >>> move_df
+         lat      lon              datetime  id
+    0   33.1    -77.0   2012-05-19 00:00:00   2
+    1   32.8    -77.1   2012-05-19 06:00:00   3
+    2   32.5    -77.3   2012-05-19 12:00:00   4
+    >>> range_query(
+    >>>    traj_df, move_df, min_dist=80.5
+    >>> )
+         lat      lon              datetime  id
+    1   32.8	-77.1	2012-05-19 06:00:00	  3
+    2	32.5	-77.3	2012-05-19 12:00:00	  4
     """
     result = traj.copy()
     result.drop(result.index, inplace=True)
@@ -139,6 +158,27 @@ def knn_query(
     ------
         ValueError: if distance measure is invalid
 
+    Examples
+    --------
+    >>> from pymove.query.query import knn_query
+    >>> traj_df
+         lat      lon              datetime  id
+    0   16.4    -54.9   2014-10-11 18:00:00   1
+    1   16.4    -55.9   2014-10-12 00:00:00   1
+    2   16.4    -56.9   2014-10-12 06:00:00   1
+    >>> move_df
+         lat      lon              datetime  id
+    0   33.1    -77.0   2012-05-19 00:00:00   2
+    1   32.8    -77.1   2012-05-19 06:00:00   3
+    2   32.5    -77.3   2012-05-19 12:00:00   4
+    >>> knn_query(
+    >>>    traj_df, move_df, k=1
+    >>> )
+         lat      lon              datetime  id
+    0	16.4	-54.9	2014-10-11 18:00:00   1
+    1	16.4	-55.9	2014-10-12 00:00:00	  1
+    2	16.4	-56.9	2014-10-12 06:00:00	  1
+    2	32.5	-77.3	2012-05-19 12:00:00	  4
     """
     k_list = pd.DataFrame([[np.Inf, 'empty']] * k, columns=['distance', TRAJ_ID])
 
