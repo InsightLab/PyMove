@@ -19,8 +19,6 @@ plot_bbox,
 plot_points_folium,
 plot_poi_folium,
 plot_event_folium,
-show_trajs_with_event,
-show_traj_id_with_event,
 plot_traj_timestamp_geo_json
 
 """
