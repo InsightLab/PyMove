@@ -79,6 +79,29 @@ def show_object_id_by_date(
     ----------
     https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
 
+    Examples
+    --------
+    >>> from pymove.visualization.matplotlib import show_object_id_by_date
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> show_object_id_by_date(move_df)
+              lat          lon              datetime   id\
+              date   hour          period        day
+    0   39.984094   116.319236   2008-10-23 05:53:05    1\
+        2008-10-23      5   Early morning   Thursday
+    1   39.984198   116.319322   2008-10-23 05:53:06    1\
+        2008-10-23      5   Early morning   Thursday
+    2   39.984224   116.319402   2008-10-23 05:53:11    1\
+        2008-10-23      5   Early morning   Thursday
+    3   39.984211   116.319389   2008-10-23 05:53:16    1\
+        2008-10-23      5   Early morning   Thursday
+    4   39.984217   116.319422   2008-10-23 05:53:21    1\
+        2008-10-23      5   Early morning   Thursday
     """
     if kind is None:
         kind = ['bar', 'bar', 'line', 'line']
@@ -151,6 +174,18 @@ def plot_trajectories(
     -------
     figure
         The generated picture or None
+
+    Examples
+    --------
+    >>>  from pymove.visualization.matplotlib import plot_trajectories
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> plot_trajectories(move_df)
     """
     fig = plt.figure(figsize=figsize)
 
@@ -225,6 +260,18 @@ def plot_traj_by_id(
     IndexError
         If there is no trajectory with the tid passed
 
+    Examples
+    --------
+    >>> from pymove.visualization.matplotlib import  plot_traj_by_id
+    >>> move_df
+              lat          lon              datetime   id   tid
+    0   39.984094   116.319236   2008-10-23 05:53:05    1     1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1     1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1     2
+    3   39.984211   116.319389   2008-10-23 05:53:16    2     2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2     2
+    >>> print(plot_traj_by_id(move_df_3, '1'))
+    >>> print(plot_traj_by_id(move_df_3, '2'))
     """
     if label not in move_data:
         raise KeyError('%s feature not in dataframe' % label)
@@ -306,6 +353,17 @@ def plot_all_features(
     AttributeError
         If there are no columns with the specified type
 
+    Examples
+    --------
+    >>>  from pymove.visualization.matplotlib import plot_all_features
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>>  plot_all_features(move_df)
     """
     col_dtype = move_data.select_dtypes(include=[dtype]).columns
     tam = col_dtype.size
@@ -341,6 +399,11 @@ def plot_coords(ax: axes, ob: BaseGeometry, color: Text = 'r'):
 
     Example
     -------
+    >>> from pymove.visualization.matplotlib import plot_coords
+    >>> import matplotlib.pyplot as plt
+    >>> coords = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    >>> _, ax = plt.subplots(figsize=(21, 9))
+    >>> plot_coords(ax, coords)
     """
     x, y = ob.xy
     ax.plot(x, y, 'o', color=color, zorder=1)
@@ -348,7 +411,7 @@ def plot_coords(ax: axes, ob: BaseGeometry, color: Text = 'r'):
 
 def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
     """
-    Plot the limites of geometric object.
+    Plot the limits of geometric object.
 
     Parameters
     ----------
@@ -361,7 +424,11 @@ def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
 
     Example
     -------
-
+    >>> from pymove.visualization.matplotlib import plot_bounds
+    >>> import matplotlib.pyplot as plt
+    >>> bounds = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    >>> _, ax = plt.subplots(figsize=(21, 9))
+    >>> plot_bounds(ax, bounds)
     """
     x, y = zip(*list((p.x, p.y) for p in ob.boundary))
     ax.plot(x, y, '-', color=color, zorder=1)
@@ -398,6 +465,11 @@ def plot_line(
 
     Example
     -------
+    >>> from pymove.visualization.matplotlib import plot_line
+    >>> import matplotlib.pyplot as plt
+    >>> line = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    >>> _, ax = plt.subplots(figsize=(21, 9))
+    >>> plot_line(ax, line)
     """
     x, y = ob.xy
     ax.plot(
