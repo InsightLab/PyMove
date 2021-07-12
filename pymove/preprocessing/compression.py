@@ -94,7 +94,7 @@ def compress_segment_stop_to_point(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     if (label_segment not in move_data) & (label_stop not in move_data):
         create_or_update_move_stop_by_dist_time(

@@ -298,7 +298,7 @@ def create_bin_geohash_df(data: DataFrame, precision: float = 15):
     3   39.984211   116.319389  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
     4   39.984217   116.319422  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, ...
     """
-    _, _, _, bin_geohash = _reset_and_create_arrays_none(data)
+    *_, bin_geohash = _reset_and_create_arrays_none(data)
 
     for idx, row in progress_bar(
         data[[LATITUDE, LONGITUDE]].iterrows(), total=data.shape[0]
