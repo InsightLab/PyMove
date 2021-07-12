@@ -7,7 +7,7 @@ plot_traj_by_id,
 plot_all_features
 plot_coords,
 plot_bounds,
-plot_line,
+plot_line
 
 """
 
@@ -37,7 +37,6 @@ if TYPE_CHECKING:
 
 def show_object_id_by_date(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    create_features: bool = True,
     kind: Optional[List] = None,
     figsize: Tuple[float, float] = (21, 9),
     return_fig: bool = True,
@@ -56,9 +55,6 @@ def show_object_id_by_date(
     ----------
     move_data : pymove.core.MoveDataFrameAbstract subclass.
         Input trajectory data.
-    create_features : bool, optional
-        Represents whether or not to delete features created for viewing,
-        by default True.
     kind: list, optional
         Determines the kinds of each plot, by default None
     figsize : tuple, optional
@@ -79,12 +75,24 @@ def show_object_id_by_date(
     ----------
     https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
 
+    Examples
+    --------
+    >>> from pymove.visualization.matplotlib import show_object_id_by_date
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> show_object_id_by_date(move_df)
     """
     if kind is None:
         kind = ['bar', 'bar', 'line', 'line']
 
     fig, ax = plt.subplots(2, 2, figsize=figsize)
 
+    columns = move_data.columns
     move_data.generate_date_features()
     move_data.generate_hour_features()
     move_data.generate_time_of_day_features()
@@ -108,11 +116,11 @@ def show_object_id_by_date(
         subplots=True, kind=kind[3], grid=True, ax=ax[1][1], fontsize=12
     )
 
-    if not create_features:
-        move_data.drop(columns=[DATE, HOUR, PERIOD, DAY], inplace=True)
-
     if save_fig:
         plt.savefig(fname=name)
+
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     if return_fig:
         return fig
@@ -151,6 +159,18 @@ def plot_trajectories(
     -------
     figure
         The generated picture or None
+
+    Examples
+    --------
+    >>>  from pymove.visualization.matplotlib import plot_trajectories
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> plot_trajectories(move_df)
     """
     fig = plt.figure(figsize=figsize)
 
@@ -225,6 +245,18 @@ def plot_traj_by_id(
     IndexError
         If there is no trajectory with the tid passed
 
+    Examples
+    --------
+    >>> from pymove.visualization.matplotlib import  plot_traj_by_id
+    >>> move_df
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> plot_traj_by_id(move_df_3, 1, label='id)
+    >>> plot_traj_by_id(move_df_3, 2, label='id)
     """
     if label not in move_data:
         raise KeyError('%s feature not in dataframe' % label)
@@ -256,10 +288,10 @@ def plot_traj_by_id(
 
     plt.plot(
         df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=markersize
-    )  # start point
+    )
     plt.plot(
         df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=markersize
-    )  # end point
+    )
 
     if save_fig:
         if not name:
@@ -306,6 +338,17 @@ def plot_all_features(
     AttributeError
         If there are no columns with the specified type
 
+    Examples
+    --------
+    >>>  from pymove.visualization.matplotlib import plot_all_features
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>>  plot_all_features(move_df)
     """
     col_dtype = move_data.select_dtypes(include=[dtype]).columns
     tam = col_dtype.size
@@ -341,6 +384,11 @@ def plot_coords(ax: axes, ob: BaseGeometry, color: Text = 'r'):
 
     Example
     -------
+    >>> from pymove.visualization.matplotlib import plot_coords
+    >>> import matplotlib.pyplot as plt
+    >>> coords = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    >>> _, ax = plt.subplots(figsize=(21, 9))
+    >>> plot_coords(ax, coords)
     """
     x, y = ob.xy
     ax.plot(x, y, 'o', color=color, zorder=1)
@@ -348,7 +396,7 @@ def plot_coords(ax: axes, ob: BaseGeometry, color: Text = 'r'):
 
 def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
     """
-    Plot the limites of geometric object.
+    Plot the limits of geometric object.
 
     Parameters
     ----------
@@ -361,7 +409,11 @@ def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
 
     Example
     -------
-
+    >>> from pymove.visualization.matplotlib import plot_bounds
+    >>> import matplotlib.pyplot as plt
+    >>> bounds = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    >>> _, ax = plt.subplots(figsize=(21, 9))
+    >>> plot_bounds(ax, bounds)
     """
     x, y = zip(*list((p.x, p.y) for p in ob.boundary))
     ax.plot(x, y, '-', color=color, zorder=1)
@@ -398,6 +450,11 @@ def plot_line(
 
     Example
     -------
+    >>> from pymove.visualization.matplotlib import plot_line
+    >>> import matplotlib.pyplot as plt
+    >>> line = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    >>> _, ax = plt.subplots(figsize=(21, 9))
+    >>> plot_line(ax, line)
     """
     x, y = ob.xy
     ax.plot(

@@ -1169,13 +1169,6 @@ def plot_trajectory_by_period(
     3   39.984211   116.319389   2008-10-23 05:53:16    1
     4   39.984217   116.319422   2008-10-23 05:53:21    1
     >>> plot_trajectory_by_period(move_df, period='Early morning')
-    >>> move_df.head()
-              lat          lon              datetime   id          period
-    0   39.984094   116.319236   2008-10-23 05:53:05    1   Early morning
-    1   39.984198   116.319322   2008-10-23 05:53:06    1   Early morning
-    2   39.984224   116.319402   2008-10-23 05:53:11    1   Early morning
-    3   39.984211   116.319389   2008-10-23 05:53:16    1   Early morning
-    4   39.984217   116.319422   2008-10-23 05:53:21    1   Early morning
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1186,6 +1179,7 @@ def plot_trajectory_by_period(
             default_zoom_start=zoom_start,
         )
 
+    columns = move_data.columns
     if PERIOD not in move_data:
         move_data.generate_time_of_day_features()
 
@@ -1194,6 +1188,8 @@ def plot_trajectory_by_period(
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 
@@ -1278,13 +1274,6 @@ def plot_trajectory_by_day_week(
     3   39.984211   116.319389   2008-10-23 05:53:16    1
     4   39.984217   116.319422   2008-10-23 05:53:21    1
     >>> plot_trajectory_by_day_week(move_df, day_week='Friday')
-    >>> move_df.head()
-              lat          lon              datetime   id        day
-    0   39.984094   116.319236   2008-10-23 05:53:05    1   Thursday
-    1   39.984198   116.319322   2008-10-23 05:53:06    1   Thursday
-    2   39.984224   116.319402   2008-10-23 05:53:11    1   Thursday
-    3   39.984211   116.319389   2008-10-23 05:53:16    1   Thursday
-    4   39.984217   116.319422   2008-10-23 05:53:21    1   Thursday
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1295,6 +1284,7 @@ def plot_trajectory_by_day_week(
             default_zoom_start=zoom_start,
         )
 
+    columns = move_data.columns
     if DAY not in move_data:
         move_data.generate_day_of_the_week_features()
 
@@ -1303,6 +1293,8 @@ def plot_trajectory_by_day_week(
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 
@@ -1394,13 +1386,6 @@ def plot_trajectory_by_date(
     >>>     start_date='2008-10-23 05:53:05',
     >>>     end_date='2008-10-23 23:43:56'
     >>> )
-    >>> move_df.head()
-              lat          lon              datetime   id         date
-    0   39.984094   116.319236   2008-10-23 05:53:05    1   2008-10-23
-    1   39.984198   116.319322   2008-10-23 05:53:06    1   2008-10-23
-    2   39.984224   116.319402   2008-10-23 05:53:11    1   2008-10-23
-    3   39.984211   116.319389   2008-10-23 05:53:16    1   2008-10-23
-    4   39.984217   116.319422   2008-10-23 05:53:21    1   2008-10-23
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1417,6 +1402,7 @@ def plot_trajectory_by_date(
     if isinstance(end_date, str):
         end_date = str_to_datetime(end_date).date()
 
+    columns = move_data.columns
     if DATE not in move_data:
         move_data.generate_date_features()
 
@@ -1425,6 +1411,8 @@ def plot_trajectory_by_date(
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 
@@ -1511,13 +1499,7 @@ def plot_trajectory_by_hour(
     2   39.984224   116.319402   2008-10-23 05:53:11    1
     3   39.984211   116.319389   2008-10-23 05:53:16    1
     4   39.984217   116.319422   2008-10-23 05:53:21    1
-    >>> plot_trajectory_by_hour(move_df, start_hour=4,end_hour=6)
-              lat          lon              datetime   id   hour
-    0   39.984094   116.319236   2008-10-23 05:53:05    1      5
-    1   39.984198   116.319322   2008-10-23 05:53:06    1      5
-    2   39.984224   116.319402   2008-10-23 05:53:11    1      5
-    3   39.984211   116.319389   2008-10-23 05:53:16    1      5
-    4   39.984217   116.319422   2008-10-23 05:53:21    1      5
+    >>> plot_trajectory_by_hour(move_df, start_hour=4, end_hour=6)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1528,6 +1510,7 @@ def plot_trajectory_by_hour(
             default_zoom_start=zoom_start,
         )
 
+    columns = move_data.columns
     if HOUR not in move_data:
         move_data.generate_hour_features()
 
@@ -1536,6 +1519,8 @@ def plot_trajectory_by_hour(
     _add_trajectories_to_folium_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 
@@ -1620,19 +1605,6 @@ def plot_stops(
     3   39.984211   116.319389   2008-10-23 05:53:16    1
     4   39.984217   116.319422   2008-10-23 05:53:21    1
     >>> plot_stops(move_df)
-    >>> move_df.head()
-              lat          lon              datetime   id \
-    dist_to_prev   dist_to_next   dist_prev_to_next   situation
-    0   39.984094   116.319236   2008-10-23 05:53:05    1 \
-             NaN      13.690153                 NaN         nan
-    1   39.984198   116.319322   2008-10-23 05:53:06    1 \
-       13.690153       7.403788           20.223428        move
-    2   39.984224   116.319402   2008-10-23 05:53:11    1 \
-        7.403788       1.821083            5.888579        move
-    3   39.984211   116.319389   2008-10-23 05:53:16    1 \
-        1.821083       2.889671            1.873356        move
-    4   39.984217   116.319422   2008-10-23 05:53:21    1 \
-        2.889671      66.555997           68.727260        move
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1643,6 +1615,7 @@ def plot_stops(
             default_zoom_start=zoom_start,
         )
 
+    columns = move_data.columns
     if SITUATION not in move_data:
         move_data.generate_move_and_stop_by_radius(radius=radius)
 
@@ -1669,6 +1642,8 @@ def plot_stops(
 
     if save_as_html:
         base_map.save(outfile=filename)
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 

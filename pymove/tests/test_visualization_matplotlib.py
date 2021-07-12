@@ -50,7 +50,6 @@ def test_show_object_id_by_date(tmpdir):
 
     mpl.show_object_id_by_date(
         move_data=move_df,
-        create_features=False,
         name=filename_write_default
     )
 
@@ -63,22 +62,6 @@ def test_show_object_id_by_date(tmpdir):
         0.0001,
         in_decorator=False
     )
-
-    assert(HOUR not in move_df)
-    assert(DATE not in move_df)
-    assert(PERIOD not in move_df)
-    assert(DAY not in move_df)
-
-    mpl.show_object_id_by_date(
-        move_data=move_df,
-        create_features=True,
-        name=filename_write_default
-    )
-
-    assert(DATE in move_df)
-    assert(HOUR in move_df)
-    assert(PERIOD in move_df)
-    assert(DAY in move_df)
 
 
 def test_plot_traj_by_id(tmpdir):
