@@ -7,7 +7,7 @@ plot_traj_by_id,
 plot_all_features
 plot_coords,
 plot_bounds,
-plot_line,
+plot_line
 
 """
 
@@ -37,7 +37,6 @@ if TYPE_CHECKING:
 
 def show_object_id_by_date(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    create_features: bool = True,
     kind: Optional[List] = None,
     figsize: Tuple[float, float] = (21, 9),
     return_fig: bool = True,
@@ -56,9 +55,6 @@ def show_object_id_by_date(
     ----------
     move_data : pymove.core.MoveDataFrameAbstract subclass.
         Input trajectory data.
-    create_features : bool, optional
-        Represents whether or not to delete features created for viewing,
-        by default True.
     kind: list, optional
         Determines the kinds of each plot, by default None
     figsize : tuple, optional
@@ -90,24 +86,13 @@ def show_object_id_by_date(
     3   39.984211   116.319389   2008-10-23 05:53:16    2
     4   39.984217   116.319422   2008-10-23 05:53:21    2
     >>> show_object_id_by_date(move_df)
-              lat          lon              datetime   id\
-              date   hour          period        day
-    0   39.984094   116.319236   2008-10-23 05:53:05    1\
-        2008-10-23      5   Early morning   Thursday
-    1   39.984198   116.319322   2008-10-23 05:53:06    1\
-        2008-10-23      5   Early morning   Thursday
-    2   39.984224   116.319402   2008-10-23 05:53:11    1\
-        2008-10-23      5   Early morning   Thursday
-    3   39.984211   116.319389   2008-10-23 05:53:16    1\
-        2008-10-23      5   Early morning   Thursday
-    4   39.984217   116.319422   2008-10-23 05:53:21    1\
-        2008-10-23      5   Early morning   Thursday
     """
     if kind is None:
         kind = ['bar', 'bar', 'line', 'line']
 
     fig, ax = plt.subplots(2, 2, figsize=figsize)
 
+    columns = move_data.columns
     move_data.generate_date_features()
     move_data.generate_hour_features()
     move_data.generate_time_of_day_features()
@@ -131,11 +116,11 @@ def show_object_id_by_date(
         subplots=True, kind=kind[3], grid=True, ax=ax[1][1], fontsize=12
     )
 
-    if not create_features:
-        move_data.drop(columns=[DATE, HOUR, PERIOD, DAY], inplace=True)
-
     if save_fig:
         plt.savefig(fname=name)
+
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     if return_fig:
         return fig
@@ -264,14 +249,14 @@ def plot_traj_by_id(
     --------
     >>> from pymove.visualization.matplotlib import  plot_traj_by_id
     >>> move_df
-              lat          lon              datetime   id   tid
-    0   39.984094   116.319236   2008-10-23 05:53:05    1     1
-    1   39.984198   116.319322   2008-10-23 05:53:06    1     1
-    2   39.984224   116.319402   2008-10-23 05:53:11    1     2
-    3   39.984211   116.319389   2008-10-23 05:53:16    2     2
-    4   39.984217   116.319422   2008-10-23 05:53:21    2     2
-    >>> print(plot_traj_by_id(move_df_3, '1'))
-    >>> print(plot_traj_by_id(move_df_3, '2'))
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> plot_traj_by_id(move_df_3, 1, label='id)
+    >>> plot_traj_by_id(move_df_3, 2, label='id)
     """
     if label not in move_data:
         raise KeyError('%s feature not in dataframe' % label)
@@ -303,10 +288,10 @@ def plot_traj_by_id(
 
     plt.plot(
         df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=markersize
-    )  # start point
+    )
     plt.plot(
         df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=markersize
-    )  # end point
+    )
 
     if save_fig:
         if not name:
