@@ -786,9 +786,9 @@ c. DataFrames
 
     lon_min_x: 113.548843
     lat_min_y: 22.147577
-    grid_size_lat_y: 262999
-    grid_size_lon_x: 105388
-    cell_size_by_degree: 7.218478943256657e-05
+    grid_size_lat_y: 263013
+    grid_size_lon_x: 105394
+    cell_size_by_degree: 7.218082747158498e-05
 
 
 
@@ -804,7 +804,7 @@ c. DataFrames
 
 .. parsed-literal::
 
-    {'name': 'to_grid', 'time in seconds': 0.004861116409301758, 'memory': '0.0 B'}
+    {'name': 'to_grid', 'time in seconds': 0.010914802551269531, 'memory': '0.0 B'}
 
 
 
