@@ -15,9 +15,9 @@ join_with_home_by_id,
 merge_home_with_poi
 
 """
+from __future__ import annotations
 
 from collections import namedtuple
-from typing import List, Optional, Text, Tuple
 
 import numpy as np
 from numpy import ndarray
@@ -50,10 +50,10 @@ from pymove.utils.log import logger, progress_bar
 
 def union_poi_bank(
     data: DataFrame,
-    label_poi: Text = TYPE_POI,
-    banks: Optional[List[Text]] = None,
+    label_poi: str = TYPE_POI,
+    banks: list[str] | None = None,
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Performs the union between the different bank categories.
 
@@ -114,7 +114,7 @@ def union_poi_bank(
     if not inplace:
         data = data.copy()
     logger.debug('union bank categories to one category')
-    logger.debug('... There are {} -- {}'.format(data[label_poi].nunique(), label_poi))
+    logger.debug(f'... There are {data[label_poi].nunique()} -- {label_poi}')
     if banks is None:
         banks = [
             'bancos_filiais',
@@ -131,10 +131,10 @@ def union_poi_bank(
 
 def union_poi_bus_station(
     data: DataFrame,
-    label_poi: Text = TYPE_POI,
-    bus_stations: Optional[List[Text]] = None,
+    label_poi: str = TYPE_POI,
+    bus_stations: list[str] | None = None,
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Performs the union between the different bus station categories.
 
@@ -203,10 +203,10 @@ def union_poi_bus_station(
 
 def union_poi_bar_restaurant(
     data: DataFrame,
-    label_poi: Text = TYPE_POI,
-    bar_restaurant: Optional[List[Text]] = None,
+    label_poi: str = TYPE_POI,
+    bar_restaurant: list[str] | None = None,
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Performs the union between bar and restaurant categories.
 
@@ -270,10 +270,10 @@ def union_poi_bar_restaurant(
 
 def union_poi_parks(
     data: DataFrame,
-    label_poi: Text = TYPE_POI,
-    parks: Optional[List[Text]] = None,
+    label_poi: str = TYPE_POI,
+    parks: list[str] | None = None,
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Performs the union between park categories.
 
@@ -337,10 +337,10 @@ def union_poi_parks(
 
 def union_poi_police(
     data: DataFrame,
-    label_poi: Text = TYPE_POI,
-    police: Optional[List[Text]] = None,
+    label_poi: str = TYPE_POI,
+    police: list[str] | None = None,
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Performs the union between police categories.
 
@@ -405,9 +405,9 @@ def union_poi_police(
 def join_collective_areas(
     data: DataFrame,
     areas: DataFrame,
-    label_geometry: Text = GEOMETRY,
+    label_geometry: str = GEOMETRY,
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Performs the integration between trajectories and collective areas.
 
@@ -487,7 +487,7 @@ def _reset_and_creates_id_and_lat_lon(
     df_pois: DataFrame,
     lat_lon_poi: bool = True,
     reset_index: bool = True
-) -> Tuple[ndarray, ndarray, ndarray, ndarray, ndarray]:
+) -> tuple[ndarray, ndarray, ndarray, ndarray, ndarray]:
     """
     Resets the indexes of the dataframes.
 
@@ -555,8 +555,8 @@ def _reset_and_creates_id_and_lat_lon(
 
 
 def _reset_set_window__and_creates_event_id_type(
-    data: DataFrame, df_events: DataFrame, time_window: float, label_date: Text = DATETIME
-) -> Tuple[Series, Series, ndarray, ndarray, ndarray]:
+    data: DataFrame, df_events: DataFrame, time_window: float, label_date: str = DATETIME
+) -> tuple[Series, Series, ndarray, ndarray, ndarray]:
     """
     Resets the indexes of the dataframes.
 
@@ -619,8 +619,8 @@ def _reset_set_window__and_creates_event_id_type(
 
 
 def _reset_set_window_and_creates_event_id_type_all(
-    data: DataFrame, df_events: DataFrame, time_window: float, label_date: Text = DATETIME
-) -> Tuple[Series, Series, ndarray, ndarray, ndarray]:
+    data: DataFrame, df_events: DataFrame, time_window: float, label_date: str = DATETIME
+) -> tuple[Series, Series, ndarray, ndarray, ndarray]:
     """
     Resets the indexes of the dataframes.
 
@@ -685,8 +685,8 @@ def _reset_set_window_and_creates_event_id_type_all(
 def join_with_pois(
     data: DataFrame,
     df_pois: DataFrame,
-    label_id: Text = TRAJ_ID,
-    label_poi_name: Text = NAME_POI,
+    label_id: str = TRAJ_ID,
+    label_poi_name: str = NAME_POI,
     reset_index: bool = True,
     inplace: bool = False
 ):
@@ -806,8 +806,8 @@ def join_with_pois(
 def join_with_pois_by_category(
     data: DataFrame,
     df_pois: DataFrame,
-    label_category: Text = TYPE_POI,
-    label_id: Text = TRAJ_ID,
+    label_category: str = TYPE_POI,
+    label_id: str = TRAJ_ID,
     inplace: bool = False
 ):
     """
@@ -888,7 +888,7 @@ def join_with_pois_by_category(
         df_category = df_pois[df_pois[label_category] == c]
         df_category.reset_index(drop=True, inplace=True)
 
-        desc = 'computing dist to {} category ({}/{})'.format(c, i, size_categories)
+        desc = f'computing dist to {c} category ({i}/{size_categories})'
         for idx, row in progress_bar(data.iterrows(), total=len(data), desc=desc):
             lat_user = np.full(
                 df_category.shape[0], row[LATITUDE], dtype=np.float64
@@ -923,10 +923,10 @@ def join_with_pois_by_category(
 def join_with_events(
     data: DataFrame,
     df_events: DataFrame,
-    label_date: Text = DATETIME,
+    label_date: str = DATETIME,
     time_window: int = 900,
-    label_event_id: Text = EVENT_ID,
-    label_event_type: Text = EVENT_TYPE,
+    label_event_id: str = EVENT_ID,
+    label_event_type: str = EVENT_TYPE,
     inplace: bool = False
 ):
     """
@@ -1070,9 +1070,9 @@ def join_with_events(
 def join_with_event_by_dist_and_time(
     data: DataFrame,
     df_events: DataFrame,
-    label_date: Text = DATETIME,
-    label_event_id: Text = EVENT_ID,
-    label_event_type: Text = EVENT_TYPE,
+    label_date: str = DATETIME,
+    label_event_id: str = EVENT_ID,
+    label_event_type: str = EVENT_TYPE,
     time_window: float = 3600,
     radius: float = 1000,
     inplace: bool = False
@@ -1219,9 +1219,9 @@ def join_with_event_by_dist_and_time(
 def join_with_home_by_id(
     data: DataFrame,
     df_home: DataFrame,
-    label_id: Text = TRAJ_ID,
-    label_address: Text = ADDRESS,
-    label_city: Text = CITY,
+    label_id: str = TRAJ_ID,
+    label_address: str = ADDRESS,
+    label_city: str = CITY,
     drop_id_without_home: bool = False,
     inplace: bool = False
 ):
@@ -1288,7 +1288,7 @@ def join_with_home_by_id(
     ids_without_home = []
 
     if data.index.name is None:
-        logger.debug('...setting {} as index'.format(label_id))
+        logger.debug(f'...setting {label_id} as index')
         data.set_index(label_id, inplace=True)
 
     for idx in progress_bar(
@@ -1297,7 +1297,7 @@ def join_with_home_by_id(
         filter_home = df_home[label_id] == idx
 
         if df_home[filter_home].shape[0] == 0:
-            logger.debug('...id: {} has not HOME'.format(idx))
+            logger.debug(f'...id: {idx} has not HOME')
             ids_without_home.append(idx)
         else:
             home = df_home[filter_home].iloc[0]
@@ -1338,11 +1338,11 @@ def join_with_home_by_id(
 
 def merge_home_with_poi(
     data: DataFrame,
-    label_dist_poi: Text = DIST_POI,
-    label_name_poi: Text = NAME_POI,
-    label_id_poi: Text = ID_POI,
-    label_home: Text = HOME,
-    label_dist_home: Text = DIST_HOME,
+    label_dist_poi: str = DIST_POI,
+    label_name_poi: str = NAME_POI,
+    label_id_poi: str = ID_POI,
+    label_home: str = HOME,
+    label_dist_home: str = DIST_HOME,
     drop_columns: bool = True,
     inplace: bool = False
 ):

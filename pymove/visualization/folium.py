@@ -22,9 +22,10 @@ plot_event,
 plot_traj_timestamp_geo_json
 
 """
+from __future__ import annotations
 
 from datetime import date
-from typing import Any, Dict, List, Optional, Sequence, Text, Tuple, Union
+from typing import Any, Sequence
 
 import folium
 import numpy as np
@@ -38,11 +39,9 @@ from pymove.utils.constants import (
     DATE,
     DATETIME,
     DAY,
-    EVENT_ID,
     EVENT_POINT,
     HOUR,
     LATITUDE,
-    LINE_COLOR,
     LONGITUDE,
     PERIOD,
     POI_POINT,
@@ -50,7 +49,6 @@ from pymove.utils.constants import (
     STOP,
     TILES,
     TRAJ_ID,
-    UID,
     USER_POINT,
 )
 from pymove.utils.datetime import str_to_datetime
@@ -60,12 +58,12 @@ from pymove.utils.visual import add_map_legend, cmap_hex_color, get_cmap
 
 def save_map(
     move_data: DataFrame,
-    filename: Text,
-    tiles: Text = TILES[0],
-    label_id: Text = TRAJ_ID,
-    cmap: Text = 'Set1',
+    filename: str,
+    tiles: str = TILES[0],
+    label_id: str = TRAJ_ID,
+    cmap: str = 'Set1',
     return_map: bool = False
-) -> Optional[Map]:
+) -> Map | None:
     """
     Save a visualization in a map in a new file.
 
@@ -130,9 +128,9 @@ def save_map(
 
 def create_base_map(
     move_data: DataFrame,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
-    tile: Text = TILES[0],
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
+    tile: str = TILES[0],
     default_zoom_start: float = 12,
 ) -> Map:
     """
@@ -182,15 +180,15 @@ def create_base_map(
 
 def heatmap(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     radius: float = 8,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'heatmap.html',
+    filename: str = 'heatmap.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -267,17 +265,17 @@ def heatmap(
 
 def heatmap_with_time(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     radius: float = 8,
     min_opacity: float = 0.5,
     max_opacity: float = 0.8,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'heatmap_time.html',
+    filename: str = 'heatmap_time.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -371,14 +369,14 @@ def heatmap_with_time(
 
 def cluster(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'cluster.html',
+    filename: str = 'cluster.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -461,14 +459,14 @@ def cluster(
 
 def faster_cluster(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'faster_cluster.html',
+    filename: str = 'faster_cluster.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -546,14 +544,14 @@ def faster_cluster(
 
 def plot_markers(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'markers.html',
+    filename: str = 'markers.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -646,11 +644,11 @@ def plot_markers(
 
 def _filter_and_generate_colors(
     move_data: DataFrame,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None
-) -> Tuple[DataFrame, List[Tuple[Any, Any]]]:
+    id_: int | None = None,
+    n_rows: int | None = None,
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None
+) -> tuple[DataFrame, list[tuple[Any, Any]]]:
     """
     Filters the dataframe and generate colors for folium map.
 
@@ -744,7 +742,7 @@ def _filter_and_generate_colors(
 
 
 def _filter_generated_feature(
-    move_data: DataFrame, feature: Text, values: Any
+    move_data: DataFrame, feature: str, values: Any
 ) -> DataFrame:
     """
     Filters the values from the dataframe.
@@ -795,8 +793,8 @@ def _filter_generated_feature(
 def _add_begin_end_markers_to_map(
     move_data: DataFrame,
     base_map: Map,
-    color: Optional[Text] = None,
-    _id: Optional[int] = None
+    color: str | None = None,
+    _id: int | None = None
 ):
     """
     Adds markers to the beggining and end of a trajectory.
@@ -857,11 +855,11 @@ def _add_begin_end_markers_to_map(
 
 def _add_trajectories_to_map(
     move_data: DataFrame,
-    items: Sequence[Tuple],
+    items: Sequence[tuple],
     base_map: Map,
     legend: bool = True,
     save_as_html: bool = True,
-    filename: Text = 'map.html',
+    filename: str = 'map.html',
 ):
     """
     Adds a trajectory to a folium map with begin and end markers.
@@ -914,17 +912,17 @@ def _add_trajectories_to_map(
 
 def plot_trajectories(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1003,16 +1001,16 @@ def plot_trajectories(
 def plot_trajectory_by_id(
     move_data: DataFrame,
     id_: int,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    filename: Text = 'plot_trajectories.html',
+    color: str | list[str] | None = None,
+    filename: str = 'plot_trajectories.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1091,19 +1089,19 @@ def plot_trajectory_by_id(
 
 def plot_trajectory_by_period(
     move_data: PandasMoveDataFrame,
-    period: Text,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    period: str,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories_by_period.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories_by_period.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1196,19 +1194,19 @@ def plot_trajectory_by_period(
 
 def plot_trajectory_by_day_week(
     move_data: PandasMoveDataFrame,
-    day_week: Text,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    day_week: str,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories_by_day_week.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories_by_day_week.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1301,20 +1299,20 @@ def plot_trajectory_by_day_week(
 
 def plot_trajectory_by_date(
     move_data: PandasMoveDataFrame,
-    start_date: Union[Text, date],
-    end_date: Union[Text, date],
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    start_date: str | date,
+    end_date: str | date,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories_by_date.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories_by_date.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1419,20 +1417,20 @@ def plot_trajectory_by_date(
 
 def plot_trajectory_by_hour(
     move_data: PandasMoveDataFrame,
-    start_hour: Text,
-    end_hour: Text,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    start_hour: str,
+    end_hour: str,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories_by_hour.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories_by_hour.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1529,17 +1527,17 @@ def plot_stops(
     move_data: PandasMoveDataFrame,
     radius: float = 0,
     weight: float = 3,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    filename: Text = 'plot_stops.html',
+    color: str | list[str] | None = None,
+    filename: str = 'plot_stops.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1649,12 +1647,12 @@ def plot_stops(
 
 
 def plot_bbox(
-    bbox_tuple: Tuple[float, float, float, float],
-    base_map: Optional[Map] = None,
-    tiles: Text = TILES[0],
-    color: Text = 'red',
+    bbox_tuple: tuple[float, float, float, float],
+    base_map: Map | None = None,
+    tiles: str = TILES[0],
+    color: str = 'red',
     save_as_html: bool = False,
-    filename: Text = 'bbox.html'
+    filename: str = 'bbox.html'
 ) -> Map:
     """
     Plots a bbox using Folium.
@@ -1707,7 +1705,7 @@ def plot_bbox(
     return base_map
 
 
-def _format_tags(line: Union[List, Dict], slice_: List) -> Text:
+def _format_tags(line: list | dict, slice_: list) -> str:
     """
     Create or format tags.
 
@@ -1742,17 +1740,17 @@ def _format_tags(line: Union[List, Dict], slice_: List) -> Text:
     >>> )
     lat: 39.984094<br/>lon: 116.319236<br/>datetime: 2008-10-23 05:53:05<br/>id: 1
     """
-    map_formated_tags = map(lambda tag: '{}: {}'.format(tag, line[tag]), slice_)
+    map_formated_tags = map(lambda tag: f'{tag}: {line[tag]}', slice_)
 
     return '<br/>'.join(map_formated_tags)
 
 
 def _circle_maker(
     iter_tuple: DataFrame,
-    user_lat: Text,
-    user_lon: Text,
-    slice_tags: List,
-    user_point: Text,
+    user_lat: str,
+    user_lon: str,
+    slice_tags: list,
+    user_point: str,
     radius: float,
     map_: Map
 ):
@@ -1814,15 +1812,15 @@ def _circle_maker(
 
 def plot_points(
     move_data: DataFrame,
-    user_lat: Text = LATITUDE,
-    user_lon: Text = LONGITUDE,
-    user_point: Text = USER_POINT,
+    user_lat: str = LATITUDE,
+    user_lon: str = LONGITUDE,
+    user_point: str = USER_POINT,
     radius: float = 2,
-    base_map: Optional[Map] = None,
-    slice_tags: Optional[List] = None,
-    tiles: Text = TILES[0],
+    base_map: Map | None = None,
+    slice_tags: list | None = None,
+    tiles: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'points.html'
+    filename: str = 'points.html'
 ) -> Map:
     """
     Generates a folium map with the trajectories plots and a point.
@@ -1901,15 +1899,15 @@ def plot_points(
 
 def plot_poi(
     move_data: DataFrame,
-    poi_lat: Text = LATITUDE,
-    poi_lon: Text = LONGITUDE,
-    poi_point: Text = POI_POINT,
+    poi_lat: str = LATITUDE,
+    poi_lon: str = LONGITUDE,
+    poi_point: str = POI_POINT,
     radius: float = 2,
-    base_map: Optional[Map] = None,
-    slice_tags: Optional[List] = None,
-    tiles: Text = TILES[0],
+    base_map: Map | None = None,
+    slice_tags: list | None = None,
+    tiles: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'pois.html'
+    filename: str = 'pois.html'
 ) -> Map:
     """
     Receives a MoveDataFrame and returns a folium map with poi points.
@@ -1970,15 +1968,15 @@ def plot_poi(
 
 def plot_event(
     move_data: DataFrame,
-    event_lat: Text = LATITUDE,
-    event_lon: Text = LONGITUDE,
-    event_point: Text = EVENT_POINT,
+    event_lat: str = LATITUDE,
+    event_lon: str = LONGITUDE,
+    event_point: str = EVENT_POINT,
     radius: float = 2,
-    base_map: Optional[Map] = None,
-    slice_tags: Optional[List] = None,
-    tiles: Text = TILES[0],
+    base_map: Map | None = None,
+    slice_tags: list | None = None,
+    tiles: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'events.html'
+    filename: str = 'events.html'
 ) -> Map:
     """
     Receives a MoveDataFrame and returns a folium map with events.
@@ -2036,10 +2034,10 @@ def plot_event(
 
 def _create_geojson_features_line(
     move_data: DataFrame,
-    label_lat: Text = LATITUDE,
-    label_lon: Text = LONGITUDE,
-    label_datetime: Text = DATETIME
-) -> List:
+    label_lat: str = LATITUDE,
+    label_lon: str = LONGITUDE,
+    label_datetime: str = DATETIME
+) -> list:
     """
     Create geojson features.
 
@@ -2155,12 +2153,12 @@ def _create_geojson_features_line(
 
 def plot_traj_timestamp_geo_json(
     move_data: DataFrame,
-    label_lat: Text = LATITUDE,
-    label_lon: Text = LONGITUDE,
-    label_datetime: Text = DATETIME,
-    tiles: Text = TILES[0],
+    label_lat: str = LATITUDE,
+    label_lon: str = LONGITUDE,
+    label_datetime: str = DATETIME,
+    tiles: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'events.html'
+    filename: str = 'events.html'
 ) -> Map:
     """
     Plot trajectories wit geo_json.

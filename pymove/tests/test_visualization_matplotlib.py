@@ -67,7 +67,7 @@ def test_show_object_id_by_date(tmpdir):
 
 def test_plot_trajectory_by_id(tmpdir):
     move_df = _default_move_df()
-    move_df[TID] = ['1', '1', '2', '2', '2']
+    move_df[TRAJ_ID] = ['1', '1', '2', '2', '2']
 
     d = tmpdir.mkdir('visualization')
 

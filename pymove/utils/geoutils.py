@@ -7,8 +7,7 @@ create_bin_geohash_df,
 decode_geohash_to_latlon,
 
 """
-
-from typing import Text, Tuple
+from __future__ import annotations
 
 import geohash2 as gh
 import numpy as np
@@ -30,15 +29,13 @@ from pymove.utils.log import progress_bar
 
 BINARY = [
     np.asarray(
-        list('{0:05b}'.format(x)), dtype=int
+        list(f'{x:05b}'), dtype=int
     ) for x in range(0, len(BASE_32))
 ]
-
-
 BASE_32_TO_BIN = dict(zip(BASE_32, BINARY))
 
 
-def v_color(ob: BaseGeometry) -> Text:
+def v_color(ob: BaseGeometry) -> str:
     """
     Returns '#ffcc33' if object crosses otherwise it returns '#6699cc'.
 
@@ -69,7 +66,7 @@ def v_color(ob: BaseGeometry) -> Text:
     return COLORS[ob.is_simple + 33]
 
 
-def _encode(lat: float, lon: float, precision: float = 15) -> Text:
+def _encode(lat: float, lon: float, precision: float = 15) -> str:
     """
     Encodes latitude/longitude to geohash.
 
@@ -102,7 +99,7 @@ def _encode(lat: float, lon: float, precision: float = 15) -> Text:
     return gh.encode(lat, lon, precision)
 
 
-def _decode(geohash: Text) -> Tuple[float, float]:
+def _decode(geohash: str) -> tuple[float, float]:
     """
     Decode geohash to latitude/longitude.
 
@@ -169,7 +166,7 @@ def _bin_geohash(lat: float, lon: float, precision: float = 15) -> ndarray:
 
 def _reset_and_create_arrays_none(
     data: DataFrame, reset_index: bool = True
-) -> Tuple[ndarray, ndarray, ndarray, ndarray]:
+) -> tuple[ndarray, ndarray, ndarray, ndarray]:
     """
     Reset the df index and create arrays of none values.
 
@@ -310,7 +307,7 @@ def create_bin_geohash_df(data: DataFrame, precision: float = 15):
 
 def decode_geohash_to_latlon(
     data: DataFrame,
-    label_geohash: Text = GEOHASH,
+    label_geohash: str = GEOHASH,
     reset_index: bool = True
 ):
     """
@@ -350,7 +347,7 @@ def decode_geohash_to_latlon(
     4   39.984217   116.319422   wx4eqyvhyyr2yy8   39.984217   116.319422
     """
     if label_geohash not in data:
-        raise ValueError('feature {} not in df'.format(label_geohash))
+        raise ValueError(f'feature {label_geohash} not in df')
 
     lat, lon, _, _ = _reset_and_create_arrays_none(data, reset_index=reset_index)
 

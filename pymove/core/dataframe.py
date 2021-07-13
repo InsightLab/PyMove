@@ -1,6 +1,5 @@
 """MoveDataFrame class."""
-
-from typing import Dict, List, Text, Union
+from __future__ import annotations
 
 from dateutil.parser._parser import ParserError
 from pandas.core.frame import DataFrame
@@ -21,12 +20,12 @@ class MoveDataFrame:
     @staticmethod
     def __new__(
         self,
-        data: Union[DataFrame, Dict, List],
-        latitude: Text = LATITUDE,
-        longitude: Text = LONGITUDE,
-        datetime: Text = DATETIME,
-        traj_id: Text = TRAJ_ID,
-        type_: Text = TYPE_PANDAS,
+        data: DataFrame | dict | list,
+        latitude: str = LATITUDE,
+        longitude: str = LONGITUDE,
+        datetime: str = DATETIME,
+        traj_id: str = TRAJ_ID,
+        type_: str = TYPE_PANDAS,
         n_partitions: int = 1,
     ):
         """
@@ -125,8 +124,8 @@ class MoveDataFrame:
 
     @staticmethod
     def format_labels(
-        current_id: Text, current_lat: Text, current_lon: Text, current_datetime: Text
-    ) -> Dict:
+        current_id: str, current_lat: str, current_lon: str, current_datetime: str
+    ) -> dict:
         """
         Format the labels for the PyMove lib pattern labels output lat, lon and datatime.
 

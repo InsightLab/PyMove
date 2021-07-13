@@ -8,7 +8,7 @@ medp,
 medt
 
 """
-from typing import Text, Union
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
@@ -21,13 +21,13 @@ from pymove.utils.constants import DATETIME, EARTH_RADIUS, LATITUDE, LONGITUDE
 
 
 def haversine(
-    lat1: Union[float, ndarray],
-    lon1: Union[float, ndarray],
-    lat2: Union[float, ndarray],
-    lon2: Union[float, ndarray],
+    lat1: float | ndarray,
+    lon1: float | ndarray,
+    lat2: float | ndarray,
+    lon2: float | ndarray,
     to_radians: bool = True,
     earth_radius: float = EARTH_RADIUS
-) -> Union[float, ndarray]:
+) -> float | ndarray:
     """
     Calculates the great circle distance between two points on the earth.
 
@@ -83,11 +83,11 @@ def haversine(
 
 
 def euclidean_distance_in_meters(
-    lat1: Union[float, ndarray],
-    lon1: Union[float, ndarray],
-    lat2: Union[float, ndarray],
-    lon2: Union[float, ndarray]
-) -> Union[float, ndarray]:
+    lat1: float | ndarray,
+    lon1: float | ndarray,
+    lat2: float | ndarray,
+    lon2: float | ndarray
+) -> float | ndarray:
     """
     Calculate the euclidean distance in meters between two points.
 
@@ -130,8 +130,8 @@ def euclidean_distance_in_meters(
 def nearest_points(
     traj1: DataFrame,
     traj2: DataFrame,
-    latitude: Text = LATITUDE,
-    longitude: Text = LONGITUDE,
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE,
 ) -> DataFrame:
     """
     Returns the point closest to another trajectory based on the Euclidean distance.
@@ -191,8 +191,8 @@ def nearest_points(
 def medp(
     traj1: DataFrame,
     traj2: DataFrame,
-    latitude: Text = LATITUDE,
-    longitude: Text = LONGITUDE
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE
 ) -> float:
     """
     Returns the Mean Euclidian Distance Predictive between two trajectories.
@@ -243,9 +243,9 @@ def medp(
 def medt(
     traj1: DataFrame,
     traj2: DataFrame,
-    latitude: Text = LATITUDE,
-    longitude: Text = LONGITUDE,
-    datetime: Text = DATETIME
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE,
+    datetime: str = DATETIME
 ) -> float:
     """
     Returns the Mean Euclidian Distance Trajectory between two trajectories.
