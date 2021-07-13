@@ -50,7 +50,8 @@ def test_show_object_id_by_date(tmpdir):
 
     mpl.show_object_id_by_date(
         move_data=move_df,
-        name=filename_write_default
+        name=filename_write_default,
+        save_fig=True
     )
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
@@ -64,7 +65,7 @@ def test_show_object_id_by_date(tmpdir):
     )
 
 
-def test_plot_traj_by_id(tmpdir):
+def test_plot_trajectory_by_id(tmpdir):
     move_df = _default_move_df()
     move_df[TID] = ['1', '1', '2', '2', '2']
 
@@ -75,7 +76,7 @@ def test_plot_traj_by_id(tmpdir):
         file_write_default.dirname, file_write_default.basename
     )
 
-    mpl.plot_traj_by_id(move_df, '1', save_fig=True, name=filename_write_default)
+    mpl.plot_trajectory_by_id(move_df, '1', save_fig=True, name=filename_write_default)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
     data_dir = os.path.join(test_dir, 'baseline/traj_id.png')
