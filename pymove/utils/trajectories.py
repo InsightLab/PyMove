@@ -36,7 +36,7 @@ def read_csv(
     type_: str = TYPE_PANDAS,
     n_partitions: int = 1,
     **kwargs
-) -> MoveDataFrame:
+):
     """
     Reads a `csv` file and structures the data.
 

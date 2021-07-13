@@ -753,11 +753,6 @@ def join_with_pois(
     values = _reset_and_creates_id_and_lat_lon(data, df_pois, False, reset_index)
     minimum_distances, ids_pois, tag_pois, lat_poi, lon_poi = values
 
-    df_pois.rename(
-        columns={label_id: TRAJ_ID, label_poi_name: NAME_POI},
-        inplace=True
-    )
-
     for idx, row in progress_bar(
         df_pois.iterrows(), total=len(df_pois), desc='Optimized integration with POIs'
     ):
@@ -1006,12 +1001,6 @@ def join_with_events(
 
     minimum_distances = np.full(
         data.shape[0], np.Infinity, dtype=np.float64
-    )
-
-    # Rename for access columns of each row directly
-    df_events.rename(
-        columns={label_event_id: label_event_id, label_event_type: label_event_type},
-        inplace=True
     )
 
     for idx, row in progress_bar(
