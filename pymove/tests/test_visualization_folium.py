@@ -460,7 +460,7 @@ def test_filter_generated_feature():
         pass
 
 
-def test_add_begin_end_markers_to_folium_map(tmpdir):
+def test_add_begin_end_markers_to_map(tmpdir):
 
     move_df = _default_move_df()
 
@@ -471,7 +471,7 @@ def test_add_begin_end_markers_to_folium_map(tmpdir):
         tile=TILES[0],
         default_zoom_start=12)
 
-    folium._add_begin_end_markers_to_folium_map(move_df, base_map)
+    folium._add_begin_end_markers_to_map(move_df, base_map)
 
     d = tmpdir.mkdir('visualization')
 
@@ -518,7 +518,7 @@ def test_add_begin_end_markers_to_folium_map(tmpdir):
                 '\n{"clusteredMarker":true,"color":"red"}') in map_info)
 
 
-def test_add_trajectories_to_folium_map(tmpdir):
+def test_add_trajectories_to_map(tmpdir):
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
@@ -580,18 +580,18 @@ def test_add_trajectories_to_folium_map(tmpdir):
     )
 
 
-def test_plot_trajectories_with_folium(tmpdir):
+def test_plot_trajectories(tmpdir):
 
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('plot_trajectories_with_folium.html')
+    file_write_default = d.join('plot_trajectories.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    base_map = folium.plot_trajectories_with_folium(
+    base_map = folium.plot_trajectories(
         move_df,
         n_rows=3,
         save_as_html=True,
@@ -645,18 +645,18 @@ def test_plot_trajectories_with_folium(tmpdir):
     )
 
 
-def test_plot_trajectory_by_id_folium(tmpdir):
+def test_plot_trajectory_by_id(tmpdir):
 
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('plot_trajectory_by_id_folium.html')
+    file_write_default = d.join('plot_trajectory_by_id.html')
     filename_write_default = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    base_map = folium.plot_trajectory_by_id_folium(
+    base_map = folium.plot_trajectory_by_id(
         move_df,
         id_=1,
         save_as_html=True,
@@ -866,18 +866,18 @@ def test_plot_bbox(tmpdir):
     assert_equal(expected, actual)
 
 
-def test_plot_point_folium(tmpdir):
+def test_plot_point(tmpdir):
 
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('plot_point_folium.html')
+    file_write_default = d.join('plot_point.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    base_map = folium.plot_points_folium(
+    base_map = folium.plot_points(
         move_data=move_df,
         user_lat=LATITUDE,
         user_lon=LONGITUDE,
@@ -936,18 +936,18 @@ def test_plot_point_folium(tmpdir):
     )
 
 
-def test_plot_poi_folium(tmpdir):
+def test_plot_poi(tmpdir):
 
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('plot_point_folium.html')
+    file_write_default = d.join('plot_point.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    base_map = folium.plot_poi_folium(
+    base_map = folium.plot_poi(
         move_data=move_df,
         poi_lat=LATITUDE,
         poi_lon=LONGITUDE,
@@ -1005,18 +1005,18 @@ def test_plot_poi_folium(tmpdir):
     )
 
 
-def test_plot_event_folium(tmpdir):
+def test_plot_event(tmpdir):
 
     move_df = _default_move_df()
 
     d = tmpdir.mkdir('visualization')
 
-    file_write_default = d.join('plot_event_folium.html')
+    file_write_default = d.join('plot_event.html')
     filename = os.path.join(
         file_write_default.dirname, file_write_default.basename
     )
 
-    base_map = folium.plot_event_folium(
+    base_map = folium.plot_event(
         move_data=move_df,
         event_lat=LATITUDE,
         event_lon=LONGITUDE,

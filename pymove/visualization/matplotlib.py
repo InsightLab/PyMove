@@ -3,7 +3,7 @@ Matplolib operations.
 
 show_object_id_by_date,
 plot_trajectories,
-plot_traj_by_id,
+plot_trajectory_by_id,
 plot_all_features
 plot_coords,
 plot_bounds,
@@ -39,8 +39,8 @@ def show_object_id_by_date(
     move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
     kind: Optional[List] = None,
     figsize: Tuple[float, float] = (21, 9),
-    return_fig: bool = True,
-    save_fig: bool = True,
+    return_fig: bool = False,
+    save_fig: bool = False,
     name: Text = 'shot_points_by_date.png',
 ) -> Optional[figure]:
     """
@@ -60,9 +60,9 @@ def show_object_id_by_date(
     figsize : tuple, optional
         Represents dimensions of figure, by default (21,9).
     return_fig : bool, optional
-        Represents whether or not to save the generated picture, by default True.
+        Represents whether or not to save the generated picture, by default False.
     save_fig : bool, optional
-        Represents whether or not to save the generated picture, by default True.
+        Represents whether or not to save the generated picture, by default False.
     name : String, optional
         Represents name of a file, by default 'shot_points_by_date.png'.
 
@@ -131,8 +131,8 @@ def plot_trajectories(
     markers: Text = 'o',
     markersize: float = 12,
     figsize: Tuple[float, float] = (10, 10),
-    return_fig: bool = True,
-    save_fig: bool = True,
+    return_fig: bool = False,
+    save_fig: bool = False,
     name: Text = 'trajectories.png',
 ) -> Optional[figure]:
     """
@@ -149,7 +149,7 @@ def plot_trajectories(
     figsize : tuple(float, float), optional
             Represents dimensions of figure, by default (10, 10)
     return_fig : bool, optional
-        Represents whether or not to return the generated picture, by default True
+        Represents whether or not to return the generated picture, by default False
     save_fig : bool, optional
         Represents whether or not to save the generated picture, by default False
     name : str, optional
@@ -191,7 +191,7 @@ def plot_trajectories(
         return fig
 
 
-def plot_traj_by_id(
+def plot_trajectory_by_id(
     move_data: DataFrame,
     id_: Union[int, Text],
     label: Text = TID,
@@ -200,8 +200,8 @@ def plot_traj_by_id(
     linewidth: float = 3,
     markersize: float = 20,
     figsize: Tuple[float, float] = (10, 10),
-    return_fig: bool = True,
-    save_fig: bool = True,
+    return_fig: bool = False,
+    save_fig: bool = False,
     name: Optional[Text] = None,
 ) -> Optional[figure]:
     """
@@ -226,7 +226,7 @@ def plot_traj_by_id(
     figsize : tuple(float, float), optional
         Represents dimensions of figure, by default (10, 10)
     return_fig : bool, optional
-        Represents whether or not to return the generated picture, by default True
+        Represents whether or not to return the generated picture, by default False
     save_fig : bool, optional
         Represents whether or not to save the generated picture, by default False
     name : str, optional
@@ -306,8 +306,8 @@ def plot_all_features(
     move_data: DataFrame,
     dtype: Callable = float,
     figsize: Tuple[float, float] = (21, 15),
-    return_fig: bool = True,
-    save_fig: bool = True,
+    return_fig: bool = False,
+    save_fig: bool = False,
     name: Text = 'features.png',
 ) -> Optional[figure]:
     """
@@ -322,7 +322,7 @@ def plot_all_features(
     figsize : tuple(float, float), optional
         Represents dimensions of figure, by default (21, 15)
     return_fig : bool, optional
-        Represents whether or not to return the generated picture, by default True
+        Represents whether or not to return the generated picture, by default False
     save_fig : bool, optional
         Represents whether or not to save the generated picture, by default False
     name : str, optional
