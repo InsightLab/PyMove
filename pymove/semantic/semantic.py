@@ -12,8 +12,9 @@ filter_block_signal_by_time,
 filter_longer_time_to_stop_segment_by_id
 
 """
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Text, Tuple, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
 from pandas import DataFrame
@@ -42,8 +43,8 @@ if TYPE_CHECKING:
 
 
 def _end_create_operation(
-    move_data: DataFrame, new_label: Text, inplace: bool
-) -> Optional[DataFrame]:
+    move_data: DataFrame, new_label: str, inplace: bool
+) -> DataFrame | None:
     """
     Returns the dataframe after create operation.
 
@@ -69,8 +70,8 @@ def _end_create_operation(
 
 
 def _process_simple_filter(
-    move_data: DataFrame, new_label: Text, feature: Text, value: float, inplace: bool
-) -> Optional[DataFrame]:
+    move_data: DataFrame, new_label: str, feature: str, value: float, inplace: bool
+) -> DataFrame | None:
     """
     Processes create operation with simple filter.
 
@@ -108,12 +109,12 @@ def _process_simple_filter(
 
 @timer_decorator
 def outliers(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
     jump_coefficient: float = 3.0,
     threshold: float = 1,
-    new_label: Text = OUTLIER,
+    new_label: str = OUTLIER,
     inplace: bool = False
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Create or update a boolean feature to detect outliers.
 
@@ -173,10 +174,10 @@ def outliers(
 @timer_decorator
 def create_or_update_out_of_the_bbox(
     move_data: DataFrame,
-    bbox: Tuple[int, int, int, int],
-    new_label: Text = OUT_BBOX,
+    bbox: tuple[int, int, int, int],
+    new_label: str = OUT_BBOX,
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Create or update a boolean feature to detect points out of the bbox.
 
@@ -229,11 +230,11 @@ def create_or_update_out_of_the_bbox(
 
 @timer_decorator
 def create_or_update_gps_deactivated_signal(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
     max_time_between_adj_points: float = 7200,
-    new_label: Text = DEACTIVATED,
+    new_label: str = DEACTIVATED,
     inplace: bool = False
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Creates a new feature that inform if point invalid.
 
@@ -279,11 +280,11 @@ def create_or_update_gps_deactivated_signal(
 
 @timer_decorator
 def create_or_update_gps_jump(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
     max_dist_between_adj_points: float = 3000,
-    new_label: Text = JUMP,
+    new_label: str = JUMP,
     inplace: bool = False
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Creates a new feature that inform if point is a gps jump.
 
@@ -328,15 +329,15 @@ def create_or_update_gps_jump(
 
 @timer_decorator
 def create_or_update_short_trajectory(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
     max_dist_between_adj_points: float = 3000,
     max_time_between_adj_points: float = 7200,
     max_speed_between_adj_points: float = 50,
     k_segment_max: int = 50,
-    label_tid: Text = TID_PART,
-    new_label: Text = SHORT,
+    label_tid: str = TID_PART,
+    new_label: str = SHORT,
     inplace: bool = False
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Creates a new feature that inform if point belongs to a short trajectory.
 
@@ -397,12 +398,12 @@ def create_or_update_short_trajectory(
 
 @timer_decorator
 def create_or_update_gps_block_signal(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
     max_time_stop: float = 7200,
-    new_label: Text = BLOCK,
-    label_tid: Text = TID_PART,
+    new_label: str = BLOCK,
+    label_tid: str = TID_PART,
     inplace: bool = False
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Creates a new feature that inform segments with periods without moving.
 
@@ -460,13 +461,13 @@ def create_or_update_gps_block_signal(
 
 @timer_decorator
 def filter_block_signal_by_repeated_amount_of_points(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
     amount_max_of_points_stop: float = 30.0,
     max_time_stop: float = 7200,
     filter_out: bool = False,
-    label_tid: Text = TID_PART,
+    label_tid: str = TID_PART,
     inplace: bool = False
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Filters from dataframe points with blocked signal by amount of points.
 
@@ -521,12 +522,12 @@ def filter_block_signal_by_repeated_amount_of_points(
 
 @timer_decorator
 def filter_block_signal_by_time(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
     max_time_stop: float = 7200,
     filter_out: bool = False,
-    label_tid: Text = TID_PART,
+    label_tid: str = TID_PART,
     inplace: bool = False
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Filters from dataframe points with blocked signal by time.
 
@@ -582,14 +583,14 @@ def filter_block_signal_by_time(
 
 @timer_decorator
 def filter_longer_time_to_stop_segment_by_id(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
     dist_radius: float = 30,
     time_radius: float = 900,
-    label_id: Text = TRAJ_ID,
-    label_segment_stop: Text = SEGMENT_STOP,
+    label_id: str = TRAJ_ID,
+    label_segment_stop: str = SEGMENT_STOP,
     filter_out: bool = False,
     inplace: bool = False
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Filters from dataframe segment with longest stop time.
 

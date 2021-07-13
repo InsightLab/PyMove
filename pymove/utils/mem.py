@@ -9,6 +9,7 @@ sizeof_fmt,
 top_mem_vars
 
 """
+from __future__ import annotations
 
 import os
 import re
@@ -16,7 +17,6 @@ import time
 from collections import deque
 from itertools import chain
 from sys import getsizeof
-from typing import Dict, Text
 
 import numpy as np
 import psutil
@@ -52,7 +52,7 @@ def reduce_mem_usage_automatic(df: DataFrame):
     dtype: object
     """
     start_mem = df.memory_usage().sum() / 1024 ** 2
-    logger.info('Memory usage of dataframe is {:.2f} MB'.format(start_mem))
+    logger.info(f'Memory usage of dataframe is {start_mem:.2f} MB')
 
     for col in df.columns:
         col_type = df[col].dtype
@@ -113,14 +113,14 @@ def reduce_mem_usage_automatic(df: DataFrame):
                 df[col] = df[col].astype(np.float64)
 
     end_mem = df.memory_usage().sum() / 1024 ** 2
-    logger.info('Memory usage after optimization is: {:.2f} MB'.format(end_mem))
+    logger.info(f'Memory usage after optimization is: {end_mem:.2f} MB')
     logger.info(
-        'Decreased by {:.1f} %'.format(100 * (start_mem - end_mem) / start_mem)
+        f'Decreased by {100 * (start_mem - end_mem) / start_mem:.1f} %'
     )
 
 
 def total_size(
-    o: object, handlers: Dict = None, verbose: bool = True
+    o: object, handlers: dict = None, verbose: bool = True
 ) -> float:
     """
     Calculates the approximate memory footprint of an given object.
@@ -195,14 +195,14 @@ def total_size(
 
         if verbose:
 
-            logger.info('Size in bytes: {}, Type: {}'.format(s, type(o)))
+            logger.info(f'Size in bytes: {s}, Type: {type(o)}')
 
         return s
 
     return sizeof(o)
 
 
-def begin_operation(name: Text) -> Dict:
+def begin_operation(name: str) -> dict:
     """
     Gets the stats for the current operation.
 
@@ -233,7 +233,7 @@ def begin_operation(name: Text) -> Dict:
     return {'process': process, 'init': init, 'start': start, 'name': name}
 
 
-def end_operation(operation: Dict) -> Dict:
+def end_operation(operation: dict) -> dict:
     """
     Gets the time and memory usage of the operation.
 
@@ -269,7 +269,7 @@ def end_operation(operation: Dict) -> Dict:
     }
 
 
-def sizeof_fmt(mem_usage: float, suffix: Text = 'B') -> Text:
+def sizeof_fmt(mem_usage: float, suffix: str = 'B') -> str:
     """
     Returns the memory usage calculation of the last function.
 
@@ -295,13 +295,13 @@ def sizeof_fmt(mem_usage: float, suffix: Text = 'B') -> Text:
     """
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(mem_usage) < 1024.0:
-            return '{:3.1f} {}{}'.format(mem_usage, unit, suffix)
+            return f'{mem_usage:3.1f} {unit}{suffix}'
         mem_usage /= 1024.0
     return '{:.1f} {}{}'.format(mem_usage, 'Yi', suffix)
 
 
 def top_mem_vars(
-    variables: Dict, n: int = 10, hide_private=True
+    variables: dict, n: int = 10, hide_private=True
 ) -> DataFrame:
     """
     Shows the sizes of the active variables.

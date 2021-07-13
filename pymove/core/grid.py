@@ -1,12 +1,11 @@
 """Grid class."""
+from __future__ import annotations
 
 import math
-from typing import Callable, Dict, Optional, Text, Tuple, Union
+from typing import Callable
 
 import joblib
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.pyplot import figure
 from pandas import DataFrame
 from shapely.geometry import Polygon
 
@@ -17,7 +16,6 @@ from pymove.utils.constants import (
     INDEX_GRID_LON,
     LATITUDE,
     LONGITUDE,
-    POLYGON,
     TRAJ_ID,
 )
 from pymove.utils.conversions import lat_meters
@@ -30,9 +28,9 @@ class Grid:
 
     def __init__(
         self,
-        data: Union[DataFrame, Dict],
-        cell_size: Optional[float] = None,
-        meters_by_degree: Optional[float] = None
+        data: DataFrame | dict,
+        cell_size: float | None = None,
+        meters_by_degree: float | None = None
     ):
         """
         Creates a virtual grid from the trajectories.
@@ -58,7 +56,7 @@ class Grid:
         ValueError
             If one of data or cell grid is not provided
         """
-        self.last_operation: Dict = dict()
+        self.last_operation: dict = dict()
         if meters_by_degree is None:
             meters_by_degree = lat_meters(-3.71839)
         if isinstance(data, dict):
@@ -69,7 +67,7 @@ class Grid:
             raise ValueError('Must pass either data or cell size.')
         self.grid_polygon = None
 
-    def get_grid(self) -> Dict:
+    def get_grid(self) -> dict:
         """
         Returns the grid object in a dict format.
 
@@ -91,7 +89,7 @@ class Grid:
             'cell_size_by_degree': self.cell_size_by_degree,
         }
 
-    def _grid_from_dict(self, dict_grid: Dict):
+    def _grid_from_dict(self, dict_grid: dict):
         """
         Coverts the dict grid to a Grid object.
 
@@ -218,8 +216,8 @@ class Grid:
     def convert_two_index_grid_to_one(
         self,
         data: DataFrame,
-        label_grid_lat: Text = INDEX_GRID_LAT,
-        label_grid_lon: Text = INDEX_GRID_LON,
+        label_grid_lat: str = INDEX_GRID_LAT,
+        label_grid_lon: str = INDEX_GRID_LON,
     ):
         """
         Converts grid lat-lon ids to unique values.
@@ -241,7 +239,7 @@ class Grid:
     def convert_one_index_grid_to_two(
         self,
         data: DataFrame,
-        label_grid_index: Text = INDEX_GRID,
+        label_grid_index: str = INDEX_GRID,
     ):
         """
         Converts grid lat-lon ids to unique values.
@@ -360,7 +358,7 @@ class Grid:
         self.last_operation = end_operation(operation)
         return datapolygons
 
-    def point_to_index_grid(self, event_lat: float, event_lon: float) -> Tuple[int, int]:
+    def point_to_index_grid(self, event_lat: float, event_lon: float) -> tuple[int, int]:
         """
         Locate the coordinates x and y in a grid of point (lat, long).
 
@@ -394,7 +392,7 @@ class Grid:
 
         return indexes_lat_y, indexes_lon_x
 
-    def save_grid_pkl(self, filename: Text):
+    def save_grid_pkl(self, filename: str):
         """
         Save a grid with new file .pkl.
 
@@ -409,7 +407,7 @@ class Grid:
             joblib.dump(self.get_grid(), f)
         self.last_operation = end_operation(operation)
 
-    def read_grid_pkl(self, filename: Text) -> 'Grid':
+    def read_grid_pkl(self, filename: str) -> 'Grid':
         """
         Read grid dict from a file .pkl.
 
@@ -431,74 +429,6 @@ class Grid:
         self.last_operation = end_operation(operation)
         return grid
 
-    def show_grid_polygons(
-        self,
-        data: DataFrame,
-        markersize: float = 10,
-        linewidth: float = 2,
-        figsize: Tuple[int, int] = (10, 10),
-        return_fig: bool = True,
-        save_fig: bool = False,
-        name: Text = 'grid.png',
-    ) -> Optional[figure]:
-        """
-        Generate a visualization with grid polygons.
-
-        Parameters
-        ----------
-        data : DataFrame
-            Input trajectory data
-        markersize : float, optional
-            Represents visualization size marker, by default 10
-        linewidth : float, optional
-            Represents visualization size line, by default 2
-        figsize : tuple(int, int), optional
-            Represents the size (float: width, float: height) of a figure,
-                by default (10, 10)
-        return_fig : bool, optional
-            Represents whether or not to save the generated picture, by default True
-        save_fig : bool, optional
-            Wether to save the figure, by default False
-        name : str, optional
-            Represents name of a file, by default 'grid.png'
-
-        Returns
-        -------
-        figure
-            The generated picture or None
-
-        Raises
-        ------
-            If the dataframe does not contains the POLYGON feature
-        IndexError
-            If there is no user with the id passed
-
-        """
-        if POLYGON not in data:
-            raise KeyError('POLYGON feature not in dataframe')
-
-        data.dropna(subset=[POLYGON], inplace=True)
-
-        operation = begin_operation('show_grid_polygons')
-
-        fig = plt.figure(figsize=figsize)
-
-        for _, row in data.iterrows():
-            xs, ys = row[POLYGON].exterior.xy
-            plt.plot(ys, xs, 'g', linewidth=linewidth, markersize=markersize)
-        xs_start, ys_start = data.iloc[0][POLYGON].exterior.xy
-        xs_end, ys_end = data.iloc[-1][POLYGON].exterior.xy
-        plt.plot(ys_start, xs_start, 'bo', markersize=markersize * 1.5)
-        plt.plot(ys_end, xs_end, 'bX', markersize=markersize * 1.5)  # start point
-
-        if save_fig:
-            plt.savefig(fname=name)
-
-        self.last_operation = end_operation(operation)
-
-        if return_fig:
-            return fig
-
     def __repr__(self) -> str:
         """
         String representation of grid.
@@ -512,5 +442,5 @@ class Grid:
             grid_size_lon_x: grid longitude size
             cell_size_by_degree: grid cell size
         """
-        text = ['{}: {}'.format(k, v) for k, v in self.get_grid().items()]
+        text = [f'{k}: {v}' for k, v in self.get_grid().items()]
         return '\n'.join(text)

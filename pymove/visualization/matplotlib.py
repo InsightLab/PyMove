@@ -4,14 +4,16 @@ Matplolib operations.
 show_object_id_by_date,
 plot_trajectories,
 plot_trajectory_by_id,
+plot_grid_polygons,
 plot_all_features
 plot_coords,
 plot_bounds,
 plot_line
 
 """
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Text, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable
 
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import axes, figure
@@ -19,6 +21,7 @@ from pandas.core.frame import DataFrame
 from shapely.geometry import LineString, MultiLineString
 from shapely.geometry.base import BaseGeometry
 
+from pymove.core.grid import Grid
 from pymove.utils.constants import (
     DATE,
     DAY,
@@ -26,7 +29,7 @@ from pymove.utils.constants import (
     LATITUDE,
     LONGITUDE,
     PERIOD,
-    TID,
+    POLYGON,
     TRAJ_ID,
 )
 
@@ -36,13 +39,13 @@ if TYPE_CHECKING:
 
 
 def show_object_id_by_date(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    kind: Optional[List] = None,
-    figsize: Tuple[float, float] = (21, 9),
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    kind: list | None = None,
+    figsize: tuple[float, float] = (21, 9),
     return_fig: bool = False,
     save_fig: bool = False,
-    name: Text = 'shot_points_by_date.png',
-) -> Optional[figure]:
+    name: str = 'shot_points_by_date.png',
+) -> figure | None:
     """
     Generates four visualizations based on datetime feature.
 
@@ -128,13 +131,13 @@ def show_object_id_by_date(
 
 def plot_trajectories(
     move_data: DataFrame,
-    markers: Text = 'o',
+    markers: str = 'o',
     markersize: float = 12,
-    figsize: Tuple[float, float] = (10, 10),
+    figsize: tuple[float, float] = (10, 10),
     return_fig: bool = False,
     save_fig: bool = False,
-    name: Text = 'trajectories.png',
-) -> Optional[figure]:
+    name: str = 'trajectories.png',
+) -> figure | None:
     """
     Generate a visualization that show trajectories.
 
@@ -193,17 +196,17 @@ def plot_trajectories(
 
 def plot_trajectory_by_id(
     move_data: DataFrame,
-    id_: Union[int, Text],
-    label: Text = TID,
-    feature: Optional[Text] = None,
-    value: Optional[Any] = None,
+    id_: int | str,
+    label: str = TRAJ_ID,
+    feature: str | None = None,
+    value: Any | None = None,
     linewidth: float = 3,
     markersize: float = 20,
-    figsize: Tuple[float, float] = (10, 10),
+    figsize: tuple[float, float] = (10, 10),
     return_fig: bool = False,
     save_fig: bool = False,
-    name: Optional[Text] = None,
-) -> Optional[figure]:
+    name: str | None = None,
+) -> figure | None:
     """
     Generate a visualization that shows a trajectory with the specified tid.
 
@@ -302,14 +305,83 @@ def plot_trajectory_by_id(
         return fig
 
 
+def plot_grid_polygons(
+        data: DataFrame,
+        grid: Grid | None = None,
+        markersize: float = 10,
+        linewidth: float = 2,
+        figsize: tuple[int, int] = (10, 10),
+        return_fig: bool = False,
+        save_fig: bool = False,
+        name: str = 'grid.png',
+) -> figure | None:
+    """
+    Generate a visualization with grid polygons.
+
+    Parameters
+    ----------
+    data : DataFrame
+        Input trajectory data
+    markersize : float, optional
+        Represents visualization size marker, by default 10
+    linewidth : float, optional
+        Represents visualization size line, by default 2
+    figsize : tuple(int, int), optional
+        Represents the size (float: width, float: height) of a figure,
+            by default (10, 10)
+    return_fig : bool, optional
+        Represents whether or not to save the generated picture, by default False
+    save_fig : bool, optional
+        Wether to save the figure, by default False
+    name : str, optional
+        Represents name of a file, by default 'grid.png'
+
+    Returns
+    -------
+    figure
+        The generated picture or None
+
+    Raises
+    ------
+        If the dataframe does not contains the POLYGON feature
+    IndexError
+        If there is no user with the id passed
+
+    """
+    if POLYGON not in data:
+        if grid is None:
+            raise KeyError('POLYGON feature not in dataframe')
+        data = grid.create_all_polygons_to_all_point_on_grid(data)
+
+    data = data.copy()
+
+    data.dropna(subset=[POLYGON], inplace=True)
+
+    fig = plt.figure(figsize=figsize)
+
+    for _, row in data.iterrows():
+        xs, ys = row[POLYGON].exterior.xy
+        plt.plot(ys, xs, 'g', linewidth=linewidth, markersize=markersize)
+    xs_start, ys_start = data.iloc[0][POLYGON].exterior.xy
+    xs_end, ys_end = data.iloc[-1][POLYGON].exterior.xy
+    plt.plot(ys_start, xs_start, 'bo', markersize=markersize * 1.5)
+    plt.plot(ys_end, xs_end, 'bX', markersize=markersize * 1.5)
+
+    if save_fig:
+        plt.savefig(fname=name)
+
+    if return_fig:
+        return fig
+
+
 def plot_all_features(
     move_data: DataFrame,
     dtype: Callable = float,
-    figsize: Tuple[float, float] = (21, 15),
+    figsize: tuple[float, float] = (21, 15),
     return_fig: bool = False,
     save_fig: bool = False,
-    name: Text = 'features.png',
-) -> Optional[figure]:
+    name: str = 'features.png',
+) -> figure | None:
     """
     Generate a visualization for each columns that type is equal dtype.
 
@@ -369,7 +441,7 @@ def plot_all_features(
         return fig
 
 
-def plot_coords(ax: axes, ob: BaseGeometry, color: Text = 'r'):
+def plot_coords(ax: axes, ob: BaseGeometry, color: str = 'r'):
     """
     Plot the coordinates of each point of the object in a 2D chart.
 
@@ -394,7 +466,7 @@ def plot_coords(ax: axes, ob: BaseGeometry, color: Text = 'r'):
     ax.plot(x, y, 'o', color=color, zorder=1)
 
 
-def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
+def plot_bounds(ax: axes, ob: LineString | MultiLineString, color='b'):
     """
     Plot the limits of geometric object.
 
@@ -422,10 +494,10 @@ def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
 def plot_line(
     ax: axes,
     ob: LineString,
-    color: Text = 'r',
+    color: str = 'r',
     alpha: float = 0.7,
     linewidth: float = 3,
-    solid_capstyle: Text = 'round',
+    solid_capstyle: str = 'round',
     zorder: float = 2
 ):
     """

@@ -6,8 +6,9 @@ gap_statistic,
 dbscan_clustering
 
 """
+from __future__ import annotations
 
-from typing import Callable, Dict, Optional, Text, Union
+from typing import Callable
 
 import numpy as np
 from pandas import DataFrame
@@ -24,8 +25,8 @@ def elbow_method(
     k_initial: int = 1,
     max_clusters: int = 15,
     k_iteration: int = 1,
-    random_state: Optional[int] = None
-) -> Dict:
+    random_state: int | None = None
+) -> dict:
     """
     Determines the optimal number of clusters.
 
@@ -84,8 +85,8 @@ def gap_statistic(
     k_initial: int = 1,
     max_clusters: int = 15,
     k_iteration: int = 1,
-    random_state: Optional[int] = None
-) -> Dict:
+    random_state: int | None = None
+) -> dict:
     """
     Calculates optimal clusters numbers using Gap Statistic.
 
@@ -151,13 +152,13 @@ def gap_statistic(
 @timer_decorator
 def dbscan_clustering(
     move_data: DataFrame,
-    cluster_by: Text,
+    cluster_by: str,
     meters: int = 10,
     min_sample: float = 1680 / 2,
     earth_radius: float = EARTH_RADIUS,
-    metric: Union[Text, Callable] = 'euclidean',
+    metric: str | Callable = 'euclidean',
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Performs density based clustering on the move_dataframe according to cluster_by.
 

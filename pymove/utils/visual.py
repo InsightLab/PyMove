@@ -10,8 +10,9 @@ get_cmap,
 save_wkt
 
 """
+from __future__ import annotations
 
-from typing import Sequence, Text, Tuple, Union
+from typing import Sequence
 
 from branca.element import MacroElement, Template
 from folium import Map
@@ -23,7 +24,7 @@ from pandas import DataFrame
 from pymove.utils.constants import COLORS, LATITUDE, LONGITUDE, TRAJ_ID
 
 
-def add_map_legend(m: Map, title: Text, items: Union[Tuple, Sequence[Tuple]]):
+def add_map_legend(m: Map, title: str, items: tuple | Sequence[tuple]):
     """
     Adds a legend for a folium map.
 
@@ -202,7 +203,7 @@ def add_map_legend(m: Map, title: Text, items: Union[Tuple, Sequence[Tuple]]):
     m.get_root().add_child(macro, name='map_legend')
 
 
-def generate_color() -> Text:
+def generate_color() -> str:
     """
     Generates a random color.
 
@@ -221,7 +222,7 @@ def generate_color() -> Text:
     return COLORS[randint(0, len(COLORS))]
 
 
-def rgb(rgb_colors: Tuple[float, float, float]) -> Tuple[int, int, int]:
+def rgb(rgb_colors: tuple[float, float, float]) -> tuple[int, int, int]:
     """
     Return a tuple of integers, as used in AWT/Java plots.
 
@@ -250,7 +251,7 @@ def rgb(rgb_colors: Tuple[float, float, float]) -> Tuple[int, int, int]:
     return int(red * 255), int(green * 255), int(blue * 255)
 
 
-def hex_rgb(rgb_colors: Tuple[float, float, float]) -> Text:
+def hex_rgb(rgb_colors: tuple[float, float, float]) -> str:
     """
     Return a hex str, as used in Tk plots.
 
@@ -276,7 +277,7 @@ def hex_rgb(rgb_colors: Tuple[float, float, float]) -> Text:
     return '#%02X%02X%02X' % rgb(rgb_colors)
 
 
-def cmap_hex_color(cmap: ListedColormap, i: int) -> Text:
+def cmap_hex_color(cmap: ListedColormap, i: int) -> str:
     """
     Convert a Colormap to hex color.
 
@@ -305,7 +306,7 @@ def cmap_hex_color(cmap: ListedColormap, i: int) -> Text:
     return rgb2hex(cmap(i))
 
 
-def get_cmap(cmap: Text) -> Colormap:
+def get_cmap(cmap: str) -> Colormap:
     """
     Returns a matplotlib colormap instance.
 
@@ -329,7 +330,7 @@ def get_cmap(cmap: Text) -> Colormap:
 
 
 def save_wkt(
-    move_data: DataFrame, filename: Text, label_id: Text = TRAJ_ID
+    move_data: DataFrame, filename: str, label_id: str = TRAJ_ID
 ):
     """
     Save a visualization in a map in a new file .wkt.
@@ -370,7 +371,7 @@ def save_wkt(
         move_df = move_data[move_data[label_id] == id_]
         curr_str = '%s;LINESTRING(' % id_
         curr_str += ','.join(
-            '%s %s' % (x[0], x[1])
+            f'{x[0]} {x[1]}'
             for x in move_df[[LONGITUDE, LATITUDE]].values
         )
         curr_str += ')\n'

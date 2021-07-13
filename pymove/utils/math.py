@@ -11,12 +11,12 @@ array_stats,
 interpolation
 
 """
+from __future__ import annotations
 
 import math
-from typing import List, Optional, Tuple, Union
 
 
-def is_number(value: Union[int, float, str]):
+def is_number(value: int | float | str):
     """
     Returns if value is numerical or not.
 
@@ -49,7 +49,7 @@ def is_number(value: Union[int, float, str]):
     return True
 
 
-def std(values_array: List[float]) -> float:
+def std(values_array: list[float]) -> float:
     """
     Compute standard deviation.
 
@@ -77,12 +77,12 @@ def std(values_array: List[float]) -> float:
     """
     size = len(values_array)
     mean = sum(values_array) / size
-    sum_sq = sum([(i - mean) * (i - mean) for i in values_array])
+    sum_sq = sum((i - mean) * (i - mean) for i in values_array)
 
     return math.sqrt(sum_sq / size)
 
 
-def avg_std(values_array: List[float]) -> Tuple[float, float]:
+def avg_std(values_array: list[float]) -> tuple[float, float]:
     """
     Compute the average of standard deviation.
 
@@ -109,7 +109,7 @@ def avg_std(values_array: List[float]) -> Tuple[float, float]:
     return avg, std(values_array)
 
 
-def std_sample(values_array: List[float]) -> float:
+def std_sample(values_array: list[float]) -> float:
     """
     Compute the standard deviation of sample.
 
@@ -134,7 +134,7 @@ def std_sample(values_array: List[float]) -> float:
     return std(values_array) * math.sqrt(size / (size - 1))
 
 
-def avg_std_sample(values_array: List[float]) -> Tuple[float, float]:
+def avg_std_sample(values_array: list[float]) -> tuple[float, float]:
     """
     Compute the average of standard deviation of sample.
 
@@ -162,7 +162,7 @@ def avg_std_sample(values_array: List[float]) -> Tuple[float, float]:
 
 
 def arrays_avg(
-    values_array: List[float], weights_array: Optional[List[float]] = None
+    values_array: list[float], weights_array: list[float] | None = None
 ) -> float:
     """
     Computes the mean of the elements of the array.
@@ -211,7 +211,7 @@ def arrays_avg(
     return result / n
 
 
-def array_stats(values_array: List[float]) -> Tuple[float, float, int]:
+def array_stats(values_array: list[float]) -> tuple[float, float, int]:
     """
     Computes statistics about the array.
 

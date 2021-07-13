@@ -1,6 +1,7 @@
 """PandasMoveDataFrame class."""
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Text, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 from pandas import DataFrame, DateOffset, Series, Timedelta
@@ -54,11 +55,11 @@ class PandasMoveDataFrame(DataFrame):
 
     def __init__(
         self,
-        data: Union[DataFrame, List, Dict],
-        latitude: Text = LATITUDE,
-        longitude: Text = LONGITUDE,
-        datetime: Text = DATETIME,
-        traj_id: Text = TRAJ_ID,
+        data: DataFrame | list | dict,
+        latitude: str = LATITUDE,
+        longitude: str = LONGITUDE,
+        datetime: str = DATETIME,
+        traj_id: str = TRAJ_ID,
     ):
         """
         Checks whether past data has 'lat', 'lon', 'datetime' columns.
@@ -113,9 +114,9 @@ class PandasMoveDataFrame(DataFrame):
 
         if MoveDataFrame.has_columns(tdf):
             MoveDataFrame.validate_move_data_frame(tdf)
-            super(PandasMoveDataFrame, self).__init__(tdf)
+            super().__init__(tdf)
             self._type = TYPE_PANDAS
-            self.last_operation: Dict = dict()
+            self.last_operation: dict = dict()
         else:
 
             raise KeyError(
@@ -190,13 +191,13 @@ class PandasMoveDataFrame(DataFrame):
 
     def rename(
         self,
-        mapper: Optional[Union[Dict, Callable]] = None,
-        index: Optional[Union[Dict, Callable]] = None,
-        columns: Optional[Union[Dict, Callable]] = None,
-        axis: Optional[Union[int, Text]] = None,
+        mapper: dict | Callable | None = None,
+        index: dict | Callable | None = None,
+        columns: dict | Callable | None = None,
+        axis: int | str | None = None,
         copy: bool = True,
         inplace: bool = False
-    ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
+    ) -> 'PandasMoveDataFrame' | DataFrame | None:
         """
         Alter axes labels.
 
@@ -245,7 +246,7 @@ class PandasMoveDataFrame(DataFrame):
         if inplace:
             if MoveDataFrame.has_columns(rename_):
                 self._mgr = rename_._mgr
-                self._item_cache: Dict = dict()
+                self._item_cache: dict = dict()
                 rename_ = None
             else:
                 raise AttributeError(
@@ -352,7 +353,7 @@ class PandasMoveDataFrame(DataFrame):
     def to_grid(
         self,
         cell_size: float,
-        meters_by_degree: Optional[float] = None
+        meters_by_degree: float | None = None
     ) -> Grid:
         """
         Converts trajectory data to grid format.
@@ -394,7 +395,7 @@ class PandasMoveDataFrame(DataFrame):
         return DataFrame(self)
 
     def to_dicrete_move_df(
-        self, local_label: Text = LOCAL_LABEL
+        self, local_label: str = LOCAL_LABEL
     ) -> 'PandasMoveDataFrame':
         """
         Generate a discrete dataframe move.
@@ -413,7 +414,7 @@ class PandasMoveDataFrame(DataFrame):
 
         if local_label not in self:
             raise ValueError(
-                'columns {} not in df'.format(local_label)
+                f'columns {local_label} not in df'
             )
 
         self.last_operation = end_operation(operation)
@@ -464,10 +465,10 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_tid_based_on_id_datetime(
         self,
-        str_format: Text = '%Y%m%d%H',
+        str_format: str = '%Y%m%d%H',
         sort: bool = True,
         inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Create or update trajectory id based on id and datetime.
 
@@ -513,7 +514,7 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_date_features(
         self, inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Create or update date feature based on datetime.
 
@@ -546,7 +547,7 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_hour_features(
         self, inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Create or update hour features based on datetime.
 
@@ -579,7 +580,7 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_day_of_the_week_features(
         self, inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Create or update day of the week features based on datetime.
 
@@ -613,7 +614,7 @@ class PandasMoveDataFrame(DataFrame):
         self,
         create_day_of_week: bool = False,
         inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Adds information to rows determining if it is a weekend day.
 
@@ -661,7 +662,7 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_time_of_day_features(
         self, inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Create or update time of day features based on datetime.
 
@@ -719,9 +720,9 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_datetime_in_format_cyclical(
         self,
-        label_datetime: Text = DATETIME,
+        label_datetime: str = DATETIME,
         inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Create or update column with cyclical datetime feature.
 
@@ -763,8 +764,8 @@ class PandasMoveDataFrame(DataFrame):
 
     @staticmethod
     def _prepare_generate_data(
-        data_: DataFrame, sort: bool, label_id: Text
-    ) -> Tuple[Any, int, None]:
+        data_: DataFrame, sort: bool, label_id: str
+    ) -> tuple[Any, int, None]:
         """
         Processes the data and create variables for generate methods.
 
@@ -807,11 +808,11 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_dist_time_speed_features(
         self,
-        label_id: Text = TRAJ_ID,
+        label_id: str = TRAJ_ID,
         label_dtype: Callable = np.float64,
         sort: bool = True,
         inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Adds distance, time and speed information to the dataframe.
 
@@ -903,11 +904,11 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_dist_features(
         self,
-        label_id: Text = TRAJ_ID,
+        label_id: str = TRAJ_ID,
         label_dtype: Callable = np.float64,
         sort: bool = True,
         inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Create the three distance in meters to an GPS point P.
 
@@ -991,11 +992,11 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_time_features(
         self,
-        label_id: Text = TRAJ_ID,
+        label_id: str = TRAJ_ID,
         label_dtype: Callable = np.float64,
         sort: bool = True,
         inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Create the three time in seconds to an GPS point P.
 
@@ -1070,11 +1071,11 @@ class PandasMoveDataFrame(DataFrame):
 
     def generate_speed_features(
         self,
-        label_id: Text = TRAJ_ID,
+        label_id: str = TRAJ_ID,
         label_dtype: Callable = np.float64,
         sort: bool = True,
         inplace: bool = True
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Create the three speed in meter by seconds to an GPS point P.
 
@@ -1145,7 +1146,7 @@ class PandasMoveDataFrame(DataFrame):
     def generate_move_and_stop_by_radius(
         self,
         radius: float = 0,
-        target_label: Text = DIST_TO_PREV,
+        target_label: str = DIST_TO_PREV,
         inplace: bool = True
     ):
         """
@@ -1208,7 +1209,7 @@ class PandasMoveDataFrame(DataFrame):
 
         return time_diff
 
-    def get_bbox(self) -> Tuple[float, float, float, float]:
+    def get_bbox(self) -> tuple[float, float, float, float]:
         """
         Returns the bounding box of the dataframe.
 
@@ -1291,7 +1292,7 @@ class PandasMoveDataFrame(DataFrame):
 
         if LATITUDE and LONGITUDE in self:
             print(
-                'Bounding Box:%s\n' % (self.get_bbox(),)
+                f'Bounding Box:{self.get_bbox()}\n'
             )  # bbox return =  Lat_min , Long_min, Lat_max, Long_max
 
         if TIME_TO_PREV in self:
@@ -1326,9 +1327,9 @@ class PandasMoveDataFrame(DataFrame):
 
     def astype(
         self,
-        dtype: Union[Callable, Dict],
+        dtype: Callable | dict,
         copy: bool = True,
-        errors: Text = 'raise'
+        errors: str = 'raise'
     ) -> DataFrame:
         """
         Cast a pandas object to a specified dtype.
@@ -1382,13 +1383,13 @@ class PandasMoveDataFrame(DataFrame):
 
     def sort_values(
         self,
-        by: Union[Text, List[Text]],
+        by: str | list[str],
         axis: int = 0,
         ascending: bool = True,
         inplace: bool = False,
-        kind: Text = 'quicksort',
-        na_position: Text = 'last',
-    ) -> Optional['PandasMoveDataFrame']:
+        kind: str = 'quicksort',
+        na_position: str = 'last',
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Sorts the values of the _data, along an axis.
 
@@ -1441,12 +1442,12 @@ class PandasMoveDataFrame(DataFrame):
 
     def reset_index(
         self,
-        level: Optional[Union[int, Text, Tuple, List]] = None,
+        level: int | str | tuple | list | None = None,
         drop: bool = False,
         inplace: bool = False,
-        col_level: Union[int, Text] = 0,
-        col_fill: Text = ''
-    ) -> Optional['PandasMoveDataFrame']:
+        col_level: int | str = 0,
+        col_fill: str = ''
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Resets the DataFrame's index, and use the default one.
 
@@ -1489,12 +1490,12 @@ class PandasMoveDataFrame(DataFrame):
 
     def set_index(
         self,
-        keys: Union[Text, List[Text]],
+        keys: str | list[str],
         drop: bool = True,
         append: bool = False,
         inplace: bool = False,
         verify_integrity: bool = False,
-    ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
+    ) -> 'PandasMoveDataFrame' | DataFrame | None:
         """
         Set the DataFrame index (row labels) using one or more existing columns or arrays.
 
@@ -1558,14 +1559,14 @@ class PandasMoveDataFrame(DataFrame):
 
     def drop(
         self,
-        labels: Optional[Union[Text, List[Text]]] = None,
-        axis: Union[int, Text] = 0,
-        index: Optional[Union[Text, List[Text]]] = None,
-        columns: Optional[Union[Text, List[Text]]] = None,
-        level: Optional[Union[int, Text]] = None,
+        labels: str | list[str] | None = None,
+        axis: int | str = 0,
+        index: str | list[str] | None = None,
+        columns: str | list[str] | None = None,
+        level: int | str | None = None,
         inplace: bool = False,
-        errors: Text = 'raise',
-    ) -> Optional[Union['PandasMoveDataFrame', DataFrame]]:
+        errors: str = 'raise',
+    ) -> 'PandasMoveDataFrame' | DataFrame | None:
         """
         Removes rows or columns.
 
@@ -1651,10 +1652,10 @@ class PandasMoveDataFrame(DataFrame):
 
     def drop_duplicates(
         self,
-        subset: Optional[Union[int, Text]] = None,
-        keep: Union[Text, bool] = 'first',
+        subset: int | str | None = None,
+        keep: str | bool = 'first',
         inplace: bool = False
-    ) -> Optional['PandasMoveDataFrame']:
+    ) -> 'PandasMoveDataFrame' | None:
         """
         Uses the pandas's function drop_duplicates, to remove duplicated rows from data.
 
@@ -1694,9 +1695,9 @@ class PandasMoveDataFrame(DataFrame):
     def shift(
         self,
         periods: int = 1,
-        freq: Optional[Union[DateOffset, Timedelta, Text]] = None,
-        axis: Union[int, Text] = 0,
-        fill_value: Optional[Any] = None
+        freq: DateOffset | Timedelta | str | None = None,
+        axis: int | str = 0,
+        fill_value: Any | None = None
     ) -> 'PandasMoveDataFrame':
         """
         Shift index by desired number of periods with an optional time freq.
@@ -1740,12 +1741,12 @@ class PandasMoveDataFrame(DataFrame):
 
     def fillna(
         self,
-        value: Optional[Any] = None,
-        method: Optional[Text] = None,
-        axis: Optional[Union[int, Text]] = None,
+        value: Any | None = None,
+        method: str | None = None,
+        axis: int | str | None = None,
         inplace: bool = False,
-        limit: Optional[int] = None,
-        downcast: Optional[Dict] = None,
+        limit: int | None = None,
+        downcast: dict | None = None,
     ):
         """
         Fill NA/NaN values using the specified method.
@@ -1803,10 +1804,10 @@ class PandasMoveDataFrame(DataFrame):
 
     def dropna(
         self,
-        axis: Union[int, Text] = 0,
-        how: Text = 'any',
-        thresh: Optional[float] = None,
-        subset: Optional[List] = None,
+        axis: int | str = 0,
+        how: str = 'any',
+        thresh: float | None = None,
+        subset: list | None = None,
         inplace: bool = False
     ):
         """
@@ -1870,12 +1871,12 @@ class PandasMoveDataFrame(DataFrame):
 
     def sample(
         self,
-        n: Optional[int] = None,
-        frac: Optional[float] = None,
+        n: int | None = None,
+        frac: float | None = None,
         replace: bool = False,
-        weights: Optional[Union[Text, List]] = None,
-        random_state: Optional[int] = None,
-        axis: Optional[Union[int, Text]] = None
+        weights: str | list | None = None,
+        random_state: int | None = None,
+        axis: int | str | None = None
     ) -> 'PandasMoveDataFrame':
         """
         Return a random sample of items from an axis of object.
@@ -1938,7 +1939,7 @@ class PandasMoveDataFrame(DataFrame):
         )
         return PandasMoveDataFrame(data=_sample)
 
-    def isin(self, values: Union[List, Series, DataFrame, Dict]) -> DataFrame:
+    def isin(self, values: list | Series | DataFrame | dict) -> DataFrame:
         """
         Determines whether each element in the DataFrame is contained in values.
 
@@ -1965,7 +1966,7 @@ class PandasMoveDataFrame(DataFrame):
 
     def append(
         self,
-        other: Union['PandasMoveDataFrame', DataFrame],
+        other: 'PandasMoveDataFrame' | DataFrame,
         ignore_index: bool = False,
         verify_integrity: bool = False,
         sort: bool = False
@@ -2010,11 +2011,11 @@ class PandasMoveDataFrame(DataFrame):
 
     def join(
         self,
-        other: Union['PandasMoveDataFrame', DataFrame],
-        on: Optional[Union[Text, List]] = None,
-        how: Text = 'left',
-        lsuffix: Text = '',
-        rsuffix: Text = '',
+        other: 'PandasMoveDataFrame' | DataFrame,
+        on: str | list | None = None,
+        how: str = 'left',
+        lsuffix: str = '',
+        rsuffix: str = '',
         sort: bool = False
     ) -> 'PandasMoveDataFrame':
         """
@@ -2080,18 +2081,18 @@ class PandasMoveDataFrame(DataFrame):
 
     def merge(
             self,
-            right: Union['PandasMoveDataFrame', DataFrame, Series],
-            how: Text = 'inner',
-            on: Optional[Union[Text, List]] = None,
-            left_on: Optional[Union[Text, List]] = None,
-            right_on: Optional[Union[Text, List]] = None,
+            right: 'PandasMoveDataFrame' | DataFrame | Series,
+            how: str = 'inner',
+            on: str | list | None = None,
+            left_on: str | list | None = None,
+            right_on: str | list | None = None,
             left_index: bool = False,
             right_index: bool = False,
             sort: bool = False,
-            suffixes: Tuple[Text, Text] = ('_x', '_y'),
+            suffixes: tuple[str, str] = ('_x', '_y'),
             copy: bool = True,
-            indicator: Union[bool, Text] = False,
-            validate: Optional[Text] = None
+            indicator: bool | str = False,
+            validate: str | None = None
     ) -> 'PandasMoveDataFrame':
         """
         Merge DataFrame or named Series objects with a database-style join.
@@ -2180,7 +2181,7 @@ class PandasMoveDataFrame(DataFrame):
         )
         return PandasMoveDataFrame(data=_merge)
 
-    def write_file(self, file_name: Text, separator: Text = ','):
+    def write_file(self, file_name: str, separator: str = ','):
         """
         Write trajectory data to a new file.
 
@@ -2197,8 +2198,8 @@ class PandasMoveDataFrame(DataFrame):
         )
 
     def convert_to(
-        self, new_type: Text
-    ) -> Union[MoveDataFrame, 'PandasMoveDataFrame', 'DaskMoveDataFrame']:
+        self, new_type: str
+    ) -> MoveDataFrame | 'PandasMoveDataFrame' | 'DaskMoveDataFrame':
         """
         Convert an object from one type to another specified by the user.
 
@@ -2231,7 +2232,7 @@ class PandasMoveDataFrame(DataFrame):
             self.last_operation = end_operation(operation)
             return self
 
-    def get_type(self) -> Text:
+    def get_type(self) -> str:
         """
         Returns the type of the object.
 

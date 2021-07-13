@@ -6,12 +6,13 @@ set_verbosity
 timer_decorator
 
 """
+from __future__ import annotations
 
 import logging
 import os
 import time
 from functools import wraps
-from typing import Callable, Iterable, Optional, Text
+from typing import Callable, Iterable
 
 from IPython import get_ipython
 from IPython.display import display
@@ -42,7 +43,7 @@ def timer_decorator(func: Callable) -> Callable:
         t_start = time.time()
         result = func(*args, **kwargs)
         t_total = deltatime_str(time.time() - t_start)
-        message = '%s took %s' % (func.__name__, t_total)
+        message = f'{func.__name__} took {t_total}'
         logger.debug('{}\n{}\n{}'.format('*' * len(message), message, '*' * len(message)))
         return result
 
@@ -51,9 +52,9 @@ def timer_decorator(func: Callable) -> Callable:
 
 def _log_progress(
     sequence: Iterable,
-    desc: Optional[Text] = None,
-    total: Optional[int] = None,
-    miniters: Optional[int] = None
+    desc: str | None = None,
+    total: int | None = None,
+    miniters: int | None = None
 ):
     """
     Make and display a progress bar.
@@ -102,10 +103,10 @@ def _log_progress(
         for index, record in enumerate(sequence, 1):
             if index == 1 or index % miniters == 0:
                 if is_iterator:
-                    label.value = '%s: %s / ?' % (desc, index)
+                    label.value = f'{desc}: {index} / ?'
                 else:
                     progress.value = index
-                    label.value = u'%s: %s / %s' % (desc, index, total)
+                    label.value = f'{desc}: {index} / {total}'
             yield record
     except Exception:
         progress.bar_style = 'danger'
@@ -113,7 +114,7 @@ def _log_progress(
     else:
         progress.bar_style = 'success'
         progress.value = index
-        label.value = '%s: %s' % (desc, str(index or '?'))
+        label.value = '{}: {}'.format(desc, str(index or '?'))
 
 
 try:
@@ -127,9 +128,9 @@ except NameError:
 
 def progress_bar(
     sequence: Iterable,
-    desc: Optional[Text] = None,
-    total: Optional[int] = None,
-    miniters: Optional[int] = None
+    desc: str | None = None,
+    total: int | None = None,
+    miniters: int | None = None
 ):
     """
     Make and display a progress bar.
