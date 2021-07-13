@@ -167,7 +167,7 @@ class PandasMoveDataFrame(DataFrame):
         return self[LONGITUDE]
 
     @property
-    def datetime(self):
+    def datetime(self) -> Series:
         """
         Checks for the DATETIME column and returns its value.
 

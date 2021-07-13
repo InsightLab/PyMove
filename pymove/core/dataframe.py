@@ -1,6 +1,8 @@
 """MoveDataFrame class."""
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from dateutil.parser._parser import ParserError
 from pandas.core.frame import DataFrame
 
@@ -13,12 +15,16 @@ from pymove.utils.constants import (
     TYPE_PANDAS,
 )
 
+if TYPE_CHECKING:
+    from pymove.core.dask import DaskMoveDataFrame
+    from pymove.core.pandas import PandasMoveDataFrame
+
 
 class MoveDataFrame:
     """Auxiliary class to check and transform data into Pymove Dataframes."""
 
     @staticmethod
-    def __new__(
+    def __new__(  # type: ignore[misc]
         self,
         data: DataFrame | dict | list,
         latitude: str = LATITUDE,
@@ -27,7 +33,7 @@ class MoveDataFrame:
         traj_id: str = TRAJ_ID,
         type_: str = TYPE_PANDAS,
         n_partitions: int = 1,
-    ):
+    ) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame':
         """
         Creates the PyMove dataframe, which must contain latitude, longitude and datetime.
 
@@ -68,6 +74,9 @@ class MoveDataFrame:
             return DaskMoveDataFrame(
                 data, latitude, longitude, datetime, traj_id, n_partitions
             )
+        raise TypeError(
+            f'Unknown MoveDataFrame type {type_}, use {TYPE_PANDAS} or {TYPE_DASK}'
+        )
 
     @staticmethod
     def has_columns(data: DataFrame) -> bool:

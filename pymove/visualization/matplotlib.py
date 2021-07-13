@@ -267,7 +267,7 @@ def plot_trajectory_by_id(
     df_ = move_data[move_data[label] == id_]
 
     if not len(df_):
-        raise IndexError(f'No trajectory with tid {id_} in dataframe')
+        raise IndexError(f'No trajectory with {label} {id_} in dataframe')
 
     fig = plt.figure(figsize=figsize)
 
