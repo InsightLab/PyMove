@@ -116,9 +116,8 @@ class PandasMoveDataFrame(DataFrame):
             MoveDataFrame.validate_move_data_frame(tdf)
             super().__init__(tdf)
             self._type = TYPE_PANDAS
-            self.last_operation: dict = dict()
+            self.last_operation: dict = None  # type: ignore[assignment]
         else:
-
             raise KeyError(
                 'Couldn\'t instantiate MoveDataFrame because data has missing columns.'
             )
