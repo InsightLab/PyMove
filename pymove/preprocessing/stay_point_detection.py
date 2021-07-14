@@ -5,8 +5,9 @@ create_or_update_move_stop_by_dist_time,
 create_or_update_move_and_stop_by_radius
 
 """
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Text, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -29,13 +30,13 @@ if TYPE_CHECKING:
 
 @timer_decorator
 def create_or_update_move_stop_by_dist_time(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    dist_radius: Optional[float] = 30,
-    time_radius: Optional[float] = 900,
-    label_id: Optional[Text] = TRAJ_ID,
-    new_label: Optional[Text] = SEGMENT_STOP,
-    inplace: Optional[bool] = False
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    dist_radius: float = 30,
+    time_radius: float = 900,
+    label_id: str = TRAJ_ID,
+    new_label: str = SEGMENT_STOP,
+    inplace: bool = False
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Determines the stops and moves points of the dataframe.
 
@@ -97,7 +98,7 @@ def create_or_update_move_stop_by_dist_time(
     move_dataagg_tid = (
         move_data.groupby(by=new_label)
         .agg({TIME_TO_PREV: 'sum'})
-        .query('%s > %s' % (TIME_TO_PREV, time_radius))
+        .query(f'{TIME_TO_PREV} > {time_radius}')
         .index
     )
     idx = move_data[
@@ -112,12 +113,12 @@ def create_or_update_move_stop_by_dist_time(
 
 @timer_decorator
 def create_or_update_move_and_stop_by_radius(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    radius: Optional[float] = 0,
-    target_label: Optional[Text] = DIST_TO_PREV,
-    new_label: Optional[Text] = SITUATION,
-    inplace: Optional[bool] = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    radius: float = 0,
+    target_label: str = DIST_TO_PREV,
+    new_label: str = SITUATION,
+    inplace: bool = False,
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Finds the stops and moves points of the dataframe.
 

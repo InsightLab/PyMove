@@ -29,15 +29,13 @@ def test_reduce_mem_usage_automatic():
 
     move_df = _default_move_df()
 
-    expected_initial_size = 280
-
-    expected_final_size = 232
-
-    assert abs(mem.total_size(move_df) - expected_initial_size) <= 20
+    initial_size = mem.total_size(move_df)
 
     mem.reduce_mem_usage_automatic(move_df)
 
-    assert abs(mem.total_size(move_df) - expected_final_size) <= 20
+    final_size = mem.total_size(move_df)
+
+    assert initial_size > final_size
 
 
 def test_total_size():

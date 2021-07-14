@@ -1,6 +1,7 @@
 """MoveDataFrame class."""
+from __future__ import annotations
 
-from typing import Dict, List, Optional, Text, Union
+from typing import TYPE_CHECKING
 
 from dateutil.parser._parser import ParserError
 from pandas.core.frame import DataFrame
@@ -14,21 +15,25 @@ from pymove.utils.constants import (
     TYPE_PANDAS,
 )
 
+if TYPE_CHECKING:
+    from pymove.core.dask import DaskMoveDataFrame
+    from pymove.core.pandas import PandasMoveDataFrame
+
 
 class MoveDataFrame:
     """Auxiliary class to check and transform data into Pymove Dataframes."""
 
     @staticmethod
-    def __new__(
+    def __new__(  # type: ignore[misc]
         self,
-        data: Union[DataFrame, Dict, List],
-        latitude: Optional[Text] = LATITUDE,
-        longitude: Optional[Text] = LONGITUDE,
-        datetime: Optional[Text] = DATETIME,
-        traj_id: Optional[Text] = TRAJ_ID,
-        type_: Optional[Text] = TYPE_PANDAS,
-        n_partitions: Optional[int] = 1,
-    ):
+        data: DataFrame | dict | list,
+        latitude: str = LATITUDE,
+        longitude: str = LONGITUDE,
+        datetime: str = DATETIME,
+        traj_id: str = TRAJ_ID,
+        type_: str = TYPE_PANDAS,
+        n_partitions: int = 1,
+    ) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame':
         """
         Creates the PyMove dataframe, which must contain latitude, longitude and datetime.
 
@@ -48,7 +53,7 @@ class MoveDataFrame:
             Represents column name trajectory id, by default TRAJ_ID
         type_ : str, optional
             Number of partitions of the dask dataframe, by default TYPE_PANDAS
-        n_partitions : Optional[int], optional
+        n_partitions : int, optional
             Amount of partitions for dask dataframe, by default 1
 
         Raises
@@ -69,6 +74,9 @@ class MoveDataFrame:
             return DaskMoveDataFrame(
                 data, latitude, longitude, datetime, traj_id, n_partitions
             )
+        raise TypeError(
+            f'Unknown MoveDataFrame type {type_}, use {TYPE_PANDAS} or {TYPE_DASK}'
+        )
 
     @staticmethod
     def has_columns(data: DataFrame) -> bool:
@@ -125,8 +133,8 @@ class MoveDataFrame:
 
     @staticmethod
     def format_labels(
-        current_id: Text, current_lat: Text, current_lon: Text, current_datetime: Text
-    ) -> Dict:
+        current_id: str, current_lat: str, current_lon: str, current_datetime: str
+    ) -> dict:
         """
         Format the labels for the PyMove lib pattern labels output lat, lon and datatime.
 

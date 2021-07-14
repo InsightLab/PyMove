@@ -1,6 +1,7 @@
 """DaskMoveDataFrame class."""
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Text, Union
+from typing import TYPE_CHECKING
 
 import dask
 import numpy as np
@@ -27,12 +28,12 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def __init__(
         self,
-        data: Union[DataFrame, List, Dict],
-        latitude: Optional[Text] = LATITUDE,
-        longitude: Optional[Text] = LONGITUDE,
-        datetime: Optional[Text] = DATETIME,
-        traj_id: Optional[Text] = TRAJ_ID,
-        n_partitions: Optional[int] = 1,
+        data: DataFrame | list | dict,
+        latitude: str = LATITUDE,
+        longitude: str = LONGITUDE,
+        datetime: str = DATETIME,
+        traj_id: str = TRAJ_ID,
+        n_partitions: int = 1,
     ):
         """
         Checks whether past data has 'lat', 'lon', 'datetime' columns.
@@ -78,7 +79,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
                 try:
                     zip_list[i] = zip_list[i]
                 except KeyError:
-                    zip_list.append(i)
+                    zip_list.append(str(i))
             data = pd.DataFrame(data, columns=zip_list)
 
         mapping_columns = MoveDataFrame.format_labels(
@@ -204,23 +205,23 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """Return a tuple representing the dimensionality of the DataFrame."""
         raise NotImplementedError('To be implemented')
 
-    def rename(self):
+    def rename(self, *args, **kwargs):
         """Alter axes labels.."""
         raise NotImplementedError('To be implemented')
 
-    def len(self):
+    def len(self, *args, **kwargs):
         """Returns the length/row numbers in trajectory data."""
         raise NotImplementedError('To be implemented')
 
-    def unique(self):
+    def unique(self, *args, **kwargs):
         """Return unique values of Series object."""
         raise NotImplementedError('To be implemented')
 
     def head(
         self,
-        n: Optional[int] = 5,
-        npartitions: Optional[int] = 1,
-        compute: Optional[bool] = True
+        n: int = 5,
+        npartitions: int = 1,
+        compute: bool = True
     ) -> DataFrame:
         """
         Return the first n rows.
@@ -248,9 +249,9 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def tail(
         self,
-        n: Optional[int] = 5,
-        npartitions: Optional[int] = 1,
-        compute: Optional[bool] = True
+        n: int = 5,
+        npartitions: int = 1,
+        compute: bool = True
     ) -> DataFrame:
         """
         Return the last n rows.
@@ -276,19 +277,19 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
         return self._data.tail(n, npartitions, compute)
 
-    def get_users_number(self):
+    def get_users_number(self, *args, **kwargs):
         """Check and return number of users in trajectory data."""
         raise NotImplementedError('To be implemented')
 
-    def to_numpy(self):
+    def to_numpy(self, *args, **kwargs):
         """Converts trajectory data to numpy array format."""
         raise NotImplementedError('To be implemented')
 
-    def to_dict(self):
+    def to_dict(self, *args, **kwargs):
         """Converts trajectory data to dict format."""
         raise NotImplementedError('To be implemented')
 
-    def to_grid(self):
+    def to_grid(self, *args, **kwargs):
         """Converts trajectory data to grid format."""
         raise NotImplementedError('To be implemented')
 
@@ -304,205 +305,205 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         """
         return self._data
 
-    def info(self):
+    def info(self, *args, **kwargs):
         """Print a concise summary of a DataFrame."""
         raise NotImplementedError('To be implemented')
 
-    def describe(self):
+    def describe(self, *args, **kwargs):
         """Generate descriptive statistics."""
         raise NotImplementedError('To be implemented')
 
-    def memory_usage(self):
+    def memory_usage(self, *args, **kwargs):
         """Return the memory usage of each column in bytes."""
         raise NotImplementedError('To be implemented')
 
-    def copy(self):
+    def copy(self, *args, **kwargs):
         """Make a copy of this object’srs indices and data."""
         raise NotImplementedError('To be implemented')
 
-    def generate_tid_based_on_id_datetime(self):
+    def generate_tid_based_on_id_datetime(self, *args, **kwargs):
         """Create or update trajectory id based on id e datetime."""
         raise NotImplementedError('To be implemented')
 
-    def generate_date_features(self):
+    def generate_date_features(self, *args, **kwargs):
         """Create or update date feature."""
         raise NotImplementedError('To be implemented')
 
-    def generate_hour_features(self):
+    def generate_hour_features(self, *args, **kwargs):
         """Create or update hour feature."""
         raise NotImplementedError('To be implemented')
 
-    def generate_day_of_the_week_features(self):
+    def generate_day_of_the_week_features(self, *args, **kwargs):
         """Create or update a feature day of the week from datatime."""
         raise NotImplementedError('To be implemented')
 
-    def generate_weekend_features(self):
+    def generate_weekend_features(self, *args, **kwargs):
         """Create or update the feature weekend to the dataframe."""
         raise NotImplementedError('To be implemented')
 
-    def generate_time_of_day_features(self):
+    def generate_time_of_day_features(self, *args, **kwargs):
         """Create a feature time of day or period from datatime."""
         raise NotImplementedError('To be implemented')
 
-    def generate_datetime_in_format_cyclical(self):
+    def generate_datetime_in_format_cyclical(self, *args, **kwargs):
         """Create or update column with cyclical datetime feature."""
         raise NotImplementedError('To be implemented')
 
-    def generate_dist_time_speed_features(self):
+    def generate_dist_time_speed_features(self, *args, **kwargs):
         """Creates features of distance, time and speed between points."""
         raise NotImplementedError('To be implemented')
 
-    def generate_dist_features(self):
+    def generate_dist_features(self, *args, **kwargs):
         """Create the three distance in meters to an GPS point P."""
         raise NotImplementedError('To be implemented')
 
-    def generate_time_features(self):
+    def generate_time_features(self, *args, **kwargs):
         """Create the three time in seconds to an GPS point P."""
         raise NotImplementedError('To be implemented')
 
-    def generate_speed_features(self):
+    def generate_speed_features(self, *args, **kwargs):
         """Create the three speed in meters by seconds to an GPS point P."""
         raise NotImplementedError('To be implemented')
 
-    def generate_move_and_stop_by_radius(self):
+    def generate_move_and_stop_by_radius(self, *args, **kwargs):
         """Create or update column with move and stop points by radius."""
         raise NotImplementedError('To be implemented')
 
-    def time_interval(self):
+    def time_interval(self, *args, **kwargs):
         """Get time difference between max and min datetime in trajectory."""
         raise NotImplementedError('To be implemented')
 
-    def get_bbox(self):
+    def get_bbox(self, *args, **kwargs):
         """Creates the bounding box of the trajectories."""
         raise NotImplementedError('To be implemented')
 
-    def plot_all_features(self):
+    def plot_all_features(self, *args, **kwargs):
         """Generate a visualization for each column that type is equal dtype."""
         raise NotImplementedError('To be implemented')
 
-    def plot_trajs(self):
+    def plot_trajs(self, *args, **kwargs):
         """Generate a visualization that show trajectories."""
         raise NotImplementedError('To be implemented')
 
-    def plot_traj_id(self):
+    def plot_traj_id(self, *args, **kwargs):
         """Generate a visualization for a trajectory with the specified tid."""
         raise NotImplementedError('To be implemented')
 
-    def show_trajectories_info(self):
+    def show_trajectories_info(self, *args, **kwargs):
         """Show dataset information from dataframe."""
         raise NotImplementedError('To be implemented')
 
-    def min(self):
+    def min(self, *args, **kwargs):
         """Return the minimum of the values for the requested axis."""
         raise NotImplementedError('To be implemented')
 
-    def max(self):
+    def max(self, *args, **kwargs):
         """Return the maximum of the values for the requested axis."""
         raise NotImplementedError('To be implemented')
 
-    def count(self):
+    def count(self, *args, **kwargs):
         """Counts the non-NA cells for each column or row."""
         raise NotImplementedError('To be implemented')
 
-    def groupby(self):
+    def groupby(self, *args, **kwargs):
         """Groups dask DataFrame using a mapper or by a Series of columns."""
         raise NotImplementedError('To be implemented')
 
-    def plot(self):
+    def plot(self, *args, **kwargs):
         """Plot the data of the dask DataFrame."""
         raise NotImplementedError('To be implemented')
 
-    def select_dtypes(self):
+    def select_dtypes(self, *args, **kwargs):
         """Returns a subset of the columns based on the column dtypes."""
         raise NotImplementedError('To be implemented')
 
-    def astype(self):
+    def astype(self, *args, **kwargs):
         """Casts a dask object to a specified dtype."""
         raise NotImplementedError('To be implemented')
 
-    def sort_values(self):
+    def sort_values(self, *args, **kwargs):
         """Sorts the values of the dask DataFrame."""
         raise NotImplementedError('To be implemented')
 
-    def reset_index(self):
+    def reset_index(self, *args, **kwargs):
         """Resets the dask DataFrame'srs index, and use the default one."""
         raise NotImplementedError('To be implemented')
 
-    def set_index(self):
+    def set_index(self, *args, **kwargs):
         """Set of row labels using one or more existing columns or arrays."""
         raise NotImplementedError('To be implemented')
 
-    def drop(self):
+    def drop(self, *args, **kwargs):
         """Drops specified rows or columns of the dask Dataframe."""
         raise NotImplementedError('To be implemented')
 
-    def duplicated(self):
+    def duplicated(self, *args, **kwargs):
         """Returns boolean Series denoting duplicate rows."""
         raise NotImplementedError('To be implemented')
 
-    def drop_duplicates(self):
+    def drop_duplicates(self, *args, **kwargs):
         """Removes duplicated rows from the data."""
         raise NotImplementedError('To be implemented')
 
-    def shift(self):
+    def shift(self, *args, **kwargs):
         """Shifts by desired number of periods with an optional time freq."""
         raise NotImplementedError('To be implemented')
 
-    def all(self):
+    def all(self, *args, **kwargs):
         """Indicates if all elements are True, potentially over an axis."""
         raise NotImplementedError('To be implemented')
 
-    def any(self):
+    def any(self, *args, **kwargs):
         """Indicates if any element is True, potentially over an axis."""
         raise NotImplementedError('To be implemented')
 
-    def isna(self):
+    def isna(self, *args, **kwargs):
         """Detect missing values."""
         raise NotImplementedError('To be implemented')
 
-    def fillna(self):
+    def fillna(self, *args, **kwargs):
         """Fills missing data in the dask DataFrame."""
         raise NotImplementedError('To be implemented')
 
-    def dropna(self):
+    def dropna(self, *args, **kwargs):
         """Removes missing data from dask DataFrame."""
         raise NotImplementedError('To be implemented')
 
-    def sample(self):
+    def sample(self, *args, **kwargs):
         """Samples data from the dask DataFrame."""
         raise NotImplementedError('To be implemented')
 
-    def isin(self):
+    def isin(self, *args, **kwargs):
         """Determines whether each element is contained in values."""
         raise NotImplementedError('To be implemented')
 
-    def append(self):
+    def append(self, *args, **kwargs):
         """Append rows of other to the end of caller, returning a new object."""
         raise NotImplementedError('To be implemented')
 
-    def join(self):
+    def join(self, *args, **kwargs):
         """Join columns of another DataFrame."""
         raise NotImplementedError('To be implemented')
 
-    def merge(self):
+    def merge(self, *args, **kwargs):
         """Merge columns of another DataFrame."""
         raise NotImplementedError('To be implemented')
 
-    def nunique(self):
+    def nunique(self, *args, **kwargs):
         """Count distinct observations over requested axis."""
         raise NotImplementedError('To be implemented')
 
-    def write_file(self):
+    def write_file(self, *args, **kwargs):
         """Write trajectory data to a new file."""
         raise NotImplementedError('To be implemented')
 
-    def to_csv(self):
+    def to_csv(self, *args, **kwargs):
         """Write object to a comma-separated values (csv) file."""
         raise NotImplementedError('To be implemented')
 
     def convert_to(
-        self, new_type: Text
-    ) -> Union['PandasMoveDataFrame', 'DaskMoveDataFrame']:
+        self, new_type: str
+    ) -> MoveDataFrame | 'PandasMoveDataFrame' | 'DaskMoveDataFrame':
         """
         Convert an object from one type to another specified by the user.
 
@@ -517,9 +518,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
             The converted object.
 
         """
-        if new_type == TYPE_DASK:
-            return self
-        elif new_type == TYPE_PANDAS:
+        if new_type == TYPE_PANDAS:
             df_pandas = self._data.compute()
             return MoveDataFrame(
                 df_pandas,
@@ -529,8 +528,10 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
                 traj_id=TRAJ_ID,
                 type_=TYPE_PANDAS
             )
+        else:
+            return self
 
-    def get_type(self) -> Text:
+    def get_type(self) -> str:
         """
         Returns the type of the object.
 

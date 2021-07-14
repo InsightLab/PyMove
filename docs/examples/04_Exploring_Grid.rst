@@ -175,7 +175,7 @@ Create virtual Grid
      'lat_min_y': 39.970511,
      'grid_size_lat_y': 341,
      'grid_size_lon_x': 266,
-     'cell_size_by_degree': 0.0001353464801860623}
+     'cell_size_by_degree': 0.00013533905150922183}
 
 
 
@@ -189,7 +189,7 @@ Create one polygon to point on grid
 
 .. parsed-literal::
 
-    POLYGON ((116.3056033464802 39.97078169296037, 116.3056033464802 39.97091703944056, 116.3057386929604 39.97091703944056, 116.3057386929604 39.97078169296037, 116.3056033464802 39.97078169296037))
+    POLYGON ((116.3056033390515 39.97078167810302, 116.3056033390515 39.97091701715453, 116.305738678103 39.97091701715453, 116.305738678103 39.97078167810302, 116.3056033390515 39.97078167810302))
 
 
 Create or update index grid feature
@@ -326,35 +326,35 @@ Create all polygons to all point on grid
           <td>1</td>
           <td>100</td>
           <td>101</td>
-          <td>POLYGON ((116.3191379944988 39.98404564801861,...</td>
+          <td>POLYGON ((116.3191372442024 39.98404490515092,...</td>
         </tr>
         <tr>
           <th>1</th>
           <td>1</td>
           <td>101</td>
           <td>102</td>
-          <td>POLYGON ((116.319273340979 39.98418099449879, ...</td>
+          <td>POLYGON ((116.3192725832539 39.98418024420243,...</td>
         </tr>
         <tr>
           <th>4</th>
           <td>1</td>
           <td>101</td>
           <td>103</td>
-          <td>POLYGON ((116.3194086874592 39.98418099449879,...</td>
+          <td>POLYGON ((116.3194079223055 39.98418024420243,...</td>
         </tr>
         <tr>
           <th>5</th>
           <td>1</td>
           <td>104</td>
           <td>106</td>
-          <td>POLYGON ((116.3198147268997 39.98458703393936,...</td>
+          <td>POLYGON ((116.31981393946 39.98458626135696, 1...</td>
         </tr>
         <tr>
           <th>6</th>
           <td>1</td>
           <td>104</td>
           <td>105</td>
-          <td>POLYGON ((116.3196793804195 39.98458703393936,...</td>
+          <td>POLYGON ((116.3196786004085 39.98458626135696,...</td>
         </tr>
       </tbody>
     </table>
@@ -428,7 +428,7 @@ Read .pkl to grid
      'lat_min_y': 39.970511,
      'grid_size_lat_y': 341,
      'grid_size_lon_x': 266,
-     'cell_size_by_degree': 0.0001353464801860623}
+     'cell_size_by_degree': 0.00013533905150922183}
 
 
 
@@ -437,8 +437,12 @@ Show a grid polygons
 
 .. code:: ipython3
 
-    grid.show_grid_polygons(grid_data, return_fig=False)
+    from pymove.visualization.matplotlib import plot_grid_polygons
+
+.. code:: ipython3
+
+    plot_grid_polygons(grid_data, return_fig=False)
 
 
 
-.. image:: 04_Exploring_Grid_files/04_Exploring_Grid_25_0.png
+.. image:: 04_Exploring_Grid_files/04_Exploring_Grid_26_0.png

@@ -6,8 +6,9 @@ gap_statistic,
 dbscan_clustering
 
 """
+from __future__ import annotations
 
-from typing import Callable, Dict, Optional, Text, Union
+from typing import Callable
 
 import numpy as np
 from pandas import DataFrame
@@ -21,11 +22,11 @@ from pymove.utils.log import logger, progress_bar, timer_decorator
 @timer_decorator
 def elbow_method(
     move_data: DataFrame,
-    k_initial: Optional[int] = 1,
-    max_clusters: Optional[int] = 15,
-    k_iteration: Optional[int] = 1,
-    random_state: Optional[int] = None
-) -> Dict:
+    k_initial: int = 1,
+    max_clusters: int = 15,
+    k_iteration: int = 1,
+    random_state: int | None = None
+) -> dict:
     """
     Determines the optimal number of clusters.
 
@@ -80,12 +81,12 @@ def elbow_method(
 @timer_decorator
 def gap_statistic(
     move_data: DataFrame,
-    nrefs: Optional[int] = 3,
-    k_initial: Optional[int] = 1,
-    max_clusters: Optional[int] = 15,
-    k_iteration: Optional[int] = 1,
-    random_state: Optional[int] = None
-) -> Dict:
+    nrefs: int = 3,
+    k_initial: int = 1,
+    max_clusters: int = 15,
+    k_iteration: int = 1,
+    random_state: int | None = None
+) -> dict:
     """
     Calculates optimal clusters numbers using Gap Statistic.
 
@@ -151,13 +152,13 @@ def gap_statistic(
 @timer_decorator
 def dbscan_clustering(
     move_data: DataFrame,
-    cluster_by: Text,
-    meters: Optional[int] = 10,
-    min_sample: Optional[float] = 1680 / 2,
-    earth_radius: Optional[float] = EARTH_RADIUS,
-    metric: Optional[Union[Text, Callable]] = 'euclidean',
-    inplace: Optional[bool] = False
-) -> Optional[DataFrame]:
+    cluster_by: str,
+    meters: int = 10,
+    min_sample: float = 1680 / 2,
+    earth_radius: float = EARTH_RADIUS,
+    metric: str | Callable = 'euclidean',
+    inplace: bool = False
+) -> DataFrame | None:
     """
     Performs density based clustering on the move_dataframe according to cluster_by.
 

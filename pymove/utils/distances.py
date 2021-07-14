@@ -8,7 +8,7 @@ medp,
 medt
 
 """
-from typing import Optional, Text, Union
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
@@ -21,17 +21,17 @@ from pymove.utils.constants import DATETIME, EARTH_RADIUS, LATITUDE, LONGITUDE
 
 
 def haversine(
-    lat1: Union[float, ndarray],
-    lon1: Union[float, ndarray],
-    lat2: Union[float, ndarray],
-    lon2: Union[float, ndarray],
-    to_radians: Optional[bool] = True,
-    earth_radius: Optional[float] = EARTH_RADIUS
-) -> Union[float, ndarray]:
+    lat1: float | ndarray,
+    lon1: float | ndarray,
+    lat2: float | ndarray,
+    lon2: float | ndarray,
+    to_radians: bool = True,
+    earth_radius: float = EARTH_RADIUS
+) -> float | ndarray:
     """
     Calculates the great circle distance between two points on the earth.
 
-    (specified in decimal degrees or in radians). All (lat, lon) coordinates
+    Specified in decimal degrees or in radians. All (lat, lon) coordinates
     must have numeric dtypes and be of equal length. Result in meters. Use 3956
     in earth radius for miles.
 
@@ -72,7 +72,7 @@ def haversine(
 
     """
     if to_radians:
-        lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])
+        lat1, lon1, lat2, lon2 = np.radians([lat1, lon1, lat2, lon2])  # type: ignore
     a = (
         np.sin((lat2 - lat1) / 2.0)
         ** 2 + np.cos(lat1)
@@ -83,11 +83,11 @@ def haversine(
 
 
 def euclidean_distance_in_meters(
-    lat1: Union[float, ndarray],
-    lon1: Union[float, ndarray],
-    lat2: Union[float, ndarray],
-    lon2: Union[float, ndarray]
-) -> Union[float, ndarray]:
+    lat1: float | ndarray,
+    lon1: float | ndarray,
+    lat2: float | ndarray,
+    lon2: float | ndarray
+) -> float | ndarray:
     """
     Calculate the euclidean distance in meters between two points.
 
@@ -130,8 +130,8 @@ def euclidean_distance_in_meters(
 def nearest_points(
     traj1: DataFrame,
     traj2: DataFrame,
-    latitude: Optional[Text] = LATITUDE,
-    longitude: Optional[Text] = LONGITUDE,
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE,
 ) -> DataFrame:
     """
     Returns the point closest to another trajectory based on the Euclidean distance.
@@ -191,8 +191,8 @@ def nearest_points(
 def medp(
     traj1: DataFrame,
     traj2: DataFrame,
-    latitude: Optional[Text] = LATITUDE,
-    longitude: Optional[Text] = LONGITUDE
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE
 ) -> float:
     """
     Returns the Mean Euclidian Distance Predictive between two trajectories.
@@ -243,9 +243,9 @@ def medp(
 def medt(
     traj1: DataFrame,
     traj2: DataFrame,
-    latitude: Optional[Text] = LATITUDE,
-    longitude: Optional[Text] = LONGITUDE,
-    datetime: Optional[Text] = DATETIME
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE,
+    datetime: str = DATETIME
 ) -> float:
     """
     Returns the Mean Euclidian Distance Trajectory between two trajectories.
@@ -286,7 +286,7 @@ def medt(
     >>> medt(traj_1, traj_2)
     6.592419887747872e-05
     """
-    soma = 0
+    soma = 0.
     proportion = 1000000000
     if(len(traj2) < len(traj1)):
         traj1, traj2 = traj2, traj1
@@ -307,6 +307,7 @@ def medt(
         soma = soma + this_distance
     for j in range(len(traj1) + 1, len(traj2)):
         soma = soma + \
-            float(utils.datetime.timestamp_to_millis(
-                traj2[datetime].iloc[j])) / proportion
+            float(
+                utils.datetime.timestamp_to_millis(traj2[datetime].iloc[j])
+            ) / proportion
     return soma

@@ -1,6 +1,5 @@
 """PandasDiscreteMoveDataFrame class."""
-
-from typing import Dict, List, Optional, Text, Union
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
@@ -37,12 +36,12 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
     def __init__(
         self,
-        data: Union[DataFrame, List, Dict],
-        latitude: Optional[Text] = LATITUDE,
-        longitude: Optional[Text] = LONGITUDE,
-        datetime: Optional[Text] = DATETIME,
-        traj_id: Optional[Text] = TRAJ_ID,
-        local_label: Optional[Text] = LOCAL_LABEL
+        data: DataFrame | list | dict,
+        latitude: str = LATITUDE,
+        longitude: str = LONGITUDE,
+        datetime: str = DATETIME,
+        traj_id: str = TRAJ_ID,
+        local_label: str = LOCAL_LABEL
     ):
         """
         Creates a dataframe using local_label as a discrete feature for localization.
@@ -69,7 +68,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         ValueError, ParserError
             If the data types can't be converted.
         """
-        super(PandasDiscreteMoveDataFrame, self).__init__(
+        super().__init__(
             data=data,
             latitude=latitude,
             longitude=longitude,
@@ -79,10 +78,10 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         if local_label not in self:
             raise ValueError(
-                '{} column not in dataframe'.format(local_label)
+                f'{local_label} column not in dataframe'
             )
 
-    def discretize_based_grid(self, region_size: Optional[int] = 1000):
+    def discretize_based_grid(self, region_size: int = 1000):
         """
         Discrete space in cells of the same size, assigning a unique id to each cell.
 
@@ -100,11 +99,11 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
     def generate_prev_local_features(
         self,
-        label_id: Optional[Text] = TRAJ_ID,
-        local_label: Optional[Text] = LOCAL_LABEL,
-        sort: Optional[bool] = True,
-        inplace: Optional[bool] = True
-    ) -> Optional['PandasDiscreteMoveDataFrame']:
+        label_id: str = TRAJ_ID,
+        local_label: str = LOCAL_LABEL,
+        sort: bool = True,
+        inplace: bool = True
+    ) -> 'PandasDiscreteMoveDataFrame' | None:
         """
         Create a feature prev_local with the label of previous local to current point.
 
@@ -145,7 +144,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         if (data_[local_label].dtype == 'int'):
             data_[local_label] = data_[local_label].astype(np.float16)
         for idx in progress_bar(
-            ids, desc='Generating previous {}'.format(local_label)
+            ids, desc=f'Generating previous {local_label}'
         ):
             current_local = data_.at[idx, local_label]
             current_local = np.array(current_local)
@@ -162,20 +161,21 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
         data_.reset_index(inplace=True)
         data_.last_operation = end_operation(operation)
+
         if not inplace:
             return data_
 
     def generate_tid_based_statistics(
         self,
-        label_id: Optional[Text] = TRAJ_ID,
-        local_label: Optional[Text] = LOCAL_LABEL,
-        mean_coef: Optional[float] = 1.0,
-        std_coef: Optional[float] = 1.0,
-        statistics: Optional[DataFrame] = None,
-        label_tid_stat: Optional[Text] = TID_STAT,
-        drop_single_points: Optional[bool] = False,
-        inplace: Optional[bool] = True,
-    ) -> Optional['PandasDiscreteMoveDataFrame']:
+        label_id: str = TRAJ_ID,
+        local_label: str = LOCAL_LABEL,
+        mean_coef: float = 1.0,
+        std_coef: float = 1.0,
+        statistics: DataFrame | None = None,
+        label_tid_stat: str = TID_STAT,
+        drop_single_points: bool = False,
+        inplace: bool = True,
+    ) -> 'PandasDiscreteMoveDataFrame' | None:
         """
         Splits the trajectories into segments based on time statistics for segments.
 
@@ -190,7 +190,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
             Multiplication coefficient of the mean time for the segment, by default 1.0
         std_coef : float, optional
             Multiplication coefficient of sdt time for the segment, by default 1.0
-        statistics : Optional[DataFrame], optional
+        statistics : DataFrame, optional
             Time Statistics of the pairwise local labels, by default None
         label_tid_stat : str, optional
             The label of the column containing the ids of the formed segments.
@@ -222,7 +222,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
             self.generate_dist_time_speed_features(TRAJ_ID)
 
         if local_label not in data_:
-            raise KeyError('{} not in data frame.'.format(local_label))
+            raise KeyError(f'{local_label} not in data frame.')
 
         if PREV_LOCAL not in data_:
             data_[local_label] = data_[local_label].astype(np.float64)
@@ -233,7 +233,7 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         if statistics is None:
             if (data_[PREV_LOCAL].isna().sum() == data_.shape[0]):
                 raise ValueError(
-                    'all values in the {} column are null.'.format(PREV_LOCAL)
+                    f'all values in the {PREV_LOCAL} column are null.'
                 )
             else:
                 statistics = generate_time_statistics(data_, local_label=local_label)
@@ -260,14 +260,15 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
 
                 filter_.append(row[TIME_TO_PREV] > threshold)
 
-            filter_ = np.array(filter_)
+            filter_arr = np.array(filter_)
             current_tid, count = _update_curr_tid_count(
-                filter_, data_, idx, label_tid_stat, current_tid, count)
+                filter_arr, data_, idx, label_tid_stat, current_tid, count
+            )
 
         if label_id == TID_STAT:
             self.reset_index(drop=True, inplace=True)
             logger.debug(
-                '... {} = {}, then reseting and drop index!'.format(TID, TID_STAT))
+                f'... {TID} = {TID_STAT}, then reseting and drop index!')
         else:
             self.reset_index(inplace=True)
             logger.debug('... reseting index\n')
@@ -275,5 +276,6 @@ class PandasDiscreteMoveDataFrame(PandasMoveDataFrame):
         if drop_single_points:
             _drop_single_point(data_, TID_STAT, label_id)
             self.generate_dist_time_speed_features()
+
         if not inplace:
             return data_

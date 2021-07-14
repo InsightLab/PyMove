@@ -21,9 +21,9 @@ generate_time_statistics,
 threshold_time_statistics
 
 """
+from __future__ import annotations
 
-from datetime import date, datetime
-from typing import Optional, Text, Union
+from datetime import datetime
 
 import holidays
 from pandas import DataFrame, Timestamp
@@ -44,7 +44,7 @@ from pymove.utils.constants import (
 )
 
 
-def date_to_str(dt: datetime) -> Text:
+def date_to_str(dt: datetime) -> str:
     """
     Get date, in string format, from timestamp.
 
@@ -73,7 +73,7 @@ def date_to_str(dt: datetime) -> Text:
     return dt.strftime('%Y-%m-%d')
 
 
-def str_to_datetime(dt_str: Text) -> datetime:
+def str_to_datetime(dt_str: str) -> datetime:
     """
     Converts a datetime in string format to datetime format.
 
@@ -107,7 +107,7 @@ def str_to_datetime(dt_str: Text) -> datetime:
         return datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
 
-def datetime_to_str(dt: datetime) -> Text:
+def datetime_to_str(dt: datetime) -> str:
     """
     Converts a date in datetime format to string format.
 
@@ -221,9 +221,9 @@ def to_day_of_week_int(dt: datetime) -> int:
 
 
 def working_day(
-    dt: Union[Text, datetime],
-    country: Optional[Text] = 'BR',
-    state: Optional[Text] = None
+    dt: str | datetime,
+    country: str = 'BR',
+    state: str | None = None
 ) -> bool:
     """
     Indices if a day specified by the user is a working day.
@@ -267,7 +267,7 @@ def working_day(
         dt = str_to_datetime(dt)
 
     if isinstance(dt, datetime):
-        dt = date(dt.year, dt.month, dt.day)
+        dt = datetime(dt.year, dt.month, dt.day)
 
     if dt in holidays.CountryHoliday(country=country, prov=None, state=state):
         result = False
@@ -280,7 +280,7 @@ def working_day(
     return result
 
 
-def now_str() -> Text:
+def now_str() -> str:
     """
     Get datetime of now.
 
@@ -298,7 +298,7 @@ def now_str() -> Text:
     return datetime_to_str(datetime.now())
 
 
-def deltatime_str(deltatime_seconds: float) -> Text:
+def deltatime_str(deltatime_seconds: float) -> str:
     """
     Convert time in a format appropriate of time.
 
@@ -327,14 +327,14 @@ def deltatime_str(deltatime_seconds: float) -> Text:
     hours, rem = divmod(deltatime_seconds, 3600)
     minutes, seconds = divmod(rem, 60)
     if hours:
-        return '{:0>2}h:{:0>2}m:{:05.2f}s'.format(int(hours), int(minutes), seconds)
+        return f'{int(hours):0>2}h:{int(minutes):0>2}m:{seconds:05.2f}s'
     elif minutes:
-        return '{:0>2}m:{:05.2f}s'.format(int(minutes), seconds)
+        return f'{int(minutes):0>2}m:{seconds:05.2f}s'
     else:
-        return '{:05.2f}s'.format(seconds)
+        return f'{seconds:05.2f}s'
 
 
-def timestamp_to_millis(timestamp: Text) -> int:
+def timestamp_to_millis(timestamp: str) -> int:
     """
     Converts a local datetime to a POSIX timestamp in milliseconds (like in Java).
 
@@ -380,7 +380,7 @@ def millis_to_timestamp(milliseconds: float) -> Timestamp:
     return Timestamp(milliseconds, unit='ms')
 
 
-def time_to_str(time: Timestamp) -> Text:
+def time_to_str(time: Timestamp) -> str:
     """
     Get time, in string format, from timestamp.
 
@@ -403,7 +403,7 @@ def time_to_str(time: Timestamp) -> Text:
     return time.strftime('%H:%M:%S')
 
 
-def str_to_time(dt_str: Text) -> datetime:
+def str_to_time(dt_str: str) -> datetime:
     """
     Converts a time in string format "%H:%M:%S" to datetime format.
 
@@ -489,12 +489,12 @@ def diff_time(start_time: datetime, end_time: datetime) -> int:
 
 def create_time_slot_in_minute(
     data: DataFrame,
-    slot_interval: Optional[int] = 15,
-    initial_slot: Optional[int] = 0,
-    label_datetime: Optional[Text] = DATETIME,
-    label_time_slot: Optional[Text] = TIME_SLOT,
-    inplace: Optional[bool] = False
-) -> Optional[DataFrame]:
+    slot_interval: int = 15,
+    initial_slot: int = 0,
+    label_datetime: str = DATETIME,
+    label_time_slot: str = TIME_SLOT,
+    inplace: bool = False
+) -> DataFrame | None:
     """
     Partitions the time in slot windows.
 
@@ -524,20 +524,20 @@ def create_time_slot_in_minute(
     >>> from pymove.utils.datetime import create_time_slot_in_minute
     >>> from pymove import datetime
     >>> data
-                  lat          lon              datetime  id
-        0   39.984094   116.319236   2008-10-23 05:44:05   1
-        1   39.984198   116.319322   2008-10-23 05:56:06   1
-        2   39.984224   116.319402   2008-10-23 05:56:11   1
-        3   39.984224   116.319402   2008-10-23 06:10:15   1
+              lat          lon              datetime  id
+    0   39.984094   116.319236   2008-10-23 05:44:05   1
+    1   39.984198   116.319322   2008-10-23 05:56:06   1
+    2   39.984224   116.319402   2008-10-23 05:56:11   1
+    3   39.984224   116.319402   2008-10-23 06:10:15   1
     >>> datetime.create_time_slot_in_minute(data, inplace=False)
-                  lat          lon              datetime  id   time_slot
-        0   39.984094   116.319236   2008-10-23 05:44:05   1          22
-        1   39.984198   116.319322   2008-10-23 05:56:06   1          23
-        2   39.984224   116.319402   2008-10-23 05:56:11   1          23
-        3   39.984224   116.319402   2008-10-23 06:10:15   1          24
+              lat          lon              datetime  id   time_slot
+    0   39.984094   116.319236   2008-10-23 05:44:05   1          22
+    1   39.984198   116.319322   2008-10-23 05:56:06   1          23
+    2   39.984224   116.319402   2008-10-23 05:56:11   1          23
+    3   39.984224   116.319402   2008-10-23 06:10:15   1          24
     """
     if data.dtypes[label_datetime] != 'datetime64[ns]':
-        raise ValueError('{} colum must be of type datetime'.format(label_datetime))
+        raise ValueError(f'{label_datetime} colum must be of type datetime')
     if not inplace:
         data = data.copy()
     minute_day = data[label_datetime].dt.hour * 60 + data[label_datetime].dt.minute
@@ -548,7 +548,7 @@ def create_time_slot_in_minute(
 
 def generate_time_statistics(
     data: DataFrame,
-    local_label: Optional[Text] = LOCAL_LABEL
+    local_label: str = LOCAL_LABEL
 ):
     """
     Calculates time statistics of the pairwise local labels.
@@ -572,17 +572,21 @@ def generate_time_statistics(
     -------
     >>> from pymove.utils.datetime import generate_time_statistics
     >>> df
-            local_label   prev_local   time_to_prev   id
-        0         house          NaN            NaN    1
-        1        market        house          720.0    1
-        2        market       market            5.0    1
-        3        market       market            1.0    1
-        4        school       market          844.0    1
+        local_label   prev_local   time_to_prev   id
+    0         house          NaN            NaN    1
+    1        market        house          720.0    1
+    2        market       market            5.0    1
+    3        market       market            1.0    1
+    4        school       market          844.0    1
     >>> generate_time_statistics(df)
-            local_label   prev_local    mean        std     min     max     sum   count
-        0         house       market   844.0   0.000000   844.0   844.0   844.0       1
-        1        market        house   720.0   0.000000   720.0   720.0   720.0       1
-        2        market       market     3.0   2.828427     1.0     5.0     6.0       2
+       local_label   prev_local    mean        std \
+               min          max     sum      count
+    0        house       market   844.0   0.000000 \
+             844.0        844.0   844.0          1
+    1       market        house   720.0   0.000000 \
+             720.0        720.0   720.0          1
+    2       market       market     3.0   2.828427 \
+               1.0          5.0     6.0          2
     """
     df_statistics = data.groupby(
         [local_label, PREV_LOCAL]
@@ -619,25 +623,24 @@ def _calc_time_threshold(seg_mean: float, seg_std: float) -> float:
     Examples
     --------
     >>> from pymove.utils.datetime import _calc_time_threshold
-    >>> print(_calc_time_threshold(12.3,2.1))
+    >>> print(_calc_time_threshold(12.3, 2.1))
     14.4
-    >>> print(_calc_time_threshold(1,1.5))
+    >>> print(_calc_time_threshold(1, 1.5))
     2.5
-    >>> print(_calc_time_threshold(-2,2))
+    >>> print(_calc_time_threshold(-2, 2))
     0.0
-
     """
     threshold = seg_std + seg_mean
-    threshold = float('{:.1f}'.format(threshold))
+    threshold = float(f'{threshold:.1f}')
     return threshold
 
 
 def threshold_time_statistics(
     df_statistics: DataFrame,
-    mean_coef: Optional[float] = 1.0,
-    std_coef: Optional[float] = 1.0,
-    inplace: Optional[bool] = False
-) -> Optional[DataFrame]:
+    mean_coef: float = 1.0,
+    std_coef: float = 1.0,
+    inplace: bool = False
+) -> DataFrame | None:
     """
     Calculates and creates the threshold column.
 
@@ -665,27 +668,27 @@ def threshold_time_statistics(
     -------
     >>> from pymove.utils.datetime import generate_time_statistics
     >>> df
-            local_label   prev_local   time_to_prev   id
-        0         house          NaN            NaN    1
-        1        market        house          720.0    1
-        2        market       market            5.0    1
-        3        market       market            1.0    1
-        4        school       market          844.0    1
+        local_label   prev_local   time_to_prev   id
+    0         house          NaN            NaN    1
+    1        market        house          720.0    1
+    2        market       market            5.0    1
+    3        market       market            1.0    1
+    4        school       market          844.0    1
     >>> statistics = generate_time_statistics(df)
     >>> statistics
-            local_label   prev_local    mean        std     min     max     sum   count
-        0         house       market   844.0   0.000000   844.0   844.0   844.0       1
-        1        market        house   720.0   0.000000   720.0   720.0   720.0       1
-        2        market       market     3.0   2.828427     1.0     5.0     6.0       2
+        local_label   prev_local    mean        std     min     max     sum   count
+    0         house       market   844.0   0.000000   844.0   844.0   844.0       1
+    1        market        house   720.0   0.000000   720.0   720.0   720.0       1
+    2        market       market     3.0   2.828427     1.0     5.0     6.0       2
     >>> threshold_time_statistics(statistics)
-            local_label   prev_local    mean        std     min     max     sum   count
-        0         house       market   844.0   0.000000   844.0   844.0   844.0       1
-        1        market        house   720.0   0.000000   720.0   720.0   720.0       1
-        2        market       market     3.0   2.828427     1.0     5.0     6.0       2
-            threshold
-        0       844.0
-        1       720.0
-        2         5.8
+        local_label   prev_local    mean         std     min \
+                max          sum   count   threshold
+    0         house       market   844.0    0.000000   844.0 \
+              844.0        844.0       1       844.0
+    1        market        house   720.0    0.000000   720.0 \
+              720.0        720.0       1       720.0
+    2        market       market     3.0    2.828427     1.0 \
+                5.0          6.0       2         5.8
     """
     if not inplace:
         df_statistics = df_statistics.copy()

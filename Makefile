@@ -13,20 +13,22 @@ dev:
 
 clean:
 	rm -rf `find . -type d -name .pytest_cache`
+	rm -rf `find . -type d -name .mypy_cache`
 	rm -rf `find . -type d -name __pycache__`
 	rm -rf `find . -type d -name .ipynb_checkpoints`
 	rm -rf docs/_build
 	rm -f .coverage
 
 test: clean
-	pytest
+	pytest pymove
 
 coverage: clean
-	coverage run -m pytest
+	coverage run -m pytest pymove
 	coverage report
 
 lint: clean
-	flake8
+	flake8 pymove
+	mypy pymove
 
 docs: clean
 	cp docs/examples/notebooks.rst docs

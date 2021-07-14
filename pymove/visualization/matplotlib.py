@@ -3,15 +3,17 @@ Matplolib operations.
 
 show_object_id_by_date,
 plot_trajectories,
-plot_traj_by_id,
+plot_trajectory_by_id,
+plot_grid_polygons,
 plot_all_features
 plot_coords,
 plot_bounds,
-plot_line,
+plot_line
 
 """
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Text, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable
 
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import axes, figure
@@ -19,6 +21,7 @@ from pandas.core.frame import DataFrame
 from shapely.geometry import LineString, MultiLineString
 from shapely.geometry.base import BaseGeometry
 
+from pymove.core.grid import Grid
 from pymove.utils.constants import (
     DATE,
     DAY,
@@ -26,7 +29,7 @@ from pymove.utils.constants import (
     LATITUDE,
     LONGITUDE,
     PERIOD,
-    TID,
+    POLYGON,
     TRAJ_ID,
 )
 
@@ -36,14 +39,13 @@ if TYPE_CHECKING:
 
 
 def show_object_id_by_date(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    create_features: Optional[bool] = True,
-    kind: Optional[List] = None,
-    figsize: Optional[Tuple[float, float]] = (21, 9),
-    return_fig: Optional[bool] = True,
-    save_fig: Optional[bool] = True,
-    name: Optional[Text] = 'shot_points_by_date.png',
-) -> Optional[figure]:
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    kind: list | None = None,
+    figsize: tuple[float, float] = (21, 9),
+    return_fig: bool = False,
+    save_fig: bool = False,
+    name: str = 'shot_points_by_date.png',
+) -> figure | None:
     """
     Generates four visualizations based on datetime feature.
 
@@ -56,17 +58,14 @@ def show_object_id_by_date(
     ----------
     move_data : pymove.core.MoveDataFrameAbstract subclass.
         Input trajectory data.
-    create_features : bool, optional
-        Represents whether or not to delete features created for viewing,
-        by default True.
     kind: list, optional
         Determines the kinds of each plot, by default None
     figsize : tuple, optional
         Represents dimensions of figure, by default (21,9).
     return_fig : bool, optional
-        Represents whether or not to save the generated picture, by default True.
+        Represents whether or not to save the generated picture, by default False.
     save_fig : bool, optional
-        Represents whether or not to save the generated picture, by default True.
+        Represents whether or not to save the generated picture, by default False.
     name : String, optional
         Represents name of a file, by default 'shot_points_by_date.png'.
 
@@ -79,12 +78,24 @@ def show_object_id_by_date(
     ----------
     https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
 
+    Examples
+    --------
+    >>> from pymove.visualization.matplotlib import show_object_id_by_date
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> show_object_id_by_date(move_df)
     """
     if kind is None:
         kind = ['bar', 'bar', 'line', 'line']
 
     fig, ax = plt.subplots(2, 2, figsize=figsize)
 
+    columns = move_data.columns
     move_data.generate_date_features()
     move_data.generate_hour_features()
     move_data.generate_time_of_day_features()
@@ -108,11 +119,11 @@ def show_object_id_by_date(
         subplots=True, kind=kind[3], grid=True, ax=ax[1][1], fontsize=12
     )
 
-    if not create_features:
-        move_data.drop(columns=[DATE, HOUR, PERIOD, DAY], inplace=True)
-
     if save_fig:
         plt.savefig(fname=name)
+
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     if return_fig:
         return fig
@@ -120,13 +131,13 @@ def show_object_id_by_date(
 
 def plot_trajectories(
     move_data: DataFrame,
-    markers: Optional[Text] = 'o',
-    markersize: Optional[float] = 12,
-    figsize: Optional[Tuple[float, float]] = (10, 10),
-    return_fig: Optional[bool] = True,
-    save_fig: Optional[bool] = True,
-    name: Optional[Text] = 'trajectories.png',
-) -> Optional[figure]:
+    markers: str = 'o',
+    markersize: float = 12,
+    figsize: tuple[float, float] = (10, 10),
+    return_fig: bool = False,
+    save_fig: bool = False,
+    name: str = 'trajectories.png',
+) -> figure | None:
     """
     Generate a visualization that show trajectories.
 
@@ -141,7 +152,7 @@ def plot_trajectories(
     figsize : tuple(float, float), optional
             Represents dimensions of figure, by default (10, 10)
     return_fig : bool, optional
-        Represents whether or not to return the generated picture, by default True
+        Represents whether or not to return the generated picture, by default False
     save_fig : bool, optional
         Represents whether or not to save the generated picture, by default False
     name : str, optional
@@ -151,6 +162,18 @@ def plot_trajectories(
     -------
     figure
         The generated picture or None
+
+    Examples
+    --------
+    >>>  from pymove.visualization.matplotlib import plot_trajectories
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> plot_trajectories(move_df)
     """
     fig = plt.figure(figsize=figsize)
 
@@ -171,19 +194,19 @@ def plot_trajectories(
         return fig
 
 
-def plot_traj_by_id(
+def plot_trajectory_by_id(
     move_data: DataFrame,
-    id_: Union[int, Text],
-    label: Optional[Text] = TID,
-    feature: Optional[Text] = None,
-    value: Optional[Any] = None,
-    linewidth: Optional[float] = 3,
-    markersize: Optional[float] = 20,
-    figsize: Optional[Tuple[float, float]] = (10, 10),
-    return_fig: Optional[bool] = True,
-    save_fig: Optional[bool] = True,
-    name: Optional[Text] = None,
-) -> Optional[figure]:
+    id_: int | str,
+    label: str = TRAJ_ID,
+    feature: str | None = None,
+    value: Any | None = None,
+    linewidth: float = 3,
+    markersize: float = 20,
+    figsize: tuple[float, float] = (10, 10),
+    return_fig: bool = False,
+    save_fig: bool = False,
+    name: str | None = None,
+) -> figure | None:
     """
     Generate a visualization that shows a trajectory with the specified tid.
 
@@ -206,7 +229,7 @@ def plot_traj_by_id(
     figsize : tuple(float, float), optional
         Represents dimensions of figure, by default (10, 10)
     return_fig : bool, optional
-        Represents whether or not to return the generated picture, by default True
+        Represents whether or not to return the generated picture, by default False
     save_fig : bool, optional
         Represents whether or not to save the generated picture, by default False
     name : str, optional
@@ -225,6 +248,18 @@ def plot_traj_by_id(
     IndexError
         If there is no trajectory with the tid passed
 
+    Examples
+    --------
+    >>> from pymove.visualization.matplotlib import  plot_traj_by_id
+    >>> move_df
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> plot_traj_by_id(move_df_3, 1, label='id)
+    >>> plot_traj_by_id(move_df_3, 2, label='id)
     """
     if label not in move_data:
         raise KeyError('%s feature not in dataframe' % label)
@@ -232,7 +267,7 @@ def plot_traj_by_id(
     df_ = move_data[move_data[label] == id_]
 
     if not len(df_):
-        raise IndexError(f'No trajectory with tid {id_} in dataframe')
+        raise IndexError(f'No trajectory with {label} {id_} in dataframe')
 
     fig = plt.figure(figsize=figsize)
 
@@ -256,10 +291,10 @@ def plot_traj_by_id(
 
     plt.plot(
         df_.iloc[0][LONGITUDE], df_.iloc[0][LATITUDE], 'yo', markersize=markersize
-    )  # start point
+    )
     plt.plot(
         df_.iloc[-1][LONGITUDE], df_.iloc[-1][LATITUDE], 'yX', markersize=markersize
-    )  # end point
+    )
 
     if save_fig:
         if not name:
@@ -270,14 +305,83 @@ def plot_traj_by_id(
         return fig
 
 
+def plot_grid_polygons(
+        data: DataFrame,
+        grid: Grid | None = None,
+        markersize: float = 10,
+        linewidth: float = 2,
+        figsize: tuple[int, int] = (10, 10),
+        return_fig: bool = False,
+        save_fig: bool = False,
+        name: str = 'grid.png',
+) -> figure | None:
+    """
+    Generate a visualization with grid polygons.
+
+    Parameters
+    ----------
+    data : DataFrame
+        Input trajectory data
+    markersize : float, optional
+        Represents visualization size marker, by default 10
+    linewidth : float, optional
+        Represents visualization size line, by default 2
+    figsize : tuple(int, int), optional
+        Represents the size (float: width, float: height) of a figure,
+            by default (10, 10)
+    return_fig : bool, optional
+        Represents whether or not to save the generated picture, by default False
+    save_fig : bool, optional
+        Wether to save the figure, by default False
+    name : str, optional
+        Represents name of a file, by default 'grid.png'
+
+    Returns
+    -------
+    figure
+        The generated picture or None
+
+    Raises
+    ------
+        If the dataframe does not contains the POLYGON feature
+    IndexError
+        If there is no user with the id passed
+
+    """
+    if POLYGON not in data:
+        if grid is None:
+            raise KeyError('POLYGON feature not in dataframe')
+        data = grid.create_all_polygons_to_all_point_on_grid(data)
+
+    data = data.copy()
+
+    data.dropna(subset=[POLYGON], inplace=True)
+
+    fig = plt.figure(figsize=figsize)
+
+    for _, row in data.iterrows():
+        xs, ys = row[POLYGON].exterior.xy
+        plt.plot(ys, xs, 'g', linewidth=linewidth, markersize=markersize)
+    xs_start, ys_start = data.iloc[0][POLYGON].exterior.xy
+    xs_end, ys_end = data.iloc[-1][POLYGON].exterior.xy
+    plt.plot(ys_start, xs_start, 'bo', markersize=markersize * 1.5)
+    plt.plot(ys_end, xs_end, 'bX', markersize=markersize * 1.5)
+
+    if save_fig:
+        plt.savefig(fname=name)
+
+    if return_fig:
+        return fig
+
+
 def plot_all_features(
     move_data: DataFrame,
-    dtype: Optional[Callable] = float,
-    figsize: Optional[Tuple[float, float]] = (21, 15),
-    return_fig: Optional[bool] = True,
-    save_fig: Optional[bool] = True,
-    name: Optional[Text] = 'features.png',
-) -> Optional[figure]:
+    dtype: Callable = float,
+    figsize: tuple[float, float] = (21, 15),
+    return_fig: bool = False,
+    save_fig: bool = False,
+    name: str = 'features.png',
+) -> figure | None:
     """
     Generate a visualization for each columns that type is equal dtype.
 
@@ -290,7 +394,7 @@ def plot_all_features(
     figsize : tuple(float, float), optional
         Represents dimensions of figure, by default (21, 15)
     return_fig : bool, optional
-        Represents whether or not to return the generated picture, by default True
+        Represents whether or not to return the generated picture, by default False
     save_fig : bool, optional
         Represents whether or not to save the generated picture, by default False
     name : str, optional
@@ -306,6 +410,17 @@ def plot_all_features(
     AttributeError
         If there are no columns with the specified type
 
+    Examples
+    --------
+    >>>  from pymove.visualization.matplotlib import plot_all_features
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>>  plot_all_features(move_df)
     """
     col_dtype = move_data.select_dtypes(include=[dtype]).columns
     tam = col_dtype.size
@@ -326,7 +441,7 @@ def plot_all_features(
         return fig
 
 
-def plot_coords(ax: axes, ob: BaseGeometry, color: Optional[Text] = 'r'):
+def plot_coords(ax: axes, ob: BaseGeometry, color: str = 'r'):
     """
     Plot the coordinates of each point of the object in a 2D chart.
 
@@ -341,14 +456,19 @@ def plot_coords(ax: axes, ob: BaseGeometry, color: Optional[Text] = 'r'):
 
     Example
     -------
+    >>> from pymove.visualization.matplotlib import plot_coords
+    >>> import matplotlib.pyplot as plt
+    >>> coords = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    >>> _, ax = plt.subplots(figsize=(21, 9))
+    >>> plot_coords(ax, coords)
     """
     x, y = ob.xy
     ax.plot(x, y, 'o', color=color, zorder=1)
 
 
-def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
+def plot_bounds(ax: axes, ob: LineString | MultiLineString, color='b'):
     """
-    Plot the limites of geometric object.
+    Plot the limits of geometric object.
 
     Parameters
     ----------
@@ -361,7 +481,11 @@ def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
 
     Example
     -------
-
+    >>> from pymove.visualization.matplotlib import plot_bounds
+    >>> import matplotlib.pyplot as plt
+    >>> bounds = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    >>> _, ax = plt.subplots(figsize=(21, 9))
+    >>> plot_bounds(ax, bounds)
     """
     x, y = zip(*list((p.x, p.y) for p in ob.boundary))
     ax.plot(x, y, '-', color=color, zorder=1)
@@ -370,11 +494,11 @@ def plot_bounds(ax: axes, ob: Union[LineString, MultiLineString], color='b'):
 def plot_line(
     ax: axes,
     ob: LineString,
-    color: Optional[Text] = 'r',
-    alpha: Optional[float] = 0.7,
-    linewidth: Optional[float] = 3,
-    solid_capstyle: Optional[Text] = 'round',
-    zorder: Optional[float] = 2
+    color: str = 'r',
+    alpha: float = 0.7,
+    linewidth: float = 3,
+    solid_capstyle: str = 'round',
+    zorder: float = 2
 ):
     """
     Plot a LineString.
@@ -398,6 +522,11 @@ def plot_line(
 
     Example
     -------
+    >>> from pymove.visualization.matplotlib import plot_line
+    >>> import matplotlib.pyplot as plt
+    >>> line = LineString([(1, 1), (1, 2), (2, 2), (2, 3)])
+    >>> _, ax = plt.subplots(figsize=(21, 9))
+    >>> plot_line(ax, line)
     """
     x, y = ob.xy
     ax.plot(

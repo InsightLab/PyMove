@@ -1,4 +1,5 @@
 from numpy import nan
+from numpy.testing import assert_almost_equal
 from pandas import DataFrame, Timestamp
 from pandas.testing import assert_frame_equal
 from shapely.geometry import Point
@@ -39,7 +40,7 @@ def test_lat_meters():
 
     lat_in_meters = conversions.lat_meters(39.984094)
 
-    assert(lat_in_meters == expected)
+    assert_almost_equal(lat_in_meters, expected)
 
 
 def test_list_to_str():
@@ -63,28 +64,28 @@ def test_lon_to_x_spherical():
 
     expected = -4285978.172767829
 
-    assert(conversions.lon_to_x_spherical(-38.501597) == expected)
+    assert_almost_equal(conversions.lon_to_x_spherical(-38.501597), expected)
 
 
 def test_lat_to_y_spherical():
 
     expected = -423086.2213610324
 
-    assert(conversions.lat_to_y_spherical(-3.797864) == expected)
+    assert_almost_equal(conversions.lat_to_y_spherical(-3.797864), expected)
 
 
 def test_x_to_lon_spherical():
 
     expected = -38.50159697513617
 
-    assert(conversions.x_to_lon_spherical(-4285978.17) == expected)
+    assert_almost_equal(conversions.x_to_lon_spherical(-4285978.17), expected)
 
 
 def test_y_to_lat_spherical():
 
     expected = -35.89350841198311
 
-    assert(conversions.y_to_lat_spherical(-4285978.17) == expected)
+    assert_almost_equal(conversions.y_to_lat_spherical(-4285978.17), expected)
 
 
 def test_geometry_points_to_lat_and_lon():

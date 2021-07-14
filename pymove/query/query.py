@@ -5,8 +5,7 @@ range_query,
 knn_query
 
 """
-
-from typing import Optional, Text
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
@@ -20,12 +19,12 @@ from pymove.utils.log import logger, progress_bar
 def range_query(
     traj: DataFrame,
     move_df: DataFrame,
-    _id: Optional[Text] = TRAJ_ID,
-    min_dist: Optional[float] = 1000,
-    distance: Optional[Text] = MEDP,
-    latitude: Optional[Text] = LATITUDE,
-    longitude: Optional[Text] = LONGITUDE,
-    datetime: Optional[Text] = DATETIME
+    _id: str = TRAJ_ID,
+    min_dist: float = 1000,
+    distance: str = MEDP,
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE,
+    datetime: str = DATETIME
 ) -> DataFrame:
     """
     Returns all trajectories that have a distance equal to or less than the trajectory.
@@ -81,7 +80,7 @@ def range_query(
         raise ValueError('Unknown distance measure. Use MEDP or MEDT')
 
     for traj_id in progress_bar(
-        move_df[_id].unique(), desc='Querying range by {}'.format(distance)
+        move_df[_id].unique(), desc=f'Querying range by {distance}'
     ):
         this = move_df.loc[move_df[_id] == traj_id]
         if dist_measure(traj, this, latitude, longitude, datetime) < min_dist:
@@ -93,12 +92,12 @@ def range_query(
 def knn_query(
     traj: DataFrame,
     move_df: DataFrame,
-    k: Optional[int] = 5,
-    id_: Optional[Text] = TRAJ_ID,
-    distance: Optional[Text] = MEDP,
-    latitude: Optional[Text] = LATITUDE,
-    longitude: Optional[Text] = LONGITUDE,
-    datetime: Optional[Text] = DATETIME
+    k: int = 5,
+    id_: str = TRAJ_ID,
+    distance: str = MEDP,
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE,
+    datetime: str = DATETIME
 ) -> DataFrame:
     """
     Returns the k neighboring trajectories closest to the trajectory.
@@ -154,7 +153,7 @@ def knn_query(
         raise ValueError('Unknown distance measure. Use MEDP or MEDT')
 
     for traj_id in progress_bar(
-        move_df[id_].unique(), desc='Querying knn by {}'.format(distance)
+        move_df[id_].unique(), desc=f'Querying knn by {distance}'
     ):
         if (traj_id != traj[id_].values[0]):
             this = move_df.loc[move_df[id_] == traj_id]

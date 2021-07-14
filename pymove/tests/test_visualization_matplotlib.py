@@ -50,8 +50,8 @@ def test_show_object_id_by_date(tmpdir):
 
     mpl.show_object_id_by_date(
         move_data=move_df,
-        create_features=False,
-        name=filename_write_default
+        name=filename_write_default,
+        save_fig=True
     )
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
@@ -64,26 +64,10 @@ def test_show_object_id_by_date(tmpdir):
         in_decorator=False
     )
 
-    assert(HOUR not in move_df)
-    assert(DATE not in move_df)
-    assert(PERIOD not in move_df)
-    assert(DAY not in move_df)
 
-    mpl.show_object_id_by_date(
-        move_data=move_df,
-        create_features=True,
-        name=filename_write_default
-    )
-
-    assert(DATE in move_df)
-    assert(HOUR in move_df)
-    assert(PERIOD in move_df)
-    assert(DAY in move_df)
-
-
-def test_plot_traj_by_id(tmpdir):
+def test_plot_trajectory_by_id(tmpdir):
     move_df = _default_move_df()
-    move_df[TID] = ['1', '1', '2', '2', '2']
+    move_df[TRAJ_ID] = ['1', '1', '2', '2', '2']
 
     d = tmpdir.mkdir('visualization')
 
@@ -92,7 +76,7 @@ def test_plot_traj_by_id(tmpdir):
         file_write_default.dirname, file_write_default.basename
     )
 
-    mpl.plot_traj_by_id(move_df, '1', save_fig=True, name=filename_write_default)
+    mpl.plot_trajectory_by_id(move_df, '1', save_fig=True, name=filename_write_default)
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
     data_dir = os.path.join(test_dir, 'baseline/traj_id.png')
