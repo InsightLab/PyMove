@@ -202,18 +202,18 @@ The library was originally created during the bachelor's thesis of 2 students fr
 
 ```txt
 @mastersthesis{arina2019,
-  title        = {Uma Arquitetura E Implementação Do Módulo De Pré-processamento Para Biblioteca Pymove},
-  author       = {Arina De Jesus Amador Monteiro Sanches},
-  year         = 2019,
-  school       = {Universidade Federal Do Ceará},
-  type         = {Bachelor's thesis}
+	title        = {Uma arquitetura e implementação do módulo de pré-processamento para biblioteca PyMove},
+	author       = {Arina De Jesus Amador Monteiro Sanches},
+	year         = 2019,
+	school       = {Universidade Federal Do Ceará},
+	type         = {Bachelor's thesis}
 }
 @mastersthesis{andreza2019,
-  title        = {Uma Arquitetura E Implementação Do Módulo De Visualizaçãopara Biblioteca Pymove},
-  author       = {Andreza Fernandes De Oliveira},
-  year         = 2019,
-  school       = {Universidade Federal Do Ceará},
-  type         = {Bachelor's thesis}
+	title        = {Uma arquitetura e implementação do módulo de visualização para biblioteca PyMove},
+	author       = {Andreza Fernandes De Oliveira},
+	year         = 2019,
+	school       = {Universidade Federal Do Ceará},
+	type         = {Bachelor's thesis}
 }
 ```
 
@@ -221,8 +221,10 @@ The library was originally created during the bachelor's thesis of 2 students fr
 
 ## Publications
 
--   [Uma Arquitetura E Implementação Do Módulo De Pré-processamento Para Biblioteca Pymove](http://repositorio.ufc.br/handle/riufc/58551)
--   [Uma Arquitetura E Implementação Do Módulo De Visualizaçãopara Biblioteca Pymove](http://repositorio.ufc.br/handle/riufc/58550)
+-   [Uma arquitetura e implementação do módulo de pré-processamento para biblioteca PyMove](http://repositorio.ufc.br/handle/riufc/58551)
+-   [Uma arquitetura e implementação do módulo de visualização para biblioteca PyMove](http://repositorio.ufc.br/handle/riufc/58550)
+-   [Avaliação de técnicas de aumento de dados para trajetórias](http://www.repositorio.ufc.br/handle/riufc/58958)
+-   [Implementação de algoritmos para análise de similaridade de trajetória na biblioteca PyMove](http://www.repositorio.ufc.br/handle/riufc/58957)
 
 ---
 
