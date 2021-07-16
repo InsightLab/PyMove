@@ -199,7 +199,7 @@ def lon_to_x_spherical(lon: float | ndarray) -> float | ndarray:
     Parameters
     ----------
     lon : float
-        Represents longitude.
+        This represents longitude value.
 
     Returns
     -------
@@ -229,7 +229,7 @@ def lat_to_y_spherical(lat: float | ndarray) -> float | ndarray:
     Parameters
     ----------
     lat : float
-        Represents latitude.
+        This represents latitude value.
 
     Returns
     -------
