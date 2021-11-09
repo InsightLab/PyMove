@@ -24,10 +24,10 @@ seconds_to_hours,
 hours_to_seconds
 
 """
-
+from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, List, Optional, Text, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy import ndarray
@@ -109,7 +109,7 @@ def meters_to_eps(
     return radius_meters / earth_radius
 
 
-def list_to_str(input_list: List, delimiter: Text = ',') -> Text:
+def list_to_str(input_list: list, delimiter: str = ',') -> str:
     """
     Concatenates a list elements, joining them by the separator `delimiter`.
 
@@ -138,7 +138,7 @@ def list_to_str(input_list: List, delimiter: Text = ',') -> Text:
     )
 
 
-def list_to_csv_str(input_list: List) -> Text:
+def list_to_csv_str(input_list: list) -> str:
     """
     Concatenates the elements of the list, joining them by ",".
 
@@ -163,7 +163,7 @@ def list_to_csv_str(input_list: List) -> Text:
     return list_to_str(input_list)
 
 
-def list_to_svm_line(original_list: List) -> Text:
+def list_to_svm_line(original_list: list) -> str:
     """
     Concatenates list elements in consecutive element pairs.
 
@@ -188,18 +188,18 @@ def list_to_svm_line(original_list: List) -> Text:
     list_size = len(original_list)
     svm_line = '%s ' % original_list[0]
     for i in range(1, list_size):
-        svm_line += '%s:%s ' % (i, original_list[i])
+        svm_line += f'{i}:{original_list[i]} '
     return svm_line.rstrip()
 
 
-def lon_to_x_spherical(lon: Union[float, ndarray]) -> Union[float, ndarray]:
+def lon_to_x_spherical(lon: float | ndarray) -> float | ndarray:
     """
     Convert longitude to X EPSG:3857 WGS 84/Pseudo-Mercator.
 
     Parameters
     ----------
     lon : float
-        Represents longitude.
+        This represents longitude value.
 
     Returns
     -------
@@ -222,14 +222,14 @@ def lon_to_x_spherical(lon: Union[float, ndarray]) -> Union[float, ndarray]:
     return 6378137 * np.radians(lon)
 
 
-def lat_to_y_spherical(lat: Union[float, ndarray]) -> Union[float, ndarray]:
+def lat_to_y_spherical(lat: float | ndarray) -> float | ndarray:
     """
     Convert latitude to Y EPSG:3857 WGS 84/Pseudo-Mercator.
 
     Parameters
     ----------
     lat : float
-        Represents latitude.
+        This represents latitude value.
 
     Returns
     -------
@@ -252,7 +252,7 @@ def lat_to_y_spherical(lat: Union[float, ndarray]) -> Union[float, ndarray]:
     return 6378137 * np.log(np.tan(np.pi / 4 + np.radians(lat) / 2.0))
 
 
-def x_to_lon_spherical(x: Union[float, ndarray]) -> Union[float, ndarray]:
+def x_to_lon_spherical(x: float | ndarray) -> float | ndarray:
     """
     Convert X EPSG:3857 WGS 84 / Pseudo-Mercator to longitude.
 
@@ -281,7 +281,7 @@ def x_to_lon_spherical(x: Union[float, ndarray]) -> Union[float, ndarray]:
     return np.degrees(x / 6378137.0)
 
 
-def y_to_lat_spherical(y: Union[float, ndarray]) -> Union[float, ndarray]:
+def y_to_lat_spherical(y: float | ndarray) -> float | ndarray:
     """
     Convert Y EPSG:3857 WGS 84 / Pseudo-Mercator to latitude.
 
@@ -312,7 +312,7 @@ def y_to_lat_spherical(y: Union[float, ndarray]) -> Union[float, ndarray]:
 
 def geometry_points_to_lat_and_lon(
     move_data: DataFrame,
-    geometry_label: Text = GEOMETRY,
+    geometry_label: str = GEOMETRY,
     drop_geometry: bool = False,
     inplace: bool = False
 ) -> DataFrame:
@@ -369,8 +369,8 @@ def geometry_points_to_lat_and_lon(
 
 def lat_and_lon_decimal_degrees_to_decimal(
     move_data: DataFrame,
-    latitude: Text = LATITUDE,
-    longitude: Text = LONGITUDE
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE
 ) -> DataFrame:
     """
     Converts latitude and longitude format from decimal degrees to decimal format.
@@ -419,11 +419,11 @@ def lat_and_lon_decimal_degrees_to_decimal(
 
 
 def ms_to_kmh(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_speed: Text = SPEED_TO_PREV,
-    new_label: Text = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_speed: str = SPEED_TO_PREV,
+    new_label: str = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in ms, in label_speed column to kmh.
 
@@ -496,11 +496,11 @@ def ms_to_kmh(
 
 
 def kmh_to_ms(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_speed: Text = SPEED_TO_PREV,
-    new_label: Optional[Text] = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_speed: str = SPEED_TO_PREV,
+    new_label: str | None = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in kmh, in label_speed column to ms.
 
@@ -567,11 +567,11 @@ def kmh_to_ms(
 
 
 def meters_to_kilometers(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_distance: Text = DIST_TO_PREV,
-    new_label: Optional[Text] = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_distance: str = DIST_TO_PREV,
+    new_label: str | None = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in meters, in label_distance column to kilometers.
 
@@ -637,11 +637,11 @@ def meters_to_kilometers(
 
 
 def kilometers_to_meters(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_distance: Text = DIST_TO_PREV,
-    new_label: Optional[Text] = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_distance: str = DIST_TO_PREV,
+    new_label: str | None = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in kilometers, in label_distance column to meters.
 
@@ -708,11 +708,11 @@ def kilometers_to_meters(
 
 
 def seconds_to_minutes(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_time: Text = TIME_TO_PREV,
-    new_label: Optional[Text] = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_time: str = TIME_TO_PREV,
+    new_label: str | None = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in seconds, in label_distance column to minutes.
 
@@ -778,11 +778,11 @@ def seconds_to_minutes(
 
 
 def minute_to_seconds(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_time: Text = TIME_TO_PREV,
-    new_label: Optional[Text] = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_time: str = TIME_TO_PREV,
+    new_label: str | None = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in minutes, in label_distance column to seconds.
 
@@ -849,11 +849,11 @@ def minute_to_seconds(
 
 
 def minute_to_hours(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_time: Text = TIME_TO_PREV,
-    new_label: Optional[Text] = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_time: str = TIME_TO_PREV,
+    new_label: str | None = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in minutes, in label_distance column to hours.
 
@@ -921,11 +921,11 @@ def minute_to_hours(
 
 
 def hours_to_minute(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_time: Text = TIME_TO_PREV,
-    new_label: Optional[Text] = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_time: str = TIME_TO_PREV,
+    new_label: str | None = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in hours, in label_distance column to minute.
 
@@ -992,11 +992,11 @@ def hours_to_minute(
 
 
 def seconds_to_hours(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_time: Text = TIME_TO_PREV,
-    new_label: Optional[Text] = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_time: str = TIME_TO_PREV,
+    new_label: str | None = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in seconds, in label_distance column to hours.
 
@@ -1063,11 +1063,11 @@ def seconds_to_hours(
 
 
 def hours_to_seconds(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_time: Text = TIME_TO_PREV,
-    new_label: Optional[Text] = None,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_time: str = TIME_TO_PREV,
+    new_label: str | None = None,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Convert values, in hours, in label_distance column to seconds.
 

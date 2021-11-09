@@ -11,10 +11,10 @@ object_for_array,
 column_to_array
 
 """
-
+from __future__ import annotations
 
 from itertools import chain
-from typing import Any, Dict, List, Optional, Text, Tuple, Union
+from typing import Any
 
 import numpy as np
 from numpy import ndarray
@@ -29,14 +29,14 @@ from pymove.utils.math import is_number
 
 def read_csv(
     filepath_or_buffer: FilePathOrBuffer,
-    latitude: Text = LATITUDE,
-    longitude: Text = LONGITUDE,
-    datetime: Text = DATETIME,
-    traj_id: Text = TRAJ_ID,
-    type_: Text = TYPE_PANDAS,
+    latitude: str = LATITUDE,
+    longitude: str = LONGITUDE,
+    datetime: str = DATETIME,
+    traj_id: str = TRAJ_ID,
+    type_: str = TYPE_PANDAS,
     n_partitions: int = 1,
     **kwargs
-) -> MoveDataFrame:
+):
     """
     Reads a `csv` file and structures the data.
 
@@ -94,7 +94,7 @@ def read_csv(
     )
 
 
-def invert_dict(d: Dict) -> Dict:
+def invert_dict(d: dict) -> dict:
     """
     Inverts the key:value relation of a dictionary.
 
@@ -119,10 +119,10 @@ def invert_dict(d: Dict) -> Dict:
 
 
 def flatten_dict(
-    d: Dict,
-    parent_key: Text = '',
-    sep: Text = '_'
-) -> Dict:
+    d: dict,
+    parent_key: str = '',
+    sep: str = '_'
+) -> dict:
     """
     Flattens a nested dictionary.
 
@@ -153,7 +153,7 @@ def flatten_dict(
     """
     if not isinstance(d, dict):
         return {parent_key: d}
-    items: List[Tuple[Text, Any]] = []
+    items: list[tuple[str, Any]] = []
     for k, v in d.items():
         new_key = f'{parent_key}{sep}{k}' if parent_key else k
         if isinstance(v, dict):
@@ -163,7 +163,7 @@ def flatten_dict(
     return dict(items)
 
 
-def flatten_columns(data: DataFrame, columns: List) -> DataFrame:
+def flatten_columns(data: DataFrame, columns: list) -> DataFrame:
     """
     Transforms columns containing dictionaries in individual columns.
 
@@ -223,9 +223,9 @@ def flatten_columns(data: DataFrame, columns: List) -> DataFrame:
 
 
 def shift(
-    arr: Union[List, Series, ndarray],
+    arr: list | Series | ndarray,
     num: int,
-    fill_value: Optional[Any] = None
+    fill_value: Any | None = None
 ) -> ndarray:
     """
     Shifts the elements of the given array by the number of periods specified.
@@ -288,7 +288,7 @@ def shift(
     return result
 
 
-def fill_list_with_new_values(original_list: List, new_list_values: List):
+def fill_list_with_new_values(original_list: list, new_list_values: list):
     """
     Copies elements from one list to another.
 
@@ -314,7 +314,7 @@ def fill_list_with_new_values(original_list: List, new_list_values: List):
     original_list[:n] = new_list_values
 
 
-def object_for_array(object_: Text) -> ndarray:
+def object_for_array(object_: str) -> ndarray:
     """
     Transforms an object into an array.
 
@@ -346,7 +346,7 @@ def object_for_array(object_: Text) -> ndarray:
         return conv.astype('object_')
 
 
-def column_to_array(data: DataFrame, column: Text) -> DataFrame:
+def column_to_array(data: DataFrame, column: str) -> DataFrame:
     """
     Transforms all columns values to list.
 

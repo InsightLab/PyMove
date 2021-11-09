@@ -1,6 +1,7 @@
 """MoveDataFrame class."""
+from __future__ import annotations
 
-from typing import Dict, List, Text, Union
+from typing import TYPE_CHECKING
 
 from dateutil.parser._parser import ParserError
 from pandas.core.frame import DataFrame
@@ -14,21 +15,25 @@ from pymove.utils.constants import (
     TYPE_PANDAS,
 )
 
+if TYPE_CHECKING:
+    from pymove.core.dask import DaskMoveDataFrame
+    from pymove.core.pandas import PandasMoveDataFrame
+
 
 class MoveDataFrame:
     """Auxiliary class to check and transform data into Pymove Dataframes."""
 
     @staticmethod
-    def __new__(
+    def __new__(  # type: ignore[misc]
         self,
-        data: Union[DataFrame, Dict, List],
-        latitude: Text = LATITUDE,
-        longitude: Text = LONGITUDE,
-        datetime: Text = DATETIME,
-        traj_id: Text = TRAJ_ID,
-        type_: Text = TYPE_PANDAS,
+        data: DataFrame | dict | list,
+        latitude: str = LATITUDE,
+        longitude: str = LONGITUDE,
+        datetime: str = DATETIME,
+        traj_id: str = TRAJ_ID,
+        type_: str = TYPE_PANDAS,
         n_partitions: int = 1,
-    ):
+    ) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame':
         """
         Creates the PyMove dataframe, which must contain latitude, longitude and datetime.
 
@@ -69,6 +74,9 @@ class MoveDataFrame:
             return DaskMoveDataFrame(
                 data, latitude, longitude, datetime, traj_id, n_partitions
             )
+        raise TypeError(
+            f'Unknown MoveDataFrame type {type_}, use {TYPE_PANDAS} or {TYPE_DASK}'
+        )
 
     @staticmethod
     def has_columns(data: DataFrame) -> bool:
@@ -125,8 +133,8 @@ class MoveDataFrame:
 
     @staticmethod
     def format_labels(
-        current_id: Text, current_lat: Text, current_lon: Text, current_datetime: Text
-    ) -> Dict:
+        current_id: str, current_lat: str, current_lon: str, current_datetime: str
+    ) -> dict:
         """
         Format the labels for the PyMove lib pattern labels output lat, lon and datatime.
 

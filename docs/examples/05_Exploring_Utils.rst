@@ -15,6 +15,7 @@ Imports
 
     import pymove.utils as utils
     import pymove as pm
+    import datetime
 
 Conversions
 -----------
@@ -1256,29 +1257,12 @@ To get date, in string’s format, from timestamp, you can use
 
 
 
-To converts a date in datetime’s format to string’s format, you can use
-**to_str**.
-
-.. code:: ipython3
-
-    import datetime
-    utils.datetime.to_str(datetime.datetime(2018, 6, 29, 8, 15, 27))
-
-
-
-
-.. parsed-literal::
-
-    '2018-06-29 08:15:27'
-
-
-
 To converts a datetime to an int representation in minutes, you can use
 **to_min**.
 
 .. code:: ipython3
 
-    utils.datetime.to_min(datetime.datetime(2018, 6, 29, 8, 15, 27))
+    utils.datetime.datetime_to_min(datetime.datetime(2018, 6, 29, 8, 15, 27))
 
 
 
@@ -1360,7 +1344,7 @@ To get datetime of now, you can use **now_str**.
 
 .. parsed-literal::
 
-    '2021-04-16 22:35:04'
+    '2021-07-13 19:56:01'
 
 
 
@@ -1456,7 +1440,7 @@ the function is called, you can use **elapsed_time_dt**.
 
 .. parsed-literal::
 
-    3827572504825
+    3835166163375
 
 
 
@@ -1591,7 +1575,7 @@ use **array_stats**.
 
 .. parsed-literal::
 
-    (625, 360425, 3)
+    (625.0, 360425.0, 3)
 
 
 
@@ -1760,9 +1744,9 @@ To flatten a dataframe with dict as row values
           <th>lon</th>
           <th>datetime</th>
           <th>id</th>
-          <th>dict_column_a</th>
-          <th>dict_column_b</th>
           <th>dict_column_c</th>
+          <th>dict_column_b</th>
+          <th>dict_column_a</th>
         </tr>
       </thead>
       <tbody>
@@ -1772,9 +1756,9 @@ To flatten a dataframe with dict as row values
           <td>116.319236</td>
           <td>2008-10-23 05:53:05</td>
           <td>1</td>
+          <td>NaN</td>
+          <td>NaN</td>
           <td>1.0</td>
-          <td>NaN</td>
-          <td>NaN</td>
         </tr>
         <tr>
           <th>1</th>
@@ -1792,9 +1776,9 @@ To flatten a dataframe with dict as row values
           <td>116.319402</td>
           <td>2008-10-23 05:53:11</td>
           <td>1</td>
-          <td>NaN</td>
-          <td>NaN</td>
           <td>3.0</td>
+          <td>NaN</td>
+          <td>NaN</td>
         </tr>
       </tbody>
     </table>
@@ -2367,8 +2351,8 @@ Reduce size of dataframe
 .. parsed-literal::
 
     Memory usage of dataframe is 6.64 MB
-    Memory usage after optimization is: 4.15 MB
-    Decreased by 37.5 %
+    Memory usage after optimization is: 2.70 MB
+    Decreased by 59.4 %
 
 
 Create a dataframe with the variables with largest memory footpring
@@ -2417,7 +2401,7 @@ Create a dataframe with the variables with largest memory footpring
         <tr>
           <th>1</th>
           <td>mdf</td>
-          <td>4.2 MiB</td>
+          <td>2.7 MiB</td>
         </tr>
         <tr>
           <th>2</th>
@@ -2446,17 +2430,17 @@ Create a dataframe with the variables with largest memory footpring
         </tr>
         <tr>
           <th>7</th>
-          <td>utils</td>
+          <td>matplotlib</td>
           <td>72.0 B</td>
         </tr>
         <tr>
           <th>8</th>
-          <td>pm</td>
+          <td>sys</td>
           <td>72.0 B</td>
         </tr>
         <tr>
           <th>9</th>
-          <td>datetime</td>
+          <td>os</td>
           <td>72.0 B</td>
         </tr>
       </tbody>

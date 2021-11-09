@@ -4,8 +4,7 @@ Compression operations.
 compress_segment_stop_to_point
 
 """
-
-from typing import Text
+from __future__ import annotations
 
 import numpy as np
 from pandas import DataFrame
@@ -28,11 +27,11 @@ from pymove.utils.log import logger, progress_bar, timer_decorator
 @timer_decorator
 def compress_segment_stop_to_point(
     move_data: DataFrame,
-    label_segment: Text = SEGMENT_STOP,
-    label_stop: Text = STOP,
-    point_mean: Text = 'default',
+    label_segment: str = SEGMENT_STOP,
+    label_stop: str = STOP,
+    point_mean: str = 'default',
     drop_moves: bool = False,
-    label_id: Text = TRAJ_ID,
+    label_id: str = TRAJ_ID,
     dist_radius: float = 30,
     time_radius: float = 900,
     inplace: bool = False,
@@ -94,7 +93,7 @@ def compress_segment_stop_to_point(
 
     """
     if not inplace:
-        move_data = move_data[:]
+        move_data = move_data.copy()
 
     if (label_segment not in move_data) & (label_stop not in move_data):
         create_or_update_move_stop_by_dist_time(
@@ -147,7 +146,7 @@ def compress_segment_stop_to_point(
                 lat_mean[ind_end] = move_data.loc[filter_][LATITUDE].mean()
                 lon_mean[ind_end] = move_data.loc[filter_][LONGITUDE].mean()
         else:
-            logger.debug('There are segments with only one point: {}'.format(idx))
+            logger.debug(f'There are segments with only one point: {idx}')
 
     move_data[LAT_MEAN] = lat_mean
     move_data[LON_MEAN] = lon_mean

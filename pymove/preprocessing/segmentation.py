@@ -8,8 +8,9 @@ by_max_time,
 by_max_speed
 
 """
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Text, Tuple, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -34,7 +35,7 @@ if TYPE_CHECKING:
 
 
 @timer_decorator
-def bbox_split(bbox: Tuple[int, int, int, int], number_grids: int) -> DataFrame:
+def bbox_split(bbox: tuple[int, int, int, int], number_grids: int) -> DataFrame:
     """
     Splits the bounding box in N grids of the same size.
 
@@ -60,7 +61,7 @@ def bbox_split(bbox: Tuple[int, int, int, int], number_grids: int) -> DataFrame:
 
     const_lat = abs(abs(lat_max) - abs(lat_min)) / number_grids
     const_lon = abs(abs(lon_max) - abs(lon_min)) / number_grids
-    logger.debug('const_lat: {}\nconst_lon: {}'.format(const_lat, const_lon))
+    logger.debug(f'const_lat: {const_lat}\nconst_lon: {const_lon}')
 
     move_data = pd.DataFrame(
         columns=['lat_min', 'lon_min', 'lat_max', 'lon_max']
@@ -79,7 +80,7 @@ def bbox_split(bbox: Tuple[int, int, int, int], number_grids: int) -> DataFrame:
     return move_data
 
 
-def _drop_single_point(move_data: DataFrame, label_new_tid: Text, label_id: Text):
+def _drop_single_point(move_data: DataFrame, label_new_tid: str, label_id: str):
     """
     Removes trajectory with single point.
 
@@ -147,7 +148,7 @@ def _filter_and_dist_time_speed(
 
 
 def _filter_or_dist_time_speed(
-    move_data: DataFrame, idx: int, feature: Text, max_between_adj_points: float
+    move_data: DataFrame, idx: int, feature: str, max_between_adj_points: float
 ) -> ndarray:
     """
     Filters the dataframe considering thresholds for time, dist and speed.
@@ -172,7 +173,7 @@ def _filter_or_dist_time_speed(
     return np.nan_to_num(move_data.at[idx, feature]) > max_between_adj_points
 
 
-def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: Text):
+def _prepare_segmentation(move_data: DataFrame, label_id: str, label_new_tid: str):
     """
     Resets the dataframe index, collects unique ids and initiates curr_id and count.
 
@@ -196,7 +197,7 @@ def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: T
 
     """
     if move_data.index.name is None:
-        logger.debug('...setting {} as index'.format(label_id))
+        logger.debug(f'...setting {label_id} as index')
         move_data.set_index(label_id, inplace=True)
     curr_tid = 0
     if label_new_tid not in move_data:
@@ -209,8 +210,8 @@ def _prepare_segmentation(move_data: DataFrame, label_id: Text, label_new_tid: T
 
 def _update_curr_tid_count(
     filter_: ndarray, move_data: DataFrame, idx: int,
-    label_new_tid: Text, curr_tid: int, count: int
-) -> Tuple[int, int]:
+    label_new_tid: str, curr_tid: int, count: int
+) -> tuple[int, int]:
     """
     Updates the tid.
 
@@ -239,7 +240,7 @@ def _update_curr_tid_count(
     """
     curr_tid += 1
     if filter_.shape == ():
-        logger.debug('id: {} has no point to split'.format(idx))
+        logger.debug(f'id: {idx} has no point to split')
         move_data.at[idx, label_new_tid] = curr_tid
         count += 1
     else:
@@ -255,7 +256,7 @@ def _update_curr_tid_count(
 
 
 def _filter_by(
-    move_data: DataFrame, label_id: Text, label_new_tid: Text,
+    move_data: DataFrame, label_id: str, label_new_tid: str,
     drop_single_points: bool, **kwargs
 ) -> DataFrame:
     """
@@ -333,15 +334,15 @@ def _filter_by(
 
 @timer_decorator
 def by_dist_time_speed(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Text = TRAJ_ID,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_id: str = TRAJ_ID,
     max_dist_between_adj_points: float = 3000,
     max_time_between_adj_points: float = 900,
     max_speed_between_adj_points: float = 50.0,
     drop_single_points: bool = True,
-    label_new_tid: Text = TID_PART,
+    label_new_tid: str = TID_PART,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Splits the trajectories into segments based on distance, time and speed.
 
@@ -413,13 +414,13 @@ def by_dist_time_speed(
 
 @timer_decorator
 def by_max_dist(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Text = TRAJ_ID,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_id: str = TRAJ_ID,
     max_dist_between_adj_points: float = 3000,
     drop_single_points: bool = True,
-    label_new_tid: Text = TID_DIST,
+    label_new_tid: str = TID_DIST,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Segments the trajectories based on distance.
 
@@ -480,13 +481,13 @@ def by_max_dist(
 
 @timer_decorator
 def by_max_time(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Text = TRAJ_ID,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_id: str = TRAJ_ID,
     max_time_between_adj_points: float = 900.0,
     drop_single_points: bool = True,
-    label_new_tid: Text = TID_TIME,
+    label_new_tid: str = TID_TIME,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Splits the trajectories into segments based on a maximum.
 
@@ -548,13 +549,13 @@ def by_max_time(
 
 @timer_decorator
 def by_max_speed(
-    move_data: Union['PandasMoveDataFrame', 'DaskMoveDataFrame'],
-    label_id: Text = TRAJ_ID,
+    move_data: 'PandasMoveDataFrame' | 'DaskMoveDataFrame',
+    label_id: str = TRAJ_ID,
     max_speed_between_adj_points: float = 50.0,
     drop_single_points: bool = True,
-    label_new_tid: Text = TID_SPEED,
+    label_new_tid: str = TID_SPEED,
     inplace: bool = False,
-) -> Optional[Union['PandasMoveDataFrame', 'DaskMoveDataFrame']]:
+) -> 'PandasMoveDataFrame' | 'DaskMoveDataFrame' | None:
     """
     Splits the trajectories into segments based on a maximum speed.
 

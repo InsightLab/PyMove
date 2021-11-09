@@ -1,6 +1,7 @@
 """DaskMoveDataFrame class."""
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Text, Union
+from typing import TYPE_CHECKING
 
 import dask
 import numpy as np
@@ -27,11 +28,11 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
 
     def __init__(
         self,
-        data: Union[DataFrame, List, Dict],
-        latitude: Text = LATITUDE,
-        longitude: Text = LONGITUDE,
-        datetime: Text = DATETIME,
-        traj_id: Text = TRAJ_ID,
+        data: DataFrame | list | dict,
+        latitude: str = LATITUDE,
+        longitude: str = LONGITUDE,
+        datetime: str = DATETIME,
+        traj_id: str = TRAJ_ID,
         n_partitions: int = 1,
     ):
         """
@@ -501,8 +502,8 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         raise NotImplementedError('To be implemented')
 
     def convert_to(
-        self, new_type: Text
-    ) -> Union[MoveDataFrame, 'PandasMoveDataFrame', 'DaskMoveDataFrame']:
+        self, new_type: str
+    ) -> MoveDataFrame | 'PandasMoveDataFrame' | 'DaskMoveDataFrame':
         """
         Convert an object from one type to another specified by the user.
 
@@ -530,7 +531,7 @@ class DaskMoveDataFrame(DataFrame, MoveDataFrameAbstractModel):
         else:
             return self
 
-    def get_type(self) -> Text:
+    def get_type(self) -> str:
         """
         Returns the type of the object.
 

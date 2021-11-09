@@ -8,45 +8,40 @@ heatmap_with_time,
 cluster,
 faster_cluster,
 plot_markers,
-plot_trajectories_with_folium,
-plot_trajectory_by_id_folium,
+plot_trajectories,
+plot_trajectory_by_id,
 plot_trajectory_by_period,
 plot_trajectory_by_day_week,
 plot_trajectory_by_date,
 plot_trajectory_by_hour,
 plot_stops,
 plot_bbox,
-plot_points_folium,
-plot_poi_folium,
-plot_event_folium,
-show_trajs_with_event,
-show_traj_id_with_event,
+plot_points,
+plot_poi,
+plot_event,
 plot_traj_timestamp_geo_json
 
 """
+from __future__ import annotations
 
 from datetime import date
-from typing import Any, Dict, List, Optional, Sequence, Text, Tuple, Union
+from typing import Any, Sequence
 
 import folium
 import numpy as np
-import pandas as pd
 from folium import Map, plugins
 from folium.plugins import FastMarkerCluster, HeatMap, HeatMapWithTime, MarkerCluster
 from pandas import DataFrame
 
-from pymove.preprocessing import filters
-from pymove.utils import distances
+from pymove import PandasMoveDataFrame
 from pymove.utils.constants import (
     COUNT,
     DATE,
     DATETIME,
     DAY,
-    EVENT_ID,
     EVENT_POINT,
     HOUR,
     LATITUDE,
-    LINE_COLOR,
     LONGITUDE,
     PERIOD,
     POI_POINT,
@@ -54,7 +49,6 @@ from pymove.utils.constants import (
     STOP,
     TILES,
     TRAJ_ID,
-    UID,
     USER_POINT,
 )
 from pymove.utils.datetime import str_to_datetime
@@ -64,12 +58,12 @@ from pymove.utils.visual import add_map_legend, cmap_hex_color, get_cmap
 
 def save_map(
     move_data: DataFrame,
-    filename: Text,
-    tiles: Text = TILES[0],
-    label_id: Text = TRAJ_ID,
-    cmap: Text = 'Set1',
+    filename: str,
+    tiles: str = TILES[0],
+    label_id: str = TRAJ_ID,
+    cmap: str = 'Set1',
     return_map: bool = False
-) -> Optional[Map]:
+) -> Map | None:
     """
     Save a visualization in a map in a new file.
 
@@ -92,6 +86,18 @@ def save_map(
     -------
     Map
         folium map or None
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import save_map
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> save_map(df, filename='test.map')
     """
     map_ = folium.Map(tiles=tiles)
     map_.fit_bounds(
@@ -122,9 +128,9 @@ def save_map(
 
 def create_base_map(
     move_data: DataFrame,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
-    tile: Text = TILES[0],
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
+    tile: str = TILES[0],
     default_zoom_start: float = 12,
 ) -> Map:
     """
@@ -147,6 +153,18 @@ def create_base_map(
     -------
     Map
         a folium map
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import create_base_map
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> create_base_map(move_df)
     """
     if lat_origin is None and lon_origin is None:
         lat_origin = move_data[LATITUDE].median()
@@ -162,15 +180,15 @@ def create_base_map(
 
 def heatmap(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     radius: float = 8,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'heatmap.html',
+    filename: str = 'heatmap.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -204,6 +222,18 @@ def heatmap(
     -------
     Map
         folium Map
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import heatmap
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> heatmap(move_df)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -235,17 +265,17 @@ def heatmap(
 
 def heatmap_with_time(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     radius: float = 8,
     min_opacity: float = 0.5,
     max_opacity: float = 0.8,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'heatmap_time.html',
+    filename: str = 'heatmap_time.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -283,6 +313,18 @@ def heatmap_with_time(
     -------
     Map
         folium Map
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import heatmap_with_time
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> heatmap_with_time(move_df)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -327,14 +369,14 @@ def heatmap_with_time(
 
 def cluster(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'cluster.html',
+    filename: str = 'cluster.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -368,6 +410,18 @@ def cluster(
     -------
     Map
         folium Map
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import cluster
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> cluster(move_df)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -405,14 +459,14 @@ def cluster(
 
 def faster_cluster(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'faster_cluster.html',
+    filename: str = 'faster_cluster.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -446,6 +500,18 @@ def faster_cluster(
     -------
     Map
         folium Map
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import faster_cluster
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> faster_cluster(move_df)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -478,14 +544,14 @@ def faster_cluster(
 
 def plot_markers(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'markers.html',
+    filename: str = 'markers.html',
 ) -> Map:
     """
     Generate visualization of Heat Map using folium plugin.
@@ -519,6 +585,18 @@ def plot_markers(
     -------
     Map
         folium Map
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_markers
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_markers(move_df)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -566,11 +644,11 @@ def plot_markers(
 
 def _filter_and_generate_colors(
     move_data: DataFrame,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None
-) -> Tuple[DataFrame, List[Tuple[Any, Any]]]:
+    id_: int | None = None,
+    n_rows: int | None = None,
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None
+) -> tuple[DataFrame, list[tuple[Any, Any]]]:
     """
     Filters the dataframe and generate colors for folium map.
 
@@ -595,6 +673,26 @@ def _filter_and_generate_colors(
     list of tuples
         list containing a combination of id and color
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import _filter_and_generate_colors
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> df, colors = _filter_and_generate_colors(move_df)
+    >>> df
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> colors
+    [(1, '#e41a1c'), (2, '#377eb8')]
     """
     if n_rows is None:
         n_rows = move_data.shape[0]
@@ -644,7 +742,7 @@ def _filter_and_generate_colors(
 
 
 def _filter_generated_feature(
-    move_data: DataFrame, feature: Text, values: Any
+    move_data: DataFrame, feature: str, values: Any
 ) -> DataFrame:
     """
     Filters the values from the dataframe.
@@ -663,6 +761,22 @@ def _filter_generated_feature(
     dataframe
         filtered dataframe
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import _filter_generated_feature
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> _filter_generated_feature(move_df, feature='lat', values=[39.984198])
+              lat          lon              datetime   id
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    >>> _filter_generated_feature(move_df, feature='lon', values=[116.319236])
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
     """
     if len(values) == 1:
         mv_df = move_data[move_data[feature] == values[0]]
@@ -676,11 +790,11 @@ def _filter_generated_feature(
     return mv_df
 
 
-def _add_begin_end_markers_to_folium_map(
+def _add_begin_end_markers_to_map(
     move_data: DataFrame,
     base_map: Map,
-    color: Optional[Text] = None,
-    _id: Optional[int] = None
+    color: str | None = None,
+    _id: int | None = None
 ):
     """
     Adds markers to the beggining and end of a trajectory.
@@ -698,6 +812,19 @@ def _add_begin_end_markers_to_folium_map(
         Color of the markers, by default None
     id: int, optional
         Id of the trajectory, by default None
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import _add_begin_end_markers_to_map
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> map = create_base_map(move_df)
+    >>> _add_begin_end_markers_to_map(move_df, map)
     """
     points = folium.map.FeatureGroup(
         'The start and end points of trajectory {}'.format(_id or '')
@@ -726,13 +853,13 @@ def _add_begin_end_markers_to_folium_map(
     base_map.add_child(points)
 
 
-def _add_trajectories_to_folium_map(
+def _add_trajectories_to_map(
     move_data: DataFrame,
-    items: Sequence[Tuple],
+    items: Sequence[tuple],
     base_map: Map,
     legend: bool = True,
     save_as_html: bool = True,
-    filename: Text = 'map.html',
+    filename: str = 'map.html',
 ):
     """
     Adds a trajectory to a folium map with begin and end markers.
@@ -750,11 +877,25 @@ def _add_trajectories_to_folium_map(
     filename : str, optional
         Represents the file name of new file .html, by default 'map.html'.
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import _add_trajectories_to_map
+    >>> move_df
+                   lat          lon              datetime   id
+    0        39.984094   116.319236   2008-10-23 05:53:05    1
+    1        39.984198   116.319322   2008-10-23 05:53:06    1
+    3        39.988118   116.326672   2008-10-25 14:39:19    5
+    4        39.987965   116.326675   2008-10-25 14:39:24    5
+    >>> _add_trajectories_to_map(
+    >>>    move_data=move_df,
+    >>>    base_map=map1,
+    >>>    items=[(1, 'red'), [5, 'green']]
+    >>> )
     """
     for _id, color in items:
         mv = move_data[move_data[TRAJ_ID] == _id]
 
-        _add_begin_end_markers_to_folium_map(mv, base_map, color, _id)
+        _add_begin_end_markers_to_map(mv, base_map, color, _id)
 
         folium.PolyLine(
             mv[[LATITUDE, LONGITUDE]], color=color, weight=2.5, opacity=1
@@ -769,19 +910,19 @@ def _add_trajectories_to_folium_map(
         base_map.save(outfile=filename)
 
 
-def plot_trajectories_with_folium(
+def plot_trajectories(
     move_data: DataFrame,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories_with_folium.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -818,13 +959,24 @@ def plot_trajectories_with_folium(
         by default None.
     filename : str, optional
         Represents the file name of new file .html,
-        by default 'plot_trajectory_with_folium.html'.
+        by default 'plot_trajectory.html'.
 
     Returns
     -------
     Map
         a folium map with visualization.
 
+    Examples
+    --------
+    >>>  from pymove.visualization.folium import plot_trajectories
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_trajectories(move_df)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -839,26 +991,26 @@ def plot_trajectories_with_folium(
         move_data, n_rows=n_rows, color=color, color_by_id=color_by_id
     )
 
-    _add_trajectories_to_folium_map(
+    _add_trajectories_to_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
 
     return base_map
 
 
-def plot_trajectory_by_id_folium(
+def plot_trajectory_by_id(
     move_data: DataFrame,
     id_: int,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    filename: Text = 'plot_trajectories_with_folium.html',
+    color: str | list[str] | None = None,
+    filename: str = 'plot_trajectories.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -894,7 +1046,7 @@ def plot_trajectory_by_id_folium(
         Can be a single color name, a list of colors or a colormap name, by default None.
     filename : str, optional
         Represents the file name of new file .html,
-        by default 'plot_trajectory_by_id_with_folium.html'.
+        by default 'plot_trajectory_by_id.html'.
 
     Returns
     -------
@@ -906,6 +1058,17 @@ def plot_trajectory_by_id_folium(
     IndexError
         If there is no user with the id passed
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_trajectory_by_id
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    2
+    4   39.984217   116.319422   2008-10-23 05:53:21    2
+    >>> plot_trajectory_by_id(move_df, id_=1)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -917,7 +1080,7 @@ def plot_trajectory_by_id_folium(
         )
 
     mv_df, items = _filter_and_generate_colors(move_data, id_, n_rows, color)
-    _add_trajectories_to_folium_map(
+    _add_trajectories_to_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
 
@@ -925,20 +1088,20 @@ def plot_trajectory_by_id_folium(
 
 
 def plot_trajectory_by_period(
-    move_data: DataFrame,
-    period: Text,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    move_data: PandasMoveDataFrame,
+    period: str,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories_by_period.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories_by_period.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -993,6 +1156,17 @@ def plot_trajectory_by_period(
     IndexError
         If there is no user with the id passed
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_trajectory_by_period
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_trajectory_by_period(move_df, period='Early morning')
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1003,33 +1177,36 @@ def plot_trajectory_by_period(
             default_zoom_start=zoom_start,
         )
 
+    columns = move_data.columns
     if PERIOD not in move_data:
         move_data.generate_time_of_day_features()
 
     mv_df = _filter_generated_feature(move_data, PERIOD, [period])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color, color_by_id)
-    _add_trajectories_to_folium_map(
+    _add_trajectories_to_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 
 
 def plot_trajectory_by_day_week(
-    move_data: DataFrame,
-    day_week: Text,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    move_data: PandasMoveDataFrame,
+    day_week: str,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories_by_day_week.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories_by_day_week.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1084,6 +1261,17 @@ def plot_trajectory_by_day_week(
     IndexError
         If there is no user with the id passed
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_trajectory_by_day_week
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_trajectory_by_day_week(move_df, day_week='Friday')
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1094,34 +1282,37 @@ def plot_trajectory_by_day_week(
             default_zoom_start=zoom_start,
         )
 
+    columns = move_data.columns
     if DAY not in move_data:
         move_data.generate_day_of_the_week_features()
 
     mv_df = _filter_generated_feature(move_data, DAY, [day_week])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color, color_by_id)
-    _add_trajectories_to_folium_map(
+    _add_trajectories_to_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 
 
 def plot_trajectory_by_date(
-    move_data: DataFrame,
-    start_date: Union[Text, date],
-    end_date: Union[Text, date],
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    move_data: PandasMoveDataFrame,
+    start_date: str | date,
+    end_date: str | date,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories_by_date.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories_by_date.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1178,6 +1369,21 @@ def plot_trajectory_by_date(
     IndexError
         If there is no user with the id passed
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_trajectory_by_date
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_trajectory_by_date(
+    >>>     move_df,
+    >>>     start_date='2008-10-23 05:53:05',
+    >>>     end_date='2008-10-23 23:43:56'
+    >>> )
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1194,34 +1400,37 @@ def plot_trajectory_by_date(
     if isinstance(end_date, str):
         end_date = str_to_datetime(end_date).date()
 
+    columns = move_data.columns
     if DATE not in move_data:
         move_data.generate_date_features()
 
     mv_df = _filter_generated_feature(move_data, DATE, [start_date, end_date])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color, color_by_id)
-    _add_trajectories_to_folium_map(
+    _add_trajectories_to_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 
 
 def plot_trajectory_by_hour(
-    move_data: DataFrame,
-    start_hour: Text,
-    end_hour: Text,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    move_data: PandasMoveDataFrame,
+    start_hour: str,
+    end_hour: str,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    color_by_id: Optional[Dict] = None,
-    filename: Text = 'plot_trajectories_by_hour.html',
+    color: str | list[str] | None = None,
+    color_by_id: dict | None = None,
+    filename: str = 'plot_trajectories_by_hour.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1278,6 +1487,17 @@ def plot_trajectory_by_hour(
     IndexError
         If there is no user with the id passed
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_trajectory_by_hour
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_trajectory_by_hour(move_df, start_hour=4, end_hour=6)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1288,33 +1508,36 @@ def plot_trajectory_by_hour(
             default_zoom_start=zoom_start,
         )
 
+    columns = move_data.columns
     if HOUR not in move_data:
         move_data.generate_hour_features()
 
     mv_df = _filter_generated_feature(move_data, HOUR, [start_hour, end_hour])
     mv_df, items = _filter_and_generate_colors(mv_df, id_, n_rows, color, color_by_id)
-    _add_trajectories_to_folium_map(
+    _add_trajectories_to_map(
         mv_df, items, base_map, legend, save_as_html, filename
     )
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 
 
 def plot_stops(
-    move_data: DataFrame,
+    move_data: PandasMoveDataFrame,
     radius: float = 0,
     weight: float = 3,
-    id_: Optional[int] = None,
-    n_rows: Optional[int] = None,
-    lat_origin: Optional[float] = None,
-    lon_origin: Optional[float] = None,
+    id_: int | None = None,
+    n_rows: int | None = None,
+    lat_origin: float | None = None,
+    lon_origin: float | None = None,
     zoom_start: float = 12,
     legend: bool = True,
-    base_map: Optional[Map] = None,
-    tile: Text = TILES[0],
+    base_map: Map | None = None,
+    tile: str = TILES[0],
     save_as_html: bool = False,
-    color: Optional[Union[Text, List[Text]]] = None,
-    filename: Text = 'plot_stops.html',
+    color: str | list[str] | None = None,
+    filename: str = 'plot_stops.html',
 ) -> Map:
     """
     Generate visualization of all trajectories with folium.
@@ -1369,6 +1592,17 @@ def plot_stops(
     IndexError
         If there is no user with the id passed
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_stops
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_stops(move_df)
     """
     if base_map is None:
         base_map = create_base_map(
@@ -1379,6 +1613,7 @@ def plot_stops(
             default_zoom_start=zoom_start,
         )
 
+    columns = move_data.columns
     if SITUATION not in move_data:
         move_data.generate_move_and_stop_by_radius(radius=radius)
 
@@ -1405,17 +1640,19 @@ def plot_stops(
 
     if save_as_html:
         base_map.save(outfile=filename)
+    to_drop = list(set(move_data.columns) - set(columns))
+    move_data.drop(columns=to_drop, inplace=True)
 
     return base_map
 
 
 def plot_bbox(
-    bbox_tuple: Tuple[float, float, float, float],
-    base_map: Optional[Map] = None,
-    tiles: Text = TILES[0],
-    color: Text = 'red',
+    bbox_tuple: tuple[float, float, float, float],
+    base_map: Map | None = None,
+    tiles: str = TILES[0],
+    color: str = 'red',
     save_as_html: bool = False,
-    filename: Text = 'bbox.html'
+    filename: str = 'bbox.html'
 ) -> Map:
     """
     Plots a bbox using Folium.
@@ -1442,6 +1679,10 @@ def plot_bbox(
     Map
         folium map with bounding box
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_bbox
+    >>> plot_bbox((39.984094,116.319236,39.997535,116.196345))
     """
     if base_map is None:
         base_map = folium.Map(tiles=tiles)
@@ -1464,7 +1705,7 @@ def plot_bbox(
     return base_map
 
 
-def _format_tags(line: Union[List, Dict], slice_: List) -> Text:
+def _format_tags(line: list | dict, slice_: list) -> str:
     """
     Create or format tags.
 
@@ -1478,18 +1719,38 @@ def _format_tags(line: Union[List, Dict], slice_: List) -> Text:
     -------
     str: formatted html tag
 
+    Examples
+    --------
+    >>> from pymove.visualization.folium import _format_tags, plot_points
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> _format_tags(
+    >>>    line={
+    >>>        'lat': 39.984094,
+    >>>        'lon': 116.319236,
+    >>>        'datetime': '2008-10-23 05:53:05',
+    >>>        'id': 1
+    >>>    },
+    >>>    slice_=['lat', 'lon', 'datetime', 'id']
+    >>> )
+    lat: 39.984094<br/>lon: 116.319236<br/>datetime: 2008-10-23 05:53:05<br/>id: 1
     """
-    map_formated_tags = map(lambda tag: '{}: {}'.format(tag, line[tag]), slice_)
+    map_formated_tags = map(lambda tag: f'{tag}: {line[tag]}', slice_)
 
     return '<br/>'.join(map_formated_tags)
 
 
 def _circle_maker(
     iter_tuple: DataFrame,
-    user_lat: Text,
-    user_lon: Text,
-    slice_tags: List,
-    user_point: Text,
+    user_lat: str,
+    user_lon: str,
+    slice_tags: list,
+    user_point: str,
     radius: float,
     map_: Map
 ):
@@ -1504,12 +1765,34 @@ def _circle_maker(
     user_lon: str.
         Longitude column name.
     slice_tags: list or iterable
-
     user_point: str.
         Point color.
     radius: float.
         radius size.
     map_: Folium map.
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import _circle_maker
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> row = move_df.iloc[0]
+    >>> iter_tuple = (0, row)
+    >>> user_lat = 'lat'
+    >>> user_lon = 'lon'
+    >>> slice_tags = row.keys()
+    >>> user_point = 'pink'
+    >>> radius = 10
+    >>> map_ = create_base_map(move_df)
+    >>> _circle_maker(
+    >>>    iter_tuple, user_lat, user_lon,
+    >>>    slice_tags, user_point, radius, map_
+    >>> )
     """
     _, line = iter_tuple
 
@@ -1527,17 +1810,17 @@ def _circle_maker(
     ).add_to(map_)
 
 
-def plot_points_folium(
+def plot_points(
     move_data: DataFrame,
-    user_lat: Text = LATITUDE,
-    user_lon: Text = LONGITUDE,
-    user_point: Text = USER_POINT,
+    user_lat: str = LATITUDE,
+    user_lon: str = LONGITUDE,
+    user_point: str = USER_POINT,
     radius: float = 2,
-    base_map: Optional[Map] = None,
-    slice_tags: Optional[List] = None,
-    tiles: Text = TILES[0],
+    base_map: Map | None = None,
+    slice_tags: list | None = None,
+    tiles: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'points.html'
+    filename: str = 'points.html'
 ) -> Map:
     """
     Generates a folium map with the trajectories plots and a point.
@@ -1571,6 +1854,18 @@ def plot_points_folium(
     -------
     Map
         A folium map
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_points
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_points(move_df)
     """
     if slice_tags is None:
         slice_tags = list(move_data.columns)
@@ -1602,17 +1897,17 @@ def plot_points_folium(
     return base_map
 
 
-def plot_poi_folium(
+def plot_poi(
     move_data: DataFrame,
-    poi_lat: Text = LATITUDE,
-    poi_lon: Text = LONGITUDE,
-    poi_point: Text = POI_POINT,
+    poi_lat: str = LATITUDE,
+    poi_lon: str = LONGITUDE,
+    poi_point: str = POI_POINT,
     radius: float = 2,
-    base_map: Optional[Map] = None,
-    slice_tags: Optional[List] = None,
-    tiles: Text = TILES[0],
+    base_map: Map | None = None,
+    slice_tags: list | None = None,
+    tiles: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'pois.html'
+    filename: str = 'pois.html'
 ) -> Map:
     """
     Receives a MoveDataFrame and returns a folium map with poi points.
@@ -1644,8 +1939,20 @@ def plot_poi_folium(
     -------
     folium.folium.Map.
         Represents a folium map with visualization.
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_poi
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_poi(move_df)
     """
-    return plot_points_folium(
+    return plot_points(
         move_data,
         user_lat=poi_lat,
         user_lon=poi_lon,
@@ -1659,17 +1966,17 @@ def plot_poi_folium(
     )
 
 
-def plot_event_folium(
+def plot_event(
     move_data: DataFrame,
-    event_lat: Text = LATITUDE,
-    event_lon: Text = LONGITUDE,
-    event_point: Text = EVENT_POINT,
+    event_lat: str = LATITUDE,
+    event_lon: str = LONGITUDE,
+    event_point: str = EVENT_POINT,
     radius: float = 2,
-    base_map: Optional[Map] = None,
-    slice_tags: Optional[List] = None,
-    tiles: Text = TILES[0],
+    base_map: Map | None = None,
+    slice_tags: list | None = None,
+    tiles: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'events.html'
+    filename: str = 'events.html'
 ) -> Map:
     """
     Receives a MoveDataFrame and returns a folium map with events.
@@ -1698,8 +2005,20 @@ def plot_event_folium(
     Returns
     -------
     A folium map.
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_event
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_event(move_df)
     """
-    return plot_points_folium(
+    return plot_points(
         move_data,
         user_lat=event_lat,
         user_lon=event_lon,
@@ -1713,293 +2032,12 @@ def plot_event_folium(
     )
 
 
-def show_trajs_with_event(
-    move_data: DataFrame,
-    window_time_subject: float,
-    df_event: DataFrame,
-    window_time_event: float,
-    radius: float,
-    event_lat: Text = LATITUDE,
-    event_lon: Text = LONGITUDE,
-    event_datetime: Text = DATETIME,
-    user_lat: Text = LATITUDE,
-    user_lon: Text = LONGITUDE,
-    user_datetime: Text = DATETIME,
-    event_id: Text = EVENT_ID,
-    event_point: Text = EVENT_POINT,
-    user_id: Text = UID,
-    user_point: Text = USER_POINT,
-    line_color: Text = LINE_COLOR,
-    slice_event_show: Optional[List] = None,
-    slice_subject_show: Optional[List] = None,
-) -> List[Map]:
-    """
-    Plot a trajectory, including your user_points lat lon and your tags.
-
-    Parameters
-    ----------
-    move_data: DataFrame.
-        Trajectory input data.
-    window_time_subject: float.
-        The subject time window.
-    window_time_event: float.
-        The event time window.
-    radius: float.
-        The radius to use.
-    event_lat: str, optional
-        Event latitude column name, by default LATITUDE.
-    event_lon: str, optional
-        Event longitude column name, by default LONGITUDE.
-    event_datetime: str, optional
-        Event datetime column name, by default DATETIME.
-    user_lat: str, optional
-        User latitude column name, by default LATITUDE.
-    user_lon: str, optional
-        User longitude column name, by default LONGITUDE.
-    user_datetime: str, optional
-        User datetime column name, by default DATETIME.
-    event_id_: str, optional
-        Event id column name, by default TRAJ_ID.
-    event_point: str, optional
-        Event color, by default EVENT_POI.
-    user_id: str, optional
-        User id column name, by default TRAJ_ID.
-    user_point: str, optional
-        User point color, by default USER_POINT.
-    line_color: str, optional
-        Line color, by default 'blue'.
-    slice_event_show: list, optional
-        by default None.
-    slice_subject_show: list, optional
-        by default None.
-
-    Returns
-    -------
-    list of Map
-        A list of folium maps.
-
-    Raises
-    ------
-    ValueError
-        If feature generation fails
-    """
-    # building structure for deltas
-    delta_event = pd.to_timedelta(window_time_event, unit='s')
-    delta_user = pd.to_timedelta(window_time_subject, unit='s')
-
-    # length of df_user
-    len_df_user = move_data.shape[0]
-
-    # building structure for lat and lon array
-    lat_arr = np.zeros(len_df_user)
-    lon_arr = np.zeros(len_df_user)
-
-    # folium map list
-    folium_maps = []
-
-    # for each event in df_event
-    for _, line in df_event.iterrows():
-
-        e_lat = line[event_lat]
-        e_lon = line[event_lon]
-        e_datetime = line[event_datetime]
-        e_id = line[event_id]
-
-        # building time window for event search
-        start_time = pd.to_datetime(e_datetime - delta_event)
-        end_time = pd.to_datetime(e_datetime + delta_event)
-
-        # filtering df_ for time window
-        df_filtered = filters.by_datetime(
-            move_data,
-            start_datetime=start_time,
-            end_datetime=end_time
-        )
-
-        if df_filtered is None:
-            raise ValueError('Filter datetime failed!')
-
-        # length of df_temp
-        len_df_temp = df_filtered.shape[0]
-
-        # using the util part of the array for haversine function
-        lat_arr[:len_df_temp] = e_lat
-        lon_arr[:len_df_temp] = e_lon
-
-        # building distances to event column
-        df_filtered['distances'] = distances.haversine(
-            lat_arr[:len_df_temp],
-            lon_arr[:len_df_temp],
-            df_filtered[user_lat].values,
-            df_filtered[user_lon].values
-        )
-
-        # building nearby column
-        df_filtered['nearby'] = df_filtered['distances'].map(lambda x: (x <= radius))
-
-        # if any data for df_ in event time window is True
-        if df_filtered['nearby'].any():
-
-            # building the df for the first user_points of user in nearby event
-            df_begin = df_filtered[df_filtered['nearby']].sort_values(
-                user_datetime
-            )
-
-            move_data = df_event[df_event[event_id] == e_id]
-
-            base_map = plot_event_folium(
-                move_data,
-                event_lat=event_lat,
-                event_lon=event_lon,
-                event_point=event_point,
-                slice_tags=slice_event_show
-            )
-
-            # keep only the first user_point nearby to event for each user
-            df_begin.drop_duplicates(
-                subset=[user_id, 'nearby'],
-                inplace=True
-            )
-            # for each user nearby to event
-            users = []
-
-            for time_user, id_user in zip(
-                df_begin[user_datetime],
-                df_begin[user_id]
-            ):
-                # making the time window for user
-                start_time = pd.to_datetime(time_user - delta_user)
-                end_time = pd.to_datetime(time_user + delta_user)
-
-                # building the df for one id
-                df_id = move_data[move_data[user_id] == id_user]
-
-                # filtering df_id for time window
-                df_temp = filters.by_datetime(
-                    df_id,
-                    start_datetime=start_time,
-                    end_datetime=end_time
-                )
-
-                users.append(df_temp)
-                # add to folium map created
-                base_map = plot_trajectories_with_folium(
-                    df_temp,
-                    color=[line_color],
-                    base_map=base_map
-                )
-                base_map = plot_points_folium(
-                    df_temp,
-                    user_lat=user_lat,
-                    user_lon=user_lon,
-                    user_point=user_point,
-                    base_map=base_map,
-                    slice_tags=slice_subject_show
-                )
-            # add to folium maps list: (id event, folium map, quantity of user in map, df)
-            folium_maps.append((base_map, pd.concat(users)))
-
-    return folium_maps
-
-
-def show_traj_id_with_event(
-    move_data: DataFrame,
-    window_time_subject: float,
-    df_event: DataFrame,
-    window_time_event: float,
-    radius: float,
-    subject_id: int,
-    event_lat: Text = LATITUDE,
-    event_lon: Text = LONGITUDE,
-    event_datetime: Text = DATETIME,
-    user_lat: Text = LATITUDE,
-    user_lon: Text = LONGITUDE,
-    user_datetime: Text = DATETIME,
-    event_id: Text = EVENT_ID,
-    event_point: Text = EVENT_POINT,
-    user_id: Text = UID,
-    user_point: Text = USER_POINT,
-    line_color: Text = LINE_COLOR,
-    slice_event_show: Optional[List] = None,
-    slice_subject_show: Optional[List] = None,
-) -> Map:
-    """
-    Plot a trajectory, including your user_points lat lon and your tags.
-
-    Parameters
-    ----------
-    move_data: DataFrame.
-        Trajectory input data.
-    window_time_subject: float.
-        The subject time window.
-    window_time_event: float.
-        The event time window.
-    radius: float.
-        The radius to use.
-    subject_id: int
-        Id of the trajectory
-    event_lat: str, optional
-        Event latitude column name, by default LATITUDE.
-    event_lon: str, optional
-        Event longitude column name, by default LONGITUDE.
-    event_datetime: str, optional
-        Event datetime column name, by default DATETIME.
-    user_lat: str, optional
-        User latitude column name, by default LATITUDE.
-    user_lon: str, optional
-        User longitude column name, by default LONGITUDE.
-    user_datetime: str, optional
-        User datetime column name, by default DATETIME.
-    event_id_: str, optional
-        Event id column name, by default TRAJ_ID.
-    event_point: str, optional
-        Event color, by default EVENT_POINT.
-    user_id: str, optional
-        User id column name, by default TRAJ_ID.
-    user_point: str, optional
-        User point color, by default USER_POINT.
-    line_color: str, optional
-        Line color, by default 'blue'.
-    slice_event_show: list, optional
-        by default None.
-    slice_subject_show: list, optional
-        by default None.
-
-    Returns
-    -------
-    Map
-        A list of folium maps.
-    """
-    df_id = move_data[move_data[user_id] == subject_id]
-
-    return show_trajs_with_event(
-        df_id,
-        window_time_subject,
-        df_event,
-        window_time_event,
-        radius,
-        event_lat=event_lat,
-        event_lon=event_lon,
-        event_datetime=event_datetime,
-        user_lat=user_lat,
-        user_lon=user_lon,
-        user_datetime=user_datetime,
-        event_id=event_id,
-        event_point=event_point,
-        user_id=user_id,
-        user_point=user_point,
-        line_color=line_color,
-        slice_event_show=slice_event_show,
-        slice_subject_show=slice_subject_show
-    )[0]
-
-
 def _create_geojson_features_line(
     move_data: DataFrame,
-    label_lat: Text = LATITUDE,
-    label_lon: Text = LONGITUDE,
-    label_datetime: Text = DATETIME
-) -> List:
+    label_lat: str = LATITUDE,
+    label_lon: str = LONGITUDE,
+    label_datetime: str = DATETIME
+) -> list:
     """
     Create geojson features.
 
@@ -2018,6 +2056,53 @@ def _create_geojson_features_line(
     -------
     list
         GeoJSON features.
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import _create_geojson_features_line
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> _create_geojson_features_line(move_df)
+    [
+    {
+        "type":"Feature",
+        "geometry":{
+            "type":"Linestr",
+            "coordinates":[
+                [
+                116.319236,
+                39.984094
+                ],
+                [
+                116.319322,
+                39.984198
+                ]
+            ]
+        },
+        "properties":{
+            "times":[
+                "2008-10-23T05:53:05",
+                "2008-10-23T05:53:06"
+            ],
+            "popup":"lat: 39.984094<br>lon: 116.319236<br> \
+                datetime: 2008-10-23 05:53:05<br>id: 1",
+            "style":{
+                "color":"red",
+                "icon":"circle",
+                "iconstyle":{
+                "color":"red",
+                "weight":4
+                }
+            }
+        }
+    },
+    ...
+    ]
     """
     features = []
 
@@ -2025,7 +2110,11 @@ def _create_geojson_features_line(
     _, last = next(row_iterator)
     columns = move_data.columns
 
-    for i, row in progress_bar(row_iterator, total=move_data.shape[0] - 1) :
+    for i, row in progress_bar(
+        row_iterator,
+        total=move_data.shape[0],
+        desc='Generating GeoJSon'
+    ):
         last_time = last[label_datetime].strftime('%Y-%m-%dT%H:%M:%S')
         next_time = row[label_datetime].strftime('%Y-%m-%dT%H:%M:%S')
 
@@ -2064,12 +2153,12 @@ def _create_geojson_features_line(
 
 def plot_traj_timestamp_geo_json(
     move_data: DataFrame,
-    label_lat: Text = LATITUDE,
-    label_lon: Text = LONGITUDE,
-    label_datetime: Text = DATETIME,
-    tiles: Text = TILES[0],
+    label_lat: str = LATITUDE,
+    label_lon: str = LONGITUDE,
+    label_datetime: str = DATETIME,
+    tiles: str = TILES[0],
     save_as_html: bool = False,
-    filename: Text = 'events.html'
+    filename: str = 'events.html'
 ) -> Map:
     """
     Plot trajectories wit geo_json.
@@ -2095,6 +2184,18 @@ def plot_traj_timestamp_geo_json(
     -------
     Map
         A folium map.
+
+    Examples
+    --------
+    >>> from pymove.visualization.folium import plot_traj_timestamp_geo_json
+    >>> move_df.head()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    1
+    3   39.984211   116.319389   2008-10-23 05:53:16    1
+    4   39.984217   116.319422   2008-10-23 05:53:21    1
+    >>> plot_traj_timestamp_geo_json(move_df)
     """
     features = _create_geojson_features_line(
         move_data,

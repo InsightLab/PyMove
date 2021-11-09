@@ -21,9 +21,9 @@ generate_time_statistics,
 threshold_time_statistics
 
 """
+from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional, Text, Union
 
 import holidays
 from pandas import DataFrame, Timestamp
@@ -44,14 +44,14 @@ from pymove.utils.constants import (
 )
 
 
-def date_to_str(dt: datetime) -> Text:
+def date_to_str(dt: datetime) -> str:
     """
     Get date, in string format, from timestamp.
 
     Parameters
     ----------
     dt : datetime
-        Represents a date
+        This represents a date
 
     Returns
     -------
@@ -73,7 +73,7 @@ def date_to_str(dt: datetime) -> Text:
     return dt.strftime('%Y-%m-%d')
 
 
-def str_to_datetime(dt_str: Text) -> datetime:
+def str_to_datetime(dt_str: str) -> datetime:
     """
     Converts a datetime in string format to datetime format.
 
@@ -107,7 +107,7 @@ def str_to_datetime(dt_str: Text) -> datetime:
         return datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
 
 
-def datetime_to_str(dt: datetime) -> Text:
+def datetime_to_str(dt: datetime) -> str:
     """
     Converts a date in datetime format to string format.
 
@@ -177,7 +177,7 @@ def min_to_datetime(minutes: int) -> datetime:
     Parameters
     ----------
     minutes : int
-        Represents minutes
+        This represents a value in minutes
 
     Returns
     -------
@@ -221,9 +221,9 @@ def to_day_of_week_int(dt: datetime) -> int:
 
 
 def working_day(
-    dt: Union[Text, datetime],
-    country: Text = 'BR',
-    state: Optional[Text] = None
+    dt: str | datetime,
+    country: str = 'BR',
+    state: str | None = None
 ) -> bool:
     """
     Indices if a day specified by the user is a working day.
@@ -280,7 +280,7 @@ def working_day(
     return result
 
 
-def now_str() -> Text:
+def now_str() -> str:
     """
     Get datetime of now.
 
@@ -298,7 +298,7 @@ def now_str() -> Text:
     return datetime_to_str(datetime.now())
 
 
-def deltatime_str(deltatime_seconds: float) -> Text:
+def deltatime_str(deltatime_seconds: float) -> str:
     """
     Convert time in a format appropriate of time.
 
@@ -327,14 +327,14 @@ def deltatime_str(deltatime_seconds: float) -> Text:
     hours, rem = divmod(deltatime_seconds, 3600)
     minutes, seconds = divmod(rem, 60)
     if hours:
-        return '{:0>2}h:{:0>2}m:{:05.2f}s'.format(int(hours), int(minutes), seconds)
+        return f'{int(hours):0>2}h:{int(minutes):0>2}m:{seconds:05.2f}s'
     elif minutes:
-        return '{:0>2}m:{:05.2f}s'.format(int(minutes), seconds)
+        return f'{int(minutes):0>2}m:{seconds:05.2f}s'
     else:
-        return '{:05.2f}s'.format(seconds)
+        return f'{seconds:05.2f}s'
 
 
-def timestamp_to_millis(timestamp: Text) -> int:
+def timestamp_to_millis(timestamp: str) -> int:
     """
     Converts a local datetime to a POSIX timestamp in milliseconds (like in Java).
 
@@ -380,7 +380,7 @@ def millis_to_timestamp(milliseconds: float) -> Timestamp:
     return Timestamp(milliseconds, unit='ms')
 
 
-def time_to_str(time: Timestamp) -> Text:
+def time_to_str(time: Timestamp) -> str:
     """
     Get time, in string format, from timestamp.
 
@@ -403,7 +403,7 @@ def time_to_str(time: Timestamp) -> Text:
     return time.strftime('%H:%M:%S')
 
 
-def str_to_time(dt_str: Text) -> datetime:
+def str_to_time(dt_str: str) -> datetime:
     """
     Converts a time in string format "%H:%M:%S" to datetime format.
 
@@ -491,10 +491,10 @@ def create_time_slot_in_minute(
     data: DataFrame,
     slot_interval: int = 15,
     initial_slot: int = 0,
-    label_datetime: Text = DATETIME,
-    label_time_slot: Text = TIME_SLOT,
+    label_datetime: str = DATETIME,
+    label_time_slot: str = TIME_SLOT,
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Partitions the time in slot windows.
 
@@ -537,7 +537,7 @@ def create_time_slot_in_minute(
     3   39.984224   116.319402   2008-10-23 06:10:15   1          24
     """
     if data.dtypes[label_datetime] != 'datetime64[ns]':
-        raise ValueError('{} colum must be of type datetime'.format(label_datetime))
+        raise ValueError(f'{label_datetime} colum must be of type datetime')
     if not inplace:
         data = data.copy()
     minute_day = data[label_datetime].dt.hour * 60 + data[label_datetime].dt.minute
@@ -548,7 +548,7 @@ def create_time_slot_in_minute(
 
 def generate_time_statistics(
     data: DataFrame,
-    local_label: Text = LOCAL_LABEL
+    local_label: str = LOCAL_LABEL
 ):
     """
     Calculates time statistics of the pairwise local labels.
@@ -631,7 +631,7 @@ def _calc_time_threshold(seg_mean: float, seg_std: float) -> float:
     0.0
     """
     threshold = seg_std + seg_mean
-    threshold = float('{:.1f}'.format(threshold))
+    threshold = float(f'{threshold:.1f}')
     return threshold
 
 
@@ -640,7 +640,7 @@ def threshold_time_statistics(
     mean_coef: float = 1.0,
     std_coef: float = 1.0,
     inplace: bool = False
-) -> Optional[DataFrame]:
+) -> DataFrame | None:
     """
     Calculates and creates the threshold column.
 
