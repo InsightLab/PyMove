@@ -1,4 +1,6 @@
-from pandas import DataFrame, Timestamp
+from datetime import timedelta
+
+from pandas import DataFrame, Timedelta, Timestamp
 from pandas.testing import assert_frame_equal
 
 from pymove import MoveDataFrame
@@ -281,6 +283,182 @@ expected_knn_medt_data = [[16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
                           [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
                           '             HELENE']]
 
+expected__datetime_filter = [[11.6, -46.7, Timestamp('2012-08-01 12:00:00'),
+                             '            ERNESTO', Timedelta('801 days 06:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [12.0, -48.2, Timestamp('2012-08-01 18:00:00'),
+                             '            ERNESTO', Timedelta('801 days 00:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [12.4, -49.9, Timestamp('2012-08-02 00:00:00'),
+                             '            ERNESTO', Timedelta('800 days 18:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [12.7, -51.7, Timestamp('2012-08-02 06:00:00'),
+                             '            ERNESTO', Timedelta('800 days 12:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.0, -53.6, Timestamp('2012-08-02 12:00:00'),
+                             '            ERNESTO', Timedelta('800 days 06:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.2, -55.5, Timestamp('2012-08-02 18:00:00'),
+                             '            ERNESTO', Timedelta('800 days 00:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.4, -57.5, Timestamp('2012-08-03 00:00:00'),
+                             '            ERNESTO', Timedelta('799 days 18:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.6, -59.7, Timestamp('2012-08-03 06:00:00'),
+                             '            ERNESTO', Timedelta('799 days 12:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.7, -61.6, Timestamp('2012-08-03 12:00:00'),
+                             '            ERNESTO', Timedelta('799 days 06:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.8, -63.3, Timestamp('2012-08-03 18:00:00'),
+                             '            ERNESTO', Timedelta('799 days 00:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.6, -44.6, Timestamp('2012-08-10 00:00:00'),
+                             '             HELENE', Timedelta('792 days 18:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.5, -46.3, Timestamp('2012-08-10 06:00:00'),
+                             '             HELENE', Timedelta('792 days 12:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.4, -48.2, Timestamp('2012-08-10 12:00:00'),
+                             '             HELENE', Timedelta('792 days 06:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.4, -50.5, Timestamp('2012-08-10 18:00:00'),
+                             '             HELENE', Timedelta('792 days 00:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.4, -52.9, Timestamp('2012-08-11 00:00:00'),
+                             '             HELENE', Timedelta('791 days 18:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.4, -55.4, Timestamp('2012-08-11 06:00:00'),
+                             '             HELENE', Timedelta('791 days 12:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.3, -57.9, Timestamp('2012-08-11 12:00:00'),
+                             '             HELENE', Timedelta('791 days 06:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.3, -59.9, Timestamp('2012-08-11 18:00:00'),
+                             '             HELENE', Timedelta('791 days 00:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')],
+                             [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
+                             '             HELENE', Timedelta('790 days 18:00:00'),
+                             '            GONZALO', 16.4, -54.9,
+                             Timestamp('2014-10-11 18:00:00')]]
+
+expected__meters_filter = [[11.6, -46.7, Timestamp('2012-08-01 12:00:00'),
+                           '            ERNESTO', 1066161.6471417674, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [12.0, -48.2, Timestamp('2012-08-01 18:00:00'),
+                           '            ERNESTO', 900938.714887712, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [12.4, -49.9, Timestamp('2012-08-02 00:00:00'),
+                           '            ERNESTO', 721970.410639291, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [12.7, -51.7, Timestamp('2012-08-02 06:00:00'),
+                           '            ERNESTO', 555014.4613063192, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.0, -53.6, Timestamp('2012-08-02 12:00:00'),
+                           '            ERNESTO', 417258.69534832065, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.2, -55.5, Timestamp('2012-08-02 18:00:00'),
+                           '            ERNESTO', 374504.9191824335, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.4, -57.5, Timestamp('2012-08-03 00:00:00'),
+                           '            ERNESTO', 450805.43534718483, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.6, -59.7, Timestamp('2012-08-03 06:00:00'),
+                           '            ERNESTO', 624231.4229153295, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.7, -61.6, Timestamp('2012-08-03 12:00:00'),
+                           '            ERNESTO', 808188.0577929622, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.8, -63.3, Timestamp('2012-08-03 18:00:00'),
+                           '            ERNESTO', 981971.5317471786, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.6, -44.6, Timestamp('2012-08-10 00:00:00'),
+                           '             HELENE', 1191143.517942208, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.5, -46.3, Timestamp('2012-08-10 06:00:00'),
+                           '             HELENE', 1013996.5382597771, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.4, -48.2, Timestamp('2012-08-10 12:00:00'),
+                           '             HELENE', 822030.1743065921, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.4, -50.5, Timestamp('2012-08-10 18:00:00'),
+                           '             HELENE', 599470.6884598556, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.4, -52.9, Timestamp('2012-08-11 00:00:00'),
+                           '             HELENE', 411124.72610444814, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.4, -55.4, Timestamp('2012-08-11 06:00:00'),
+                           '             HELENE', 350076.3224643749, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.3, -57.9, Timestamp('2012-08-11 12:00:00'),
+                           '             HELENE', 488900.00555183407, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.3, -59.9, Timestamp('2012-08-11 18:00:00'),
+                           '             HELENE', 661283.3582634325, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')],
+                           [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
+                           '             HELENE', 797018.0293108114, '            GONZALO',
+                           16.4, -54.9, Timestamp('2014-10-11 18:00:00')]]
+
+expected_query_all_points_by_range = [[13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
+                                      '             HELENE', 513299.9786988872, '            GONZALO',
+                                      16.4, -57.9, Timestamp('2014-10-12 12:00:00'),
+                                      Timedelta('791 days 12:00:00')],
+                                      [13.3, -59.9, Timestamp('2012-08-11 18:00:00'),
+                                      '             HELENE', 488900.0055518347, '            GONZALO',
+                                      16.4, -56.9, Timestamp('2014-10-12 06:00:00'),
+                                      Timedelta('791 days 12:00:00')],
+                                      [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
+                                      '             HELENE', 602173.6463646247, '            GONZALO',
+                                      16.4, -56.9, Timestamp('2014-10-12 06:00:00'),
+                                      Timedelta('791 days 06:00:00')],
+                                      [13.3, -57.9, Timestamp('2012-08-11 12:00:00'),
+                                      '             HELENE', 420788.62897684716, '            GONZALO',
+                                      16.4, -55.9, Timestamp('2014-10-12 00:00:00'),
+                                      Timedelta('791 days 12:00:00')],
+                                      [13.3, -59.9, Timestamp('2012-08-11 18:00:00'),
+                                      '             HELENE', 570760.3863635769, '            GONZALO',
+                                      16.4, -55.9, Timestamp('2014-10-12 00:00:00'),
+                                      Timedelta('791 days 06:00:00')],
+                                      [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
+                                      '             HELENE', 697519.455413829, '            GONZALO',
+                                      16.4, -55.9, Timestamp('2014-10-12 00:00:00'),
+                                      Timedelta('791 days 00:00:00')],
+                                      [13.4, -55.4, Timestamp('2012-08-11 06:00:00'),
+                                      '             HELENE', 350076.3224643749, '            GONZALO',
+                                      16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
+                                      Timedelta('791 days 12:00:00')],
+                                      [13.3, -57.9, Timestamp('2012-08-11 12:00:00'),
+                                      '             HELENE', 488900.00555183407, '            GONZALO',
+                                      16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
+                                      Timedelta('791 days 06:00:00')],
+                                      [13.3, -59.9, Timestamp('2012-08-11 18:00:00'),
+                                      '             HELENE', 661283.3582634325, '            GONZALO',
+                                      16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
+                                      Timedelta('791 days 00:00:00')],
+                                      [13.5, -61.4, Timestamp('2012-08-12 00:00:00'),
+                                      '             HELENE', 797018.0293108114, '            GONZALO',
+                                      16.4, -54.9, Timestamp('2014-10-11 18:00:00'),
+                                      Timedelta('790 days 18:00:00')]]
+
 
 def _default_traj_df(data=None):
     if data is None:
@@ -348,3 +526,48 @@ def test_knn_query():
 
     medt_move_df = query.knn_query(traj_df, move_df, k=2, distance='MEDT')
     assert_frame_equal(medt_move_df, expected_medt)
+
+def test__datetime_filter():
+    traj_df = _default_traj_df()
+    firstpoint = traj_df.iloc[0]
+    move_df = _default_move_df()
+    expected = DataFrame(
+        data=expected__datetime_filter,
+        columns=['lat', 'lon', 'datetime', 'id', 'temporal_distance', 'target_id',
+                 'target_lat', 'target_lon', 'target_datetime'],
+        index=[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+               37, 38]
+    )
+
+    result = query._datetime_filter(firstpoint, move_df, timedelta(hours=20000))
+    assert_frame_equal(result, expected)
+
+
+def test__meters_filter():
+    traj_df = _default_traj_df()
+    firstpoint = traj_df.iloc[0]
+    move_df = _default_move_df()
+    expected = DataFrame(
+        data=expected__meters_filter,
+        columns=['lat', 'lon', 'datetime', 'id', 'spatial_distance', 'target_id',
+                 'target_lat', 'target_lon', 'target_datetime'],
+        index=[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+               37, 38]
+    )
+
+    result = query._meters_filter(firstpoint, move_df, 2000000)
+    assert_frame_equal(result, expected)
+
+
+def test_query_all_points_by_range():
+    traj_df = _default_traj_df();
+    move_df = _default_move_df();
+    expected = DataFrame(
+        data=expected_query_all_points_by_range,
+        columns=['lat', 'lon', 'datetime', 'id', 'spatial_distance', 'target_id',
+                'target_lat', 'target_lon', 'target_datetime', 'temporal_distance'],
+        index=[38, 37, 38, 36, 37, 38, 35, 36, 37, 38]
+    )
+
+    result = query.query_all_points_by_range(traj_df, move_df, minimum_meters=1900000, minimum_time=timedelta(hours=19000))
+    assert_frame_equal(result, expected)
