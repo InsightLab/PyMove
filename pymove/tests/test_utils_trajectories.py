@@ -186,10 +186,7 @@ def test_append_trajectory():
     graph = build_transition_graph_from_df(traj_df)
 
     expected = pd.DataFrame({
-        TRAJ_ID: [[1, 1, 1], [2, 2, 2, 2],
-                  ['216363698b529b4a97b750923ceb3ffd',
-                   '216363698b529b4a97b750923ceb3ffd',
-                   '216363698b529b4a97b750923ceb3ffd']],
+        TRAJ_ID: [[1, 1, 1], [2, 2, 2, 2], [3, 3, 3]],
         DATETIME: [[pd.Timestamp('2017-09-02 22:00:27'), pd.Timestamp('2017-09-02 22:01:36'),
                     pd.Timestamp('2017-09-02 22:03:08')],
                    [pd.Timestamp('2017-09-02 23:03:46'), pd.Timestamp('2017-09-02 23:07:19'),
