@@ -21,10 +21,10 @@ from pymove.utils.constants import (
 )
 from pymove.utils.networkx import build_transition_graph_from_df
 from pymove.utils.trajectories import (
-    append_trajectory, 
-    split_trajectory,
+    append_trajectory,
+    columns_to_array,
     object_for_array,
-    columns_to_array
+    split_trajectory,
 )
 
 list_data = [
@@ -59,7 +59,7 @@ list_data4 = {
                 pd.Timestamp('2017-09-02 22:03:08')],
                [pd.Timestamp('2017-09-02 23:03:46'),
                 pd.Timestamp('2017-09-02 23:07:19'),
-                pd.Timestamp('2017-09-02 23:07:40'), 
+                pd.Timestamp('2017-09-02 23:07:40'),
                 pd.Timestamp('2017-09-02 23:09:10')]],
     LOCAL_LABEL: [[85, 673, 394], [263, 224, 623, 394]],
     LATITUDE: [[-3.8347478, -3.8235834, -3.813889],

@@ -62,24 +62,24 @@ list_data1 = {
 
 def _transition_graph():
     expected_graph = DiGraph()
-    expected_graph.add_node('85', coords=(-3.8347478, -38.592189), 
+    expected_graph.add_node('85', coords=(-3.8347478, -38.592189),
                    datetime=['2017-09-02 22:00:27'], freq_source=1, freq_target=0)
-    expected_graph.add_node('673', coords=(-3.8235834, -38.590389), 
+    expected_graph.add_node('673', coords=(-3.8235834, -38.590389),
                    datetime=['2017-09-02 22:01:36'], freq_source=0, freq_target=0)
-    expected_graph.add_node('394', coords=(-3.813889, -38.5904445), 
+    expected_graph.add_node('394', coords=(-3.813889, -38.5904445),
                    datetime=['2017-09-02 22:03:08'], freq_source=0, freq_target=0)
-    expected_graph.add_node('263', coords=(-3.9067654, -38.5907723), 
+    expected_graph.add_node('263', coords=(-3.9067654, -38.5907723),
                    datetime=['2017-09-02 22:03:46'], freq_source=0, freq_target=0)
-    expected_graph.add_node('224', coords=(-3.8857223, -38.5928892), 
+    expected_graph.add_node('224', coords=(-3.8857223, -38.5928892),
                    datetime=['2017-09-02 22:07:19'], freq_source=0, freq_target=0)
-    expected_graph.add_node('623', coords=(-3.8828723, -38.5929789), 
+    expected_graph.add_node('623', coords=(-3.8828723, -38.5929789),
                datetime=['2017-09-02 22:07:40'], freq_source=0, freq_target=1)
     expected_graph.add_edge( '85', '673', weight=1, mean_times='0 days 00:01:09')
     expected_graph.add_edge('673', '394', weight=1, mean_times='0 days 00:01:32')
     expected_graph.add_edge('394', '263', weight=1, mean_times='0 days 00:00:38')
     expected_graph.add_edge('263', '224', weight=1, mean_times='0 days 00:03:33')
     expected_graph.add_edge('224', '623', weight=1, mean_times='0 days 00:00:21')
-    
+
     return expected_graph
 
 

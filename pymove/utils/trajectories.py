@@ -15,6 +15,7 @@ column_to_array
 """
 from __future__ import annotations
 
+from ast import literal_eval
 from itertools import chain
 from typing import Any, Generator, Text
 
@@ -27,16 +28,15 @@ from pandas import read_csv as _read_csv
 from pandas._typing import FilePathOrBuffer
 
 from pymove.core.dataframe import MoveDataFrame
-from pymove.utils.networkx import graph_to_dict
 from pymove.utils.constants import (
     DATETIME,
     LATITUDE,
     LOCAL_LABEL,
     LONGITUDE,
-    TID_STAT,
     TRAJ_ID,
     TYPE_PANDAS,
 )
+from pymove.utils.networkx import graph_to_dict
 
 
 def read_csv(
@@ -484,19 +484,19 @@ def object_for_array(object_: str) -> ndarray:
     >>> from pymove.utils.trajectories import object_for_array
     >>>
     >>> object_1, object_2, object_3
-    ('[1, 2, 3]', '[1.5, 2.5, 3.5]', '[event, event]')
+    ('[1, 2, 3]', '[1.5, 2.5, 3.5]', "['event', 'event']")
     >>>
     >>> object_for_array(object_1)
     [1, 2, 3]
     >>> object_for_array(object_2)
     [1.5, 2.5, 3.5]
     >>> object_for_array(object_3)
-    [event, event]
+    ['event', 'event'   ]
     """
     if object_ is None:
         return object_
 
-    return eval('[' + object_ + ']', {'nan': np.nan})[0]
+    return literal_eval('[' + object_ + ']')[0]
 
 
 def columns_to_array(

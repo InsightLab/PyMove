@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 from numpy.testing import assert_array_almost_equal
 from pandas.testing import assert_frame_equal
@@ -19,9 +18,9 @@ from pymove.utils.constants import (
 from pymove.utils.data_augmentation import (
     _augmentation,
     append_row,
+    flatten_trajectories_dataframe,
     generate_trajectories_df,
     get_all_paths,
-    flatten_trajectories_dataframe,
     instance_crossover_augmentation,
     sliding_window,
     split_crossover,
