@@ -27,7 +27,7 @@ from pandas import read_csv as _read_csv
 from pandas._typing import FilePathOrBuffer
 
 from pymove.core.dataframe import MoveDataFrame
-from pymove.util.networkx import graph_to_dict
+from pymove.utils.networkx import graph_to_dict
 from pymove.utils.constants import (
     DATETIME,
     LATITUDE,
