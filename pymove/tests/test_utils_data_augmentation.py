@@ -321,11 +321,7 @@ def test_transition_graph_augmentation_all_vertex():
     traj_df = pd.DataFrame(list_data4)
 
     expected = pd.DataFrame({
-        TRAJ_ID: [[1, 1, 1], [2, 2, 2, 2],
-                  ['216363698b529b4a97b750923ceb3ffd', '216363698b529b4a97b750923ceb3ffd',
-                   '216363698b529b4a97b750923ceb3ffd'],
-                  ['b8a1abcd1a6916c74da4f9fc3c6da5d7', 'b8a1abcd1a6916c74da4f9fc3c6da5d7',
-                   'b8a1abcd1a6916c74da4f9fc3c6da5d7']],
+        TRAJ_ID: [[1, 1, 1], [2, 2, 2, 2], [3, 3, 3], [4, 4, 4]],
         DATETIME: [[pd.Timestamp('2017-09-02 22:00:27'), pd.Timestamp('2017-09-02 22:01:36'),
                     pd.Timestamp('2017-09-02 22:03:08')],
                    [pd.Timestamp('2017-09-02 23:03:46'), pd.Timestamp('2017-09-02 23:07:19'),
@@ -343,10 +339,7 @@ def test_transition_graph_augmentation_all_vertex():
         LONGITUDE: [[-38.592189, -38.590389, -38.5904445],
                     [-38.5907723, -38.5928892, -38.5929789, -38.70409],
                     [-38.5907723, -38.5928892, -38.5929789],
-                    [-38.5928892, -38.5929789, -38.70409]],
-        PREV_LOCAL: [[np.nan, 85, 673], [np.nan, 263, 224, 623],
-                     [np.nan, 263.0, 224.0], [np.nan, 224.0, 623.0]],
-        TID_STAT: [[1, 1, 1], [2, 2, 2, 2], [3, 3, 3], [4, 4, 4]]
+                    [-38.5928892, -38.5929789, -38.70409]]
     })
 
     transition_graph_augmentation_all_vertex(traj_df)
