@@ -312,7 +312,7 @@ def test_get_all_paths():
                         [-38.5928892, -38.5929789, -38.70409]]
         })
 
-    get_all_paths(traj_df, graph, 224, 394)
+    get_all_paths(traj_df, graph, '224', '394')
     assert_frame_equal(traj_df, expected)
 
 
