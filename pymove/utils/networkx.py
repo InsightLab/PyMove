@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, Optional, Text, Union
+from typing import Dict, Text
 
 import networkx as nx
 import pandas as pd
@@ -32,12 +32,12 @@ def _populate_graph(
 ):
     """
     Populate Transition Graph.
-    
+
     Insert the nodes and edges in the transition graph with all the
     necessary attributes for the execution of the search and
     recovery operations of paths / trajectories. The required
     parameters are: latitude, longitude and datetime.
-    
+
     Parameters
     ----------
     row: Series
@@ -48,7 +48,7 @@ def _populate_graph(
         Attributes of the transition graph edges.
     label_local: str, optional
         Name of the column referring to the trajectories, by default LOCAL_LABEL
-        
+
     Example
     -------
     >>> from pymove.utils.networkx import _populate_graph
@@ -136,21 +136,21 @@ def _populate_graph(
 def build_transition_graph_from_dict(dict_graph: Dict) -> DiGraph:
     """
     Built Graph from Dict.
-    
+
     It builds a transition graph from a dictionary
     with nodes and edges and all necessary parameters.
     Example: {'nodes': nodes, 'edges': edges}.
-    
+
     Parameters
     ----------
     dict_graph: dict
         Dictionary with the attributes of nodes and edges.
-        
+
     Return
     ------
     graph: DiGraph
         Transition graph constructed from trajectory data.
-        
+
     Example
     -------
     >>> from pymove.utils.networkx import build_transition_graph_from_dict
@@ -202,19 +202,19 @@ def build_transition_graph_from_dict(dict_graph: Dict) -> DiGraph:
 def build_transition_graph_from_df(data: DataFrame) -> DiGraph:
     """
     Build Graph from data.
-    
+
     Constructs a Transition Graph from trajectory data.
-    
+
     Parameters
     ----------
     data: DataFrame
         Trajectory data in sequence format.
-        
+
     Return
     ------
     graph: DiGraph
         Transition graph constructed from trajectory data.
-        
+
     Example
     -------
     >>> from pymove.utils.networkx import build_transition_graph_from_df
@@ -241,11 +241,11 @@ def build_transition_graph_from_df(data: DataFrame) -> DiGraph:
                  ('263', '224'), ('224', '623')])
     >>>
     >>> graph.adj
-    AdjacencyView({ '85': {'673': {'weight': 1, 'mean_times': '0 days 00:01:09'}}, 
-                   '673': {'394': {'weight': 1, 'mean_times': '0 days 00:01:32'}}, 
-                   '263': {'224': {'weight': 1, 'mean_times': '0 days 00:03:33'}}, 
-                   '224': {'623': {'weight': 1, 'mean_times': '0 days 00:00:21'}}, 
-                   '623': {'394': {'weight': 1, 'mean_times': '0 days 00:01:30'}}, 
+    AdjacencyView({ '85': {'673': {'weight': 1, 'mean_times': '0 days 00:01:09'}},
+                   '673': {'394': {'weight': 1, 'mean_times': '0 days 00:01:32'}},
+                   '263': {'224': {'weight': 1, 'mean_times': '0 days 00:03:33'}},
+                   '224': {'623': {'weight': 1, 'mean_times': '0 days 00:00:21'}},
+                   '623': {'394': {'weight': 1, 'mean_times': '0 days 00:01:30'}},
                    '394': {}})
 
     """
@@ -264,20 +264,20 @@ def build_transition_graph_from_df(data: DataFrame) -> DiGraph:
 def graph_to_dict(graph: DiGraph) -> Dict:
     """
     Graph to Dict.
-    
+
     Converts nodes and edges from the Transition Graph
     with all your attributes in a dictionary.
-    
+
     Parameters
     ----------
     graph: DiGraph
         Transition graph constructed from trajectory data.
-        
+
     Return
     ------
     dict
         Dictionary with the attributes of nodes and edges.
-        
+
     Example
     -------
     >>> from pymove.utils.networkx import graph_to_dict
@@ -337,17 +337,17 @@ def save_graph_as_json(
 ):
     """
     Save Graph as JSON.
-    
+
     Saves the data extracted from the Transition Graph
     into a JSON file.
-    
+
     Parameters
     ----------
     graph: DiGraph
         Transition graph constructed from trajectory data.
     file_path: str or path, optional
         File name that will be saved with transition graph data, by default 'graph.json'.
-        
+
     Example
     -------
     >>> from pymove.utils.networkx import save_graph_as_json
@@ -411,19 +411,19 @@ def save_graph_as_json(
 def read_graph_json(file_path: Path | str):
     """
     Read Graph from JSON file.
-    
+
     You load a Transition Graph from a file in JSON format.
-    
+
     Parameters
     ----------
     file_path: str or path
         Name of the JSON file to be read
-        
+
     Return
     ------
     dict
         Dictionary with the attributes of nodes and edges
-        
+
     Example
     -------
     >>> from pymove.utils.networkx import read_graph_json
