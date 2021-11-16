@@ -84,6 +84,14 @@ pymove.utils.mem module
    :undoc-members:
    :show-inheritance:
 
+pymove.utils.networkx module
+----------------------------
+
+.. automodule:: pymove.utils.networkx
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pymove.utils.trajectories module
 --------------------------------
 
