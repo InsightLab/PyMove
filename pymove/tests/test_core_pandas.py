@@ -71,7 +71,7 @@ str_data_missing = """
 
 def _default_move_df():
     """
-    Returns the MoveDataFrame of the previously declared list_data.
+    Returns the PandasMoveDataFrame of the previously declared list_data.
     
     Parameters
     ----------
