@@ -75,9 +75,9 @@ def _encode(lat: float, lon: float, precision: float = 15) -> str:
     Parameters
     ----------
     lat : float
-        Latitude in degrees.
+        This represents latitude in degrees.
     lon : float
-        Longitude in degrees.
+        This represents longitude in degrees.
     precision : float, optional
         Number of characters in resulting geohash, by default 15
 
@@ -135,9 +135,9 @@ def _bin_geohash(lat: float, lon: float, precision: float = 15) -> ndarray:
     Parameters
     ----------
     lat : float
-        Latitude in degrees
+        This represents latitude in degrees.
     lon : float
-        Longitude in degrees
+        This represents longitude in degrees.
     precision : float, optional
         Number of characters in resulting geohash, by default 15
 

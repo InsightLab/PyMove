@@ -33,4 +33,4 @@ from .utils import (
 from .utils.trajectories import read_csv
 from .visualization import folium, matplotlib
 
-__version__ = '3.0.0'
+__version__ = '3.0.1'

@@ -51,7 +51,7 @@ def date_to_str(dt: datetime) -> str:
     Parameters
     ----------
     dt : datetime
-        Represents a date
+        This represents a date
 
     Returns
     -------
@@ -177,7 +177,7 @@ def min_to_datetime(minutes: int) -> datetime:
     Parameters
     ----------
     minutes : int
-        Represents minutes
+        This represents a value in minutes
 
     Returns
     -------
