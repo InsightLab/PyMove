@@ -10,7 +10,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='pymove',
-    version='3.0.0',
+    version='3.0.1',
     author='Insight Data Science Lab',
     author_email='insightlab@dc.ufc.br',
     license='MIT',
