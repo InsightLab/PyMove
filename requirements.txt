@@ -11,7 +11,7 @@ matplotlib
 mplleaflet
 networkx
 numpy
-pandas>=1.1.0
+pandas>=1.1.0,<1.4.0
 psutil
 python-dateutil
 pytz

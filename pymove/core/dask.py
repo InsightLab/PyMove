@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """DaskMoveDataFrame class."""
 from __future__ import annotations
 
