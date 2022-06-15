@@ -12,7 +12,7 @@ We love your input! We want to make contributing to this project as easy
 We use github to host code, to track issues and feature requests,
  as well as accept pull requests.
 
-## We Use [Github Flow](https://guides.github.com/introduction/flow/index.html)
+## We Use [Github Flow](https://docs.github.com/en/get-started/quickstart/github-flow)
 All Code Changes Happen Through Pull Requests.
 Pull requests are the best way to propose changes to the codebase.
 We actively welcome your pull requests:
@@ -75,4 +75,4 @@ When creating new modules these need to be added to the docs.
 
 ## References
 This document was adapted from <https://gist.github.com/briandk/3d2e8b3ec8daf5a27a62>,
- who follows the open-source contribution guidelines for [Facebook's Draft](https://github.com/facebook/draft-js/blob/a9316a723f9e918afde44dea68b5f9f39b7d9b00/CONTRIBUTING.md)
+ who follows the open-source contribution guidelines for [Facebook's Draft](https://github.com/facebook/draft-js/blob/main/CONTRIBUTING.md)
