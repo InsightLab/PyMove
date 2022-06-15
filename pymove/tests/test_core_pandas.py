@@ -70,6 +70,23 @@ str_data_missing = """
 
 
 def _default_move_df():
+    """
+    Returns the PandasMoveDataFrame of the previously declared list_data.
+    
+    Parameters
+    ----------
+    The function has no parameters
+    
+    Example
+    ----------
+    >>> from pymove.tests.test_core_pandas import _default_move_df
+    >>> _default_move_df()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    2
+    3   39.984224   116.319402   2008-10-23 05:53:11    2
+    """
     return MoveDataFrame(
         data=list_data,
         latitude=LATITUDE,
@@ -77,9 +94,26 @@ def _default_move_df():
         datetime=DATETIME,
         traj_id=TRAJ_ID,
     )
-
-
+    
+    
 def _default_pandas_df():
+    """
+    Returns the DataFrame of the list that is defined as the value of the data parameter.
+    
+    Parameters
+    ----------
+    The function has no parameters
+    
+    Example
+    ----------
+    >>> from pymove.tests.test_core_pandas import _default_pandas_df
+    >>> _default_pandas_df()
+              lat          lon              datetime   id
+    0   39.984094   116.319236   2008-10-23 05:53:05    1
+    1   39.984198   116.319322   2008-10-23 05:53:06    1
+    2   39.984224   116.319402   2008-10-23 05:53:11    2
+    3   39.984224   116.319402   2008-10-23 05:53:11    2
+    """
     return DataFrame(
         data=[
             [39.984094, 116.319236, Timestamp('2008-10-23 05:53:05'), 1],
