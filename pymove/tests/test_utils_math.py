@@ -2,6 +2,8 @@ from numpy.testing import assert_almost_equal
 
 from pymove import math
 
+import pytest
+
 
 def test_is_number():
     value_1 = 'str'
@@ -56,6 +58,16 @@ def test_arrays_avg():
     array_avg = math.arrays_avg([600, 20, 5])
 
     assert_almost_equal(array_avg, expected)
+    
+    
+def test_array_avg_len_weight_is_not_equal():
+    list = [7.8, 9.7, 6.4, 5.6, 10]
+    weights = [0.1, 0.3, 0.15, 0.15]
+
+    with pytest.raises(ValueError) as exception_info:
+            math.arrays_avg(list, weights)
+
+    assert exception_info.match('values_array and qt_array must have the same number of rows')
 
 
 def test_array_stats():
