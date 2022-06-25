@@ -111,6 +111,13 @@ def test_read_csv(tmpdir):
     assert isinstance(dask_move_df, DaskMoveDataFrame)
 
 
+def test_invert_dict():
+    d = {'a': 1, 'b': 2}
+    expected = {1: 'a', 2: 'b'}
+    actual = trajectories.invert_dict(d)
+    assert_equal(actual, expected)
+
+
 def test_flatten_dict():
     d = {'a': 1, 'b': {'c': 2, 'd': 3}}
     expected = {'a': 1, 'b_c': 2, 'b_d': 3}
@@ -152,6 +159,11 @@ def test_shift():
     expected = ['dewberry', 'eggplant', 'nan', 'nan', 'nan']
     array_ = ['apple', 'banana', 'coconut', 'dewberry', 'eggplant']
     shifted_array = trajectories.shift(arr=array_, num=-3, fill_value=np.nan)
+    assert_array_equal(shifted_array, expected)
+
+    expected = [1, 2, 3, 4, 5, 6, 7]
+    array_ = [1, 2, 3, 4, 5, 6, 7]
+    shifted_array = trajectories.shift(arr=array_, num=0)
     assert_array_equal(shifted_array, expected)
 
 
