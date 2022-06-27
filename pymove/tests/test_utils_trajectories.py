@@ -248,6 +248,7 @@ def test_object_for_array():
     data_1 = '[1, 2, 3]'
     data_2 = '[1.5, 2.5, 3.5]'
     data_3 = "['event', 'event']"
+    data_4 = None
 
     expected_data_1 = np.array([1., 2., 3.], dtype=np.float32)
     expected_data_2 = np.array([1.5, 2.5, 3.5], dtype=np.float32)
@@ -256,6 +257,7 @@ def test_object_for_array():
     assert_array_almost_equal(object_for_array(data_1), expected_data_1)
     assert_array_almost_equal(object_for_array(data_2), expected_data_2)
     assert_array_equal(object_for_array(data_3), expected_data_3)
+    assert object_for_array(data_4) == None
 
 
 def test_columns_to_array():
