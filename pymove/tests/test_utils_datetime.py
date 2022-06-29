@@ -198,6 +198,17 @@ def test_time_to_str():
     time = datetime.time_to_str(data)
 
     assert(time == expected)
+    
+    
+def test_str_to_time():
+
+    expected = dt.datetime.strptime('1900-01-01 08:00:00', '%Y-%m-%d %H:%M:%S')
+
+    time = '08:00:00'
+
+    data = datetime.str_to_time(time)
+
+    assert(data == expected)
 
 
 def test_elapsed_time_dt():
@@ -240,7 +251,23 @@ def test_create_time_slot_in_minute():
     datetime.create_time_slot_in_minute(df, inplace=True)
     assert_frame_equal(df, expected)
 
-
+    # When the inplace parameter is equal to false
+    df = _default_move_df()
+    expected = DataFrame({
+        'lat': {0: 39.984094, 1: 39.984198, 2: 39.984224, 3: 39.984224},
+        'lon': {0: 116.319236, 1: 116.319322, 2: 116.319402, 3: 116.319402},
+        'datetime': {
+            0: Timestamp('2008-10-23 05:44:05'),
+            1: Timestamp('2008-10-23 05:56:06'),
+            2: Timestamp('2008-10-23 05:56:11'),
+            3: Timestamp('2008-10-23 06:10:15')
+        },
+        'id': {0: 1, 1: 1, 2: 1, 3: 1},
+    })
+    datetime.create_time_slot_in_minute(df, inplace=False)
+    assert_frame_equal(df, expected)
+    
+    
 def test_generate_time_statistics():
     df_ = DataFrame(
         data=[
@@ -317,4 +344,30 @@ def test_threshold_time_statistics():
     )
 
     datetime.threshold_time_statistics(statistics, inplace=True)
+    assert_frame_equal(statistics, expected)
+    
+    # When the inplace parameter is equal to false
+    statistics = DataFrame(
+        data=[
+            [376, 580.0, 91.0, 0.0, 91.0, 91.0, 91.0, 1],
+            [386, 376.0, 17449.0, 0.0, 17449.0, 17449.0, 17449.0, 1],
+            [580, 261.0, 252.0, 0.0, 252.0, 252.0, 252.0, 1],
+            [644, 386.0, 21824.0, 0.0, 21824.0, 21824.0, 21824.0, 1]
+        ],
+        columns=[LOCAL_LABEL, PREV_LOCAL, MEAN, STD, MIN, MAX, SUM, COUNT],
+        index=[0, 1, 2, 3]
+    )
+
+    expected = DataFrame(
+        data=[
+            [376, 580.0, 91.0, 0.0, 91.0, 91.0, 91.0, 1],
+            [386, 376.0, 17449.0, 0.0, 17449.0, 17449.0, 17449.0, 1],
+            [580, 261.0, 252.0, 0.0, 252.0, 252.0, 252.0, 1],
+            [644, 386.0, 21824.0, 0.0, 21824.0, 21824.0, 21824.0, 1]
+        ],
+        columns=[LOCAL_LABEL, PREV_LOCAL, MEAN, STD, MIN, MAX, SUM, COUNT],
+        index=[0, 1, 2, 3]
+    )
+
+    datetime.threshold_time_statistics(statistics, inplace=False)
     assert_frame_equal(statistics, expected)
