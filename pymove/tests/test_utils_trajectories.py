@@ -142,6 +142,18 @@ def test_flatten_columns():
     actual = trajectories.flatten_columns(df, ['col2'])
     actual = actual[sorted(actual.columns)]
     assert_frame_equal(actual, expected)
+    
+    d = {'a': 1, 'b': {'c': 2, 'd': 3}}
+    df = DataFrame({'col1': [0], 'col2': [d]})
+    expected = DataFrame({
+        'col1': [0],
+        'col2_a': [1],
+        'col2_b_c': [2],
+        'col2_b_d': [3],
+    })
+    actual = trajectories.flatten_columns(df, 'col2')
+    actual = actual[sorted(actual.columns)]
+    assert_frame_equal(actual, expected)
 
 
 def test_shift():
