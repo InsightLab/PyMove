@@ -1,4 +1,5 @@
 import datetime as dt
+import pytest
 
 from numpy import nan
 from numpy.testing import assert_equal
@@ -266,6 +267,22 @@ def test_create_time_slot_in_minute():
     })
     datetime.create_time_slot_in_minute(df, inplace=False)
     assert_frame_equal(df, expected)
+    
+    df = DataFrame({
+        'lat': {0: 39.984094, 1: 39.984198, 2: 39.984224, 3: 39.984224},
+        'lon': {0: 116.319236, 1: 116.319322, 2: 116.319402, 3: 116.319402},
+        'datetime': {
+            0: '2008-10-23 05:44:05',
+            1: '2008-10-23 05:56:06',
+            2: '2008-10-23 05:56:11',
+            3: '2008-10-23 06:10:15'
+        },
+        'id': {0: 1, 1: 1, 2: 1, 3: 1},
+        'time_slot': {0: 22, 1: 23, 2: 23, 3: 24}
+    })
+    with pytest.raises(ValueError) as exception_info:
+        datetime.create_time_slot_in_minute(df)
+    assert exception_info.match('datetime colum must be of type datetime')
     
     
 def test_generate_time_statistics():
