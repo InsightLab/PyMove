@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 from numpy.testing import assert_array_almost_equal
 from pandas.testing import assert_frame_equal
 
@@ -155,6 +156,14 @@ def test_generate_trajectories_df():
 
     traj_df = generate_trajectories_df(df)
     assert_frame_equal(traj_df, expected)
+    
+    df = pd.DataFrame(
+        list_data4,
+        columns=[TRAJ_ID, DATETIME, LOCAL_LABEL, LATITUDE, LONGITUDE]
+    )
+    with pytest.raises(ValueError) as exception_info:
+        generate_trajectories_df(df)
+    assert exception_info.match('tid not in DataFrame')
 
 
 def test_split_crossover():
@@ -341,4 +350,11 @@ def test_transition_graph_augmentation_all_vertex():
     })
 
     transition_graph_augmentation_all_vertex(traj_df)
+    assert_frame_equal(traj_df, expected)
+
+    traj_df = pd.DataFrame(list_data4)
+
+    expected = traj_df.copy()
+
+    transition_graph_augmentation_all_vertex(traj_df, inplace=False)
     assert_frame_equal(traj_df, expected)
